@@ -1,0 +1,1 @@
+import{D as e,i}from"./index-B3F33_mG.js";function c(){const t=document.querySelectorAll(".xo-bundle-box");t.length!=0&&(i.any||t.forEach(o=>{xoSticky.subscribe(()=>{o.style.top=`${xoSticky.getStickyHeight("top")+10}px`})}))}e(()=>{c()});

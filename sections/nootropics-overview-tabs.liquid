@@ -1,0 +1,226 @@
+{% comment %}
+SECTION: Nootropics Overview Tabs
+Wires to product metafields:
+- pdp.first_paragraph  (rich text)          → Overview
+- pdp.mechanism        (rich text, optional)→ How it works (fallback: first_paragraph)
+- pdp.whats_inside     (rich text)          → Ingredients
+- pdp.timing           (single line / list) → Usage timing chips
+- pdp.usage_note       (rich text)          → Usage body
+
+Anchors for sticky jump chips:
+- #nootropic-overview     (Overview / How it works area)
+- #nootropic-ingredients  (Ingredients tab)
+
+All motion respects prefers-reduced-motion.
+{% endcomment %}
+
+{%- liquid
+  assign mf_overview  = product.metafields.pdp.first_paragraph
+  assign mf_mech      = product.metafields.pdp.mechanism
+  assign mf_inside    = product.metafields.pdp.whats_inside
+  assign mf_timing    = product.metafields.pdp.timing
+  assign mf_usage     = product.metafields.pdp.usage_note
+
+  # timing chips prep (comma or newline separated)
+  assign timing_str = nil
+  if mf_timing and mf_timing != blank
+    assign timing_str = mf_timing
+  endif
+-%}
+
+<section id="nootropic-overview" class="ntabs-wrap">
+  <style>
+    #nootropic-overview{
+      --nt-maxw: {{ section.settings.max_width | default: 1200 }}px;
+      --nt-border:#E7E9ED;
+      --nt-bg:#FAFAFB;
+      --nt-card:#FFFFFF;
+      --nt-text:#111111;
+      --nt-muted:#6B7280;
+      --nt-accent: {{ section.settings.accent_color | default: '#FBBF24' }};
+      --nt-radius: 14px;
+      --nt-shadow: 0 1px 6px rgba(16,24,40,.06);
+    }
+    .ntabs-wrap{ padding:24px var(--page-gutter); background:var(--nt-bg); border-top:1px solid var(--nt-border); }
+    .nt-container{ max-width:var(--nt-maxw); margin:0 auto; }
+
+    /* Tab bar */
+    .nt-tabbar{ display:flex; gap:8px; flex-wrap:wrap; border-bottom:1px solid var(--nt-border); margin-bottom:12px; }
+    .nt-tab{
+      border:1px solid var(--nt-border); border-radius:999px; background:#fff;
+      padding:8px 12px; font-weight:700; cursor:pointer;
+    }
+    .nt-tab[aria-selected="true"]{
+      border-color:var(--nt-accent);
+      box-shadow:0 0 0 3px color-mix(in srgb, var(--nt-accent) 18%, transparent);
+    }
+
+    /* Panes */
+    .nt-pane{ display:none; }
+    .nt-pane.is-active{ display:block; }
+    .nt-card{
+      border:1px solid var(--nt-border); border-radius:var(--nt-radius); background:var(--nt-card);
+      padding:14px; box-shadow:var(--nt-shadow);
+    }
+    .nt-card :where(p, ul, ol){ margin:8px 0; }
+    .nt-sub{ font-weight:800; margin:12px 0 6px; color:var(--nt-text); }
+
+    /* Timing chips (Usage) */
+    .nt-chips{ display:flex; flex-wrap:wrap; gap:8px; margin:6px 0 10px; }
+    .nt-chip{
+      border:1px solid var(--nt-border); border-radius:10px; background:#fff; padding:6px 10px; line-height:1.2;
+    }
+
+    /* Anchor for Ingredients sticky jump */
+    #nootropic-ingredients{ scroll-margin-top: 84px; }
+    #nootropic-overview{ scroll-margin-top: 84px; }
+
+    /* micro-cues */
+    @media (prefers-reduced-motion:no-preference){
+      .nt-tabbar{ box-shadow:0 0 0 0 color-mix(in srgb, var(--nt-accent) 0%, transparent) inset; transition: box-shadow .7s ease; }
+      .nt-tabbar.nt-in{ box-shadow:0 0 0 2px color-mix(in srgb, var(--nt-accent) 12%, transparent) inset; }
+      .nt-card{ opacity:0; transform:translateY(6px); }
+      .nt-card.nt-in{ opacity:1; transform:none; transition:opacity .22s ease, transform .22s ease; }
+    }
+  </style>
+
+  <div class="nt-container">
+    <nav class="nt-tabbar" role="tablist" aria-label="Product details tabs">
+      <button class="nt-tab" role="tab" aria-selected="true"  aria-controls="nt-pane-overview"  id="nt-tab-overview"  data-tab="overview">{{ section.settings.label_overview | default: 'Overview' }}</button>
+      <button class="nt-tab" role="tab" aria-selected="false" aria-controls="nt-pane-mech"      id="nt-tab-mech"      data-tab="mech">{{ section.settings.label_mech | default: 'How it works' }}</button>
+      <button class="nt-tab" role="tab" aria-selected="false" aria-controls="nt-pane-ingredients" id="nt-tab-ingredients" data-tab="ingredients">{{ section.settings.label_ingredients | default: 'Ingredients' }}</button>
+      <button class="nt-tab" role="tab" aria-selected="false" aria-controls="nt-pane-usage"     id="nt-tab-usage"     data-tab="usage">{{ section.settings.label_usage | default: 'Usage' }}</button>
+    </nav>
+
+    <!-- OVERVIEW -->
+    <div id="nt-pane-overview" class="nt-pane is-active" role="tabpanel" aria-labelledby="nt-tab-overview">
+      <div class="nt-card">
+        {% if mf_overview %}{{ mf_overview | metafield_tag }}{% else %}
+          <p>{{ section.settings.fallback_overview | default: 'Overview content will appear here.' }}</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- HOW IT WORKS -->
+    <div id="nt-pane-mech" class="nt-pane" role="tabpanel" aria-labelledby="nt-tab-mech">
+      <div class="nt-card">
+        {% if mf_mech %}
+          {{ mf_mech | metafield_tag }}
+        {% elsif mf_overview %}
+          {{ mf_overview | metafield_tag }}
+        {% else %}
+          <p>{{ section.settings.fallback_mech | default: 'Mechanism details will appear here.' }}</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- INGREDIENTS -->
+    <div id="nootropic-ingredients" class="nt-pane" role="tabpanel" aria-labelledby="nt-tab-ingredients">
+      <div class="nt-card">
+        {% if mf_inside %}
+          {{ mf_inside | metafield_tag }}
+        {% else %}
+          <p>{{ section.settings.fallback_ingredients | default: 'Ingredient details will appear here.' }}</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- USAGE -->
+    <div id="nt-pane-usage" class="nt-pane" role="tabpanel" aria-labelledby="nt-tab-usage">
+      <div class="nt-card">
+        {% if timing_str %}
+          {%- assign timing_clean = timing_str | replace: '\n', ',' | replace: ' ,', ',' -%}
+          {%- assign timing_list = timing_clean | split: ',' -%}
+          <div class="nt-chips">
+            {% for t in timing_list %}
+              {% assign tt = t | strip %}
+              {% if tt != blank %}<span class="nt-chip">{{ tt }}</span>{% endif %}
+            {% endfor %}
+          </div>
+        {% endif %}
+        {% if mf_usage %}
+          {{ mf_usage | metafield_tag }}
+        {% else %}
+          <p>{{ section.settings.fallback_usage | default: 'Usage guidance will appear here.' }}</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  var root = document.getElementById('nootropic-overview'); if(!root) return;
+  var bar = root.querySelector('.nt-tabbar');
+  var tabs = root.querySelectorAll('.nt-tab');
+  var panes = {
+    overview:    root.querySelector('#nt-pane-overview'),
+    mech:        root.querySelector('#nt-pane-mech'),
+    ingredients: root.querySelector('#nootropic-ingredients'),
+    usage:       root.querySelector('#nt-pane-usage')
+  };
+
+  function activate(key){
+    tabs.forEach(function(b){ b.setAttribute('aria-selected', b.dataset.tab===key ? 'true' : 'false'); });
+    Object.keys(panes).forEach(function(k){ panes[k].classList.toggle('is-active', k===key); });
+    // small enter animation
+    var card = panes[key].querySelector('.nt-card');
+    if(card){ card.classList.add('nt-in'); }
+  }
+
+  tabs.forEach(function(btn){
+    btn.addEventListener('click', function(){ activate(btn.dataset.tab); btn.focus(); });
+    btn.addEventListener('keydown', function(e){
+      if(e.key==='Enter' || e.key===' '){ e.preventDefault(); btn.click(); }
+      if(e.key==='ArrowRight' || e.key==='ArrowLeft'){
+        var list = Array.from(tabs);
+        var i = list.indexOf(btn);
+        var next = e.key==='ArrowRight' ? (i+1)%list.length : (i-1+list.length)%list.length;
+        list[next].focus();
+      }
+    });
+  });
+
+  // micro-cues on entry
+  try{
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      var io = new IntersectionObserver(function(entries){
+        entries.forEach(function(e){
+          if(e.isIntersecting){
+            bar.classList.add('nt-in');
+            var active = root.querySelector('.nt-pane.is-active .nt-card');
+            if(active) active.classList.add('nt-in');
+            io.disconnect();
+          }
+        });
+      }, { threshold: 0.35 });
+      io.observe(root);
+    } else {
+      bar.classList.add('nt-in');
+      var active = root.querySelector('.nt-pane.is-active .nt-card');
+      if(active) active.classList.add('nt-in');
+    }
+  }catch(e){}
+});
+</script>
+
+{% schema %}
+{
+  "name": "Nootropics overview tabs",
+  "settings": [
+    { "type":"range","id":"max_width","min":800,"max":1600,"step":10,"unit":"px","label":"Container max width","default":1200 },
+    { "type":"color","id":"accent_color","label":"Accent color","default":"#FBBF24" },
+
+    { "type":"text","id":"label_overview","label":"Tab label: Overview","default":"Overview" },
+    { "type":"text","id":"label_mech","label":"Tab label: How it works","default":"How it works" },
+    { "type":"text","id":"label_ingredients","label":"Tab label: Ingredients","default":"Ingredients" },
+    { "type":"text","id":"label_usage","label":"Tab label: Usage","default":"Usage" },
+
+    { "type":"text","id":"fallback_overview","label":"Fallback: Overview","default":"Overview content will appear here." },
+    { "type":"text","id":"fallback_mech","label":"Fallback: How it works","default":"Mechanism details will appear here." },
+    { "type":"text","id":"fallback_ingredients","label":"Fallback: Ingredients","default":"Ingredient details will appear here." },
+    { "type":"text","id":"fallback_usage","label":"Fallback: Usage","default":"Usage guidance will appear here." }
+  ],
+  "presets":[ { "name":"Nootropics overview tabs" } ]
+}
+{% endschema %}

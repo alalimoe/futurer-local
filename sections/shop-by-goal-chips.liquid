@@ -1,0 +1,74 @@
+{% comment %}
+Shop-by-goal chips — links to filtered collection pages
+e.g. /collections/peptides?filter.p.tag=focus
+{% endcomment %}
+
+{%- assign sid = section.id | replace:'_','' | downcase -%}
+<style>
+#sbg-{{ sid }}{ --b:var(--color-border-default); --text:var(--color-text-primary); --mut:var(--color-text-secondary); }
+#sbg-{{ sid }} .s-wrap{ padding:16px var(--page-gutter); border-top:1px solid var(--b); background:var(--color-surface-secondary); }
+#sbg-{{ sid }} .s-container{ max-width:{{ section.settings.maxw | default:1200 }}px; margin:0 auto; }
+#sbg-{{ sid }} .s-title{ margin:0 0 10px; font-weight:800; color:var(--text); }
+#sbg-{{ sid }} .s-row{ display:flex; flex-wrap:wrap; gap:8px; }
+#sbg-{{ sid }} .s-chip{
+  display:inline-flex; align-items:center; gap:6px; padding:8px 12px;
+  border:1px solid var(--b); border-radius:999px; background:var(--color-surface-primary); color:var(--text); font-weight:700;
+  text-decoration:none;
+}
+#sbg-{{ sid }} .s-chip:hover{ background:var(--color-warning-bg); border-color:{{ section.settings.accent | default: 'var(--color-accent-primary)' }}; }
+</style>
+
+<section id="sbg-{{ sid }}" class="pdp-section" aria-label="Shop by goal">
+  <div class="s-wrap">
+    <div class="s-container">
+      <h2 class="s-title">{{ section.settings.title | default: 'Shop by goal' }}</h2>
+      <div class="s-row">
+        {% for i in (1..8) %}
+          {% assign l_key = 'label_' | append:i %}
+          {% assign h_key = 'href_'  | append:i %}
+          {% assign label = section.settings[l_key] %}
+          {% assign href  = section.settings[h_key] %}
+          {% if label != blank and href != blank %}
+            <a class="s-chip" href="{{ href }}">{{ label }}</a>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name":"Shop by goal chips",
+  "settings":[
+    { "type":"range","id":"maxw","min":800,"max":1600,"step":10,"unit":"px","label":"Max width","default":1200 },
+    { "type":"color","id":"accent","label":"Accent","default":"#FBBF24" },
+    { "type":"text","id":"title","label":"Heading","default":"Shop by goal" },
+
+    { "type":"text","id":"label_1","label":"Chip 1 label","default":"Focus" },
+    { "type":"url", "id":"href_1", "label":"Chip 1 link" },
+
+    { "type":"text","id":"label_2","label":"Chip 2 label","default":"Recovery" },
+    { "type":"url", "id":"href_2", "label":"Chip 2 link" },
+
+    { "type":"text","id":"label_3","label":"Chip 3 label","default":"Anti-aging" },
+    { "type":"url", "id":"href_3", "label":"Chip 3 link" },
+
+    { "type":"text","id":"label_4","label":"Chip 4 label","default":"Sleep" },
+    { "type":"url", "id":"href_4", "label":"Chip 4 link" },
+
+    { "type":"text","id":"label_5","label":"Chip 5 label","default":"Wellness" },
+    { "type":"url", "id":"href_5", "label":"Chip 5 link" },
+
+    { "type":"text","id":"label_6","label":"Chip 6 label" },
+    { "type":"url", "id":"href_6", "label":"Chip 6 link" },
+
+    { "type":"text","id":"label_7","label":"Chip 7 label" },
+    { "type":"url", "id":"href_7", "label":"Chip 7 link" },
+
+    { "type":"text","id":"label_8","label":"Chip 8 label" },
+    { "type":"url", "id":"href_8", "label":"Chip 8 link" }
+  ],
+  "presets":[{ "name":"Shop by goal chips" }]
+}
+{% endschema %}

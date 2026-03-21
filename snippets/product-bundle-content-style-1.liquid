@@ -1,0 +1,47 @@
+{% comment %}
+  Render a product bundle content style 1
+
+  @param {object} product - Product
+
+  @example
+  {% render 'product-bundle-content-style-1', product: product %}
+{% endcomment %}
+
+<template xo-bundle-item xo-bundle-price="{{ product.selected_or_first_available_variant.price }}" xo-binding="variantPrice[xo-bundle-price]">
+  <div class="xo-product-bundle-content xo-product-bundle-content--1">
+    <div class="xo-product-bundle-content__group-info">
+      <div class="xo-product-bundle-content__image" xo-binding="bundleImg">
+        {% render 'product-image', product: product, aspect_ratio: '1', lazyload: lazyload %}
+      </div>
+      <div class="xo-product-bundle-content__info">
+        <div class="xo-product-bundle-content__wrapper">
+          <div class="xo-product-bundle-content__title">{{ product.title }}</div>
+          {% if product.has_only_default_variant == false %}
+            <div xo-binding="bundleVariantLabel">
+              <div class="xo-product-bundle-content__variant-label">{{ product.selected_or_first_available_variant.title }}</div>
+            </div>
+          {% endif %}
+          <xo-bundle-properties></xo-bundle-properties>
+        </div>
+        <div class="xo-product-bundle-content__quantity">
+          {% render 'quantity', size: 'md', variant: product.selected_or_first_available_variant, product: product, is_cart: false %}
+        </div>
+      </div>
+    </div>
+    <div class="xo-product-bundle-content__action-group">
+      <div xo-binding="bundlePrice" class="xo-product-bundle-content__price">
+        {{ product.price | money_with_currency }}
+      </div>
+      <xo-tooltip
+        xo-mobile-disabled
+        xo-title="{{ 'general.tooltip.remove' | t }}"
+        xo-placement="top-center"
+        class="tooltip{% if settings.enable_border_radius %} tooltip--radius{% endif %}"
+      >
+        <xo-bundle-remove class="xo-product-bundle-content__remove xo-stack" style="--ai: end; --jc: flex-end">
+          {% render 'icon', name: 'trash', size: '20' %}
+        </xo-bundle-remove>
+      </xo-tooltip>
+    </div>
+  </div>
+</template>

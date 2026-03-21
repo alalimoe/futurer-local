@@ -1,0 +1,76 @@
+{%- assign sid = section.id -%}
+{%- assign alpha = section.settings.alpha_gpc -%}
+{%- assign cdp = section.settings.cdp_choline -%}
+
+{%- style -%}
+#nx-how-{{ sid }} {
+  max-width: var(--container-width-narrow);
+  margin: 0 auto;
+  padding: 8px 16px;
+  font-family: var(--font-body-family, sans-serif);
+  color: var(--color-text-main, #111827);
+  line-height: 1.7;
+  content-visibility: auto;
+}
+#nx-how-{{ sid }} h2 {
+  font-family: var(--font-heading-family, sans-serif);
+  font-size: clamp(22px, 3vw, 30px);
+  font-weight: 700;
+  line-height: 1.2;
+  margin: 0 0 12px;
+}
+#nx-how-{{ sid }} ul { margin: 0; padding-left: 18px; }
+#nx-how-{{ sid }} li { margin: 8px 0; color: var(--color-text-muted, #4b5563); }
+#nx-how-{{ sid }} li strong { color: var(--color-text-main, #111827); }
+#nx-how-{{ sid }} a {
+  color: var(--color-accent-dark, #92400e);
+  text-decoration: none;
+  font-weight: 600;
+  position: relative;
+  transition: var(--transition-premium, all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1));
+}
+#nx-how-{{ sid }} a::after {
+  content: "";
+  position: absolute;
+  left: 50%; right: 50%;
+  bottom: -1px;
+  height: 1.5px;
+  background: var(--color-accent-primary, #FBBF24);
+  transition: var(--transition-premium, all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1));
+}
+#nx-how-{{ sid }} a:hover { color: var(--color-text-main, #111827); }
+#nx-how-{{ sid }} a:hover::after { left: 0; right: 0; }
+#nx-how-{{ sid }} a:focus-visible {
+  outline: 2px solid var(--color-accent-primary, #FBBF24);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #nx-how-{{ sid }},
+  #nx-how-{{ sid }} * {
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
+  }
+}
+{%- endstyle -%}
+
+<section id="nx-how-{{ sid }}" aria-label="How racetams work">
+  <h2>How Do Racetams Work?</h2>
+  <ul>
+    <li><strong>Glutamatergic modulation:</strong> Several racetams interact with AMPA/NMDA pathways involved in synaptic plasticity and learning.</li>
+    <li><strong>Cholinergic demand:</strong> Many users pair racetams with a choline donor{% if alpha != blank or cdp != blank %} — {% if alpha != blank %}<a href="{{ alpha.url }}">Alpha-GPC</a>{% endif %}{% if alpha != blank and cdp != blank %} or {% endif %}{% if cdp != blank %}<a href="{{ cdp.url }}">CDP-Choline</a>{% endif %}{% endif %} to support acetylcholine needs.</li>
+    <li><strong>Perceived "signal quality":</strong> Reports often include clearer recall, smoother switching between tasks, and steadier engagement.</li>
+  </ul>
+</section>
+
+{% schema %}
+{
+  "name": "NX — How They Work",
+  "settings": [
+    { "type": "product", "id": "alpha_gpc", "label": "Alpha-GPC (optional)" },
+    { "type": "product", "id": "cdp_choline", "label": "CDP-Choline (optional)" }
+  ],
+  "presets": [{ "name": "NX — How They Work" }]
+}
+{% endschema %}

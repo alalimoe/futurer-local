@@ -1,0 +1,32 @@
+<section class="np-surface">
+  <div class="np-wrap">
+    <div style="border:1px solid var(--np-border); border-radius:var(--np-radius); padding:1rem;">
+      <h3 style="margin:0 0 .25rem 0;">{{ section.settings.title }}</h3>
+      <p class="np-card__deck" style="margin:.25rem 0 1rem 0;">{{ section.settings.subtitle }}</p>
+      {% form 'customer' %}
+        {{ form.errors | default_errors }}
+        <input type="hidden" name="contact[tags]" value="newsletter, blog">
+        <div style="display:flex; gap:.5rem; flex-wrap:wrap;">
+          <input type="email" name="contact[email]" required placeholder="you@email.com" autocomplete="email"
+                 style="flex:1 1 280px; padding:.6rem .8rem; border:1px solid var(--np-border); border-radius:.4rem;">
+          <button class="btn btn--primary" type="submit">{{ section.settings.cta }}</button>
+        </div>
+        {% if form.posted_successfully? %}
+          <p class="np-meta" role="status" style="margin-top:.5rem;">Thanks! Check your inbox.</p>
+        {% endif %}
+      {% endform %}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Newsletter Lead",
+  "settings":[
+    { "type":"text", "id":"title", "label":"Title", "default":"Get the Brain Briefing" },
+    { "type":"text", "id":"subtitle", "label":"Subtitle", "default":"Weekly, science‑backed tips to sharpen focus and memory." },
+    { "type":"text", "id":"cta", "label":"Button label", "default":"Subscribe" }
+  ],
+  "presets":[{ "name":"NP • Newsletter Lead" }]
+}
+{% endschema %}

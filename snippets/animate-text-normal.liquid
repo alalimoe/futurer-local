@@ -1,0 +1,44 @@
+{% comment %}
+  Renders animate-text-normal
+
+  Accepts:
+  - tag_name: {String} Html tag name (optional). Default: span
+  - text: {String} text (required)
+  - class: {String} class (optional)
+  - attrs: {String} Attributes (optional)
+  - content_class: {String} Content class (optional)
+  - effect: {underline-in | underline-out | mask} Animate effect (optional). Default: underline-in
+  - underline_size: {Number} Underline size (optional). Default: 0.1rem
+  - underline_color: {String} Underline color (optional).
+
+  Usage:
+  <div xo-animate-text-normal-hover>
+    {% render 'animate-text-normal', effect: 'mask', text: 'Lorem ipsum, dolor sit amet consectetur adipisicing elit. Minima nesciunt quidem obcaecati, dicta libero a omnis eligendi vel hic adipisci.' %}
+  </div>
+{% endcomment %}
+
+{% liquid
+  assign tag_name = tag_name | default: 'span'
+  assign text = text
+  assign effect = effect | default: 'underline-in'
+  assign duration = duration | default: 400
+  assign delay = delay | default: 0
+  assign underline_size = underline_size | default: '0.1rem'
+  assign container_class = 'xo-animate-text-normal'
+  if class
+    assign container_class = container_class | append: ' ' | append: class
+  endif
+  if effect contains 'underline'
+    assign container_class = container_class | append: ' xo-animate-text-normal--underline xo-animate-text-normal--' | append: effect
+  else
+    assign container_class = container_class | append: ' xo-animate-text-normal--mask'
+  endif
+%}
+
+<{{ tag_name }}
+  class="{{ container_class }}"
+  style="--duration: {{ duration }}ms; --delay: {{ delay }}ms; --underline-size: {{ underline_size }}; --underline-color: {{ underline_color | default: 'currentColor' }}"
+  {{ attrs }}
+>
+  <span class="{{ content_class }}">{{ text }}</span>
+</{{ tag_name }}>

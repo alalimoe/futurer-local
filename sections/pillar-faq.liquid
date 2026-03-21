@@ -1,0 +1,74 @@
+{% comment %} Pillar-level FAQ with JSON-LD {% endcomment %}
+{%- assign sid = section.id | replace:'_','' | downcase -%}
+<style>
+#pfq-{{ sid }}{ --b:#E7E9ED; --text:#111; }
+#pfq-{{ sid }} .f-wrap{ padding:24px var(--page-gutter); border-top:1px solid var(--b); background:#FAFAFB; }
+#pfq-{{ sid }} .f-container{ max-width:{{ section.settings.maxw | default:1200 }}px; margin:0 auto; }
+#pfq-{{ sid }} .f-title{ margin:0 0 12px; color:var(--text); font-weight:800; }
+
+#pfq-{{ sid }} details{ border:1px solid var(--b); border-radius:14px; background:#fff; margin-bottom:10px; box-shadow:var(--shadow-xs); overflow:hidden; }
+#pfq-{{ sid }} summary{ list-style:none; cursor:pointer; padding:12px 14px; font-weight:800; color:var(--color-text-primary); display:flex; justify-content:space-between; align-items:center; }
+#pfq-{{ sid }} summary::-webkit-details-marker{ display:none; }
+#pfq-{{ sid }} .ans{ padding:0 14px 14px; color:#1f2937; }
+</style>
+
+<section id="pfq-{{ sid }}" class="pdp-section" aria-label="Peptides FAQ">
+  <div class="f-wrap">
+    <div class="f-container">
+      <h2 class="f-title">{{ section.settings.title | default: 'Frequently Asked Questions' }}</h2>
+      <div class="f-acc">
+        {% for i in (1..8) %}
+          {% assign q_key = 'q' | append: i %}
+          {% assign a_key = 'a' | append: i %}
+          {% assign q = section.settings[q_key] %}
+          {% assign a = section.settings[a_key] %}
+          {% if q != blank and a != blank %}
+            <details{% if forloop.index == 1 %} open{% endif %}>
+              <summary><span>{{ q }}</span></summary>
+              <div class="ans">{{ a }}</div>
+            </details>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</section>
+
+{%- capture faq_json -%}
+[
+  {%- assign first = true -%}
+  {%- for i in (1..8) -%}
+    {%- assign q_key = 'q' | append: i -%}
+    {%- assign a_key = 'a' | append: i -%}
+    {%- assign q = section.settings[q_key] -%}
+    {%- assign a = section.settings[a_key] -%}
+    {%- if q != blank and a != blank -%}
+      {%- if first == false -%},{%- endif -%}
+      {"@type":"Question","name":{{ q | strip | json }},"acceptedAnswer":{"@type":"Answer","text":{{ a | strip | json }}}}
+      {%- assign first = false -%}
+    {%- endif -%}
+  {%- endfor -%}
+]
+{%- endcapture -%}
+<script type="application/ld+json">
+{ "@context":"https://schema.org", "@type":"FAQPage", "mainEntity": {{ faq_json | strip }} }
+</script>
+
+{% schema %}
+{
+  "name":"Pillar FAQ",
+  "settings":[
+    { "type":"range","id":"maxw","min":800,"max":1600,"step":10,"unit":"px","label":"Max width","default":1200 },
+    { "type":"text","id":"title","label":"Heading","default":"Frequently Asked Questions" },
+    { "type":"text","id":"q1","label":"Q1" },{ "type":"textarea","id":"a1","label":"A1" },
+    { "type":"text","id":"q2","label":"Q2" },{ "type":"textarea","id":"a2","label":"A2" },
+    { "type":"text","id":"q3","label":"Q3" },{ "type":"textarea","id":"a3","label":"A3" },
+    { "type":"text","id":"q4","label":"Q4" },{ "type":"textarea","id":"a4","label":"A4" },
+    { "type":"text","id":"q5","label":"Q5" },{ "type":"textarea","id":"a5","label":"A5" },
+    { "type":"text","id":"q6","label":"Q6" },{ "type":"textarea","id":"a6","label":"A6" },
+    { "type":"text","id":"q7","label":"Q7" },{ "type":"textarea","id":"a7","label":"A7" },
+    { "type":"text","id":"q8","label":"Q8" },{ "type":"textarea","id":"a8","label":"A8" }
+  ],
+  "presets":[{ "name":"Pillar FAQ" }]
+}
+{% endschema %}

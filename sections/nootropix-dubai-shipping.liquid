@@ -1,0 +1,727 @@
+{% comment %}
+  =============================================
+  Section: Nootropix Dubai Shipping
+  File: sections/nootropix-dubai-shipping.liquid
+  Purpose: Shipping info LP — hero, map, rates table, trust, FAQ, CTA
+  Theme: Futurer 2.x (OS 2.0) — cascades from global tokens
+  =============================================
+{% endcomment %}
+
+{%- assign s = section.settings -%}
+{%- assign sid = section.id -%}
+{%- assign faq_blocks = section.blocks | where: 'type', 'faq' -%}
+
+{%- comment -%} ── JSON-LD: FAQPage (dynamic from blocks) ── {%- endcomment -%}
+{% if faq_blocks.size > 0 %}
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {%- for block in faq_blocks -%}
+        {
+          "@type": "Question",
+          "name": {{ block.settings.q | json }},
+          "acceptedAnswer": { "@type": "Answer", "text": {{ block.settings.a | json }} }
+        }{%- unless forloop.last -%},{%- endunless -%}
+      {%- endfor -%}
+    ]
+  }
+  </script>
+{% endif %}
+
+{%- comment -%} ── JSON-LD: LocalBusiness ── {%- endcomment -%}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "name": "Nootropix",
+  "url": {{ shop.url | json }},
+  "address": {
+    "@type": "PostalAddress",
+    "addressLocality": "Dubai",
+    "addressCountry": "AE"
+  },
+  "areaServed": ["Dubai", "Abu Dhabi", "Sharjah", "UAE"],
+  "description": "Same-day nootropics delivery in Dubai. 4-hour courier within city limits, next-day across the UAE."
+}
+</script>
+
+{%- comment -%} ── JSON-LD: BreadcrumbList ── {%- endcomment -%}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": {{ shop.url | json }} },
+    { "@type": "ListItem", "position": 2, "name": "Dubai Shipping", "item": {{ canonical_url | json }} }
+  ]
+}
+</script>
+
+<section id="dubai-shipping-{{ sid }}" class="ds-section" aria-labelledby="ds-title-{{ sid }}">
+  <div class="ds-inner">
+
+    {%- comment -%} ── HERO ── {%- endcomment -%}
+    <header class="ds-hero"{% if s.hero_image != blank %} style="background-image:url({{ s.hero_image | image_url: width: 1600 }});"{% endif %}>
+      <div class="ds-hero-overlay">
+        <h1 id="ds-title-{{ sid }}" class="ds-hero-title">{{ s.hero_title | default: "Delivered in 4 Hours — Order by 5 pm" }}</h1>
+        <p class="ds-hero-sub">{{ s.hero_subtitle | default: "Every SKU ships from our Dubai warehouse. Same-day delivery — often within four hours." }}</p>
+        <div class="ds-hero-actions">
+          <a href="{{ s.cta_link | default: routes.all_products_collection_url }}" class="ds-btn ds-btn--primary">Browse All</a>
+          <a href="#ds-zones" class="ds-btn ds-btn--ghost">See Shipping Zones</a>
+        </div>
+      </div>
+    </header>
+
+    {%- comment -%} ── INTRO ── {%- endcomment -%}
+    <div class="ds-intro" aria-label="Introduction">
+      <p class="ds-intro-text">{{ s.intro_text | default: "Forget shipping delays and week-long waits. Because every SKU ships from our Dubai warehouse, you'll get your stack the <strong>same day</strong> — often within four hours. Below you'll find exact cut-off times, courier zones, and costs for Dubai and the rest of the UAE." }}</p>
+    </div>
+
+    {%- comment -%} ── COVERAGE MAP ── {%- endcomment -%}
+    <section aria-label="4-Hour Courier Coverage Map">
+      <span class="ds-kicker">Delivery Zones</span>
+      <h2 class="ds-heading">4-Hour Courier Coverage Map</h2>
+      <div class="ds-map-wrap">
+        <iframe
+          src="{{ s.map_embed_url | default: 'https://www.google.com/maps/d/embed?mid=1g60YiIEmniUuLZMj5sC1J_IRca6qK-w&ehbc=2E312F' }}"
+          loading="lazy"
+          allowfullscreen
+          title="Dubai same-day delivery coverage map"
+        ></iframe>
+      </div>
+    </section>
+
+    {%- comment -%} ── SHIPPING RATES TABLE ── {%- endcomment -%}
+    <section id="ds-zones" aria-label="Shipping rates">
+      <span class="ds-kicker">Rates &amp; Cut-offs</span>
+      <h2 class="ds-heading">Shipping at a Glance</h2>
+      <div class="ds-table-wrap">
+        <table class="ds-table" aria-label="Shipping rates by destination">
+          <thead>
+            <tr>
+              <th scope="col">Destination</th>
+              <th scope="col">Cut-off</th>
+              <th scope="col">Transit</th>
+              <th scope="col">Cost</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td data-label="Destination"><strong>Dubai city limits (Zone A)</strong></td>
+              <td data-label="Cut-off">4 pm</td>
+              <td data-label="Transit">4 hours</td>
+              <td data-label="Cost">Free</td>
+            </tr>
+            <tr>
+              <td data-label="Destination"><strong>Dubai outskirts (Zone B)</strong></td>
+              <td data-label="Cut-off">3 pm</td>
+              <td data-label="Transit">Same day</td>
+              <td data-label="Cost">Free</td>
+            </tr>
+            <tr>
+              <td data-label="Destination"><strong>Other Emirates</strong></td>
+              <td data-label="Cut-off">2 pm</td>
+              <td data-label="Transit">Next day</td>
+              <td data-label="Cost">Free</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="ds-table-note">Free shipping on all UAE orders &ge; 300 AED. International express available at checkout.</p>
+    </section>
+
+    {%- comment -%} ── TRUST ICONS ── {%- endcomment -%}
+    <section aria-label="Why choose Nootropix">
+      <span class="ds-kicker">Why Nootropix</span>
+      <h2 class="ds-heading">Everything You Need, Nothing You Don't</h2>
+      <div class="ds-trust-grid">
+        <div class="ds-trust-card">
+          {% if s.icon_1_image != blank %}
+            <div class="ds-trust-icon"><img src="{{ s.icon_1_image | image_url: width: 120 }}" alt="{{ s.icon_1_title | default: '4-Hour Courier' }}" loading="lazy" width="60" height="60"></div>
+          {% else %}
+            <span class="ds-trust-emoji" aria-hidden="true">&#9889;</span>
+          {% endif %}
+          <span class="ds-trust-label">{{ s.icon_1_title | default: "4-Hour Courier" }}</span>
+        </div>
+        <div class="ds-trust-card">
+          {% if s.icon_2_image != blank %}
+            <div class="ds-trust-icon"><img src="{{ s.icon_2_image | image_url: width: 120 }}" alt="{{ s.icon_2_title | default: 'Legal & Tested' }}" loading="lazy" width="60" height="60"></div>
+          {% else %}
+            <span class="ds-trust-emoji" aria-hidden="true">&#128737;</span>
+          {% endif %}
+          <span class="ds-trust-label">{{ s.icon_2_title | default: "Legal & Tested" }}</span>
+        </div>
+        <div class="ds-trust-card">
+          {% if s.icon_3_image != blank %}
+            <div class="ds-trust-icon"><img src="{{ s.icon_3_image | image_url: width: 120 }}" alt="{{ s.icon_3_title | default: 'Local Fulfillment' }}" loading="lazy" width="60" height="60"></div>
+          {% else %}
+            <span class="ds-trust-emoji" aria-hidden="true">&#128205;</span>
+          {% endif %}
+          <span class="ds-trust-label">{{ s.icon_3_title | default: "Local Fulfillment" }}</span>
+        </div>
+        <div class="ds-trust-card">
+          {% if s.icon_4_image != blank %}
+            <div class="ds-trust-icon"><img src="{{ s.icon_4_image | image_url: width: 120 }}" alt="{{ s.icon_4_title | default: 'Bundle & Save' }}" loading="lazy" width="60" height="60"></div>
+          {% else %}
+            <span class="ds-trust-emoji" aria-hidden="true">&#128176;</span>
+          {% endif %}
+          <span class="ds-trust-label">{{ s.icon_4_title | default: "Bundle & Save" }}</span>
+        </div>
+      </div>
+    </section>
+
+    {%- comment -%} ── FAQ (animated disclosure) ── {%- endcomment -%}
+    <section aria-label="Frequently asked questions">
+      <span class="ds-kicker">Questions</span>
+      <h2 class="ds-heading">Dubai Shipping &amp; Delivery FAQs</h2>
+
+      {% if faq_blocks.size > 0 %}
+        {% for block in faq_blocks %}
+          <details class="ds-faq" {{ block.shopify_attributes }}>
+            <summary class="ds-faq-q">{{ block.settings.q }}<span class="ds-faq-chevron" aria-hidden="true"></span></summary>
+            <div class="ds-faq-answer"><div class="ds-faq-inner"><p>{{ block.settings.a }}</p></div></div>
+          </details>
+        {% endfor %}
+      {% else %}
+        <details class="ds-faq">
+          <summary class="ds-faq-q">How fast is delivery inside Dubai city limits?<span class="ds-faq-chevron" aria-hidden="true"></span></summary>
+          <div class="ds-faq-answer"><div class="ds-faq-inner"><p>Place your order before 6 pm and our courier will reach any Zone-A address within four hours. Orders after 6 pm arrive the following morning.</p></div></div>
+        </details>
+        <details class="ds-faq">
+          <summary class="ds-faq-q">What counts as "Dubai city limits"?<span class="ds-faq-chevron" aria-hidden="true"></span></summary>
+          <div class="ds-faq-answer"><div class="ds-faq-inner"><p>City limits cover every address inside the E11 (Sheikh Zayed Rd) boundary, including Downtown, Marina, JLT, Business Bay, and DIFC.</p></div></div>
+        </details>
+      {% endif %}
+    </section>
+
+    {%- comment -%} ── FINAL CTA ── {%- endcomment -%}
+    <section class="ds-final-cta" aria-label="Get started">
+      <h2 class="ds-heading">Ready to order?</h2>
+      <p class="ds-body-muted">Place your order now and get it delivered to your door — same day in Dubai, next day across the UAE.</p>
+      <a class="ds-btn ds-btn--primary" href="{{ s.cta_link | default: routes.all_products_collection_url }}">{{ s.cta_text | default: "Shop All Nootropics" }}</a>
+    </section>
+
+  </div>
+</section>
+
+{%- style -%}
+/* ═══════════════════════════════════════════════════════
+   DUBAI SHIPPING — Premium Design Tokens
+   ═══════════════════════════════════════════════════════ */
+
+#dubai-shipping-{{ sid }} {
+  --section-max-width: {{ s.max_width | default: 1100 }}px;
+  --ds-py: {{ s.padding_y | default: 56 }}px;
+  --ds-accent: var(--color-accent-primary, #FBBF24);
+  --ds-accent-hover: var(--color-accent-hover, #D97706);
+  --ds-accent-dark: var(--color-accent-dark, #92400e);
+  --ds-accent-glass: rgba(251, 191, 36, 0.08);
+  --ds-accent-glass-strong: rgba(251, 191, 36, 0.14);
+  --ds-text: var(--color-text-main, #111827);
+  --ds-muted: var(--color-text-muted, #4b5563);
+  --ds-bg: {{ s.background_color | default: '#ffffff' }};
+  --ds-bg-alt: var(--color-bg-secondary, #f9fafb);
+  --ds-radius: var(--radius-premium, 14px);
+  --ds-transition: var(--transition-premium, all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1));
+  --ds-shadow-rest: var(--shadow-sm, 0 2px 8px rgba(0, 0, 0, 0.04));
+  --ds-shadow-hover: var(--shadow-md, 0 12px 30px rgba(0, 0, 0, 0.06));
+  --ds-gold-glow: var(--shadow-gold-glow, 0 4px 14px rgba(251, 191, 36, 0.25));
+  --ds-gold-glow-hover: var(--shadow-gold-glow-hover, 0 8px 24px rgba(251, 191, 36, 0.35));
+  --ds-font: var(--font-body-family, sans-serif);
+  --ds-font-heading: var(--font-heading-family, sans-serif);
+
+  background: var(--ds-bg);
+  color: var(--ds-text);
+  font-family: var(--ds-font);
+  line-height: 1.6;
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 4000px;
+}
+
+/* ── Inner container ── */
+#dubai-shipping-{{ sid }} .ds-inner {
+  max-width: var(--section-max-width);
+  margin: 0 auto;
+  padding: var(--ds-py) var(--page-gutter);
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+@media (min-width: 990px) {
+  #dubai-shipping-{{ sid }} .ds-inner { gap: 56px; }
+}
+
+/* ── Shared typography ── */
+#dubai-shipping-{{ sid }} .ds-kicker {
+  display: block;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 700;
+  font-size: 12px;
+  color: var(--ds-accent-dark);
+  margin-bottom: 6px;
+}
+#dubai-shipping-{{ sid }} .ds-heading {
+  font-family: var(--ds-font-heading);
+  font-size: clamp(22px, 3vw, 34px);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--ds-text);
+  margin: 0 0 10px;
+}
+#dubai-shipping-{{ sid }} .ds-body-muted {
+  color: var(--ds-muted);
+  line-height: 1.6;
+  margin: 0 0 16px;
+}
+
+/* ═══════════════════════════════════════════════════════
+   BUTTONS — Ghost + Primary
+   ═══════════════════════════════════════════════════════ */
+#dubai-shipping-{{ sid }} .ds-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 11px 20px;
+  border-radius: var(--nx-radius-md);
+  font-family: var(--ds-font);
+  font-weight: 600;
+  font-size: 15px;
+  text-decoration: none;
+  min-height: var(--touch-min, 44px);
+  transition: var(--ds-transition);
+  cursor: pointer;
+}
+#dubai-shipping-{{ sid }} .ds-btn--ghost {
+  background: transparent;
+  border: 1.5px solid var(--ds-accent);
+  color: var(--ds-text);
+}
+#dubai-shipping-{{ sid }} .ds-btn--ghost:hover {
+  background: var(--ds-accent);
+  color: var(--color-text-primary);
+  transform: translateY(-2px);
+  box-shadow: var(--ds-shadow-hover);
+}
+#dubai-shipping-{{ sid }} .ds-btn--primary {
+  background: var(--ds-accent);
+  color: var(--color-text-primary);
+  border: 1.5px solid var(--ds-accent);
+  box-shadow: var(--ds-gold-glow);
+}
+#dubai-shipping-{{ sid }} .ds-btn--primary:hover {
+  background: var(--ds-accent-hover);
+  border-color: var(--ds-accent-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--ds-gold-glow-hover);
+}
+#dubai-shipping-{{ sid }} .ds-btn:active {
+  transform: scale(0.98);
+}
+
+/* ═══════════════════════════════════════════════════════
+   HERO
+   ═══════════════════════════════════════════════════════ */
+#dubai-shipping-{{ sid }} .ds-hero {
+  background: linear-gradient(135deg, rgba(251,191,36,0.08) 0%, rgba(251,191,36,0.18) 50%, rgba(251,191,36,0.08) 100%);
+  background-size: cover;
+  background-position: center;
+  border-radius: var(--nx-radius-lg);
+  overflow: hidden;
+  min-height: 280px;
+  display: flex;
+  align-items: flex-end;
+}
+#dubai-shipping-{{ sid }} .ds-hero-overlay {
+  width: 100%;
+  padding: 36px 24px;
+  background: rgba(0, 0, 0, 0.25);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+}
+@media (min-width: 990px) {
+  #dubai-shipping-{{ sid }} .ds-hero { min-height: 360px; }
+  #dubai-shipping-{{ sid }} .ds-hero-overlay { padding: 48px 36px; }
+}
+#dubai-shipping-{{ sid }} .ds-hero-title {
+  font-family: var(--ds-font-heading);
+  font-size: clamp(26px, 4.5vw, 46px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  color: #fff;
+  margin: 0 0 10px;
+}
+#dubai-shipping-{{ sid }} .ds-hero-sub {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: clamp(15px, 2vw, 18px);
+  line-height: 1.6;
+  margin: 0 0 20px;
+  max-width: 640px;
+}
+#dubai-shipping-{{ sid }} .ds-hero-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+#dubai-shipping-{{ sid }} .ds-hero .ds-btn--ghost {
+  border-color: rgba(255, 255, 255, 0.5);
+  color: #fff;
+}
+#dubai-shipping-{{ sid }} .ds-hero .ds-btn--ghost:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: #fff;
+  color: #fff;
+}
+
+/* ═══════════════════════════════════════════════════════
+   INTRO
+   ═══════════════════════════════════════════════════════ */
+#dubai-shipping-{{ sid }} .ds-intro-text {
+  font-size: clamp(16px, 2vw, 18px);
+  line-height: 1.7;
+  color: var(--ds-muted);
+  max-width: 800px;
+  margin: 0;
+}
+
+/* ═══════════════════════════════════════════════════════
+   COVERAGE MAP
+   ═══════════════════════════════════════════════════════ */
+#dubai-shipping-{{ sid }} .ds-map-wrap {
+  position: relative;
+  padding-bottom: 56.25%;
+  height: 0;
+  overflow: hidden;
+  border-radius: var(--ds-radius);
+  box-shadow: var(--ds-shadow-rest);
+  margin-top: 12px;
+}
+#dubai-shipping-{{ sid }} .ds-map-wrap iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+/* ═══════════════════════════════════════════════════════
+   SHIPPING RATES TABLE
+   ═══════════════════════════════════════════════════════ */
+#dubai-shipping-{{ sid }} .ds-table-wrap {
+  border-radius: var(--ds-radius);
+  overflow: hidden;
+  box-shadow: var(--ds-shadow-rest);
+  margin-top: 12px;
+}
+#dubai-shipping-{{ sid }} .ds-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+#dubai-shipping-{{ sid }} .ds-table thead {
+  background: var(--ds-bg-alt);
+}
+#dubai-shipping-{{ sid }} .ds-table th {
+  text-align: left;
+  padding: 12px 16px;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--ds-text);
+  line-height: 1.4;
+}
+#dubai-shipping-{{ sid }} .ds-table td {
+  padding: 14px 16px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ds-text);
+  border-top: 1px solid rgba(0, 0, 0, 0.04);
+}
+#dubai-shipping-{{ sid }} .ds-table tbody tr {
+  transition: var(--ds-transition);
+}
+#dubai-shipping-{{ sid }} .ds-table tbody tr:hover {
+  background: var(--ds-accent-glass);
+}
+#dubai-shipping-{{ sid }} .ds-table-note {
+  font-size: 13px;
+  color: var(--ds-muted);
+  margin-top: 10px;
+}
+@media (max-width: 640px) {
+  #dubai-shipping-{{ sid }} .ds-table thead { display: none; }
+  #dubai-shipping-{{ sid }} .ds-table tbody tr {
+    display: block;
+    padding: 14px;
+    border-top: 1px solid rgba(0, 0, 0, 0.04);
+  }
+  #dubai-shipping-{{ sid }} .ds-table tbody tr:first-child { border-top: none; }
+  #dubai-shipping-{{ sid }} .ds-table td {
+    display: block;
+    padding: 3px 0;
+    border-top: none;
+  }
+  #dubai-shipping-{{ sid }} .ds-table td::before {
+    content: attr(data-label) ": ";
+    font-weight: 700;
+    color: var(--ds-text);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   TRUST ICONS — Glass grid
+   ═══════════════════════════════════════════════════════ */
+#dubai-shipping-{{ sid }} .ds-trust-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-top: 14px;
+}
+@media (min-width: 760px) {
+  #dubai-shipping-{{ sid }} .ds-trust-grid { grid-template-columns: repeat(4, 1fr); }
+}
+#dubai-shipping-{{ sid }} .ds-trust-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 20px 14px;
+  border: none;
+  border-radius: var(--ds-radius);
+  background: var(--ds-accent-glass);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  box-shadow: var(--ds-shadow-rest);
+  transition: var(--ds-transition);
+  text-align: center;
+}
+#dubai-shipping-{{ sid }} .ds-trust-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--ds-shadow-hover);
+}
+#dubai-shipping-{{ sid }} .ds-trust-icon {
+  width: 60px;
+  height: 60px;
+  flex-shrink: 0;
+}
+#dubai-shipping-{{ sid }} .ds-trust-icon img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+#dubai-shipping-{{ sid }} .ds-trust-emoji {
+  font-size: 32px;
+  line-height: 1;
+}
+#dubai-shipping-{{ sid }} .ds-trust-label {
+  display: inline-block;
+  padding: 5px 12px;
+  border-radius: var(--nx-radius-sm);
+  background: var(--ds-accent);
+  color: var(--color-text-primary);
+  font-weight: 600;
+  font-size: 13px;
+}
+
+/* ═══════════════════════════════════════════════════════
+   FAQ — Animated disclosure, chevron rotation
+   ═══════════════════════════════════════════════════════ */
+#dubai-shipping-{{ sid }} .ds-faq {
+  border: none;
+  border-radius: var(--nx-radius-md);
+  margin: 8px 0;
+  box-shadow: var(--ds-shadow-rest);
+  overflow: hidden;
+  background: var(--ds-bg);
+  transition: var(--ds-transition);
+}
+#dubai-shipping-{{ sid }} .ds-faq:hover {
+  box-shadow: var(--ds-shadow-hover);
+}
+#dubai-shipping-{{ sid }} .ds-faq-q {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 18px;
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--ds-text);
+  cursor: pointer;
+  list-style: none;
+  min-height: var(--touch-min, 44px);
+}
+#dubai-shipping-{{ sid }} .ds-faq-q::-webkit-details-marker { display: none; }
+#dubai-shipping-{{ sid }} .ds-faq-q::marker { content: ""; }
+
+#dubai-shipping-{{ sid }} .ds-faq-chevron {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  position: relative;
+  transition: transform 0.35s var(--ease-premium);
+}
+#dubai-shipping-{{ sid }} .ds-faq-chevron::before,
+#dubai-shipping-{{ sid }} .ds-faq-chevron::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 10px;
+  height: 2px;
+  background: var(--ds-muted);
+  border-radius: 1px;
+  transition: transform 0.35s var(--ease-premium);
+}
+#dubai-shipping-{{ sid }} .ds-faq-chevron::before {
+  left: 1px;
+  transform: translateY(-50%) rotate(45deg);
+}
+#dubai-shipping-{{ sid }} .ds-faq-chevron::after {
+  right: 1px;
+  transform: translateY(-50%) rotate(-45deg);
+}
+#dubai-shipping-{{ sid }} .ds-faq[open] .ds-faq-chevron::before {
+  transform: translateY(-50%) rotate(-45deg);
+}
+#dubai-shipping-{{ sid }} .ds-faq[open] .ds-faq-chevron::after {
+  transform: translateY(-50%) rotate(45deg);
+}
+#dubai-shipping-{{ sid }} .ds-faq-answer {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.35s var(--ease-premium);
+}
+#dubai-shipping-{{ sid }} .ds-faq[open] .ds-faq-answer {
+  grid-template-rows: 1fr;
+}
+#dubai-shipping-{{ sid }} .ds-faq-inner {
+  overflow: hidden;
+}
+#dubai-shipping-{{ sid }} .ds-faq-inner p {
+  padding: 0 18px 16px;
+  margin: 0;
+  color: var(--ds-muted);
+  line-height: 1.6;
+  font-size: 14px;
+}
+
+/* ═══════════════════════════════════════════════════════
+   FINAL CTA
+   ═══════════════════════════════════════════════════════ */
+#dubai-shipping-{{ sid }} .ds-final-cta {
+  background: var(--ds-bg-alt);
+  border-radius: var(--ds-radius);
+  padding: 28px 24px;
+  box-shadow: var(--ds-shadow-rest);
+  text-align: center;
+}
+
+/* ═══════════════════════════════════════════════════════
+   ACCESSIBILITY — focus-visible + reduced motion
+   ═══════════════════════════════════════════════════════ */
+#dubai-shipping-{{ sid }} :focus-visible {
+  outline: 2px solid var(--ds-accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #dubai-shipping-{{ sid }} *,
+  #dubai-shipping-{{ sid }} *::before,
+  #dubai-shipping-{{ sid }} *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+{%- endstyle -%}
+
+{% schema %}
+{
+  "name": "Dubai Shipping",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Hero"
+    },
+    { "type": "text", "id": "hero_title", "label": "Hero title", "default": "Delivered in 4 Hours — Order by 5 pm" },
+    { "type": "textarea", "id": "hero_subtitle", "label": "Hero subtitle", "default": "Every SKU ships from our Dubai warehouse. Same-day delivery — often within four hours." },
+    { "type": "image_picker", "id": "hero_image", "label": "Hero background image (optional)" },
+    {
+      "type": "header",
+      "content": "Intro"
+    },
+    { "type": "richtext", "id": "intro_text", "label": "Intro paragraph", "default": "<p>Forget shipping delays and week-long waits. Because every SKU ships from our Dubai warehouse, you'll get your stack the <strong>same day</strong> — often within four hours. Below you'll find exact cut-off times, courier zones, and costs for Dubai and the rest of the UAE.</p>" },
+    {
+      "type": "header",
+      "content": "Coverage Map"
+    },
+    { "type": "text", "id": "map_embed_url", "label": "Google Maps embed URL", "default": "https://www.google.com/maps/d/embed?mid=1g60YiIEmniUuLZMj5sC1J_IRca6qK-w&ehbc=2E312F" },
+    {
+      "type": "header",
+      "content": "Trust Icons"
+    },
+    { "type": "image_picker", "id": "icon_1_image", "label": "Icon 1 image" },
+    { "type": "text", "id": "icon_1_title", "label": "Icon 1 title", "default": "4-Hour Courier" },
+    { "type": "image_picker", "id": "icon_2_image", "label": "Icon 2 image" },
+    { "type": "text", "id": "icon_2_title", "label": "Icon 2 title", "default": "Legal & Tested" },
+    { "type": "image_picker", "id": "icon_3_image", "label": "Icon 3 image" },
+    { "type": "text", "id": "icon_3_title", "label": "Icon 3 title", "default": "Local Fulfillment" },
+    { "type": "image_picker", "id": "icon_4_image", "label": "Icon 4 image" },
+    { "type": "text", "id": "icon_4_title", "label": "Icon 4 title", "default": "Bundle & Save" },
+    {
+      "type": "header",
+      "content": "Final CTA"
+    },
+    { "type": "text", "id": "cta_text", "label": "CTA button text", "default": "Shop All Nootropics" },
+    { "type": "url", "id": "cta_link", "label": "CTA button link" },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "max_width",
+      "label": "Max width (px)",
+      "min": 800,
+      "max": 1400,
+      "step": 20,
+      "default": 1100
+    },
+    {
+      "type": "range",
+      "id": "padding_y",
+      "label": "Vertical padding (px)",
+      "min": 32,
+      "max": 120,
+      "step": 4,
+      "default": 56
+    }
+  ],
+  "blocks": [
+    {
+      "type": "faq",
+      "name": "FAQ",
+      "settings": [
+        { "type": "text", "id": "q", "label": "Question", "default": "How fast is delivery inside Dubai city limits?" },
+        { "type": "textarea", "id": "a", "label": "Answer", "default": "Place your order before 6 pm and our courier will reach any Zone-A address within four hours. Orders after 6 pm arrive the following morning." }
+      ]
+    }
+  ],
+  "max_blocks": 12,
+  "presets": [
+    { "name": "Dubai Shipping", "category": "Nootropix" }
+  ]
+}
+{% endschema %}

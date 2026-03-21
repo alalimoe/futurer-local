@@ -1,0 +1,80 @@
+{% comment %}
+  Renders a feature collection
+
+  @param {String} sub_heading - Subheading (required)
+  @param {String} heading - Heading (required)
+  @param {Object} block - Blocks (required)
+
+  @example
+  {% render 'featured-collection-10', sub_heading: sub_heading, heading: heading, block: block %}
+{% endcomment %}
+
+<div class="featured-collection-10">
+  <xo-carousel
+    xo-per-view="3"
+    xo-per-move="1"
+    xo-overflow="visible"
+    {% if autoplay == 'on' %}
+      xo-autoplay="{{ autoplay_time }}"
+      xo-loop
+    {% endif %}
+    xo-breakpoints='
+      {
+        768: {
+          perView: 1,
+          perMove: 1,
+          gap: 10,
+          overflow: "visible"
+        },
+      }
+    '
+    class="featured-collection-10__carousel"
+  >
+    <xo-animate xo-cascade>
+      <div class="featured-collection-10__head">
+        {% if sub_heading %}
+          <div class="featured-collection-10__sub-heading">
+            <p>{{ sub_heading }}</p>
+          </div>
+        {% endif %}
+        {% if heading %}
+          <div class="featured-collection-10__heading">
+            {% render 'text', context: section %}
+          </div>
+        {% endif %}
+        <div class="featured-collection-10__navigation">
+          <xo-carousel-prev class="featured-collection-10__button" role="button" tabindex="0" aria-label="Previous button">
+            {% render 'button-slide', icon: 'arrow-left', icon_size: '2.4rem', size: '3.6rem', direction: 'left', style: 'dark' %}
+          </xo-carousel-prev>
+          <xo-carousel-next class="featured-collection-10__button" role="button" tabindex="0" aria-label="Next button">
+            {% render 'button-slide', icon: 'arrow-right', icon_size: '2.4rem', size: '3.6rem', direction: 'right', style: 'dark' %}
+          </xo-carousel-next>
+        </div>
+      </div>
+    </xo-animate>
+    <div class="featured-collection-10__bottom">
+      <xo-carousel-inner>
+        <xo-carousel-list>
+          {% for item in block %}
+            <xo-carousel-slide>
+              <xo-animate xo-cascade>
+                <div class="featured-collection-10__product{% if settings.enable_border_radius %} featured-collection-10__product--radius{% endif %}">
+                  {%- assign placeholder_image = 'collection-1' -%}
+                  {% render 'product-card-custom',
+                    product: item.settings.product,
+                    show_image: item.settings.product_card_show_image,
+                    show_secondary_image: item.settings.product_card_show_secondary_image,
+                    show_price: item.settings.product_card_show_price,
+                    media_aspect_ratio: item.settings.product_card_aspect_ratio,
+                    card_color_scheme: item.settings.card_color_scheme,
+                    placeholder_image: placeholder_image
+                  %}
+                </div>
+              </xo-animate>
+            </xo-carousel-slide>
+          {% endfor %}
+        </xo-carousel-list>
+      </xo-carousel-inner>
+    </div>
+  </xo-carousel>
+</div>

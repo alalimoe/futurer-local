@@ -1,0 +1,995 @@
+{% doc %}
+  @prompt
+    a 'Page' section that will simply load the page in nice, clean formatting to use as the default page template with toc on the left side of the page
+{% enddoc %}
+
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{%- liquid
+  assign mf = page.metafields.custom
+
+  assign author = mf.author.value | strip
+  assign date_published = mf.date_published.value
+  assign last_reviewed = mf.last_reviewed.value
+
+  assign tldr_mf = mf.tldr
+  assign takeaways_mf = mf.key_takeaways
+
+  assign related_pages = mf.related_pages.value
+  assign related_products = mf.related_products.value
+  assign related_collections = mf.related_collections.value
+
+  assign has_meta = false
+  if author != blank or date_published != blank or last_reviewed != blank
+    assign has_meta = true
+  endif
+
+  assign has_tldr = false
+  if tldr_mf != blank and tldr_mf.value != blank
+    assign has_tldr = true
+  endif
+
+  assign has_takeaways = false
+  if takeaways_mf != blank and takeaways_mf.value != blank
+    assign has_takeaways = true
+  endif
+
+  assign has_related = false
+  if related_pages != blank or related_products != blank or related_collections != blank
+    assign has_related = true
+  endif
+
+  assign related_limit = block.settings.related_limit
+  if related_limit == blank
+    assign related_limit = 3
+  endif
+
+  assign show_sidebar_enrichment = block.settings.show_sidebar_enrichment
+  if show_sidebar_enrichment == blank
+    assign show_sidebar_enrichment = true
+  endif
+-%}
+
+{% style %}
+  .ai-page-toc-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    max-width: {{ block.settings.max_width }}px;
+    margin: 0 auto;
+    padding: {{ block.settings.section_padding }}px var(--page-gutter);
+  }
+
+  .ai-page-toc-container-{{ ai_gen_id }} {
+    display: grid;
+    grid-template-columns: {{ block.settings.toc_width }}px 1fr;
+    gap: {{ block.settings.gap }}px;
+    align-items: start;
+  }
+
+  .ai-page-toc-sidebar-{{ ai_gen_id }} {
+    position: sticky;
+    top: {{ block.settings.sticky_offset }}px;
+    background-color: {{ block.settings.toc_background }};
+    padding: {{ block.settings.toc_padding }}px;
+    border-radius: {{ block.settings.border_radius }}px;
+    {% if block.settings.show_toc_border %}
+      border: 1px solid {{ block.settings.border_color }};
+    {% endif %}
+
+    {% if block.settings.sidebar_scroll %}
+      max-height: calc(100vh - {{ block.settings.sticky_offset }}px - 20px);
+      overflow: auto;
+    {% endif %}
+  }
+
+  .ai-page-toc-title-{{ ai_gen_id }} {
+    font-size: {{ block.settings.toc_title_size }}px;
+    font-weight: 600;
+    color: {{ block.settings.toc_title_color }};
+    margin: 0 0 {{ block.settings.toc_title_spacing }}px 0;
+  }
+
+  .ai-page-toc-list-{{ ai_gen_id }} {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .ai-page-toc-item-{{ ai_gen_id }} {
+    margin-bottom: {{ block.settings.toc_item_spacing }}px;
+  }
+
+  .ai-page-toc-link-{{ ai_gen_id }} {
+    display: block;
+    color: {{ block.settings.toc_link_color }};
+    text-decoration: none;
+    font-size: {{ block.settings.toc_link_size }}px;
+    line-height: 1.5;
+    padding: {{ block.settings.toc_link_padding }}px;
+    border-radius: {{ block.settings.toc_link_radius }}px;
+    transition: var(--transition-smooth);
+  }
+
+  .ai-page-toc-link-{{ ai_gen_id }}:hover {
+    background-color: {{ block.settings.toc_link_hover_bg }};
+    color: {{ block.settings.toc_link_hover_color }};
+  }
+
+  .ai-page-toc-link-{{ ai_gen_id }}.active {
+    background-color: {{ block.settings.toc_link_active_bg }};
+    color: {{ block.settings.toc_link_active_color }};
+    font-weight: 600;
+  }
+
+  .ai-page-toc-content-{{ ai_gen_id }} {
+    background-color: {{ block.settings.content_background }};
+    padding: {{ block.settings.content_padding }}px;
+    border-radius: {{ block.settings.border_radius }}px;
+    {% if block.settings.show_content_border %}
+      border: 1px solid {{ block.settings.border_color }};
+    {% endif %}
+  }
+
+  .ai-page-toc-content-{{ ai_gen_id }} h1,
+  .ai-page-toc-content-{{ ai_gen_id }} h2,
+  .ai-page-toc-content-{{ ai_gen_id }} h3,
+  .ai-page-toc-content-{{ ai_gen_id }} h4,
+  .ai-page-toc-content-{{ ai_gen_id }} h5,
+  .ai-page-toc-content-{{ ai_gen_id }} h6 {
+    color: {{ block.settings.heading_color }};
+    margin-top: {{ block.settings.heading_spacing }}px;
+    margin-bottom: {{ block.settings.heading_spacing | divided_by: 2 }}px;
+    scroll-margin-top: {{ block.settings.sticky_offset | plus: 20 }}px;
+  }
+
+  .ai-page-toc-content-{{ ai_gen_id }} h1 { font-size: {{ block.settings.h1_size }}px; }
+  .ai-page-toc-content-{{ ai_gen_id }} h2 { font-size: {{ block.settings.h2_size }}px; }
+  .ai-page-toc-content-{{ ai_gen_id }} h3 { font-size: {{ block.settings.h3_size }}px; }
+
+  .ai-page-toc-content-{{ ai_gen_id }} p {
+    color: {{ block.settings.text_color }};
+    font-size: {{ block.settings.text_size }}px;
+    line-height: {{ block.settings.line_height }};
+    margin-bottom: {{ block.settings.paragraph_spacing }}px;
+  }
+
+  .ai-page-toc-content-{{ ai_gen_id }} ul,
+  .ai-page-toc-content-{{ ai_gen_id }} ol {
+    color: {{ block.settings.text_color }};
+    font-size: {{ block.settings.text_size }}px;
+    line-height: {{ block.settings.line_height }};
+    margin-bottom: {{ block.settings.paragraph_spacing }}px;
+    padding-left: 24px;
+  }
+
+  .ai-page-toc-content-{{ ai_gen_id }} a {
+    color: {{ block.settings.link_color }};
+    text-decoration: underline;
+  }
+
+  .ai-page-toc-content-{{ ai_gen_id }} a:hover {
+    color: {{ block.settings.link_hover_color }};
+  }
+
+  .ai-page-toc-content-{{ ai_gen_id }} img {
+    max-width: 100%;
+    height: auto;
+    border-radius: {{ block.settings.image_radius }}px;
+    margin: {{ block.settings.image_spacing }}px 0;
+  }
+
+  /* ---------- Sidebar enrichment UI ---------- */
+  .ai-sidebar-stack-{{ ai_gen_id }} {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+
+  .ai-sidebar-meta-{{ ai_gen_id }} {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 14px;
+    font-size: {{ block.settings.toc_link_size }}px;
+    color: {{ block.settings.toc_link_color }};
+    opacity: 0.85;
+  }
+
+  .ai-sidebar-accordion-{{ ai_gen_id }} {
+    background: {{ block.settings.content_background }};
+    border-radius: {{ block.settings.border_radius }}px;
+    border: 1px solid {{ block.settings.border_color }};
+    overflow: hidden;
+  }
+
+  .ai-sidebar-accordion-{{ ai_gen_id }} summary {
+    cursor: pointer;
+    list-style: none;
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    font-size: {{ block.settings.toc_title_size }}px;
+    font-weight: 600;
+    color: {{ block.settings.toc_title_color }};
+    background: {{ block.settings.content_background }};
+  }
+
+  .ai-sidebar-accordion-{{ ai_gen_id }} summary::-webkit-details-marker { display: none; }
+
+  .ai-sidebar-accordion-{{ ai_gen_id }} summary::after {
+    content: "+";
+    font-size: 18px;
+    line-height: 1;
+    opacity: 0.7;
+  }
+
+  .ai-sidebar-accordion-{{ ai_gen_id }}[open] summary::after {
+    content: "−";
+  }
+
+  .ai-sidebar-accordion-{{ ai_gen_id }}[open] summary {
+    border-bottom: 1px solid {{ block.settings.border_color }};
+  }
+
+  .ai-sidebar-accordion-content-{{ ai_gen_id }} {
+    padding: 10px 12px 12px;
+  }
+
+  .ai-sidebar-accordion-content-{{ ai_gen_id }} p {
+    margin: 0 0 10px 0;
+    font-size: {{ block.settings.toc_link_size }}px;
+    line-height: 1.5;
+    color: {{ block.settings.text_color }};
+  }
+
+  .ai-sidebar-accordion-content-{{ ai_gen_id }} p:last-child { margin-bottom: 0; }
+
+  .ai-sidebar-accordion-content-{{ ai_gen_id }} ul,
+  .ai-sidebar-accordion-content-{{ ai_gen_id }} ol {
+    margin: 0;
+    padding-left: 18px;
+    font-size: {{ block.settings.toc_link_size }}px;
+    line-height: 1.5;
+    color: {{ block.settings.text_color }};
+  }
+
+  .ai-sidebar-subtitle-{{ ai_gen_id }} {
+    font-weight: 700;
+    margin: 10px 0 6px 0;
+    font-size: {{ block.settings.toc_link_size }}px;
+    color: {{ block.settings.heading_color }};
+  }
+
+  .ai-sidebar-simplelist-{{ ai_gen_id }} {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .ai-sidebar-simplelist-{{ ai_gen_id }} li {
+    margin: 4px 0;
+  }
+
+  .ai-sidebar-simplelist-{{ ai_gen_id }} a {
+    color: {{ block.settings.link_color }};
+    text-decoration: underline;
+    font-size: {{ block.settings.toc_link_size }}px;
+  }
+
+  .ai-sidebar-simplelist-{{ ai_gen_id }} a:hover {
+    color: {{ block.settings.link_hover_color }};
+  }
+
+  @media screen and (max-width: 989px) {
+    .ai-page-toc-container-{{ ai_gen_id }} {
+      grid-template-columns: 1fr;
+    }
+
+    .ai-page-toc-sidebar-{{ ai_gen_id }} {
+      position: static;
+      margin-bottom: {{ block.settings.gap }}px;
+      max-height: none;
+      overflow: visible;
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-page-toc-{{ ai_gen_id }} {
+      padding: {{ block.settings.section_padding | times: 0.5 }}px var(--page-gutter);
+    }
+
+    .ai-page-toc-content-{{ ai_gen_id }} {
+      padding: {{ block.settings.content_padding | times: 0.7 }}px;
+    }
+
+    .ai-page-toc-sidebar-{{ ai_gen_id }} {
+      padding: {{ block.settings.toc_padding | times: 0.7 }}px;
+    }
+  }
+{% endstyle %}
+
+<page-with-toc-{{ ai_gen_id }} class="ai-page-toc-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="ai-page-toc-container-{{ ai_gen_id }}">
+    <aside class="ai-page-toc-sidebar-{{ ai_gen_id }}">
+<details class="ai-sidebar-accordion-{{ ai_gen_id }}" open>
+        <summary>{{ block.settings.toc_title }}</summary>
+        <div class="ai-sidebar-accordion-content-{{ ai_gen_id }}">
+          <nav aria-label="Table of contents">
+            <ul class="ai-page-toc-list-{{ ai_gen_id }}" id="ai-toc-list-{{ ai_gen_id }}">
+            </ul>
+          </nav>
+        </div>
+      </details>
+      {%- if show_sidebar_enrichment -%}
+        <div class="ai-sidebar-stack-{{ ai_gen_id }}">
+
+          {%- if block.settings.show_meta -%}
+            {%- if has_meta -%}
+              <div class="ai-sidebar-meta-{{ ai_gen_id }}">
+                {%- if author != blank -%}<span>By {{ author }}</span>{%- endif -%}
+                {%- if date_published != blank -%}<span>Published {{ date_published | date: "%-d %b %Y" }}</span>{%- endif -%}
+                {%- if last_reviewed != blank -%}<span>Last reviewed {{ last_reviewed | date: "%-d %b %Y" }}</span>{%- endif -%}
+              </div>
+            {%- endif -%}
+          {%- endif -%}
+
+          {%- if block.settings.show_tldr -%}
+            {%- if has_tldr -%}
+              <details class="ai-sidebar-accordion-{{ ai_gen_id }}" open>
+                <summary>TLDR</summary>
+                <div class="ai-sidebar-accordion-content-{{ ai_gen_id }}">
+                  {%- if tldr_mf.type == 'rich_text_field' -%}
+                    {{ tldr_mf | metafield_tag }}
+                  {%- else -%}
+                    <p>{{ tldr_mf.value | escape | newline_to_br }}</p>
+                  {%- endif -%}
+                </div>
+              </details>
+            {%- endif -%}
+          {%- endif -%}
+
+          {%- if block.settings.show_takeaways -%}
+            {%- if has_takeaways -%}
+              <details class="ai-sidebar-accordion-{{ ai_gen_id }}" open>
+                <summary>Key takeaways</summary>
+                <div class="ai-sidebar-accordion-content-{{ ai_gen_id }}">
+                  {%- comment -%}
+                    Fixes the {"type"=>"root"...} blob:
+                    rich_text metafields MUST be rendered with metafield_tag.
+                  {%- endcomment -%}
+                  {%- if takeaways_mf.type == 'rich_text_field' -%}
+                    {{ takeaways_mf | metafield_tag }}
+                  {%- else -%}
+                    {%- assign kt = takeaways_mf.value | strip -%}
+                    {%- assign items = kt | split: '•' -%}
+                    {%- if items.size == 1 -%}
+                      {%- assign items = kt | split: '|' -%}
+                    {%- endif -%}
+
+                    {%- if items.size > 1 -%}
+                      <ul>
+                        {%- for it in items -%}
+                          {%- assign clean = it | strip -%}
+                          {%- if clean != blank -%}<li>{{ clean }}</li>{%- endif -%}
+                        {%- endfor -%}
+                      </ul>
+                    {%- else -%}
+                      <p>{{ kt | escape }}</p>
+                    {%- endif -%}
+                  {%- endif -%}
+                </div>
+              </details>
+            {%- endif -%}
+          {%- endif -%}
+
+        </div>
+      {%- endif -%}
+
+      
+
+      {%- if show_sidebar_enrichment -%}
+        {%- if block.settings.show_related -%}
+          {%- if has_related -%}
+            <details class="ai-sidebar-accordion-{{ ai_gen_id }}">
+              <summary>Related</summary>
+              <div class="ai-sidebar-accordion-content-{{ ai_gen_id }}">
+
+                {%- if block.settings.show_related_pages -%}
+                  {%- if related_pages != blank -%}
+                    <div class="ai-sidebar-subtitle-{{ ai_gen_id }}">Pages</div>
+                    <ul class="ai-sidebar-simplelist-{{ ai_gen_id }}">
+                      {%- for p in related_pages limit: related_limit -%}
+                        <li><a href="{{ p.url }}">{{ p.title }}</a></li>
+                      {%- endfor -%}
+                    </ul>
+                  {%- endif -%}
+                {%- endif -%}
+
+                {%- if block.settings.show_related_products -%}
+                  {%- if related_products != blank -%}
+                    <div class="ai-sidebar-subtitle-{{ ai_gen_id }}">Products</div>
+                    <ul class="ai-sidebar-simplelist-{{ ai_gen_id }}">
+                      {%- for pr in related_products limit: related_limit -%}
+                        <li><a href="{{ pr.url }}">{{ pr.title }}</a></li>
+                      {%- endfor -%}
+                    </ul>
+                  {%- endif -%}
+                {%- endif -%}
+
+                {%- if block.settings.show_related_collections -%}
+                  {%- if related_collections != blank -%}
+                    <div class="ai-sidebar-subtitle-{{ ai_gen_id }}">Collections</div>
+                    <ul class="ai-sidebar-simplelist-{{ ai_gen_id }}">
+                      {%- for c in related_collections limit: related_limit -%}
+                        <li><a href="{{ c.url }}">{{ c.title }}</a></li>
+                      {%- endfor -%}
+                    </ul>
+                  {%- endif -%}
+                {%- endif -%}
+
+              </div>
+            </details>
+          {%- endif -%}
+        {%- endif -%}
+      {%- endif -%}
+
+    </aside>
+
+    <div class="ai-page-toc-content-{{ ai_gen_id }}" id="ai-page-content-{{ ai_gen_id }}">
+      {{ page.content }}
+    </div>
+  </div>
+</page-with-toc-{{ ai_gen_id }}>
+
+{%- if block.settings.emit_faq_schema -%}
+  {%- assign faq_mf = mf.faq_json -%}
+  {%- if faq_mf != blank and faq_mf.type == 'json' -%}
+    {%- assign faq_items = faq_mf.value -%}
+    {%- if faq_items != blank and faq_items.size > 0 -%}
+      <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {%- assign first_faq = true -%}
+          {%- for item in faq_items -%}
+            {%- assign q = item.q | default: item.question | strip -%}
+            {%- assign a = item.a | default: item.answer | strip -%}
+            {%- if q != blank and a != blank -%}
+              {%- unless first_faq -%},{%- endunless -%}
+              {
+                "@type": "Question",
+                "name": {{ q | json }},
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": {{ a | strip_html | json }}
+                }
+              }
+              {%- assign first_faq = false -%}
+            {%- endif -%}
+          {%- endfor -%}
+        ]
+      }
+      </script>
+    {%- endif -%}
+  {%- endif -%}
+{%- endif -%}
+
+<script>
+  (function() {
+    class PageWithToc{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+        this.content = this.querySelector('#ai-page-content-{{ ai_gen_id }}');
+        this.tocList = this.querySelector('#ai-toc-list-{{ ai_gen_id }}');
+        this.headings = [];
+        this.links = [];
+      }
+
+      connectedCallback() {
+        this.generateTOC();
+        this.setupScrollSpy();
+      }
+
+      generateTOC() {
+        const headingSelector = '{{ block.settings.heading_levels }}';
+        this.headings = Array.from(this.content.querySelectorAll(headingSelector));
+
+        if (this.headings.length === 0) {
+          this.tocList.innerHTML = '<li style="color: #999; font-style: italic; padding: 8px;">No headings found</li>';
+          return;
+        }
+
+        this.headings.forEach((heading, index) => {
+          const id = heading.id || `heading-${index}-{{ ai_gen_id }}`;
+          if (!heading.id) {
+            heading.id = id;
+          }
+
+          const li = document.createElement('li');
+          li.className = 'ai-page-toc-item-{{ ai_gen_id }}';
+
+          const link = document.createElement('a');
+          link.href = `#${id}`;
+          link.className = 'ai-page-toc-link-{{ ai_gen_id }}';
+          link.textContent = heading.textContent;
+          link.addEventListener('click', (e) => {
+            e.preventDefault();
+            heading.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            history.pushState(null, null, `#${id}`);
+          });
+
+          li.appendChild(link);
+          this.tocList.appendChild(li);
+          this.links.push({ link, heading });
+        });
+      }
+
+      setupScrollSpy() {
+        const observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              const link = this.links.find((item) => item.heading === entry.target);
+              if (link && entry.isIntersecting) {
+                this.links.forEach((item) => item.link.classList.remove('active'));
+                link.link.classList.add('active');
+              }
+            });
+          },
+          {
+            rootMargin: '-20% 0px -70% 0px',
+            threshold: 0
+          }
+        );
+
+        this.headings.forEach((heading) => observer.observe(heading));
+      }
+    }
+
+    customElements.define('page-with-toc-{{ ai_gen_id }}', PageWithToc{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Page with TOC",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "max_width",
+      "min": 1000,
+      "max": 1600,
+      "step": 50,
+      "unit": "px",
+      "label": "Maximum width",
+      "default": 1400
+    },
+    {
+      "type": "range",
+      "id": "section_padding",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Section padding",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "gap",
+      "min": 20,
+      "max": 80,
+      "step": 5,
+      "unit": "px",
+      "label": "Gap between TOC and content",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "min": 0,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "label": "Border radius",
+      "default": 8
+    },
+
+    {
+      "type": "header",
+      "content": "Enrichment sidebar"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_sidebar_enrichment",
+      "label": "Show enrichment blocks in sidebar (TL;DR, takeaways, related)",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_meta",
+      "label": "Show author + published + last reviewed",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_tldr",
+      "label": "Show TL;DR",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_takeaways",
+      "label": "Show key takeaways",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_related",
+      "label": "Show related links",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_related_pages",
+      "label": "Related: Pages",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_related_products",
+      "label": "Related: Products",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_related_collections",
+      "label": "Related: Collections",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "related_limit",
+      "min": 0,
+      "max": 12,
+      "step": 1,
+      "label": "Max per group",
+      "default": 3
+    },
+    {
+      "type": "checkbox",
+      "id": "emit_faq_schema",
+      "label": "Emit FAQPage JSON-LD from custom.faq_json",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "sidebar_scroll",
+      "label": "sidebar scrollable",
+      "default": true
+    },
+
+    {
+      "type": "header",
+      "content": "Table of contents"
+    },
+    {
+      "type": "text",
+      "id": "toc_title",
+      "label": "TOC title",
+      "default": "Table of Contents"
+    },
+    {
+      "type": "select",
+      "id": "heading_levels",
+      "label": "Heading levels to include",
+      "options": [
+        { "value": "h2, h3", "label": "H2 and H3" },
+        { "value": "h2, h3, h4", "label": "H2, H3, and H4" },
+        { "value": "h1, h2, h3", "label": "H1, H2, and H3" },
+        { "value": "h1, h2, h3, h4", "label": "H1, H2, H3, and H4" }
+      ],
+      "default": "h2, h3"
+    },
+    {
+      "type": "range",
+      "id": "toc_width",
+      "min": 200,
+      "max": 400,
+      "step": 20,
+      "unit": "px",
+      "label": "TOC width",
+      "default": 280
+    },
+    {
+      "type": "range",
+      "id": "sticky_offset",
+      "min": 0,
+      "max": 200,
+      "step": 10,
+      "unit": "px",
+      "label": "Sticky offset from top",
+      "default": 100
+    },
+    {
+      "type": "color",
+      "id": "toc_background",
+      "label": "Background",
+      "default": "#f6f6f6"
+    },
+    {
+      "type": "range",
+      "id": "toc_padding",
+      "min": 10,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Padding",
+      "default": 24
+    },
+    {
+      "type": "checkbox",
+      "id": "show_toc_border",
+      "label": "Show border",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "toc_title_size",
+      "min": 14,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Title size",
+      "default": 18
+    },
+    {
+      "type": "color",
+      "id": "toc_title_color",
+      "label": "Title color",
+      "default": "#1e1e1e"
+    },
+    {
+      "type": "range",
+      "id": "toc_title_spacing",
+      "min": 8,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "label": "Title spacing",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "toc_item_spacing",
+      "min": 4,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "label": "Item spacing",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "toc_link_size",
+      "min": 12,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "label": "Link size",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "toc_link_padding",
+      "min": 4,
+      "max": 16,
+      "step": 2,
+      "unit": "px",
+      "label": "Link padding",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "toc_link_radius",
+      "min": 0,
+      "max": 12,
+      "step": 2,
+      "unit": "px",
+      "label": "Link border radius",
+      "default": 4
+    },
+    {
+      "type": "color",
+      "id": "toc_link_color",
+      "label": "Link color",
+      "default": "#666666"
+    },
+    {
+      "type": "color",
+      "id": "toc_link_hover_bg",
+      "label": "Link hover background",
+      "default": "#e8e8e8"
+    },
+    {
+      "type": "color",
+      "id": "toc_link_hover_color",
+      "label": "Link hover color",
+      "default": "#1e1e1e"
+    },
+    {
+      "type": "color",
+      "id": "toc_link_active_bg",
+      "label": "Active link background",
+      "default": "#FBBF24"
+    },
+    {
+      "type": "color",
+      "id": "toc_link_active_color",
+      "label": "Active link color",
+      "default": "#1e1e1e"
+    },
+
+    {
+      "type": "header",
+      "content": "Content area"
+    },
+    {
+      "type": "color",
+      "id": "content_background",
+      "label": "Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "content_padding",
+      "min": 20,
+      "max": 80,
+      "step": 5,
+      "unit": "px",
+      "label": "Padding",
+      "default": 40
+    },
+    {
+      "type": "checkbox",
+      "id": "show_content_border",
+      "label": "Show border",
+      "default": false
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Border color",
+      "default": "#e2e2e2"
+    },
+
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "range",
+      "id": "h1_size",
+      "min": 24,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "label": "H1 size",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "h2_size",
+      "min": 20,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "H2 size",
+      "default": 28
+    },
+    {
+      "type": "range",
+      "id": "h3_size",
+      "min": 16,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "label": "H3 size",
+      "default": 22
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading color",
+      "default": "#1e1e1e"
+    },
+    {
+      "type": "range",
+      "id": "heading_spacing",
+      "min": 16,
+      "max": 48,
+      "step": 4,
+      "unit": "px",
+      "label": "Heading spacing",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "text_size",
+      "min": 14,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Text size",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "line_height",
+      "min": 1.4,
+      "max": 2,
+      "step": 0.1,
+      "label": "Line height",
+      "default": 1.6
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#1e1e1e"
+    },
+    {
+      "type": "range",
+      "id": "paragraph_spacing",
+      "min": 12,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "label": "Paragraph spacing",
+      "default": 20
+    },
+    {
+      "type": "color",
+      "id": "link_color",
+      "label": "Link color",
+      "default": "#0066cc"
+    },
+    {
+      "type": "color",
+      "id": "link_hover_color",
+      "label": "Link hover color",
+      "default": "#004499"
+    },
+    {
+      "type": "range",
+      "id": "image_radius",
+      "min": 0,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "label": "Image border radius",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "image_spacing",
+      "min": 16,
+      "max": 48,
+      "step": 4,
+      "unit": "px",
+      "label": "Image spacing",
+      "default": 24
+    }
+  ],
+  "presets": [
+    { "name": "Page with TOC" }
+  ]
+}
+{% endschema %}

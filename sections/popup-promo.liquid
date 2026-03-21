@@ -1,0 +1,499 @@
+{{ 'section-popup-promo.css' | asset_url | stylesheet_tag }}
+
+{% comment %}
+  Renders popup promo
+
+  Accepts:
+  - type: {String} lightbox, flyout Default: modal
+
+  Usage:
+  {% render 'popup-promo' %}
+{% endcomment %}
+
+{% liquid
+  assign show = true
+  if section.settings.where_to_show == 'target_pages'
+    assign pages = section.settings.target_pages | split: ' '
+    assign show = false
+    for item in pages
+      assign text = item | strip
+      if text == request.page_type
+        assign show = true
+      elsif request.page_type == 'product' and request.path contains text
+        assign show = true
+      endif
+    endfor
+  endif
+
+  assign type = section.settings.placement_type
+
+  if type == 'flyout'
+    assign animate = 'slide-up'
+    assign placement = 'bottom-right'
+  else
+    assign placement = 'center'
+    assign animate = 'zoom'
+  endif
+
+  assign settings = show | append: section.settings.target_pages | append: section.settings.when_to_show | append: section.settings.time_delay | append: section.settings.show_scroll_depth
+  assign observed = settings | base64_encode
+
+  assign class = section.settings.font_size_heading
+%}
+
+<xo-popup-promo
+  xo-observed='{{ observed }}'
+  xo-show='{{ show }}'
+  xo-when='{{ section.settings.when_to_show }}'
+  xo-delay='{{ section.settings.time_delay }}'
+  xo-scroll='{{ section.settings.show_scroll_depth }}'
+  xo-frequency='{{ section.settings.often_show }}'
+>
+  <xo-modal
+    xo-name='xo-popup-{{ section.id }}'
+    xo-animate='{{ animate }}'
+    xo-duration='500'
+    xo-placement='{{ placement | default: 'center' }}'
+  >
+    <div
+      {% if section.settings.hidden_image_mobile %}
+        class='xo-popup-promo xo-popup-promo--{{ section.settings.image_position }} xo-popup-promo--{{ type | default: 'lightbox' }} xo-popup-promo--hidden-image-mobile'
+      {% else %}
+        class='xo-popup-promo xo-popup-promo--{{ section.settings.image_position }} xo-popup-promo--{{ type | default: 'lightbox' }}'
+      {% endif %}
+      style='
+        --xo-popup-promo-text-alignment: {{ section.settings.content_alignment }};
+        --xo-popup-promo-content-width: {{ section.settings.content_width }}px;
+        --xo-popup-promo-image-width: {{ section.settings.media_width }}px;
+      '
+    >
+      <div class='xo-popup-promo__container{% if settings.enable_border_radius %} xo-popup-promo__container--radius{% endif %} color-{{ section.settings.color_scheme }}'>
+        {% if section.settings.image != blank or section.settings.video != blank %}
+          <div class='xo-popup-promo__media'>
+            {% if section.settings.video != blank %}
+              {{ section.settings.video | video_tag: image_size: '1100x', autoplay: true, loop: true, controls: false, muted: true }}
+            {% elsif section.settings.image != blank %}
+              {% render 'image', image: section.settings.image, class: 'xo-popup-promo__image' %}
+            {% endif %}
+            {% assign overlay_opacity = section.settings.overlay_opacity | divided_by: 100.00 %}
+            <div class='xo-popup-promo__media-overlay' style='background-color: rgba(var(--color-shadow), {{ overlay_opacity }});'></div>
+          </div>
+        {% endif %}
+        <div class='xo-popup-promo__content-container'>
+          <div class='xo-popup-promo__content'>
+            {% if section.settings.subheading %}
+              <xo-animate xo-type='fade-up' xo-delay='300' xo-cascade>
+                <div class='xo-popup-promo__subheading'>{{ section.settings.subheading }}</div>
+              </xo-animate>
+            {% endif %}
+            {% if section.settings.heading != blank %}
+              <xo-animate xo-type='fade-up' xo-delay='300' xo-cascade>
+                <h2 class='xo-popup-promo__heading {{ class }}'>{{ section.settings.heading }}</h2>
+              </xo-animate>
+            {% endif %}
+            {% if section.settings.body != blank %}
+              <xo-animate xo-type='fade-up' xo-delay='300' xo-cascade>
+                <div class='xo-popup-promo__body'>{{ section.settings.body }}</div>
+              </xo-animate>
+            {% endif %}
+            <div class='xo-popup-promo__button' style='--buttons-border-width: 1px;'>
+              <xo-animate xo-type='fade-up' xo-delay='300' xo-cascade style='width: 100%;'>
+                {% render 'button', text: section.settings.promo_button_label, link: section.settings.promo_button_link, size: 'md', style: 'primary', block: true %}
+              </xo-animate>
+              <xo-animate xo-type='fade-up' xo-delay='300' xo-cascade style='width: 100%;'>
+                <xo-modal-trigger style='width: 100%;'>
+                  {% render 'button',
+                    text: section.settings.close_button_label,
+                    size: 'md',
+                    style: 'secondary',
+                    block: true,
+                    type: 'button',
+                    class: 'xo-popup-promo__button-cancel'
+                  %}
+                </xo-modal-trigger>
+              </xo-animate>
+            </div>
+            {% if section.settings.disclaimer != blank %}
+              <xo-animate xo-type='fade-up' xo-delay='300' xo-cascade style='width: 100%;'>
+                <div class='xo-popup-promo__disclaimer'>{{ section.settings.disclaimer }}</div>
+              </xo-animate>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </xo-modal>
+</xo-popup-promo>
+
+{% schema %}
+{
+  "name": "t:sections.popup_promo.name",
+  "enabled_on": {
+    "groups": [
+      "custom.popups"
+    ]
+  },
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:sections.popup_promo.settings.color_scheme"
+    },
+    {
+      "type": "range",
+      "id": "content_width",
+      "min": 320,
+      "max": 800,
+      "step": 5,
+      "unit": "px",
+      "label": "t:sections.popup_promo.settings.content_width",
+      "default": 510
+    },
+    {
+      "type": "header",
+      "content": "t:sections.popup_promo.settings.conditions"
+    },
+    {
+      "type": "select",
+      "id": "placement_type",
+      "options": [
+        {
+          "value": "flyout",
+          "label": "t:sections.popup_promo.settings.placement_type.options.flyout"
+        },
+        {
+          "value": "lightbox",
+          "label": "t:sections.popup_promo.settings.placement_type.options.lightbox"
+        }
+      ],
+      "default": "lightbox",
+      "label": "t:sections.popup_promo.settings.placement_type.label"
+    },
+    {
+      "type": "select",
+      "id": "where_to_show",
+      "options": [
+        {
+          "value": "all_pages",
+          "label": "t:sections.popup_promo.settings.where_to_show.options.all_pages"
+        },
+        {
+          "value": "target_pages",
+          "label": "t:sections.popup_promo.settings.where_to_show.options.target_pages"
+        }
+      ],
+      "default": "all_pages",
+      "label": "t:sections.popup_promo.settings.where_to_show.label"
+    },
+    {
+      "type": "textarea",
+      "id": "target_pages",
+      "info": "t:sections.popup_promo.settings.target_pages.info",
+      "placeholder": "index \nproduct",
+      "label": "t:sections.popup_promo.settings.target_pages.label"
+    },
+    {
+      "type": "radio",
+      "id": "when_to_show",
+      "options": [
+        {
+          "value": "immediately",
+          "label": "t:sections.popup_promo.settings.when_to_show.options.immediately"
+        },
+        {
+          "value": "conditions",
+          "label": "t:sections.popup_promo.settings.when_to_show.options.conditions"
+        }
+      ],
+      "default": "immediately",
+      "label": "t:sections.popup_promo.settings.when_to_show.label"
+    },
+    {
+      "type": "radio",
+      "id": "time_delay",
+      "options": [
+        {
+          "value": "0",
+          "label": "t:sections.popup_promo.settings.time_delay.options.none"
+        },
+        {
+          "value": "3000",
+          "label": "t:sections.popup_promo.settings.time_delay.options.after_3s"
+        },
+        {
+          "value": "5000",
+          "label": "t:sections.popup_promo.settings.time_delay.options.after_5s"
+        },
+        {
+          "value": "15000",
+          "label": "t:sections.popup_promo.settings.time_delay.options.after_15s"
+        },
+        {
+          "value": "30000",
+          "label": "t:sections.popup_promo.settings.time_delay.options.after_30s"
+        },
+        {
+          "value": "60000",
+          "label": "t:sections.popup_promo.settings.time_delay.options.after_1m"
+        },
+        {
+          "value": "120000",
+          "label": "t:sections.popup_promo.settings.time_delay.options.after_2m"
+        }
+      ],
+      "default": "0",
+      "label": "t:sections.popup_promo.settings.time_delay.label"
+    },
+    {
+      "type": "radio",
+      "id": "show_scroll_depth",
+      "options": [
+        {
+          "value": "none",
+          "label": "t:sections.popup_promo.settings.show_scroll_depth.options.none"
+        },
+        {
+          "value": "25",
+          "label": "t:sections.popup_promo.settings.show_scroll_depth.options.after_25"
+        },
+        {
+          "value": "50",
+          "label": "t:sections.popup_promo.settings.show_scroll_depth.options.after_50"
+        },
+        {
+          "value": "75",
+          "label": "t:sections.popup_promo.settings.show_scroll_depth.options.after_75"
+        },
+        {
+          "value": "100",
+          "label": "t:sections.popup_promo.settings.show_scroll_depth.options.after_100"
+        }
+      ],
+      "default": "none",
+      "label": "t:sections.popup_promo.settings.show_scroll_depth.label"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.popup_promo.settings.frequency"
+    },
+    {
+      "type": "select",
+      "id": "often_show",
+      "options": [
+        {
+          "value": "once",
+          "label": "t:sections.popup_promo.settings.often_show.options.once"
+        },
+        {
+          "value": "every_hour",
+          "label": "t:sections.popup_promo.settings.often_show.options.every_hour"
+        },
+        {
+          "value": "every_12_hours",
+          "label": "t:sections.popup_promo.settings.often_show.options.every_12_hours"
+        },
+        {
+          "value": "every_day",
+          "label": "t:sections.popup_promo.settings.often_show.options.every_day"
+        },
+        {
+          "value": "every_3_day",
+          "label": "t:sections.popup_promo.settings.often_show.options.every_3_day"
+        },
+        {
+          "value": "every_week",
+          "label": "t:sections.popup_promo.settings.often_show.options.every_week"
+        },
+        {
+          "value": "every_2_weeks",
+          "label": "t:sections.popup_promo.settings.often_show.options.every_2_weeks"
+        },
+        {
+          "value": "no_limit",
+          "label": "t:sections.popup_promo.settings.often_show.options.no_limit"
+        }
+      ],
+      "default": "no_limit",
+      "label": "t:sections.popup_promo.settings.often_show.label"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.popup_promo.settings.content.label"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "default": "Promo lightbox",
+      "label": "t:sections.popup_promo.settings.content.subheading"
+    },
+    {
+      "type": "select",
+      "id": "font_size_heading",
+      "label": "Font size heading",
+      "default": "h6",
+      "options": [
+        {
+          "value": "h1",
+          "label": "Extra extra large"
+        },
+        {
+          "value": "h2",
+          "label": "Extra large"
+        },
+        {
+          "value": "h3",
+          "label": "Large"
+        },
+        {
+          "value": "h4",
+          "label": "Medium"
+        },
+        {
+          "value": "h5",
+          "label": "Small"
+        },
+        {
+          "value": "h6",
+          "label": "Extra small"
+        }
+      ]
+    },
+    {
+      "type": "richtext",
+      "id": "heading",
+      "default": "<p>Share our news or<br>annouce sales</p>",
+      "label": "t:sections.popup_promo.settings.content.heading"
+    },
+    {
+      "type": "richtext",
+      "id": "body",
+      "default": "<p>Tell about ongoing promotions or important<br>events in your store.</p>",
+      "label": "t:sections.popup_promo.settings.content.body"
+    },
+    {
+      "type": "richtext",
+      "id": "disclaimer",
+      "default": "<p>Provide a disclaimer statement or any<br>details about your campaign.</p>",
+      "label": "t:sections.popup_promo.settings.content.disclaimer"
+    },
+    {
+      "type": "text_alignment",
+      "id": "content_alignment",
+      "label": "t:sections.popup_promo.settings.content.content_alignment",
+      "default": "center"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.popup_promo.settings.button.label"
+    },
+    {
+      "type": "text",
+      "id": "promo_button_label",
+      "default": "See more",
+      "label": "t:sections.popup_promo.settings.button.promo_button_label"
+    },
+    {
+      "type": "url",
+      "id": "promo_button_link",
+      "label": "t:sections.popup_promo.settings.button.promo_button_link"
+    },
+    {
+      "type": "text",
+      "id": "close_button_label",
+      "default": "Close",
+      "label": "t:sections.popup_promo.settings.button.close_button_label"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.popup_promo.settings.media.label"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "t:sections.popup_promo.settings.media.image"
+    },
+    {
+      "type": "video",
+      "id": "video",
+      "label": "t:sections.popup_promo.settings.media.video"
+    },
+    {
+      "type": "range",
+      "id": "media_width",
+      "min": 320,
+      "max": 500,
+      "step": 2,
+      "unit": "px",
+      "label": "t:sections.popup_promo.settings.media.media_width",
+      "default": 476
+    },
+    {
+      "type": "select",
+      "id": "image_position",
+      "options": [
+        {
+          "value": "left",
+          "label": "t:sections.popup_promo.settings.media.image_position.options.left"
+        },
+        {
+          "value": "right",
+          "label": "t:sections.popup_promo.settings.media.image_position.options.right"
+        },
+        {
+          "value": "background",
+          "label": "t:sections.popup_promo.settings.media.image_position.options.background"
+        }
+      ],
+      "default": "left",
+      "label": "t:sections.popup_promo.settings.media.image_position.label"
+    },
+    {
+      "type": "checkbox",
+      "id": "hidden_image_mobile",
+      "default": false,
+      "label": "t:sections.popup_promo.settings.media.hidden_image_mobile"
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "label": "t:sections.popup_promo.settings.media.overlay_opacity",
+      "default": 0
+    }
+  ],
+  "blocks": [],
+  "presets": [
+    {
+      "name": "t:sections.popup_promo.name",
+      "settings": {
+        "color_scheme": "",
+        "content_width": 400,
+        "where_to_show": "all_pages",
+        "target_pages": "",
+        "when_to_show": "immediately",
+        "time_delay": "0",
+        "show_scroll_depth": "none",
+        "often_show": "no_limit",
+        "subheading": "PROMO LIGHTBOX",
+        "font_size_heading": "h6",
+        "heading": "<p>SHARE OUR NEWS OR <br/>ANNOUCE SALES</p>",
+        "body": "<p>Tell about ongoing promotions or <br/>important events in your store.</p>",
+        "disclaimer": "<p>Provide a disclaimer statement or <br/>any details about your campaign.</p>",
+        "content_alignment": "left",
+        "promo_button_label": "See more",
+        "promo_button_link": "",
+        "close_button_label": "Close",
+        "image": "shopify://shop_images/col3_39aeba9d-d6d6-4700-9c15-a0e8470df019.png",
+        "media_width": 358,
+        "image_position": "left",
+        "hidden_image_mobile": false,
+        "overlay_opacity": 0
+      },
+      "blocks": []
+    }
+  ]
+}
+{% endschema %}

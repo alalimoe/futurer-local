@@ -1,0 +1,113 @@
+{% comment %}
+  Renders a list our team
+
+  Accepts:
+  - heading: {String} Heading (required)
+  - image: {Object} Image (required)
+  - name: {String} Name (required)
+  - position: {String} Position (required)
+
+  Usage:
+  {% render 'our-team', heading: heading, class: class, col: col, block: block %}
+{% endcomment %}
+
+<div class="our-team">
+  <div class="our-team__header">
+    {% if heading %}
+      <div class="our-team__heading">
+        {% render 'text', text: heading, class: class %}
+      </div>
+    {% endif %}
+  </div>
+  <div class="our-team__body">
+    <div class="our-team__desktop">
+      <xo-grid class="out-team__grid" style="--lg: {{ col }}; --md: 2; --xs : 2;">
+        {% for item in block %}
+          {% liquid
+            assign image = item.settings.image
+            assign aspect_ratio = item.settings.aspect_ratio
+            if aspect_ratio == 'custom'
+              assign aspect_ratio = item.settings.aspect_ratio_width | append: '/' | append: item.settings.aspect_ratio_height
+            endif
+            assign name = item.settings.name
+            assign position = item.settings.position
+          %}
+          <xo-animate xo-cascade xo-order="{{ forloop.index }}">
+            <div class="our-team__item {% if settings.enable_border_radius %}our-team__item--radius{% endif %}">
+              <div class="our-team__image">
+                {% render 'image', image: image, aspect_ratio: aspect_ratio %}
+              </div>
+              <div class="our-team__info {% if settings.enable_border_radius %}our-team__info--radius{% endif %}">
+                {% if name != blank %}
+                  <div class="our-team__name">
+                    <p>{{ name }}</p>
+                  </div>
+                {% endif %}
+                {% if position != blank %}
+                  <div class="our-team__position">
+                    <p>{{ position }}</p>
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+          </xo-animate>
+        {% endfor %}
+      </xo-grid>
+    </div>
+    <div class="our-team__mobile">
+      <xo-carousel
+        xo-per-view="1"
+        xo-per-move="1"
+        xo-breakpoints='
+          {
+            768: {
+              perView: 1,
+              perMove: 1,
+              gap: 10,
+              overflow: "visible"
+            },
+          }
+        '
+        xo-render-bullet="<span class='carousel-bullet'></span>"
+      >
+        <xo-carousel-inner>
+          <xo-carousel-list>
+            {% for item in block %}
+              {% liquid
+                assign image = item.settings.image
+                assign aspect_ratio = item.settings.aspect_ratio
+                if aspect_ratio == 'custom'
+                  assign aspect_ratio = item.settings.aspect_ratio_width | append: '/' | append: item.settings.aspect_ratio_height
+                endif
+                assign name = item.settings.name
+                assign position = item.settings.position
+              %}
+              <xo-carousel-slide>
+                <div class="our-team__item {% if settings.enable_border_radius %}our-team__item--radius{% endif %}">
+                  <div class="our-team__image">
+                    {% render 'image', image: image, aspect_ratio: aspect_ratio %}
+                  </div>
+                  <div class="our-team__info {% if settings.enable_border_radius %}our-team__info--radius{% endif %}">
+                    {% if name != blank %}
+                      <div class="our-team__name">
+                        <p>{{ name }}</p>
+                      </div>
+                    {% endif %}
+                    {% if position != blank %}
+                      <div class="our-team__position">
+                        <p>{{ position }}</p>
+                      </div>
+                    {% endif %}
+                  </div>
+                </div>
+              </xo-carousel-slide>
+            {% endfor %}
+          </xo-carousel-list>
+        </xo-carousel-inner>
+        <div class="out-team__pagination">
+          {% render 'carousel-pagination', align: 'center', style: 'sticks' %}
+        </div>
+      </xo-carousel>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,167 @@
+{% comment %}
+  Renders a product special element with a given value
+
+  Accepts:
+  - block: {Object} Block (required)
+  - sub_heading: {String} Subheading (required)
+  - collection: {Object} Collection (required)
+
+  Usage:
+  {% render 'product-specification-10', sub_heading: sub_heading, collection: collection, block: block %}
+{% endcomment %}
+
+<div class='product-specification-10'>
+  <div class='product-specification-10__content'>
+    <xo-grid class='product-specification-10__grid'>
+      <div class='product-specification-10__left' style='--xl: 6; --lg: 5; --md: 12; --xs: 12'>
+        <xo-tabs>
+          <xo-animate xo-cascade style='height: 100%;'>
+            <div class='product-specification-10__product{% if settings.enable_border_radius %} product-specification-10__product--radius{% endif %}'>
+              {% if sub_heading %}
+                <div class='product-specification-10__sub-heading'>
+                  <p>{{ sub_heading }}</p>
+                </div>
+              {% endif %}
+              <div class='product-specification-10__image'>
+                {% if collection != blank %}
+                  <xo-tabs-content class='product-specification-10__content'>
+                    {% for product in collection.products %}
+                      {%- assign image_product = product.featured_image -%}
+                      <xo-tabs-pane
+                        class='product-specification-10__tab-pane'
+                        xo-name='product-{{ forloop.index }}'
+                        {% if forloop.index == 1 %}
+                          xo-active
+                        {% endif %}
+                      >
+                        <div class='product-specification-10__product-image'>
+                          <xo-animate xo-cascade xo-type='zoom-out' xo-duration='600'>
+                            {% render 'image', image: image_product, aspect_ratio: '580/580' %}
+                          </xo-animate>
+                        </div>
+                      </xo-tabs-pane>
+                    {% endfor %}
+                  </xo-tabs-content>
+                {%- else -%}
+                  <xo-tabs-content class='product-specification-10__content'>
+                    {% for i in (1..4) %}
+                      {%- assign placeholder_image = 'product-apparel-1' -%}
+                      <xo-tabs-pane
+                        class='product-specification-10__tab-pane'
+                        xo-name='product-{{ i }}'
+                        {% if i == 1 %}
+                          xo-active
+                        {% endif %}
+                      >
+                        <div class='product-specification-10__product-image'>
+                          <xo-animate xo-cascade xo-type='zoom-out' xo-duration='600'>
+                            {% render 'image', placeholder: placeholder_image, aspect_ratio: '580/580' %}
+                          </xo-animate>
+                        </div>
+                      </xo-tabs-pane>
+                    {% endfor %}
+                  </xo-tabs-content>
+                {% endif %}
+              </div>
+              <div class='product-specification-10__select'>
+                <div class='product-specification-10__toggle-trigger {% if settings.enable_border_radius %}product-specification-10__toggle-trigger--radius{% endif %}'>
+                  <div class='product-specification-10__product-title'>
+                    {% if collection != blank %}
+                      {% for product in collection.products %}
+                        {% if forloop.index == 1 %}
+                          {{ product.title }}
+                        {% endif %}
+                      {% endfor %}
+                    {%- else -%}
+                      {% for i in (1..4) %}
+                        {% if i == 1 %}
+                          {{ 'onboarding.product_title' | t }}
+                        {% endif %}
+                      {% endfor %}
+                    {% endif %}
+                  </div>
+                  <div class='product-specification-10__icon'>
+                    {% render 'icon', name: 'arrow-down', size: '1.8rem' %}
+                  </div>
+                </div>
+                <div class='product-specification-10__toggle-content xo-scrollbar{% if settings.enable_border_radius %} product-specification-10__toggle-content--radius{% endif %}'>
+                  {% if collection != blank %}
+                    {% for product in collection.products %}
+                      <xo-tabs-trigger
+                        class='product-specification-10__tab-trigger'
+                        xo-name='product-{{ forloop.index }}'
+                        {% if forloop.index == 1 %}
+                          xo-active
+                        {% endif %}
+                      >
+                        {{ product.title }}
+                      </xo-tabs-trigger>
+                    {% endfor %}
+                  {%- else -%}
+                    {% for i in (1..4) %}
+                      <xo-tabs-trigger
+                        class='product-specification-10__tab-trigger'
+                        xo-name='product-{{ i }}'
+                        {% if i == 1 %}
+                          xo-active
+                        {% endif %}
+                      >
+                        {{ 'onboarding.product_title' | t }}
+                      </xo-tabs-trigger>
+                    {% endfor %}
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          </xo-animate>
+        </xo-tabs>
+      </div>
+      <div class='product-specification-10__right' style='--xl: 6; --lg: 7; --md: 12; --xs: 12;'>
+        <xo-animate xo-cascade>
+          <div class='product-specification-10__perfomance'>
+            <xo-grid class='product-specification-10__perfomance-grid' style='--lg: 2; --md: 2; --xs: 1'>
+              {% for item in block %}
+                {% case item.type %}
+                  {% when 'perfomance' %}
+                    {% liquid
+                      assign title = item.settings.title
+                      assign sub_title = item.settings.sub_title
+                      assign number = item.settings.number
+                    %}
+                    {% render 'perfomance', title: title, sub_title: sub_title, number: number %}
+                {% endcase %}
+              {% endfor %}
+            </xo-grid>
+          </div>
+        </xo-animate>
+        <xo-animate xo-cascade>
+          <div class='product-specification-10__chart'>
+            {% for item in block %}
+              {% case item.type %}
+                {% when 'chart' %}
+                  {% liquid
+                    assign sub_heading = item.settings.sub_heading
+                    assign value_max = item.settings.value_max
+
+                    assign dataset_input = item.settings.dataset
+                    assign dataset_arr = dataset_input | newline_to_br | split: '<br />'
+
+                    assign x_label_input = item.settings.x_label
+                    assign x_label_items = x_label_input | split: ' '
+                    assign x_label_arr = x_label_items | join: "', '"
+                    assign x_label_output = "['" | append: x_label_arr | append: "']"
+
+                    assign y_label_input = item.settings.y_label
+                    assign y_label_items = y_label_input | split: ' '
+                    assign y_label_arr = y_label_items | join: "', '"
+                    assign y_label_output = "['" | append: y_label_arr | append: "']"
+                  %}
+                  {% render 'chart', sub_heading: sub_heading, dataset_arr: dataset_arr, x_label_output: x_label_output, y_label_output: y_label_output, value_max: value_max %}
+              {% endcase %}
+            {% endfor %}
+          </div>
+        </xo-animate>
+      </div>
+    </xo-grid>
+  </div>
+</div>

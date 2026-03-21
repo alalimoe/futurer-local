@@ -1,0 +1,53 @@
+{% liquid
+  assign currencies_using_comma_decimals = 'ANG,ARS,BRL,BYN,BYR,CLF,CLP,COP,CRC,CZK,DKK,EUR,HRK,HUF,IDR,ISK,MZN,NOK,PLN,RON,RUB,SEK,TRY,UYU,VES,VND' | split: ','
+  assign uses_comma_decimals = false
+  if currencies_using_comma_decimals contains cart.currency.iso_code
+    assign uses_comma_decimals = true
+  endif
+
+  if uses_comma_decimals
+    assign range_max = filter.range_max | money_without_currency | replace: '.', '' | replace: ',', '.'
+  else
+    assign range_max = filter.range_max | money_without_currency | replace: ',', ''
+  endif
+%}
+
+{% comment %} TODO: "to" translation {% endcomment %}
+
+<xo-filters-field>
+  <div class='xo-field-price'>
+    <xo-range
+      class='xo-field-price__range'
+      xo-component-name='range-price'
+      xo-name="['{{ filter.min_value.param_name }}', '{{ filter.max_value.param_name }}']"
+      xo-min='0'
+      xo-max='{{ range_max }}'
+      xo-step='0.1'
+      xo-value='[0, {{ range_max }}]'
+    ></xo-range>
+
+    <div class='xo-field-price__input-group'>
+      <div class='xo-field-price__input-box'>
+        <span>{{ cart.currency.symbol }}</span>
+        <input
+          class='xo-field-price__input'
+          type='text'
+          value='0'
+          xo-component-name='range-price'
+          xo-type='min'
+        >
+      </div>
+      <span>to</span>
+      <div class='xo-field-price__input-box'>
+        <span>{{ cart.currency.symbol }}</span>
+        <input
+          class='xo-field-price__input'
+          type='text'
+          xo-component-name='range-price'
+          xo-type='max'
+          xo-max='{{ range_max }}'
+        >
+      </div>
+    </div>
+  </div>
+</xo-filters-field>

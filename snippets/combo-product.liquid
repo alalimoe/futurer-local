@@ -1,0 +1,171 @@
+{% comment %}
+  Renders a combo product
+
+  @param {String} class - Font size heading (required)
+  @param {String} heading - Heading (required)
+  @param {Object} products - Products (required)
+
+  @example
+  {% render 'combo-product', class: class, heading: heading, products: products %}
+{% endcomment %}
+
+{% liquid
+  assign product_id_arr = ''
+  assign total_price = 0
+  for product in products
+    assign product_id_arr = product_id_arr | append: "'" | append: product.id | append: "'"
+    unless forloop.last
+      assign product_id_arr = product_id_arr | append: ','
+    endunless
+    assign total_price = total_price | plus: product.price
+  endfor
+
+  assign total_price_after_discount = 0
+  if products != blank
+    if discount_type == 'fixed-amount'
+      assign total_price_after_discount = total_price | minus: discount_value
+    else
+      assign percentage = discount_value | divided_by: 100.00
+      assign total_price_discount = total_price | times: percentage
+      assign total_price_after_discount = total_price | minus: total_price_discount
+    endif
+  endif
+%}
+
+<div class="combo-product">
+  <xo-grid class="combo-product__grid">
+    <div class="combo-product__inner" style="--lg: 8; --md: 10; --xs: 12; --start-lg: 3; --start-md: 2;">
+      {% if heading != blank %}
+        <div class="combo-product__heading">
+          {% render 'text', context: section %}
+        </div>
+      {% endif %}
+      <div class="combo-product__content{% if color_scheme_box %} color-{{ color_scheme_box }}{% endif %}{% if settings.enable_border_radius %} combo-product__content--radius{% endif %}">
+        <div class="combo-product__wrap">
+          <xo-carousel
+            xo-per-view="2"
+            xo-overflow="visible"
+            xo-gap="0"
+            xo-breakpoints='
+              {
+                400: {
+                  perView: 1,
+                  overflow: "visible",
+                  gap: 5
+                },
+              }
+            '
+          >
+            <xo-carousel-inner>
+              <xo-carousel-list>
+                {% if products and products != empty %}
+                  {% for product in products %}
+                    <xo-carousel-slide class="combo-product__slide">
+                      <div class="combo-product__item">
+                        <xo-product
+                          xo-selected-or-first-available-variant-id="{{ product.selected_or_first_available_variant.id }}"
+                          xo-product-id="{{ product.id }}"
+                          xo-section-id="{{ section.id }}"
+                          class="combo-product__product"
+                        >
+                          <a href="{%- render 'product-card-variant-url', product: product -%}" class="combo-product__link">
+                            <div class="combo-product__product-media">
+                              {% render 'product-image', product: product, aspect_ratio: '1' %}
+                            </div>
+                          </a>
+                          <div class="combo-product__product-info">
+                            <xo-animate xo-cascade>
+                              {% if product and product != empty %}
+                                <a href="{%- render 'product-card-variant-url', product: product -%}" class="combo-product__link">
+                                  <span class="combo-product__product-title">{{ product.title }}</span>
+                                </a>
+                              {% else %}
+                                <span class="combo-product__product-title">{{ 'onboarding.product_title' | t }}</span>
+                              {% endif %}
+                            </xo-animate>
+                            {% if product and product != empty %}
+                              {% unless product.has_only_default_variant %}
+                                <xo-animate xo-cascade>
+                                  <xo-product-variants>
+                                    <div class="combo-product__product-variant">
+                                      {% for option in product.options_with_values %}
+                                        <div class="combo-product__variant-option">
+                                          {% if option.name == settings.product_card_color_option_name %}
+                                            {% render 'product-variant', option: option, style: 'color', product: product %}
+                                          {% else %}
+                                            {% render 'product-variant', option: option, style: 'boxed', product: product, select_custom_popover_name_suffix: product.id %}
+                                          {% endif %}
+                                        </div>
+                                      {% endfor %}
+                                    </div>
+                                  </xo-product-variants>
+                                </xo-animate>
+                              {% endunless %}
+                            {% endif %}
+                          </div>
+                          {% render 'product-data', product: product %}
+                        </xo-product>
+                      </div>
+                    </xo-carousel-slide>
+                  {% endfor %}
+                {% else %}
+                  {% for i in (1..2) %}
+                    <xo-carousel-slide class="combo-product__slide">
+                      <div class="combo-product__item">
+                        <div class="combo-product__product">
+                          <div class="combo-product__link">
+                            <div class="combo-product__product-media">
+                              {% render 'product-image', product: empty, aspect_ratio: '1' %}
+                            </div>
+                          </div>
+                          <div class="combo-product__product-info">
+                            <xo-animate xo-cascade>
+                              <span class="combo-product__product-title">{{ 'onboarding.product_title' | t }}</span>
+                            </xo-animate>
+                          </div>
+                        </div>
+                      </div>
+                    </xo-carousel-slide>
+                  {% endfor %}
+                {% endif %}
+              </xo-carousel-list>
+            </xo-carousel-inner>
+          </xo-carousel>
+        </div>
+        <div class="combo-product__bottom">
+          <xo-animate xo-cascade>
+            <div class="combo-product__product-price">
+              <span class="combo-product__price-reduced">{{ total_price_after_discount | money }}</span>
+              <span class="combo-product__price-original">{{ total_price | money }}</span>
+            </div>
+          </xo-animate>
+          <xo-animate xo-cascade style="width: 100%;">
+            <xo-product-will-change class="combo-product__button" xo-unique-id="combo-product-add-button-{{ section.id }}">
+              <xo-cart-add
+                class="combo-product__button"
+                {% if product.selected_or_first_available_variant.available == false %}
+                  xo-disabled
+                {% endif %}
+                xo-product-id="[{{ product_id_arr }}]"
+                xo-section-id="{{ section.id }}"
+              >
+                {% if product and product != empty %}
+                  {% if product.selected_or_first_available_variant.available %}
+                    {% assign button_text = 'products.product.add_to_cart' | t %}
+                    {% render 'button', style: 'primary', text: button_text, size: 'md', block: true %}
+                  {% else %}
+                    {% assign button_text = 'products.product.sold_out' | t %}
+                    {% render 'button', style: 'primary', text: button_text, size: 'md', block: true %}
+                  {% endif %}
+                {% else %}
+                  {% assign button_text = 'products.product.add_to_cart' | t %}
+                  {% render 'button', style: 'primary', text: button_text, size: 'md', block: true %}
+                {% endif %}
+              </xo-cart-add>
+            </xo-product-will-change>
+          </xo-animate>
+        </div>
+      </div>
+    </div>
+  </xo-grid>
+</div>

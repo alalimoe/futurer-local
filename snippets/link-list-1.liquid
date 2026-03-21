@@ -1,0 +1,49 @@
+{% comment %}
+  Accepts:
+  - title: {Text} Title (required)
+  - nav: {Button} Nav link (required)
+  Usage:
+  {% render 'link-list-1', title: title, nav: link %}
+{% endcomment %}
+
+<div class='link-list-1'>
+  <div class='link-list-1__desktop'>
+    <xo-grid class='link-list-1__grid' style='--xxl: 2; --xl: 2; --lg: 2; --md: 1; --xs: 1'>
+      {% for link in menu.links %}
+        <div class='link-list-1__item'>
+          <h6 class='link-list-1__title'>{{ link.title }}</h6>
+          <ul class='link-list-1__nav'>
+            {% for sub_link in link.links %}
+              <li class='link-list-1__nav-item'>
+                <a href='{{ sub_link.url }}'>{{ sub_link.title }}</a>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endfor %}
+    </xo-grid>
+  </div>
+  <div class='link-list-1__mobile'>
+    <xo-collapse-provider>
+      {% for link in menu.links %}
+        <div class='link-list-1__item'>
+          <xo-collapse-trigger class='link-list-1__header' xo-name='{{ link.title }}'>
+            <h3 class='link-list-1__title'>{{ link.title }}</h3>
+            <div class='link-list-1__icon'>
+              {% render 'icon', name: 'chevron-down', size: '2.4rem' %}
+            </div>
+          </xo-collapse-trigger>
+          <xo-collapse xo-name='{{ link.title }}'>
+            <ul class='link-list-1__nav'>
+              {% for sub_link in link.links %}
+                <li class='link-list-1__nav-item'>
+                  <a href='{{ sub_link.url }}'>{{ sub_link.title }}</a>
+                </li>
+              {% endfor %}
+            </ul>
+          </xo-collapse>
+        </div>
+      {% endfor %}
+    </xo-collapse-provider>
+  </div>
+</div>

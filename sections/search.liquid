@@ -1,0 +1,96 @@
+{{ 'section-search.css' | asset_url | stylesheet_tag }}
+
+{% liquid
+  assign value = ''
+  unless value
+    assign value = ''
+  endunless
+  assign label = 'general.search.search' | t
+%}
+
+<section {% render 'section-attr' %}>
+  <div class='xo-search'>
+    <xo-container class='xo-search__container'>
+      <div class='xo-search__content'>
+        <div class='xo-search__notice'>
+          <p>{{ 'general.search.notice' | t }}</p>
+        </div>
+        <form action='{{ routes.search_url }}' method='get' role='search' class='xo-search__form'>
+          <div class='xo-search__input'>
+            {% render 'field-input', value: value, name: 'q', label: label, type: 'search', attr: "id='predictive-search' data-predictive-search-input='header'", block: true %}
+            <div class='xo-search__icon'>
+              {% render 'button', type: 'submit', icon: 'search-1', icon_size: '3rem', style: 'link' %}
+            </div>
+            <div class="xo-search__line">
+              <div class="xo-search__line-anim{% if settings.enable_border_radius %} xo-search__line-anim--radius{% endif %}"></div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </xo-container>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "t:sections.search.name",
+  "disabled_on": {
+    "groups": [
+      "header",
+      "footer",
+      "custom.overlay",
+      "custom.popups",
+      "custom.features"
+    ]
+  },
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Section color scheme"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color"
+    },
+    {
+      "type": "color_background",
+      "id": "background_gradient",
+      "label": "Background gradient"
+    },
+    {
+      "type": "number",
+      "id": "padding_top_desktop",
+      "label": "Padding top desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_desktop",
+      "label": "Padding bottom desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_top_mobile",
+      "label": "Padding top mobile",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_mobile",
+      "label": "Padding bottom mobile",
+      "default": 50
+    }
+  ],
+  "blocks": [],
+  "presets": [
+    {
+      "name": "t:sections.search.presets.name",
+      "settings": {},
+      "blocks": []
+    }
+  ]
+}
+{% endschema %}

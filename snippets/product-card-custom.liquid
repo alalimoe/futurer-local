@@ -1,0 +1,105 @@
+{% comment %}
+  Renders a product card custome
+
+  Accepts:
+  - product: {String} 'Product' (optional)
+
+  Usage:
+  {% render 'product-card-custom', product: product %}
+{% endcomment %}
+
+{% liquid
+  assign final_aspect_ratio = media_aspect_ratio | default: '1'
+%}
+
+{% if product and product != empty %}
+  <xo-product
+    xo-selected-or-first-available-variant-id="{{ product.selected_or_first_available_variant.id }}"
+    xo-product-url="{{ product.url }}"
+    xo-product-id="{{ product.id }}"
+    xo-section-id="{{ section.id }}"
+    data-section="{{ section.id }}"
+  >
+    <div class="product-card-custom{% if card_color_scheme %} color-{{ card_color_scheme }}{% endif %}{% if settings.enable_border_radius %} product-card-custom--radius{% endif %}{% if modifier %} product-card-custom--modifier{% endif %}">
+      {% if show_image %}
+        <div class="product-card-custom__image">
+          <div xo-binding="img" style="height: 100%;">
+            <a href="{%- render 'product-card-variant-url', product: product -%}" aria-label="{{ product.title }}">
+              {% render 'product-image', product: product, show_secondary_image: show_secondary_image, aspect_ratio: final_aspect_ratio %}
+            </a>
+          </div>
+          <xo-product-liquid-static>
+            <script type="application/json">
+              {
+                {% for variant in product.variants
+                %}
+                  {{ variant.id }}: {
+                    price: `{% render 'price', variant: variant, reverse: false %}`,
+                    img: `<a href='{%- render 'product-card-variant-url', product: product -%}' aria-label='{{ product.title }}'>{% render 'product-image', product: product, variant: variant, show_secondary_image: show_secondary_image, aspect_ratio: final_aspect_ratio %}
+                    </a>`
+                  },
+                {% endfor %}
+              }
+            </script>
+          </xo-product-liquid-static>
+        </div>
+      {% endif %}
+      <div class="product-card-custom__info">
+        <div class="product-card-custom__header">
+          <a href="{%- render 'product-card-variant-url', product: product -%}" class="product-card-custom__title">
+            <p>{{ product.title | escape }}</p>
+          </a>
+          {% if modifier %}
+            <div class="product-card-custom__description xo-line-2">
+              <p>{{ product.description }}</p>
+            </div>
+          {% else %}
+            <div class="product-card-custom__description">
+              <p>{{ product.description | strip_html | truncate: 110 }}</p>
+            </div>
+          {% endif %}
+        </div>
+        <div class="product-card-custom__bottom">
+          {% if show_price %}
+            <div class="product-card-custom__price">
+              {% render 'price', product: product, show_badge: show_badge, use_variant: true, reverse: true %}
+            </div>
+          {% endif %}
+          <div class="product-card-custom__button">
+            <xo-cart-add
+              class="xo-product-card-custom__add"
+              {% if product.selected_or_first_available_variant.available == false %}
+                xo-disabled
+              {% endif %}
+            >
+              {% liquid
+                assign tooltip_title = 'onboarding.product_add_cart' | t
+                if product.selected_or_first_available_variant.available == false
+                  assign tooltip_title = 'onboarding.product_sold_out' | t
+                endif
+              %}
+              <xo-tooltip xo-title="{{ tooltip_title }}" xo-placement="top-center" class="tooltip{% if settings.enable_border_radius %} tooltip--radius{% endif %}">
+                <div class="product-card-custom__add-cart">
+                  {% if product.selected_or_first_available_variant.available == false %}
+                    {% render 'button-icon', size: 'md', style: 'primary', type: 'boxed', icon: 'plus', icon_size: '20', effect: 'rotate' %}
+                  {%- else -%}
+                    {% render 'button-icon', size: 'md', style: 'primary', type: 'boxed', icon: 'plus', icon_size: '20', effect: 'rotate' %}
+                  {% endif %}
+                </div>
+              </xo-tooltip>
+            </xo-cart-add>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% render 'product-data', product: product %}
+  </xo-product>
+{% else %}
+  {% render 'product-card-custom-placeholder',
+    placeholder_image: placeholder_image,
+    aspect_ratio: final_aspect_ratio,
+    card_color_scheme: card_color_scheme,
+    product: product,
+    modifier: modifier
+  %}
+{% endif %}

@@ -1,0 +1,78 @@
+{% comment %}
+  Accepts:
+  - class: {String} Font size heading (required)
+  - heading: {String} Heading (required)
+  - sub_heading: {String} Subheading (required)
+  - image: {String} Image (required)
+  - block: {Object} Blocks (required)
+  Usage:
+  {%
+    render 'img-with-text-4',
+    class: class,
+    heading: heading,
+    sub_heading: sub_heading,
+    image: image ,
+    block: block,
+    %}
+{% endcomment %}
+
+<div class="img-with-text-4">
+  <xo-tabs>
+    <xo-grid class="img-with-text-4__grid">
+      <xo-animate xo-cascade style="--lg: 4; --md: 12; --xs: 12">
+        <div class="img-with-text-4__left">
+          {% if sub_heading %}
+            <div class="img-with-text-4__sub-heading">
+              {{ sub_heading }}
+            </div>
+          {% endif %}
+          <div class="img-with-text-4__body">
+            {% for item in block %}
+              {% liquid
+                assign class = item.settings.font_size_heading
+                assign heading = item.settings.heading
+                assign content = item.settings.content
+              %}
+              <xo-tabs-trigger
+                xo-name="tab-{{ forloop.index }}"
+                {% if forloop.index == 1 %}
+                  xo-active
+                {% endif %}
+                class="img-with-text-4__tab"
+              >
+                {% render 'collapse-2', tag: class, heading: heading, content: content %}
+              </xo-tabs-trigger>
+            {% endfor %}
+          </div>
+        </div>
+      </xo-animate>
+      <xo-animate xo-cascade style="--lg: 6; --md: 12; --xs: 12; --start-lg: 7">
+        <div class="img-with-text-4__right">
+          <xo-tabs-content class="img-with-text-4__tab-content">
+            {% for item in block %}
+              {% liquid
+                assign image = item.settings.image
+                assign aspect_ratio = item.settings.aspect_ratio
+                if aspect_ratio == 'custom'
+                  assign aspect_ratio = item.settings.aspect_ratio_width | append: '/' | append: item.settings.aspect_ratio_height
+                endif
+              %}
+              <xo-tabs-pane
+                xo-name="tab-{{ forloop.index }}"
+                {% if forloop.index == 1 %}
+                  xo-active
+                {% endif %}
+                class="img-with-text-4__tab-pane"
+                style="overflow: hidden;"
+              >
+                <xo-animate xo-cascade xo-type="zoom-out" xo-duration="600" class="img-with-text-4__image">
+                  {% render 'image', image: image, aspect_ratio: aspect_ratio %}
+                </xo-animate>
+              </xo-tabs-pane>
+            {% endfor %}
+          </xo-tabs-content>
+        </div>
+      </xo-animate>
+    </xo-grid>
+  </xo-tabs>
+</div>

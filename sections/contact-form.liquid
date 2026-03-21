@@ -1,0 +1,207 @@
+{{ 'section-contact-form.css' | asset_url | stylesheet_tag }}
+
+<section {% render 'section-attr' %}>
+  <div class='xo-contact'>
+    <xo-container class='xo-contact__container'>
+      <div class='xo-contact__content'>
+        {%- form 'contact', id: 'ContactForm', class: 'isolate' -%}
+          <xo-animate xo-cascade>
+            <div class='xo-contact__header'>
+              {% liquid
+                assign class = section.settings.font_size_heading
+                assign heading = section.settings.heading
+                assign sub_heading = section.settings.sub_heading
+              %}
+              {% if page.title != blank %}
+                <h3 class='xo-contact__heading {{ class }}'>{{ page.title }}</h3>
+              {% else %}
+                {% if heading != blank %}
+                  <h3 class='xo-contact__heading {{ class }}'>{{ heading }}</h3>
+                {% endif %}
+              {% endif %}
+              {% if page.content != blank %}
+                <div class='xo-contact__sub-heading'>
+                  {{ page.content }}
+                </div>
+              {% else %}
+                {% if sub_heading %}
+                  <div class='xo-contact__sub-heading'>
+                    {{ sub_heading }}
+                  </div>
+                {% endif %}
+              {% endif %}
+            </div>
+          </xo-animate>
+          {% render 'space', spacing_dt: 40, spacing_mb: 40 %}
+          <div class='xo-contact__body'>
+            {% if form.posted_successfully? %}
+              {% assign message = 'templates.contact.form.post_success' | t %}
+              {% render 'form-success', form: form, message: message %}
+            {% else %}
+              {% assign message = 'templates.contact.form.error_heading' | t %}
+              {% render 'form-error', form: form, message: message %}
+            {% endif %}
+            <xo-grid class='xo-contact__grid'>
+              <xo-animate xo-cascade style='--lg: 6; --md: 12; --xs: 12'>
+                <div class='xo-contact__first-name'>
+                  {% assign first_name_id = 'first-name--' | append: section.id %}
+                  {% assign first_name_label = 'templates.contact.form.first_name' | t %}
+                  {% render 'field-input', type: 'text', name: 'contact[first_name]', value: form.first_name, label: first_name_label, id: first_name_id %}
+                </div>
+              </xo-animate>
+              <xo-animate xo-cascade style='--lg: 6; --md: 12; --xs: 12'>
+                <div class='xo-contact__last-name'>
+                  {% assign last_name_id = 'last-name--' | append: section.id %}
+                  {% assign last_name_label = 'templates.contact.form.last_name' | t %}
+                  {% render 'field-input', type: 'text', name: 'contact[last_name]', value: form.last_name, label: last_name_label, id: last_name_id %}
+                </div>
+              </xo-animate>
+            </xo-grid>
+            {% render 'space', spacing_dt: 8, spacing_mb: 8 %}
+            <xo-animate xo-cascade>
+              <div class='xo-contact__email'>
+                <div class='xo-contact__email-input'>
+                  {% assign email_id = 'email--' | append: section.id %}
+                  {% assign email_label = 'templates.contact.form.email' | t %}
+                  {% render 'field-input', type: 'email', name: 'contact[email]', value: form.email, label: email_label, id: email_id %}
+                </div>
+              </div>
+            </xo-animate>
+            {% render 'space', spacing_dt: 8, spacing_mb: 8 %}
+            <xo-animate xo-cascade>
+              <div class='xo-contact__subject'>
+                <div class='xo-contact__subject-input'>
+                  {% assign subject_id = 'subject--' | append: section.id %}
+                  {% assign subject_label = 'templates.contact.form.subject' | t %}
+                  {% render 'field-input', type: 'tel', name: 'contact[subject]', value: form.body, label: subject_label, id: subject_id %}
+                </div>
+              </div>
+            </xo-animate>
+            {% render 'space', spacing_dt: 8, spacing_mb: 8 %}
+            <xo-animate xo-cascade>
+              <div class='xo-contact__message'>
+                <div class='xo-contact__message-input'>
+                  {% assign message_id = 'message--' | append: section.id %}
+                  {% assign message_label = 'templates.contact.form.message' | t %}
+                  {% render 'field-textarea', name: 'contact[message]', value: form.body, label: message_label, id: message_id, placeholder: message_label %}
+                </div>
+              </div>
+            </xo-animate>
+            {% render 'space', spacing_dt: 40, spacing_mb: 40 %}
+          </div>
+          <xo-animate xo-cascade class='xo-contact__bottom'>
+            <div class='xo-contact__button'>
+              {% assign btn_label = 'templates.contact.form.send' | t %}
+              {% render 'button', type: 'submit', text: btn_label, size: 'md', block: true, effect: 'fade', style: 'primary' %}
+            </div>
+          </xo-animate>
+        {%- endform -%}
+      </div>
+    </xo-container>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "t:sections.contact_form.name",
+  "disabled_on": {
+    "groups": [
+      "header",
+      "footer",
+      "custom.overlay",
+      "custom.popups",
+      "custom.features"
+    ]
+  },
+  "settings": [
+    {
+      "type": "select",
+      "id": "font_size_heading",
+      "label": "Font size heading",
+      "default": "h2",
+      "options": [
+        {
+          "value": "h1",
+          "label": "Extra extra large"
+        },
+        {
+          "value": "h2",
+          "label": "Extra large"
+        },
+        {
+          "value": "h3",
+          "label": "Large"
+        },
+        {
+          "value": "h4",
+          "label": "Medium"
+        },
+        {
+          "value": "h5",
+          "label": "Small"
+        },
+        {
+          "value": "h6",
+          "label": "Extra small"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "t:sections.contact_form.settings.heading.label",
+      "default": "Contact us"
+    },
+    {
+      "type": "richtext",
+      "id": "sub_heading",
+      "label": "t:sections.contact_form.settings.sub_heading.label",
+      "default": "<p>Feel free to drop us a line via the following contact details if you are interested in any of our furnitures</p>"
+    },
+    {
+      "type": "header",
+      "content": "General settings"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Section color scheme"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color"
+    },
+    {
+      "type": "color_background",
+      "id": "background_gradient",
+      "label": "Background gradient"
+    },
+    {
+      "type": "number",
+      "id": "padding_top_desktop",
+      "label": "Padding top desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_desktop",
+      "label": "Padding bottom desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_top_mobile",
+      "label": "Padding top mobile",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_mobile",
+      "label": "Padding bottom mobile",
+      "default": 50
+    }
+  ],
+  "blocks": []
+}
+{% endschema %}

@@ -1,0 +1,33 @@
+<section class="np-surface">
+  <div class="np-wrap">
+    <div class="np-chips" role="navigation" aria-label="Topic filters">
+      {% assign tag_list = section.settings.tags | split: ',' | map: 'strip' %}
+      {% if tag_list == blank or tag_list.size == 0 %}
+        {% assign tag_list = blog.all_tags | slice: 0, 12 %}
+      {% endif %}
+
+      {% for tag in tag_list %}
+        {% assign handle = tag | handleize %}
+        {% assign active = false %}
+        {% if current_tags and current_tags contains tag %}{% assign active = true %}{% endif %}
+        <a class="np-chip" data-active="{{ active }}" href="{{ blog.url }}/tagged/{{ handle }}" {% if active %}aria-current="true"{% endif %}>
+          {{ tag }}
+        </a>
+      {% endfor %}
+
+      {% if current_tags and current_tags.size > 0 %}
+        <a class="np-chip" href="{{ blog.url }}">Clear</a>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Blog Filter Chips",
+  "settings": [
+    { "type":"textarea", "id":"tags", "label":"Tags to show (comma‑separated). Leave empty to auto‑list top tags." }
+  ],
+  "presets":[{ "name":"NP • Blog Filter Chips" }]
+}
+{% endschema %}

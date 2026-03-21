@@ -1,0 +1,43 @@
+{% comment %}
+  Renders a animate image
+
+  Accepts:
+  - image: {Image} Image (required)
+  - placeholder: {String} placeholder (optional)
+  - border_radius: {Number} border radius (optional)s
+  - max_width: {Number} maximum width (optional)
+  - aspect_ratio: {Number} aspect ratio (optional)
+  - duration: {Number} duration (optional)
+
+  Outputs:
+  Usage:
+  {% render 'animate-image', image: image, placeholder: placeholder, border_radius: border_radius, aspect_ratio: aspect_ratio, max_width: max_width, duration: duration %}
+{% endcomment %}
+
+{% liquid
+  assign duration = duration | default: 1500
+  if border_radius
+    assign border_radius = border_radius
+  else
+    assign border_radius = 1000
+  endif
+  if aspect_ratio
+    assign aspect_ratio = aspect_ratio
+  else
+    assign aspect_ratio = 1
+  endif
+%}
+
+<div
+  class="animate-image"
+  style="
+    --border-radius: {{ border_radius }}px;
+    {% if max_width %}
+      --max-width: {{ max_width }}%;
+    {% endif %}
+  "
+>
+  <xo-animate xo-cascade xo-type="zoom-out" xo-duration="{{ duration }}" xo-strength="1" style="height: 100%;">
+    {% render 'image', image: image, placeholder: placeholder, aspect_ratio: aspect_ratio, lazyload: lazyload, disable_alt: disable_alt, width_range: width_range %}
+  </xo-animate>
+</div>

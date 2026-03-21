@@ -1,0 +1,432 @@
+{{ 'section-main-page-heading-style-2.css' | asset_url | stylesheet_tag }}
+
+{% liquid
+  assign show_count_number = section.settings.show_count_number
+  assign enable_breadcrumb = section.settings.enable_breadcrumb
+  assign enable_banner = section.settings.enable_banner
+  assign position_banner = section.settings.position_banner
+  assign class = section.settings.font_size_heading
+  assign heading = section.settings.heading
+  assign sub_heading_style = section.settings.sub_heading_style
+  assign sub_heading = section.settings.sub_heading
+  assign align = section.settings.align
+  assign show_image_collection = section.settings.show_image_collection
+  assign show_description_collection = section.settings.show_description_collection
+  assign img_desktop = section.settings.background_image_desktop | image_url
+  assign img_mobile = section.settings.background_image_mobile | image_url
+  assign image_overlay_opacity = section.settings.image_overlay_opacity
+  assign image_overlay_color = section.settings.image_overlay_color
+%}
+
+{% if collection.image != blank %}
+  {% capture style %}
+    style="--img-desktop: url('{{ collection.image | image_url }}'); --img-mobile: url('{{ collection.image | image_url }}')"
+  {% endcapture %}
+{% else %}
+  {% capture style %}
+    style="--img-desktop: url('{{ collection.featured_image | image_url }}'); --img-mobile: url('{{ collection.featured_image | image_url }}')"
+  {% endcapture %}
+{% endif %}
+
+<div class="main-page-heading-style-2" style="--overlay-opacity: {{ image_overlay_opacity }}; --overlay-color: {{ image_overlay_color }}">
+  <section {% render 'section-attr' %}>
+    <xo-container class="main-page-heading-style-2__container">
+      {% if enable_banner == 'show' %}
+        {% if position_banner == 'absolute' %}
+          {% if img_desktop != blank or img_mobile != blank %}
+            <xo-parallax-scroll
+              class="main-page-heading-style-2__pr"
+              xo-backface-visibility="visible"
+              xo-keyframes="
+                {
+                  '40%': { scale: 1, brightness: '100%' },
+                  '100%': { scale: 2, brightness: '40%' },
+                }
+              "
+            >
+              <xo-animate
+                xo-cascade
+                xo-type="zoom-out"
+                xo-duration="2000"
+                class="main-page-heading-style-2__bg"
+                style="--img-desktop: url('{{ img_desktop }}'); --img-mobile: url('{{ img_mobile }}')"
+              ></xo-animate>
+            </xo-parallax-scroll>
+          {%- else -%}
+            <xo-parallax-scroll
+              class="main-page-heading-style-2__pr"
+              xo-backface-visibility="visible"
+              xo-keyframes="
+                {
+                  '40%': { scale: 1, brightness: '100%' },
+                  '100%': { scale: 2, brightness: '40%' },
+                }
+              "
+            >
+              <xo-animate
+                xo-cascade
+                xo-type="zoom-out"
+                xo-duration="2000"
+                class="main-page-heading-style-2__bg"
+              >
+                {{ 'hero-apparel-1' | placeholder_svg_tag: 'placeholder-svg' }}
+              </xo-animate>
+            </xo-parallax-scroll>
+          {% endif %}
+        {% endif %}
+      {%- else -%}
+        {% if show_image_collection and position_banner == 'absolute' %}
+          <xo-parallax-scroll
+            class="main-page-heading-style-2__pr"
+            xo-backface-visibility="visible"
+            xo-keyframes="
+              {
+                '40%': { scale: 1, brightness: '100%' },
+                '100%': { scale: 2, brightness: '40%' },
+              }
+            "
+          >
+            <xo-animate
+              xo-cascade
+              xo-type="zoom-out"
+              xo-duration="2000"
+              class="main-page-heading-style-2__bg"
+              {{ style }}
+            ></xo-animate>
+          </xo-parallax-scroll>
+        {% endif %}
+      {% endif %}
+      <div class="main-page-heading-style-2__content">
+        {% if enable_breadcrumb == 'show' %}
+          <xo-animate xo-cascade>
+            <div class="main-page-heading-style-2__breadcrumb" style="--align: {{ align }}">
+              {% render 'breadcrumb', align: align %}
+            </div>
+          </xo-animate>
+        {% endif %}
+        <xo-animate xo-cascade>
+          <div class="main-page-heading-style-2__page-heading">
+            {% render 'page-heading-2',
+              class: class,
+              heading: heading,
+              sub_heading_style: sub_heading_style,
+              sub_heading: sub_heading,
+              align: align,
+              show_image_collection: show_image_collection,
+              show_description_collection: show_description_collection,
+              enable_effect: true,
+              show_count_number: show_count_number
+            %}
+          </div>
+        </xo-animate>
+        {% if position_banner == 'bottom' %}
+          <div class="main-page-heading-style-2__bottom">
+            {% if enable_banner == 'show' %}
+              <div class="main-page-heading-style-2__image{% if position_banner %} main-page-heading-style-2__image--{{ position_banner }}{% endif %}{% if settings.enable_border_radius %} main-page-heading-style-2__image--radius{% endif %}">
+                <xo-animate
+                  xo-cascade
+                  xo-type="zoom-out"
+                  xo-duration="2000"
+                  style="height: 100%; width: 100%;"
+                >
+                  <div class="main-page-heading-style-2__image-desktop">
+                    {%- render 'image', image: img_desktop -%}
+                  </div>
+                  <div class="main-page-heading-style-2__image-mobile">
+                    {%- render 'image', image: img_mobile -%}
+                  </div>
+                </xo-animate>
+              </div>
+            {% else %}
+              {% if show_image_collection %}
+                <div class="main-page-heading-style-2__image{% if position_banner %} main-page-heading-style-2__image--{{ position_banner }}{% endif %}{% if settings.enable_border_radius %} main-page-heading-style-2__image--radius{% endif %}">
+                  <xo-animate
+                    xo-cascade
+                    xo-type="zoom-out"
+                    xo-duration="2000"
+                    style="height: 100%; width: 100%;"
+                  >
+                    {%- render 'image', image: collection.image -%}
+                  </xo-animate>
+                </div>
+              {% endif %}
+            {% endif %}
+          </div>
+        {% endif %}
+      </div>
+    </xo-container>
+  </section>
+</div>
+
+{% schema %}
+{
+  "name": "t:sections.main_page_heading_style_2.name",
+  "class": "section-hero",
+  "disabled_on": {
+    "groups": [
+      "header",
+      "footer",
+      "custom.overlay",
+      "custom.popups",
+      "custom.features"
+    ]
+  },
+  "settings": [
+    {
+      "type": "select",
+      "id": "enable_breadcrumb",
+      "label": "t:sections.main_page_heading_style_2.settings.enable_breadcrumb.label",
+      "options": [
+        {
+          "value": "hide",
+          "label": "t:sections.main_page_heading_style_2.settings.enable_breadcrumb.option__1.label"
+        },
+        {
+          "value": "show",
+          "label": "t:sections.main_page_heading_style_2.settings.enable_breadcrumb.option__2.label"
+        }
+      ],
+      "default": "hide"
+    },
+    {
+      "type": "select",
+      "id": "enable_banner",
+      "label": "t:sections.main_page_heading_style_2.settings.enable_banner.label",
+      "options": [
+        {
+          "value": "hide",
+          "label": "t:sections.main_page_heading_style_2.settings.enable_banner.option__1.label"
+        },
+        {
+          "value": "show",
+          "label": "t:sections.main_page_heading_style_2.settings.enable_banner.option__2.label"
+        }
+      ],
+      "default": "hide"
+    },
+    {
+      "type": "select",
+      "id": "position_banner",
+      "label": "t:sections.main_page_heading_style_2.settings.position_banner.label",
+      "options": [
+        {
+          "value": "absolute",
+          "label": "t:sections.main_page_heading_style_2.settings.position_banner.option__1.label"
+        },
+        {
+          "value": "bottom",
+          "label": "t:sections.main_page_heading_style_2.settings.position_banner.option__2.label"
+        }
+      ],
+      "default": "absolute"
+    },
+    {
+      "type": "paragraph",
+      "content": "t:sections.main_page_heading_style_2.settings.paragraph.content"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_image_collection",
+      "label": "t:sections.main_page_heading_style_2.settings.show_image_collection.label",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "show_description_collection",
+      "label": "t:sections.main_page_heading_style_2.settings.show_description_collection.label",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "show_count_number",
+      "label": "t:sections.main_page_heading_style_2.settings.show_count_number.label",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "t:sections.main_page_heading_style_2.settings.header_text.content"
+    },
+    {
+      "type": "select",
+      "id": "font_size_heading",
+      "label": "Font size heading",
+      "default": "h3",
+      "options": [
+        {
+          "value": "h1",
+          "label": "Extra extra large"
+        },
+        {
+          "value": "h2",
+          "label": "Extra large"
+        },
+        {
+          "value": "h3",
+          "label": "Large"
+        },
+        {
+          "value": "h4",
+          "label": "Medium"
+        },
+        {
+          "value": "h5",
+          "label": "Small"
+        },
+        {
+          "value": "h6",
+          "label": "Extra small"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "t:sections.main_page_heading_style_2.settings.heading.label"
+    },
+    {
+      "type": "number",
+      "id": "text_duration",
+      "label": "t:sections.main_page_heading_style_2.settings.text_duration.label",
+      "default": 1000
+    },
+    {
+      "type": "select",
+      "id": "text_effect",
+      "label": "t:sections.main_page_heading_style_2.settings.text_effect.label",
+      "options": [
+        {
+          "value": "none",
+          "label": "t:sections.main_page_heading_style_2.settings.text_effect.option__1.label"
+        },
+        {
+          "value": "reveal",
+          "label": "t:sections.main_page_heading_style_2.settings.text_effect.option__2.label"
+        },
+        {
+          "value": "split",
+          "label": "t:sections.main_page_heading_style_2.settings.text_effect.option__3.label"
+        }
+      ],
+      "default": "split"
+    },
+    {
+      "type": "select",
+      "id": "sub_heading_style",
+      "label": "t:sections.main_page_heading_style_2.settings.sub_heading_style.label",
+      "options": [
+        {
+          "value": "body",
+          "label": "t:sections.main_page_heading_style_2.settings.sub_heading_style.option__1.label"
+        },
+        {
+          "value": "subtitle",
+          "label": "t:sections.main_page_heading_style_2.settings.sub_heading_style.option__2.label"
+        },
+        {
+          "value": "uppercase",
+          "label": "t:sections.main_page_heading_style_2.settings.sub_heading_style.option__3.label"
+        }
+      ],
+      "default": "body"
+    },
+    {
+      "type": "richtext",
+      "id": "sub_heading",
+      "label": "t:sections.main_page_heading_style_2.settings.sub_heading.label",
+      "default": "<p>Use this text to share information about your brand with your customers. Describe a product, share announcements, or welcome customers to your store.</p>"
+    },
+    {
+      "type": "select",
+      "id": "align",
+      "label": "t:sections.main_page_heading_style_2.settings.align.label",
+      "options": [
+        {
+          "value": "left",
+          "label": "t:sections.main_page_heading_style_2.settings.align.option__1.label"
+        },
+        {
+          "value": "center",
+          "label": "t:sections.main_page_heading_style_2.settings.align.option__2.label"
+        },
+        {
+          "value": "right",
+          "label": "t:sections.main_page_heading_style_2.settings.align.option__3.label"
+        }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.main_page_heading_style_2.settings.header_image.content"
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image_desktop",
+      "label": "t:sections.main_page_heading_style_2.settings.image_dt.label"
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image_mobile",
+      "label": "t:sections.main_page_heading_style_2.settings.image_mb.label"
+    },
+    {
+      "type": "range",
+      "id": "image_overlay_opacity",
+      "min": 0,
+      "max": 1,
+      "step": 0.1,
+      "label": "t:sections.main_page_heading_style_2.settings.image_overlay_opacity.label",
+      "default": 0
+    },
+    {
+      "type": "color",
+      "id": "image_overlay_color",
+      "label": "t:sections.main_page_heading_style_2.settings.image_overlay_color.label",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "General settings"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Section color scheme"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color"
+    },
+    {
+      "type": "color_background",
+      "id": "background_gradient",
+      "label": "Background gradient"
+    },
+    {
+      "type": "number",
+      "id": "padding_top_desktop",
+      "label": "Padding top desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_desktop",
+      "label": "Padding bottom desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_top_mobile",
+      "label": "Padding top mobile",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_mobile",
+      "label": "Padding bottom mobile",
+      "default": 50
+    }
+  ]
+}
+{% endschema %}

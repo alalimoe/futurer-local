@@ -1,0 +1,178 @@
+{% comment %}
+  Renders a list multi column
+
+  Accepts:
+  - image: {Object} Image (required)
+  - title: {String} Title (required)
+  - number: {Number} Number (optional)
+
+  Usage:
+  {% render 'multi-column-1', title: title, block: block %}
+{% endcomment %}
+
+{%- if layout == 'style-2' -%}
+  {%- capture class_1 -%}
+      multi-column-1__header--style-2
+    {%- endcapture -%}
+  {%- capture class_2 -%}
+      multi-column-1__content--style-2
+    {%- endcapture -%}
+  {%- capture class_3 -%}
+      multi-column-1__item--style-2
+    {%- endcapture -%}
+{% endif %}
+
+<div class="multi-column-1">
+  <div class="multi-column-1__header {{ class_1 }}">
+    {% render 'heading-multi-column', class: class, heading: heading, layout: layout, column: 12 %}
+  </div>
+  <div class="multi-column-1__body">
+    <div class="multi-column-1__desktop">
+      <xo-grid class="multi-column-1__grid" style="--lg: {{ column }}; --md: {{ column }}; --xs: 2">
+        {% for item in block %}
+          {% liquid
+            assign image_first = item.settings.image_first
+            assign image_first_on_dark_mode = item.settings.image_first_on_dark_mode
+            assign aspect_ratio_first = item.settings.aspect_ratio_first
+            if aspect_ratio_first == 'custom'
+              assign aspect_ratio_first = item.settings.aspect_ratio_width | append: '/' | append: item.settings.aspect_ratio_height
+            endif
+            assign image_second = item.settings.image_second
+            assign image_second_on_dark_mode = item.settings.image_second_on_dark_mode
+            assign video = item.settings.video.sources[1].url
+            assign hover_type = item.settings.hover_type
+            assign aspect_ratio_second = item.settings.aspect_ratio_second
+            if aspect_ratio_second == 'custom'
+              assign aspect_ratio_second = item.settings.aspect_ratio_width | append: '/' | append: item.settings.aspect_ratio_height
+            endif
+            assign title = item.settings.title
+            assign enable_overlay = item.settings.enable_overlay
+            assign number = forloop.index0 | plus: 1 | prepend: '00' | slice: -2, 2
+          %}
+          <xo-animate
+            xo-cascade
+            xo-order="{{ forloop.index }}"
+            class="multi-column-1__item {{ class_3 }}{% if settings.enable_border_radius %} multi-column-1__item--radius{% endif %}"
+          >
+            <div class="multi-column-1__image multi-column-1__image--light-mode{% if settings.enable_border_radius %} multi-column-1__image--radius{% endif %}">
+              {% render 'image', image: image_first, aspect_ratio: aspect_ratio_first %}
+            </div>
+            <div class="multi-column-1__image multi-column-1__image--dark-mode{% if settings.enable_border_radius %} multi-column-1__image--radius{% endif %}">
+              {% render 'image', image: image_first_on_dark_mode, aspect_ratio: aspect_ratio_first %}
+            </div>
+            {% if hover_type == 'image' %}
+              <div class="multi-column-1__image multi-column-1__image--second multi-column-1__image--light-mode{% if settings.enable_border_radius %} multi-column-1__image--radius{% endif %}">
+                {% render 'image', image: image_second, aspect_ratio: aspect_ratio_second %}
+              </div>
+              <div class="multi-column-1__image multi-column-1__image--second multi-column-1__image--dark-mode{% if settings.enable_border_radius %} multi-column-1__image--radius{% endif %}">
+                {% render 'image', image: image_second_on_dark_mode, aspect_ratio: aspect_ratio_second %}
+              </div>
+            {% else %}
+              <div class="multi-column-1__image multi-column-1__image--second{% if settings.enable_border_radius %} multi-column-1__image--radius{% endif %}">
+                <xo-video-cover
+                  class="multi-column-1__video"
+                  style="--aspect-ratio: {{ aspect_ratio_second }}"
+                  xo-src="{{ video }}"
+                >
+                </xo-video-cover>
+              </div>
+            {% endif %}
+            <div class="multi-column-1__content {{ class_2 }}">
+              <span class="multi-column-1__number">{{ number }}</span>
+              <div class="multi-column-1__title{% if settings.enable_border_radius %} multi-column-1__title--radius{% endif %}{% if enable_overlay == 'on' %} multi-column-1__title--overlay{% endif %}">
+                {{ title }}
+              </div>
+            </div>
+          </xo-animate>
+        {% endfor %}
+      </xo-grid>
+    </div>
+    <div class="multi-column-1__mobile">
+      <xo-carousel
+        xo-per-view="1"
+        xo-per-move="1"
+        xo-breakpoints='
+          {
+            767: {
+              perView: 1,
+              perMove: 1,
+              gap: 10,
+              overflow: "visible"
+            },
+            768: {
+              perView: 2,
+              perMove: 1,
+              gap: 10,
+              overflow: "visible"
+            },
+          }
+        '
+        {% if layout == 'style-2' %}
+          xo-render-bullet="<span class='carousel-bullet'></span>"
+        {% endif %}
+      >
+        <xo-carousel-inner>
+          <xo-carousel-list>
+            {% for item in block %}
+              {% liquid
+                assign image_first = item.settings.image_first
+                assign image_second = item.settings.image_second
+                assign aspect_ratio_first = item.settings.aspect_ratio_first
+                if aspect_ratio_first == 'custom'
+                  assign aspect_ratio_first = item.settings.aspect_ratio_width | append: '/' | append: item.settings.aspect_ratio_height
+                endif
+                assign aspect_ratio_second = item.settings.aspect_ratio_second
+                if aspect_ratio_second == 'custom'
+                  assign aspect_ratio_second = item.settings.aspect_ratio_width | append: '/' | append: item.settings.aspect_ratio_height
+                endif
+                assign video = item.settings.video.sources[1].url
+                assign hover_type = item.settings.hover_type
+                assign title = item.settings.title
+                assign enable_overlay = item.settings.enable_overlay
+                assign number = forloop.index0 | plus: 1 | prepend: '00' | slice: -2, 2
+              %}
+              <xo-carousel-slide>
+                <div class="multi-column-1__item {{ class_3 }}{% if settings.enable_border_radius %} multi-column-1__item--radius{% endif %}">
+                  <div class="multi-column-1__image multi-column-1__image--light-mode{% if settings.enable_border_radius %} multi-column-1__image--radius{% endif %}">
+                    {% render 'image', image: image_first, aspect_ratio: aspect_ratio_first %}
+                  </div>
+                  <div class="multi-column-1__image multi-column-1__image--dark-mode{% if settings.enable_border_radius %} multi-column-1__image--radius{% endif %}">
+                    {% render 'image', image: image_first_on_dark_mode, aspect_ratio: aspect_ratio_first %}
+                  </div>
+                  {% if hover_type == 'image' %}
+                    <div class="multi-column-1__image multi-column-1__image--second multi-column-1__image--light-mode{% if settings.enable_border_radius %} multi-column-1__image--radius{% endif %}">
+                      {% render 'image', image: image_second, aspect_ratio: aspect_ratio_second %}
+                    </div>
+                    <div class="multi-column-1__image multi-column-1__image--second multi-column-1__image--dark-mode{% if settings.enable_border_radius %} multi-column-1__image--radius{% endif %}">
+                      {% render 'image', image: image_second_on_dark_mode, aspect_ratio: aspect_ratio_second %}
+                    </div>
+                  {% else %}
+                    <div class="multi-column-1__image multi-column-1__image--second{% if settings.enable_border_radius %} multi-column-1__image--radius{% endif %}">
+                      <xo-video-cover
+                        class="multi-column-1__video"
+                        style="--aspect-ratio: {{ aspect_ratio_second }}"
+                        xo-src="{{ video }}"
+                      >
+                      </xo-video-cover>
+                    </div>
+                  {% endif %}
+                  <div class="multi-column-1__content {{ class_2 }}">
+                    <span class="multi-column-1__number">
+                      {{ number }}
+                    </span>
+                    <div class="multi-column-1__title{% if settings.enable_border_radius %} multi-column-1__title--radius{% endif %}{% if enable_overlay == 'on' %} multi-column-1__title--overlay{% endif %}">
+                      {{ title }}
+                    </div>
+                  </div>
+                </div>
+              </xo-carousel-slide>
+            {% endfor %}
+          </xo-carousel-list>
+        </xo-carousel-inner>
+        {% if layout == 'style-2' %}
+          {% render 'carousel-pagination', align: 'center', style: 'sticks' %}
+        {% endif %}
+      </xo-carousel>
+    </div>
+  </div>
+</div>

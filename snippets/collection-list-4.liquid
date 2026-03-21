@@ -1,0 +1,92 @@
+{% comment %}
+  Renders a collection list 4
+
+  @param {String} collection_image - Image of the collection (required),
+  @param {String} collection_name - Title of the collection (required),
+  @param {String} collection_link - URL of the collection (required),
+  @param {String} image_dt - Desktop image of the collection (optional),
+  @param {String} aspect_ratio_dt - Desktop aspect ratio of the collection (optional),
+  @param {String} image_mb - Mobile image of the collection (optional),
+  @param {String} aspect_ratio_mb - Mobile aspect ratio of the collection (optional),
+  @param {String} heading - Heading of the collection (optional),
+  @param {String} class - Class of the collection (optional),
+  @param {String} button - Button of the collection (optional),
+
+  @example
+  {% render 'collection-list-4',
+  collection_image: collection_image,
+  collection_name: collection_name,
+  collection_link: collection_link,
+  image_dt: image_dt,
+  aspect_ratio_dt: aspect_ratio_dt,
+  image_mb: image_mb,
+  aspect_ratio_mb: aspect_ratio_mb,
+  heading: heading,
+  class: class,
+  button: button
+  %}
+{% endcomment %}
+
+<div class="collection-list-4 {% if settings.enable_border_radius %}collection-list-4--radius{% endif %}" tabindex="0">
+  <a
+    href="{{ collection_link }}"
+    class="collection-list-4__link"
+    title="Collection link"
+  >
+    <div class="collection-list-4__content {% if color_scheme_collection %} color-{{ color_scheme_collection }} {% endif %}" style="--opacity: {{ background_overlay }}">
+      {% if collection_image == blank %}
+        {% if image_dt != blank %}
+          <div class="collection-list-4__image collection-list-4__image--desktop">
+            {% render 'animate-image', image: image_dt, border_radius: 0, aspect_ratio: aspect_ratio_dt, disable_alt: true %}
+          </div>
+        {%- else -%}
+          <div class="collection-list-4__image collection-list-4__image--desktop">
+            {% render 'animate-image', image: image, placeholder: placeholder, border_radius: 0, aspect_ratio: aspect_ratio_dt, disable_alt: true %}
+          </div>
+        {% endif %}
+        {% if image_mb != blank %}
+          <div class="collection-list-4__image collection-list-4__image--mobile">
+            {% render 'animate-image', image: image_mb, border_radius: 0, aspect_ratio: aspect_ratio_mb, disable_alt: true %}
+          </div>
+        {%- else -%}
+          <div class="collection-list-4__image collection-list-4__image--mobile">
+            {% render 'animate-image', image: image, border_radius: 0, placeholder: placeholder, aspect_ratio: aspect_ratio_mb, disable_alt: true %}
+          </div>
+        {% endif %}
+      {%- else -%}
+        {% if image_dt != blank %}
+          <div class="collection-list-4__image collection-list-4__image--desktop">
+            {% render 'animate-image', image: image_dt, border_radius: 0, placeholder: placeholder, aspect_ratio: aspect_ratio_dt, disable_alt: true %}
+          </div>
+        {%- else -%}
+          <div class="collection-list-4__image collection-list-4__image--desktop">
+            {% render 'animate-image', image: collection_image, border_radius: 0, aspect_ratio: aspect_ratio_dt, disable_alt: true %}
+          </div>
+        {% endif %}
+        {% if image_mb != blank %}
+          <div class="collection-list-4__image collection-list-4__image--mobile">
+            {% render 'animate-image', image: image_mb, border_radius: 0, aspect_ratio: aspect_ratio_mb, disable_alt: true %}
+          </div>
+        {%- else -%}
+          <div class="collection-list-4__image collection-list-4__image--mobile">
+            {% render 'animate-image', image: collection_image, border_radius: 0, aspect_ratio: aspect_ratio_mb, disable_alt: true %}
+          </div>
+        {% endif %}
+      {% endif %}
+      <div class="collection-list-4__text">
+        {% if heading != blank %}
+          <div class="collection-list-4__heading">
+            {% render 'text', class: class, text: heading, effect: 'split', duration: 500 %}
+          </div>
+        {%- else -%}
+          <div class="collection-list-4__heading">
+            {% render 'text', class: class, text: collection_name, effect: 'split', duration: 500 %}
+          </div>
+        {% endif %}
+        <div class="collection-list-4__button">
+          {% render 'button', text: button.button_text, style: button.button_style, size: button.button_size, radius: settings.button_radius, padding: settings.button_padding %}
+        </div>
+      </div>
+    </div>
+  </a>
+</div>

@@ -1,0 +1,82 @@
+{% comment %}
+  Renders a page heading.
+
+  Accepts:
+  - heading: {String} Title of the page (optional)
+  - class: {String} Font size heading (optional)
+  - description: {String} Description of the page (optional)
+  - align: {String} Alignment of the page heading (optional)
+
+  Usage:
+  {% render 'page-heading', class: class, heading: heading, description: description, align: align %}
+{% endcomment %}
+
+{%- assign class = section.settings.font_size_heading -%}
+
+<div class='xo-page-heading{% if align %} xo-page-heading--{{ align }}{% endif %}'>
+  <xo-animate xo-cascade>
+    <h2 class='xo-page-heading__heading {{ class }}'>
+      {% if heading != blank %}
+        {{ heading }}
+      {% else %}
+        {% if template.name == 'product' %}
+          {% liquid
+            assign product_title = ''
+            assign current_collection = null
+            assign collections_size = product.collections | size
+            if collection
+              assign current_collection = collection
+            elsif product and collections_size > 0
+              assign current_collection = product.collections.first
+            endif
+            if current_collection and current_collection.handle
+              assign product_title = current_collection.title
+            else
+              assign product_title = product.title
+            endif
+          %}
+          {{ product_title | escape }}
+        {% elsif template.name == 'collection' and collection.handle %}
+          {% if current_tags %}
+            {{ current_tags | join: ' + ' | escape }}
+          {% else %}
+            {{ collection.title | escape }}
+          {% endif %}
+        {% elsif template.name == 'blog' %}
+          {% if current_tags %}
+            {{ current_tags | join: ' + ' | escape }}
+          {% else %}
+            {{ blog.title | escape }}
+          {% endif %}
+        {% elsif template == 'article' %}
+          {{ blog.title | escape }}
+        {% elsif template == 'customers/login' %}
+          {{ 'customer.login_page.sign_in' | t }}
+        {% elsif template == 'customers/addresses' %}
+          {{ page_title | escape }}
+        {% elsif template contains 'page' %}
+          {% if page.title != blank %}
+            {{ page.title | escape }}
+          {% else %}
+            {{ page_title | escape }}
+          {% endif %}
+        {% elsif template contains 'search' %}
+          {%- if search.performed -%}
+            {{ 'templates.search.title' | t }}
+          {%- else -%}
+            {{ 'general.search.search' | t }}
+          {%- endif -%}
+        {% else %}
+          {{ page_title | escape }}
+        {% endif %}
+      {% endif %}
+    </h2>
+  </xo-animate>
+  <xo-animate xo-cascade>
+    {% if description != blank %}
+      <div class='xo-page-heading__description'>{{ description }}</div>
+    {%- else -%}
+      <div class='xo-page-heading__description xo-content'>{{ page.content }}</div>
+    {% endif %}
+  </xo-animate>
+</div>

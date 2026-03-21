@@ -1,0 +1,295 @@
+{{ 'section-testimonial-style-3.css' | asset_url | stylesheet_tag }}
+{{ 'testimonial-box-3.css' | asset_url | stylesheet_tag }}
+
+{% liquid
+  assign class = section.settings.font_size_heading
+  assign heading = section.settings.heading
+  assign autoplay = section.settings.autoplay
+  assign autoplay_time = section.settings.autoplay_time
+%}
+
+<section {% render 'section-attr' %}>
+  <div class="testimonial-style-3">
+    <xo-container class="testimonial-style-3__container">
+      <xo-carousel
+        xo-per-view="3"
+        xo-per-view="1"
+        {% if autoplay == 'on' %}
+          xo-autoplay="{{ autoplay_time }}"
+          xo-loop
+        {% endif %}
+        xo-breakpoints="
+          {
+            600: {
+              perView: 1,
+              perMove: 1,
+              gap: 10,
+              overflow: 'visible'
+            },
+            1000: {
+              perView: 2,
+              perMove: 2,
+            },
+          }
+        "
+      >
+        <div class="testimonial-style-3__head">
+          <div class="testimonial-style-3__heading">
+            {% render 'text', text: heading, class: class, effect: 'split', duration: 1000 %}
+          </div>
+          <div class="testimonial-style-3__group">
+            <xo-carousel-prev
+              class="testimonial-style-3__button{% if settings.enable_border_radius %} testimonial-style-3__button--radius{% endif %}"
+              role="button"
+              tabindex="0"
+              aria-label="Previous button"
+            >
+              {% render 'button-slide', icon: 'chevron-left', icon_size: '2rem', size: '4rem', direction: 'left', style: 'dark' %}
+            </xo-carousel-prev>
+            <xo-carousel-next
+              class="testimonial-style-3__button{% if settings.enable_border_radius %} testimonial-style-3__button--radius{% endif %}"
+              role="button"
+              tabindex="0"
+              aria-label="Next button"
+            >
+              {% render 'button-slide', icon: 'chevron-right', icon_size: '2rem', size: '4rem', direction: 'right', style: 'dark' %}
+            </xo-carousel-next>
+          </div>
+        </div>
+        <xo-carousel-inner>
+          <xo-carousel-list>
+            {% for block in section.blocks %}
+              <xo-carousel-slide>
+                {% render 'testimonial-box-3',
+                  message: block.settings.message,
+                  customer_name: block.settings.customer_name,
+                  verified_user: block.settings.verified_user,
+                  product: block.settings.product,
+                  card_color: section.settings.card_color,
+                  border_radius: section.settings.border_radius
+                %}
+              </xo-carousel-slide>
+            {% endfor %}
+          </xo-carousel-list>
+        </xo-carousel-inner>
+      </xo-carousel>
+    </xo-container>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "t:sections.testimonial_style_3.name",
+  "disabled_on": {
+    "groups": [
+      "header",
+      "footer",
+      "custom.overlay",
+      "custom.popups",
+      "custom.features"
+    ]
+  },
+  "settings": [
+    {
+      "type": "select",
+      "id": "font_size_heading",
+      "label": "Font size heading",
+      "default": "h4",
+      "options": [
+        {
+          "value": "h1",
+          "label": "Extra extra large"
+        },
+        {
+          "value": "h2",
+          "label": "Extra large"
+        },
+        {
+          "value": "h3",
+          "label": "Large"
+        },
+        {
+          "value": "h4",
+          "label": "Medium"
+        },
+        {
+          "value": "h5",
+          "label": "Small"
+        },
+        {
+          "value": "h6",
+          "label": "Extra small"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "t:sections.testimonial_style_3.settings.heading.label",
+      "default": "Testimonial"
+    },
+    {
+      "type": "select",
+      "id": "autoplay",
+      "label": "t:sections.testimonial_style_3.settings.autoplay.label",
+      "options": [
+        {
+          "value": "off",
+          "label": "t:sections.testimonial_style_3.settings.autoplay.option__1.label"
+        },
+        {
+          "value": "on",
+          "label": "t:sections.testimonial_style_3.settings.autoplay.option__2.label"
+        }
+      ],
+      "default": "off"
+    },
+    {
+      "type": "range",
+      "id": "autoplay_time",
+      "min": 1000,
+      "max": 5000,
+      "step": 1000,
+      "label": "t:sections.testimonial_style_3.settings.autoplay_time.label",
+      "default": 3000
+    },
+    {
+      "type": "color_scheme",
+      "id": "card_color",
+      "default": "scheme_1",
+      "label": "t:sections.testimonial_style_3.settings.card_color.label"
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "min": 10,
+      "max": 40,
+      "step": 1,
+      "unit": "px",
+      "label": "t:sections.testimonial_style_3.settings.border_radius.label",
+      "default": 10
+    },
+    {
+      "type": "header",
+      "content": "General settings"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Section color scheme"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color"
+    },
+    {
+      "type": "color_background",
+      "id": "background_gradient",
+      "label": "Background gradient"
+    },
+    {
+      "type": "number",
+      "id": "padding_top_desktop",
+      "label": "Padding top desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_desktop",
+      "label": "Padding bottom desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_top_mobile",
+      "label": "Padding top mobile",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_mobile",
+      "label": "Padding bottom mobile",
+      "default": 50
+    }
+  ],
+  "blocks": [
+    {
+      "name": "t:sections.testimonial_style_3.blocks.slide.label",
+      "type": "testimonial-slide",
+      "settings": [
+        {
+          "type": "richtext",
+          "id": "message",
+          "label": "t:sections.testimonial_style_3.blocks.slide.settings.message.label",
+          "default": "<p>Share what your customers are saying about your products, customer service or shipping rates.</p>"
+        },
+        {
+          "type": "text",
+          "id": "customer_name",
+          "label": "t:sections.testimonial_style_3.blocks.slide.settings.customer_name.label",
+          "default": "Customer' name"
+        },
+        {
+          "type": "select",
+          "id": "verified_user",
+          "label": "t:sections.testimonial_style_3.blocks.slide.settings.verified_user.label",
+          "options": [
+            {
+              "value": "hide",
+              "label": "t:sections.testimonial_style_3.blocks.slide.settings.verified_user.option__1.label"
+            },
+            {
+              "value": "show",
+              "label": "t:sections.testimonial_style_3.blocks.slide.settings.verified_user.option__2.label"
+            }
+          ],
+          "default": "show"
+        },
+        {
+          "type": "product",
+          "id": "product",
+          "label": "t:sections.testimonial_style_3.blocks.slide.settings.product.label"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.testimonial_style_3.presets.name",
+      "blocks": [
+        {
+          "type": "testimonial-slide",
+          "settings": {
+            "customer_name": "Customer name"
+          }
+        },
+        {
+          "type": "testimonial-slide",
+          "settings": {
+            "customer_name": "Customer name"
+          }
+        },
+        {
+          "type": "testimonial-slide",
+          "settings": {
+            "customer_name": "Customer name"
+          }
+        },
+        {
+          "type": "testimonial-slide",
+          "settings": {
+            "customer_name": "Customer 4"
+          }
+        },
+        {
+          "type": "testimonial-slide",
+          "settings": {
+            "customer_name": "Customer 5"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

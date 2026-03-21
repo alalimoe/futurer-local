@@ -1,0 +1,195 @@
+{% comment %}
+  Rennder a img banner
+
+  Accepts:
+  - layout: {String} Layout (required)
+  - tag: {String} Tag heading (required)
+  - heading: {String} Heading (required)
+  - description: {String} Description (required)
+  - button: {Object} Button (required)
+  Usage:
+  {%
+  render 'img-banner-3',
+  layout: layout,
+  tag: tag,
+  heading: heading,
+  description: description,
+  button: button,
+  %}
+{% endcomment %}
+
+<div class='img-banner-3{% if layout %} img-banner-3--{{ layout }}{% endif %}'>
+  <div is='xo-cursor' xo-name="['cursor-prev', 'cursor-next']">
+    <xo-carousel
+      xo-per-view='1'
+      xo-per-move='1'
+      xo-type='none'
+      xo-loop
+      style='height: 100%;'
+      {% if autoplay == 'on' %}
+        xo-autoplay='{{ autoplay_speed }}'
+      {% endif %}
+      xo-render-bullet="<span class='carousel-bullet'></span>"
+    >
+      <xo-carousel-inner style='height: 100vh'>
+        <xo-carousel-list style='height: 100%'>
+          {% for item in block %}
+            {% liquid
+              assign placeholder_image_index = forloop.index0 | modulo: 3 | plus: 1
+              assign placeholder = 'hero-apparel-' | append: placeholder_image_index
+            %}
+            {% case item.type %}
+              {% when 'image' %}
+                {% liquid
+                  assign heading = item.settings.heading
+                  assign description = item.settings.description
+                  assign button = item.settings
+                  assign img_desktop = item.settings.background_image_desktop | image_url
+                  assign img_mobile = item.settings.background_image_mobile | image_url
+                  assign lazyload = true
+                  assign carousel_visible = ''
+                  if forloop.index0 == 0
+                    assign lazyload = false
+                    assign carousel_visible = 'xo-visible xo-active'
+                  endif
+                %}
+                <xo-carousel-slide style='height: 100%;' {{ carousel_visible }}>
+                  {% if block.size > 1 %}
+                    <xo-carousel-prev class='img-banner-3__prev'>
+                  {% endif %}
+                  <div class='img-banner-3__bg-image'>
+                    <xo-animate xo-type='zoom-out' xo-order='4' class='img-banner-3__bg img-banner-3__bg--desktop'>
+                      {% render 'image', image: img_desktop, placeholder: placeholder, lazyload: lazyload %}
+                    </xo-animate>
+                    <xo-animate xo-type='zoom-out' xo-order='4' class='img-banner-3__bg img-banner-3__bg--mobile'>
+                      {% render 'image', image: img_mobile, placeholder: placeholder, lazyload: lazyload %}
+                    </xo-animate>
+                  </div>
+
+                  <div class='img-banner-3__body'>
+                    <div class='img-banner-3__content'>
+                      <div class='img-banner-3__box'>
+                        {% if description != blank %}
+                          <xo-animate xo-order='5'>
+                            <div class='img-banner-3__description'>{{ description }}</div>
+                          </xo-animate>
+                        {% endif %}
+                        <xo-animate xo-order='6'>
+                          <div class='img-banner-3__button'>
+                            {% render 'button',
+                              text: button.button_text,
+                              link: button.button_link,
+                              style: button.button_style,
+                              size: button.button_size,
+                              radius: settings.button_radius,
+                              padding: settings.button_padding
+                            %}
+                          </div>
+                        </xo-animate>
+                      </div>
+                      {% if heading != blank %}
+                        <div class='img-banner-3__bottom'>
+                          <xo-animate xo-order='7'>
+                            <h1 class='img-banner-3__heading'>{{ heading }}</h1>
+                          </xo-animate>
+                        </div>
+                      {% endif %}
+                    </div>
+                  </div>
+                  {% if block.size > 1 %}
+                    </xo-carousel-prev>
+                  {% endif %}
+                  {% if block.size > 1 %}
+                    <xo-carousel-next class='img-banner-3__next'></xo-carousel-next>
+                  {% endif %}
+                </xo-carousel-slide>
+
+              {% when 'video' %}
+                {% liquid
+                  assign video_dt = item.settings.video_dt
+                  assign video_mb = item.settings.video_mb
+                  assign heading = item.settings.heading
+                  assign description = item.settings.description
+                  assign button = item.settings
+                  assign carousel_visible = ''
+                  if forloop.index0 == 0
+                    assign carousel_visible = 'xo-visible xo-active'
+                  endif
+                %}
+                <xo-carousel-slide style='height: 100%;' {{ carousel_visible }}>
+                  {% if block.size > 1 %}
+                    <xo-carousel-prev class='img-banner-3__prev'>
+                  {% endif %}
+                  <div class='img-banner-3__bg-image'>
+                    <xo-animate xo-type='zoom-out' xo-order='4' class='img-banner-3__bg img-banner-3__bg--desktop'>
+                      {% if video_dt != blank %}
+                        {% render 'media', media: video_dt, type: 'video', autoplay: true, enable_video_looping: true, controls: false, muted: true, class: 'xo-media--modifier' %}
+                      {% else %}
+                        {{ placeholder | placeholder_svg_tag: 'placeholder-svg' }}
+                      {% endif %}
+                    </xo-animate>
+                    <xo-animate xo-type='zoom-out' xo-order='4' class='img-banner-3__bg img-banner-3__bg--mobile'>
+                      {% if video_mb != blank %}
+                        {% render 'media', media: video_mb, type: 'video', autoplay: true, enable_video_looping: true, controls: false, muted: true, class: 'xo-media--modifier' %}
+                      {% else %}
+                        {{ placeholder | placeholder_svg_tag: 'placeholder-svg' }}
+                      {% endif %}
+                    </xo-animate>
+                  </div>
+
+                  <div class='img-banner-3__body'>
+                    <div class='img-banner-3__content'>
+                      <div class='img-banner-3__box'>
+                        {% if description != blank %}
+                          <xo-animate xo-order='5'>
+                            <div class='img-banner-3__description'>{{ description }}</div>
+                          </xo-animate>
+                        {% endif %}
+                        <xo-animate xo-order='6'>
+                          <div class='img-banner-3__button'>
+                            {% render 'button',
+                              text: button.button_text,
+                              link: button.button_link,
+                              style: button.button_style,
+                              size: button.button_size,
+                              radius: settings.button_radius,
+                              padding: settings.button_padding
+                            %}
+                          </div>
+                        </xo-animate>
+                      </div>
+                      {% if heading != blank %}
+                        <div class='img-banner-3__bottom'>
+                          <xo-animate xo-order='7'>
+                            <h1 class='img-banner-3__heading'>{{ heading }}</h1>
+                          </xo-animate>
+                        </div>
+                      {% endif %}
+                    </div>
+                  </div>
+                  {% if block.size > 1 %}
+                    </xo-carousel-prev>
+                  {% endif %}
+                  {% if block.size > 1 %}
+                    <xo-carousel-next class='img-banner-3__next'></xo-carousel-next>
+                  {% endif %}
+                </xo-carousel-slide>
+            {% endcase %}
+          {% endfor %}
+        </xo-carousel-list>
+        <div class='img-banner-3__paginate'>
+          {% render 'carousel-pagination', align: 'center', style: 'sticks' %}
+        </div>
+      </xo-carousel-inner>
+    </xo-carousel>
+
+    {% if block.size > 1 %}
+      <xo-cursor-item xo-name='cursor-prev' class='img-banner-3__cursor'>
+        {% render 'button-slide', icon: 'arrow-left', icon_size: '3.2rem', size: '5rem', direction: 'left', style: 'primary' %}
+      </xo-cursor-item>
+      <xo-cursor-item xo-name='cursor-next' class='img-banner-3__cursor'>
+        {% render 'button-slide', icon: 'arrow-right', icon_size: '3.2rem', size: '5rem', direction: 'right', style: 'primary' %}
+      </xo-cursor-item>
+    {% endif %}
+  </div>
+</div>

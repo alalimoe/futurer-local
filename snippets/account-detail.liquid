@@ -1,0 +1,80 @@
+<div class='xo-account-detail'>
+  <xo-animate xo-cascade>
+    <div class='xo-account-detail__title'>
+      {{ 'customer.account.details' | t }}
+    </div>
+  </xo-animate>
+  <div class='xo-account-detail__content'>
+    {% if customer.default_address != null %}
+      {% if customer.default_address.first_name != blank and customer.default_address.last_name != blank %}
+        <xo-animate xo-cascade>
+          <div class='xo-account-detail__item'>
+            <div class='xo-account-detail__icon'>
+              {% render 'icon', name: 'account', size: '1.8rem' %}
+            </div>
+            <div class='xo-account-detail__text'>
+              {{ customer.default_address.first_name | capitalize }}
+              {{ customer.default_address.last_name | capitalize }}
+            </div>
+          </div>
+        </xo-animate>
+      {% endif %}
+      {% if customer.default_address.phone != blank %}
+        <xo-animate xo-cascade>
+          <div class='xo-account-detail__item'>
+            <div class='xo-account-detail__icon'>
+              {% render 'icon', name: 'phone', size: '2.4rem' %}
+            </div>
+            <div class='xo-account-detail__text'>{{ customer.default_address.phone }}</div>
+          </div>
+        </xo-animate>
+      {% endif %}
+      {% if customer.default_address.company != blank or customer.default_address.street != blank or customer.default_address.city != blank %}
+        <xo-animate xo-cascade>
+          <div class='xo-account-detail__item'>
+            <div class='xo-account-detail__icon'>
+              {% render 'icon', name: 'location', size: '2.4rem' %}
+            </div>
+            <div class='xo-account-detail__text'>
+              {{- customer.default_address.company }}
+              {{ customer.default_address.street }}
+              {{ customer.default_address.city | capitalize }}
+            </div>
+          </div>
+        </xo-animate>
+      {% endif %}
+      <xo-animate xo-cascade>
+        <div class='xo-account-detail__view-address'>
+          {% capture button_text %}
+            {{ 'customer.account.view_addresses' | t }} ({{ customer.addresses_count }})
+          {% endcapture %}
+          {% render 'button', text: button_text, link: routes.account_addresses_url, style: 'link' %}
+        </div>
+      </xo-animate>
+    {% else %}
+      <xo-animate xo-cascade>
+        <div class='xo-account-detail__empty'>
+          {% assign empty_address = 'customer.addresses.empty_address' | t %}
+          {% render 'empty', title: empty_address, icon_name: 'address-empty', icon_size: '12.8rem' %}
+          <div class='xo-account-detail__add-address'>
+            <xo-modal-trigger xo-name='create-address'>
+              <xo-animate xo-cascade>
+                {% assign add_new_label = 'customer.addresses.add_new' | t %}
+                {% render 'button', text: add_new_label, style: 'link', size: 'md', icon: 'plus', icon_position: 'left' %}
+              </xo-animate>
+            </xo-modal-trigger>
+            <xo-modal xo-name='create-address' xo-portal class='xo-account-detail__add-address-form'>
+              {% liquid
+                assign title = 'customer.addresses.add_new' | t
+                capture add_form
+                  render 'address-form', address: customer.new_address, type: 'add'
+                endcapture
+                render 'modal-content', title: title, content: add_form
+              %}
+            </xo-modal>
+          </div>
+        </div>
+      </xo-animate>
+    {% endif %}
+  </div>
+</div>

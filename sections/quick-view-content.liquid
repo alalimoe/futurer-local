@@ -1,0 +1,52 @@
+{{ 'section-quick-view-content.css' | asset_url | stylesheet_tag }}
+{{ 'product-info-content-quickview.css' | asset_url | stylesheet_tag }}
+{{ 'product-info-media-quickview.css' | asset_url | stylesheet_tag }}
+{{ '3d-model.css' | asset_url | stylesheet_tag }}
+
+{% liquid
+  assign variant_images = product.images | where: 'attached_to_variant?', true | map: 'src'
+%}
+
+<div class="xo-main-product-quickview">
+  <xo-product
+    xo-product-information
+    xo-product-id="{{ product.id }}"
+    xo-section-id="{{ section.id }}"
+    xo-product-url="{{ shop.url }}{{ product.url }}"
+    xo-selected-or-first-available-variant-id="{{ product.selected_or_first_available_variant.id }}"
+    class="xo-main-product-quickview__product"
+  >
+    <div class="xo-main-product-quickview__container">
+      <xo-grid class="xo-main-product-quickview__grid">
+        <div style="--xs: 12; --md: 12; --lg: 6" class="xo-main-product-quickview__media">
+          {% render 'product-info-media-quickview', variant_images: variant_images %}
+        </div>
+        <div style="--xs: 12; --md: 12; --lg: 6" class="xo-main-product-quickview__content xo-scrollbar">
+          {% render 'product-info-content-quickview', is_bundle: false %}
+        </div>
+      </xo-grid>
+    </div>
+
+    {% comment %} 3d model {% endcomment %}
+    {%- assign first_3d_model = product.media | where: 'media_type', 'model' | first -%}
+    {%- if first_3d_model -%}
+      <script type="application/json" id="xo-3d-product-json-{{ product.id }}">
+        {{ product.media | where: 'media_type', 'model' | json }}
+      </script>
+    {%- endif -%}
+
+    {% comment %} product helpers {% endcomment %}
+    {% render 'product-data', product: product %}
+    {% render 'product-quick-view-liquid-binding', product: product %}
+    {% render 'main-product-ld-json', product: product %}
+  </xo-product>
+</div>
+
+{% schema %}
+{
+  "name": "t:sections.quick_view_content.name",
+  "tag": "section",
+  "class": "section",
+  "settings": []
+}
+{% endschema %}

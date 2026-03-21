@@ -1,0 +1,35 @@
+{% comment %}
+  Renders facets horizontal (filtering and sorting)
+
+  Accepts:
+  - results: {Object} Collection or Search object
+  - enable_filtering: {Boolean} Show filtering when true
+  - enable_sorting: {Boolean} Show sorting when true
+  - color_scheme: {String} Color scheme
+  - facets_horizontal: {boolean} Use the facets horizontal (optional)
+  Usage:
+  {% render 'facets-horizontal', results: collection, enable_filtering: true, enable_sorting: true %}
+{% endcomment %}
+
+<xo-animate xo-cascade>
+  <div class='xo-facets-horizontal'>
+    {% if enable_filtering %}
+      <div class='xo-facets-horizontal__item'>
+        <div class='xo-facets-horizontal__caption xo-facets-horizontal__caption--hide'>{{ 'products.facets.filter_by_label' | t }} :</div>
+        <div class='xo-facets-horizontal__selector'>
+          {%- for filter in results.filters -%}
+            {% render 'filters-fieldset', type: 'popover', filter: filter, facets_horizontal: facets_horizontal %}
+          {%- endfor -%}
+        </div>
+      </div>
+    {% endif %}
+
+    {% if enable_sorting %}
+      <div class='xo-facets-horizontal__item'>
+        <div class='xo-facets-horizontal__caption'>{{ 'products.facets.sort_by_label' | t }}</div>
+        {% assign name = 'field-sort-by-horizontal-' | append: section.id %}
+        {% render 'field-sort-by', results: results, name: name %}
+      </div>
+    {% endif %}
+  </div>
+</xo-animate>

@@ -1,0 +1,149 @@
+{% comment %}
+  Rennder a feature product
+
+  Accepts:
+  - tag: {String} Tag heading (required)
+  - heading: {String} Heading (required)
+  - product: {Object} Product (required)
+  Usage:
+  {%
+    render 'featured-product-4',
+    tag: tag,
+    heading: heading,
+    product: product,
+  %}
+{% endcomment %}
+
+{% assign first_two_items = block | slice: 0, 2 %}
+
+<div class="featured-product-4">
+  <div class="featured-product-4__head featured-product-4__head--mobile">
+    <xo-container>
+      {% if sub_heading %}
+        <div class="featured-product-4__sub-heading">
+          <p>{{ sub_heading }}</p>
+        </div>
+      {% endif %}
+      <div class="featured-product-4__wrapper">
+        {% for item in block %}
+          <div class="featured-product-4__item">
+            <h2 class="featured-product-4__heading" data-index="{{ forloop.index0 }}">{{ item.settings.heading }}</h2>
+          </div>
+        {% endfor %}
+      </div>
+    </xo-container>
+  </div>
+  <div class="featured-product-4__content">
+    <xo-scroll-scene class="featured-product-4__scene" xo-mobile-disabled xo-mobile-breakpoint="991">
+      <xo-scroll-scene-inner class="featured-product-4__scene-inner">
+        <div class="featured-product-4__head featured-product-4__head--desktop">
+          <xo-container>
+            {% if sub_heading %}
+              <div class="featured-product-4__sub-heading">
+                <p>{{ sub_heading }}</p>
+              </div>
+            {% endif %}
+            <div class="featured-product-4__wrapper">
+              {% for item in block %}
+                <div class="featured-product-4__item">
+                  <h2 class="featured-product-4__heading" data-index="{{ forloop.index0 }}">{{ item.settings.heading }}</h2>
+                </div>
+              {% endfor %}
+              {% for item in first_two_items %}
+                <div class="featured-product-4__item">
+                  <h2 class="featured-product-4__heading" data-index="{{ forloop.index0 }}">{{ item.settings.heading }}</h2>
+                </div>
+              {% endfor %}
+            </div>
+          </xo-container>
+        </div>
+        {% for item in block %}
+          {% liquid
+            assign product = item.settings.product
+            assign image_product = product.featured_image
+            assign list_information = item.settings.list_information
+            assign selected_product_handle = product
+            assign selected_product = all_products[selected_product_handle]
+          %}
+          <xo-scroll-scene-item
+            class="featured-product-4__scene-item"
+            {% if forloop.first %}
+              xo-active
+            {% endif %}
+          >
+            <xo-container class="featured-product-4__container">
+              <div class="featured-product-4__body">
+                <div class="featured-product-4__left">
+                  <div class="featured-product-4__box{% if settings.enable_border_radius %} featured-product-4__box--radius{% endif %}">
+                    <div class="featured-product-4__info">
+                      <div class="featured-product-4__price featured-product-4__atom-animate">
+                        {% if product and product != empty %}
+                          {% render 'price', product: product %}
+                        {%- else -%}
+                          {% render 'price' %}
+                        {% endif %}
+                      </div>
+                      <div class="featured-product-4__description featured-product-4__atom-animate">
+                        {%- if product and product != empty -%}
+                          <p>{{ product.description }}</p>
+                        {%- else -%}
+                          <p>{{ 'onboarding.product_description' | t }}</p>
+                        {%- endif -%}
+                      </div>
+                    </div>
+                    <div class="featured-product-4__specification">
+                      {% render 'list-information',
+                        list_information: list_information,
+                        animate_delay_enabled: true,
+                        animate_delay_from: 250,
+                        list_item_class: 'featured-product-4__atom-animate'
+                      %}
+                    </div>
+                    <xo-product
+                      {% if product and product != empty %}
+                        xo-selected-or-first-available-variant-id="{{ product.selected_or_first_available_variant.id }}"
+                        xo-product-id="{{ product.id }}" xo-section-id="{{ section.id }}" data-section="{{ section.id }}"
+                      {% endif %}
+                    >
+                      <div class="featured-product-4__button">
+                        {%- assign add_to_cart = 'onboarding.product_add_cart' | t -%}
+                        {%- assign sold_out = 'onboarding.product_sold_out' | t -%}
+                        {% if product and product != empty %}
+                          <xo-cart-add
+                            class="featured-product-4__add-cart"
+                            {% if product.selected_or_first_available_variant.available == false %}
+                              disabled
+                            {% endif %}
+                            {% if settings.cart_type == 'page' %}
+                              xo-cart-redirection
+                            {% endif %}
+                          >
+                            {% if product.selected_or_first_available_variant.available == false %}
+                              {% render 'button', style: 'primary', text: sold_out, size: 'sm' %}
+                            {%- else -%}
+                              {% render 'button', style: 'primary', text: add_to_cart, size: 'sm' %}
+                            {% endif %}
+                          </xo-cart-add>
+                        {%- else -%}
+                          {% render 'button', style: 'primary', text: add_to_cart, size: 'sm' %}
+                        {% endif %}
+                      </div>
+                      {% render 'product-data', product: selected_product %}
+                    </xo-product>
+                  </div>
+                </div>
+                <div class="featured-product-4__right">
+                  <div class="featured-product-4__image-wrapper">
+                    <div class="featured-product-4__image">
+                      {% render 'image', image: image_product, aspect_ratio: '885/884' %}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </xo-container>
+          </xo-scroll-scene-item>
+        {% endfor %}
+      </xo-scroll-scene-inner>
+    </xo-scroll-scene>
+  </div>
+</div>

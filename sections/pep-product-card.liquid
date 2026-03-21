@@ -1,0 +1,46 @@
+{%- liquid
+  assign enable_quick_add = enable_quick_add | default: false
+  assign p = product
+  assign v = p.selected_or_first_available_variant
+  assign money = v.price | money
+-%}
+<article class="pep-card">
+  <a href="{{ p.url }}" class="pep-card-media" aria-label="{{ p.title | escape }}">
+    {% if p.featured_media %}
+      {{ p.featured_media | image_url: width: 700 | image_tag: alt: p.title, loading: 'lazy', class: 'pep-card-img' }}
+    {% else %}
+      <div class="pep-card-ph">No image</div>
+    {% endif %}
+  </a>
+  <div class="pep-card-body">
+    <h3 class="pep-card-title"><a href="{{ p.url }}">{{ p.title }}</a></h3>
+    <div class="pep-card-price">
+      <span class="pep-price">{{ money }}</span>
+      {% if v.compare_at_price > v.price %}<s class="pep-compare">{{ v.compare_at_price | money }}</s>{% endif %}
+    </div>
+    <div class="pep-card-actions">
+      {% if enable_quick_add %}
+        <button class="pep-btn pep-btn-primary pep-quick" data-quick-add data-handle="{{ p.handle }}" {% unless v.available %}disabled{% endunless %}>
+          {% if v.available %}Add to Cart{% else %}Sold out{% endif %}
+        </button>
+      {% endif %}
+      <a class="pep-btn pep-btn-ghost" href="{{ p.url }}">Details</a>
+    </div>
+  </div>
+</article>
+
+<style>
+  .pep-card{border:1px solid var(--pep-border);border-radius:var(--nx-radius);background:#fff;overflow:hidden;display:flex;flex-direction:column}
+  .pep-card-media{display:block;background:#fff}
+  .pep-card-img{width:100%;aspect-ratio:1/1;object-fit:contain}
+  .pep-card-ph{height:260px;display:flex;align-items:center;justify-content:center;color:#9AA3AE;background:#F5F7FA}
+  .pep-card-body{padding:12px;display:flex;flex-direction:column;gap:8px}
+  .pep-card-title{margin:0;font-size:1rem;color:var(--color-text-primary)}
+  .pep-card-title a{color:var(--color-text-primary);text-decoration:none}
+  .pep-card-title a:hover{text-decoration:underline}
+  .pep-card-price{display:flex;gap:8px;align-items:baseline}
+  .pep-price{font-weight:900;color:var(--color-text-primary)}
+  .pep-compare{color:#9AA3AE}
+  .pep-card-actions{display:flex;gap:10px;flex-wrap:wrap}
+  .pep-quick{min-width:140px}
+</style>

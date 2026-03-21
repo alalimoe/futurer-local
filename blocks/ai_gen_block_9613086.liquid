@@ -1,0 +1,625 @@
+{% doc %}
+  @prompt
+    ultra premium, clean, modern UX/UI, SEO + GEO optimized breadcrumbs to use across all templates and pages, optimize white space & alignment for mobile view and desktop view 
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-breadcrumbs-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    max-width: {{ block.settings.max_width }}px;
+    margin: 0 auto;
+    padding: {{ block.settings.padding_vertical_desktop }}px {{ block.settings.padding_horizontal_desktop }}px;
+  }
+
+  .ai-breadcrumbs-container-{{ ai_gen_id }} {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: {{ block.settings.item_spacing }}px;
+    row-gap: {{ block.settings.row_gap }}px;
+    font-size: {{ block.settings.font_size }}px;
+    font-family: {{ block.settings.font_family.family }}, {{ block.settings.font_family.fallback_families }};
+    font-weight: {{ block.settings.font_family.weight }};
+    line-height: 1.6;
+  }
+
+  .ai-breadcrumbs-item-{{ ai_gen_id }} {
+    display: flex;
+    align-items: center;
+    gap: {{ block.settings.item_spacing }}px;
+    white-space: nowrap;
+  }
+
+  .ai-breadcrumbs-link-{{ ai_gen_id }} {
+    color: {{ block.settings.link_color }};
+    text-decoration: none;
+    transition: color 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .ai-breadcrumbs-link-{{ ai_gen_id }}:hover {
+    color: {{ block.settings.link_hover_color }};
+    text-decoration: {{ block.settings.hover_underline }};
+  }
+
+  .ai-breadcrumbs-current-{{ ai_gen_id }} {
+    color: {{ block.settings.current_color }};
+    font-weight: {{ block.settings.current_font_weight }};
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+
+  .ai-breadcrumbs-separator-{{ ai_gen_id }} {
+    color: {{ block.settings.separator_color }};
+    user-select: none;
+    flex-shrink: 0;
+  }
+
+  .ai-breadcrumbs-home-icon-{{ ai_gen_id }} {
+    width: {{ block.settings.home_icon_size }}px;
+    height: {{ block.settings.home_icon_size }}px;
+    fill: currentColor;
+    flex-shrink: 0;
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-breadcrumbs-{{ ai_gen_id }} {
+      padding: {{ block.settings.padding_vertical_mobile }}px {{ block.settings.padding_horizontal_mobile }}px;
+    }
+
+    .ai-breadcrumbs-container-{{ ai_gen_id }} {
+      font-size: {{ block.settings.font_size_mobile }}px;
+      gap: {{ block.settings.item_spacing_mobile }}px;
+      row-gap: {{ block.settings.row_gap_mobile }}px;
+    }
+
+    .ai-breadcrumbs-item-{{ ai_gen_id }} {
+      gap: {{ block.settings.item_spacing_mobile }}px;
+    }
+
+    .ai-breadcrumbs-home-icon-{{ ai_gen_id }} {
+      width: {{ block.settings.home_icon_size_mobile }}px;
+      height: {{ block.settings.home_icon_size_mobile }}px;
+    }
+
+    .ai-breadcrumbs-current-{{ ai_gen_id }} {
+      max-width: 200px;
+    }
+  }
+
+  @media screen and (min-width: 750px) and (max-width: 989px) {
+    .ai-breadcrumbs-{{ ai_gen_id }} {
+      padding: {{ block.settings.padding_vertical_desktop }}px {{ block.settings.padding_horizontal_desktop | times: 0.7 }}px;
+    }
+  }
+{% endstyle %}
+
+<breadcrumbs-{{ ai_gen_id }} class="ai-breadcrumbs-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <nav aria-label="Breadcrumb" class="ai-breadcrumbs-container-{{ ai_gen_id }}">
+    {% liquid
+      assign breadcrumb_items = '' | split: ''
+      assign home_item = '{"@type": "ListItem", "position": 1, "name": "Home", "item": "' | append: shop.url | append: '"}'
+      assign breadcrumb_items = breadcrumb_items | concat: home_item | split: ''
+      assign position = 2
+    %}
+
+    <div class="ai-breadcrumbs-item-{{ ai_gen_id }}">
+      <a href="{{ routes.root_url }}" class="ai-breadcrumbs-link-{{ ai_gen_id }}" aria-label="Home">
+        {% if block.settings.show_home_icon %}
+          <svg class="ai-breadcrumbs-home-icon-{{ ai_gen_id }}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+          </svg>
+        {% else %}
+          {{ block.settings.home_text }}
+        {% endif %}
+      </a>
+      <span class="ai-breadcrumbs-separator-{{ ai_gen_id }}" aria-hidden="true">{{ block.settings.separator }}</span>
+    </div>
+
+    {% if template.name == 'collection' and collection %}
+      <div class="ai-breadcrumbs-item-{{ ai_gen_id }}">
+        <span class="ai-breadcrumbs-current-{{ ai_gen_id }}" aria-current="page">{{ collection.title }}</span>
+      </div>
+      {% assign collection_item = '{"@type": "ListItem", "position": ' | append: position | append: ', "name": "' | append: collection.title | append: '", "item": "' | append: collection.url | append: '"}' %}
+      {% assign breadcrumb_items = breadcrumb_items | push: collection_item %}
+
+    {% elsif template.name == 'product' and product %}
+      {% if collection %}
+        <div class="ai-breadcrumbs-item-{{ ai_gen_id }}">
+          <a href="{{ collection.url }}" class="ai-breadcrumbs-link-{{ ai_gen_id }}">{{ collection.title }}</a>
+          <span class="ai-breadcrumbs-separator-{{ ai_gen_id }}" aria-hidden="true">{{ block.settings.separator }}</span>
+        </div>
+        {% assign collection_item = '{"@type": "ListItem", "position": ' | append: position | append: ', "name": "' | append: collection.title | append: '", "item": "' | append: collection.url | append: '"}' %}
+        {% assign breadcrumb_items = breadcrumb_items | push: collection_item %}
+        {% assign position = position | plus: 1 %}
+      {% endif %}
+      <div class="ai-breadcrumbs-item-{{ ai_gen_id }}">
+        <span class="ai-breadcrumbs-current-{{ ai_gen_id }}" aria-current="page">{{ product.title }}</span>
+      </div>
+      {% assign product_item = '{"@type": "ListItem", "position": ' | append: position | append: ', "name": "' | append: product.title | append: '", "item": "' | append: product.url | append: '"}' %}
+      {% assign breadcrumb_items = breadcrumb_items | push: product_item %}
+
+    {% elsif template.name == 'page' and page %}
+      <div class="ai-breadcrumbs-item-{{ ai_gen_id }}">
+        <span class="ai-breadcrumbs-current-{{ ai_gen_id }}" aria-current="page">{{ page.title }}</span>
+      </div>
+      {% assign page_item = '{"@type": "ListItem", "position": ' | append: position | append: ', "name": "' | append: page.title | append: '", "item": "' | append: page.url | append: '"}' %}
+      {% assign breadcrumb_items = breadcrumb_items | push: page_item %}
+
+    {% elsif template.name == 'blog' and blog %}
+      <div class="ai-breadcrumbs-item-{{ ai_gen_id }}">
+        <span class="ai-breadcrumbs-current-{{ ai_gen_id }}" aria-current="page">{{ blog.title }}</span>
+      </div>
+      {% assign blog_item = '{"@type": "ListItem", "position": ' | append: position | append: ', "name": "' | append: blog.title | append: '", "item": "' | append: blog.url | append: '"}' %}
+      {% assign breadcrumb_items = breadcrumb_items | push: blog_item %}
+
+    {% elsif template.name == 'article' and article %}
+      <div class="ai-breadcrumbs-item-{{ ai_gen_id }}">
+        <a href="{{ blog.url }}" class="ai-breadcrumbs-link-{{ ai_gen_id }}">{{ blog.title }}</a>
+        <span class="ai-breadcrumbs-separator-{{ ai_gen_id }}" aria-hidden="true">{{ block.settings.separator }}</span>
+      </div>
+      {% assign blog_item = '{"@type": "ListItem", "position": ' | append: position | append: ', "name": "' | append: blog.title | append: '", "item": "' | append: blog.url | append: '"}' %}
+      {% assign breadcrumb_items = breadcrumb_items | push: blog_item %}
+      {% assign position = position | plus: 1 %}
+      <div class="ai-breadcrumbs-item-{{ ai_gen_id }}">
+        <span class="ai-breadcrumbs-current-{{ ai_gen_id }}" aria-current="page">{{ article.title }}</span>
+      </div>
+      {% assign article_item = '{"@type": "ListItem", "position": ' | append: position | append: ', "name": "' | append: article.title | append: '", "item": "' | append: article.url | append: '"}' %}
+      {% assign breadcrumb_items = breadcrumb_items | push: article_item %}
+
+    {% elsif template.name == 'search' %}
+      <div class="ai-breadcrumbs-item-{{ ai_gen_id }}">
+        <span class="ai-breadcrumbs-current-{{ ai_gen_id }}" aria-current="page">Search results</span>
+      </div>
+      {% assign search_item = '{"@type": "ListItem", "position": ' | append: position | append: ', "name": "Search results"}' %}
+      {% assign breadcrumb_items = breadcrumb_items | push: search_item %}
+
+    {% elsif template.name == 'cart' %}
+      <div class="ai-breadcrumbs-item-{{ ai_gen_id }}">
+        <span class="ai-breadcrumbs-current-{{ ai_gen_id }}" aria-current="page">Cart</span>
+      </div>
+      {% assign cart_item = '{"@type": "ListItem", "position": ' | append: position | append: ', "name": "Cart", "item": "' | append: routes.cart_url | append: '"}' %}
+      {% assign breadcrumb_items = breadcrumb_items | push: cart_item %}
+
+    {% elsif template.name == 'list-collections' %}
+      <div class="ai-breadcrumbs-item-{{ ai_gen_id }}">
+        <span class="ai-breadcrumbs-current-{{ ai_gen_id }}" aria-current="page">Collections</span>
+      </div>
+      {% assign collections_item = '{"@type": "ListItem", "position": ' | append: position | append: ', "name": "Collections", "item": "' | append: routes.collections_url | append: '"}' %}
+      {% assign breadcrumb_items = breadcrumb_items | push: collections_item %}
+
+    {% elsif template.name == 'account' or template.name == 'login' or template.name == 'register' %}
+      <div class="ai-breadcrumbs-item-{{ ai_gen_id }}">
+        <span class="ai-breadcrumbs-current-{{ ai_gen_id }}" aria-current="page">Account</span>
+      </div>
+      {% assign account_item = '{"@type": "ListItem", "position": ' | append: position | append: ', "name": "Account", "item": "' | append: routes.account_url | append: '"}' %}
+      {% assign breadcrumb_items = breadcrumb_items | push: account_item %}
+    {% endif %}
+  </nav>
+
+  {% if block.settings.enable_schema %}
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "{{ block.settings.home_text | default: 'Home' }}",
+          "item": "{{ shop.url }}"
+        }
+        {% if template.name == 'collection' and collection %}
+          ,{
+            "@type": "ListItem",
+            "position": 2,
+            "name": {{ collection.title | json }},
+            "item": "{{ shop.url }}{{ collection.url }}"
+          }
+        {% elsif template.name == 'product' and product %}
+          {% if collection %}
+            ,{
+              "@type": "ListItem",
+              "position": 2,
+              "name": {{ collection.title | json }},
+              "item": "{{ shop.url }}{{ collection.url }}"
+            }
+            ,{
+              "@type": "ListItem",
+              "position": 3,
+              "name": {{ product.title | json }},
+              "item": "{{ shop.url }}{{ product.url }}"
+            }
+          {% else %}
+            ,{
+              "@type": "ListItem",
+              "position": 2,
+              "name": {{ product.title | json }},
+              "item": "{{ shop.url }}{{ product.url }}"
+            }
+          {% endif %}
+        {% elsif template.name == 'page' and page %}
+          ,{
+            "@type": "ListItem",
+            "position": 2,
+            "name": {{ page.title | json }},
+            "item": "{{ shop.url }}{{ page.url }}"
+          }
+        {% elsif template.name == 'blog' and blog %}
+          ,{
+            "@type": "ListItem",
+            "position": 2,
+            "name": {{ blog.title | json }},
+            "item": "{{ shop.url }}{{ blog.url }}"
+          }
+        {% elsif template.name == 'article' and article %}
+          ,{
+            "@type": "ListItem",
+            "position": 2,
+            "name": {{ blog.title | json }},
+            "item": "{{ shop.url }}{{ blog.url }}"
+          }
+          ,{
+            "@type": "ListItem",
+            "position": 3,
+            "name": {{ article.title | json }},
+            "item": "{{ shop.url }}{{ article.url }}"
+          }
+        {% elsif template.name == 'search' %}
+          ,{
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Search results"
+          }
+        {% elsif template.name == 'cart' %}
+          ,{
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Cart",
+            "item": "{{ shop.url }}{{ routes.cart_url }}"
+          }
+        {% elsif template.name == 'list-collections' %}
+          ,{
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Collections",
+            "item": "{{ shop.url }}{{ routes.collections_url }}"
+          }
+        {% elsif template.name == 'account' or template.name == 'login' or template.name == 'register' %}
+          ,{
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Account",
+            "item": "{{ shop.url }}{{ routes.account_url }}"
+          }
+        {% endif %}
+      ]
+    }
+    </script>
+  {% endif %}
+</breadcrumbs-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class Breadcrumbs{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+      }
+
+      connectedCallback() {
+        this.init();
+      }
+
+      init() {
+        const links = this.querySelectorAll('.ai-breadcrumbs-link-{{ ai_gen_id }}');
+        links.forEach(link => {
+          link.addEventListener('click', (e) => {
+            const url = link.getAttribute('href');
+            if (url && url !== '#') {
+              sessionStorage.setItem('breadcrumb_referrer', window.location.href);
+            }
+          });
+        });
+      }
+    }
+
+    customElements.define('breadcrumbs-{{ ai_gen_id }}', Breadcrumbs{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "SEO breadcrumbs",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_home_icon",
+      "label": "Show home icon",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "home_text",
+      "label": "Home text",
+      "default": "Home"
+    },
+    {
+      "type": "select",
+      "id": "separator",
+      "label": "Separator",
+      "options": [
+        {
+          "value": "/",
+          "label": "Slash /"
+        },
+        {
+          "value": ">",
+          "label": "Greater than >"
+        },
+        {
+          "value": "›",
+          "label": "Single angle ›"
+        },
+        {
+          "value": "»",
+          "label": "Double angle »"
+        },
+        {
+          "value": "•",
+          "label": "Bullet •"
+        },
+        {
+          "value": "—",
+          "label": "Dash —"
+        }
+      ],
+      "default": "/"
+    },
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "font_picker",
+      "id": "font_family",
+      "label": "Font",
+      "default": "inter_n4"
+    },
+    {
+      "type": "range",
+      "id": "font_size",
+      "label": "Desktop font size",
+      "min": 10,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "font_size_mobile",
+      "label": "Mobile font size",
+      "min": 10,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "select",
+      "id": "current_font_weight",
+      "label": "Current page weight",
+      "options": [
+        {
+          "value": "400",
+          "label": "Normal"
+        },
+        {
+          "value": "500",
+          "label": "Medium"
+        },
+        {
+          "value": "600",
+          "label": "Semibold"
+        },
+        {
+          "value": "700",
+          "label": "Bold"
+        }
+      ],
+      "default": "500"
+    },
+    {
+      "type": "header",
+      "content": "Icon size"
+    },
+    {
+      "type": "range",
+      "id": "home_icon_size",
+      "label": "Desktop icon size",
+      "min": 12,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "home_icon_size_mobile",
+      "label": "Mobile icon size",
+      "min": 12,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "link_color",
+      "label": "Link",
+      "default": "#666666"
+    },
+    {
+      "type": "color",
+      "id": "link_hover_color",
+      "label": "Link hover",
+      "default": "#1e1e1e"
+    },
+    {
+      "type": "color",
+      "id": "current_color",
+      "label": "Current page",
+      "default": "#1e1e1e"
+    },
+    {
+      "type": "color",
+      "id": "separator_color",
+      "label": "Separator",
+      "default": "#cccccc"
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "item_spacing",
+      "label": "Desktop item spacing",
+      "min": 4,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "item_spacing_mobile",
+      "label": "Mobile item spacing",
+      "min": 4,
+      "max": 16,
+      "step": 2,
+      "unit": "px",
+      "default": 6
+    },
+    {
+      "type": "range",
+      "id": "row_gap",
+      "label": "Desktop row gap",
+      "min": 4,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "row_gap_mobile",
+      "label": "Mobile row gap",
+      "min": 4,
+      "max": 16,
+      "step": 2,
+      "unit": "px",
+      "default": 6
+    },
+    {
+      "type": "range",
+      "id": "padding_vertical_desktop",
+      "label": "Desktop vertical padding",
+      "min": 0,
+      "max": 60,
+      "step": 4,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "padding_horizontal_desktop",
+      "label": "Desktop horizontal padding",
+      "min": 0,
+      "max": 60,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "padding_vertical_mobile",
+      "label": "Mobile vertical padding",
+      "min": 0,
+      "max": 40,
+      "step": 4,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "padding_horizontal_mobile",
+      "label": "Mobile horizontal padding",
+      "min": 0,
+      "max": 40,
+      "step": 4,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "max_width",
+      "label": "Maximum width",
+      "min": 1200,
+      "max": 2000,
+      "step": 40,
+      "unit": "px",
+      "default": 1680
+    },
+    {
+      "type": "select",
+      "id": "hover_underline",
+      "label": "Hover underline",
+      "options": [
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "underline",
+          "label": "Underline"
+        }
+      ],
+      "default": "none"
+    },
+    {
+      "type": "header",
+      "content": "SEO"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_schema",
+      "label": "Enable structured data",
+      "info": "Adds BreadcrumbList schema markup for search engines",
+      "default": true
+    }
+  ],
+  "presets": [
+    {
+      "name": "SEO breadcrumbs"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,241 @@
+{% comment %}
+  Renders a product media tabs with thumbnails.
+
+  Accepts:
+  - zoom_enabled: {Boolean} Whether to enable zoom on the main image (optional)
+
+  Usage:
+  {% render 'featured-product-media' %}
+{% endcomment %}
+
+{% assign featured_media = product.selected_or_first_available_variant.featured_media %}
+
+<div class='featured-product-media'>
+  <xo-product-will-change xo-unique-id='featured-product-media-{{ section.id }}'>
+    <xo-gallery xo-sync='false' xo-backdrop-color='transparent'>
+      <xo-carousel>
+        <xo-carousel-inner>
+          <xo-carousel-list>
+            {% if product.media != blank or featured_media != blank %}
+              {% if featured_media != null %}
+                {% case featured_media.media_type %}
+                  {%- when 'image' -%}
+                    <xo-carousel-slide>
+                      <xo-gallery-item xo-src='{{ featured_media.src | image_url: width: 1200 }}'>
+                        <div class='featured-product-media__image{% if settings.enable_border_radius %} featured-product-media__image--radius{% endif %}'>
+                          {% render 'media', type: 'image', media: featured_media, image_lazyload: false, image_widths: '375, 550, 750, 900' %}
+                        </div>
+                      </xo-gallery-item>
+                    </xo-carousel-slide>
+                  {% when 'model' %}
+                    <xo-carousel-slide>
+                      <div data-media-id='{{ media.id }}' style='height: 100%; width: 100%'>
+                        <div class='featured-product-media__image{% if settings.enable_border_radius %} featured-product-media__image--radius{% endif %}'>
+                          <div style='height: 100%; width: 100%; position: relative'>
+                            <xo-product-model style='height: 100%'>
+                              <button
+                                class='xo-product-model__poster'
+                                type='button'
+                                aria-label='Button 3D'
+                                role='button'
+                                tabindex='0'
+                              >
+                                <span class='xo-product-model__poster-button'>
+                                  {% render 'icon', name: '3d-model', icon_size: '20' %}
+                                </span>
+                                <div class='xo-product-model__poster-image'>
+                                  <img
+                                    is='xo-lazyload'
+                                    width='810'
+                                    height='590'
+                                    src='{{ featured_media | image_url: width: 550, height: 550 }}'
+                                    alt='{{ featured_media.preview_image.alt | escape }}'
+                                  >
+                                  <div class='xo-lazyload-overlay'></div>
+                                </div>
+                              </button>
+                              <template>{% render 'media', type: 'model', media: featured_media %}</template>
+                            </xo-product-model>
+                            <button
+                              class='xb-product-model__btn-view'
+                              type='button'
+                              aria-label='{{ 'products.product.xr_button_label' | t }}'
+                              data-shopify-xr
+                              data-shopify-model3d-id='{{ media.id }}'
+                              data-shopify-title='title'
+                              data-shopify-xr-hidden
+                            >
+                              <span>
+                                {% render 'icon', name: '3d-model', icon_size: '10' %}
+                              </span>
+                              {{ 'products.product.xr_button' | t }}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </xo-carousel-slide>
+                  {% else %}
+                    <xo-carousel-slide>
+                      <div style='height: 100%;'>
+                        <div class='featured-product-media__image{% if settings.enable_border_radius %} featured-product-media__image--radius{% endif %}'>
+                          {% render 'media', type: featured_media.media_type, media: featured_media, enable_video_looping: true, controls: true, muted: true, autoplay: false %}
+                        </div>
+                      </div>
+                    </xo-carousel-slide>
+                {% endcase %}
+              {% endif %}
+              {% for media in product.media %}
+                {% if variant_images contains media.src and section.settings.hide_variants %}
+                  {% continue %}
+                {% endif %}
+                {%- unless media.id == featured_media.id -%}
+                  {% case media.media_type %}
+                    {%- when 'image' -%}
+                      <xo-carousel-slide>
+                        <xo-gallery-item xo-src='{{ media.src | image_url: width: 1200 }}'>
+                          <div style='height: 100%;'>
+                            <div class='featured-product-media__image{% if settings.enable_border_radius %} featured-product-media__image--radius{% endif %}'>
+                              {% render 'media', type: 'image', media: media, image_lazyload: false, image_widths: '375, 550, 750, 900' %}
+                            </div>
+                          </div>
+                        </xo-gallery-item>
+                      </xo-carousel-slide>
+                    {% when 'model' %}
+                      <xo-carousel-slide>
+                        <div style='height: 100%;' data-media-id='{{ media.id }}'>
+                          <div class='featured-product-media__image{% if settings.enable_border_radius %} featured-product-media__image--radius{% endif %}'>
+                            <div style='height: 100%; position: relative'>
+                              <xo-product-model style='height: 100%'>
+                                <button
+                                  class='xo-product-model__poster'
+                                  type='button'
+                                  aria-label='Button 3D'
+                                  role='button'
+                                  tabindex='0'
+                                >
+                                  <span class='xo-product-model__poster-button'>
+                                    {% render 'icon', name: '3d-model', icon_size: '20' %}
+                                  </span>
+                                  <div class='xo-product-model__poster-image'>
+                                    <img
+                                      is='xo-lazyload'
+                                      width='810'
+                                      height='590'
+                                      src='{{ media | image_url: width: 550, height: 550 }}'
+                                      alt='{{ media.preview_image.alt | escape }}'
+                                    >
+                                    <div class='xo-lazyload-overlay'></div>
+                                  </div>
+                                </button>
+                                <template>{% render 'media', type: 'model', media: media %}</template>
+                              </xo-product-model>
+                              <button
+                                class='xb-product-model__btn-view'
+                                type='button'
+                                aria-label='{{ 'products.product.xr_button_label' | t }}'
+                                data-shopify-xr
+                                data-shopify-model3d-id='{{ media.id }}'
+                                data-shopify-title='title'
+                                data-shopify-xr-hidden
+                              >
+                                <span>
+                                  {% render 'icon', name: '3d-model', icon_size: '10' %}
+                                </span>
+                                {{ 'products.product.xr_button' | t }}
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </xo-carousel-slide>
+                    {%- else -%}
+                      <xo-carousel-slide>
+                        <div class='featured-product-media__image{% if settings.enable_border_radius %} featured-product-media__image--radius{% endif %}'>
+                          {% render 'media', type: media.media_type, media: media, enable_video_looping: true, controls: true, muted: true, autoplay: false %}
+                        </div>
+                      </xo-carousel-slide>
+                  {% endcase %}
+                {%- endunless -%}
+              {% endfor %}
+            {%- else -%}
+              <xo-carousel-slide>
+                <div class='featured-product-media__image-placeholder'>
+                  {% render 'image', placeholder: 'detailed-apparel-1' %}
+                </div>
+              </xo-carousel-slide>
+            {% endif %}
+          </xo-carousel-list>
+        </xo-carousel-inner>
+        <div class='featured-product-media__content'>
+          <xo-carousel-thumbnail
+            class='featured-product-media__thumbnail'
+            xo-per-view='6'
+            xo-breakpoints='
+              {
+                600: {
+                  perView: 4,
+                },
+                1000: {
+                  perView: 5,
+                },
+              }
+            '
+          >
+            <xo-carousel-inner>
+              <xo-carousel-list>
+                {%- if featured_media != null -%}
+                  {% case featured_media.media_type %}
+                    {%- when 'image' -%}
+                      <xo-carousel-slide class='featured-product-media__thumb-slide'>
+                        <div class='featured-product-media__thumb-image{% if settings.enable_border_radius %} featured-product-media__thumb-image--radius{% endif %}'>
+                          {% render 'media', type: 'image', media: featured_media %}
+                        </div>
+                      </xo-carousel-slide>
+                    {%- when 'model' -%}
+                      <xo-carousel-slide class='featured-product-media__thumb-slide'>
+                        <div class='featured-product-media__thumb-image{% if settings.enable_border_radius %} featured-product-media__thumb-image--radius{% endif %}'>
+                          {% render 'media', type: 'model', media: featured_media %}
+                        </div>
+                      </xo-carousel-slide>
+                    {%- else -%}
+                      <xo-carousel-slide class='featured-product-media__thumb-slide'>
+                        <div class='featured-product-media__thumb-image{% if settings.enable_border_radius %} featured-product-media__thumb-image--radius{% endif %}'>
+                          {% render 'media', type: featured_media.media_type, media: featured_media, enable_video_looping: true, controls: true, muted: true, autoplay: false %}
+                        </div>
+                      </xo-carousel-slide>
+                  {% endcase %}
+                {%- endif -%}
+                {% for media in product.media %}
+                  {% if variant_images contains media.src and section.settings.hide_variants %}
+                    {% continue %}
+                  {% endif %}
+                  {% unless media.id == featured_media.id %}
+                    {% case media.media_type %}
+                      {%- when 'image' -%}
+                        <xo-carousel-slide class='featured-product-media__thumb-slide'>
+                          <div class='featured-product-media__thumb-image{% if settings.enable_border_radius %} featured-product-media__thumb-image--radius{% endif %}'>
+                            {% render 'media', type: 'image', media: media.preview_image %}
+                          </div>
+                        </xo-carousel-slide>
+                      {%- when 'model' -%}
+                        <xo-carousel-slide class='featured-product-media__thumb-slide'>
+                          <div class='featured-product-media__thumb-image{% if settings.enable_border_radius %} featured-product-media__thumb-image--radius{% endif %}'>
+                            {% render 'media', type: 'model', media: media %}
+                          </div>
+                        </xo-carousel-slide>
+                      {%- else -%}
+                        <xo-carousel-slide class='featured-product-media__thumb-slide'>
+                          <div class='featured-product-media__thumb-image{% if settings.enable_border_radius %} featured-product-media__thumb-image--radius{% endif %}'>
+                            {% render 'media', type: media.media_type, media: media, enable_video_looping: true, controls: true, muted: true, autoplay: false %}
+                          </div>
+                        </xo-carousel-slide>
+                    {% endcase %}
+                  {% endunless %}
+                {% endfor %}
+              </xo-carousel-list>
+            </xo-carousel-inner>
+          </xo-carousel-thumbnail>
+        </div>
+      </xo-carousel>
+    </xo-gallery>
+  </xo-product-will-change>
+</div>

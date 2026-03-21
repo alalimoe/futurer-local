@@ -1,0 +1,282 @@
+{{ 'section-custom-section.css' | asset_url | stylesheet_tag }}
+
+{% liquid
+  assign width = section.settings.width
+  assign custom_width = section.settings.custom_width | divided_by: 10.0
+  assign height = section.settings.height
+  assign custom_height = section.settings.custom_height
+  assign gap = section.settings.container_gap
+  assign container_gap_desktop = section.settings.container_gap_desktop | divided_by: 10.0
+  assign container_gap_mobile = section.settings.container_gap_mobile | divided_by: 10.0
+
+  assign section_class = 'xo-custom-section'
+  assign section_style = ''
+
+  if gap == 'custom'
+    assign section_class = section_class | append: ' xo-custom-section--custom-gap'
+  endif
+
+  if width == 'boxed'
+    assign section_style = section_style | append: '--xo-container-width: ' | append: custom_width | append: 'rem;'
+  elsif width == 'fill'
+    assign section_style = section_style | append: '--xo-container-width: 100%;'
+  endif
+
+  if height == 'auto'
+    assign section_style = section_style | append: '--height: auto;'
+  elsif height == 'fill'
+    assign section_style = section_style | append: '--height: 100vh;'
+  elsif height == 'custom'
+    if custom_height != null
+      assign section_style = section_style | append: '--height: ' | append: custom_height | append: 'vh;'
+    endif
+  endif
+
+  if gap == 'custom' and container_gap_desktop != null
+    assign section_style = section_style | append: '--xo-container-gap: ' | append: container_gap_desktop | append: 'rem;'
+  endif
+  if gap == 'custom' and container_gap_mobile != null
+    assign section_style = section_style | append: '--xo-container-gap-mobile: ' | append: container_gap_mobile | append: 'rem;'
+  endif
+%}
+
+<section {% render 'section-attr' %}>
+  <div class="{{ section_class }}" style="{{ section_style }}">
+    <xo-container class="xo-custom-section__container">
+      <div class="xo-custom-section__content">
+        {% content_for 'blocks' %}
+      </div>
+    </xo-container>
+  </div>
+</section>
+
+{% schema %}
+{
+  "tag": "div",
+  "name": "t:sections.custom_section.name",
+  "class": "section",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "t:sections.custom_section.settings.paragraph.content"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.custom_section.settings.header_size.content"
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "t:sections.custom_section.settings.width.label",
+      "info": "t:sections.custom_section.settings.width.info",
+      "options": [
+        {
+          "value": "global",
+          "label": "t:sections.custom_section.settings.width.option_1.label"
+        },
+        {
+          "value": "boxed",
+          "label": "t:sections.custom_section.settings.width.option_2.label"
+        },
+        {
+          "value": "fill",
+          "label": "t:sections.custom_section.settings.width.option_3.label"
+        }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "custom_width",
+      "label": "t:sections.custom_section.settings.custom_width.label",
+      "min": 1200,
+      "max": 2000,
+      "step": 20,
+      "default": 1400,
+      "unit": "px",
+      "visible_if": "{{ section.settings.width == 'boxed' }}"
+    },
+    {
+      "type": "select",
+      "id": "height",
+      "label": "t:sections.custom_section.settings.height.label",
+      "options": [
+        {
+          "value": "auto",
+          "label": "t:sections.custom_section.settings.height.option_1.label"
+        },
+        {
+          "value": "fill",
+          "label": "t:sections.custom_section.settings.height.option_2.label"
+        },
+        {
+          "value": "custom",
+          "label": "t:sections.custom_section.settings.height.option_3.label"
+        }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "custom_height",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "vh",
+      "default": 50,
+      "label": "t:sections.custom_section.settings.custom_height.label",
+      "visible_if": "{{ section.settings.height == 'custom' }}"
+    },
+    {
+      "type": "select",
+      "id": "container_gap",
+      "label": "t:sections.custom_section.settings.container_gap.label",
+      "options": [
+        {
+          "value": "global",
+          "label": "t:sections.custom_section.settings.container_gap.option_1.label"
+        },
+        {
+          "value": "custom",
+          "label": "t:sections.custom_section.settings.container_gap.option_2.label"
+        }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "container_gap_desktop",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "default": 30,
+      "label": "t:sections.custom_section.settings.container_gap_desktop.label",
+      "visible_if": "{{ section.settings.container_gap == 'custom' }}"
+    },
+    {
+      "type": "range",
+      "id": "container_gap_mobile",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "default": 20,
+      "label": "t:sections.custom_section.settings.container_gap_mobile.label",
+      "visible_if": "{{ section.settings.container_gap == 'custom' }}"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.custom_section.settings.header_general.content"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Section color scheme"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color"
+    },
+    {
+      "type": "color_background",
+      "id": "background_gradient",
+      "label": "Background gradient"
+    },
+    {
+      "type": "number",
+      "id": "padding_top_desktop",
+      "label": "Padding top desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_desktop",
+      "label": "Padding bottom desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_top_mobile",
+      "label": "Padding top mobile",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_mobile",
+      "label": "Padding bottom mobile",
+      "default": 50
+    }
+  ],
+  "blocks": [
+    {
+      "type": "@theme"
+    },
+    {
+      "type": "@app"
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.custom_section.presets.name",
+      "blocks": [
+        {
+          "type": "grid",
+          "settings": {
+            "desktop_col": 3,
+            "fixed_row": false,
+            "auto_row": 20,
+            "tablet_col": 2,
+            "mobile_col": 1
+          },
+          "blocks": [
+            {
+              "type": "column",
+              "settings": {
+                "desktop_col_span": 1,
+                "desktop_row_span": 1,
+                "mobile_col_span": 1,
+                "mobile_row_span": 1
+              }
+            },
+            {
+              "type": "column",
+              "settings": {
+                "desktop_col_span": 1,
+                "desktop_row_span": 1,
+                "mobile_col_span": 1,
+                "mobile_row_span": 1
+              }
+            },
+            {
+              "type": "column",
+              "settings": {
+                "desktop_col_span": 1,
+                "desktop_row_span": 1,
+                "mobile_col_span": 1,
+                "mobile_row_span": 1
+              }
+            }
+          ]
+        }
+      ],
+      "settings": {
+        "color_scheme": "",
+        "background_color": "",
+        "background_gradient": "",
+        "padding_top_desktop": 50,
+        "padding_bottom_desktop": 50,
+        "padding_top_mobile": 50,
+        "padding_bottom_mobile": 50
+      }
+    }
+  ],
+  "disabled_on": {
+    "groups": [
+      "header",
+      "footer",
+      "custom.overlay",
+      "custom.popups",
+      "custom.features"
+    ]
+  }
+}
+{% endschema %}

@@ -1,0 +1,113 @@
+{% comment %}
+  Renders a field color
+
+  Accepts:
+  - name: {string} Name of the color button
+  - value: {string} Value of the color button
+  - label: {string} Label of the color button (optional)
+  - size: {string} Size of the color button. Default: 16px (optional)
+  - count_id: {string} Unique ID for the count element (optional, support filters)
+  - count_value: {string} Value of the count element (optional, support filters)
+  - checked: {Boolean} If the radio button is checked (optional)
+  - image: {Image} Image of the color button (optional)
+  - use_image: {Boolean} If the image should be used (optional)
+  - style: {String} Style class to add to the color button (optional)
+
+  Usage:
+  {% render 'field-color',
+    style: style,
+    name: option.name,
+    value: value,
+    label: value,
+    checked: value.selected,
+    image: value.swatch.image,
+    use_image: true,
+    use_with: 'product-variant'
+  %}
+{% endcomment %}
+
+{% liquid
+  assign color = value
+  if value.swatch.color
+    assign color = value.swatch.color
+  endif
+
+  assign tag_name = 'label'
+  if variant_link
+    assign tag_name = 'div'
+  endif
+
+  assign size = size | default: '2rem'
+  assign container_class = 'xo-field-color'
+  assign container_style = '--size: ' | append: size | append: '; --color: ' | append: color | append: ';'
+  if use_image and image != blank
+    assign container_class = container_class | append: ' xo-field-color--modifier'
+  endif
+  if settings.enable_border_radius
+    assign container_class = container_class | append: ' xo-field-color--radius'
+  endif
+%}
+
+<{{ tag_name }}
+  class="{{ container_class }}"
+  style="{{ container_style }}"
+  {% if tag_name == 'label' %}
+    data-button="true"
+    tabindex="0"
+    aria-label="{{ value.name | escape }}"
+  {% endif %}
+>
+  <input
+    class="xo-field-color__input"
+    type="radio"
+    name="{{ option.name | escape }}"
+    value="{{ value | escape }}"
+    xo-label="{{ value.name | escape }}"
+    aria-label="{{ value.name | escape }}"
+    xo-option-value-id="{{ value.id }}"
+    xo-variant-id="{{ value.variant.id }}"
+    {% if value.product_url != blank %}
+      xo-connected-product-url="{{ shop.url }}{{ value.product_url }}"
+    {% endif %}
+    {%- if value.available == false and value.variant.id == blank -%}
+      xo-unavailable
+    {%- endif -%}
+    {% if value.variant.available == false and value.variant.id != blank %}
+      xo-disabled
+    {%- endif -%}
+    {% if value.selected %}
+      checked
+    {% endif %}
+  >
+  <span class="xo-field-color__item">
+    <span class="xo-field-color__fill">
+      <span class="xo-field-color__icon">
+        {%- render 'icon', name: 'check', size: '1.4rem', color: '#FFFFFF' -%}
+      </span>
+      {% if use_image and image != blank %}
+        <span class="xo-field-color__image">
+          {% render 'image', image: image, aspect_ratio: 1 %}
+        </span>
+      {% endif %}
+    </span>
+  </span>
+  {% if value.name != null and settings.variant_color_show_label %}
+    <span class="xo-field-color__label">
+      <span>{{ value.name | escape }}</span>
+      {% if count_value %}
+        <xo-filters-count xo-unique-id="{{ count_id }}">({{ count_value }})</xo-filters-count>
+      {% endif %}
+    </span>
+  {% endif %}
+  <svg
+    width="100%"
+    height="100%"
+    viewBox="0 0 100 46"
+    class="xo-field-color__diagonal"
+    style="stroke: currentColor;"
+    preserveAspectRatio="xMidYMid slice"
+  >
+    <line x1="100" y1="0" x2="0" y2="46" vector-effect="non-scaling-stroke"></line>
+    <line x1="100" y1="0" x2="0" y2="46" vector-effect="non-scaling-stroke" style="stroke: white;"></line>
+  </svg>
+</{{ tag_name }}>

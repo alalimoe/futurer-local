@@ -1,0 +1,61 @@
+{% comment %}
+  Renders a sort by field for a collection or search object
+
+  Accepts:
+  - name: {String} Name of the field (optional)
+  - value: {String} Value of the field (optional)
+  - use_with: {String} Filters or product variant (optional)
+  - placement: {String} Placement of the popover (optional)
+  - popover_name_suffix: {String} Placement of the popover (optional)
+
+  Usage:
+  {% render 'field-select-custom' %}
+{% endcomment %}
+
+{% liquid
+  assign xo_name = 'filter-select-custom-' | append: name | append: '-' | append: popover_name_suffix
+  assign trigger_class = 'xo-field-select-custom__trigger'
+  if settings.enable_border_radius
+    assign trigger_class = trigger_class | append: ' xo-field-select-custom__trigger--radius'
+  endif
+  assign popover_class = 'xo-field-select-custom__popover xo-scrollbar'
+  if settings.enable_border_radius
+    assign popover_class = popover_class | append: ' xo-field-select-custom__popover--radius'
+  endif
+%}
+
+<div class="xo-field-select-custom">
+  <xo-popover-trigger
+    class="{{ trigger_class }}"
+    xo-name="{{ xo_name }}"
+    tabindex="0"
+    role="button"
+  >
+    {% if use_with == 'filters' %}
+      <xo-filters-sort-by-selected
+        xo-unique-id="{{ section.id }}-{{ filter.label }}-sort_by"
+        xo-name="{{ name | escape }}"
+        class="xo-field-select-custom__name"
+      >
+        {{ value | escape }}
+      </xo-filters-sort-by-selected>
+    {% elsif use_with == 'product-variant' %}
+      <xo-product-variant-selected xo-name="{{ name | escape }}" class="xo-field-select-custom__name">
+        {{ value | escape }}
+      </xo-product-variant-selected>
+    {% endif %}
+    {% render 'icon', name: 'arrow-down', color: 'rgba(var(--color-foreground), 1)', size: '2rem' %}
+  </xo-popover-trigger>
+  <xo-popover
+    xo-portal
+    class="{{ popover_class }}"
+    xo-name="{{ xo_name }}"
+    xo-placement="{{ placement | default: 'bottom-right' }}"
+  >
+    {% if use_with == 'filters' %}
+      {{ options | replace: '<label', '<xo-filters-field><label' | replace: '</label>', '</label></xo-filters-field>' }}
+    {% elsif use_with == 'product-variant' %}
+      {{ options }}
+    {% endif %}
+  </xo-popover>
+</div>

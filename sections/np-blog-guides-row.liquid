@@ -1,0 +1,56 @@
+<section class="np-surface">
+  <div class="np-wrap">
+    {% if section.settings.title != blank %}
+      <h3 style="margin-bottom:.5rem;">{{ section.settings.title }}</h3>
+    {% endif %}
+    <div class="np-grid np-grid--3">
+      {% for block in section.blocks %}
+        {% assign a = block.settings.article %}
+        {% if a %}
+          <article class="np-card" {{ block.shopify_attributes }}>
+            {% if a.image %}
+              <a class="np-card__media" href="{{ a.url }}">
+                <img src="{{ a.image | image_url: width: 900 }}" alt="{{ a.image.alt | escape }}" width="900" height="{{ 900 | divided_by: a.image.aspect_ratio | round }}" loading="lazy">
+              </a>
+            {% endif %}
+            <div class="np-card__body">
+              <h4 class="np-card__title"><a href="{{ a.url }}" style="text-decoration:none; color:inherit;">{{ a.title }}</a></h4>
+              {% if a.excerpt != blank %}
+                <p class="np-card__deck">{{ a.excerpt | strip_html }}</p>
+              {% endif %}
+            </div>
+            <div class="np-card__footer">
+              <div class="np-card__actions">
+                <a class="btn btn--secondary" href="{{ a.url }}">View guide</a>
+                {% if block.settings.stack_url != blank %}
+                  <a class="btn btn--secondary" href="{{ block.settings.stack_url }}">See recommended stack</a>
+                {% endif %}
+              </div>
+            </div>
+          </article>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Guides Row (Pillars)",
+  "settings": [
+    { "type":"text", "id":"title", "label":"Row title", "default":"Guides to get you started" }
+  ],
+  "blocks": [
+    {
+      "type":"guide",
+      "name":"Guide",
+      "settings":[
+        { "type":"article", "id":"article", "label":"Article" },
+        { "type":"url", "id":"stack_url", "label":"Recommended stack link (optional)" }
+      ]
+    }
+  ],
+  "max_blocks": 6,
+  "presets":[{ "name":"NP • Guides Row" }]
+}
+{% endschema %}

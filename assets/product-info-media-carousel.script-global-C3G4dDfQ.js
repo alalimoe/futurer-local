@@ -1,0 +1,1 @@
+function n(){const e=document.querySelector(".xo-product-info-media-carousel__content"),o=document.querySelectorAll(".xo-product-info-media-carousel__thumb-slide").length;e&&o==1&&e.classList.add("xo-product-info-media-carousel__content--hidden")}document.addEventListener("load",function(){n()});document.addEventListener("change",function(){n()});

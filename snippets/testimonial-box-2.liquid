@@ -1,0 +1,66 @@
+{% comment %}
+  Renders a testimonial element with a given value
+
+  Accepts:
+  - autoplay: {String} Autoplay slide (required)
+  - autoplay_time: {String} Set time for autoplay slide (required)
+
+  Usage:
+  {% render 'testimonial-box-1', autoplay: autoplay, autoplay_time: autoplay_time %}
+{% endcomment %}
+
+<div class="testimonial-box-2">
+  <xo-carousel
+    xo-per-view="1"
+    xo-per-move="1"
+    {% if autoplay == 'on' %}
+      xo-autoplay="{{ autoplay_time }}"
+      xo-loop
+    {% endif %}
+    xo-type="none"
+    xo-breakpoints='
+      {
+        768: {
+          perView: 1,
+          perMove: 1,
+          gap: 10,
+          overflow: "visible"
+        },
+      }
+    '
+  >
+    <xo-carousel-inner>
+      <xo-carousel-list>
+        {% for item in block %}
+          {% liquid
+            assign placeholder_image = 'collection-1'
+          %}
+          <xo-carousel-slide>
+            <xo-grid class="testimonial-box-2__grid">
+              <xo-animate xo-duration="300" xo-cascade class="testimonial-box-2__left" style="--xl: 3; --lg: 4; --md: 5; --xs: 12">
+                {% render 'product-card',
+                  product: item.settings.product,
+                  show_image: settings.product_card_show_image,
+                  show_secondary_image: settings.product_card_show_secondary_image,
+                  show_vendor: settings.product_card_show_vendor,
+                  show_description: settings.product_card_show_description,
+                  show_quick_add: settings.product_card_show_quick_add,
+                  show_quick_view: settings.product_card_show_quick_view,
+                  show_favorite: settings.product_card_show_favorite,
+                  show_price: settings.product_card_show_price,
+                  show_badge: settings.product_card_show_badge,
+                  media_aspect_ratio: section.settings.product_card_aspect_ratio,
+                  color_scheme: section.settings.card_color_scheme,
+                  placeholder_image: placeholder_image
+                -%}
+              </xo-animate>
+              <div class="testimonial-box-2__right" style="--xl: 6; --lg: 8; --md: 7; --xs: 12">
+                {% render 'testimonial-box', content: item.settings.content, name: item.settings.customer_name, show_navigation: 'true', enable_show_icon: 'false', tag_1: 'div', tag_2: 'div', tag_3: 'xo-animate' %}
+              </div>
+            </xo-grid>
+          </xo-carousel-slide>
+        {% endfor %}
+      </xo-carousel-list>
+    </xo-carousel-inner>
+  </xo-carousel>
+</div>

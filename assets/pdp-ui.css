@@ -1,0 +1,376 @@
+/* =========================
+   Nootropix PDP UI (lean)
+   Loads after all theme CSS
+========================= */
+
+/* Tokens: inherited from base.css :root (--nx-*, --shadow-*, --ease-premium) */
+
+/* ---- Layout polish (hero columns) ---- */
+@media (min-width:1200px){
+  .main-product__image  { --lg:5; }
+  .main-product__content{ --lg:7; }
+  .main-product__image-content{ max-width:560px; margin-inline:auto; }
+  .main-product__image-content :is(img,video,model-viewer){
+    width:100%; height:auto; object-fit:contain;
+  }
+}
+
+/* =========================
+   Controls: Variants / Qty / CTAs
+========================= */
+
+/* VARIANT PILLS (PDP + VARIANT MODAL) */
+/* hide native radios but keep a11y */
+.main-product .xo-product-info-content__variant :is(.xo-field-radio--radio,.xo-field-radio--boxed) input[type=radio],
+.xo-sticky-variant-modal :is(.xo-field-radio--radio,.xo-field-radio--boxed) input[type=radio]{ position:absolute; opacity:0; pointer-events:none; }
+
+/* visible pill (label or .xo-field__label) */
+.main-product .xo-product-info-content__variant :is(.xo-field-radio--radio,.xo-field-radio--boxed) :is(label,.xo-field__label),
+.xo-sticky-variant-modal :is(.xo-field-radio--radio,.xo-field-radio--boxed) :is(label,.xo-field__label){
+  display:inline-flex; align-items:center; justify-content:center;
+  min-height:48px; min-width:88px; padding:10px 16px;
+  border:none;
+  border-radius:12px; background:var(--color-surface-secondary); color:var(--nx-text);
+  font-weight:600; line-height:1; cursor:pointer;
+  transition: background-color .35s var(--ease-premium),
+              color .35s var(--ease-premium),
+              box-shadow .35s var(--ease-premium);
+}
+
+/* hover/focus */
+.main-product .xo-product-info-content__variant :is(.xo-field-radio--radio,.xo-field-radio--boxed) :is(label,.xo-field__label):hover,
+.xo-sticky-variant-modal :is(.xo-field-radio--radio,.xo-field-radio--boxed) :is(label,.xo-field__label):hover{
+  background:var(--color-border-default);
+}
+.main-product .xo-product-info-content__variant :is(.xo-field-radio--radio,.xo-field-radio--boxed) :is(label,.xo-field__label):focus-visible,
+.xo-sticky-variant-modal :is(.xo-field-radio--radio,.xo-field-radio--boxed) :is(label,.xo-field__label):focus-visible{
+  outline:none;
+  box-shadow: 0 0 0 3px var(--nx-accent-bg);
+}
+
+/* selected (covers :has, state classes, and input+label) */
+.main-product .xo-product-info-content__variant :is(.xo-field-radio--radio,.xo-field-radio--boxed):has(input:checked) :is(label,.xo-field__label),
+.xo-sticky-variant-modal :is(.xo-field-radio--radio,.xo-field-radio--boxed):has(input:checked) :is(label,.xo-field__label),
+.main-product .xo-product-info-content__variant .is-selected :is(label,.xo-field__label),
+.xo-sticky-variant-modal .is-selected :is(label,.xo-field__label),
+.main-product .xo-product-info-content__variant [aria-pressed=true],
+.xo-sticky-variant-modal [aria-pressed=true],
+.main-product .xo-product-info-content__variant input[type=radio]:checked + label,
+.xo-sticky-variant-modal input[type=radio]:checked + label{
+  background:var(--color-ui-charcoal); color:var(--color-text-inverse);
+  box-shadow: 0 6px 20px rgba(28,28,30,0.18);
+}
+
+/* Structural settle on selection (scale down then back) */
+@keyframes ntx-pill-settle {
+  0%   { transform: scale(0.95); }
+  60%  { transform: scale(1.02); }
+  100% { transform: scale(1); }
+}
+.main-product .xo-product-info-content__variant :is(.xo-field-radio--radio,.xo-field-radio--boxed):has(input:checked) :is(label,.xo-field__label),
+.main-product .xo-product-info-content__variant input[type=radio]:checked + label {
+  animation: ntx-pill-settle 0.3s var(--ease-premium);
+}
+
+/* disabled */
+.main-product .xo-product-info-content__variant input[disabled] + label,
+.xo-sticky-variant-modal input[disabled] + label{ opacity:.45; cursor:not-allowed; pointer-events:none; }
+
+/* headings + spacing like mock */
+.product-form .product-form__input{ margin-bottom:18px; }
+.product-form :is(.product-option__name, .product-form__input > legend){ font-weight:700; margin-bottom:8px; }
+
+/* QUANTITY (PDP + STICKY + VARIANT MODAL) */
+:is(.main-product .xo-product-info-content__quantity, .xo-sticky-cart, .sticky-cart, .xo-sticky-variant-modal) .xo-quantity{
+  display:inline-flex; align-items:center; justify-content:center;
+  border:none; border-radius:12px;
+  padding:6px 10px; min-height:48px; background:var(--color-surface-secondary);
+  box-shadow: none;
+  transition: background-color .35s var(--ease-premium),
+              box-shadow .35s var(--ease-premium);
+}
+:is(.main-product .xo-product-info-content__quantity, .xo-sticky-cart, .sticky-cart, .xo-sticky-variant-modal) .xo-quantity:hover{
+  background:var(--color-surface-secondary);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+}
+:is(.main-product .xo-product-info-content__quantity, .xo-sticky-cart, .sticky-cart, .xo-sticky-variant-modal) .xo-quantity:focus-within{
+  background:var(--color-surface-secondary);
+  box-shadow: 0 0 0 3px var(--nx-accent-bg);
+}
+:is(.main-product .xo-product-info-content__quantity, .xo-sticky-cart, .sticky-cart, .xo-sticky-variant-modal) .xo-quantity__button{
+  width:44px; height:44px; border:0; background:transparent; cursor:pointer;
+  color:var(--color-text-primary);
+}
+:is(.main-product .xo-product-info-content__quantity, .xo-sticky-cart, .sticky-cart, .xo-sticky-variant-modal) .xo-quantity__button svg{
+  color:inherit;
+}
+:is(.main-product .xo-product-info-content__quantity, .xo-sticky-cart, .sticky-cart, .xo-sticky-variant-modal) .xo-quantity__number{
+  width:2.8ch; text-align:center; border:0; background:transparent; font-weight:700; font-size:18px; color:var(--color-text-primary);
+}
+
+/* CTAs — ADD TO CART (PDP + STICKY + VARIANT MODAL) */
+:is(
+  .main-product .xo-product-info-content__add .xo-btn.xo-btn--md.xo-btn--block,
+  .xo-sticky-cart .xo-btn,
+  .sticky-cart .xo-btn,
+  .xo-sticky-variant-modal__button-add .xo-btn
+){
+  min-height:48px; padding:0 18px; border-radius:12px;
+  background:var(--btn-primary-bg, var(--color-accent-primary)); color:var(--btn-primary-text, var(--color-text-primary));
+  font-weight:700; font-size:15px;
+  border:none;
+  box-shadow: var(--shadow-gold-glow);
+  transition: all 0.35s var(--ease-premium);
+}
+:is(
+  .main-product .xo-product-info-content__add .xo-btn.xo-btn--md.xo-btn--block,
+  .xo-sticky-cart .xo-btn,
+  .sticky-cart .xo-btn,
+  .xo-sticky-variant-modal__button-add .xo-btn
+):hover {
+  transform: translateY(-2px);
+  filter: brightness(1.04);
+  box-shadow: var(--shadow-gold-glow-hover);
+}
+:is(
+  .main-product .xo-product-info-content__add .xo-btn.xo-btn--md.xo-btn--block,
+  .xo-sticky-cart .xo-btn,
+  .sticky-cart .xo-btn,
+  .xo-sticky-variant-modal__button-add .xo-btn
+):active {
+  transform: scale(0.97);
+  filter: brightness(0.98);
+  box-shadow: 0 4px 12px rgba(251,191,36,0.14);
+}
+
+/* CTAs — BUY NOW (PDP + STICKY + VARIANT MODAL) — universal secondary tokens */
+:is(
+  .main-product .shopify-payment-button__button--unbranded,
+  .xo-sticky-cart .shopify-payment-button__button--unbranded,
+  .sticky-cart .shopify-payment-button__button--unbranded,
+  .xo-sticky-variant-modal .shopify-payment-button__button--unbranded
+){
+  min-height:48px; padding:0 18px; border-radius:12px;
+  background:var(--btn-secondary-bg, transparent);
+  color:var(--btn-secondary-text, var(--color-text-primary));
+  font-weight:700; font-size:15px;
+  border:2px solid var(--btn-secondary-border, var(--color-ui-charcoal));
+  box-shadow:var(--shadow-sm);
+  transition: all 0.35s var(--ease-premium);
+}
+:is(
+  .main-product .shopify-payment-button__button--unbranded,
+  .xo-sticky-cart .shopify-payment-button__button--unbranded,
+  .sticky-cart .shopify-payment-button__button--unbranded,
+  .xo-sticky-variant-modal .shopify-payment-button__button--unbranded
+):hover {
+  background:var(--color-ui-charcoal);
+  color:var(--color-text-inverse);
+  transform:translateY(-1px);
+  box-shadow:var(--shadow-md);
+}
+:is(
+  .main-product .shopify-payment-button__button--unbranded,
+  .xo-sticky-cart .shopify-payment-button__button--unbranded,
+  .sticky-cart .shopify-payment-button__button--unbranded,
+  .xo-sticky-variant-modal .shopify-payment-button__button--unbranded
+):active {
+  transform:translateY(0) scale(0.98);
+}
+
+/* mobile pill width */
+@media (max-width:480px){
+  .main-product .xo-product-info-content__variant :is(.xo-field-radio--radio,.xo-field-radio--boxed) :is(label,.xo-field__label){
+    min-width:84px;
+  }
+}
+
+/* =========================
+   PDP Rhythm Pack (global)
+   - shared spacing, borders, radius, shadow, headings
+========================= */
+
+/* Section container rhythm */
+.pdp-section{
+  padding: var(--nx-gap-y) var(--page-gutter);
+  border-top: none;
+  background: var(--color-surface-primary);
+}
+@media (min-width:1020px){
+  .pdp-section{ padding: var(--nx-gap-y-lg) var(--page-gutter); }
+}
+.pdp-section .nx-container{
+  max-width: var(--nx-maxw);
+  margin: 0 auto;
+}
+.pdp-section .nx-title{
+  margin: 0 0 12px;
+  color: var(--nx-text);
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+/* Card shell */
+.nx-card{
+  border: none;
+  border-radius: var(--nx-radius);
+  background: var(--nx-card-bg);
+  padding: var(--nx-pad-card);
+  box-shadow: var(--shadow-md);
+  transition: var(--transition-premium);
+}
+
+/* Grids */
+.nx-grid{ display:grid; gap: var(--nx-gap-card); }
+.nx-grid.cols-4{ grid-template-columns: repeat(4, minmax(0,1fr)); }
+.nx-grid.cols-3{ grid-template-columns: repeat(3, minmax(0,1fr)); }
+.nx-grid.cols-2{ grid-template-columns: repeat(2, minmax(0,1fr)); }
+
+@media (max-width:1020px){
+  .nx-grid.cols-4{ grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width:900px){
+  .nx-grid.cols-4, .nx-grid.cols-3{ grid-template-columns: repeat(2, 1fr); }
+}
+
+/* Card hover polish */
+.nx-card:hover{
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-3px);
+}
+
+/* Text rhythm inside cards */
+.nx-name{ font-weight: 800; color: var(--nx-text); line-height: 1.3; margin: 0 0 6px; }
+.nx-price{ font-weight: 800; color: var(--nx-text); margin: 6px 0 10px; }
+.nx-muted{ color: var(--nx-muted); }
+
+/* Media frames */
+.nx-media{
+  border:none;
+  border-radius: 10px;
+  overflow: hidden;
+  background:var(--color-surface-primary);
+  box-shadow: var(--shadow-sm);
+}
+.nx-media.aspect-16x9{ aspect-ratio: 16/9; }
+.nx-media.aspect-4x3{  aspect-ratio: 4/3; }
+.nx-media > img{ width:100%; height:100%; object-fit: cover; display:block; }
+
+/* Ghost button: .nx-btn now lives in base.css as a global primitive */
+
+/* Title anchors land nicely below sticky chips */
+#peptide-compare, #pep-refs, #pep-coa-band, #quality-testing, #recently-viewed, #related-peptides,
+#peptide-faq, #nootropic-overview, #nootropic-ingredients { scroll-margin-top: 84px; }
+
+/* =========================
+   Section-specific harmonizers
+========================= */
+
+/* Research Tabs (nootropics or peptides) */
+.ntabs-wrap{ border-top: none; background:var(--color-surface-primary); }
+.nt-container{ max-width: var(--nx-maxw); margin:0 auto; }
+.nt-tabbar.nt-in{ box-shadow:0 0 0 2px color-mix(in srgb, var(--nx-accent) 12%, transparent) inset; }
+.nt-card{ border:none; border-radius: var(--nx-radius); background:var(--color-surface-primary); padding: var(--nx-pad-card); box-shadow: var(--shadow-md); }
+
+/* COA band (side-by-side version) */
+.pcb-wrap{ padding: var(--nx-gap-y) var(--page-gutter); border-top:none; border-bottom:none; background:var(--color-surface-primary); }
+.pcb-container{ max-width: var(--nx-maxw); margin:0 auto; }
+.pcb-card{ border:none; border-radius: var(--nx-radius); background:var(--color-surface-primary); padding: var(--nx-pad-card); box-shadow: var(--shadow-md); }
+.pcb-grid{ display:grid; grid-template-columns: 1fr 1fr; gap: var(--nx-gap-card); }
+@media (max-width:1020px){ .pcb-grid{ grid-template-columns:1fr; } }
+.pcb-imgframe{ border:none; border-radius:10px; background:var(--color-surface-primary); padding:8px; box-shadow: var(--shadow-sm); }
+
+/* Compare (new component uses its own ids; this keeps rhythm consistent) */
+.pcmp-outer{ padding: var(--nx-gap-y) var(--page-gutter); border-top:none; background:var(--color-surface-primary); }
+.pcmp-container{ max-width: var(--nx-maxw); margin:0 auto; }
+.pcmp-card{ padding: var(--nx-pad-card); }
+.pcmp-media{ margin-bottom: 8px; }
+
+/* FAQ (metaobject render) */
+.pfq-outer{ padding: var(--nx-gap-y) var(--page-gutter); border-top:none; background:var(--color-surface-primary); }
+.pfq-wrap details{ border-radius: var(--nx-radius); box-shadow: var(--nx-shadow); }
+.pfq-wrap summary{ padding:10px 12px; }
+.pfq-wrap .ans{ padding:0 12px 12px; }
+
+/* Related / Recently Viewed / You-Might-Like */
+.relp-outer,.rv-outer,.yml-outer{ padding: var(--nx-gap-y) var(--page-gutter); border-top:none; background:var(--color-surface-primary); }
+.relp-container,.rv-container,.yml-container{ max-width: var(--nx-maxw); margin:0 auto; }
+.relp-card,.rv-card,.yml-card{ border:none; border-radius: var(--nx-radius); background:var(--color-surface-primary); padding: var(--nx-pad-card); box-shadow: var(--shadow-md); transition: var(--transition-premium); }
+.relp-card:hover,.rv-card:hover,.yml-card:hover{ box-shadow: var(--shadow-lg); transform:translateY(-3px); }
+.relp-media,.rv-media,.yml-media{ margin-bottom:10px; border:none; border-radius:10px; overflow:hidden; background:var(--color-surface-primary); box-shadow: var(--shadow-sm); }
+/* .relp-btn, .rv-btn, .yml-btn: now in base.css as global primitives */
+
+/* Unified section titles for lower blocks */
+.pdp-section .nx-title,
+.pcb-title,
+.pcmp-title,
+.pfq-title,
+.yml-title{
+  font-size: 20px; line-height: 1.25; margin-bottom: 12px;
+}
+
+/* Badge overlay (kept from original, deduped) */
+.main-product__image-content, .xo-product-info-media-slide, .xo-product-info-media-carousel{ position: relative; }
+.pdp-badges-overlay{
+  position:absolute; top:10px; left:10px; z-index:20;
+  pointer-events:none;
+}
+.pdp-badges-overlay .xo-badge-block{ pointer-events:auto; }
+.xo-pdp-badges{ display:flex; gap:8px; flex-wrap:wrap; }
+.xo-badge-block{
+  display:inline-flex; align-items:center; gap:6px;
+  padding:6px 10px; border-radius:999px; font-weight:600; font-size:12px; line-height:1;
+  background: rgba(255,255,255,0.4); color:var(--text-color, var(--color-text-primary));
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Prevent default blue anchor styles inside PDP cards/grids */
+.relp-wrap a, .rv-wrap a, .yml-wrap a, .pcmp-wrap a{ color: inherit; }
+
+/* ── Reduced motion: disable all PDP transitions/animations ── */
+@media (prefers-reduced-motion: reduce) {
+  .nx-card:hover {
+    transform: none;
+    transition: none;
+  }
+  :is(.main-product .xo-product-info-content__variant, .xo-sticky-variant-modal) :is(.xo-field-radio--radio,.xo-field-radio--boxed) :is(label,.xo-field__label),
+  :is(.main-product .xo-product-info-content__quantity, .xo-sticky-cart, .sticky-cart, .xo-sticky-variant-modal) .xo-quantity {
+    transition: none !important;
+  }
+  .main-product .xo-product-info-content__variant :is(.xo-field-radio--radio,.xo-field-radio--boxed):has(input:checked) :is(label,.xo-field__label),
+  .main-product .xo-product-info-content__variant input[type=radio]:checked + label {
+    animation: none !important;
+    transform: none !important;
+  }
+}
+
+/* Focus-visible for ghost buttons: now in base.css */
+
+/* ── ATC loading state: prevent rage-clicks ── */
+xo-cart-add[xo-loading] {
+  pointer-events: none;
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* ── Dynamic checkout skeleton shimmer ── */
+.shopify-payment-button__button--unbranded:empty {
+  background: linear-gradient(90deg, var(--color-border-subtle) 25%, var(--color-border-default) 50%, var(--color-border-subtle) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s ease-in-out infinite;
+  border-radius: var(--nx-radius, 14px);
+  min-height: 4.8rem;
+}
+@keyframes skeleton-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ── Touch target enforcement for PDP quantity buttons ── */
+@media (pointer: coarse) {
+  :is(.main-product .xo-product-info-content__quantity, .xo-sticky-cart, .sticky-cart, .xo-sticky-variant-modal) .xo-quantity__button {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}

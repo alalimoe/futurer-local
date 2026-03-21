@@ -1,0 +1,209 @@
+{% comment %}
+───────────────────────────────────────────────
+SECTION: Peptide references (refined)
+Data:
+- pep.reference.scientific_reference_list (could be array[str] or array[obj] or JSON-like string)
+  Optional object keys we honor if present: url, title, journal
+- product.metafields.pep.featured_articles (list.article_reference with fields: url, title)
+Behavior:
+- Graceful parsing and normalization into a list of {url, title?, journal?, host, doi?}
+- Polished UI cards with small badges (PubMed / DOI / host)
+───────────────────────────────────────────────
+{% endcomment %}
+
+{%- liquid
+  assign pep_ref = product.metafields.pep.reference
+  assign pep = nil
+  if pep_ref and pep_ref.value
+    assign pep = pep_ref.value
+  endif
+
+  assign raw_list = nil
+  if pep and pep.scientific_reference_list
+    if pep.scientific_reference_list.value
+      assign raw_list = pep.scientific_reference_list.value
+    else
+      assign raw = pep.scientific_reference_list | strip
+      assign raw = raw | replace: '["','' | replace: '"]',''
+      assign raw_list = raw | split: '","'
+    endif
+  endif
+
+  assign arts = nil
+  if product.metafields.pep.featured_articles and product.metafields.pep.featured_articles.value
+    assign arts = product.metafields.pep.featured_articles.value
+  endif
+
+  # Helper: convert a URL to host (no www)
+  # (Liquid doesn't have URL parser; do a simple split)
+  # We'll do this per item in the loop.
+-%}
+
+<section id="pep-refs" class="prf-wrap">
+  <style>
+    #pep-refs{
+      --prf-maxw: {{ section.settings.max_width | default: 1200 }}px;
+      --prf-border:#E7E9ED;
+      --prf-bg:#FAFAFB;
+      --prf-card:#FFFFFF;
+      --prf-text:#111;
+      --prf-muted:#6B7280;
+      --prf-accent: {{ section.settings.accent_color | default: '#FBBF24' }};
+      --prf-radius: var(--nx-radius);
+      --prf-shadow: 0 1px 6px rgba(16,24,40,.06);
+    }
+    .prf-wrap{padding:24px var(--page-gutter);background:var(--prf-bg);border-top:none;font-family:var(--font-body-family,sans-serif)}
+    .prf-container{max-width:var(--prf-maxw);margin:0 auto}
+
+    .prf-head{display:flex;align-items:center;gap:10px;margin:0 0 12px;flex-wrap:wrap}
+    .prf-title{font-family:var(--font-heading-family,sans-serif);font-weight:800;font-size:clamp(1.1rem,2vw,1.35rem);margin:0;color:var(--prf-text);letter-spacing:-0.02em}
+
+    /* Cards */
+    .prf-list{display:grid;grid-template-columns:1fr;gap:10px;margin:0;padding:0;list-style:none}
+    .prf-card{
+      border:none;border-radius:var(--prf-radius);background:var(--prf-card);
+      padding:14px 16px; box-shadow:var(--shadow-sm);
+      display:grid;grid-template-columns:1fr auto;gap:8px; align-items:start;
+      opacity:0; transform:translateY(8px);
+      transition:var(--transition-premium);
+    }
+    .prf-card.is-in{opacity:1; transform:none;}
+    .prf-card:hover{box-shadow:var(--shadow-md);transform:translateY(-2px)}
+
+    .prf-main{min-width:0}
+    .prf-titleline{font-family:var(--font-heading-family,sans-serif);font-weight:700;color:var(--prf-text);margin:0 0 4px;font-size:clamp(0.9rem,1.3vw,1rem)}
+    .prf-link{ position:relative; text-decoration:none; font-weight:600; color:var(--prf-text); }
+    .prf-link:focus-visible{outline:2px solid var(--prf-accent);outline-offset:2px;border-radius:4px}
+    .prf-link::after{content:""; position:absolute; left:50%; right:50%; bottom:-2px; height:1px; background: currentColor; transition:left .18s ease,right .18s ease;}
+    .prf-link:hover::after{ left:0; right:0; }
+
+    .prf-meta{display:flex;flex-wrap:wrap;gap:6px}
+    .prf-chip{border:none;border-radius:var(--nx-radius-pill);background:rgba(255,255,255,0.7);font-size:clamp(0.65rem,1vw,0.75rem);padding:5px 12px;box-shadow:var(--shadow-xs);transition:all .3s ease}
+    .prf-chip:hover{box-shadow:var(--shadow-sm-hover)}
+    .prf-chip.pubmed{background:rgba(240,249,255,0.85)}
+    .prf-chip.doi{background:rgba(238,242,255,0.85)}
+    .prf-chip.host{background:rgba(249,250,251,0.85)}
+
+    /* Featured reading */
+    .prf-sub{margin:16px 0 8px;font-family:var(--font-heading-family,sans-serif);font-weight:800;font-size:clamp(1rem,1.5vw,1.125rem);color:var(--prf-text)}
+    .prf-arts{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+    .prf-arts a{ text-decoration:none; font-weight:600; color:var(--prf-text); position:relative; }
+    .prf-arts a:focus-visible{outline:2px solid var(--prf-accent);outline-offset:2px;border-radius:4px}
+    .prf-arts a::after{content:""; position:absolute; left:50%; right:50%; bottom:-2px; height:1px; background: currentColor; transition:left .18s ease,right .18s ease;}
+    .prf-arts a:hover::after{ left:0; right:0; }
+
+    .prf-fallback{color:var(--prf-muted);font-size:clamp(0.85rem,1.2vw,0.9375rem)}
+    @media(prefers-reduced-motion:reduce){
+      .prf-card,.prf-chip{transition:none}
+      .prf-card:hover{transform:none}
+    }
+  </style>
+
+  <div class="prf-container">
+    <div class="prf-head">
+      <h2 class="prf-title">{{ section.settings.heading | default: 'Referenced Citations' }}</h2>
+    </div>
+
+    {% assign has_refs = false %}
+    {% if raw_list and raw_list.size > 0 %}{% assign has_refs = true %}{% endif %}
+
+    {% if has_refs %}
+      <ul class="prf-list" data-prf-list>
+        {%- for item in raw_list -%}
+          {%- assign url = nil -%}
+          {%- assign title = nil -%}
+          {%- assign journal = nil -%}
+          {%- if item.url -%}
+            {%- assign url = item.url -%}
+            {%- if item.title %}{% assign title = item.title %}{% endif -%}
+            {%- if item.journal %}{% assign journal = item.journal %}{% endif -%}
+          {%- else -%}
+            {%- assign url = item -%}
+          {%- endif -%}
+          {% # theme-check-disable UnknownFilter %}
+          {%- assign u = url | to_s | strip -%}
+          {% # theme-check-enable UnknownFilter %}
+          {%- if u != blank -%}
+            {%- assign after_proto = u | split: '//' | last -%}
+            {%- assign host = after_proto | split: '/' | first | replace: 'www.', '' -%}
+            {%- assign is_pubmed = false -%}
+            {%- if host contains 'pubmed' or host contains 'ncbi.nlm.nih.gov' -%}{% assign is_pubmed = true %}{%- endif -%}
+            {%- assign doi = nil -%}
+            {%- if u contains 'doi.org/' -%}
+              {%- assign doi = u | split: 'doi.org/' | last -%}
+            {%- endif -%}
+            <li class="prf-card">
+              <div class="prf-main">
+                {% if title %}
+                  <div class="prf-titleline">{{ title }}</div>
+                {% elsif journal %}
+                  <div class="prf-titleline">{{ journal }}</div>
+                {% endif %}
+                <a class="prf-link" href="{{ u }}" target="_blank" rel="noopener">
+                  {{ u }}
+                </a>
+                <div class="prf-meta" style="margin-top:6px">
+                  {% if is_pubmed %}<span class="prf-chip pubmed">PubMed</span>{% endif %}
+                  {% if doi %}<span class="prf-chip doi">DOI: {{ doi }}</span>{% endif %}
+                  {% if journal %}<span class="prf-chip">{{ journal }}</span>{% endif %}
+                  {% if host %}<span class="prf-chip host">{{ host }}</span>{% endif %}
+                </div>
+              </div>
+              <!-- right side could hold a tiny external icon later if desired -->
+            </li>
+          {%- endif -%}
+        {%- endfor -%}
+      </ul>
+    {% else %}
+      <p class="prf-fallback">{{ section.settings.fallback_text }}</p>
+    {% endif %}
+
+    {% if arts and arts.size > 0 %}
+      <h3 class="prf-sub">{{ section.settings.featured_heading | default: 'Featured Reading' }}</h3>
+      <ul class="prf-arts">
+        {% for a in arts %}
+          {% if a.url %}
+            <li><a href="{{ a.url }}" target="_blank" rel="noopener">{{ a.title | default: a.url }}</a></li>
+          {% endif %}
+        {% endfor %}
+      </ul>
+    {% endif %}
+  </div>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  var list = document.querySelector('#pep-refs [data-prf-list]');
+  if(!list) return;
+  try{
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      var io = new IntersectionObserver(function(entries){
+        entries.forEach(function(e){
+          if(e.isIntersecting){
+            e.target.classList.add('is-in');
+            io.unobserve(e.target);
+          }
+        });
+      }, { threshold: 0.2 });
+      list.querySelectorAll('.prf-card').forEach(function(card){ io.observe(card); });
+    } else {
+      list.querySelectorAll('.prf-card').forEach(function(card){ card.classList.add('is-in'); });
+    }
+  }catch(e){}
+});
+</script>
+
+{% schema %}
+{
+  "name": "Peptide references",
+  "settings": [
+    { "type": "range", "id": "max_width", "min": 800, "max": 1600, "step": 10, "unit": "px", "label": "Container max width", "default": 1200 },
+    { "type": "color", "id": "accent_color", "label": "Accent color", "default": "#FBBF24" },
+
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Referenced Citations" },
+    { "type": "text", "id": "featured_heading", "label": "Featured articles heading", "default": "Featured Reading" },
+    { "type": "text", "id": "fallback_text", "label": "Fallback text", "default": "Citations will appear here when added to the metaobject." }
+  ],
+  "presets": [{ "name": "Peptide references" }]
+}
+{% endschema %}

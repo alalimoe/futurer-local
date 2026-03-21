@@ -1,0 +1,69 @@
+{% comment %}
+  Renders a grid block
+
+  @param content: {String} Content (required)
+  @param desktop_col: {Number} Desktop column (required)
+  @param mobile_col: {Number} Mobile column (required)
+  @param auto_row: {Boolean} Auto row (required)
+  @param fixed_row: {Boolean} Fixed row (required)
+  @param gap: {String} Gap (required)
+  @param col_gap_custom_desktop: {Number} Column gap custom desktop (required)
+  @param col_gap_custom_mobile: {Number} Column gap custom mobile (required)
+  @param row_gap_custom_desktop: {Number} Row gap custom desktop (required)
+  @param row_gap_custom_mobile: {Number} Row gap custom mobile (required)
+
+  @example
+  {% render 'grid-block',
+    content: content,
+    desktop_col: 3,
+    mobile_col: 2,
+    auto_row: true,
+    fixed_row: false,
+    gap: 'custom',
+    col_gap_custom_desktop: 10,
+    col_gap_custom_mobile: 10,
+    row_gap_custom_desktop: 10,
+    row_gap_custom_mobile: 10
+  %}
+{% endcomment %}
+
+{% liquid
+  assign container_class = 'xo-grid-block'
+  assign container_style = ''
+
+  if fixed_row == true
+    assign container_class = container_class | append: ' xo-grid-block--fixed-row'
+  endif
+
+  # Column
+  if desktop_col != blank
+    assign container_style = container_style | append: '--xo-col-desktop: ' | append: desktop_col | append: ';'
+  endif
+  if tablet_col != blank
+    assign container_style = container_style | append: '--xo-col-tablet: ' | append: tablet_col | append: ';'
+  endif
+  if mobile_col != blank
+    assign container_style = container_style | append: '--xo-col-mobile: ' | append: mobile_col | append: ';'
+  endif
+  if fixed_row == true and auto_row != blank
+    assign container_style = container_style | append: '--xo-auto-row: ' | append: auto_row | append: ';'
+  endif
+
+  # Gap
+  if gap == 'custom'
+    assign col_gap_desktop = col_gap_custom_desktop | divided_by: 10.0 | append: 'rem'
+    assign row_gap_desktop = row_gap_custom_desktop | divided_by: 10.0 | append: 'rem'
+    assign col_gap_mobile = col_gap_custom_mobile | divided_by: 10.0 | append: 'rem'
+    assign row_gap_mobile = row_gap_custom_mobile | divided_by: 10.0 | append: 'rem'
+    assign container_style = container_style | append: '--xo-col-gap-desktop:' | append: col_gap_desktop | append: ';'
+    assign container_style = container_style | append: '--xo-col-gap-tablet:' | append: col_gap_desktop | append: ';'
+    assign container_style = container_style | append: '--xo-col-gap-mobile:' | append: col_gap_mobile | append: ';'
+    assign container_style = container_style | append: '--xo-row-gap-desktop:' | append: row_gap_desktop | append: ';'
+    assign container_style = container_style | append: '--xo-row-gap-tablet:' | append: row_gap_desktop | append: ';'
+    assign container_style = container_style | append: '--xo-row-gap-mobile:' | append: row_gap_mobile | append: ';'
+  endif
+%}
+
+<div xo-grid class="{{ container_class }}" style="{{ container_style }}" {{ block.shopify_attributes }}>
+  {{ content }}
+</div>

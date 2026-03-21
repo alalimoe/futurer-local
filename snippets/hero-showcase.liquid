@@ -1,0 +1,95 @@
+{% comment %}
+  Render hero showcase
+
+  @param {string} heading - The heading of the hero showcase
+  @param {object} button - The button of the hero showcase
+  @param {string} image_desktop - The desktop image of the hero showcase
+  @param {string} image_mobile - The mobile image of the hero showcase
+  @param {array} blocks - The blocks of the hero showcase
+
+  @example
+  {% render 'hero-showcase', heading: heading, button: button, image_desktop: image_desktop, image_mobile: image_mobile, blocks: blocks %}
+{% endcomment %}
+
+{% liquid
+  assign image_parallax_blocks = blocks | where: 'type', 'image-parallax'
+  assign image_text_blocks = blocks | where: 'type', 'image-text'
+
+  assign container_class = 'hero-showcase'
+  if settings.enable_border_radius
+    assign container_class = container_class | append: ' hero-showcase--radius'
+  endif
+%}
+
+<div xo-parallax class="{{ container_class }}">
+  <div class="hero-showcase__inner">
+    <xo-grid class="hero-showcase__grid" style="--xo-grid-row-gap: 0;">
+      <div class="hero-showcase__heading" style="--lg: 8; --md: 8; --xs: 12; --start-md: 3; --start-lg: 3;">
+        {% render 'text-with-image', context: section, blocks: image_text_blocks %}
+      </div>
+      <div class="hero-showcase__image-content" style="--lg: 6; --md: 8; --xs: 12; --start-md: 3; --start-lg: 4;">
+        <div class="hero-showcase__image hero-showcase__image--desktop">
+          {% render 'animate-image', image: image_desktop, border_radius: 0, aspect_ratio: 'auto', disable_alt: true, max_width: 100 %}
+        </div>
+        <div class="hero-showcase__image hero-showcase__image--mobile">
+          {% render 'animate-image', image: image_mobile, border_radius: 0, aspect_ratio: 'auto', disable_alt: true, max_width: 100 %}
+        </div>
+      </div>
+    </xo-grid>
+    <div class="hero-showcase__content">
+      <div class="hero-showcase__parallax">
+        {% for block in image_parallax_blocks %}
+          {% liquid
+            assign image = block.settings.image
+            assign width = block.settings.width | divided_by: 10.0
+            assign height = block.settings.height | divided_by: 10.0
+
+            assign image_style = ''
+            if width
+              assign image_style = image_style | append: '--width: ' | append: width | append: 'rem;'
+            endif
+            if height
+              assign image_style = image_style | append: '--height: ' | append: height | append: 'rem;'
+            endif
+
+            assign item_class = 'hero-showcase__parallax-item' | append: ' hero-showcase__parallax-item--' | append: forloop.index
+          %}
+          <div class="{{ item_class }}">
+            <xo-parallax-hover xo-strength="60">
+              <div class="hero-showcase__image hero-showcase__image--parallax" style="{{ image_style }}">
+                <xo-animate xo-cascade xo-type="zoom-in" xo-duration="400">
+                  {% render 'image', image: image, aspect_ratio: 'auto', lazyload: true %}
+                </xo-animate>
+              </div>
+            </xo-parallax-hover>
+          </div>
+        {% endfor %}
+      </div>
+      <div class="hero-showcase__carousel">
+        <xo-carousel xo-per-view="1" xo-per-move="1" xo-overflow="visible" xo-gap="10">
+          <xo-carousel-inner>
+            <xo-carousel-list>
+              {% for block in image_parallax_blocks %}
+                <xo-carousel-slide class="hero-showcase__carousel-slide">
+                  <div class="hero-showcase__image hero-showcase__image--carousel">
+                    {% render 'image', image: block.settings.image, aspect_ratio: 'auto', lazyload: true %}
+                  </div>
+                </xo-carousel-slide>
+              {% endfor %}
+            </xo-carousel-list>
+          </xo-carousel-inner>
+        </xo-carousel>
+      </div>
+    </div>
+    <div class="hero-showcase__button">
+      {% render 'button',
+        text: button.button_text,
+        link: button.button_link,
+        style: button.button_style,
+        size: button.button_size,
+        radius: settings.button_radius,
+        padding: settings.button_padding
+      %}
+    </div>
+  </div>
+</div>

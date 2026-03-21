@@ -1,0 +1,80 @@
+{% comment %}
+  Render a collection link
+
+  Accepts:
+  - heading: {String} Heading (required)
+  - collection_list: {Object} Collection list (required)
+  Usage:
+  {% render 'collection-link', heading: heading, collection_list: collection_list %}
+{% endcomment %}
+
+{% liquid
+  assign limit = 9
+  assign offset = limit | plus: 1
+%}
+
+<div class='collection-link'>
+  <xo-collapse-provider>
+    <div class='collection-link__desktop'>
+      <div class='collection-link__item'>
+        {% if heading != blank %}
+          <div class='collection-link__title'>{{ heading }}</div>
+        {% endif %}
+        {% if collection_list != blank %}
+          {% if collection_list.count > limit %}
+            <div class='collection-link__wrapper'>
+              <ul class='collection-link__nav'>
+                {% for collection in collection_list limit: limit %}
+                  <li class='collection-link__nav-item'>
+                    <a href='{{ collection.url }}'>{{ collection.title }}</a>
+                  </li>
+                {% endfor %}
+              </ul>
+              <ul class='collection-link__nav'>
+                {% for collection in collection_list offset: offset limit: limit %}
+                  <li class='collection-link__nav-item'>
+                    <a href='{{ collection.url }}'>{{ collection.title }}</a>
+                  </li>
+                {% endfor %}
+              </ul>
+            </div>
+          {% else %}
+            <ul class='collection-link__nav'>
+              {% for collection in collection_list %}
+                <li class='collection-link__nav-item'>
+                  <a href='{{ collection.url }}'>{{ collection.title }}</a>
+                </li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+          {% if button.button_text != blank %}
+            <div class='collection-link__button'>
+              <a href='{{ button.button_link }}' class='collection-link__button-link'>
+                {% render 'button-slide', text: button.button_text, icon: 'arrow-right', icon_size: '1.6rem', direction: 'right', style: 'transparent' %}
+              </a>
+            </div>
+          {% endif %}
+        {% endif %}
+      </div>
+    </div>
+    <div class='collection-link__mobile'>
+      <div class='collection-link__item'>
+        <xo-collapse-trigger class='collection-link__trigger' xo-name='{{ heading }}'>
+          <div class='collection-link__title'>{{ heading }}</div>
+          <div class='collection-link__icon'>
+            {% render 'icon', name: 'arrow-down', size: '2.4rem' %}
+          </div>
+        </xo-collapse-trigger>
+        <xo-collapse class='collection-link__collapse' xo-name='{{ heading }}'>
+          <ul class='collection-link__nav'>
+            {% for collection in collection_list %}
+              <li class='collection-link__nav-item'>
+                <a href='{{ collection.url }}'>{{ collection.title }}</a>
+              </li>
+            {% endfor %}
+          </ul>
+        </xo-collapse>
+      </div>
+    </div>
+  </xo-collapse-provider>
+</div>

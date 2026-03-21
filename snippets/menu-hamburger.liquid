@@ -1,0 +1,284 @@
+{% comment %}
+  Renders a hamburger menu
+
+  Accepts:
+  - menu: {Object} Menu object
+
+  Usage:
+  {% render 'menu-hamburger', menu: section.settings.menu %}
+{% endcomment %}
+
+{% capture back_button %}
+  <xo-modal-trigger class='xo-menu-hamburger__link xo-menu-hamburger__link--back'>
+    <div class='xo-menu-hamburger__back'>
+      <div class='xo-menu-hamburger__back-icon'>
+        {% render 'icon', name: 'arrow-left', size: '2.4rem' %}
+      </div>
+      <div class='xo-menu-hamburger__label'>{{ 'general.back' | t }}</div>
+    </div>
+  </xo-modal-trigger>
+{% endcapture %}
+
+{% if menu != blank %}
+  <div class="xo-menu-hamburger">
+    <div class="xo-menu-hamburger__icon">
+      <div class="xo-menu-hamburger__search">
+        <xo-modal-trigger class="xo-menu-hamburger__search-trigger" xo-name="search">
+          {% render 'icon', name: 'search', size: '1.6rem' %}
+        </xo-modal-trigger>
+      </div>
+
+      {%- if shop.customer_accounts_enabled -%}
+        <a href="{%- if customer -%}{{ routes.account_url }}{%- else -%}{{ routes.account_login_url }}{%- endif -%}" class="xo-menu-hamburger__action-account" aria-label="Account">
+          {% if customer %}
+            {% render 'icon', name: 'user', size: '1.6rem' %}
+          {% else %}
+            {% render 'icon', name: 'user', size: '1.6rem' %}
+          {% endif %}
+        </a>
+      {%- endif -%}
+
+      {% if settings.cart_type == 'page' or settings.cart_type == 'notification' %}
+        <a class="xo-menu-hamburger__action-cart" href="{{ routes.cart_url }}" aria-label="Cart">
+          {% render 'icon', name: 'cart', size: '1.6rem' %}
+          <div>
+            <xo-cart-size class="xo-menu-hamburger__action-number">{{ cart.item_count }}</xo-cart-size>
+          </div>
+        </a>
+      {% else %}
+        <xo-modal-trigger class="xo-menu-hamburger__action-cart" xo-name="cart">
+          {% render 'icon', name: 'cart', size: '1.6rem' %}
+          <div>
+            <xo-cart-size class="xo-menu-hamburger__action-number">{{ cart.item_count }}</xo-cart-size>
+          </div>
+        </xo-modal-trigger>
+      {% endif %}
+    </div>
+    <xo-modal-trigger class="xo-menu-hamburger__trigger" xo-name="xo-menu-hamburger-1">
+      <div class="xo-menu-hamburger__icon-bar">
+        {% render 'icon', name: 'hamburger', size: '1.5rem' %}
+      </div>
+    </xo-modal-trigger>
+    <xo-modal
+      class="xo-menu-hamburger__modal"
+      xo-portal
+      xo-name="xo-menu-hamburger-1"
+      xo-animate="slide-right"
+      xo-duration="300"
+      xo-placement="top-left"
+    >
+      <div class="xo-menu-hamburger__content">
+        <!-- logo, button-close -->
+        <div class="xo-menu-hamburger__header">
+          {% render 'menu-hamburger-header', modal_name: 'xo-menu-hamburger-1', show_icon: 'show' %}
+        </div>
+
+        <div class="xo-menu-hamburger__body">
+          <!-- search input -->
+          <div class="xo-menu-hamburger__link xo-menu-hamburger__link--search">
+            <form class="xo-menu-hamburger__search-form" action="{{ routes.search_url }}" method="get">
+              <div class="xo-menu-hamburger__search-icon">
+                {% render 'icon', name: 'search', size: '2.1rem' %}
+              </div>
+              <input
+                class="xo-menu-hamburger__search-input"
+                type="search"
+                name="q"
+                placeholder="Search"
+              >
+            </form>
+          </div>
+          <!-- nav links -->
+          {% for link in menu.links %}
+            {% assign parent_of_child_index = forloop.index %}
+            {% if link.links == blank %}
+              <div class="xo-menu-hamburger__item-wrap">
+                <a
+                  class="xo-menu-hamburger__link{% if link.current %} xo-menu-hamburger__item--current{% endif %} xo-menu-hamburger__link--first"
+                  href="{{ link.url }}"
+                  {% if link.current %}
+                    aria-current="page"
+                  {% endif %}
+                >
+                  <span class="xo-menu-hamburger__label">
+                    {{ link.title }}
+                  </span>
+                  {% if link.links != blank %}
+                    <span class="xo-menu-hamburger__arrow">
+                      {% render 'icon', name: 'arrow-right', size: '2.4rem' %}
+                    </span>
+                  {% else %}
+                    <span class="xo-menu-hamburger__arrow xo-menu-hamburger__arrow--mega-menu">
+                      {% render 'icon', name: 'arrow-right', size: '2.4rem' %}
+                    </span>
+                  {% endif %}
+                </a>
+                {% assign mega_menu_index = forloop.index %}
+                {% assign mega_menu_modal_name = 'xo-mega-menu-' | append: mega_menu_index %}
+                <xo-modal
+                  class="xo-menu-hamburger__modal xo-menu-hamburger__modal--first"
+                  xo-name="{{ mega_menu_modal_name }}"
+                  xo-animate="slide-right"
+                  xo-duration="300"
+                  xo-placement="top-left"
+                  xo-backdrop-color="transparent"
+                >
+                  <div class="xo-menu-hamburger__content">
+                    <!-- logo, button-close -->
+                    <div class="xo-menu-hamburger__header">
+                      {% render 'menu-hamburger-header', modal_name: mega_menu_modal_name, show_icon: 'hidden' %}
+                    </div>
+
+                    <div class="xo-menu-hamburger__body">
+                      <!-- button-back -->
+                      {{ back_button }}
+                      <!-- mega-menu -->
+                      <xo-mega-menu class="xo-menu-hamburger__mega-menu" xo-name="header-mega-menu" xo-index="{{ forloop.index0 }}"></xo-mega-menu>
+                    </div>
+                  </div>
+                </xo-modal>
+              </div>
+            {% else %}
+              {% assign hamburger_child_index = forloop.index %}
+              {% assign hamburger_child_modal_name = 'xo-menu-hamburger-child-' | append: hamburger_child_index %}
+              <div class="xo-menu-hamburger__item-wrap">
+                <xo-modal-trigger xo-name="{{ hamburger_child_modal_name }}" class="xo-menu-hamburger__link xo-menu-hamburger__link--second">
+                  <span class="xo-menu-hamburger__label">
+                    {{ link.title }}
+                  </span>
+                  {% if link.links != blank %}
+                    <span class="xo-menu-hamburger__arrow">
+                      {% render 'icon', name: 'arrow-right', size: '2.4rem' %}
+                    </span>
+                  {% else %}
+                    <span class="xo-menu-hamburger__arrow xo-menu-hamburger__arrow--mega-menu">
+                      {% render 'icon', name: 'arrow-right', size: '2.4rem' %}
+                    </span>
+                  {% endif %}
+                </xo-modal-trigger>
+                <xo-modal
+                  class="xo-menu-hamburger__modal"
+                  xo-name="{{ hamburger_child_modal_name }}"
+                  xo-animate="slide-right"
+                  xo-duration="300"
+                  xo-placement="top-left"
+                  xo-backdrop-color="transparent"
+                >
+                  <div class="xo-menu-hamburger__content">
+                    <!-- logo, button-close -->
+                    <div class="xo-menu-hamburger__header">
+                      {% render 'menu-hamburger-header', modal_name: hamburger_child_modal_name, show_icon: 'hidden' %}
+                    </div>
+
+                    <div class="xo-menu-hamburger__body">
+                      <!-- button-back -->
+                      {{ back_button }}
+                      <!-- nav links -->
+                      <xo-mega-menu class="xo-menu-hamburger__mega-menu" xo-name="header-mega-menu" xo-index="{{ forloop.index0 }}"></xo-mega-menu>
+                      {% for childlink in link.links %}
+                        {% if childlink.links == blank %}
+                          <a
+                            class="xo-menu-hamburger__link{% if childlink.current %} xo-menu-hamburger__item--current{% endif %} xo-menu-hamburger__link--thirt"
+                            href="{{ childlink.url }}"
+                            {% if childlink.current %}
+                              aria-current="page"
+                            {% endif %}
+                          >
+                            <span class="xo-menu-hamburger__label">
+                              {{ childlink.title }}
+                            </span>
+                          </a>
+                        {% else %}
+                          {% assign grand_child_index = forloop.index %}
+                          {% assign grand_child_modal_name = 'xo-menu-hamburger-grand-' | append: parent_of_child_index | append: grand_child_index %}
+                          <xo-modal-trigger xo-name="{{ grand_child_modal_name }}" class="xo-menu-hamburger__link">
+                            <span class="xo-menu-hamburger__label">
+                              {{ childlink.title }}
+                            </span>
+                            {% if childlink.links != blank %}
+                              <span class="xo-menu-hamburger__arrow">
+                                {% render 'icon', name: 'arrow-right', size: '2.4rem' %}
+                              </span>
+                            {% endif %}
+                          </xo-modal-trigger>
+                          <xo-modal
+                            class="xo-menu-hamburger__modal"
+                            xo-name="{{ grand_child_modal_name }}"
+                            xo-animate="slide-right"
+                            xo-duration="300"
+                            xo-placement="top-left"
+                            xo-backdrop-color="transparent"
+                          >
+                            <div class="xo-menu-hamburger__content">
+                              <!-- logo, button-close -->
+                              <div class="xo-menu-hamburger__header">
+                                {% render 'menu-hamburger-header', modal_name: grand_child_modal_name %}
+                              </div>
+
+                              <div class="xo-menu-hamburger__body">
+                                <!-- button-back -->
+                                {{ back_button }}
+                                <!-- nav links -->
+                                {% for grandchildlink in childlink.links %}
+                                  <a
+                                    class="xo-menu-hamburger__link{% if grandchildlink.current %} xo-menu-hamburger__item--current{% endif %}"
+                                    href="{{ grandchildlink.url }}"
+                                    {% if grandchildlink.current %}
+                                      aria-current="page"
+                                    {% endif %}
+                                  >
+                                    <span class="xo-menu-hamburger__label">
+                                      {{ grandchildlink.title }}
+                                    </span>
+                                  </a>
+                                {% endfor %}
+                              </div>
+                            </div>
+                          </xo-modal>
+                        {% endif %}
+                      {% endfor %}
+                      <!-- login -->
+                      {{ login }}
+                    </div>
+                  </div>
+                </xo-modal>
+              </div>
+            {% endif %}
+          {% endfor %}
+          <!-- nav links second -->
+          {% if header_style == 'style-5' %}
+            {% for link in secondary_menu.links %}
+              <a
+                class="xo-menu-hamburger__link{% if link.current %} xo-menu-hamburger__item--current{% endif %} xo-menu-hamburger__link--first"
+                href="{{ link.url }}"
+                {% if link.current %}
+                  aria-current="page"
+                {% endif %}
+              >
+                <span class="xo-menu-hamburger__label">
+                  {{ link.title }}
+                </span>
+              </a>
+            {% endfor %}
+          {% endif %}
+          <!-- login -->
+          <div class="xo-menu-hamburger__link xo-menu-hamburger__link--login">
+            {%- if shop.customer_accounts_enabled -%}
+              <a href="{%- if customer -%}{{ routes.account_url }}{%- else -%}{{ routes.account_login_url }}{%- endif -%}">{{ 'customer.log_in' | t }}</a>
+            {%- endif -%}
+          </div>
+          {% if section.settings.show_currency_selector == 'show' %}
+            <div class="xo-menu-hamburger__currency-select">
+              {% render 'currency-select', selector_position: 'footer' %}
+            </div>
+          {% endif %}
+          {% if section.settings.show_language_selector == 'show' %}
+            <div class="xo-menu-hamburger__language-select">
+              {% render 'language-select', selector_position: 'footer' %}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </xo-modal>
+  </div>
+{% endif %}

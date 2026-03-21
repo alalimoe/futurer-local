@@ -1,0 +1,40 @@
+{% comment %}
+  Render add new address
+
+  @param {object} customer - customer object
+
+  @example
+  {% render 'add-new-address', customer: customer %}
+{% endcomment %}
+
+{% liquid
+  assign add_new_label = 'customer.addresses.add_new' | t
+  assign button_style = button_style | default: 'primary'
+%}
+
+<div class="xo-address-table__add-new-address">
+  <xo-modal-trigger xo-name="create-address">
+    {% if button_style == 'link' %}
+      <div class="xo-address-table__button">
+        {% render 'button', text: add_new_label, type: 'button', style: 'link', size: 'lg', icon: 'plus', icon_size: '2rem', icon_position: 'left' %}
+      </div>
+    {% else %}
+      <xo-animate xo-cascade>
+        {% render 'button', text: add_new_label, style: 'primary', size: 'md', icon: 'plus', icon_position: 'left' %}
+      </xo-animate>
+    {% endif %}
+  </xo-modal-trigger>
+  <xo-modal
+    xo-name="create-address"
+    xo-portal
+    style="z-index: 1000"
+    class="xo-address-table__add-address-form"
+  >
+    {% liquid
+      capture add_form
+        render 'address-form', address: customer.new_address, type: 'add'
+      endcapture
+      render 'modal-content', title: add_new_label, content: add_form
+    %}
+  </xo-modal>
+</div>

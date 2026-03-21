@@ -1,0 +1,22 @@
+{% comment %}
+  Renders a space element with a given value
+
+  Accepts:
+  - value: {String} Default value of the space. Default: 0 (optional)
+
+  Usage:
+  {% render 'space', spacing_dt: 50, spacing_mb: 0 %}
+{% endcomment %}
+
+{% liquid
+  assign container_style = ''
+  assign container_class = 'xo-space'
+  if class
+    assign container_class = container_class | append: ' ' | append: class
+  endif
+  assign spacing_dt = spacing_dt | divided_by: 10.0
+  assign spacing_mb = spacing_mb | divided_by: 10.0
+  assign container_style = container_style | append: '--space_dt: ' | append: spacing_dt | append: 'rem; --space_mb: ' | append: spacing_mb | append: 'rem;'
+%}
+
+<div class='{{ container_class }}' style='{{ container_style }}'></div>

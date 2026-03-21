@@ -1,0 +1,237 @@
+{{ 'section-collection-list-slider.css' | asset_url | stylesheet_tag }}
+
+{% liquid
+  assign collection_title_default = 'onboarding.collection_title' | t
+  assign collection_list = section.settings.collection_list
+  assign autoplay = section.settings.autoplay
+  assign autoplay_speed = section.settings.autoplay_speed
+  assign loop = section.settings.loop
+  assign per_view = section.settings.per_view
+  assign per_move = section.settings.per_move
+
+  assign container_class = 'collection-list-slider'
+  if settings.enable_border_radius
+    assign container_class = container_class | append: ' collection-list-slider--radius'
+  endif
+%}
+
+<section {% render 'section-attr' %}>
+  <div class="{{ container_class }}">
+    <xo-container class="collection-list-slider__container">
+      <div class="collection-list-slider__content">
+        <xo-carousel
+          xo-per-view="{{ per_view }}"
+          xo-per-move="{{ per_move }}"
+          xo-gap="10"
+          xo-breakpoints='
+            {
+              600: {
+                perView: 1,
+                gap: 10,
+                overflow: "visible"
+              },
+              768: {
+                perView: 2,
+                gap: 10,
+                overflow: "visible"
+              },
+              992: {
+                perView: {{ per_view | minus: 1 }},
+              },
+            }
+          '
+          class="collection-list-slider__carousel"
+        >
+          <xo-carousel-inner>
+            <xo-carousel-list>
+              {% if collection_list != blank %}
+                {% for collection in collection_list %}
+                  {% liquid
+                    assign collection_title = collection.title
+                    assign collection_url = collection.url
+                    assign collection_image = collection.image
+                    if collection_image == blank
+                      assign collection_image = collection.featured_image
+                    endif
+                  %}
+                  <xo-carousel-slide>
+                    <a href="{{ collection_url }}" class="collection-list-slider__item">
+                      <div class="collection-list-slider__image">
+                        {% render 'image', image: collection_image, aspect_ratio: '1' %}
+                      </div>
+                      <h3 class="collection-list-slider__title h6">
+                        {{ collection_title }}
+                      </h3>
+                    </a>
+                  </xo-carousel-slide>
+                {% endfor %}
+              {% else %}
+                {% for i in (1..6) %}
+                  <xo-carousel-slide>
+                    <div class="collection-list-slider__item">
+                      <div class="collection-list-slider__image">
+                        {% render 'image', placeholder: 'collection-1', aspect_ratio: '1' %}
+                      </div>
+                      <h3 class="collection-list-slider__title h6">
+                        {{ collection_title_default }}
+                      </h3>
+                    </div>
+                  </xo-carousel-slide>
+                {% endfor %}
+              {% endif %}
+            </xo-carousel-list>
+          </xo-carousel-inner>
+          <div class="collection-list-slider__navigation">
+            <xo-carousel-prev
+              class="collection-list-slider__navigation-button collection-list-slider__navigation-button--prev"
+              role="button"
+              tabindex="0"
+              aria-label="Previous button"
+            >
+              {% render 'button-slide', icon: 'arrow-left', icon_size: '2rem', size: '3.5rem', direction: 'left', style: 'primary' %}
+            </xo-carousel-prev>
+            <xo-carousel-next
+              class="collection-list-slider__navigation-button collection-list-slider__navigation-button--next"
+              role="button"
+              tabindex="0"
+              aria-label="Next button"
+            >
+              {% render 'button-slide', icon: 'arrow-right', icon_size: '2rem', size: '3.5rem', direction: 'right', style: 'primary' %}
+            </xo-carousel-next>
+          </div>
+        </xo-carousel>
+      </div>
+    </xo-container>
+  </div>
+</section>
+
+{% schema %}
+{
+  "tag": "section",
+  "name": "t:sections.collection_list_slider.name",
+  "settings": [
+    {
+      "type": "collection_list",
+      "id": "collection_list",
+      "label": "t:sections.collection_list_slider.settings.collection_list.label"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.collection_list_slider.settings.header_layout.content"
+    },
+    {
+      "type": "range",
+      "id": "per_view",
+      "min": 1,
+      "max": 10,
+      "step": 1,
+      "default": 4,
+      "label": "t:sections.collection_list_slider.settings.per_view.label"
+    },
+    {
+      "type": "range",
+      "id": "per_move",
+      "min": 1,
+      "max": 10,
+      "step": 1,
+      "default": 1,
+      "label": "t:sections.collection_list_slider.settings.per_move.label"
+    },
+    {
+      "type": "checkbox",
+      "id": "autoplay",
+      "label": "t:sections.collection_list_slider.settings.autoplay.label",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "autoplay_speed",
+      "min": 500,
+      "max": 9000,
+      "step": 100,
+      "default": 3000,
+      "label": "t:sections.collection_list_slider.settings.autoplay_speed.label",
+      "visible_if": "{{ section.settings.autoplay == true }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "loop",
+      "label": "t:sections.collection_list_slider.settings.loop.label",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "t:sections.collection_list_slider.settings.header_general.content"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Section color scheme"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color"
+    },
+    {
+      "type": "color_background",
+      "id": "background_gradient",
+      "label": "Background gradient"
+    },
+    {
+      "type": "number",
+      "id": "padding_top_desktop",
+      "label": "Padding top desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_desktop",
+      "label": "Padding bottom desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_top_mobile",
+      "label": "Padding top mobile",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_mobile",
+      "label": "Padding bottom mobile",
+      "default": 50
+    }
+  ],
+  "blocks": [],
+  "presets": [
+    {
+      "name": "t:sections.collection_list_slider.presets.name",
+      "settings": {
+        "collection_list": [],
+        "per_view": 4,
+        "per_move": 1,
+        "autoplay": false,
+        "autoplay_speed": 3000,
+        "loop": false,
+        "color_scheme": "",
+        "background_color": "",
+        "background_gradient": "",
+        "padding_top_desktop": 50,
+        "padding_bottom_desktop": 50,
+        "padding_top_mobile": 50,
+        "padding_bottom_mobile": 50
+      }
+    }
+  ],
+  "disabled_on": {
+    "groups": [
+      "header",
+      "footer",
+      "custom.overlay",
+      "custom.popups",
+      "custom.features"
+    ]
+  }
+}
+{% endschema %}

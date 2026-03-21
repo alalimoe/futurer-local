@@ -1,0 +1,228 @@
+{% comment %}
+  Renders a product info content with thumbnails.
+
+  Accepts:
+  - zoom_enabled: {Boolean} Whether to enable zoom on the main image (optional)
+
+  Usage:
+  {% render 'fetured-product-content' %}
+{% endcomment %}
+
+<div class="xo-featured-product-content">
+  <div class="xo-featured-product-content__top">
+    {% for block in section.blocks %}
+      {% case block.type %}
+          <!-- app -->
+        {% when '@app' %}
+          {% render block %}
+
+          <!-- custom liquid -->
+        {% when 'custom_liquid' %}
+          {{ block.settings.custom_liquid }}
+
+          <!-- title -->
+        {% when 'title' %}
+          <xo-animate xo-cascade>
+            {% if product != blank %}
+              <h2 class="xo-featured-product-content__title h4 {{ style_title }}" {{ block.shopify_attributes }}>
+                {{ product.title }}
+              </h2>
+            {%- else -%}
+              <h2 class="xo-featured-product-content__title h4 {{ style_title }}" {{ block.shopify_attributes }}>
+                {{ 'onboarding.product_title' | t }}
+              </h2>
+            {% endif %}
+          </xo-animate>
+
+          <!-- description -->
+        {% when 'description' %}
+          <xo-animate xo-cascade>
+            {% if product != blank %}
+              <div class="xo-featured-product-content__description xo-table {{ block.shopify_attributes }}">
+                {{ product.description }}
+              </div>
+            {%- else -%}
+              <div class="xo-featured-product-content__description xo-table">
+                {{ 'onboarding.product_description' | t }}
+              </div>
+            {% endif %}
+          </xo-animate>
+
+          <!-- price -->
+        {% when 'price' %}
+          <xo-animate xo-cascade>
+            <div class="xo-featured-product-content__price {{ style_price }} {{ style_price_pd }}">
+              <xo-product-will-change xo-unique-id="product-price-{{ section.id }}" {{ block.shopify_attributes }} xo-morph-selector="[xo-price]">
+                {% render 'price', product: product, use_variant: true %}
+                {% if cart.taxes_included == true %}
+                  <span>{{ 'products.product.price.include_tax' | t }}</span>
+                {% endif %}
+              </xo-product-will-change>
+            </div>
+          </xo-animate>
+
+          <!-- variants -->
+        {% when 'variants' %}
+          {% unless product.has_only_default_variant %}
+            <xo-animate xo-cascade>
+              <xo-product-variants>
+                <div class="xo-featured-product-content__variant {{ style_variant }} {{ hidden_variant }} {% if product.has_only_default_variant == false %}xo-featured-product-content__variant--pd{% endif %}">
+                  {%- for option in product.options_with_values -%}
+                    {% if option.name == settings.product_card_color_option_name %}
+                      {% render 'product-variant', option: option, style: block.settings.variant_color_style, product: product %}
+                    {% else %}
+                      {% render 'product-variant',
+                        option: option,
+                        style: block.settings.variant_style,
+                        button_text: block.settings.button_text,
+                        button_link: block.settings.button_link,
+                        product: product
+                      %}
+                    {% endif %}
+                  {%- endfor -%}
+                </div>
+              </xo-product-variants>
+            </xo-animate>
+          {% endunless %}
+      {% endcase %}
+    {% endfor %}
+  </div>
+
+  <div class="xo-featured-product-content__bottom">
+    <!-- quantity -->
+    {% for block in section.blocks %}
+      {% case block.type %}
+        {%- when 'quantity_picker' -%}
+          <xo-animate xo-cascade>
+            <div class="xo-featured-product-content__quantity">
+              {%- render 'quantity', size: 'md', variant: product.selected_or_first_available_variant, product: product, is_cart: false %}
+            </div>
+          </xo-animate>
+      {% endcase %}
+    {% endfor %}
+
+    <!-- button -->
+    {% for block in section.blocks %}
+      {% case block.type %}
+        {% when 'buy_button' %}
+          <div class="xo-featured-product-content__buy-form" {{ block.shopify_attributes }}>
+            <div class="xo-featured-product-content__group">
+              <xo-animate xo-cascade class="xo-featured-product-content__buy-now {{ style_button_buy }}">
+                {% if product != blank %}
+                  {% render 'buy-button',
+                    show_gift_card_recipient: block.settings.show_gift_card_recipient,
+                    show_dynamic_checkout: block.settings.show_dynamic_checkout,
+                    product: product
+                  %}
+                {%- else -%}
+                  {% assign button_text_buy_now = 'products.product.buy_now' | t %}
+                  {% render 'button', style: 'primary', text: button_text_buy_now, size: 'md', block: true %}
+                {% endif %}
+              </xo-animate>
+              <xo-animate xo-cascade class="xo-featured-product-content__add-cart">
+                <xo-product-will-change class="shopify-payment-button__add" xo-unique-id="product-add-button-{{ section.id }}">
+                  <xo-cart-add
+                    class="xo-featured-product-content__add"
+                    {% if product.selected_or_first_available_variant.available == false %}
+                      xo-disabled
+                    {% endif %}
+                    {% if settings.cart_type == 'page' %}
+                      xo-cart-redirection
+                    {% endif %}
+                  >
+                    {% if product.selected_or_first_available_variant.available %}
+                      {% assign button_text = 'products.product.add_to_cart' | t %}
+                      {% render 'button', style: 'secondary', text: button_text, size: 'md', block: true %}
+                    {%- else -%}
+                      {% assign button_text = 'products.product.sold_out' | t %}
+                      {% render 'button', style: 'secondary', text: button_text, size: 'md', block: true %}
+                    {% endif %}
+                  </xo-cart-add>
+                </xo-product-will-change>
+              </xo-animate>
+            </div>
+          </div>
+      {% endcase %}
+    {% endfor %}
+
+    <!-- share -->
+    <div class="xo-featured-product-content__wrapper">
+      {% for block in section.blocks %}
+        {% case block.type %}
+          {%- when 'share' -%}
+            <xo-animate xo-cascade>
+              <div class="xo-featured-product-content__share">
+                <!-- text -->
+                {%- assign text = 'general.share.title' | t -%}
+                {% capture permalink_url %}{{ shop.url }}/{{ 'products/' | append: product.handle }}{% endcapture %}
+                {% for block in section.blocks %}
+                  {%- assign share_option = block.settings.share_option -%}
+                {% endfor %}
+                <div class="xo-featured-product-content__share-link {% if share_option == 'link' %}xo-featured-product-content__share-link--block{% endif %}">
+                  <xo-popover-trigger class="xo-featured-product-content__share-link-trigger" xo-name="link-copy">
+                    <div class="xo-featured-product-content__icon-link">
+                      {% render 'icon', name: 'share', size: '1.4rem' %}
+                    </div>
+                    <p>{{ text }}</p>
+                  </xo-popover-trigger>
+                  <xo-popover xo-name="link-copy" xo-placement="bottom-left">
+                    <div class="xo-featured-product-content__link-copy">
+                      <a class="xo-featured-product-content__link-url" href="{{ permalink_url }}">{{ permalink_url }}</a>
+                      <xo-popover-trigger xo-name="link-copy" class="xo-featured-product-content__icon-copy">
+                        {% render 'icon', name: 'copy', size: '1.4rem' %}
+                      </xo-popover-trigger>
+                    </div>
+                  </xo-popover>
+                </div>
+                <div class="xo-featured-product-content__share-social {% if share_option == 'social' %}xo-featured-product-content__share-social--block{% endif %}">
+                  <p>{{ text }} :</p>
+                  <div class="xo-featured-product-content__list-icon-social">
+                    <div class="xo-featured-product-content__icon-social">
+                      {% render 'share', list: 'facebook', url: permalink_url %}
+                    </div>
+                    <div class="xo-featured-product-content__icon-social">
+                      {% render 'share', list: 'printerest', url: permalink_url %}
+                    </div>
+                    <div class="xo-featured-product-content__icon-social">
+                      {% render 'share', list: 'twitter', url: permalink_url %}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </xo-animate>
+        {% endcase %}
+      {% endfor %}
+      <xo-animate xo-cascade>
+        <div class="xo-featured-product-content__view-full-detail">
+          <a href="{%- render 'product-card-variant-url', product: product -%}">{{ 'products.product.view_full_details' | t }}</a>
+        </div>
+      </xo-animate>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    let count = 0;
+    const iconCopy = document.querySelector('.xo-featured-product-content__icon-copy');
+    const linkURL = document.querySelector('.xo-featured-product-content__link-url');
+
+    if (iconCopy) {
+      iconCopy.addEventListener('click', () => {
+        //copytext
+        const linkText = linkURL.textContent;
+        navigator.clipboard.writeText(linkText);
+        //toast
+        count++;
+        xoToast({
+          className: 'xo-featured-product-content__toast',
+          content: `Content copied to clipboard`,
+          placement: 'bottom-center',
+          closeButtonPlacement: 'center-right',
+          easing: 'spring',
+          duration: 1000,
+        });
+      });
+    }
+  });
+</script>

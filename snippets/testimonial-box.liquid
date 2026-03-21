@@ -1,0 +1,84 @@
+{% comment %}
+  Renders a testimonial element with a given value
+
+  Accepts:
+  - content: {String} Content (required)
+  - customer: {String} User name (required)
+  - image: {String} Image (required)
+
+  Usage:
+  {% render 'testimonial-box', content: content, customer: customer, image: image %}
+{% endcomment %}
+
+{% liquid
+  assign verified_text = verified_text | default: 'verified user'
+  assign tag_type_1 = tag_1 | default: 'div'
+  assign tag_type_2 = tag_2 | default: 'xo-animate'
+  assign tag_type_3 = tag_3 | default: 'div'
+
+  if enable_navigation == 'true'
+    assign show_navigation = 'true'
+  elsif enable_navigation == 'false'
+    assign show_navigation = 'false'
+  endif
+
+  if enable_show_icon == 'true'
+    assign show_icon = 'true'
+  elsif enable_show_icon == 'false'
+    assign show_icon = 'false'
+  endif
+
+  assign content_class_name = 'testimonial-box__content testimonial-box__content--default'
+  if content_class
+    assign content_class_name = 'testimonial-box__content ' | append: content_class
+  endif
+%}
+
+<{{ tag_type_1 }} xo-cascade class="testimonial-box{% if settings.enable_border_radius %} testimonial-box--radius{% endif %}">
+  <{{ tag_type_3 }} xo-duration="300" xo-order="4" class="testimonial-box__head">
+    {% if show_icon == 'true' %}
+      <{{ tag_type_2 }} xo-cascade class="testimonial-box__icon">
+        {% render 'icon', name: 'testimonial', size: '10.2rem' %}
+      </{{ tag_type_2 }}>
+    {% endif %}
+    <{{ tag_type_2 }} xo-order="5">
+      <h5 class="{{ content_class_name }}">{{ content }}</h5>
+    </{{ tag_type_2 }}>
+    <{{ tag_type_2 }} xo-order="6" class="testimonial-box__customer">
+      <div class="testimonial-box__info">
+        {% if avatar %}
+          <div class="testimonial-box__avatar">
+            {% render 'image', image: avatar %}
+          </div>
+        {% endif %}
+        <p class="testimonial-box__name">{{ name }}</p>
+      </div>
+      <div class="testimonial-box__verified">
+        <div class="testimonial-box__verified-icon">
+          {% render 'icon', name: 'verified', size: '2rem' %}
+        </div>
+        <p class="testimonial-box__verified-text">{{ verified_text }}</p>
+      </div>
+    </{{ tag_type_2 }}>
+  </{{ tag_type_3 }}>
+  {% if show_navigation == 'true' %}
+    <div class="testimonial-box__navigation">
+      <xo-carousel-prev role="button" tabindex="0" aria-label="Previous button">
+        <div class="testimonial-box__navi-icon testimonial-box__navi-icon--desktop">
+          {% render 'button-slide', icon: 'chevron-left', icon_size: '2.4rem', size: '5.6rem', direction: 'left', style: 'primary' %}
+        </div>
+        <div class="testimonial-box__navi-icon testimonial-box__navi-icon--mobile">
+          {% render 'button-slide', icon: 'arrow-left', icon_size: '2.4rem', size: '3.6rem', direction: 'left', style: 'primary' %}
+        </div>
+      </xo-carousel-prev>
+      <xo-carousel-next role="button" tabindex="0" aria-label="Next button">
+        <div class="testimonial-box__navi-icon testimonial-box__navi-icon--desktop">
+          {% render 'button-slide', icon: 'chevron-right', icon_size: '2.4rem', size: '5.6rem', direction: 'right', style: 'primary' %}
+        </div>
+        <div class="testimonial-box__navi-icon testimonial-box__navi-icon--mobile">
+          {% render 'button-slide', icon: 'arrow-right', icon_size: '2.4rem', size: '3.6rem', direction: 'right', style: 'primary' %}
+        </div>
+      </xo-carousel-next>
+    </div>
+  {% endif %}
+</{{ tag_type_1 }}>

@@ -1,0 +1,215 @@
+{{ 'section-main-blog.css' | asset_url | stylesheet_tag }}
+{{ 'article-card.css' | asset_url | stylesheet_tag }}
+
+{% liquid
+  assign limit = section.settings.limit
+  assign column_desktop = section.settings.columns_desktop
+  assign column_gap = section.settings.columns_spacing
+  assign row_gap = section.settings.rows_spacing
+%}
+
+<section {% render 'section-attr' %}>
+  <div class='xo-main-blog'>
+    <xo-container class='xo-main-blog__container'>
+      <div class='xo-main-blog__content'>
+        {%- paginate blog.articles by limit -%}
+          <div class='xo-main-blog__article'>
+            <xo-grid class='xo-main-blog__grid' style='--lg: {{ column_desktop }}; --md: 2; --xs: 1; --col-gap: {{ column_gap }}px; --row-gap: {{ row_gap }}px;'>
+              {%- for article in blog.articles -%}
+                {%- assign placeholder_image_index = forloop.index0 | modulo: 4 | plus: 1 -%}
+                {%- assign placeholder_image = 'product-apparel-' | append: placeholder_image_index -%}
+                {%- assign lazyload = true -%}
+                {% if forloop.index0 < 3 %}
+                  {%- assign lazyload = false -%}
+                {% endif %}
+                {% render 'article-card',
+                  article: article,
+                  media_aspect_ratio: section.settings.article_card_media_aspect_ratio,
+                  show_image: section.settings.article_card_show_image,
+                  show_date: section.settings.article_card_show_date,
+                  show_author: section.settings.article_card_show_author,
+                  show_blog: section.settings.article_card_show_blog,
+                  show_excerpt: section.settings.article_card_show_excerpt,
+                  show_tags: section.settings.article_card_show_tags,
+                  color_scheme: section.settings.card_color_scheme,
+                  placeholder_image: placeholder_image,
+                  lazyload: lazyload
+                %}
+              {%- endfor -%}
+            </xo-grid>
+          </div>
+          <xo-animate xo-cascade>
+            <div class='xo-main-blog__pagination'>
+              {% render 'pagination', paginate: paginate, anchor: '' %}
+            </div>
+          </xo-animate>
+        {%- endpaginate -%}
+      </div>
+    </xo-container>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "t:sections.main_blog.name",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "range",
+      "id": "limit",
+      "min": 2,
+      "max": 12,
+      "step": 1,
+      "default": 9,
+      "label": "t:sections.main_blog.settings.limit.label"
+    },
+    {
+      "type": "range",
+      "id": "columns_desktop",
+      "min": 2,
+      "max": 4,
+      "step": 1,
+      "default": 3,
+      "label": "t:sections.main_blog.settings.columns_desktop.label"
+    },
+    {
+      "type": "number",
+      "label": "t:sections.main_blog.settings.columns_spacing.label",
+      "id": "columns_spacing",
+      "default": 20
+    },
+    {
+      "type": "number",
+      "id": "rows_spacing",
+      "label": "t:sections.main_blog.settings.rows_spacing.label",
+      "default": 65
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.article_card_header.content"
+    },
+    {
+      "type": "checkbox",
+      "id": "article_card_show_image",
+      "default": true,
+      "label": "t:sections.all.article_card_show_image.label",
+      "info": "t:sections.all.article_card_show_image.info"
+    },
+    {
+      "type": "checkbox",
+      "id": "article_card_show_date",
+      "default": true,
+      "label": "t:sections.all.article_card_show_date.label"
+    },
+    {
+      "type": "checkbox",
+      "id": "article_card_show_author",
+      "default": true,
+      "label": "t:sections.all.article_card_show_author.label"
+    },
+    {
+      "type": "checkbox",
+      "id": "article_card_show_excerpt",
+      "default": false,
+      "label": "t:sections.all.article_card_show_excerpt.label"
+    },
+    {
+      "type": "checkbox",
+      "id": "article_card_show_tags",
+      "default": false,
+      "label": "t:sections.all.article_card_show_tags.label"
+    },
+    {
+      "type": "checkbox",
+      "id": "article_card_show_badge",
+      "default": false,
+      "label": "t:sections.all.article_card_show_badge.label"
+    },
+    {
+      "type": "select",
+      "id": "article_card_media_aspect_ratio",
+      "default": "3/2",
+      "label": "t:sections.all.article_card_media_aspect_ratio.label",
+      "options": [
+        {
+          "value": "auto",
+          "label": "t:sections.all.article_card_media_aspect_ratio.option__1.label"
+        },
+        {
+          "value": "2/3",
+          "label": "t:sections.all.article_card_media_aspect_ratio.option__2.label"
+        },
+        {
+          "value": "3/4",
+          "label": "t:sections.all.article_card_media_aspect_ratio.option__3.label"
+        },
+        {
+          "value": "3/2",
+          "label": "t:sections.all.article_card_media_aspect_ratio.option__4.label"
+        },
+        {
+          "value": "1",
+          "label": "t:sections.all.article_card_media_aspect_ratio.option__5.label"
+        },
+        {
+          "value": "4/3",
+          "label": "t:sections.all.article_card_media_aspect_ratio.option__6.label"
+        },
+        {
+          "value": "16/9",
+          "label": "t:sections.all.article_card_media_aspect_ratio.option__7.label"
+        },
+        {
+          "value": "21/9",
+          "label": "t:sections.all.article_card_media_aspect_ratio.option__8.label"
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "General settings"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Section color scheme"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color"
+    },
+    {
+      "type": "color_background",
+      "id": "background_gradient",
+      "label": "Background gradient"
+    },
+    {
+      "type": "number",
+      "id": "padding_top_desktop",
+      "label": "Padding top desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_desktop",
+      "label": "Padding bottom desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_top_mobile",
+      "label": "Padding top mobile",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_mobile",
+      "label": "Padding bottom mobile",
+      "default": 50
+    }
+  ],
+  "blocks": []
+}
+{% endschema %}

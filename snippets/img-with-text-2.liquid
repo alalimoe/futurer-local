@@ -1,0 +1,93 @@
+{% comment %}
+  Accepts:
+  - class: {String} Font size heading (required)
+  - heading: {String} Heading (required)
+  - sub_heading: {String} Subheading (required)
+  - image: {String} Image (required)
+  - block: {Object} Blocks (required)
+  Usage:
+  {%
+    render 'img-with-text-2',
+    class: class,
+    heading: heading,
+    sub_heading: sub_heading,
+    image: image ,
+    block: block,
+    %}
+{% endcomment %}
+
+<div class="img-with-text-2{% if show_image_right == "show" %} img-with-text-2--show-image-right{% endif %}">
+  {% if show_image_right == 'show' %}
+    <xo-grid class="img-with-text-2__grid">
+      <xo-animate xo-cascade class="img-with-text-2__left{% if settings.enable_border_radius %} img-with-text-2__left--radius{% endif %}" style="--lg: 6; --md: 12; --md: 12">
+        <div class="img-with-text-2__header">
+  {% endif %}
+  <xo-animate xo-cascade>
+    <div class="img-with-text-2__text">
+      {% if sub_heading %}
+        <div class="img-with-text-2__sub-heading">
+          <p>{{ sub_heading }}</p>
+        </div>
+      {% endif %}
+      {% if heading %}
+        <div class="img-with-text-2__heading">
+          {% render 'text', context: section %}
+        </div>
+      {% endif %}
+    </div>
+  </xo-animate>
+  {% if block.size > 0 %}
+    <xo-animate xo-cascade>
+      <div class="img-with-text-2__feature">
+        {% for item in block %}
+          {% liquid
+            assign image_icon = item.settings.image
+            assign color_config_enable = item.settings.color_config_enable
+            assign heading = item.settings.heading
+          %}
+          <div class="img-with-text-2__feature-item{% if color_config_enable %} img-with-text-2__feature-item--modifier{% endif %}">
+            <div class="img-with-text-2__feature-image">
+              {% render 'image', image: image_icon %}
+            </div>
+            <div class="img-with-text-2__feature-heading">
+              <p>{{ heading }}</p>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </xo-animate>
+  {% endif %}
+  {% if show_image_right == 'show' %}
+    </div>
+  {% endif %}
+  <div class="img-with-text-2__image-box">
+    <xo-parallax>
+      <xo-parallax-scroll
+        class="xo-background-lazyload"
+        xo-keyframes="
+          {
+            '0%': { y: 0, scale: 0.5 },
+            '50%': { y: 0, scale: 1 },
+            '100%': { y: 0, scale: 0.5 }
+          }
+        "
+        style="width: 100%;"
+      >
+        <xo-animate xo-cascade xo-type="zoom-out" xo-duration="400" class="img-with-text-2__image">
+          {% render 'image', image: left_image, aspect_ratio: aspect_ratio_left %}
+        </xo-animate>
+      </xo-parallax-scroll>
+    </xo-parallax>
+  </div>
+  {% if show_image_right == 'show' %}
+    </xo-animate>
+    <div style="--lg: 6; --md: 12; --md: 12">
+      <div class="img-with-text-2__right">
+        <div class="img-with-text-2__image {% if settings.enable_border_radius %}img-with-text-2__image--radius{% endif %}">
+          {% render 'animate-image', image: right_image, border_radius: 0, aspect_ratio: aspect_ratio_right %}
+        </div>
+      </div>
+    </div>
+    </xo-grid>
+  {% endif %}
+</div>

@@ -1,0 +1,657 @@
+{%- liquid
+  assign protocol_blocks = section.blocks | where: "type", "protocol"
+  assign ap_id = section.id
+-%}
+
+<style>
+  /* ── Advanced Protocols — ap- prefix ── */
+  .ap { --ap-max: 1200px; font-family: var(--font-body-family, sans-serif); color: var(--color-text-main, #111827); }
+  .ap__wrap { max-width: var(--ap-max); margin: 0 auto; padding: 0 var(--page-gutter); }
+
+  /* ── Hero ── */
+  .ap-hero { padding: clamp(48px, 8vw, 96px) 0 clamp(24px, 4vw, 48px); }
+  .ap-hero__inner { max-width: 820px; }
+  .ap-hero__h1 {
+    font-family: var(--font-heading-family, sans-serif);
+    font-size: clamp(2.2rem, 4.5vw, 3.2rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    margin: 0 0 16px;
+  }
+  .ap-hero__sub {
+    font-size: clamp(0.95rem, 1.2vw, 1.1rem);
+    line-height: 1.7;
+    color: var(--color-text-muted, #4b5563);
+    margin: 0 0 20px;
+  }
+  .ap-hero__sub p { margin: 0 0 10px; }
+  .ap-hero__meta {
+    display: flex; flex-wrap: wrap; gap: 8px 20px;
+    font-size: 0.82rem; color: var(--color-text-muted, #6b7280);
+    padding-top: 16px;
+    border-top: 1px solid rgba(0,0,0,0.06);
+  }
+  .ap-hero__meta-item { display: inline-flex; align-items: center; gap: 5px; }
+  .ap-hero__meta-icon { width: 15px; height: 15px; flex-shrink: 0; opacity: 0.55; }
+  .ap-hero__badges { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+  .ap-hero__badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 13px; border-radius: var(--nx-radius-pill);
+    background: rgba(251, 191, 36, 0.1);
+    font-size: 0.75rem; font-weight: 600; letter-spacing: 0.03em; text-transform: uppercase;
+    color: var(--color-text-main, #111827); white-space: nowrap;
+  }
+  .ap-hero__badge-icon { width: 16px; height: 16px; flex-shrink: 0; color: var(--color-accent-primary, #FBBF24); }
+
+  /* ── Layout: sidebar + content ── */
+  .ap-body { display: grid; grid-template-columns: 1fr; gap: 0; }
+  @media (min-width: 1024px) {
+    .ap-body { grid-template-columns: 220px 1fr; gap: 40px; }
+  }
+
+  /* ── TOC — Desktop (sticky sidebar) ── */
+  .ap-toc { display: none; }
+  @media (min-width: 1024px) {
+    .ap-toc {
+      display: block; position: sticky; top: 80px; align-self: start;
+      max-height: calc(100vh - 100px); overflow-y: auto;
+      padding: 20px 0;
+    }
+    .ap-toc__title {
+      font-family: var(--font-heading-family, sans-serif);
+      font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--color-text-muted, #6b7280); margin: 0 0 12px; padding: 0 12px;
+    }
+    .ap-toc__list { list-style: none; margin: 0; padding: 0; }
+    .ap-toc__link {
+      display: block; padding: 7px 12px; border-left: 2px solid transparent;
+      font-size: 0.84rem; line-height: 1.35; color: var(--color-text-muted, #6b7280);
+      text-decoration: none; transition: all 0.2s ease;
+    }
+    .ap-toc__link:hover { color: var(--color-text-main, #111827); }
+    .ap-toc__link[aria-current="true"] {
+      border-left-color: var(--color-accent-primary, #FBBF24);
+      color: var(--color-text-main, #111827); font-weight: 600;
+      background: rgba(251, 191, 36, 0.06);
+    }
+    .ap-toc__link:focus-visible { outline: 2px solid var(--color-accent-dark, #92400e); outline-offset: -2px; border-radius: 4px; }
+  }
+
+  /* ── TOC — Mobile (collapsible) ── */
+  .ap-toc-mobile { margin-bottom: 24px; border-radius: var(--nx-radius-md); background: #fff; box-shadow: var(--shadow-sm); }
+  .ap-toc-mobile__trigger {
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    width: 100%; padding: 14px 16px; cursor: pointer; min-height: 44px;
+    font-family: var(--font-heading-family, sans-serif);
+    font-size: 0.88rem; font-weight: 700;
+    list-style: none;
+  }
+  .ap-toc-mobile__trigger::-webkit-details-marker { display: none; }
+  .ap-toc-mobile__trigger::after {
+    content: ''; width: 18px; height: 18px; flex-shrink: 0;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%234b5563' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") no-repeat center;
+    transition: transform 0.3s cubic-bezier(0.25,0.8,0.25,1);
+  }
+  .ap-toc-mobile[open] .ap-toc-mobile__trigger::after { transform: rotate(180deg); }
+  .ap-toc-mobile__trigger:focus-visible { outline: 2px solid var(--color-accent-dark, #92400e); outline-offset: -2px; border-radius: var(--nx-radius-md); }
+  .ap-toc-mobile__list { list-style: none; margin: 0; padding: 0 16px 14px; }
+  .ap-toc-mobile__link {
+    display: block; padding: 8px 0; font-size: 0.88rem;
+    color: var(--color-text-muted, #4b5563); text-decoration: none;
+    border-bottom: 1px solid rgba(0,0,0,0.04);
+  }
+  .ap-toc-mobile__link:last-child { border-bottom: none; }
+  .ap-toc-mobile__link:hover { color: var(--color-text-main, #111827); }
+  .ap-toc-mobile__link:focus-visible { outline: 2px solid var(--color-accent-dark, #92400e); outline-offset: 2px; border-radius: 4px; }
+  @media (min-width: 1024px) { .ap-toc-mobile { display: none; } }
+
+  /* ── Protocol card ── */
+  .ap-protocol {
+    scroll-margin-top: 84px;
+    background: #fff; border-radius: var(--nx-radius);
+    box-shadow: var(--shadow-sm);
+    padding: clamp(20px, 3vw, 32px);
+    margin-bottom: 24px;
+    transition: box-shadow 0.35s cubic-bezier(0.25,0.8,0.25,1);
+  }
+  .ap-protocol:hover { box-shadow: var(--shadow-md-hover); }
+  .ap-protocol__h2 {
+    font-family: var(--font-heading-family, sans-serif);
+    font-size: clamp(1.4rem, 2.5vw, 1.9rem);
+    font-weight: 800; letter-spacing: -0.02em;
+    line-height: 1.15; margin: 0 0 20px;
+  }
+
+  /* ── Data table ── */
+  .ap-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-bottom: 24px; }
+  .ap-table {
+    width: 100%; border-collapse: collapse;
+    font-size: clamp(0.82rem, 1vw, 0.9rem);
+  }
+  .ap-table thead { border-bottom: 2px solid var(--color-accent-primary, #FBBF24); }
+  .ap-table th {
+    text-align: left; padding: 10px 14px;
+    font-family: var(--font-heading-family, sans-serif);
+    font-weight: 700; font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--color-text-muted, #6b7280);
+  }
+  .ap-table td {
+    padding: 12px 14px; border-bottom: 1px solid rgba(0,0,0,0.05);
+    color: var(--color-text-main, #111827); font-weight: 500;
+  }
+  .ap-table tbody tr:last-child td { border-bottom: none; }
+
+  /* ── Mechanism section ── */
+  .ap-mechanism { margin-bottom: 24px; }
+  .ap-mechanism__h3 {
+    font-family: var(--font-heading-family, sans-serif);
+    font-size: clamp(1rem, 1.4vw, 1.15rem); font-weight: 700;
+    margin: 0 0 10px; letter-spacing: -0.01em;
+  }
+  .ap-mechanism__body {
+    font-size: clamp(0.9rem, 1.1vw, 1rem); line-height: 1.75;
+    color: var(--color-text-muted, #4b5563);
+  }
+  .ap-mechanism__body p { margin: 0 0 10px; }
+  .ap-mechanism__body p:last-child { margin-bottom: 0; }
+
+  /* ── Shoppable products ── */
+  .ap-products__h3 {
+    font-family: var(--font-heading-family, sans-serif);
+    font-size: clamp(1rem, 1.4vw, 1.15rem); font-weight: 700;
+    margin: 0 0 14px; letter-spacing: -0.01em;
+  }
+  .ap-products__grid { display: flex; gap: 16px; flex-wrap: wrap; }
+  .ap-pcard {
+    flex: 1 1 180px; max-width: 220px;
+    background: var(--color-bg-secondary, #f9fafb);
+    border-radius: var(--nx-radius-md); overflow: hidden;
+    display: flex; flex-direction: column;
+    transition: box-shadow 0.3s ease;
+  }
+  .ap-pcard:hover { box-shadow: var(--shadow-sm-hover); }
+  .ap-pcard__img {
+    width: 100%; aspect-ratio: 1; object-fit: cover; display: block;
+    background: var(--color-bg-secondary, #f9fafb);
+  }
+  .ap-pcard__body { padding: 12px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
+  .ap-pcard__title {
+    font-family: var(--font-heading-family, sans-serif);
+    font-size: 0.82rem; font-weight: 700; line-height: 1.3;
+    margin: 0;
+  }
+  .ap-pcard__title a { color: inherit; text-decoration: none; }
+  .ap-pcard__title a:hover { color: var(--color-accent-dark, #92400e); }
+  .ap-pcard__title a:focus-visible { outline: 2px solid var(--color-accent-dark, #92400e); outline-offset: 2px; border-radius: 4px; }
+  .ap-pcard__price { font-size: 0.88rem; font-weight: 700; }
+  .ap-pcard__price s { opacity: 0.5; font-weight: 400; margin-right: 4px; }
+  .ap-pcard__cta {
+    margin-top: auto;
+    display: flex; align-items: center; justify-content: center;
+    width: 100%; min-height: 40px; padding: 8px 12px;
+    border: none; border-radius: var(--nx-radius-sm); cursor: pointer;
+    background: var(--color-accent-primary, #FBBF24);
+    color: var(--color-accent-on-gold, #1e1e1e);
+    font-family: var(--font-body-family, sans-serif);
+    font-size: 0.78rem; font-weight: 700; letter-spacing: 0.02em;
+    box-shadow: var(--shadow-xs);
+    transition: all 0.3s cubic-bezier(0.25,0.8,0.25,1);
+  }
+  .ap-pcard__cta:hover { transform: translateY(-1px); filter: brightness(1.06); box-shadow: var(--shadow-sm-hover); }
+  .ap-pcard__cta:active { transform: scale(0.97); }
+  .ap-pcard__cta:focus-visible { outline: 2px solid var(--color-accent-dark, #92400e); outline-offset: 2px; }
+  .ap-pcard__cta[disabled] { opacity: 0.45; cursor: not-allowed; transform: none; filter: none; pointer-events: none; }
+
+  /* ── Disclaimer ── */
+  .ap-disclaimer {
+    margin: clamp(24px, 4vw, 48px) 0 clamp(32px, 5vw, 56px);
+    background: #fef2f2;
+    border-left: 4px solid #dc2626;
+    border-radius: 0 12px 12px 0;
+    padding: 18px 22px;
+    display: flex; gap: 14px; align-items: flex-start;
+  }
+  .ap-disclaimer__icon {
+    width: 22px; height: 22px; flex-shrink: 0; color: #dc2626; margin-top: 1px;
+  }
+  .ap-disclaimer__body {
+    font-size: clamp(0.78rem, 1vw, 0.85rem);
+    line-height: 1.65; color: #7f1d1d;
+  }
+  .ap-disclaimer__body p { margin: 0 0 6px; }
+  .ap-disclaimer__body p:last-child { margin-bottom: 0; }
+
+  /* ── Content area spacing ── */
+  .ap-content { min-width: 0; padding-bottom: 24px; }
+
+  /* ── Reduced motion ── */
+  @media (prefers-reduced-motion: reduce) {
+    .ap-protocol, .ap-pcard, .ap-pcard__cta, .ap-toc__link { transition: none; }
+    .ap-protocol:hover, .ap-pcard:hover, .ap-pcard__cta:hover { transform: none; }
+  }
+</style>
+
+<div class="ap">
+  {%- comment -%}  ═══  1. EDITORIAL HERO  ═══ {%- endcomment -%}
+  <header class="ap-hero">
+    <div class="ap__wrap">
+      <div class="ap-hero__inner">
+        <h1 class="ap-hero__h1">{{ section.settings.heading }}</h1>
+        <div class="ap-hero__sub rte">{{ section.settings.subheading }}</div>
+
+        <div class="ap-hero__badges" role="list">
+          {%- if section.settings.badge_1_text != blank -%}
+            <span class="ap-hero__badge" role="listitem">
+              <svg class="ap-hero__badge-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>
+              {{ section.settings.badge_1_text }}
+            </span>
+          {%- endif -%}
+          {%- if section.settings.badge_2_text != blank -%}
+            <span class="ap-hero__badge" role="listitem">
+              <svg class="ap-hero__badge-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="12" y2="14"/></svg>
+              {{ section.settings.badge_2_text }}
+            </span>
+          {%- endif -%}
+          {%- if section.settings.badge_3_text != blank -%}
+            <span class="ap-hero__badge" role="listitem">
+              <svg class="ap-hero__badge-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2l7 4v5c0 5.25-3.5 9.74-7 11-3.5-1.26-7-5.75-7-11V6l7-4z"/><polyline points="9 12 11 14 15 10"/></svg>
+              {{ section.settings.badge_3_text }}
+            </span>
+          {%- endif -%}
+        </div>
+
+        <div class="ap-hero__meta">
+          {%- if section.settings.author != blank -%}
+            <span class="ap-hero__meta-item">
+              <svg class="ap-hero__meta-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              {{ section.settings.author }}
+            </span>
+          {%- endif -%}
+          {%- if section.settings.date_published != blank -%}
+            <time class="ap-hero__meta-item" datetime="{{ section.settings.date_published }}">
+              <svg class="ap-hero__meta-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              {{ section.settings.date_published | date: "%B %d, %Y" }}
+            </time>
+          {%- endif -%}
+          {%- if section.settings.read_time != blank -%}
+            <span class="ap-hero__meta-item">
+              <svg class="ap-hero__meta-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              {{ section.settings.read_time }}
+            </span>
+          {%- endif -%}
+        </div>
+      </div>
+    </div>
+  </header>
+
+  {%- comment -%}  ═══  2. BODY: TOC + PROTOCOLS  ═══ {%- endcomment -%}
+  {%- if protocol_blocks.size > 0 -%}
+    <div class="ap__wrap">
+      {%- comment -%} Mobile TOC {%- endcomment -%}
+      <details class="ap-toc-mobile" id="ap-toc-mobile-{{ ap_id }}">
+        <summary class="ap-toc-mobile__trigger">Table of Contents</summary>
+        <ul class="ap-toc-mobile__list">
+          {%- for block in protocol_blocks -%}
+            {%- assign ap_slug = block.settings.title | handleize -%}
+            <li>
+              <a class="ap-toc-mobile__link" href="#ap-{{ ap_slug }}">
+                {{ block.settings.title }}
+              </a>
+            </li>
+          {%- endfor -%}
+        </ul>
+      </details>
+
+      <div class="ap-body">
+        {%- comment -%} Desktop sidebar TOC {%- endcomment -%}
+        <aside class="ap-toc" aria-label="Table of Contents" id="ap-toc-{{ ap_id }}">
+          <p class="ap-toc__title">Protocols</p>
+          <ul class="ap-toc__list">
+            {%- for block in protocol_blocks -%}
+              {%- assign ap_slug = block.settings.title | handleize -%}
+              <li>
+                <a class="ap-toc__link" href="#ap-{{ ap_slug }}" data-ap-toc-link>
+                  {{ block.settings.title }}
+                </a>
+              </li>
+            {%- endfor -%}
+          </ul>
+        </aside>
+
+        {%- comment -%} Protocol content {%- endcomment -%}
+        <div class="ap-content">
+          {%- for block in protocol_blocks -%}
+            {%- assign ap_slug = block.settings.title | handleize -%}
+            <article class="ap-protocol" id="ap-{{ ap_slug }}" data-ap-protocol {{ block.shopify_attributes }}>
+              <h2 class="ap-protocol__h2">{{ block.settings.title }}</h2>
+
+              {%- comment -%} Data table {%- endcomment -%}
+              {%- if block.settings.cycle_length != blank or block.settings.dosage != blank or block.settings.half_life != blank or block.settings.frequency != blank -%}
+                <div class="ap-table-wrap">
+                  <table class="ap-table">
+                    <thead>
+                      <tr>
+                        <th scope="col">Parameter</th>
+                        <th scope="col">Value</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {%- if block.settings.cycle_length != blank -%}
+                        <tr><td>Cycle Length</td><td>{{ block.settings.cycle_length }}</td></tr>
+                      {%- endif -%}
+                      {%- if block.settings.dosage != blank -%}
+                        <tr><td>Dosage</td><td>{{ block.settings.dosage }}</td></tr>
+                      {%- endif -%}
+                      {%- if block.settings.half_life != blank -%}
+                        <tr><td>Half-life</td><td>{{ block.settings.half_life }}</td></tr>
+                      {%- endif -%}
+                      {%- if block.settings.frequency != blank -%}
+                        <tr><td>Frequency</td><td>{{ block.settings.frequency }}</td></tr>
+                      {%- endif -%}
+                    </tbody>
+                  </table>
+                </div>
+              {%- endif -%}
+
+              {%- comment -%} Mechanism of Action {%- endcomment -%}
+              {%- if block.settings.mechanism != blank -%}
+                <div class="ap-mechanism">
+                  <h3 class="ap-mechanism__h3">Mechanism of Action</h3>
+                  <div class="ap-mechanism__body rte">{{ block.settings.mechanism }}</div>
+                </div>
+              {%- endif -%}
+
+              {%- comment -%} Shoppable products {%- endcomment -%}
+              {%- assign ap_prod1 = block.settings.product_1 -%}
+              {%- assign ap_prod2 = block.settings.product_2 -%}
+              {%- assign ap_prod3 = block.settings.product_3 -%}
+              {%- if ap_prod1 != blank or ap_prod2 != blank or ap_prod3 != blank -%}
+                <div class="ap-products">
+                  <h3 class="ap-products__h3">Required Products</h3>
+                  <div class="ap-products__grid">
+                    {%- assign ap_prods = "" -%}
+                    {%- if ap_prod1 != blank -%}{%- assign ap_prods = ap_prods | append: ap_prod1.id | append: "," -%}{%- endif -%}
+                    {%- if ap_prod2 != blank -%}{%- assign ap_prods = ap_prods | append: ap_prod2.id | append: "," -%}{%- endif -%}
+                    {%- if ap_prod3 != blank -%}{%- assign ap_prods = ap_prods | append: ap_prod3.id | append: "," -%}{%- endif -%}
+
+                    {%- for ap_p in block.settings -%}{%- comment -%}Dummy loop to avoid repetition{%- endcomment -%}{%- endfor -%}
+
+                    {%- if ap_prod1 != blank -%}
+                      <div class="ap-pcard">
+                        <a href="{{ ap_prod1.url }}">
+                          <img class="ap-pcard__img" src="{{ ap_prod1.featured_image | image_url: width: 400 }}" alt="{{ ap_prod1.featured_image.alt | default: ap_prod1.title | escape }}" width="400" height="400" loading="lazy" decoding="async">
+                        </a>
+                        <div class="ap-pcard__body">
+                          <h4 class="ap-pcard__title"><a href="{{ ap_prod1.url }}">{{ ap_prod1.title }}</a></h4>
+                          <div class="ap-pcard__price">
+                            {%- if ap_prod1.compare_at_price > ap_prod1.price -%}<s>{{ ap_prod1.compare_at_price | money }}</s>{%- endif -%}
+                            {{ ap_prod1.price | money }}
+                          </div>
+                          <xo-cart-add {% unless ap_prod1.available %}xo-disabled{% endunless %}>
+                            <button type="button" class="ap-pcard__cta" {% unless ap_prod1.available %}disabled{% endunless %} aria-label="Add {{ ap_prod1.title | escape }} to cart">
+                              {%- if ap_prod1.available -%}Add to Cart{%- else -%}Sold Out{%- endif -%}
+                            </button>
+                            <input type="hidden" name="id" value="{{ ap_prod1.selected_or_first_available_variant.id }}">
+                          </xo-cart-add>
+                        </div>
+                      </div>
+                    {%- endif -%}
+
+                    {%- if ap_prod2 != blank -%}
+                      <div class="ap-pcard">
+                        <a href="{{ ap_prod2.url }}">
+                          <img class="ap-pcard__img" src="{{ ap_prod2.featured_image | image_url: width: 400 }}" alt="{{ ap_prod2.featured_image.alt | default: ap_prod2.title | escape }}" width="400" height="400" loading="lazy" decoding="async">
+                        </a>
+                        <div class="ap-pcard__body">
+                          <h4 class="ap-pcard__title"><a href="{{ ap_prod2.url }}">{{ ap_prod2.title }}</a></h4>
+                          <div class="ap-pcard__price">
+                            {%- if ap_prod2.compare_at_price > ap_prod2.price -%}<s>{{ ap_prod2.compare_at_price | money }}</s>{%- endif -%}
+                            {{ ap_prod2.price | money }}
+                          </div>
+                          <xo-cart-add {% unless ap_prod2.available %}xo-disabled{% endunless %}>
+                            <button type="button" class="ap-pcard__cta" {% unless ap_prod2.available %}disabled{% endunless %} aria-label="Add {{ ap_prod2.title | escape }} to cart">
+                              {%- if ap_prod2.available -%}Add to Cart{%- else -%}Sold Out{%- endif -%}
+                            </button>
+                            <input type="hidden" name="id" value="{{ ap_prod2.selected_or_first_available_variant.id }}">
+                          </xo-cart-add>
+                        </div>
+                      </div>
+                    {%- endif -%}
+
+                    {%- if ap_prod3 != blank -%}
+                      <div class="ap-pcard">
+                        <a href="{{ ap_prod3.url }}">
+                          <img class="ap-pcard__img" src="{{ ap_prod3.featured_image | image_url: width: 400 }}" alt="{{ ap_prod3.featured_image.alt | default: ap_prod3.title | escape }}" width="400" height="400" loading="lazy" decoding="async">
+                        </a>
+                        <div class="ap-pcard__body">
+                          <h4 class="ap-pcard__title"><a href="{{ ap_prod3.url }}">{{ ap_prod3.title }}</a></h4>
+                          <div class="ap-pcard__price">
+                            {%- if ap_prod3.compare_at_price > ap_prod3.price -%}<s>{{ ap_prod3.compare_at_price | money }}</s>{%- endif -%}
+                            {{ ap_prod3.price | money }}
+                          </div>
+                          <xo-cart-add {% unless ap_prod3.available %}xo-disabled{% endunless %}>
+                            <button type="button" class="ap-pcard__cta" {% unless ap_prod3.available %}disabled{% endunless %} aria-label="Add {{ ap_prod3.title | escape }} to cart">
+                              {%- if ap_prod3.available -%}Add to Cart{%- else -%}Sold Out{%- endif -%}
+                            </button>
+                            <input type="hidden" name="id" value="{{ ap_prod3.selected_or_first_available_variant.id }}">
+                          </xo-cart-add>
+                        </div>
+                      </div>
+                    {%- endif -%}
+                  </div>
+                </div>
+              {%- endif -%}
+            </article>
+          {%- endfor -%}
+        </div>
+      </div>
+    </div>
+
+    {%- comment -%}  ═══  JSON-LD: Article + ItemList  ═══ {%- endcomment -%}
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Article",
+          "headline": {{ section.settings.heading | json }},
+          "description": {{ section.settings.seo_description | default: section.settings.heading | json }},
+          "author": { "@type": "Organization", "name": {{ section.settings.author | default: shop.name | json }} },
+          "publisher": { "@type": "Organization", "name": {{ shop.name | json }} },
+          {%- if section.settings.date_published != blank -%}
+            "datePublished": {{ section.settings.date_published | json }},
+          {%- endif -%}
+          "mainEntityOfPage": {{ request.origin | append: request.path | json }}
+        },
+        {
+          "@type": "ItemList",
+          "name": {{ section.settings.heading | json }},
+          "itemListElement": [
+            {%- for block in protocol_blocks -%}
+              {%- assign ap_slug = block.settings.title | handleize -%}
+              {
+                "@type": "ListItem",
+                "position": {{ forloop.index }},
+                "name": {{ block.settings.title | json }},
+                "url": {{ request.origin | append: request.path | append: "#ap-" | append: ap_slug | json }}
+              }{%- unless forloop.last -%},{%- endunless -%}
+            {%- endfor -%}
+          ]
+        }
+      ]
+    }
+    </script>
+  {%- endif -%}
+
+  {%- comment -%}  ═══  3. DISCLAIMER FOOTER  ═══ {%- endcomment -%}
+  {%- if section.settings.disclaimer != blank -%}
+    <div class="ap__wrap">
+      <aside class="ap-disclaimer" role="note" aria-label="Medical disclaimer">
+        <svg class="ap-disclaimer__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>
+        <div class="ap-disclaimer__body rte">{{ section.settings.disclaimer }}</div>
+      </aside>
+    </div>
+  {%- endif -%}
+</div>
+
+{%- comment -%}  ═══  SCROLL-SPY JS  ═══ {%- endcomment -%}
+<script>
+(function(){
+  var tocEl = document.getElementById('ap-toc-{{ ap_id }}');
+  if (!tocEl) return;
+
+  var links = tocEl.querySelectorAll('[data-ap-toc-link]');
+  var sections = document.querySelectorAll('[data-ap-protocol]');
+  if (!links.length || !sections.length) return;
+
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        var id = entry.target.id;
+        links.forEach(function(link) {
+          var isCurrent = link.getAttribute('href') === '#' + id;
+          link.setAttribute('aria-current', isCurrent ? 'true' : 'false');
+        });
+      }
+    });
+  }, {
+    rootMargin: '-80px 0px -60% 0px',
+    threshold: 0
+  });
+
+  sections.forEach(function(sec) { observer.observe(sec); });
+
+  tocEl.addEventListener('click', function(e) {
+    var link = e.target.closest('[data-ap-toc-link]');
+    if (!link) return;
+    var target = document.querySelector(link.getAttribute('href'));
+    if (target) {
+      e.preventDefault();
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      history.replaceState(null, '', link.getAttribute('href'));
+    }
+  });
+
+  var mobileToc = document.getElementById('ap-toc-mobile-{{ ap_id }}');
+  if (mobileToc) {
+    mobileToc.addEventListener('click', function(e) {
+      var link = e.target.closest('.ap-toc-mobile__link');
+      if (!link) return;
+      var target = document.querySelector(link.getAttribute('href'));
+      if (target) {
+        e.preventDefault();
+        mobileToc.removeAttribute('open');
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        history.replaceState(null, '', link.getAttribute('href'));
+      }
+    });
+  }
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Advanced Protocols",
+  "tag": "div",
+  "class": "ap-section",
+  "settings": [
+    { "type": "header", "content": "Editorial Hero" },
+    { "type": "text", "id": "heading", "label": "Page heading (H1)", "default": "Advanced Nootropic Protocols" },
+    {
+      "type": "richtext",
+      "id": "subheading",
+      "label": "Subheadline",
+      "default": "<p>Evidence-informed protocols for experienced users. Each protocol details cycle parameters, mechanisms of action, and the exact products required — designed for precision supplementation.</p>"
+    },
+    { "type": "text", "id": "author", "label": "Author name", "default": "Nootropix Research" },
+    { "type": "text", "id": "date_published", "label": "Publication date (YYYY-MM-DD)", "default": "2026-03-01" },
+    { "type": "text", "id": "read_time", "label": "Read time", "default": "12 min read" },
+
+    { "type": "header", "content": "Trust Badges" },
+    { "type": "text", "id": "badge_1_text", "label": "Badge 1", "default": "Peer-Reviewed Sources" },
+    { "type": "text", "id": "badge_2_text", "label": "Badge 2", "default": "Clinically Studied Dosages" },
+    { "type": "text", "id": "badge_3_text", "label": "Badge 3", "default": "3rd-Party COA Verified" },
+
+    { "type": "header", "content": "SEO" },
+    {
+      "type": "textarea",
+      "id": "seo_description",
+      "label": "SEO meta description",
+      "default": "Advanced nootropic protocols with detailed cycle parameters, dosage tables, mechanisms of action, and shoppable product links. Third-party tested compounds."
+    },
+
+    { "type": "header", "content": "Disclaimer" },
+    {
+      "type": "richtext",
+      "id": "disclaimer",
+      "label": "Medical disclaimer",
+      "default": "<p>These protocols are provided for educational and research purposes only. They have not been evaluated by the Food and Drug Administration or any equivalent regulatory body. These products are not intended to diagnose, treat, cure, or prevent any disease. Consult a qualified healthcare professional before starting any new supplement or research protocol. Individual responses vary — do not exceed recommended dosages.</p>"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "protocol",
+      "name": "Protocol",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Protocol title (H2)" },
+        { "type": "text", "id": "cycle_length", "label": "Cycle Length", "info": "e.g. 8 weeks on / 4 weeks off" },
+        { "type": "text", "id": "dosage", "label": "Dosage", "info": "e.g. 10–30 mg/day" },
+        { "type": "text", "id": "half_life", "label": "Half-life", "info": "e.g. 3–5 hours" },
+        { "type": "text", "id": "frequency", "label": "Frequency", "info": "e.g. Once daily, morning" },
+        {
+          "type": "richtext",
+          "id": "mechanism",
+          "label": "Mechanism of Action",
+          "info": "Explain how this protocol works at a pharmacological level."
+        },
+        { "type": "product", "id": "product_1", "label": "Product 1" },
+        { "type": "product", "id": "product_2", "label": "Product 2" },
+        { "type": "product", "id": "product_3", "label": "Product 3" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Advanced Protocols",
+      "blocks": [
+        {
+          "type": "protocol",
+          "settings": {
+            "title": "Racetam Cognitive Enhancement Protocol",
+            "cycle_length": "8 weeks on / 2 weeks off",
+            "dosage": "Noopept 10–30 mg/day + Alpha-GPC 300 mg/day",
+            "half_life": "Noopept: 30–60 min (active metabolite: 3–5 h)",
+            "frequency": "Twice daily — morning and early afternoon",
+            "mechanism": "<p>Noopept modulates glutamatergic AMPA and NMDA receptor activity, enhancing long-term potentiation (LTP) — the synaptic mechanism underlying learning and memory consolidation. It also upregulates BDNF and NGF expression in the hippocampus. Alpha-GPC provides the choline substrate necessary for increased acetylcholine synthesis, preventing cholinergic depletion that can occur with racetam-class compounds.</p>"
+          }
+        },
+        {
+          "type": "protocol",
+          "settings": {
+            "title": "Stress Resilience & Adaptogen Protocol",
+            "cycle_length": "12 weeks on / 2 weeks off",
+            "dosage": "Ashwagandha KSM-66 600 mg/day + Rhodiola 200–400 mg/day",
+            "half_life": "Ashwagandha: ~6 h / Rhodiola: ~4–6 h",
+            "frequency": "Once daily with breakfast",
+            "mechanism": "<p>Ashwagandha KSM-66 modulates the HPA axis by attenuating cortisol secretion and normalizing GABA-ergic and serotonergic signalling. Rhodiola rosea acts as an adaptogen via salidroside-mediated inhibition of stress-activated protein kinases (SAPKs) and modulation of heat-shock protein Hsp70 expression, conferring neuroprotective effects under chronic stress conditions.</p>"
+          }
+        },
+        {
+          "type": "protocol",
+          "settings": {
+            "title": "Deep Focus & Sustained Attention Protocol",
+            "cycle_length": "Continuous with weekend breaks",
+            "dosage": "Caffeine 100 mg + L-Theanine 200 mg + Lion's Mane 500 mg",
+            "half_life": "Caffeine: 5–6 h / L-Theanine: 2–3 h / Lion's Mane: N/A (cumulative)",
+            "frequency": "Once daily, 30 min before work session",
+            "mechanism": "<p>Caffeine competitively antagonizes adenosine A1 and A2A receptors, preventing drowsiness-associated signalling. L-Theanine crosses the blood-brain barrier and elevates alpha-wave activity while increasing GABA, serotonin, and dopamine levels — smoothing the stimulant curve. Lion's Mane (Hericium erinaceus) contains hericenones and erinacines that stimulate Nerve Growth Factor (NGF) synthesis, supporting long-term neuroplasticity and myelination.</p>"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

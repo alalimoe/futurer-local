@@ -1,0 +1,35 @@
+{% comment %}
+  Renders a product quick view liquid binding
+
+  Accepts:
+  - product: {Object} Product Liquid object
+  - aspect_ratio: image aspect ratio
+
+  Usage:
+  {% render 'product-quick-view-liquid-binding', product: product, aspect_ratio: media_aspect_ratio %}
+{% endcomment %}
+
+{%- assign selected_variant = product.selected_or_first_available_variant -%}
+
+<xo-product-quick-view-liquid-binding>
+  <template>
+    <script type="application/json">
+      {%- liquid
+        assign compare_at_price = selected_variant.compare_at_price | money
+        assign price = selected_variant.price
+        assign money_price = price | money
+        if settings.currency_code_enabled
+        assign money_price = price | money_with_currency
+        assign compare_at_price = selected_variant.compare_at_price | money_with_currency
+        endif
+      -%}
+      {
+        money_price: "{{ money_price }}",
+        compare_at_price: "{{ compare_at_price }}",
+        img: "{% if selected_variant.featured_image != blank %}{{ selected_variant.featured_image.src | image_url }}{% endif %}",
+        bundle_img: `{% render 'product-image', product: product, variant: selected_variant, aspect_ratio: '1' %}`,
+        bundle_price: "{{ selected_variant.price | money_with_currency }}"
+      }
+    </script>
+  </template>
+</xo-product-quick-view-liquid-binding>

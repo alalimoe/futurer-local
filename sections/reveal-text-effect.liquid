@@ -1,0 +1,199 @@
+{% liquid
+  assign sub_heading = section.settings.sub_heading
+  assign font_size_heading = section.settings.font_size_heading
+  assign heading = section.settings.heading
+  assign reveal_text_effect = section.settings.reveal_text_effect
+  assign reveal_text_opacity = section.settings.reveal_text_opacity | default: 50
+  assign image_desktop = section.settings.image_desktop
+  assign image_mobile = section.settings.image_mobile
+
+  assign heading_class = 'xo-reveal-text-effect__heading'
+  if font_size_heading
+    assign heading_class = heading_class | append: ' ' | append: font_size_heading
+  endif
+%}
+
+<section {% render 'section-attr' %}>
+  <div class="xo-reveal-text-effect">
+    <xo-container class="xo-reveal-text-effect__container">
+      <div class="xo-reveal-text-effect__content">
+        <xo-grid class="xo-reveal-text-effect__grid" style="--xo-grid-row-gap: 0;">
+          {% if sub_heading != blank or heading != blank %}
+            <div class="xo-reveal-text-effect__group" style="--lg: 8; --md: 8; --xs: 12; --start-md: 3; --start-lg: 3;">
+              {% if sub_heading != blank %}
+                <xo-animate xo-cascade>
+                  <span class="xo-reveal-text-effect__sub-heading">{{ sub_heading }}</span>
+                </xo-animate>
+              {% endif %}
+              {% if heading != blank %}
+                <xo-animate xo-cascade>
+                  <h3 class="{{ heading_class }}">
+                    {% if reveal_text_effect %}
+                      <xo-parallax style="--reveal-opacity: {{ reveal_text_opacity }}%">
+                        <xo-parallax-scroll class="xo-reveal-text-effect__reveal" xo-keyframes="{ '30%': { backgroundSizeX: 0 }, '65%': { backgroundSizeX: 100 } }">
+                          {{ heading }}
+                        </xo-parallax-scroll>
+                      </xo-parallax>
+                    {% else %}
+                      {{ heading }}
+                    {% endif %}
+                  </h3>
+                </xo-animate>
+              {% endif %}
+            </div>
+          {% endif %}
+          <div class="xo-reveal-text-effect__image-wrap" style="--lg: 6; --md: 6; --xs: 12; --start-md: 4; --start-lg: 4;">
+            <div class="xo-reveal-text-effect__image xo-reveal-text-effect__image--desktop">
+              {% render 'animate-image', image: image_desktop, border_radius: 0, aspect_ratio: 'auto', disable_alt: true, max_width: 100 %}
+            </div>
+            <div class="xo-reveal-text-effect__image xo-reveal-text-effect__image--mobile">
+              {% render 'animate-image', image: image_mobile, border_radius: 0, aspect_ratio: 'auto', disable_alt: true, max_width: 100 %}
+            </div>
+          </div>
+        </xo-grid>
+      </div>
+    </xo-container>
+  </div>
+</section>
+
+{% schema %}
+{
+  "tag": "section",
+  "name": "t:sections.reveal_text_effect.name",
+  "settings": [
+    {
+      "type": "text",
+      "id": "sub_heading",
+      "label": "t:sections.reveal_text_effect.settings.sub_heading.label",
+      "default": "Subheading"
+    },
+    {
+      "type": "select",
+      "id": "font_size_heading",
+      "label": "Font size heading",
+      "default": "h4",
+      "options": [
+        {
+          "value": "h1",
+          "label": "Extra extra large"
+        },
+        {
+          "value": "h2",
+          "label": "Extra large"
+        },
+        {
+          "value": "h3",
+          "label": "Large"
+        },
+        {
+          "value": "h4",
+          "label": "Medium"
+        },
+        {
+          "value": "h5",
+          "label": "Small"
+        },
+        {
+          "value": "h6",
+          "label": "Extra small"
+        }
+      ]
+    },
+    {
+      "type": "richtext",
+      "id": "heading",
+      "label": "t:sections.reveal_text_effect.settings.heading.label",
+      "default": "<p>We make things that work better and last longer. Our products solve real problems with clean design and honest materials.</p>"
+    },
+    {
+      "type": "checkbox",
+      "id": "reveal_text_effect",
+      "label": "t:sections.reveal_text_effect.settings.reveal_text_effect.label",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "reveal_text_opacity",
+      "label": "t:sections.reveal_text_effect.settings.reveal_text_opacity.label",
+      "min": 5,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 50,
+      "visible_if": "{{ section.settings.reveal_text_effect == true }}"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.reveal_text_effect.settings.header_image.content"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_desktop",
+      "label": "t:sections.reveal_text_effect.settings.image_desktop.label"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_mobile",
+      "label": "t:sections.reveal_text_effect.settings.image_mobile.label"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.reveal_text_effect.settings.header_general.content"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Section color scheme"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color"
+    },
+    {
+      "type": "color_background",
+      "id": "background_gradient",
+      "label": "Background gradient"
+    },
+    {
+      "type": "number",
+      "id": "padding_top_desktop",
+      "label": "Padding top desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_desktop",
+      "label": "Padding bottom desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_top_mobile",
+      "label": "Padding top mobile",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_mobile",
+      "label": "Padding bottom mobile",
+      "default": 50
+    }
+  ],
+  "blocks": [],
+  "presets": [
+    {
+      "name": "t:sections.reveal_text_effect.name"
+    }
+  ],
+  "disabled_on": {
+    "groups": [
+      "header",
+      "footer",
+      "custom.overlay",
+      "custom.popups",
+      "custom.features"
+    ]
+  }
+}
+{% endschema %}

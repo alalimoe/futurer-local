@@ -1,0 +1,266 @@
+{% comment %}
+  Nootropix — Racetams 101 Hero (Premium)
+  Focused on in-stock SKUs via product pickers (caps + powder variants)
+{% endcomment %}
+
+{%- assign s = section.settings -%}
+{%- assign sid = section.id -%}
+{%- assign collection_url = s.collection | default: blank -%}
+{%- if collection_url != blank -%}{%- assign collection_url = s.collection.url -%}{%- endif -%}
+
+{%- assign a_caps  = s.aniracetam_caps | default: blank -%}
+{%- assign f_caps  = s.fasoracetam_caps | default: blank -%}
+{%- assign ph_caps = s.phenyl_hydrazide_caps | default: blank -%}
+{%- assign pr_caps = s.pramiracetam_caps | default: blank -%}
+{%- assign ph_pow  = s.phenyl_hydrazide_powder | default: blank -%}
+{%- assign a_pow   = s.aniracetam_powder | default: blank -%}
+{%- assign pr_pow  = s.pramiracetam_powder | default: blank -%}
+
+{%- style -%}
+#nx-hero-{{ sid }} {
+  --section-max-width: {{ s.max_width | default: 1100 }}px;
+  --nx-py: {{ s.padding_y | default: 32 }}px;
+  --nx-accent: var(--color-accent-primary, #FBBF24);
+  --nx-accent-hover: var(--color-accent-hover, #D97706);
+  --nx-accent-dark: var(--color-accent-dark, #92400e);
+  --nx-accent-glass: rgba(251, 191, 36, 0.08);
+  --nx-text: var(--color-text-main, #111827);
+  --nx-muted: var(--color-text-muted, #4b5563);
+  --nx-bg: {{ s.background_color | default: '#ffffff' }};
+  --nx-radius: var(--radius-premium, 14px);
+  --nx-transition: var(--transition-premium, all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1));
+  --nx-shadow-rest: var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.04));
+  --nx-shadow-hover: var(--shadow-md, 0 12px 30px rgba(0,0,0,0.06));
+  --nx-gold-glow: var(--shadow-gold-glow, 0 4px 14px rgba(251,191,36,0.25));
+  --nx-font: var(--font-body-family, sans-serif);
+  --nx-font-heading: var(--font-heading-family, sans-serif);
+
+  max-width: var(--section-max-width);
+  margin: 0 auto;
+  padding: var(--nx-py) var(--page-gutter) 12px;
+  display: grid;
+  gap: 24px;
+  background: var(--nx-bg);
+  font-family: var(--nx-font);
+  color: var(--nx-text);
+  line-height: 1.6;
+  content-visibility: auto;
+}
+
+#nx-hero-{{ sid }} .nx-hero__top { display: grid; gap: 16px; }
+
+#nx-hero-{{ sid }} h1 {
+  font-family: var(--nx-font-heading);
+  font-size: clamp(28px, 4vw, 44px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin: 0;
+  color: var(--nx-text);
+}
+
+#nx-hero-{{ sid }} .nx-sub {
+  color: var(--nx-muted);
+  font-size: 16px;
+  line-height: 1.7;
+  max-width: 680px;
+}
+
+#nx-hero-{{ sid }} .nx-hero__chips { display: flex; flex-wrap: wrap; gap: 8px; }
+
+#nx-hero-{{ sid }} .nx-chip {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding: 6px 12px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background: var(--nx-accent-glass);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: var(--nx-accent-dark);
+  transition: var(--nx-transition);
+}
+
+#nx-hero-{{ sid }} .nx-hero__btns { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
+
+#nx-hero-{{ sid }} .nx-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  min-height: 44px;
+  border: 1.5px solid var(--nx-accent);
+  background: transparent;
+  color: var(--nx-text);
+  transition: var(--nx-transition);
+}
+#nx-hero-{{ sid }} .nx-btn:hover {
+  background: var(--nx-accent);
+  color: var(--color-text-primary);
+  transform: translateY(-2px);
+  box-shadow: var(--nx-gold-glow);
+}
+#nx-hero-{{ sid }} .nx-btn:active { transform: scale(0.98); }
+
+#nx-hero-{{ sid }} .nx-btn.primary {
+  background: var(--nx-accent);
+  border-color: var(--nx-accent);
+  color: var(--color-text-primary);
+  box-shadow: var(--nx-gold-glow);
+}
+#nx-hero-{{ sid }} .nx-btn.primary:hover {
+  background: var(--nx-accent-hover);
+  border-color: var(--nx-accent-hover);
+  box-shadow: 0 8px 24px rgba(251,191,36,0.35);
+  transform: translateY(-2px);
+}
+
+#nx-hero-{{ sid }} .nx-links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
+
+#nx-hero-{{ sid }} .nx-fastlink {
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  color: var(--nx-accent-dark);
+  position: relative;
+  padding-bottom: 2px;
+  transition: var(--nx-transition);
+}
+#nx-hero-{{ sid }} .nx-fastlink::after {
+  content: "";
+  position: absolute;
+  left: 50%; right: 50%;
+  bottom: 0;
+  height: 1.5px;
+  background: var(--nx-accent);
+  transition: var(--nx-transition);
+}
+#nx-hero-{{ sid }} .nx-fastlink:hover::after { left: 0; right: 0; }
+#nx-hero-{{ sid }} .nx-fastlink:hover { color: var(--nx-text); }
+
+#nx-hero-{{ sid }} .nx-hero__img img {
+  width: 100%;
+  height: auto;
+  border-radius: var(--nx-radius);
+  box-shadow: var(--nx-shadow-rest);
+  transition: var(--nx-transition);
+}
+#nx-hero-{{ sid }} .nx-hero__img img:hover {
+  box-shadow: var(--nx-shadow-hover);
+  transform: scale(1.01);
+}
+
+#nx-hero-{{ sid }} a:focus-visible,
+#nx-hero-{{ sid }} button:focus-visible {
+  outline: 2px solid var(--nx-accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #nx-hero-{{ sid }},
+  #nx-hero-{{ sid }} * {
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
+  }
+}
+{%- endstyle -%}
+
+<section id="nx-hero-{{ sid }}" aria-label="Racetams 101 guide introduction">
+  <div class="nx-hero__top">
+    <h1>{{ s.heading | default: 'Racetams 101: Understand, Compare & Build Your Stack' }}</h1>
+    <p class="nx-sub">{{ s.subheading | default: 'A clean, shopper-friendly guide to Aniracetam, Fasoracetam, Phenylpiracetam Hydrazide, and Pramiracetam—plus powder options in stock.' }}</p>
+
+    <div class="nx-hero__chips">
+      <span class="nx-chip">Same/Next-Day UAE</span>
+      <span class="nx-chip">Express Intl. Shipping &ge;300 AED</span>
+      <span class="nx-chip">Sourced from leading manufacturers</span>
+    </div>
+
+    <div class="nx-hero__btns">
+      {% if collection_url != blank %}
+        <a class="nx-btn primary" href="{{ collection_url }}">Shop Racetams</a>
+      {% endif %}
+      {% if a_caps != blank %}<a class="nx-btn" href="{{ a_caps.url }}">Aniracetam</a>{% endif %}
+      {% if f_caps != blank %}<a class="nx-btn" href="{{ f_caps.url }}">Fasoracetam</a>{% endif %}
+      {% if ph_caps != blank %}<a class="nx-btn" href="{{ ph_caps.url }}">Phenylpiracetam Hydrazide</a>{% endif %}
+      {% if pr_caps != blank %}<a class="nx-btn" href="{{ pr_caps.url }}">Pramiracetam</a>{% endif %}
+    </div>
+
+    <div class="nx-links">
+      {% if a_pow != blank %}<a class="nx-fastlink" href="{{ a_pow.url }}">Aniracetam Powder</a>{% endif %}
+      {% if ph_pow != blank %}<a class="nx-fastlink" href="{{ ph_pow.url }}">Phenylpiracetam Hydrazide Powder</a>{% endif %}
+      {% if pr_pow != blank %}<a class="nx-fastlink" href="{{ pr_pow.url }}">Pramiracetam Powder</a>{% endif %}
+      <a class="nx-fastlink" href="#quick-comparison">See Quick Comparison</a>
+    </div>
+  </div>
+
+  {% if s.hero_image != blank %}
+  <div class="nx-hero__img">
+    <img src="{{ s.hero_image | image_url: width: 1600 }}" alt="{{ s.hero_alt | escape }}" loading="eager" fetchpriority="high" width="{{ s.hero_image.width }}" height="{{ s.hero_image.height }}">
+  </div>
+  {% endif %}
+</section>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Article",
+      "headline": {{ s.heading | default: 'Racetams 101' | json }},
+      "description": {{ s.subheading | default: 'A guide to Aniracetam, Fasoracetam, Phenylpiracetam Hydrazide, and Pramiracetam.' | json }},
+      "author": { "@type": "Organization", "name": "Nootropix" },
+      "publisher": { "@type": "Organization", "name": "Nootropix", "url": {{ shop.url | json }} },
+      "datePublished": {{ s.date_published | default: "2025-06-01" | json }},
+      "dateModified": {{ page.updated_at | date: "%Y-%m-%d" | json }},
+      "mainEntityOfPage": {{ canonical_url | json }}
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Home", "item": {{ shop.url | json }} },
+        { "@type": "ListItem", "position": 2, "name": {{ s.heading | default: 'Racetams 101' | json }}, "item": {{ canonical_url | json }} }
+      ]
+    }
+  ]
+}
+</script>
+
+{% schema %}
+{
+  "name": "NX — Racetams Hero",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading" },
+    { "type": "text", "id": "subheading", "label": "Subheading" },
+    { "type": "image_picker", "id": "hero_image", "label": "Hero image" },
+    { "type": "text", "id": "hero_alt", "label": "Hero alt text" },
+    { "type": "collection", "id": "collection", "label": "Racetams collection (optional)" },
+
+    { "type": "header", "content": "In-stock SKUs — Capsules" },
+    { "type": "product", "id": "aniracetam_caps", "label": "Aniracetam (capsules)" },
+    { "type": "product", "id": "fasoracetam_caps", "label": "Fasoracetam (capsules)" },
+    { "type": "product", "id": "phenyl_hydrazide_caps", "label": "Phenylpiracetam Hydrazide (capsules)" },
+    { "type": "product", "id": "pramiracetam_caps", "label": "Pramiracetam (capsules)" },
+
+    { "type": "header", "content": "In-stock SKUs — Powders" },
+    { "type": "product", "id": "aniracetam_powder", "label": "Aniracetam Powder" },
+    { "type": "product", "id": "phenyl_hydrazide_powder", "label": "Phenylpiracetam Hydrazide Powder" },
+    { "type": "product", "id": "pramiracetam_powder", "label": "Pramiracetam Powder" },
+
+    { "type": "header", "content": "Layout" },
+    { "type": "color", "id": "background_color", "label": "Background color", "default": "#ffffff" },
+    { "type": "range", "id": "max_width", "min": 800, "max": 1400, "step": 10, "default": 1100, "label": "Max width (px)" },
+    { "type": "range", "id": "padding_y", "min": 16, "max": 120, "step": 4, "default": 32, "label": "Vertical padding (px)" },
+
+    { "type": "header", "content": "SEO" },
+    { "type": "text", "id": "date_published", "label": "Date published (YYYY-MM-DD)", "default": "2025-06-01" }
+  ],
+  "presets": [{ "name": "NX — Racetams 101 Hero" }]
+}
+{% endschema %}

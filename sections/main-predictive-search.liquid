@@ -1,0 +1,50 @@
+{{ 'section-main-predictive-search.css' | asset_url | stylesheet_tag }}
+{{ 'transform-pill.css' | asset_url | stylesheet_tag }}
+
+{% comment %}
+  <script>
+    var search_filter = '{{ section.settings.search_only | json }}';
+  </script>
+{% endcomment %}
+
+{% liquid
+  assign color_schema = section.settings.color_scheme
+  assign search_only = section.settings.search_only
+%}
+
+<xo-modal
+  class='xo-main-predictive-search color-{{ color_schema }}'
+  xo-name='search'
+  xo-scroll-disabled
+  xo-animate='fade-down'
+  xo-placement='top-left'
+  xo-autofocus
+  xo-portal
+>
+  {% capture content %}
+    <xo-container>
+      {% assign label = 'general.search.search' | t %}
+      {% render 'predictive-search', label: label, search_only: search_only %}
+      {% if settings.enable_text_suggess %}
+        <div class='xo-main-predictive-search__caption'>{{ 'general.search.popular_searches' | t }}</div>
+        <div class='xo-main-predictive-search__tag-group'>
+          {% render 'transform-pill', title_pill: settings.pill %}
+        </div>
+      {% endif %}
+    </xo-container>
+  {% endcapture %}
+  {% render 'modal-content', full_width: true, content: content, scroll_disabled: true %}
+</xo-modal>
+
+{% schema %}
+{
+  "name": "t:sections.main_predictive_search.name",
+  "enabled_on": {
+    "groups": [
+      "header"
+    ]
+  },
+  "class": "section-predictive-search",
+  "settings": []
+}
+{% endschema %}

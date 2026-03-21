@@ -1,0 +1,141 @@
+{% comment %}
+  Renders a product bundle
+
+  @param {object} collection - Collection
+  @param {object} product_list - Product list
+  @param {string} discount_type - Discount type
+  @param {number} min_quantity - Min quantity
+  @param {number} value_discount - Value discount
+
+  @example
+  {% render 'product-bundle',
+    collection: collection,
+    product_list: product_list,
+    discount_type: discount_type,
+    min_quantity: min_quantity,
+    value_discount: value_discount
+  %}
+{% endcomment %}
+
+{% capture discount_arr %}
+  xo-discounts="
+    [
+      {% for block in blocks %}
+        {% case block.type %}
+          {% when 'discount' %}
+            {% if block.settings.discount_type == 'fixed-amount' %}
+              { type: '{{ block.settings.discount_type }}', minQuantity: {{ block.settings.min_quantity }}, value: {{ block.settings.value_discount | times: 100 }} },
+            {% else %}
+              { type: '{{ block.settings.discount_type }}', minQuantity: {{ block.settings.min_quantity }}, value: {{ block.settings.value_discount }} },
+            {% endif %}
+        {% endcase %}
+      {% endfor %}
+    ]
+  "
+{% endcapture %}
+
+<div class="xo-product-bundle">
+  <div class="xo-product-bundle__heading">
+    {% render 'text', context: section %}
+  </div>
+  <xo-bundle-provider
+    xo-name="{{ section.id }}"
+    {{ discount_arr }}
+    class="xo-product-bundle__provider"
+  >
+    <template xo-bundle-property>
+      <div>{label}</div>
+      <div>{value}</div>
+    </template>
+    <div class="xo-product-bundle__sticky-mobile">
+      {% render 'bundle-modal',
+        modal_name: 'bundle-product',
+        bundle_modal_type: 'product',
+        bundle_type: 'product',
+        empty_text: empty_text,
+        blocks: blocks,
+        discount_blocks: discount_blocks
+      %}
+    </div>
+    <xo-grid class="xo-product-bundle__grid">
+      <div class="xo-product-bundle__left" style="--xxl: 9; --xl: 8; --lg: 7; --md: 12; --xs: 12">
+        <xo-grid class="xo-product-bundle__grid" style="--xxl: 3; --xl: 3; --lg: 2; --md: 2; --xs: 2">
+          {% if collection != blank %}
+            {% for product in collection.products %}
+              <div class="xo-product-bundle__product">
+                {% render 'product-card',
+                  product: product,
+                  show_image: settings.product_card_show_image,
+                  show_secondary_image: settings.product_card_show_secondary_image,
+                  show_vendor: settings.product_card_show_vendor,
+                  show_description: settings.product_card_show_description,
+                  show_quick_add: settings.product_card_show_quick_add,
+                  show_quick_view: settings.product_card_show_quick_view,
+                  show_favorite: settings.product_card_show_favorite,
+                  show_price: settings.product_card_show_price,
+                  show_badge: settings.product_card_show_badge,
+                  position_badge: settings.position_badge,
+                  media_aspect_ratio: section.settings.product_card_aspect_ratio,
+                  color_scheme: section.settings.card_color_scheme,
+                  placeholder_image: placeholder_image,
+                  animate_enabled: true,
+                  is_bundle: true
+                %}
+              </div>
+            {% endfor %}
+          {% elsif product_list != blank %}
+            {% for product in product_list %}
+              <div class="xo-product-bundle__product">
+                {% render 'product-card',
+                  product: product,
+                  show_image: settings.product_card_show_image,
+                  show_secondary_image: settings.product_card_show_secondary_image,
+                  show_vendor: settings.product_card_show_vendor,
+                  show_description: settings.product_card_show_description,
+                  show_quick_add: settings.product_card_show_quick_add,
+                  show_quick_view: settings.product_card_show_quick_view,
+                  show_favorite: settings.product_card_show_favorite,
+                  show_price: settings.product_card_show_price,
+                  show_badge: settings.product_card_show_badge,
+                  position_badge: settings.position_badge,
+                  media_aspect_ratio: section.settings.product_card_aspect_ratio,
+                  color_scheme: section.settings.card_color_scheme,
+                  placeholder_image: placeholder_image,
+                  animate_enabled: true,
+                  is_bundle: true
+                %}
+              </div>
+            {% endfor %}
+          {% else %}
+            {% for item in (1..6) %}
+              <div class="xo-product-bundle__product">
+                {% render 'product-card',
+                  product: empty,
+                  show_image: settings.product_card_show_image,
+                  show_secondary_image: settings.product_card_show_secondary_image,
+                  show_vendor: settings.product_card_show_vendor,
+                  show_description: settings.product_card_show_description,
+                  show_quick_add: settings.product_card_show_quick_add,
+                  show_quick_view: settings.product_card_show_quick_view,
+                  show_favorite: settings.product_card_show_favorite,
+                  show_price: settings.product_card_show_price,
+                  show_badge: settings.product_card_show_badge,
+                  position_badge: settings.position_badge,
+                  media_aspect_ratio: section.settings.product_card_aspect_ratio,
+                  color_scheme: section.settings.card_color_scheme,
+                  placeholder_image: placeholder_image,
+                  animate_enabled: true,
+                  is_bundle: true
+                %}
+              </div>
+            {% endfor %}
+          {% endif %}
+        </xo-grid>
+      </div>
+      <div class="xo-product-bundle__right" style="--xxl: 3; --xl: 4; --lg: 5; --md: 12; --xs: 12">
+        {% render 'bundle-box', blocks: blocks, discount_blocks: discount_blocks, bundle_type: 'product', empty_text: empty_text %}
+      </div>
+    </xo-grid>
+  </xo-bundle-provider>
+  <xo-sticky-hidden xo-name="bundle-sticky-hidden"></xo-sticky-hidden>
+</div>

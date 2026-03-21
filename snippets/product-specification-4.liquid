@@ -1,0 +1,69 @@
+{% comment %}
+  Renders a product special element with a given value
+
+  Accepts:
+  - class: {String} Font size heading (required)
+  - heading: {String} Heading (required)
+  - image: {String} Image (required)
+  - aspect_ratio: {String} Aspect ratio (required)
+  - block: {Object} Block (required)
+
+  Usage:
+  {% render 'product-specification-4', class: class, heading: heading, image: image, aspect_ratio: aspect_ratio, block: block %}
+{% endcomment %}
+
+{% if block.size == 1 %}
+  {% capture style %}
+    style="--lg: 12; --md: 12; --xs: 12"
+  {% endcapture %}
+{%- elsif block.size == 2 -%}
+  {% capture style %}
+      style="--lg: 6; --md: 12; --xs: 12"
+    {% endcapture %}
+{% endif %}
+
+<div class='product-specification-4'>
+  <xo-animate xo-cascade>
+    {% if heading %}
+      <h5 class='product-specification-4__heading {{ class }}'>{{ heading }}</h5>
+    {% endif %}
+  </xo-animate>
+  <div class='product-specification-4__content'>
+    <xo-grid class='product-specification-4__grid'>
+      <xo-animate xo-cascade style='--lg: 7; --md: 6; --xs: 12'>
+        <div class='product-specification-4__left'>
+          <div class='product-specification-4__image-comparison'>
+            <xo-image-comparison>
+              <xo-image-comparison-before>
+                <div class='product-specification-4__image'>
+                  {% render 'image', image: image_before, aspect_ratio: aspect_ratio %}
+                </div>
+              </xo-image-comparison-before>
+              <xo-image-comparison-after>
+                <div class='product-specification-4__image'>
+                  {% render 'image', image: image_after, aspect_ratio: aspect_ratio %}
+                </div>
+              </xo-image-comparison-after>
+              <xo-image-comparison-handle>
+                <xo-image-comparison-handle-icon>
+                  {% render 'icon', name: 'comparison', size: '3.6rem' %}
+                </xo-image-comparison-handle-icon>
+              </xo-image-comparison-handle>
+            </xo-image-comparison>
+          </div>
+        </div>
+      </xo-animate>
+      <xo-animate xo-cascade style='--lg: 5; --md: 6; --xs: 12'>
+        <div class='product-specification-4__right'>
+          <xo-grid class='product-specification-4__right-grid'>
+            {% for item in block %}
+              <div class='product-specification-4__right-item' {{ style }}>
+                {% render 'feature-special', item: item %}
+              </div>
+            {% endfor %}
+          </xo-grid>
+        </div>
+      </xo-animate>
+    </xo-grid>
+  </div>
+</div>

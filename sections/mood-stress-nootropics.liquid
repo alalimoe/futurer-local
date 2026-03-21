@@ -1,0 +1,951 @@
+{% comment %}
+  =============================================
+  Section: Mood & Stress / Focus Nootropics LP
+  File: sections/mood-stress-nootropics.liquid
+  Purpose: Product-focused LP — 4 focus nootropics, comparison table, CRO / SEO / A11y
+  Theme: Futurer 2.x (OS 2.0) — cascades from global tokens
+  =============================================
+{% endcomment %}
+
+{%- assign s = section.settings -%}
+{%- assign sid = section.id -%}
+
+{%- comment -%} ── Product resolution (picker → handle → known fallback) ── {%- endcomment -%}
+{%- assign p1 = s.product_1 -%}
+{%- if p1 == blank and s.product_1_handle != blank -%}
+  {%- assign p1 = all_products[s.product_1_handle] -%}
+{%- endif -%}
+{%- if p1 == blank -%}
+  {%- assign p1 = all_products['alpha-gpc'] -%}
+{%- endif -%}
+
+{%- assign p2 = s.product_2 -%}
+{%- if p2 == blank and s.product_2_handle != blank -%}
+  {%- assign p2 = all_products[s.product_2_handle] -%}
+{%- endif -%}
+{%- if p2 == blank -%}
+  {%- assign p2 = all_products['caffeine-l-theanine'] -%}
+{%- endif -%}
+
+{%- assign p3 = s.product_3 -%}
+{%- if p3 == blank and s.product_3_handle != blank -%}
+  {%- assign p3 = all_products[s.product_3_handle] -%}
+{%- endif -%}
+{%- if p3 == blank -%}
+  {%- assign p3 = all_products['fladrafinil'] -%}
+{%- endif -%}
+
+{%- assign p4 = s.product_4 -%}
+{%- if p4 == blank and s.product_4_handle != blank -%}
+  {%- assign p4 = all_products[s.product_4_handle] -%}
+{%- endif -%}
+{%- if p4 == blank -%}
+  {%- assign p4 = all_products['phenylpiracetam-hydrazide'] -%}
+{%- endif -%}
+
+{%- assign faq_blocks = section.blocks | where: 'type', 'faq' -%}
+
+{%- comment -%} ── JSON-LD: Article ── {%- endcomment -%}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": {{ s.hero_title | default: "Get Laser Focus Today" | json }},
+  "description": {{ s.hero_subtitle | strip_html | truncate: 160 | json }},
+  "author": { "@type": "Organization", "name": "Nootropix" },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Nootropix",
+    "url": {{ shop.url | json }},
+    "logo": {
+      "@type": "ImageObject",
+      "url": {{ shop.url | append: '/cdn/shop/files/nootropix-logo.png' | json }}
+    }
+  },
+  "datePublished": {{ s.date_published | default: "2025-06-01" | json }},
+  "dateModified": {{ page.updated_at | date: "%Y-%m-%d" | default: "2025-06-01" | json }},
+  "mainEntityOfPage": {{ canonical_url | json }}
+}
+</script>
+
+{%- comment -%} ── JSON-LD: ItemList ── {%- endcomment -%}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "name": "Focus & Energy Nootropics",
+  "numberOfItems": 4,
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Alpha-GPC", "description": "Choline donor for deep work blocks — supports acetylcholine for sustained attention." },
+    { "@type": "ListItem", "position": 2, "name": "Caffeine + L-Theanine", "description": "Smooth, clean energy for meetings and coding — focused alertness without jitters." },
+    { "@type": "ListItem", "position": 3, "name": "Fladrafinil", "description": "Wakefulness agent for all-nighter crunches — non-amphetamine alertness support." },
+    { "@type": "ListItem", "position": 4, "name": "Phenylpiracetam Hydrazide", "description": "Potent racetam for competitive focus — long-duration cognitive support." }
+  ]
+}
+</script>
+
+{%- comment -%} ── JSON-LD: FAQPage (dynamic from blocks) ── {%- endcomment -%}
+{% if faq_blocks.size > 0 %}
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {%- for block in faq_blocks -%}
+        {
+          "@type": "Question",
+          "name": {{ block.settings.q | json }},
+          "acceptedAnswer": { "@type": "Answer", "text": {{ block.settings.a | json }} }
+        }{%- unless forloop.last -%},{%- endunless -%}
+      {%- endfor -%}
+    ]
+  }
+  </script>
+{% endif %}
+
+{%- comment -%} ── JSON-LD: BreadcrumbList ── {%- endcomment -%}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": {{ shop.url | json }} },
+    { "@type": "ListItem", "position": 2, "name": "Focus Nootropics", "item": {{ canonical_url | json }} }
+  ]
+}
+</script>
+
+<section id="mood-stress-{{ sid }}" class="ms-section" aria-labelledby="ms-title-{{ sid }}">
+  <div class="ms-inner">
+
+    {%- comment -%} ── HERO ── {%- endcomment -%}
+    <header class="ms-hero"{% if s.hero_image != blank %} style="background-image:url({{ s.hero_image | image_url: width: 1600 }});"{% endif %}>
+      <div class="ms-hero-overlay">
+        <h1 id="ms-title-{{ sid }}" class="ms-hero-title">{{ s.hero_title | default: "Get Laser Focus Today" }}</h1>
+        <p class="ms-hero-sub">{{ s.hero_subtitle | default: "Four best-selling, lab-tested compounds for clean energy — shipped from our Dubai warehouse so the benefits kick in tonight." }}</p>
+        <div class="ms-hero-actions">
+          <a href="{{ s.collection_link | default: routes.all_products_collection_url }}" class="ms-btn ms-btn--primary">{{ s.hero_cta | default: "Order By 5 pm, Get It in 4 Hours" }}</a>
+          <a href="#ms-compare" class="ms-btn ms-btn--ghost">See Comparison</a>
+        </div>
+      </div>
+    </header>
+
+    {%- comment -%} ── INTRO ── {%- endcomment -%}
+    <div class="ms-intro" aria-label="Introduction">
+      <div class="ms-intro-text">{{ s.intro_text | default: "<p>Whether you're sprinting through code, finals week, or a 12-hour design session, the right nootropics can flip your focus switch — <em>now</em>. Below you'll find our four best-selling, lab-tested compounds for clean energy.</p>" }}</div>
+    </div>
+
+    {%- comment -%} ── 4-PRODUCT STACK GRID ── {%- endcomment -%}
+    <section aria-label="Focus Nootropics">
+      <span class="ms-kicker">Fast-Moving</span>
+      <h2 class="ms-heading">Focus Boosters</h2>
+      <div class="ms-product-grid">
+
+        {%- comment -%} Card 1 {%- endcomment -%}
+        <article class="ms-product-card">
+          {% if p1 != blank and p1.featured_image %}
+            <div class="ms-product-img">
+              <img src="{{ p1.featured_image | image_url: width: 600 }}" alt="{{ p1.title }}" loading="lazy" width="600" height="600">
+            </div>
+          {% endif %}
+          <h3 class="ms-product-title">{{ p1.title | default: "Alpha-GPC" }}</h3>
+          <p class="ms-product-desc">{{ s.product_1_desc | default: "Choline donor for deep work blocks — supports acetylcholine for sustained attention." }}</p>
+          <div class="ms-product-footer">
+            {% if p1 != blank %}
+              <div class="ms-product-ctas">
+                <a class="ms-btn ms-btn--ghost" href="{{ p1.url }}">View Product</a>
+                <form method="post" action="{{ routes.cart_add_url }}">
+                  <input type="hidden" name="id" value="{{ p1.selected_or_first_available_variant.id }}">
+                  <button type="submit" class="ms-btn ms-btn--primary">Add to Cart</button>
+                </form>
+              </div>
+              <div class="ms-product-meta">From {{ p1.price | money }}</div>
+            {% endif %}
+          </div>
+        </article>
+
+        {%- comment -%} Card 2 {%- endcomment -%}
+        <article class="ms-product-card">
+          {% if p2 != blank and p2.featured_image %}
+            <div class="ms-product-img">
+              <img src="{{ p2.featured_image | image_url: width: 600 }}" alt="{{ p2.title }}" loading="lazy" width="600" height="600">
+            </div>
+          {% endif %}
+          <h3 class="ms-product-title">{{ p2.title | default: "Caffeine + L-Theanine" }}</h3>
+          <p class="ms-product-desc">{{ s.product_2_desc | default: "Smooth, clean energy for meetings and coding — focused alertness without jitters." }}</p>
+          <div class="ms-product-footer">
+            {% if p2 != blank %}
+              <div class="ms-product-ctas">
+                <a class="ms-btn ms-btn--ghost" href="{{ p2.url }}">View Product</a>
+                <form method="post" action="{{ routes.cart_add_url }}">
+                  <input type="hidden" name="id" value="{{ p2.selected_or_first_available_variant.id }}">
+                  <button type="submit" class="ms-btn ms-btn--primary">Add to Cart</button>
+                </form>
+              </div>
+              <div class="ms-product-meta">From {{ p2.price | money }}</div>
+            {% endif %}
+          </div>
+        </article>
+
+        {%- comment -%} Card 3 {%- endcomment -%}
+        <article class="ms-product-card">
+          {% if p3 != blank and p3.featured_image %}
+            <div class="ms-product-img">
+              <img src="{{ p3.featured_image | image_url: width: 600 }}" alt="{{ p3.title }}" loading="lazy" width="600" height="600">
+            </div>
+          {% endif %}
+          <h3 class="ms-product-title">{{ p3.title | default: "Fladrafinil" }}</h3>
+          <p class="ms-product-desc">{{ s.product_3_desc | default: "Wakefulness agent for all-nighter crunches — non-amphetamine alertness support." }}</p>
+          <div class="ms-product-footer">
+            {% if p3 != blank %}
+              <div class="ms-product-ctas">
+                <a class="ms-btn ms-btn--ghost" href="{{ p3.url }}">View Product</a>
+                <form method="post" action="{{ routes.cart_add_url }}">
+                  <input type="hidden" name="id" value="{{ p3.selected_or_first_available_variant.id }}">
+                  <button type="submit" class="ms-btn ms-btn--primary">Add to Cart</button>
+                </form>
+              </div>
+              <div class="ms-product-meta">From {{ p3.price | money }}</div>
+            {% endif %}
+          </div>
+        </article>
+
+        {%- comment -%} Card 4 {%- endcomment -%}
+        <article class="ms-product-card">
+          {% if p4 != blank and p4.featured_image %}
+            <div class="ms-product-img">
+              <img src="{{ p4.featured_image | image_url: width: 600 }}" alt="{{ p4.title }}" loading="lazy" width="600" height="600">
+            </div>
+          {% endif %}
+          <h3 class="ms-product-title">{{ p4.title | default: "Phenylpiracetam Hydrazide" }}</h3>
+          <p class="ms-product-desc">{{ s.product_4_desc | default: "Potent racetam for competitive focus — long-duration cognitive support." }}</p>
+          <div class="ms-product-footer">
+            {% if p4 != blank %}
+              <div class="ms-product-ctas">
+                <a class="ms-btn ms-btn--ghost" href="{{ p4.url }}">View Product</a>
+                <form method="post" action="{{ routes.cart_add_url }}">
+                  <input type="hidden" name="id" value="{{ p4.selected_or_first_available_variant.id }}">
+                  <button type="submit" class="ms-btn ms-btn--primary">Add to Cart</button>
+                </form>
+              </div>
+              <div class="ms-product-meta">From {{ p4.price | money }}</div>
+            {% endif %}
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+    {%- comment -%} ── COMPARISON TABLE ── {%- endcomment -%}
+    <section id="ms-compare" aria-label="Comparison table">
+      <span class="ms-kicker">Head-to-Head</span>
+      <h2 class="ms-heading">Focus Nootropics Comparison</h2>
+      <div class="ms-table-wrap">
+        <table class="ms-table" aria-label="Focus nootropics comparison">
+          <thead>
+            <tr>
+              <th scope="col">Nootropic</th>
+              <th scope="col">Onset</th>
+              <th scope="col">Duration</th>
+              <th scope="col">Best For</th>
+              <th scope="col">Stack Tip</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td data-label="Nootropic"><strong>Caffeine + L-Theanine</strong></td>
+              <td data-label="Onset">15 min</td>
+              <td data-label="Duration">4-5 h</td>
+              <td data-label="Best For">Meetings, coding</td>
+              <td data-label="Stack Tip">Add Alpha-GPC for memory</td>
+            </tr>
+            <tr>
+              <td data-label="Nootropic"><strong>Alpha-GPC</strong></td>
+              <td data-label="Onset">30 min</td>
+              <td data-label="Duration">6 h</td>
+              <td data-label="Best For">Deep work blocks</td>
+              <td data-label="Stack Tip">Pair with racetam for synergy</td>
+            </tr>
+            <tr>
+              <td data-label="Nootropic"><strong>Fladrafinil</strong></td>
+              <td data-label="Onset">25 min</td>
+              <td data-label="Duration">5-6 h</td>
+              <td data-label="Best For">All-nighter crunch</td>
+              <td data-label="Stack Tip">Take L-Theanine to smooth edges</td>
+            </tr>
+            <tr>
+              <td data-label="Nootropic"><strong>Phenylpiracetam Hydrazide</strong></td>
+              <td data-label="Onset">40 min</td>
+              <td data-label="Duration">6-8 h</td>
+              <td data-label="Best For">Competitive e-sports</td>
+              <td data-label="Stack Tip">Chase with Alpha-GPC to refuel</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    {%- comment -%} ── TRUST ICONS ── {%- endcomment -%}
+    <section aria-label="Why these nootropics work">
+      <span class="ms-kicker">Quality</span>
+      <h2 class="ms-heading">Why These Focus Nootropics Work</h2>
+      <div class="ms-trust-grid">
+        <div class="ms-trust-card">
+          {% if s.icon_1_image != blank %}
+            <div class="ms-trust-icon"><img src="{{ s.icon_1_image | image_url: width: 120 }}" alt="{{ s.icon_1_title | default: 'Clinically Dosed' }}" loading="lazy" width="60" height="60"></div>
+          {% else %}
+            <span class="ms-trust-emoji" aria-hidden="true">&#128138;</span>
+          {% endif %}
+          <span class="ms-trust-label">{{ s.icon_1_title | default: "Clinically Dosed" }}</span>
+        </div>
+        <div class="ms-trust-card">
+          {% if s.icon_2_image != blank %}
+            <div class="ms-trust-icon"><img src="{{ s.icon_2_image | image_url: width: 120 }}" alt="{{ s.icon_2_title | default: 'COA Verified' }}" loading="lazy" width="60" height="60"></div>
+          {% else %}
+            <span class="ms-trust-emoji" aria-hidden="true">&#128300;</span>
+          {% endif %}
+          <span class="ms-trust-label">{{ s.icon_2_title | default: "COA Verified" }}</span>
+        </div>
+        <div class="ms-trust-card">
+          {% if s.icon_3_image != blank %}
+            <div class="ms-trust-icon"><img src="{{ s.icon_3_image | image_url: width: 120 }}" alt="{{ s.icon_3_title | default: '4-Hour Delivery' }}" loading="lazy" width="60" height="60"></div>
+          {% else %}
+            <span class="ms-trust-emoji" aria-hidden="true">&#9889;</span>
+          {% endif %}
+          <span class="ms-trust-label">{{ s.icon_3_title | default: "4-Hour Delivery" }}</span>
+        </div>
+      </div>
+    </section>
+
+    {%- comment -%} ── FAQ (animated disclosure) ── {%- endcomment -%}
+    <section aria-label="Frequently asked questions">
+      <span class="ms-kicker">Questions</span>
+      <h2 class="ms-heading">Focus Nootropics FAQ</h2>
+
+      {% if faq_blocks.size > 0 %}
+        {% for block in faq_blocks %}
+          <details class="ms-faq" {{ block.shopify_attributes }}>
+            <summary class="ms-faq-q">{{ block.settings.q }}<span class="ms-faq-chevron" aria-hidden="true"></span></summary>
+            <div class="ms-faq-answer"><div class="ms-faq-inner"><p>{{ block.settings.a }}</p></div></div>
+          </details>
+        {% endfor %}
+      {% else %}
+        <details class="ms-faq">
+          <summary class="ms-faq-q">Can I combine these nootropics in one stack?<span class="ms-faq-chevron" aria-hidden="true"></span></summary>
+          <div class="ms-faq-answer"><div class="ms-faq-inner"><p>Yes. Many customers pair a stimulant (Caffeine + L-Theanine or Fladrafinil) with a choline donor (Alpha-GPC) for smoother focus. Stay within label dosing.</p></div></div>
+        </details>
+        <details class="ms-faq">
+          <summary class="ms-faq-q">Will I crash or feel jitters?<span class="ms-faq-chevron" aria-hidden="true"></span></summary>
+          <div class="ms-faq-answer"><div class="ms-faq-inner"><p>Our Caffeine stack includes 200 mg L-Theanine to blunt spikes. Fladrafinil and Phenylpiracetam are non-amphetamine stimulants, producing minimal rebound when dosed correctly.</p></div></div>
+        </details>
+        <details class="ms-faq">
+          <summary class="ms-faq-q">Are these allowed in e-sports or exams?<span class="ms-faq-chevron" aria-hidden="true"></span></summary>
+          <div class="ms-faq-answer"><div class="ms-faq-inner"><p>Yes. None of the four compounds appear on WADA or UAE controlled-substance lists. Always check your organisation's latest policy.</p></div></div>
+        </details>
+      {% endif %}
+    </section>
+
+    {%- comment -%} ── FINAL CTA ── {%- endcomment -%}
+    <section class="ms-final-cta" aria-label="Get started">
+      <h2 class="ms-heading">Ready to test your new focus stack?</h2>
+      <p class="ms-body-muted">Place your order now and hit deep-work mode, tonight.</p>
+      <a class="ms-btn ms-btn--primary" href="{{ s.cta_link | default: routes.all_products_collection_url }}">{{ s.cta_text | default: "Shop 4-Hour Delivery" }}</a>
+    </section>
+
+  </div>
+</section>
+
+{%- style -%}
+/* ═══════════════════════════════════════════════════════
+   MOOD & STRESS / FOCUS NOOTROPICS — Premium Design Tokens
+   ═══════════════════════════════════════════════════════ */
+
+#mood-stress-{{ sid }} {
+  --section-max-width: {{ s.max_width | default: 1100 }}px;
+  --ms-py: {{ s.padding_y | default: 56 }}px;
+  --ms-accent: var(--color-accent-primary, #FBBF24);
+  --ms-accent-hover: var(--color-accent-hover, #D97706);
+  --ms-accent-dark: var(--color-accent-dark, #92400e);
+  --ms-accent-glass: rgba(251, 191, 36, 0.08);
+  --ms-accent-glass-strong: rgba(251, 191, 36, 0.14);
+  --ms-text: var(--color-text-main, #111827);
+  --ms-muted: var(--color-text-muted, #4b5563);
+  --ms-bg: {{ s.background_color | default: '#ffffff' }};
+  --ms-bg-alt: var(--color-bg-secondary, #f9fafb);
+  --ms-radius: var(--radius-premium, 14px);
+  --ms-transition: var(--transition-premium, all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1));
+  --ms-shadow-rest: var(--shadow-sm, 0 2px 8px rgba(0, 0, 0, 0.04));
+  --ms-shadow-hover: var(--shadow-md, 0 12px 30px rgba(0, 0, 0, 0.06));
+  --ms-gold-glow: var(--shadow-gold-glow, 0 4px 14px rgba(251, 191, 36, 0.25));
+  --ms-gold-glow-hover: var(--shadow-gold-glow-hover, 0 8px 24px rgba(251, 191, 36, 0.35));
+  --ms-font: var(--font-body-family, sans-serif);
+  --ms-font-heading: var(--font-heading-family, sans-serif);
+
+  background: var(--ms-bg);
+  color: var(--ms-text);
+  font-family: var(--ms-font);
+  line-height: 1.6;
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 5000px;
+}
+
+#mood-stress-{{ sid }} .ms-inner {
+  max-width: var(--section-max-width);
+  margin: 0 auto;
+  padding: var(--ms-py) var(--page-gutter);
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+@media (min-width: 990px) {
+  #mood-stress-{{ sid }} .ms-inner { gap: 56px; }
+}
+
+/* ── Shared typography ── */
+#mood-stress-{{ sid }} .ms-kicker {
+  display: block;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 700;
+  font-size: 12px;
+  color: var(--ms-accent-dark);
+  margin-bottom: 6px;
+}
+#mood-stress-{{ sid }} .ms-heading {
+  font-family: var(--ms-font-heading);
+  font-size: clamp(22px, 3vw, 34px);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--ms-text);
+  margin: 0 0 10px;
+}
+#mood-stress-{{ sid }} .ms-body-muted {
+  color: var(--ms-muted);
+  line-height: 1.6;
+  margin: 0 0 16px;
+}
+
+/* ═══════════════════════════════════════════════════════
+   BUTTONS — Ghost + Primary
+   ═══════════════════════════════════════════════════════ */
+#mood-stress-{{ sid }} .ms-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 11px 20px;
+  border-radius: 10px;
+  font-family: var(--ms-font);
+  font-weight: 600;
+  font-size: 15px;
+  text-decoration: none;
+  min-height: var(--touch-min, 44px);
+  transition: var(--ms-transition);
+  cursor: pointer;
+}
+#mood-stress-{{ sid }} .ms-btn--ghost {
+  background: transparent;
+  border: 1.5px solid var(--ms-accent);
+  color: var(--ms-text);
+}
+#mood-stress-{{ sid }} .ms-btn--ghost:hover {
+  background: var(--ms-accent);
+  color: var(--color-text-primary);
+  transform: translateY(-2px);
+  box-shadow: var(--ms-shadow-hover);
+}
+#mood-stress-{{ sid }} .ms-btn--primary {
+  background: var(--ms-accent);
+  color: var(--color-text-primary);
+  border: 1.5px solid var(--ms-accent);
+  box-shadow: var(--ms-gold-glow);
+}
+#mood-stress-{{ sid }} .ms-btn--primary:hover {
+  background: var(--ms-accent-hover);
+  border-color: var(--ms-accent-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--ms-gold-glow-hover);
+}
+#mood-stress-{{ sid }} .ms-btn:active {
+  transform: scale(0.98);
+}
+
+/* ═══════════════════════════════════════════════════════
+   HERO
+   ═══════════════════════════════════════════════════════ */
+#mood-stress-{{ sid }} .ms-hero {
+  background: linear-gradient(135deg, rgba(251,191,36,0.08) 0%, rgba(251,191,36,0.18) 50%, rgba(251,191,36,0.08) 100%);
+  background-size: cover;
+  background-position: center;
+  border-radius: 20px;
+  overflow: hidden;
+  min-height: 300px;
+  display: flex;
+  align-items: flex-end;
+}
+#mood-stress-{{ sid }} .ms-hero-overlay {
+  width: 100%;
+  padding: 36px 24px;
+  background: rgba(0, 0, 0, 0.25);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+}
+@media (min-width: 990px) {
+  #mood-stress-{{ sid }} .ms-hero { min-height: 380px; }
+  #mood-stress-{{ sid }} .ms-hero-overlay { padding: 48px 36px; }
+}
+#mood-stress-{{ sid }} .ms-hero-title {
+  font-family: var(--ms-font-heading);
+  font-size: clamp(28px, 5vw, 50px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  color: #fff;
+  margin: 0 0 10px;
+}
+#mood-stress-{{ sid }} .ms-hero-sub {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: clamp(15px, 2vw, 18px);
+  line-height: 1.6;
+  margin: 0 0 20px;
+  max-width: 640px;
+}
+#mood-stress-{{ sid }} .ms-hero-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+#mood-stress-{{ sid }} .ms-hero .ms-btn--ghost {
+  border-color: rgba(255, 255, 255, 0.5);
+  color: #fff;
+}
+#mood-stress-{{ sid }} .ms-hero .ms-btn--ghost:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: #fff;
+  color: #fff;
+}
+
+/* ═══════════════════════════════════════════════════════
+   INTRO
+   ═══════════════════════════════════════════════════════ */
+#mood-stress-{{ sid }} .ms-intro-text {
+  font-size: clamp(16px, 2vw, 18px);
+  line-height: 1.7;
+  color: var(--ms-muted);
+  max-width: 800px;
+}
+#mood-stress-{{ sid }} .ms-intro-text p { margin: 0 0 12px; }
+#mood-stress-{{ sid }} .ms-intro-text p:last-child { margin-bottom: 0; }
+
+/* ═══════════════════════════════════════════════════════
+   4-PRODUCT GRID — Sibling fade, image scale
+   ═══════════════════════════════════════════════════════ */
+#mood-stress-{{ sid }} .ms-product-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  margin-top: 16px;
+}
+@media (min-width: 900px) {
+  #mood-stress-{{ sid }} .ms-product-grid { grid-template-columns: repeat(4, 1fr); }
+}
+#mood-stress-{{ sid }} .ms-product-card {
+  background: var(--ms-bg);
+  border: none;
+  border-radius: var(--ms-radius);
+  padding: 18px;
+  box-shadow: var(--ms-shadow-rest);
+  display: flex;
+  flex-direction: column;
+  transition: var(--ms-transition);
+}
+#mood-stress-{{ sid }} .ms-product-grid:hover .ms-product-card {
+  opacity: 0.6;
+}
+#mood-stress-{{ sid }} .ms-product-grid .ms-product-card:hover {
+  opacity: 1;
+  transform: translateY(-4px);
+  box-shadow: var(--ms-shadow-hover);
+}
+#mood-stress-{{ sid }} .ms-product-img {
+  border-radius: var(--ms-radius);
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+#mood-stress-{{ sid }} .ms-product-img img {
+  display: block;
+  width: 100%;
+  height: auto;
+  transition: var(--ms-transition);
+}
+#mood-stress-{{ sid }} .ms-product-card:hover .ms-product-img img {
+  transform: scale(1.03);
+}
+#mood-stress-{{ sid }} .ms-product-title {
+  font-family: var(--ms-font-heading);
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.3;
+  margin: 0 0 6px;
+  color: var(--ms-text);
+}
+#mood-stress-{{ sid }} .ms-product-desc {
+  font-size: 13px;
+  color: var(--ms-muted);
+  line-height: 1.6;
+  margin: 0 0 12px;
+}
+#mood-stress-{{ sid }} .ms-product-footer {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+#mood-stress-{{ sid }} .ms-product-ctas {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+#mood-stress-{{ sid }} .ms-product-ctas .ms-btn {
+  padding: 8px 14px;
+  font-size: 13px;
+}
+#mood-stress-{{ sid }} .ms-product-meta {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ms-text);
+}
+
+/* ═══════════════════════════════════════════════════════
+   COMPARISON TABLE
+   ═══════════════════════════════════════════════════════ */
+#mood-stress-{{ sid }} .ms-table-wrap {
+  border-radius: var(--ms-radius);
+  overflow: hidden;
+  box-shadow: var(--ms-shadow-rest);
+  margin-top: 12px;
+}
+#mood-stress-{{ sid }} .ms-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+#mood-stress-{{ sid }} .ms-table thead {
+  background: var(--ms-bg-alt);
+}
+#mood-stress-{{ sid }} .ms-table th {
+  text-align: left;
+  padding: 10px 14px;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--ms-text);
+  line-height: 1.4;
+}
+#mood-stress-{{ sid }} .ms-table td {
+  padding: 12px 14px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ms-text);
+  border-top: 1px solid rgba(0, 0, 0, 0.04);
+}
+#mood-stress-{{ sid }} .ms-table tbody tr {
+  transition: var(--ms-transition);
+}
+#mood-stress-{{ sid }} .ms-table tbody tr:hover {
+  background: var(--ms-accent-glass);
+}
+@media (max-width: 640px) {
+  #mood-stress-{{ sid }} .ms-table thead { display: none; }
+  #mood-stress-{{ sid }} .ms-table tbody tr {
+    display: block;
+    padding: 14px;
+    border-top: 1px solid rgba(0, 0, 0, 0.04);
+  }
+  #mood-stress-{{ sid }} .ms-table tbody tr:first-child { border-top: none; }
+  #mood-stress-{{ sid }} .ms-table td {
+    display: block;
+    padding: 3px 0;
+    border-top: none;
+  }
+  #mood-stress-{{ sid }} .ms-table td::before {
+    content: attr(data-label) ": ";
+    font-weight: 700;
+    color: var(--ms-text);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   TRUST ICONS — Glass grid
+   ═══════════════════════════════════════════════════════ */
+#mood-stress-{{ sid }} .ms-trust-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  margin-top: 14px;
+}
+@media (min-width: 760px) {
+  #mood-stress-{{ sid }} .ms-trust-grid { grid-template-columns: repeat(3, 1fr); }
+}
+#mood-stress-{{ sid }} .ms-trust-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 20px 14px;
+  border: none;
+  border-radius: var(--ms-radius);
+  background: var(--ms-accent-glass);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  box-shadow: var(--ms-shadow-rest);
+  transition: var(--ms-transition);
+  text-align: center;
+}
+#mood-stress-{{ sid }} .ms-trust-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--ms-shadow-hover);
+}
+#mood-stress-{{ sid }} .ms-trust-icon {
+  width: 60px;
+  height: 60px;
+  flex-shrink: 0;
+}
+#mood-stress-{{ sid }} .ms-trust-icon img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+#mood-stress-{{ sid }} .ms-trust-emoji {
+  font-size: 32px;
+  line-height: 1;
+}
+#mood-stress-{{ sid }} .ms-trust-label {
+  display: inline-block;
+  padding: 5px 12px;
+  border-radius: 8px;
+  background: var(--ms-accent);
+  color: var(--color-text-primary);
+  font-weight: 600;
+  font-size: 13px;
+}
+
+/* ═══════════════════════════════════════════════════════
+   FAQ — Animated disclosure, chevron rotation
+   ═══════════════════════════════════════════════════════ */
+#mood-stress-{{ sid }} .ms-faq {
+  border: none;
+  border-radius: 10px;
+  margin: 8px 0;
+  box-shadow: var(--ms-shadow-rest);
+  overflow: hidden;
+  background: var(--ms-bg);
+  transition: var(--ms-transition);
+}
+#mood-stress-{{ sid }} .ms-faq:hover {
+  box-shadow: var(--ms-shadow-hover);
+}
+#mood-stress-{{ sid }} .ms-faq-q {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 18px;
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--ms-text);
+  cursor: pointer;
+  list-style: none;
+  min-height: var(--touch-min, 44px);
+}
+#mood-stress-{{ sid }} .ms-faq-q::-webkit-details-marker { display: none; }
+#mood-stress-{{ sid }} .ms-faq-q::marker { content: ""; }
+
+#mood-stress-{{ sid }} .ms-faq-chevron {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  position: relative;
+  transition: transform 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+#mood-stress-{{ sid }} .ms-faq-chevron::before,
+#mood-stress-{{ sid }} .ms-faq-chevron::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 10px;
+  height: 2px;
+  background: var(--ms-muted);
+  border-radius: 1px;
+  transition: transform 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+#mood-stress-{{ sid }} .ms-faq-chevron::before {
+  left: 1px;
+  transform: translateY(-50%) rotate(45deg);
+}
+#mood-stress-{{ sid }} .ms-faq-chevron::after {
+  right: 1px;
+  transform: translateY(-50%) rotate(-45deg);
+}
+#mood-stress-{{ sid }} .ms-faq[open] .ms-faq-chevron::before {
+  transform: translateY(-50%) rotate(-45deg);
+}
+#mood-stress-{{ sid }} .ms-faq[open] .ms-faq-chevron::after {
+  transform: translateY(-50%) rotate(45deg);
+}
+#mood-stress-{{ sid }} .ms-faq-answer {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+#mood-stress-{{ sid }} .ms-faq[open] .ms-faq-answer {
+  grid-template-rows: 1fr;
+}
+#mood-stress-{{ sid }} .ms-faq-inner {
+  overflow: hidden;
+}
+#mood-stress-{{ sid }} .ms-faq-inner p {
+  padding: 0 18px 16px;
+  margin: 0;
+  color: var(--ms-muted);
+  line-height: 1.6;
+  font-size: 14px;
+}
+
+/* ═══════════════════════════════════════════════════════
+   FINAL CTA
+   ═══════════════════════════════════════════════════════ */
+#mood-stress-{{ sid }} .ms-final-cta {
+  background: var(--ms-bg-alt);
+  border-radius: var(--ms-radius);
+  padding: 28px 24px;
+  box-shadow: var(--ms-shadow-rest);
+  text-align: center;
+}
+
+/* ═══════════════════════════════════════════════════════
+   ACCESSIBILITY — focus-visible + reduced motion
+   ═══════════════════════════════════════════════════════ */
+#mood-stress-{{ sid }} :focus-visible {
+  outline: 2px solid var(--ms-accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #mood-stress-{{ sid }} *,
+  #mood-stress-{{ sid }} *::before,
+  #mood-stress-{{ sid }} *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+{%- endstyle -%}
+
+{% schema %}
+{
+  "name": "Focus Nootropics LP",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Hero"
+    },
+    { "type": "text", "id": "hero_title", "label": "Hero title", "default": "Get Laser Focus Today" },
+    { "type": "textarea", "id": "hero_subtitle", "label": "Hero subtitle", "default": "Four best-selling, lab-tested compounds for clean energy — shipped from our Dubai warehouse so the benefits kick in tonight." },
+    { "type": "image_picker", "id": "hero_image", "label": "Hero background image (optional)" },
+    { "type": "text", "id": "hero_cta", "label": "Hero CTA text", "default": "Order By 5 pm, Get It in 4 Hours" },
+    { "type": "url", "id": "collection_link", "label": "Collection link" },
+    {
+      "type": "header",
+      "content": "Intro"
+    },
+    { "type": "richtext", "id": "intro_text", "label": "Intro paragraph", "default": "<p>Whether you're sprinting through code, finals week, or a 12-hour design session, the right nootropics can flip your focus switch — <em>now</em>. Below you'll find our four best-selling, lab-tested compounds for clean energy.</p>" },
+    {
+      "type": "header",
+      "content": "Products"
+    },
+    { "type": "product", "id": "product_1", "label": "Product 1 (picker)" },
+    { "type": "text", "id": "product_1_handle", "label": "Product 1 backup handle", "default": "alpha-gpc" },
+    { "type": "text", "id": "product_1_desc", "label": "Product 1 description", "default": "Choline donor for deep work blocks — supports acetylcholine for sustained attention." },
+    { "type": "product", "id": "product_2", "label": "Product 2 (picker)" },
+    { "type": "text", "id": "product_2_handle", "label": "Product 2 backup handle", "default": "caffeine-l-theanine" },
+    { "type": "text", "id": "product_2_desc", "label": "Product 2 description", "default": "Smooth, clean energy for meetings and coding — focused alertness without jitters." },
+    { "type": "product", "id": "product_3", "label": "Product 3 (picker)" },
+    { "type": "text", "id": "product_3_handle", "label": "Product 3 backup handle", "default": "fladrafinil" },
+    { "type": "text", "id": "product_3_desc", "label": "Product 3 description", "default": "Wakefulness agent for all-nighter crunches — non-amphetamine alertness support." },
+    { "type": "product", "id": "product_4", "label": "Product 4 (picker)" },
+    { "type": "text", "id": "product_4_handle", "label": "Product 4 backup handle", "default": "phenylpiracetam-hydrazide" },
+    { "type": "text", "id": "product_4_desc", "label": "Product 4 description", "default": "Potent racetam for competitive focus — long-duration cognitive support." },
+    {
+      "type": "header",
+      "content": "Trust Icons"
+    },
+    { "type": "image_picker", "id": "icon_1_image", "label": "Icon 1 image" },
+    { "type": "text", "id": "icon_1_title", "label": "Icon 1 title", "default": "Clinically Dosed" },
+    { "type": "image_picker", "id": "icon_2_image", "label": "Icon 2 image" },
+    { "type": "text", "id": "icon_2_title", "label": "Icon 2 title", "default": "COA Verified" },
+    { "type": "image_picker", "id": "icon_3_image", "label": "Icon 3 image" },
+    { "type": "text", "id": "icon_3_title", "label": "Icon 3 title", "default": "4-Hour Delivery" },
+    {
+      "type": "header",
+      "content": "Final CTA"
+    },
+    { "type": "text", "id": "cta_text", "label": "CTA button text", "default": "Shop 4-Hour Delivery" },
+    { "type": "url", "id": "cta_link", "label": "CTA button link" },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "max_width",
+      "label": "Max width (px)",
+      "min": 800,
+      "max": 1400,
+      "step": 20,
+      "default": 1100
+    },
+    {
+      "type": "range",
+      "id": "padding_y",
+      "label": "Vertical padding (px)",
+      "min": 32,
+      "max": 120,
+      "step": 4,
+      "default": 56
+    },
+    {
+      "type": "header",
+      "content": "SEO"
+    },
+    {
+      "type": "text",
+      "id": "date_published",
+      "label": "Date published (YYYY-MM-DD)",
+      "default": "2025-06-01",
+      "info": "Used in Article JSON-LD structured data."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "faq",
+      "name": "FAQ",
+      "settings": [
+        { "type": "text", "id": "q", "label": "Question", "default": "Can I combine these nootropics?" },
+        { "type": "textarea", "id": "a", "label": "Answer", "default": "Yes. Many customers pair a stimulant with a choline donor for smoother focus. Stay within label dosing." }
+      ]
+    }
+  ],
+  "max_blocks": 12,
+  "presets": [
+    { "name": "Focus Nootropics LP", "category": "Nootropix" }
+  ]
+}
+{% endschema %}

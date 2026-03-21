@@ -1,0 +1,86 @@
+{% comment %}
+  Renders a product card custome
+
+  Accepts:
+  - product: {String} 'Product' (optional)
+
+  Usage:
+  {% render 'product-card-custom-v2', product: product %}
+{% endcomment %}
+
+<xo-product
+  xo-selected-or-first-available-variant-id="{{ product.selected_or_first_available_variant.id }}"
+  xo-product-id="{{ product.id }}"
+  xo-section-id="{{ section.id }}"
+  data-section="{{ section.id }}"
+>
+  <div class="xo-product-card-custom-v2{% if settings.enable_border_radius %} xo-product-card-custom-v2--radius{% endif %}{% if color_schema_card %} color-{{ color_schema_card }}{% endif %}">
+    <div class="xo-product-card-custom-v2__wrapper">
+      <div class="xo-product-card-custom-v2__image">
+        <div xo-binding="img" style="width: 100%; height: 100%;">
+          <a href="{%- render 'product-card-variant-url', product: product -%}">
+            {% render 'product-image', product: product, show_secondary_image: true %}
+          </a>
+        </div>
+        <xo-product-liquid-static>
+          <script type="application/json">
+            {
+              {% for variant in product.variants
+              %}
+                {{ variant.id }}: {
+                  price: `{% render 'price', variant: variant, reverse: false %}`,
+                  img: `<a href='{{ product.url }}'>{% render 'product-image', product: product, variant: variant, show_secondary_image: true %}
+                  </a>`
+                },
+              {% endfor %}
+            }
+          </script>
+        </xo-product-liquid-static>
+      </div>
+      <div class="xo-product-card-custom-v2__info">
+        <div class="xo-product-card-custom-v2__head">
+          {% if product and product != empty %}
+            <a href="{%- render 'product-card-variant-url', product: product -%}" class="xo-product-card-custom-v2__title" aria-label="{{ product.title }}">
+              <p>{{ product.title | escape }}</p>
+            </a>
+          {% else %}
+            <div class="xo-product-card-custom-v2__title">
+              <p>{{ 'onboarding.product_title' | t }}</p>
+            </div>
+          {% endif %}
+          {% if product.has_only_default_variant == false %}
+            <xo-animate xo-cascade>
+              <xo-product-variants>
+                <div class="xo-product-card-custom-v2__variant">
+                  {%- for option in product.options_with_values -%}
+                    {% if option.name == settings.product_card_color_option_name %}
+                      {% render 'product-variant', option: option, style: 'color', product: product %}
+                    {% endif %}
+                  {%- endfor -%}
+                </div>
+              </xo-product-variants>
+            </xo-animate>
+          {% endif %}
+        </div>
+        <div class="xo-product-card-custom-v2__bottom">
+          <div class="xo-product-card-custom-v2__price">
+            {% render 'price', product: product, show_badge: show_badge, use_variant: true, reverse: true %}
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="xo-product-card-custom-v2__action">
+      <xo-product-will-change xo-unique-id="product-add-button-{{ section.id }}">
+        <xo-cart-add
+          class="xo-product-card-custom-v2__add-cart"
+          {% if product.selected_or_first_available_variant.available == false %}
+            xo-disabled
+          {% endif %}
+        >
+          {% render 'button', style: 'primary', icon: 'add-to-cart', icon_size: '20', size: 'md', block: true %}
+        </xo-cart-add>
+      </xo-product-will-change>
+    </div>
+  </div>
+  {% render 'product-data', product: product %}
+</xo-product>

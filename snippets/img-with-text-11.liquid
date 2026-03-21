@@ -1,0 +1,85 @@
+{% comment %}
+  Render a img with text
+
+  Accepts:
+  - sub_heading: {String} Sub heading
+  - blocks: {Object} Blocks
+
+  Usage:
+  {% render 'img-with-text-11', sub_heading: sub_heading, blocks: blocks %}
+{% endcomment %}
+
+<div class='img-with-text-11'>
+  <xo-tabs class='img-with-text-11__tabs'>
+    <xo-grid class='img-with-text-11__grid'>
+      <div class='img-with-text-11__col' style='--lg:6 ;--md: 7; --xs: 12;'>
+        <xo-tabs-content class='img-with-text-11__tabs-content'>
+          {% for block in blocks %}
+            {% liquid
+              assign main_media_type = block.settings.main_media_type
+              assign large_image = block.settings.large_image
+              assign large_video = block.settings.large_video
+            %}
+            <xo-tabs-pane
+              class='img-with-text-11__tabs-pane'
+              xo-name='tabs-{{ block.id }}'
+              {% if forloop.index == 1 %}
+                xo-active
+              {% endif %}
+            >
+              <div class='img-with-text-11__image img-with-text-11__image--large{% if settings.enable_border_radius %} img-with-text-11__image--radius{% endif %}'>
+                {% if main_media_type == 'image' %}
+                  {% render 'animate-image', image: large_image, border_radius: 0, duration: 500 %}
+                {% else %}
+                  {% render 'media', media: large_video, type: 'video', autoplay: true, controls: false, enable_video_looping: true, muted: true %}
+                {% endif %}
+              </div>
+            </xo-tabs-pane>
+          {% endfor %}
+        </xo-tabs-content>
+      </div>
+      <div class='img-with-text-11__col' style='--lg:5 ;--md: 5; --xs: 12; --start-md: 8;'>
+        <div class='img-with-text-11__wrap'>
+          <div class='img-with-text-11__row'>
+            {% if sub_heading != blank %}
+              <div class='img-with-text-11__sub-heading'>{{ sub_heading }}</div>
+            {% endif %}
+            <div class='img-with-text-11__trigger-wrap'>
+              {% for block in blocks %}
+                <xo-tabs-trigger
+                  class='img-with-text-11__trigger'
+                  xo-name='tabs-{{ block.id }}'
+                  {% if forloop.index == 1 %}
+                    xo-active
+                  {% endif %}
+                >
+                  <h3 class='img-with-text-11__heading h5'>
+                    <span class='img-with-text-11__bullet'></span>
+                    <span class='img-with-text-11__text'>{{ block.settings.heading }}</span>
+                  </h3>
+                </xo-tabs-trigger>
+              {% endfor %}
+            </div>
+          </div>
+          <div class='img-with-text-11__row'>
+            <xo-tabs-content>
+              {% for block in blocks %}
+                <xo-tabs-pane
+                  class='img-with-text-11__tabs-pane'
+                  xo-name='tabs-{{ block.id }}'
+                  {% if forloop.index == 1 %}
+                    xo-active
+                  {% endif %}
+                >
+                  <div class='img-with-text-11__image img-with-text-11__image--small{% if settings.enable_border_radius %} img-with-text-11__image--radius{% endif %}'>
+                    {% render 'animate-image', image: block.settings.small_image, border_radius: 0, aspect_ratio: '16/9', duration: 500 %}
+                  </div>
+                </xo-tabs-pane>
+              {% endfor %}
+            </xo-tabs-content>
+          </div>
+        </div>
+      </div>
+    </xo-grid>
+  </xo-tabs>
+</div>

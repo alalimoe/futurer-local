@@ -1,0 +1,45 @@
+{% comment %}
+  Renders a product card v2
+
+  Accepts:
+  - product: {Object} Product (required)
+  - padding: {Number} Padding (optional)
+  - imagw_size: {Object} Image size (optional)
+  - color_schema: {String} Color schema (optional)
+
+  Usage:
+  {% render 'product-card-v2', product: product, padding: padding, image_size: image_size. color_schema_card: color_schema_card %}
+{% endcomment %}
+
+{% liquid
+  assign gap = 7
+  if image_size == 'lg'
+    assign gap = 13
+  endif
+%}
+
+<xo-animate xo-cascade style="height: 100%">
+  <xo-product
+    xo-selected-or-first-available-variant-id="{{ product.selected_or_first_available_variant.id }}"
+    xo-product-url="{{ product.url }}"
+    xo-product-id="{{ product.id }}"
+    xo-section-id='{{ section.id }} data-section="{{ section.id }}'
+    data-section="{{ section.id }}"
+    class="product-card-v2{% if color_schema_card %} color-{{ color_schema_card }}{% endif %}{% if settings.enable_border_radius %} product-card-v2--radius{% endif %}"
+    style="--padding: {{ padding }}px"
+  >
+    <a href="{%- render 'product-card-variant-url', product: product -%}" class="product-card-v2__link">
+      <div class="product-card-v2__wrapper" style="--gap: {{ gap }}px">
+        <div class="product-card-v2__image{% if image_size %} product-card-v2__image--{{ image_size }}{% endif %}">
+          {% render 'image', image: product.featured_image, aspect_ratio: aspect_ratio, disable_alt: true %}
+        </div>
+        {% if product and product != empty %}
+          <h3 class="product-card-v2__title">{{ product.title }}</h3>
+        {% else %}
+          <h3 class="product-card-v2__title">{{ 'onboarding.product_title' | t }}</h3>
+        {% endif %}
+      </div>
+    </a>
+    {% render 'product-data', product: product %}
+  </xo-product>
+</xo-animate>

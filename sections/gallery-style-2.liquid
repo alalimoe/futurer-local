@@ -1,0 +1,141 @@
+{{ 'section-gallery-style-2.css' | asset_url | stylesheet_tag }}
+
+<section {% render 'section-attr' %}>
+  <xo-animate xo-cascade>
+    <div class="gallery-style-2">
+      <div class="gallery-style-2__content">
+        <xo-scroll-carousel xo-gap="0" class="gallery-style-2__carousel">
+          <div class="gallery-style-2__wrapper">
+            {% for block in section.blocks %}
+              {% liquid
+                assign image = block.settings.image
+                assign aspect_ratio = block.settings.aspect_ratio
+                if aspect_ratio == 'custom'
+                  assign aspect_ratio = block.settings.aspect_ratio_width | append: '/' | append: block.settings.aspect_ratio_height
+                endif
+              %}
+              <div class="gallery-style-2__image">
+                {% render 'image', image: image, aspect_ratio: aspect_ratio %}
+              </div>
+            {% endfor %}
+          </div>
+          <div is="xo-cursor" xo-name="cursor-prev" class="gallery-style-2__button gallery-style-2__button--prev">
+            <xo-cursor-item xo-name="cursor-prev" class="gallery-style-2__cursor">
+              {% render 'button-slide', icon: 'arrow-left', icon_size: '3.2rem', size: '5rem', direction: 'left', style: 'primary' %}
+            </xo-cursor-item>
+            <xo-scroll-carousel-prev></xo-scroll-carousel-prev>
+          </div>
+          <div is="xo-cursor" xo-name="cursor-next" class="gallery-style-2__button gallery-style-2__button--next">
+            <xo-cursor-item xo-name="cursor-next" class="gallery-style-2__cursor">
+              {% render 'button-slide', icon: 'arrow-right', icon_size: '3.2rem', size: '5rem', direction: 'right', style: 'primary' %}
+            </xo-cursor-item>
+            <xo-scroll-carousel-next></xo-scroll-carousel-next>
+          </div>
+        </xo-scroll-carousel>
+      </div>
+    </div>
+  </xo-animate>
+</section>
+
+{% schema %}
+{
+  "name": "t:sections.gallery_style_2.name",
+  "disabled_on": {
+    "groups": [
+      "header",
+      "footer",
+      "custom.overlay",
+      "custom.popups",
+      "custom.features"
+    ]
+  },
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Section color scheme"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color"
+    },
+    {
+      "type": "color_background",
+      "id": "background_gradient",
+      "label": "Background gradient"
+    },
+    {
+      "type": "number",
+      "id": "padding_top_desktop",
+      "label": "Padding top desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_desktop",
+      "label": "Padding bottom desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_top_mobile",
+      "label": "Padding top mobile",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_mobile",
+      "label": "Padding bottom mobile",
+      "default": 50
+    }
+  ],
+  "blocks": [
+    {
+      "name": "t:sections.gallery_style_2.blocks.name",
+      "type": "image",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "t:sections.gallery_style_2.blocks.settings.image.label"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.gallery_style_2.presets.name",
+      "blocks": [
+        {
+          "type": "image",
+          "settings": {
+            "image": ""
+          }
+        },
+        {
+          "type": "image",
+          "settings": {
+            "image": ""
+          }
+        },
+        {
+          "type": "image",
+          "settings": {
+            "image": ""
+          }
+        }
+      ],
+      "settings": {
+        "color_scheme": "",
+        "background_color": "",
+        "background_gradient": "",
+        "padding_top_desktop": 50,
+        "padding_bottom_desktop": 50,
+        "padding_top_mobile": 50,
+        "padding_bottom_mobile": 50
+      }
+    }
+  ]
+}
+{% endschema %}

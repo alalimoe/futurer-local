@@ -1,0 +1,965 @@
+{% doc %}
+  @prompt
+    create a clean, modern 'COA Library' section with heading, intro copy, most requested coas (table with product, form, last verified, COA link, direct download). small text under the table: Testing panels can differ by compound and lab. Always defer to the Methods / Scope section on the COA for what was (and wasn’t) tested. Below that, 'COAs by category (browse)' with 3-card row: Peptides — “COAs are listed on each product page. We’re also consolidating them here for easier lookup.” (Button: Shop Peptides / Peptides collection)
+    
+    Nootropics — “COAs are shown where applicable. Look for the COA block on the product page.” (Button: Shop Nootropics)
+    
+    Phenibut — “COAs + batch verification + shipping restrictions.” (Buttons: Phenibut hub + Shipping restrictions)
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-coa-library-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    padding: {{ block.settings.section_padding_top }}px var(--page-gutter) {{ block.settings.section_padding_bottom }}px;
+    background-color: {{ block.settings.background_color }};
+  }
+
+  .ai-coa-library-container-{{ ai_gen_id }} {
+    max-width: {{ block.settings.container_width }}px;
+    margin: 0 auto;
+  }
+
+  .ai-coa-library-header-{{ ai_gen_id }} {
+    text-align: {{ block.settings.text_alignment }};
+    margin-bottom: 40px;
+  }
+
+  .ai-coa-library-heading-{{ ai_gen_id }} {
+    color: {{ block.settings.heading_color }};
+    margin: 0 0 16px;
+    font-weight: 600;
+  }
+
+  .ai-coa-library-intro-{{ ai_gen_id }} {
+    font-size: {{ block.settings.intro_size }}px;
+    color: {{ block.settings.text_color }};
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  .ai-coa-library-table-wrapper-{{ ai_gen_id }} {
+    margin-bottom: 12px;
+    overflow-x: auto;
+    border-radius: {{ block.settings.table_border_radius }}px;
+    border: {{ block.settings.table_border_width }}px solid {{ block.settings.table_border_color }};
+  }
+
+  .ai-coa-library-table-{{ ai_gen_id }} {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: {{ block.settings.table_background }};
+  }
+
+  .ai-coa-library-table-{{ ai_gen_id }} thead {
+    background-color: {{ block.settings.table_header_background }};
+  }
+
+  .ai-coa-library-table-{{ ai_gen_id }} th {
+    padding: 16px 12px;
+    text-align: left;
+    font-size: {{ block.settings.table_header_size }}px;
+    font-weight: 600;
+    color: {{ block.settings.table_header_color }};
+    border-bottom: 2px solid {{ block.settings.table_border_color }};
+  }
+
+  .ai-coa-library-table-{{ ai_gen_id }} td {
+    padding: 14px 12px;
+    font-size: {{ block.settings.table_text_size }}px;
+    color: {{ block.settings.text_color }};
+    border-bottom: 1px solid {{ block.settings.table_border_color }};
+  }
+
+  .ai-coa-library-table-{{ ai_gen_id }} tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  .ai-coa-library-table-{{ ai_gen_id }} tbody tr:hover {
+    background-color: {{ block.settings.table_row_hover }};
+  }
+
+  .ai-coa-library-table-link-{{ ai_gen_id }} {
+    color: {{ block.settings.link_color }};
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  .ai-coa-library-table-link-{{ ai_gen_id }}:hover {
+    text-decoration: underline;
+  }
+
+  .ai-coa-library-disclaimer-{{ ai_gen_id }} {
+    font-size: {{ block.settings.disclaimer_size }}px;
+    color: {{ block.settings.disclaimer_color }};
+    line-height: 1.5;
+    margin: 0 0 48px;
+    font-style: italic;
+  }
+
+  .ai-coa-library-browse-heading-{{ ai_gen_id }} {
+    font-size: {{ block.settings.browse_heading_size }}px;
+    color: {{ block.settings.heading_color }};
+    margin: 0 0 24px;
+    font-weight: 600;
+    text-align: {{ block.settings.text_alignment }};
+  }
+
+  .ai-coa-library-cards-{{ ai_gen_id }} {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+  }
+
+  .ai-coa-library-card-{{ ai_gen_id }} {
+    background-color: {{ block.settings.card_background }};
+    border: {{ block.settings.card_border_width }}px solid {{ block.settings.card_border_color }};
+    border-radius: {{ block.settings.card_border_radius }}px;
+    padding: 28px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .ai-coa-library-card-title-{{ ai_gen_id }} {
+    font-size: {{ block.settings.card_title_size }}px;
+    color: {{ block.settings.heading_color }};
+    margin: 0;
+    font-weight: 600;
+  }
+
+  .ai-coa-library-card-description-{{ ai_gen_id }} {
+    font-size: {{ block.settings.card_text_size }}px;
+    color: {{ block.settings.text_color }};
+    line-height: 1.6;
+    margin: 0;
+    flex-grow: 1;
+  }
+
+  .ai-coa-library-card-buttons-{{ ai_gen_id }} {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .ai-coa-library-button-{{ ai_gen_id }} {
+    display: inline-block;
+    padding: 12px 20px;
+    background-color: {{ block.settings.button_background }};
+    color: {{ block.settings.button_text_color }};
+    text-decoration: none;
+    border-radius: {{ block.settings.button_border_radius }}px;
+    font-size: {{ block.settings.button_text_size }}px;
+    font-weight: 500;
+    text-align: center;
+    transition: background-color 0.3s ease;
+  }
+
+  .ai-coa-library-button-{{ ai_gen_id }}:hover {
+    background-color: {{ block.settings.button_hover_background }};
+  }
+
+  .ai-coa-library-button-secondary-{{ ai_gen_id }} {
+    background-color: {{ block.settings.button_secondary_background }};
+    color: {{ block.settings.button_secondary_text_color }};
+  }
+
+  .ai-coa-library-button-secondary-{{ ai_gen_id }}:hover {
+    background-color: {{ block.settings.button_secondary_hover_background }};
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-coa-library-{{ ai_gen_id }} {
+      padding: {{ block.settings.section_padding_top | times: 0.6 }}px var(--page-gutter) {{ block.settings.section_padding_bottom | times: 0.6 }}px;
+    }
+
+    .ai-coa-library-browse-heading-{{ ai_gen_id }} {
+      font-size: {{ block.settings.browse_heading_size | times: 0.8 }}px;
+    }
+
+    .ai-coa-library-cards-{{ ai_gen_id }} {
+      grid-template-columns: 1fr;
+    }
+
+    .ai-coa-library-table-{{ ai_gen_id }} th,
+    .ai-coa-library-table-{{ ai_gen_id }} td {
+      padding: 10px 8px;
+      font-size: {{ block.settings.table_text_size | times: 0.9 }}px;
+    }
+  }
+
+  @media screen and (min-width: 750px) {
+    .ai-coa-library-{{ ai_gen_id }} {
+      width: {{ block.settings.desktop_width_percent }}%;
+      margin-left: auto;
+      margin-right: auto;
+    }
+  }
+{% endstyle %}
+
+<coa-library-{{ ai_gen_id }} class="ai-coa-library-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="ai-coa-library-container-{{ ai_gen_id }}">
+    <div class="ai-coa-library-header-{{ ai_gen_id }}">
+      {% if block.settings.heading != blank %}
+        <h2 class="ai-coa-library-heading-{{ ai_gen_id }} {{ block.settings.heading_size }}">{{ block.settings.heading }}</h2>
+      {% endif %}
+      {% if block.settings.intro_text != blank %}
+        <div class="ai-coa-library-intro-{{ ai_gen_id }}">{{ block.settings.intro_text }}</div>
+      {% endif %}
+    </div>
+
+    {% if block.settings.show_table %}
+      <div class="ai-coa-library-table-wrapper-{{ ai_gen_id }}">
+        <table class="ai-coa-library-table-{{ ai_gen_id }}">
+          <thead>
+            <tr>
+              <th>{{ block.settings.table_col_1 }}</th>
+              <th>{{ block.settings.table_col_2 }}</th>
+              <th>{{ block.settings.table_col_3 }}</th>
+              <th>{{ block.settings.table_col_4 }}</th>
+              <th>{{ block.settings.table_col_5 }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for i in (1..5) %}
+              {% liquid
+                assign product_key = 'table_row_' | append: i | append: '_product'
+                assign form_key = 'table_row_' | append: i | append: '_form'
+                assign date_key = 'table_row_' | append: i | append: '_date'
+                assign link_key = 'table_row_' | append: i | append: '_link'
+                assign download_key = 'table_row_' | append: i | append: '_download'
+
+                assign product_name = block.settings[product_key]
+                assign form_name = block.settings[form_key]
+                assign date_verified = block.settings[date_key]
+                assign coa_link = block.settings[link_key]
+                assign download_link = block.settings[download_key]
+              %}
+              {% if product_name != blank %}
+                <tr>
+                  <td>{{ product_name }}</td>
+                  <td>{{ form_name }}</td>
+                  <td>{{ date_verified }}</td>
+                  <td>
+                    {% if coa_link != blank %}
+                      <a href="{{ coa_link }}" class="ai-coa-library-table-link-{{ ai_gen_id }}" target="_blank">View COA</a>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if download_link != blank %}
+                      <a href="{{ download_link }}" class="ai-coa-library-table-link-{{ ai_gen_id }}" download>Download</a>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endif %}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {% if block.settings.disclaimer_text != blank %}
+        <p class="ai-coa-library-disclaimer-{{ ai_gen_id }}">{{ block.settings.disclaimer_text }}</p>
+      {% endif %}
+    {% endif %}
+
+    {% if block.settings.show_browse_section %}
+      <h3 class="ai-coa-library-browse-heading-{{ ai_gen_id }}">{{ block.settings.browse_heading }}</h3>
+
+      <div class="ai-coa-library-cards-{{ ai_gen_id }}">
+        <div class="ai-coa-library-card-{{ ai_gen_id }}">
+          <h4 class="ai-coa-library-card-title-{{ ai_gen_id }}">{{ block.settings.card_1_title }}</h4>
+          <p class="ai-coa-library-card-description-{{ ai_gen_id }}">{{ block.settings.card_1_description }}</p>
+          <div class="ai-coa-library-card-buttons-{{ ai_gen_id }}">
+            {% if block.settings.card_1_button_1_text != blank and block.settings.card_1_button_1_link != blank %}
+              <a href="{{ block.settings.card_1_button_1_link }}" class="ai-coa-library-button-{{ ai_gen_id }}">
+                {{ block.settings.card_1_button_1_text }}
+              </a>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="ai-coa-library-card-{{ ai_gen_id }}">
+          <h4 class="ai-coa-library-card-title-{{ ai_gen_id }}">{{ block.settings.card_2_title }}</h4>
+          <p class="ai-coa-library-card-description-{{ ai_gen_id }}">{{ block.settings.card_2_description }}</p>
+          <div class="ai-coa-library-card-buttons-{{ ai_gen_id }}">
+            {% if block.settings.card_2_button_1_text != blank and block.settings.card_2_button_1_link != blank %}
+              <a href="{{ block.settings.card_2_button_1_link }}" class="ai-coa-library-button-{{ ai_gen_id }}">
+                {{ block.settings.card_2_button_1_text }}
+              </a>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="ai-coa-library-card-{{ ai_gen_id }}">
+          <h4 class="ai-coa-library-card-title-{{ ai_gen_id }}">{{ block.settings.card_3_title }}</h4>
+          <p class="ai-coa-library-card-description-{{ ai_gen_id }}">{{ block.settings.card_3_description }}</p>
+          <div class="ai-coa-library-card-buttons-{{ ai_gen_id }}">
+            {% if block.settings.card_3_button_1_text != blank and block.settings.card_3_button_1_link != blank %}
+              <a href="{{ block.settings.card_3_button_1_link }}" class="ai-coa-library-button-{{ ai_gen_id }}">
+                {{ block.settings.card_3_button_1_text }}
+              </a>
+            {% endif %}
+            {% if block.settings.card_3_button_2_text != blank and block.settings.card_3_button_2_link != blank %}
+              <a href="{{ block.settings.card_3_button_2_link }}" class="ai-coa-library-button-{{ ai_gen_id }} ai-coa-library-button-secondary-{{ ai_gen_id }}">
+                {{ block.settings.card_3_button_2_text }}
+              </a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</coa-library-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class CoaLibrary{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+      }
+
+      connectedCallback() {
+      }
+    }
+
+    customElements.define('coa-library-{{ ai_gen_id }}', CoaLibrary{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "COA library",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section"
+    },
+    {
+      "type": "range",
+      "id": "desktop_width_percent",
+      "label": "Desktop width",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "range",
+      "id": "container_width",
+      "label": "Container max width",
+      "min": 1000,
+      "max": 1680,
+      "step": 40,
+      "unit": "px",
+      "default": 1400
+    },
+    {
+      "type": "range",
+      "id": "section_padding_top",
+      "label": "Padding top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "section_padding_bottom",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 60
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background",
+      "default": "#f9f9f9"
+    },
+    {
+      "type": "header",
+      "content": "Header"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "COA Library"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Heading size",
+      "options": [
+        {"value": "h1", "label": "Display"},
+        {"value": "h2", "label": "XL"},
+        {"value": "h3", "label": "L"},
+        {"value": "h4", "label": "M"},
+        {"value": "h5", "label": "S"},
+        {"value": "h6", "label": "XS"}
+      ],
+      "default": "h2"
+    },
+    {
+      "type": "textarea",
+      "id": "intro_text",
+      "label": "Intro text",
+      "default": "Access certificates of analysis for our most requested products. All COAs are third-party verified and updated regularly."
+    },
+    {
+      "type": "range",
+      "id": "intro_size",
+      "label": "Intro text size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "Text alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading color",
+      "default": "#2a2a2a"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#666666"
+    },
+    {
+      "type": "header",
+      "content": "Most requested COAs table"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_table",
+      "label": "Show table",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "table_col_1",
+      "label": "Column 1 header",
+      "default": "Product"
+    },
+    {
+      "type": "text",
+      "id": "table_col_2",
+      "label": "Column 2 header",
+      "default": "Form"
+    },
+    {
+      "type": "text",
+      "id": "table_col_3",
+      "label": "Column 3 header",
+      "default": "Last Verified"
+    },
+    {
+      "type": "text",
+      "id": "table_col_4",
+      "label": "Column 4 header",
+      "default": "COA Link"
+    },
+    {
+      "type": "text",
+      "id": "table_col_5",
+      "label": "Column 5 header",
+      "default": "Direct Download"
+    },
+    {
+      "type": "text",
+      "id": "table_row_1_product",
+      "label": "Row 1 - Product"
+    },
+    {
+      "type": "text",
+      "id": "table_row_1_form",
+      "label": "Row 1 - Form"
+    },
+    {
+      "type": "text",
+      "id": "table_row_1_date",
+      "label": "Row 1 - Last verified"
+    },
+    {
+      "type": "url",
+      "id": "table_row_1_link",
+      "label": "Row 1 - COA link"
+    },
+    {
+      "type": "url",
+      "id": "table_row_1_download",
+      "label": "Row 1 - Download link"
+    },
+    {
+      "type": "text",
+      "id": "table_row_2_product",
+      "label": "Row 2 - Product"
+    },
+    {
+      "type": "text",
+      "id": "table_row_2_form",
+      "label": "Row 2 - Form"
+    },
+    {
+      "type": "text",
+      "id": "table_row_2_date",
+      "label": "Row 2 - Last verified"
+    },
+    {
+      "type": "url",
+      "id": "table_row_2_link",
+      "label": "Row 2 - COA link"
+    },
+    {
+      "type": "url",
+      "id": "table_row_2_download",
+      "label": "Row 2 - Download link"
+    },
+    {
+      "type": "text",
+      "id": "table_row_3_product",
+      "label": "Row 3 - Product"
+    },
+    {
+      "type": "text",
+      "id": "table_row_3_form",
+      "label": "Row 3 - Form"
+    },
+    {
+      "type": "text",
+      "id": "table_row_3_date",
+      "label": "Row 3 - Last verified"
+    },
+    {
+      "type": "url",
+      "id": "table_row_3_link",
+      "label": "Row 3 - COA link"
+    },
+    {
+      "type": "url",
+      "id": "table_row_3_download",
+      "label": "Row 3 - Download link"
+    },
+    {
+      "type": "text",
+      "id": "table_row_4_product",
+      "label": "Row 4 - Product"
+    },
+    {
+      "type": "text",
+      "id": "table_row_4_form",
+      "label": "Row 4 - Form"
+    },
+    {
+      "type": "text",
+      "id": "table_row_4_date",
+      "label": "Row 4 - Last verified"
+    },
+    {
+      "type": "url",
+      "id": "table_row_4_link",
+      "label": "Row 4 - COA link"
+    },
+    {
+      "type": "url",
+      "id": "table_row_4_download",
+      "label": "Row 4 - Download link"
+    },
+    {
+      "type": "text",
+      "id": "table_row_5_product",
+      "label": "Row 5 - Product"
+    },
+    {
+      "type": "text",
+      "id": "table_row_5_form",
+      "label": "Row 5 - Form"
+    },
+    {
+      "type": "text",
+      "id": "table_row_5_date",
+      "label": "Row 5 - Last verified"
+    },
+    {
+      "type": "url",
+      "id": "table_row_5_link",
+      "label": "Row 5 - COA link"
+    },
+    {
+      "type": "url",
+      "id": "table_row_5_download",
+      "label": "Row 5 - Download link"
+    },
+    {
+      "type": "textarea",
+      "id": "disclaimer_text",
+      "label": "Disclaimer text",
+      "default": "Testing panels can differ by compound and lab. Always defer to the Methods / Scope section on the COA for what was (and wasn't) tested."
+    },
+    {
+      "type": "range",
+      "id": "disclaimer_size",
+      "label": "Disclaimer text size",
+      "min": 10,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "default": 13
+    },
+    {
+      "type": "color",
+      "id": "disclaimer_color",
+      "label": "Disclaimer color",
+      "default": "#888888"
+    },
+    {
+      "type": "header",
+      "content": "Table style"
+    },
+    {
+      "type": "color",
+      "id": "table_background",
+      "label": "Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "table_header_background",
+      "label": "Header background",
+      "default": "#f0f0f0"
+    },
+    {
+      "type": "color",
+      "id": "table_header_color",
+      "label": "Header text",
+      "default": "#2a2a2a"
+    },
+    {
+      "type": "color",
+      "id": "table_border_color",
+      "label": "Border",
+      "default": "#e8e8e8"
+    },
+    {
+      "type": "color",
+      "id": "table_row_hover",
+      "label": "Row hover",
+      "default": "#f9f9f9"
+    },
+    {
+      "type": "color",
+      "id": "link_color",
+      "label": "Link color",
+      "default": "#5a9d6f"
+    },
+    {
+      "type": "range",
+      "id": "table_border_width",
+      "label": "Border width",
+      "min": 0,
+      "max": 4,
+      "step": 1,
+      "unit": "px",
+      "default": 1
+    },
+    {
+      "type": "range",
+      "id": "table_border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "table_header_size",
+      "label": "Header text size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "table_text_size",
+      "label": "Body text size",
+      "min": 12,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "header",
+      "content": "Browse by category"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_browse_section",
+      "label": "Show browse section",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "browse_heading",
+      "label": "Browse heading",
+      "default": "COAs by category (browse)"
+    },
+    {
+      "type": "range",
+      "id": "browse_heading_size",
+      "label": "Browse heading size",
+      "min": 18,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 28
+    },
+    {
+      "type": "header",
+      "content": "Card 1 - Peptides"
+    },
+    {
+      "type": "text",
+      "id": "card_1_title",
+      "label": "Title",
+      "default": "Peptides"
+    },
+    {
+      "type": "textarea",
+      "id": "card_1_description",
+      "label": "Description",
+      "default": "COAs are listed on each product page. We're also consolidating them here for easier lookup."
+    },
+    {
+      "type": "text",
+      "id": "card_1_button_1_text",
+      "label": "Button text",
+      "default": "Shop Peptides"
+    },
+    {
+      "type": "url",
+      "id": "card_1_button_1_link",
+      "label": "Button link"
+    },
+    {
+      "type": "header",
+      "content": "Card 2 - Nootropics"
+    },
+    {
+      "type": "text",
+      "id": "card_2_title",
+      "label": "Title",
+      "default": "Nootropics"
+    },
+    {
+      "type": "textarea",
+      "id": "card_2_description",
+      "label": "Description",
+      "default": "COAs are shown where applicable. Look for the COA block on the product page."
+    },
+    {
+      "type": "text",
+      "id": "card_2_button_1_text",
+      "label": "Button text",
+      "default": "Shop Nootropics"
+    },
+    {
+      "type": "url",
+      "id": "card_2_button_1_link",
+      "label": "Button link"
+    },
+    {
+      "type": "header",
+      "content": "Card 3 - Phenibut"
+    },
+    {
+      "type": "text",
+      "id": "card_3_title",
+      "label": "Title",
+      "default": "Phenibut"
+    },
+    {
+      "type": "textarea",
+      "id": "card_3_description",
+      "label": "Description",
+      "default": "COAs + batch verification + shipping restrictions."
+    },
+    {
+      "type": "text",
+      "id": "card_3_button_1_text",
+      "label": "Button 1 text",
+      "default": "Phenibut hub"
+    },
+    {
+      "type": "url",
+      "id": "card_3_button_1_link",
+      "label": "Button 1 link"
+    },
+    {
+      "type": "text",
+      "id": "card_3_button_2_text",
+      "label": "Button 2 text",
+      "default": "Shipping restrictions"
+    },
+    {
+      "type": "url",
+      "id": "card_3_button_2_link",
+      "label": "Button 2 link"
+    },
+    {
+      "type": "header",
+      "content": "Card style"
+    },
+    {
+      "type": "color",
+      "id": "card_background",
+      "label": "Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "card_border_color",
+      "label": "Border",
+      "default": "#e8e8e8"
+    },
+    {
+      "type": "range",
+      "id": "card_border_width",
+      "label": "Border width",
+      "min": 0,
+      "max": 4,
+      "step": 1,
+      "unit": "px",
+      "default": 1
+    },
+    {
+      "type": "range",
+      "id": "card_border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "card_title_size",
+      "label": "Title size",
+      "min": 16,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "card_text_size",
+      "label": "Text size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "header",
+      "content": "Button style"
+    },
+    {
+      "type": "color",
+      "id": "button_background",
+      "label": "Primary background",
+      "default": "#5a9d6f"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Primary text",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_background",
+      "label": "Primary hover",
+      "default": "#4a8d5f"
+    },
+    {
+      "type": "color",
+      "id": "button_secondary_background",
+      "label": "Secondary background",
+      "default": "#f0f0f0"
+    },
+    {
+      "type": "color",
+      "id": "button_secondary_text_color",
+      "label": "Secondary text",
+      "default": "#2a2a2a"
+    },
+    {
+      "type": "color",
+      "id": "button_secondary_hover_background",
+      "label": "Secondary hover",
+      "default": "#e0e0e0"
+    },
+    {
+      "type": "range",
+      "id": "button_border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "default": 6
+    },
+    {
+      "type": "range",
+      "id": "button_text_size",
+      "label": "Text size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    }
+  ],
+  "presets": [
+    {
+      "name": "COA library"
+    }
+  ]
+}
+{% endschema %}

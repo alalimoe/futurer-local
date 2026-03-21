@@ -1,0 +1,48 @@
+{% comment %}
+  Renders a testimonial slide
+
+  Accepts:
+  - message: {String} user message (required)
+  - customer_name: {String} Customer name (required)
+  - verified_user: {Boolean} verified user. Default: true (optional)
+  - product: {Object} Product (required)
+
+  Usage:
+  {% render 'testimonial-box-3', message: 'message', customer_name: 'customer name', verified_user: 'checkbox', product: 'product', card_color: 'color' %}
+{% endcomment %}
+
+{% assign border_radius = border_radius %}
+
+{% assign product_title_default = 'onboarding.product_title' | t %}
+
+<div class='testimonial-box-3 color-{{ card_color }}{% if settings.enable_border_radius %} testimonial-box-3--radius{% endif %}'>
+  <xo-animate xo-cascade>
+    <div class='testimonial-box-3__content'>
+      <div class='testimonial-box-3__message'>{{ message }}</div>
+      <div class='testimonial-box-3__customer-name'>
+        {{ customer_name }}
+      </div>
+      {% if verified_user == 'show' %}
+        <div class='testimonial-box-3__verified-user'>
+          {% render 'icon', name: 'verified-user', size: '1.6rem' %}
+          <p>{{ 'general.verified_user' | t }}</p>
+        </div>
+      {% endif %}
+    </div>
+  </xo-animate>
+  <xo-animate xo-cascade>
+    <div class='testimonial-box-3__product'>
+      <div class='testimonial-box-3__wrapper'>
+        <div class='testimonial-box-3__product-image' style='--border-radius: {{ border_radius }}px'>
+          {% render 'image', image: product.featured_image %}
+        </div>
+        <div class='testimonial-box-3__info'>
+          <div class='testimonial-box-3__product-title'>{{ product.title | default: product_title_default }}</div>
+          <div class='testimonial-box-3__product-price'>
+            {% render 'price', product: product %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </xo-animate>
+</div>

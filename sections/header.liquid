@@ -1,0 +1,522 @@
+{{ 'section-header.css' | asset_url | stylesheet_tag }}
+{% case section.settings.header_style %}
+  {% when 'style-1' %}
+    {{ 'section-header-style-1.css' | asset_url | stylesheet_tag }}
+  {% when 'style-2' %}
+    {{ 'section-header-style-2.css' | asset_url | stylesheet_tag }}
+  {% when 'style-3' %}
+    {{ 'section-header-style-3.css' | asset_url | stylesheet_tag }}
+  {% when 'style-4' %}
+    {{ 'section-header-style-4.css' | asset_url | stylesheet_tag }}
+  {% when 'style-5' %}
+    {{ 'section-header-style-5.css' | asset_url | stylesheet_tag }}
+{% endcase %}
+{{ 'section-header-drawer.css' | asset_url | stylesheet_tag }}
+
+{% liquid
+  assign header_style = section.settings.header_style
+  assign menu_type = section.settings.menu_type
+  assign show_currency_selector = section.settings.show_currency_selector
+  assign show_language_selector = section.settings.show_language_selector
+  assign menu = section.settings.menu
+  assign secondary_menu = section.settings.secondary_menu
+  assign event_type = section.settings.event_type
+  assign sticky_header_type = section.settings.sticky_header_type
+  assign logo_position = section.settings.logo_position
+  assign logo_transparent = section.settings.logo_transparent
+  assign logo_sticky = section.settings.logo_sticky
+
+  assign logo_alt = section.settings.logo.alt | default: shop.name | escape
+  assign height_dt = section.settings.logo_width_desktop | divided_by: settings.logo.aspect_ratio
+  assign height_mb = section.settings.logo_width_mobile | divided_by: settings.logo.aspect_ratio
+  assign width_mb = section.settings.logo_width_mobile
+  assign width_dt = section.settings.logo_width_desktop
+
+  assign blocks = section.blocks
+%}
+
+{%- capture header_menu -%}
+  <nav class='xo-header__center{% if settings.enable_border_radius %} xo-header__center--radius{% endif %}{% if header_style == 'style-1' or header_style == 'style-2' or header_style == 'style-5' %}{% if menu_type == 'drawer' %} xo-header__center--drawer{% endif %}{% if logo_position == 'center' and menu_type != "drawer" %} xo-header__center--width{% endif %}{% endif %}{% if header_style == 'style-5' %} xo-header__center--modifier{% endif %}'>
+  <div class='xo-header__desktop{% if menu_type == 'drawer' %} xo-header__desktop--only{% endif %}'>
+    {% if menu_type == 'default' %}
+      {% render 'menu-horizontal', menu: menu, event_type: event_type, blocks: blocks %}
+    {% else %}
+      {% render 'menu-hamburger', menu: menu, secondary_menu: secondary_menu, menu_type: menu_type, header_style: header_style %}
+    {% endif %}
+  </div>
+  {% if menu_type == 'default' %}
+    <div class='xo-header__mobile'>
+      {% render 'menu-hamburger', menu: menu, secondary_menu: secondary_menu, header_style: header_style %}
+    </div>
+  {% endif %}
+  </nav>
+{%- endcapture -%}
+
+{% capture header_logo %}
+  <div class='xo-header__left{% if header_style == 'style-5' %} xo-header__left--modifier{% endif %}'>
+    <a
+      href='{{ routes.root_url }}'
+      aria-label="Logo image"
+      title="Logo image">
+      {%- if logo_transparent != blank -%}
+        <img
+          class='xo-header__logo-img xo-header__logo-img--transparent'
+          src='{{ logo_transparent | image_url }}'
+          alt='{{ logo_alt }}'
+          style='--width_mobile: {{ width_mb }}px; --width_desktop: {{ width_dt }}px;--height_mobile: {{ height_mb }}px; --height_desktop: {{ height_dt }}px'
+          loading='lazy'
+          height='auto'
+          width='auto'>
+        {% if logo_sticky != blank %}
+          <img
+            class='xo-header__logo-img xo-header__logo-img--sticky'
+            src='{{ logo_sticky | image_url }}'
+            alt='{{ logo_alt }}'
+            style='--width_mobile: {{ width_mb }}px; --width_desktop: {{ width_dt }}px;--height_mobile: {{ height_mb }}px; --height_desktop: {{ height_dt }}px'
+            loading='lazy'
+            height='auto'
+            width='auto'>
+        {% endif %}
+      {%- else -%}
+        <span class='h4 xo-header__logo-heading-logo'>{{ shop.name }}</span>
+      {%- endif -%}
+    </a>
+  </div>
+{% endcapture %}
+
+{% capture header_top %}
+  <div class="xo-header__top{% if secondary_menu != blank or show_currency_selector == 'show' or show_language_selector == 'show' %} xo-header__top--modifier{% endif %}">
+    <div class="xo-header__top-left">
+      <ul class="xo-header__list">
+        {% for link in secondary_menu.links %}
+          <li class="xo-header__list-item">
+            <a href="{{ link.url }}" class="xo-header__link">{{ link.title }}</a>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+    <div class="xo-header__top-right">
+      {% if show_currency_selector == 'show' %}
+        <div class='xo-header__top-language' tabindex='0'>
+          {% render 'language-select', selector_position: 'header' %}
+        </div>
+      {% endif %}
+      {% if show_language_selector == 'show' %}
+        <div class='xo-header__top-currency' tabindex='0'>
+          {% render 'currency-select', selector_position: 'header' %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+{% endcapture %}
+
+<header style="position: relative;">
+  <div class="xo-header{% if header_style %} xo-header--{{ header_style }}{% endif %}{% if template contains 'collection-3' %} xo-header--modifier{% endif %}{% if menu_type == 'drawer' %} xo-header--drawer{% endif %}{% if header_style == 'style-2' %}{% if template contains 'collection-1' %} xo-header--style-2-absolute xo-header--transparent{% endif %}{% endif %}">
+    <xo-sticky
+      xo-direction="{{ sticky_header_type }}"
+      {% if sticky_header_type == 'none' %}
+        xo-disabled
+      {% endif %}
+      class="xo-header__body"
+      style="z-index: 10000"
+    >
+      <xo-animate
+        xo-type="fade-down"
+        class="xo-header__sticky{% if header_style %} xo-header__sticky--{{ header_style }}{% endif %}{% if template contains 'collection-3' %} xo-header__sticky--modifier{% endif %}"
+      >
+        <div class="xo-header__container{% if template.name == 'index' or template contains 'home-1' or template contains 'home-2' or template contains 'home-3' %} xo-header__container--transparent{% endif %}{% if settings.enable_border_radius %} xo-header__container--radius{% endif %} xo-header__container--{{ header_style }} color-{{ section.settings.color_scheme }}">
+          {% if header_style == 'style-5' %}
+            {{ header_top }}
+          {% endif %}
+
+          <div class="xo-header__content{% if header_style == 'style-1' or header_style == 'style-2' or header_style == 'style-5' %}{% if logo_position == 'center' or menu_type == 'drawer' %} xo-header__content--reverse{% endif %}{% endif %}{% if header_style == 'style-5' %} xo-header__content--modifier{% endif %}">
+            {% if header_style == 'style-4' %}
+              <div class="xo-header__box-first{% if settings.enable_border_radius %} xo-header__box-first--radius{% endif %}">
+            {% endif %}
+            {% if logo_position == 'left' or menu_type == 'drawer' %}
+              {{ header_logo }}
+            {%- else -%}
+              {% if header_style == 'style-4' or header_style == 'style-3' %}
+                {{ header_logo }}
+              {%- else -%}
+                {{ header_menu }}
+              {% endif %}
+            {% endif %}
+            {% if header_style == 'style-3' or header_style == 'style-4' or menu_type == 'drawer' %}
+              <div
+                class="xo-header__box-sedcond {% if settings.enable_border_radius %}xo-header__box-second--radius xo-header__box-second--{{ header_style }}-radius{% endif %} {% if header_style %}xo-header__box-second--{{ header_style }}{% endif %}"
+              >
+            {% endif %}
+            {% if logo_position == 'left' or menu_type == 'drawer' %}
+              {{ header_menu }}
+            {%- else -%}
+              {% if header_style == 'style-4' or header_style == 'style-3' %}
+                {{ header_menu }}
+              {%- else -%}
+                {{ header_logo }}
+              {% endif %}
+            {% endif %}
+
+            <div class="xo-header__right{% if header_style == 'style-1' or header_style == 'style-2' or header_style == 'style-5' %}{% if logo_position == 'center' and menu_type != "drawer" %} xo-header__right--width{% endif %}{% endif %}{% if header_style == 'style-5' %} xo-header__right--modifier{% endif %}">
+              {% if header_style != 'style-5' %}
+                {% if show_currency_selector == 'show' %}
+                  <div class="xo-header__right-item xo-header__right-item--language" tabindex="0">
+                    {% render 'language-select', selector_position: 'header' %}
+                  </div>
+                {% endif %}
+                {% if show_language_selector == 'show' %}
+                  <div class="xo-header__right-item xo-header__right-item--currency" tabindex="0">
+                    {% render 'currency-select', selector_position: 'header' %}
+                  </div>
+                {% endif %}
+              {% endif %}
+
+              <xo-tooltip
+                xo-title="{{ 'general.tooltip.search' | t }}"
+                xo-placement="bottom-center"
+                class="tooltip{% if settings.enable_border_radius %} tooltip--radius{% endif %}"
+              >
+                <xo-modal-trigger
+                  class="xo-header__right-item xo-header__right-item--search"
+                  xo-name="search"
+                  tabindex="0"
+                  role="button"
+                  aria-label="search-button"
+                >
+                  {% render 'icon', name: 'search', size: '1.6rem' %}
+                </xo-modal-trigger>
+              </xo-tooltip>
+
+              {%- if shop.customer_accounts_enabled -%}
+                <xo-tooltip
+                  xo-title="{{ 'general.tooltip.sign_in' | t }}"
+                  xo-placement="bottom-center"
+                  class="tooltip{% if settings.enable_border_radius %} tooltip--radius{% endif %}"
+                >
+                  <a
+                    href="{%- if customer -%}{{ routes.account_url }}{%- else -%}{{ routes.account_login_url }}{%- endif -%}"
+                    class="xo-header__right-item xo-header__right-item--account"
+                    aria-label="Account"
+                    title="Account"
+                  >
+                    {% if customer %}
+                      {% render 'icon', name: 'user', size: '1.6rem' %}
+                    {% else %}
+                      {% render 'icon', name: 'user', size: '1.6rem' %}
+                    {% endif %}
+                  </a>
+                </xo-tooltip>
+              {%- endif -%}
+
+              <xo-tooltip
+                xo-title="{{ 'general.tooltip.cart' | t }}"
+                xo-placement="bottom-center"
+                class="tooltip{% if settings.enable_border_radius %} tooltip--radius{% endif %}"
+              >
+                {% if settings.cart_type == 'page' or settings.cart_type == 'notification' %}
+                  <a
+                    class="xo-header__right-item xo-header__right-item--cart"
+                    href="{{ routes.cart_url }}"
+                    aria-label="Cart"
+                  >
+                    {% render 'icon', name: 'cart', size: '1.6rem' %}
+                    <div>
+                      <xo-cart-size class="xo-header__right-number">{{ cart.item_count }}</xo-cart-size>
+                    </div>
+                  </a>
+                {% else %}
+                  <xo-modal-trigger
+                    class="xo-header__right-item xo-header__right-item--cart"
+                    xo-name="cart"
+                    tabindex="0"
+                    role="button"
+                    aria-label="cart-button"
+                  >
+                    {% render 'icon', name: 'cart', size: '1.6rem' %}
+                    <div>
+                      <xo-cart-size class="xo-header__right-number">{{ cart.item_count }}</xo-cart-size>
+                    </div>
+                  </xo-modal-trigger>
+                {% endif %}
+              </xo-tooltip>
+            </div>
+
+            {% if header_style == 'style-3' or header_style == 'style-4' or menu_type == 'drawer' %}
+              </div>
+            {% endif %}
+            {% if header_style == 'style-4' %}
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </xo-animate>
+    </xo-sticky>
+  </div>
+</header>
+
+{% render 'header-ld-json' %}
+
+{% schema %}
+{
+  "name": "t:sections.header.name",
+  "class": "section-header",
+  "settings": [
+    {
+      "type": "select",
+      "id": "header_style",
+      "label": "t:sections.header.settings.header_style.label",
+      "options": [
+        {
+          "value": "style-1",
+          "label": "t:sections.header.settings.header_style.option__1.label"
+        },
+        {
+          "value": "style-2",
+          "label": "t:sections.header.settings.header_style.option__2.label"
+        },
+        {
+          "value": "style-3",
+          "label": "t:sections.header.settings.header_style.option__3.label"
+        },
+        {
+          "value": "style-4",
+          "label": "t:sections.header.settings.header_style.option__4.label"
+        },
+        {
+          "value": "style-5",
+          "label": "t:sections.header.settings.header_style.option__5.label"
+        }
+      ],
+      "default": "style-1"
+    },
+    {
+      "type": "select",
+      "id": "sticky_header_type",
+      "options": [
+        {
+          "value": "down",
+          "label": "t:sections.header.settings.sticky_header_type.options_1.label"
+        },
+        {
+          "value": "up",
+          "label": "t:sections.header.settings.sticky_header_type.options_2.label"
+        },
+        {
+          "value": "none",
+          "label": "t:sections.header.settings.sticky_header_type.options_3.label"
+        }
+      ],
+      "default": "down",
+      "label": "t:sections.header.settings.sticky_header_type.label",
+      "info": "t:sections.header.settings.sticky_header_type.info"
+    },
+    {
+      "type": "link_list",
+      "id": "menu",
+      "default": "main-menu",
+      "label": "t:sections.header.settings.menu.label"
+    },
+    {
+      "type": "link_list",
+      "id": "secondary_menu",
+      "default": "main-menu",
+      "label": "t:sections.header.settings.secondary_menu.label",
+      "info": "t:sections.header.settings.secondary_menu.info"
+    },
+    {
+      "type": "select",
+      "id": "menu_type",
+      "options": [
+        {
+          "value": "default",
+          "label": "t:sections.header.settings.menu_type.options__1.label"
+        },
+        {
+          "value": "drawer",
+          "label": "t:sections.header.settings.menu_type.options__2.label"
+        }
+      ],
+      "default": "default",
+      "label": "t:sections.header.settings.menu_type.label",
+      "info": "t:sections.header.settings.menu_type.info"
+    },
+    {
+      "type": "select",
+      "id": "event_type",
+      "options": [
+        {
+          "value": "hover",
+          "label": "t:sections.header.settings.event_type.options_1.label"
+        },
+        {
+          "value": "click",
+          "label": "t:sections.header.settings.event_type.options_2.label"
+        }
+      ],
+      "default": "hover",
+      "label": "t:sections.header.settings.event_type.label"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.header.settings.header_logo.content"
+    },
+    {
+      "type": "image_picker",
+      "id": "logo_transparent",
+      "label": "t:sections.header.settings.logo_transparent.label",
+      "info": "t:sections.header.settings.logo_transparent.info"
+    },
+    {
+      "type": "image_picker",
+      "id": "logo_sticky",
+      "label": "t:sections.header.settings.logo_sticky.label",
+      "info": "t:sections.header.settings.logo_sticky.info"
+    },
+    {
+      "type": "range",
+      "id": "logo_width_desktop",
+      "min": 50,
+      "max": 250,
+      "step": 10,
+      "default": 100,
+      "unit": "t:sections.header.settings.logo_width_desktop.unit",
+      "label": "t:sections.header.settings.logo_width_desktop.label"
+    },
+    {
+      "type": "range",
+      "id": "logo_width_mobile",
+      "min": 50,
+      "max": 250,
+      "step": 10,
+      "default": 100,
+      "unit": "t:sections.header.settings.logo_width_mobile.unit",
+      "label": "t:sections.header.settings.logo_width_mobile.label"
+    },
+    {
+      "type": "select",
+      "id": "logo_position",
+      "options": [
+        {
+          "value": "left",
+          "label": "t:sections.header.settings.logo_position.options_1.label"
+        },
+        {
+          "value": "center",
+          "label": "t:sections.header.settings.logo_position.options_2.label"
+        }
+      ],
+      "default": "center",
+      "label": "t:sections.header.settings.logo_position.label",
+      "info": "t:sections.header.settings.logo_position.info"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.header.settings.currency_header.content",
+      "info": "t:sections.header.settings.currency_header.info"
+    },
+    {
+      "type": "select",
+      "id": "show_currency_selector",
+      "label": "t:sections.header.settings.show_currency_selector.label",
+      "options": [
+        {
+          "value": "hidden",
+          "label": "t:sections.header.settings.show_currency_selector.option__1.label"
+        },
+        {
+          "value": "show",
+          "label": "t:sections.header.settings.show_currency_selector.option__2.label"
+        }
+      ],
+      "default": "hidden"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.header.settings.language_header.content",
+      "info": "t:sections.header.settings.currency_header.info"
+    },
+    {
+      "type": "select",
+      "id": "show_language_selector",
+      "label": "t:sections.header.settings.show_language_selector.label",
+      "options": [
+        {
+          "value": "hidden",
+          "label": "t:sections.header.settings.show_language_selector.option__1.label"
+        },
+        {
+          "value": "show",
+          "label": "t:sections.header.settings.show_language_selector.option__2.label"
+        }
+      ],
+      "default": "hidden"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.header.settings.header_color.content"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:sections.all.colors.label"
+    }
+  ],
+  "blocks": [
+    {
+      "name": "t:sections.header.blocks.name",
+      "type": "bubble",
+      "settings": [
+        {
+          "type": "range",
+          "id": "bind_to_main_menu",
+          "min": 1,
+          "max": 10,
+          "step": 1,
+          "default": 1,
+          "info": "t:sections.header.blocks.settings.bind_to_main_menu.info",
+          "label": "t:sections.header.blocks.settings.bind_to_main_menu.label"
+        },
+        {
+          "type": "text",
+          "id": "bubble_label",
+          "label": "t:sections.header.blocks.settings.bubble_label.label",
+          "default": "Text"
+        },
+        {
+          "type": "color",
+          "id": "background_color",
+          "label": "t:sections.header.blocks.settings.background_color.label",
+          "default": "#0F61FF"
+        },
+        {
+          "type": "color",
+          "id": "foreground_color",
+          "label": "t:sections.header.blocks.settings.foreground_color.label",
+          "default": "#FFFFFF"
+        },
+        {
+          "type": "select",
+          "id": "bubble_position",
+          "options": [
+            {
+              "value": "above",
+              "label": "t:sections.header.blocks.settings.bubble_position.option__1.label"
+            },
+            {
+              "value": "aside",
+              "label": "t:sections.header.blocks.settings.bubble_position.option__2.label"
+            }
+          ],
+          "default": "aside",
+          "label": "t:sections.header.blocks.settings.bubble_position.label"
+        },
+        {
+          "type": "textarea",
+          "id": "custom_icon",
+          "label": "t:sections.header.blocks.settings.custom_icon.label"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

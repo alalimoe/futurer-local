@@ -1,0 +1,45 @@
+{% comment %}
+  Renders a video
+
+  Accepts:
+  - context: {Object} The context in which the video is rendered (optional)
+
+  Usage:
+  {% render 'video-2', context: block %}
+{% endcomment %}
+
+{% liquid
+  assign context = context | default: block
+  assign final_video = ''
+  if context.settings.video != blank
+    assign final_video = context.settings.video.sources[1].url
+  else
+    if context.settings.video_url != blank
+      assign final_video = context.settings.video_url
+    endif
+  endif
+  assign aspect_ratio = context.settings.aspect_ratio
+  if aspect_ratio == 'custom'
+    assign aspect_ratio = context.settings.aspect_ratio_width | append: '/' | append: context.settings.aspect_ratio_height
+  endif
+  if aspect_ratio == 'auto'
+    assign aspect_ratio = '9/16'
+  endif
+%}
+
+<xo-video-cover
+  class="xo-video-2{% if settings.enable_border_radius %} xo-video-2--radius{% endif %}"
+  style="--aspect-ratio: {{ aspect_ratio }}"
+  xo-src="{{ final_video }}"
+>
+  {% if context.settings.video != blank %}
+    <xo-video-cover-button class="xo-video-2__button" tabindex="0" role="button" aria-label="Controls">
+      <div class="xo-video-2__button-play">
+        {% render 'icon', name: 'play', size: '2rem' %}
+      </div>
+      <div class="xo-video-2__button-pause">
+        {% render 'icon', name: 'pause', size: '2rem' %}
+      </div>
+    </xo-video-cover-button>
+  {% endif %}
+</xo-video-cover>

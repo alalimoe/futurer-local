@@ -1,0 +1,47 @@
+{% comment %} Wholesale & Labs CTA {% endcomment %}
+{%- assign sid = section.id | replace:'_','' | downcase -%}
+<style>
+#wh-{{ sid }}{ --b:#E7E9ED; --text:#111; }
+#wh-{{ sid }} .w-wrap{ padding:24px var(--page-gutter); border-top:1px solid var(--b); background:#FAFAFB; }
+#wh-{{ sid }} .w-container{ max-width:{{ section.settings.maxw | default:1200 }}px; margin:0 auto; }
+#wh-{{ sid }} .w-box{ display:flex; justify-content:space-between; align-items:center; gap:18px; background:#fff; border:1px solid var(--b); border-radius:var(--nx-radius); padding:16px; }
+#wh-{{ sid }} .w-title{ margin:0; color:var(--text); font-weight:800; }
+#wh-{{ sid }} .w-cta{ display:flex; gap:10px; flex-wrap:wrap; }
+#wh-{{ sid }} .w-btn{ display:inline-flex; align-items:center; justify-content:center; height:44px; padding:0 14px; border-radius:var(--nx-radius-md); text-decoration:none; font-weight:800; }
+#wh-{{ sid }} .w-btn--p{ background:var(--color-accent-primary); color:var(--color-text-primary); border:0; }
+#wh-{{ sid }} .w-btn--g{ border:1px solid var(--b); color:var(--color-text-primary); background:#fff; }
+#wh-{{ sid }} .w-btn--g:hover{ background:rgba(251,191,36,0.12); border-color:var(--color-accent-primary); }
+</style>
+
+<section id="wholesale" class="pdp-section" aria-label="Wholesale & labs">
+  <div id="wh-{{ sid }}" class="w-wrap">
+    <div class="w-container">
+      <div class="w-box">
+        <div>
+          <h2 class="w-title">{{ section.settings.title | default: 'Wholesale & Labs' }}</h2>
+          {% if section.settings.sub %}<p>{{ section.settings.sub }}</p>{% endif %}
+        </div>
+        <div class="w-cta">
+          {% if section.settings.p_label and section.settings.p_link %}<a class="w-btn w-btn--p" href="{{ section.settings.p_link }}">{{ section.settings.p_label }}</a>{% endif %}
+          {% if section.settings.s_label and section.settings.s_link %}<a class="w-btn w-btn--g" href="{{ section.settings.s_link }}">{{ section.settings.s_label }}</a>{% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name":"Wholesale CTA",
+  "settings":[
+    { "type":"range","id":"maxw","min":800,"max":1600,"step":10,"unit":"px","label":"Max width","default":1200 },
+    { "type":"text","id":"title","label":"Heading","default":"Wholesale & Labs" },
+    { "type":"textarea","id":"sub","label":"Subtext","default":"Volume pricing, standing orders, and batch documentation." },
+    { "type":"text","id":"p_label","label":"Primary label","default":"Request access" },
+    { "type":"url","id":"p_link","label":"Primary link","default":"/" },
+    { "type":"text","id":"s_label","label":"Secondary label","default":"Learn more" },
+    { "type":"url","id":"s_link","label":"Secondary link","default":"/" }
+  ],
+  "presets":[{ "name":"Wholesale CTA" }]
+}
+{% endschema %}

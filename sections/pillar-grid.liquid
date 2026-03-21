@@ -1,0 +1,118 @@
+{% comment %}
+Pillar grid — collection/manual, with ItemList JSON-LD
+Props: title, subtext, source, collection, limit, CTA label/link, show_quick_add
+Renders snippet 'product-card'
+{% endcomment %}
+
+{%- assign sid = section.id | replace:'_','' | downcase -%}
+
+<style>
+#pgrid-{{ sid }}{ --b:#E7E9ED; --text:#111; }
+#pgrid-{{ sid }} .g-wrap{ padding:24px var(--page-gutter); border-top:1px solid var(--b); background:#FAFAFB; }
+#pgrid-{{ sid }} .g-container{ max-width:{{ section.settings.maxw | default:1200 }}px; margin:0 auto; }
+#pgrid-{{ sid }} .g-head{ display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:8px; }
+#pgrid-{{ sid }} .g-title{ margin:0; font-weight:800; color:var(--text); }
+#pgrid-{{ sid }} .g-sub{ color:#374151; }
+#pgrid-{{ sid }} .g-grid{ display:grid; gap:14px; grid-template-columns:repeat(4,1fr); }
+@media(max-width:1020px){ #pgrid-{{ sid }} .g-grid{ grid-template-columns:repeat(3,1fr); } }
+@media(max-width:780px){  #pgrid-{{ sid }} .g-grid{ grid-template-columns:repeat(2,1fr); } }
+@media(max-width:520px){  #pgrid-{{ sid }} .g-grid{ grid-template-columns:1fr; } }
+#pgrid-{{ sid }} .g-more{ margin-top:12px; }
+#pgrid-{{ sid }} .g-btn{ display:inline-flex; align-items:center; justify-content:center; height:44px; padding:0 14px; border-radius:var(--nx-radius-md); border:1px solid var(--b); text-decoration:none; font-weight:700; }
+#pgrid-{{ sid }} .g-btn:hover{ background:rgba(251,191,36,0.12); border-color:var(--color-accent-primary); }
+</style>
+
+{% # theme-check-disable UnknownFilter %}
+{%- liquid
+  assign items = '' | split: ','
+  if section.settings.source == 'collection' and section.settings.collection != blank
+    assign coll = collections[section.settings.collection]
+    if coll
+      for p in coll.products
+        assign items = items | push: p
+      endfor
+    endif
+  else
+    for b in section.blocks
+      if b.type == 'product' and b.settings.product != blank
+        assign p = all_products[b.settings.product]
+        if p
+          assign items = items | push: p
+        endif
+      endif
+    endfor
+  endif
+
+  assign limit = section.settings.limit | default: 8 | plus: 0
+  assign sliced = '' | split: ','
+  for p in items
+    assign sliced = sliced | push: p
+    if forloop.index >= limit
+      break
+    endif
+  endfor
+-%}
+{% # theme-check-enable UnknownFilter %}
+
+<section id="pgrid-{{ sid }}" class="pdp-section" aria-label="{{ section.settings.title | escape }}">
+  <div class="g-wrap">
+    <div class="g-container">
+      <div class="g-head">
+        <h2 class="g-title">{{ section.settings.title | default: 'Shop Peptides' }}</h2>
+        {% if section.settings.sub %}<p class="g-sub">{{ section.settings.sub }}</p>{% endif %}
+      </div>
+
+      <div class="g-grid">
+        {% for p in sliced %}
+          {% render 'product-card', product: p, show_quick_add: section.settings.quick_add %}
+        {% endfor %}
+      </div>
+
+      {% if section.settings.cta_label and section.settings.cta_link %}
+        <div class="g-more">
+          <a class="g-btn" href="{{ section.settings.cta_link }}">{{ section.settings.cta_label }}</a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+{%- comment -%} ItemList JSON-LD {%- endcomment -%}
+{%- capture ld_json -%}
+{
+  "@context":"https://schema.org",
+  "@type":"ItemList",
+  "name": {{ section.settings.title | default: 'Shop Peptides' | json }},
+  "itemListElement":[
+    {%- for p in sliced -%}
+      { "@type":"ListItem","position": {{ forloop.index }},"url": {{ p.url | json }} }{% unless forloop.last %},{% endunless %}
+    {%- endfor -%}
+  ]
+}
+{%- endcapture -%}
+<script type="application/ld+json">{{ ld_json | strip }}</script>
+
+{% schema %}
+{
+  "name":"Pillar grid",
+  "settings":[
+    { "type":"range","id":"maxw","min":800,"max":1600,"step":10,"unit":"px","label":"Max width","default":1200 },
+    { "type":"text","id":"title","label":"Title","default":"Shop Peptides" },
+    { "type":"text","id":"sub","label":"Subtext" },
+
+    { "type":"select","id":"source","label":"Source","options":[
+      { "value":"collection","label":"Collection" }, { "value":"manual","label":"Manual (blocks)" }
+    ],"default":"collection" },
+    { "type":"collection","id":"collection","label":"Collection" },
+    { "type":"range","id":"limit","label":"Max products","min":2,"max":12,"step":1,"default":8 },
+
+    { "type":"text","id":"cta_label","label":"Section CTA label" },
+    { "type":"url","id":"cta_link","label":"Section CTA link" },
+    { "type":"checkbox","id":"quick_add","label":"Enable quick add", "default": true }
+  ],
+  "blocks":[
+    { "type":"product","name":"Manual product","settings":[ { "type":"product","id":"product","label":"Product" } ] }
+  ],
+  "presets":[{ "name":"Pillar grid" }]
+}
+{% endschema %}

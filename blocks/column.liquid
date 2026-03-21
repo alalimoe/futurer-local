@@ -1,0 +1,93 @@
+{% liquid
+  capture content
+    content_for 'blocks'
+  endcapture
+%}
+
+{%- render 'column-block',
+  content: content,
+  desktop_row_span: block.settings.desktop_row_span,
+  desktop_col_span: block.settings.desktop_col_span,
+  mobile_row_span: block.settings.mobile_row_span,
+  mobile_col_span: block.settings.mobile_col_span
+-%}
+
+
+{% schema %}
+{
+  "tag": null,
+  "name": "t:blocks.column.name",
+  "class": "xo-column-2",
+  "settings": [
+    {
+      "type": "select",
+      "id": "device",
+      "label": "Device",
+      "options": [
+        {
+          "value": "desktop",
+          "label": "Desktop"
+        },
+        {
+          "value": "mobile",
+          "label": "Mobile"
+        }
+      ],
+      "default": "desktop"
+    },
+    {
+      "type": "range",
+      "id": "desktop_col_span",
+      "label": "t:blocks.column.settings.col_span.label",
+      "default": 1,
+      "min": 1,
+      "max": 12,
+      "step": 1,
+      "visible_if": "{{ block.settings.device == 'desktop' }}"
+    },
+    {
+      "type": "range",
+      "id": "desktop_row_span",
+      "label": "t:blocks.column.settings.row_span.label",
+      "default": 1,
+      "min": 1,
+      "max": 12,
+      "step": 1,
+      "visible_if": "{{ block.settings.device == 'desktop' }}"
+    },
+    {
+      "type": "range",
+      "id": "mobile_col_span",
+      "label": "t:blocks.column.settings.col_span.label",
+      "default": 1,
+      "min": 1,
+      "max": 12,
+      "step": 1,
+      "visible_if": "{{ block.settings.device == 'mobile' }}"
+    },
+    {
+      "type": "range",
+      "id": "mobile_row_span",
+      "label": "t:blocks.column.settings.row_span.label",
+      "default": 1,
+      "min": 1,
+      "max": 12,
+      "step": 1,
+      "visible_if": "{{ block.settings.device == 'mobile' }}"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "@theme"
+    },
+    {
+      "type": "@app"
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:blocks.column.presets.name"
+    }
+  ]
+}
+{% endschema %}

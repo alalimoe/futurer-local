@@ -1,0 +1,158 @@
+{{ 'img-with-text-11.css' | asset_url | stylesheet_tag }}
+
+{% liquid
+  assign sub_heading = section.settings.sub_heading
+  assign blocks = section.blocks
+%}
+
+<section {% render 'section-attr' %}>
+  <div class="xo-image-with-text-style-11">
+    <xo-container class="xo-image-with-text-style-11__container">
+      <div class="xo-image-with-text-style-11__content">
+        {% render 'img-with-text-11', sub_heading: sub_heading, blocks: blocks %}
+      </div>
+    </xo-container>
+  </div>
+</section>
+
+{% schema %}
+{
+  "tag": "section",
+  "name": "t:sections.image_with_text_style_11.name",
+  "settings": [
+    {
+      "type": "richtext",
+      "id": "sub_heading",
+      "label": "Subheading",
+      "default": "<p>Use this text to share information about your brand with your customers</p>"
+    },
+    {
+      "type": "header",
+      "content": "General settings"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Section color scheme"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color"
+    },
+    {
+      "type": "color_background",
+      "id": "background_gradient",
+      "label": "Background gradient"
+    },
+    {
+      "type": "number",
+      "id": "padding_top_desktop",
+      "label": "Padding top desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_desktop",
+      "label": "Padding bottom desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_top_mobile",
+      "label": "Padding top mobile",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_mobile",
+      "label": "Padding bottom mobile",
+      "default": 50
+    }
+  ],
+  "blocks": [
+    {
+      "type": "tab-item",
+      "name": "List item",
+      "settings": [
+        {
+          "type": "textarea",
+          "id": "heading",
+          "label": "Heading",
+          "default": "Heading"
+        },
+        {
+          "type": "header",
+          "content": "Main media"
+        },
+        {
+          "type": "select",
+          "id": "main_media_type",
+          "label": "Media type",
+          "options": [
+            {
+              "value": "image",
+              "label": "Image"
+            },
+            {
+              "value": "video",
+              "label": "Video"
+            }
+          ],
+          "default": "image"
+        },
+        {
+          "type": "image_picker",
+          "id": "large_image",
+          "label": "Image",
+          "visible_if": "{{ block.settings.main_media_type == 'image' }}"
+        },
+        {
+          "type": "video",
+          "id": "large_video",
+          "label": "Video",
+          "visible_if": "{{ block.settings.main_media_type == 'video' }}"
+        },
+        {
+          "type": "header",
+          "content": "Thumbnail preview"
+        },
+        {
+          "type": "image_picker",
+          "id": "small_image",
+          "label": "Image"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.image_with_text_style_11.name",
+      "settings": {},
+      "blocks": [
+        {
+          "type": "tab-item",
+          "settings": {}
+        },
+        {
+          "type": "tab-item",
+          "settings": {}
+        },
+        {
+          "type": "tab-item",
+          "settings": {}
+        }
+      ]
+    }
+  ],
+  "disabled_on": {
+    "groups": [
+      "header",
+      "footer",
+      "custom.overlay",
+      "custom.popups",
+      "custom.features"
+    ]
+  }
+}
+{% endschema %}

@@ -1,0 +1,79 @@
+{% comment %}
+  Renders a collecton card v2
+
+  Accepts:
+  - collection: {Object} Collection (required)
+  - image_size: {Object} Image size (optional)
+  - color_schema_card: {String} Color schema (optional)
+
+  Usage:
+  {% render 'collection-card-v2', collection: collection, image_size: image_size, color_schema_card: color_schema_card %}
+{% endcomment %}
+
+{% liquid
+  assign image = collection.image
+  if collection.image == blank
+    assign image = collection.featured_image
+  endif
+
+  assign gap = 7
+  if image_size == 'lg'
+    assign gap = 12
+  endif
+
+  assign tag_name = 'div'
+  assign show_icon = false
+
+  if animated_enable == null
+    assign tag_name = 'div'
+  endif
+
+  if icon_enable == null
+  assign show_icon = false
+  endif
+
+  if icon_enable
+    assign show_icon = true
+  endif
+
+  if animated_enable
+    assign tag_name = 'xo-animate'
+  endif
+%}
+
+<{{ tag_name }}
+  xo-cascade
+  class='collection-card-v2{% if layout %} collection-card-v2--{{ layout }}{% endif %}{% if color_schema_card %} color-{{ color_schema_card }}{% endif %}{% if settings.enable_border_radius %} collection-card-v2--radius{% endif %}'
+  style='--padding-vertical: {{ padding_vertical }}px; --padding-horizontal: {{ padding_horizontal }}px'
+>
+  {% if show_icon %}
+    <div class='collection-card-v2__trigger'>
+      <div class='collection-card-v2__wrapper' style='--gap: {{ gap }}px'>
+        <div class='collection-card-v2__image{% if image_size %} collection-card-v2__image--{{ image_size }}{% endif %}'>
+          {% render 'image', image: image, aspect_ratio: aspect_ratio, disable_alt: true %}
+        </div>
+        {% if collection != empty %}
+          <h3 class='collection-card-v2__title'>{{ collection.title }}</h3>
+        {% else %}
+          <h3 class='collection-card-v2__title'>{{ 'onboarding.collection_title' | t }}</h3>
+        {% endif %}
+      </div>
+      <div class='collection-card-v2__icon'>
+        {% render 'button-slide', icon: 'arrow-right', icon_size: '2rem', style: 'transparent', direction: 'right' %}
+      </div>
+    </div>
+  {% else %}
+    <a href='{{ collection.url }}' class='collection-card-v2__link'>
+      <div class='collection-card-v2__wrapper' style='--gap: {{ gap }}px'>
+        <div class='collection-card-v2__image{% if image_size %} collection-card-v2__image--{{ image_size }}{% endif %}'>
+          {% render 'image', image: image, aspect_ratio: aspect_ratio, disable_alt: true %}
+        </div>
+        {% if collection and collection != empty %}
+          <h3 class='collection-card-v2__title'>{{ collection.title }}</h3>
+        {% else %}
+          <h3 class='collection-card-v2__title'>{{ 'onboarding.collection_title' | t }}</h3>
+        {% endif %}
+      </div>
+    </a>
+  {% endif %}
+</{{ tag_name }}>

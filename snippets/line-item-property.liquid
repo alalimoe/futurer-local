@@ -1,0 +1,54 @@
+{% liquid
+  assign form_id = 'product_form_id-' | append: section.id
+
+  assign type = block.settings.type
+  assign label = block.settings.label
+  assign checked_value = block.settings.checked_value
+  assign uncheck_value = block.settings.uncheck_value
+  assign radio_options = block.settings.radio_options
+  assign dropdown_options = block.settings.dropdown_options
+
+  assign name = 'properties[' | append: label | append: ']'
+%}
+
+<xo-product-property class='line-item-property'>
+  {% case type %}
+    {% when 'text' %}
+      <div class='line-item-property__text'>
+        {% render 'field-input', name: name, id: label, label: label, form_id: form_id %}
+      </div>
+    {% when 'checkbox' %}
+      <div class='line-item-property__checkbox'>
+        {% render 'field-checkbox-2', name: name, checked_value: checked_value, uncheck_value: uncheck_value, label: label, form_id: form_id %}
+      </div>
+    {% when 'radio' %}
+      {% liquid
+        assign radio_arr = radio_options | split: ','
+      %}
+      <div class='line-item-property__radio'>
+        <span class='line-item-property__label'>{{ label }}</span>
+        {% for radio_value in radio_arr %}
+          <div class='line-item-property__field'>
+            {% render 'field-radio-3', value: radio_value, label: radio_value, name: name, form_id: form_id %}
+          </div>
+        {% endfor %}
+      </div>
+    {% when 'dropdown' %}
+      {% liquid
+        assign dropdown_arr = dropdown_options | split: ','
+      %}
+      <div class='line-item-property__dropdown'>
+        <select
+          id='{{ label }}'
+          name='properties[{{ label }}]'
+          class='line-item-property__select{% if settings.enable_border_radius %} line-item-property__select--radius{% endif %}'
+          form='{{ form_id }}'
+        >
+          <option value disabled selected class='line-item-property__option'>{{ label }}</option>
+          {% for dropdown_value in dropdown_arr %}
+            <option value='{{ dropdown_value }}' class='line-item-property__option'>{{ dropdown_value }}</option>
+          {% endfor %}
+        </select>
+      </div>
+  {% endcase %}
+</xo-product-property>

@@ -1,0 +1,224 @@
+{% comment %}
+  Render a bundle combo
+
+  @param {array} collection_list - List of collections
+  @param {string} heading - Heading
+  @param {string} description - Description
+  @param {object} button - Button
+  @param {object} blocks - Blocks
+
+  @example
+  {% render 'bundle-combo',
+    collection_list: collection_list,
+    heading: heading,
+    description: description,
+    button: button,
+    blocks: blocks
+  %}
+{% endcomment %}
+
+{% liquid
+  assign container_class = 'xo-bundle-combo'
+  if settings.enable_border_radius
+    assign container_class = container_class | append: ' xo-bundle-combo--radius'
+  endif
+
+  assign content_class = 'xo-bundle-combo__content'
+  if content_color_scheme != blank
+    assign content_class = content_class | append: ' color-' | append: content_color_scheme
+  endif
+
+  assign first_collection = collection_list | first
+  assign current_handle = first_collection.handle
+  if request.path contains '/collections/'
+    assign current_handle = request.path | split: '/' | last
+  endif
+  assign current_collection = collection_list | where: 'handle', current_handle | first
+%}
+
+{% capture discount_arr %}
+  xo-discounts="
+    [
+      {% for block in blocks %}
+        {% liquid
+          assign min_quantity = block.settings.min_quantity
+          assign discount_type = block.settings.discount_type
+          assign discount_value = block.settings.discount_value
+        %}
+        {% if discount_type == 'fixed-amount' %}
+          { type: '{{ discount_type }}', minQuantity: {{ min_quantity }}, value: {{ discount_value | times: 100 }} },
+        {% else %}
+          { type: '{{ discount_type }}', minQuantity: {{ min_quantity }}, value: {{ discount_value }} },
+        {% endif %}
+      {% endfor %}
+    ]
+  "
+{% endcapture %}
+
+<div class="{{ container_class }}">
+  <xo-collection-tabs xo-section-id="{{ section.id }}">
+    <div class="xo-bundle-combo__inner">
+      {% if heading != blank %}
+        <div class="xo-bundle-combo__heading">
+          {% render 'text', context: section %}
+        </div>
+      {% endif %}
+      <xo-grid class="xo-bundle-combo__grid">
+        <div class="{{ content_class }}" style="--lg: 8; --md: 8; --xs: 12; --start-md: 3;">
+          <div class="xo-bundle-combo__top">
+            {% if description != blank %}
+              <xo-animate xo-cascade>
+                <div class="xo-bundle-combo__description">
+                  {{ description }}
+                </div>
+              </xo-animate>
+            {% endif %}
+            <div class="xo-bundle-combo__trigger-wrap">
+              <xo-scroll-carousel xo-gap="4">
+                <div class="xo-bundle-combo__title-wrap">
+                  {% if collection_list != blank %}
+                    {% for collection in collection_list %}
+                      {% liquid
+                        assign collection_title = collection.title
+                        assign collection_handle = collection.handle
+                      %}
+                      <xo-collection-tabs-trigger
+                        class="xo-bundle-combo__trigger"
+                        xo-handle="{{ collection_handle }}"
+                        {% if collection_handle == current_handle %}
+                          xo-active
+                        {% endif %}
+                      >
+                        <span class="xo-bundle-combo__trigger-text">{{ collection_title }}</span>
+                      </xo-collection-tabs-trigger>
+                    {% endfor %}
+                  {% else %}
+                    {% for i in (1..3) %}
+                      <div
+                        class="xo-bundle-combo__trigger"
+                        {% if forloop.first %}
+                          xo-active
+                        {% endif %}
+                      >
+                        <span class="xo-bundle-combo__trigger-text">{{ 'general.bundle.set_up_discount' | t }}</span>
+                      </div>
+                    {% endfor %}
+                  {% endif %}
+                </div>
+              </xo-scroll-carousel>
+            </div>
+          </div>
+          <div class="xo-bundle-combo__layout">
+            <xo-bundle-provider xo-name="{{ section.id }}" {{ discount_arr }} xo-combine-by-quantity="false">
+              <template xo-bundle-property>
+                <div>{label}</div>
+                <div>{value}</div>
+              </template>
+              <div class="xo-bundle-combo__wrapper">
+                <xo-collection-tabs-content>
+                  <xo-carousel xo-column-width="180" xo-gap="10" class="xo-bundle-combo__carousel">
+                    <xo-carousel-inner>
+                      <xo-carousel-list>
+                        {% if collection_list != blank %}
+                          {% for product in current_collection.products %}
+                            <xo-carousel-slide>
+                              <div class="xo-bundle-combo__product">
+                                {% render 'product-card',
+                                  product: product,
+                                  show_image: settings.product_card_show_image,
+                                  show_secondary_image: settings.product_card_show_secondary_image,
+                                  show_vendor: settings.product_card_show_vendor,
+                                  show_description: settings.product_card_show_description,
+                                  show_quick_add: settings.product_card_show_quick_add,
+                                  show_quick_view: settings.product_card_show_quick_view,
+                                  show_favorite: settings.product_card_show_favorite,
+                                  show_price: settings.product_card_show_price,
+                                  show_badge: settings.product_card_show_badge,
+                                  position_badge: settings.position_badge,
+                                  media_aspect_ratio: section.settings.product_card_aspect_ratio,
+                                  color_scheme: section.settings.card_color_scheme,
+                                  placeholder_image: placeholder_image,
+                                  animate_enabled: true,
+                                  is_bundle: true,
+                                  bundle_style: 'style-2'
+                                %}
+                              </div>
+                            </xo-carousel-slide>
+                          {% endfor %}
+                        {% else %}
+                          {% for i in (1..6) %}
+                            <xo-carousel-slide>
+                              <div class="xo-bundle-combo__product">
+                                {% render 'product-card',
+                                  product: empty,
+                                  show_image: settings.product_card_show_image,
+                                  show_secondary_image: settings.product_card_show_secondary_image,
+                                  show_vendor: settings.product_card_show_vendor,
+                                  show_description: settings.product_card_show_description,
+                                  show_quick_add: settings.product_card_show_quick_add,
+                                  show_quick_view: settings.product_card_show_quick_view,
+                                  show_favorite: settings.product_card_show_favorite,
+                                  show_price: settings.product_card_show_price,
+                                  show_badge: settings.product_card_show_badge,
+                                  position_badge: settings.position_badge,
+                                  media_aspect_ratio: section.settings.product_card_aspect_ratio,
+                                  color_scheme: section.settings.card_color_scheme,
+                                  placeholder_image: placeholder_image,
+                                  animate_enabled: true,
+                                  is_bundle: true,
+                                  bundle_style: 'style-2'
+                                %}
+                              </div>
+                            </xo-carousel-slide>
+                          {% endfor %}
+                        {% endif %}
+                      </xo-carousel-list>
+                    </xo-carousel-inner>
+                  </xo-carousel>
+                </xo-collection-tabs-content>
+              </div>
+              <xo-bundle-size class="xo-bundle-combo__size">
+                <div class="xo-bundle-combo__bottom">
+                  <div class="xo-bundle-combo__discount-wrap">
+                    {% for block in blocks %}
+                      {% liquid
+                        assign label = block.settings.label
+                        assign quantity = block.settings.min_quantity
+                      %}
+                      <xo-bundle-step xo-min-quantity="{{ quantity }}" class="xo-bundle-combo__discount-item">
+                        <span class="xo-bundle-combo__discount-label">{{ label }}</span>
+                      </xo-bundle-step>
+                    {% endfor %}
+                  </div>
+                  <div class="xo-bundle-combo__bottom-wrap">
+                    <div class="xo-bundle-combo__wrap-inner">
+                      <xo-bundle-content class="xo-bundle-combo__product-content"></xo-bundle-content>
+                      <xo-bundle-placeholder class="xo-bundle-combo__placeholder">
+                        <span class="xo-bundle-combo__placeholder-item"></span>
+                      </xo-bundle-placeholder>
+                    </div>
+                    <div class="xo-bundle-combo__total-price">
+                      <span class="xo-bundle-combo__total-label">
+                        {{ 'general.bundle.total' | t | append: ':' }}
+                      </span>
+                      <div class="xo-bundle-combo__price-wrap">
+                        <xo-bundle-price class="xo-bundle-combo__price"></xo-bundle-price>
+                        <xo-bundle-price class="xo-bundle-combo__price xo-bundle-combo__price--compare" xo-compare-at-price></xo-bundle-price>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="xo-bundle-combo__actions">
+                    {% assign button_text = 'general.bundle.add_bundle' | t %}
+                    <xo-cart-add xo-for-bundle class="xo-bundle-combo__button">
+                      {% render 'button', text: button_text, style: 'primary', size: 'md', block: true %}
+                    </xo-cart-add>
+                  </div>
+                </div>
+              </xo-bundle-size>
+            </xo-bundle-provider>
+          </div>
+        </div>
+      </xo-grid>
+    </div>
+  </xo-collection-tabs>
+</div>

@@ -1,0 +1,42 @@
+{% comment %}
+  Renders a product card placeholder.
+
+  Accepts:
+  - placeholder_image: {String} The placeholder image to use when no product exists. Default: 'product-apparel-1' (optional)
+
+  Usage:
+  {% render 'product-card-custom-placeholder', placeholder_image: placeholder_image %}
+{% endcomment %}
+
+{% liquid
+  assign tooltip_title = 'onboarding.product_add_cart' | t
+  assign final_aspect_ratio = aspect_ratio | default: '1'
+%}
+
+<div class='product-card-custom-placeholder{% if card_color_scheme %} color-{{ card_color_scheme }}{% endif %}{% if settings.enable_border_radius %} product-card-custom-placeholder--radius{% endif %}{% if modifier %} product-card-custom--modifier{% endif %}'>
+  <div class='product-card-custom-placeholder__image'>
+    {% render 'product-image', product: product, placeholder_image: placeholder_image, aspect_ratio: final_aspect_ratio %}
+  </div>
+  <div class='product-card-custom-placeholder__info'>
+    <div class='product-card-custom-placeholder__header'>
+      <div class='product-card-custom-placeholder__title'>
+        <p>{{ 'onboarding.product_title' | t }}</p>
+      </div>
+      <div class='product-card-custom-placeholder__description'>
+        <p>{{ 'onboarding.product_description' | t }}</p>
+      </div>
+    </div>
+    <div class='product-card-custom-placeholder__bottom'>
+      <div class='product-card-custom-placeholder__price'>
+        {% render 'price' %}
+      </div>
+      <div class='product-card-custom-placeholder__button'>
+        <xo-tooltip xo-title='{{ tooltip_title }}' xo-placement='top-center' class='tooltip{% if settings.enable_border_radius %} tooltip--radius{% endif %}'>
+          <div class='product-card-custom-placeholder__add-cart'>
+            {% render 'button-icon', size: 'md', style: 'primary', type: 'boxed', icon: 'plus', icon_size: '20', effect: 'rotate' %}
+          </div>
+        </xo-tooltip>
+      </div>
+    </div>
+  </div>
+</div>

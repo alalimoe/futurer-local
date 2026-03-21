@@ -1,0 +1,175 @@
+{% comment %}
+  Renders a mobile menu
+
+  Accepts:
+  - menu: {Object} Menu object
+  Usage:
+  {% render 'menu-mobile', menu: section.settings.menu %}
+{% endcomment %}
+
+{% if menu != blank %}
+  <div class='menu-mobile'>
+    <xo-modal-trigger class='menu-mobile__trigger' xo-name='menu-mobile'>
+      <div class='menu-mobile__icon-bar'>
+        {% render 'icon', name: 'hamburger', size: '2.5rem' %}
+      </div>
+    </xo-modal-trigger>
+    <xo-modal
+      class='menu-mobile__modal'
+      xo-name='menu-mobile'
+      xo-animate='slide-right'
+      xo-portal='true'
+    >
+      <div class='menu-mobile__content'>
+        <!-- logo, button-close -->
+        <div class='menu-mobile__top'>
+          <!-- logo -->
+          <div class='menu-mobile__logo'>
+            <a href='{{ routes.root_url }}'>
+              {%- if section.settings.logo != blank -%}
+                {% liquid
+                  assign logo_alt = section.settings.logo.alt | default: shop.name | escape
+                  assign height_dt = section.settings.logo_width_desktop | divided_by: section.settings.logo.aspect_ratio
+                  assign height_mb = section.settings.logo_width_mobile | divided_by: section.settings.logo.aspect_ratio
+                  assign width_mb = section.settings.logo_width_mobile
+                  assign width_dt = section.settings.logo_width_desktop
+                %}
+                <img
+                  class='menu-mobile__logo-img'
+                  src='{{ section.settings.logo | image_url }}'
+                  alt='{{ logo_alt }}'
+                  style='--width_mobile: {{ width_mb }}px; --width_desktop: {{ width_dt }}px;--height_mobile: {{ height_mb }}px; --height_desktop: {{ height_dt }}px'
+                  loading='lazy'
+                  height='auto'
+                  width='auto'
+                >
+              {%- else -%}
+                <span class='h4 menu-mobile__heading-logo'>{{ shop.name }}</span>
+              {%- endif -%}
+            </a>
+          </div>
+          <div class='menu-mobile__action'>
+            <!-- cart -->
+            {% if settings.cart_type == 'page' %}
+              <a class='menu-mobile__action-cart' href='{{ routes.cart_url }}'>
+                {% render 'icon', name: 'cart-1', size: '2.4rem' %}
+                <div class='menu-mobile__action-cart-number'>
+                  <xo-cart-size>{{ cart.item_count }}</xo-cart-size>
+                </div>
+              </a>
+            {% else %}
+              <xo-modal-trigger
+                class='menu-mobile__action-cart'
+                xo-name='cart'
+              >
+                {% render 'icon', name: 'cart-1', size: '2.4rem' %}
+                <div class='menu-mobile__action-cart-number'>
+                  <xo-cart-size>{{ cart.item_count }}</xo-cart-size>
+                </div>
+              </xo-modal-trigger>
+            {% endif %}
+            <!-- button close -->
+            <div class='menu-mobile__button-close'>
+              <xo-modal-trigger xo-name='menu-mobile' class='menu-mobile__button-close-trigger'>
+                {% render 'icon', name: 'close', size: '2.8rem' %}
+              </xo-modal-trigger>
+            </div>
+          </div>
+        </div>
+        <!-- nav -->
+        <nav class='menu-mobile__nav'>
+          <ul class='menu-mobile-list list-unstyled'>
+            <!-- search -->
+            <form method='get' action='{{ routes.search_url }}' role='search'>
+              <li class='menu-mobile-list__item menu-mobile-list__item--search'>
+                <div class='menu-mobile-list__search-icon'>
+                  {% render 'icon', name: 'search', size: '2rem' %}
+                </div>
+                <input
+                  class='menu-mobile-list__search-input'
+                  type='search'
+                  placeholder='Search'
+                  value='{{ value }}'
+                >
+              </li>
+            </form>
+            <!-- link -->
+            {% for link in menu.links %}
+              <xo-modal-trigger class='menu-mobile-list__trigger' xo-name='{{ link.title }}'>
+                <li class='menu-mobile-list__item{% if link.current %} menu-mobile-list__item--current{% endif %}'>
+                  <div class='menu-mobile-list__link'>
+                    <span class='menu-mobile-list__label'>
+                      {{ link.title }}
+                    </span>
+                    {% if link.links != blank %}
+                      <span class='menu-mobile-list__arrow'>
+                        {% render 'icon', name: 'chevron-down', size: '1.6rem' %}
+                      </span>
+                    {% endif %}
+                  </div>
+                  {% if link.links != blank %}
+                    <xo-modal xo-name='{{ link.title }}'>
+                      <ul class='menu-mobile-list__sub-menu list-unstyled'>
+                        {% for childlink in link.links %}
+                          <li class='menu-mobile-list__item menu-mobile-list__item--sub{% if childlink.current %} menu-mobile-list__item--current{% endif %}'>
+                            <a
+                              class='menu-mobile-list__link menu-mobile-list__link--sub'
+                              href='{{ childlink.url }}'
+                              {% if childlink.current %}
+                                aria-current='page'
+                              {% endif %}
+                            >
+                              <span class='menu-mobile-list__label'>
+                                {{ childlink.title }}
+                              </span>
+                            </a>
+                            {% if childlink.links != blank %}
+                              <ul class='menu-mobile-list__sub-menu list-unstyled'>
+                                {% for grandchildlink in childlink.links %}
+                                  <li class='menu-mobile-list__item menu-mobile-list__item--sub{% if grandchildlink.current %} menu-mobile-list__item--current{% endif %}'>
+                                    <a
+                                      class='menu-mobile-list__link menu-mobile-list__link--sub'
+                                      href='{{ grandchildlink.url }}'
+                                      {% if grandchildlink.current %}
+                                        aria-current='page'
+                                      {% endif %}
+                                    >
+                                      <span class='menu-mobile-list__label'>
+                                        {{ grandchildlink.title }}
+                                      </span>
+                                    </a>
+                                  </li>
+                                {% endfor %}
+                              </ul>
+                            {% endif %}
+                          </li>
+                        {% endfor %}
+                      </ul>
+                    </xo-modal>
+                  {% endif %}
+                </li>
+              </xo-modal-trigger>
+            {% endfor %}
+            <!-- login -->
+            <li class='menu-mobile-list__item menu-mobile-list__item--login'>
+              {%- if shop.customer_accounts_enabled -%}
+                <a
+                  href='{%- if customer -%}{{ routes.account_url }}{%- else -%}{{ routes.account_login_url }}{%- endif -%}'
+                  class=''
+                >
+                  Login
+                </a>
+              {%- endif -%}
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </xo-modal>
+  </div>
+{% endif %}
+
+<script>
+  function toggleSubMenu(event) {
+    event.preventDefault();
+  }
+</script>

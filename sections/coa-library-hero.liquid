@@ -1,0 +1,273 @@
+{% schema %}
+{
+  "name": "COA Library Hero",
+  "tag": "section",
+  "class": "section-coa-library-hero",
+  "settings": [
+    { "type": "header", "content": "Content" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Quality & COA Library" },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "We don't ask you to \"trust us.\" We show you the batch/lot and the COA — so quality claims are verifiable, not just marketing."
+    },
+    { "type": "header", "content": "Bullets" },
+    { "type": "text", "id": "bullet_1", "label": "Bullet 1", "default": "Batch/lot traceability (match your label to the report)" },
+    { "type": "text", "id": "bullet_2", "label": "Bullet 2", "default": "Third-party analytical documentation (methods + results)" },
+    { "type": "text", "id": "bullet_3", "label": "Bullet 3", "default": "UAE-aware handling (shipping heat + storage guidance)" },
+    { "type": "header", "content": "Trust Signals" },
+    { "type": "text", "id": "trust_1", "label": "Trust Signal 1", "default": "Independent Lab Tested" },
+    { "type": "text", "id": "trust_2", "label": "Trust Signal 2", "default": "Batch-Matched Reports" },
+    { "type": "text", "id": "trust_3", "label": "Trust Signal 3", "default": "UAE-Optimized Storage" },
+    { "type": "header", "content": "Call to Action" },
+    { "type": "text", "id": "cta_primary_text", "label": "Primary CTA Text", "default": "Browse COAs" },
+    { "type": "url", "id": "cta_primary_url", "label": "Primary CTA URL" },
+    { "type": "text", "id": "cta_secondary_text", "label": "Secondary CTA Text", "default": "How to Read a COA" },
+    { "type": "url", "id": "cta_secondary_url", "label": "Secondary CTA URL" },
+    { "type": "text", "id": "cta_tertiary_text", "label": "Tertiary CTA Text", "default": "Request a COA" },
+    { "type": "url", "id": "cta_tertiary_url", "label": "Tertiary CTA URL" },
+    { "type": "header", "content": "Colors" },
+    { "type": "color", "id": "bg_color", "label": "Background", "default": "#ffffff" },
+    { "type": "color", "id": "accent_color", "label": "Accent", "default": "#FBBF24" }
+  ],
+  "presets": [{ "name": "COA Library Hero" }]
+}
+{% endschema %}
+
+{%- comment -%} ── JSON-LD: WebPage + BreadcrumbList ── {%- endcomment -%}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebPage",
+      "name": {{ section.settings.heading | json }},
+      "description": {{ section.settings.subheading | json }},
+      "url": "{{ request.origin }}{{ request.path }}",
+      "publisher": {
+        "@type": "Organization",
+        "name": "Nootropix",
+        "url": "{{ shop.url }}"
+      },
+      "breadcrumb": {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Home", "item": "{{ shop.url }}" },
+          { "@type": "ListItem", "position": 2, "name": "Quality & Trust", "item": "{{ shop.url }}/pages/quality-coa-library" },
+          { "@type": "ListItem", "position": 3, "name": {{ section.settings.heading | json }}, "item": "{{ request.origin }}{{ request.path }}" }
+        ]
+      }
+    }
+  ]
+}
+</script>
+
+<div class="clh-wrapper" id="clh-{{ section.id }}">
+  <div class="clh-inner">
+
+    {%- comment -%} ── Trust strip ── {%- endcomment -%}
+    {% if section.settings.trust_1 != blank or section.settings.trust_2 != blank or section.settings.trust_3 != blank %}
+      <div class="clh-trust">
+        {% if section.settings.trust_1 != blank %}<span class="clh-trust-pill">{{ section.settings.trust_1 }}</span>{% endif %}
+        {% if section.settings.trust_2 != blank %}<span class="clh-trust-pill">{{ section.settings.trust_2 }}</span>{% endif %}
+        {% if section.settings.trust_3 != blank %}<span class="clh-trust-pill">{{ section.settings.trust_3 }}</span>{% endif %}
+      </div>
+    {% endif %}
+
+    <h1 class="clh-title">{{ section.settings.heading }}</h1>
+
+    {% if section.settings.subheading != blank %}
+      <p class="clh-subtitle">{{ section.settings.subheading }}</p>
+    {% endif %}
+
+    {%- comment -%} ── Bullet points ── {%- endcomment -%}
+    {% if section.settings.bullet_1 != blank or section.settings.bullet_2 != blank or section.settings.bullet_3 != blank %}
+      <ul class="clh-bullets">
+        {% if section.settings.bullet_1 != blank %}
+          <li class="clh-bullet">
+            <svg class="clh-bullet-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+            {{ section.settings.bullet_1 }}
+          </li>
+        {% endif %}
+        {% if section.settings.bullet_2 != blank %}
+          <li class="clh-bullet">
+            <svg class="clh-bullet-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+            {{ section.settings.bullet_2 }}
+          </li>
+        {% endif %}
+        {% if section.settings.bullet_3 != blank %}
+          <li class="clh-bullet">
+            <svg class="clh-bullet-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+            {{ section.settings.bullet_3 }}
+          </li>
+        {% endif %}
+      </ul>
+    {% endif %}
+
+    {%- comment -%} ── CTA buttons ── {%- endcomment -%}
+    {% if section.settings.cta_primary_text != blank or section.settings.cta_secondary_text != blank or section.settings.cta_tertiary_text != blank %}
+      <div class="clh-ctas">
+        {% if section.settings.cta_primary_text != blank %}
+          <a href="{{ section.settings.cta_primary_url | default: '#coa-library' }}" class="clh-btn clh-btn--primary">{{ section.settings.cta_primary_text }}</a>
+        {% endif %}
+        {% if section.settings.cta_secondary_text != blank %}
+          <a href="{{ section.settings.cta_secondary_url | default: '#' }}" class="clh-btn clh-btn--secondary">{{ section.settings.cta_secondary_text }}</a>
+        {% endif %}
+        {% if section.settings.cta_tertiary_text != blank %}
+          <a href="{{ section.settings.cta_tertiary_url | default: '#' }}" class="clh-btn clh-btn--secondary">{{ section.settings.cta_tertiary_text }}</a>
+        {% endif %}
+      </div>
+    {% endif %}
+
+  </div>
+</div>
+
+<style>
+  #clh-{{ section.id }} {
+    --clh-bg: {{ section.settings.bg_color }};
+    --clh-accent: {{ section.settings.accent_color }};
+    --clh-text: var(--color-text-main, #111827);
+    --clh-muted: var(--color-text-muted, #4b5563);
+    --clh-border: var(--nx-pill-border, #E5E7EB);
+    --clh-radius: var(--nx-radius, 14px);
+    --clh-font: var(--font-body-family, sans-serif);
+    --clh-font-heading: var(--font-heading-family, sans-serif);
+    --clh-transition: var(--transition-smooth, all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1));
+    --clh-touch: var(--touch-min, 44px);
+  }
+
+  .clh-wrapper {
+    background: var(--clh-bg);
+    padding: 80px var(--page-gutter) 64px;
+    text-align: center;
+    font-family: var(--clh-font);
+    border-bottom: 1px solid var(--clh-border);
+  }
+  .clh-inner {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .clh-trust {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+  }
+  .clh-trust-pill {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--clh-muted);
+    background: var(--color-bg-primary, #fff);
+    border: 1px solid var(--clh-border);
+    border-radius: var(--nx-radius-pill);
+    padding: 6px 14px;
+  }
+
+  .clh-title {
+    font-family: var(--clh-font-heading);
+    font-size: calc(var(--font-size-h1) * var(--scale-h1, 1));
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--clh-text);
+    margin: 0 0 20px;
+    line-height: 1.1;
+  }
+
+  .clh-subtitle {
+    font-size: clamp(1rem, 1.5vw, 1.1875rem);
+    line-height: 1.7;
+    color: var(--clh-muted);
+    margin: 0 0 32px;
+    max-width: 660px;
+    margin-inline: auto;
+  }
+
+  .clh-bullets {
+    list-style: none;
+    padding: 0;
+    margin: 0 auto 36px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    max-width: 520px;
+    text-align: left;
+  }
+  .clh-bullet {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 1rem;
+    color: var(--clh-text);
+    line-height: 1.5;
+  }
+  .clh-bullet-icon {
+    flex-shrink: 0;
+    color: var(--clh-accent);
+    margin-top: 2px;
+  }
+
+  .clh-ctas {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .clh-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: var(--clh-touch);
+    padding: 0.75rem 1.5rem;
+    font-family: var(--clh-font);
+    font-size: 0.9375rem;
+    font-weight: 700;
+    border-radius: var(--clh-radius);
+    text-decoration: none;
+    transition: var(--clh-transition);
+    cursor: pointer;
+    border: none;
+  }
+  .clh-btn--primary {
+    background: var(--clh-accent);
+    color: var(--color-text-primary);
+    box-shadow: var(--shadow-gold-glow, 0 4px 14px rgba(251,191,36,0.25));
+  }
+  .clh-btn--primary:hover {
+    box-shadow: var(--shadow-gold-glow-hover, 0 8px 24px rgba(251,191,36,0.35));
+    transform: translateY(-1px);
+  }
+  .clh-btn--secondary {
+    background: var(--color-bg-primary, #fff);
+    color: var(--clh-text);
+    border: 1px solid var(--clh-border);
+    box-shadow: var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.04));
+  }
+  .clh-btn--secondary:hover {
+    box-shadow: var(--shadow-md, 0 8px 24px rgba(0,0,0,0.06));
+    border-color: var(--clh-accent);
+    transform: translateY(-1px);
+  }
+
+  .clh-wrapper :focus-visible {
+    outline: 2px solid var(--clh-accent);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .clh-wrapper *, .clh-wrapper *::before, .clh-wrapper *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .clh-wrapper { padding: 60px var(--page-gutter) 48px; }
+    .clh-ctas { flex-direction: column; align-items: center; }
+    .clh-btn { width: 100%; max-width: 320px; }
+  }
+</style>

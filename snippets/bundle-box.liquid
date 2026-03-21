@@ -1,0 +1,167 @@
+{% comment %}
+  Renders a bundle box
+
+  Accepts:
+  - discount_type: {String} discount type (required, value: fixed | percent)
+  - min_quantity: {Number} min quantity (required)
+  - value_discount: {Number} value discount (required)
+
+  Usage:
+  {% render 'bundle-box',
+    discount_type: discount_type
+    min_quantity: min_quantity,
+    value_discount: value_discount
+  %}
+{% endcomment %}
+
+{% liquid
+  assign bundle_title = 'general.bundle.title' | t
+  assign add_bundle = 'general.bundle.add_bundle' | t
+%}
+
+<xo-animate xo-cascade class='xo-bundle-box{% if settings.enable_border_radius %} xo-bundle-box--radius{% endif %}{% if is_mobile %} xo-bundle-box--mobile{% endif %}'>
+  {% capture bundle_product %}
+    <div class='xo-bundle-box__inner'>
+      <div class='xo-bundle-box__header'>
+        <h3 class='xo-bundle-box__title h6'>{{ bundle_title }}</h3>
+        {% if discount_blocks.size > 0 %}
+          {% if discount_blocks.size == 1 %}
+            <div class='xo-bundle-box__sub-title'>{{ discount_blocks[0].settings.label }}</div>
+            <xo-bundle-progress class='xo-bundle-box__progress'>
+              <div class='xo-bundle-box__progress-inner'></div>
+            </xo-bundle-progress>
+          {% else %}
+            <div class='xo-bundle-box__step'>
+              {% for block in blocks %}
+                {% case block.type %}
+                  {% when 'discount' %}
+                    {% liquid
+                      assign label = block.settings.label
+                      assign quantity = block.settings.min_quantity
+                    %}
+                    <div class="xo-bundle-box__step-item-wrap">
+                      <xo-bundle-step xo-min-quantity='{{ quantity }}' class='xo-bundle-box__step-item'>
+                        <span class="xo-bundle-box__step-text">{{ label }}</span>
+                      </xo-bundle-step>
+                    </div>
+                {% endcase %}
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endif %}
+      </div>
+      <div class='xo-bundle-box__body-inner xo-scrollbar'>
+        <div class='xo-bundle-box__body xo-bundle-box__body--change'>
+          <xo-bundle-content class='xo-bundle-box__content xo-bundle-box__content--product'></xo-bundle-content>
+        </div>
+        <xo-bundle-placeholder class='xo-bundle-box__placeholder'>
+          {% render 'skeleton' %}
+        </xo-bundle-placeholder>
+        <div class='xo-bundle-box__empty'>
+          {% render 'bundle-empty', title: empty_text %}
+        </div>
+      </div>
+      <div class='xo-bundle-box__footer'>
+        <xo-bundle-size class='xo-bundle-box__size'>
+          <div class='xo-bundle-box__wrapper'>
+            <div class='xo-bundle-box__total'>{{ 'general.bundle.total' | t }}</div>
+            <div class='xo-bundle-box__price-inner'>
+              <xo-bundle-price class='xo-bundle-box__price'></xo-bundle-price>
+              <xo-bundle-price class='xo-bundle-box__price xo-bundle-box__price--compare' xo-compare-at-price></xo-bundle-price>
+            </div>
+          </div>
+          <xo-cart-add xo-for-bundle class='xo-bundle-box__button'>
+            {% render 'button', text: add_bundle, style: 'primary', size: 'md', block: true %}
+          </xo-cart-add>
+        </xo-bundle-size>
+      </div>
+    </div>
+  {% endcapture %}
+
+  {% capture bundle_collection %}
+    <div class='xo-bundle-box__inner xo-bundle-box__inner--modifier'>
+      <div class='xo-bundle-box__header'>
+        <h3 class='xo-bundle-box__title h6'>{{ bundle_title }}</h3>
+        {% if bundle_step_blocks.size > 0 %}
+          {% if bundle_step_blocks.size == 1 %}
+            <div class='xo-bundle-box__sub-title'>{{ bundle_step_blocks[0].settings.label }}</div>
+            <xo-bundle-progress class='xo-bundle-box__progress'>
+              <div class='xo-bundle-box__progress-inner'></div>
+            </xo-bundle-progress>
+          {% else %}
+            <div class='xo-bundle-box__step'>
+              {% for block in blocks %}
+                {% case block.type %}
+                  {% when 'bundle-step' %}
+                    {% liquid
+                      assign label = block.settings.label
+                      assign quantity = block.settings.quantity
+                    %}
+                    <div class="xo-bundle-box__step-item-wrap">
+                      <xo-bundle-step xo-min-quantity='{{ quantity }}' class='xo-bundle-box__step-item'>
+                        <span class="xo-bundle-box__step-text">{{ label }}</span>
+                      </xo-bundle-step>
+                    </div>
+                {% endcase %}
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endif %}
+      </div>
+      <div class='xo-bundle-box__body-inner xo-scrollbar{% if collection_blocks.size == 0 %} xo-bundle-box__body-inner--modifier{% endif %}'>
+        {% if collection_blocks.size > 0 %}
+          {% for block in blocks %}
+            {% case block.type %}
+              {% when 'collection' %}
+                {% liquid
+                  assign collection_title = block.settings.collection.title
+                  assign heading = block.settings.heading
+                %}
+                <div class='xo-bundle-box__body'>
+                  {% if heading != blank %}
+                    <div class='xo-bundle-box__text'>{{ heading }}</div>
+                  {% else %}
+                    <div class='xo-bundle-box__text'>{{ collection_title }}</div>
+                  {% endif %}
+                  <xo-bundle-content xo-group='group-{{ block.settings.collection.id }}' class='xo-bundle-box__content xo-bundle-box__content--collection'></xo-bundle-content>
+                </div>
+            {% endcase %}
+          {% endfor %}
+          <xo-bundle-placeholder class='xo-bundle-box__placeholder'>
+            {% render 'skeleton' %}
+          </xo-bundle-placeholder>
+          <div class='xo-bundle-box__empty'>
+            {% render 'bundle-empty', title: empty_text %}
+          </div>
+        {% else %}
+          <div class='xo-bundle-box__empty xo-bundle-box__empty--modifier'>
+            {% render 'bundle-empty', title: empty_text %}
+          </div>
+        {% endif %}
+      </div>
+      <div class='xo-bundle-box__footer'>
+        <xo-bundle-size class='xo-bundle-box__size'>
+          <div class='xo-bundle-box__wrapper'>
+            <div class='xo-bundle-box__total'>{{ 'general.bundle.total' | t }}</div>
+            <div class='xo-bundle-box__price-inner'>
+              <xo-bundle-price class='xo-bundle-box__price'></xo-bundle-price>
+              <xo-bundle-price class='xo-bundle-box__price xo-bundle-box__price--compare' xo-compare-at-price></xo-bundle-price>
+            </div>
+          </div>
+          <xo-cart-add xo-for-bundle class='xo-bundle-box__button'>
+            {% render 'button', text: add_bundle, style: 'primary', size: 'md', block: true %}
+          </xo-cart-add>
+        </xo-bundle-size>
+      </div>
+    </div>
+  {% endcapture %}
+
+  {% case bundle_type %}
+    {% when 'product' %}
+      {{ bundle_product }}
+    {% when 'collection' %}
+      {{ bundle_collection }}
+    {% else %}
+      {{ bundle_product }}
+  {% endcase %}
+</xo-animate>

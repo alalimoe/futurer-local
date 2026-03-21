@@ -1,0 +1,72 @@
+{% comment %}
+  Renders a product special element with a given value
+
+  Accepts:
+  - class: {String} Font size heading (required)
+  - heading: {String} Heading (required)
+  - color_schema_box: {String} Background box (required)
+  - block: {Object} Block (required)
+
+  Usage:
+  {% render 'product-specification-3', class: class, heading: heading, color_schema_box: color_schema_box, block: block %}
+{% endcomment %}
+
+<div class='product-specification-3'>
+  <xo-container class='product-specification-3__container'>
+    <div class='product-specification-3__content'>
+      <xo-animate xo-cascade>
+        <div class='product-specification-3__head'>
+          {% if heading %}
+            <h3 class='product-specification-3__heading {{ class }}'>{{ heading }}</h3>
+          {% endif %}
+        </div>
+      </xo-animate>
+      <xo-animate
+        xo-cascade
+        class='product-specification-3__bottom {% if settings.enable_border_radius %}product-specification-3__bottom--radius{% endif %} {% if color_schema_box %}color-{{ color_schema_box }}{% endif %}'
+      >
+        <xo-grid class='product-specification-3__grid'>
+          <div class='product-specification-3__left' style='--lg: 3; --md: 12; --xs: 12'>
+            {% for item in block %}
+              {% case item.type %}
+                {% when 'detail-infomation-1' %}
+                  {% liquid
+                    assign sub_heading_1 = item.settings.sub_heading_1
+                    assign heading_1 = item.settings.heading_1
+                    assign sub_heading_2 = item.settings.sub_heading_2
+                    assign heading_2 = item.settings.heading_2
+                    assign class = item.settings.font_size_heading
+                  %}
+                  {% render 'product-special', class: class, sub_heading_1: sub_heading_1, heading_1: heading_1, sub_heading_2: sub_heading_2, heading_2: heading_2 %}
+              {% endcase %}
+            {% endfor %}
+          </div>
+          <div class='product-specification-3__center' style='--lg: 5; --md: 12; --xs: 12'>
+            {% for item in block %}
+              {% case item.type %}
+                {% when 'detail-infomation-2' %}
+                  {% liquid
+                    assign sub_heading = item.settings.sub_heading
+                    assign title_list = item.settings.title_list
+                    assign content_list = item.settings.content_list
+                  %}
+                  {% render 'product-information', caption: sub_heading, title_list: title_list, content_list: content_list %}
+              {% endcase %}
+            {% endfor %}
+          </div>
+          <div class='product-specification-3__right {% if settings.enable_border_radius %}product-specification-3__right--radius{% endif %}' style='--lg: 4; --md: 12; --xs: 12'>
+            {% for item in block %}
+              {% case item.type %}
+                {% when 'image' %}
+                  {% liquid
+                    assign image = item.settings.image
+                  %}
+                  {% render 'image', image: image %}
+              {% endcase %}
+            {% endfor %}
+          </div>
+        </xo-grid>
+      </xo-animate>
+    </div>
+  </xo-container>
+</div>

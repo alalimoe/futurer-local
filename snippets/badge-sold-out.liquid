@@ -1,0 +1,33 @@
+{% comment %}
+  Renders a list of product's badge (regular, sale)
+
+  Accepts:
+  - product: {Object} Product Liquid object (optional)
+  - use_variant: {Boolean} Renders selected or first variant price instead of overall product pricing (optional)
+  - class: {String} Adds a price class to the price element (optional)
+
+  Usage:
+  {% render 'badge-sold-out',
+    product: product,
+    use_variant: true,
+    class: 'price and more'
+  %}
+{% endcomment %}
+
+{%- liquid
+  if use_variant
+    assign target = product.selected_or_first_available_variant
+  else
+    assign target = product
+  endif
+
+  assign available = target.available | default: false
+-%}
+
+{% if available == false %}
+  <div class='xo-badge-sold-out{% if settings.enable_border_radius %} xo-badge-sold-out--radius{% endif %}'>
+    <span class='xo-badge-sold-out__title'>
+      {{ 'products.product.sold_out' | t }}
+    </span>
+  </div>
+{% endif %}

@@ -1,0 +1,235 @@
+{% schema %}
+{
+  "name": "Peptide FAQ Accordion",
+  "tag": "section",
+  "class": "section-peptide-faq",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Theme Colors"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent Color (Gold)",
+      "default": "#fbbf24"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#111827"
+    },
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Common Questions"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Troubleshooting your research process."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "faq",
+      "name": "Question",
+      "settings": [
+        {
+          "type": "text",
+          "id": "question",
+          "label": "Question"
+        },
+        {
+          "type": "richtext",
+          "id": "answer",
+          "label": "Answer"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Peptide FAQ Accordion",
+      "blocks": [
+        {
+          "type": "faq",
+          "settings": {
+            "question": "My solution is cloudy or has floaters. Is it ruined?",
+            "answer": "<p><strong>Stop.</strong> Do not use cloudy solutions immediately. Most lyophilized peptides should dissolve into a crystal-clear solution. <br><br>1. Allow the vial to sit in the refrigerator for 20 minutes.<br>2. If it remains cloudy or has visible particles (floaters) after this time, the peptide may have degraded or the bacteriostatic water quality is compromised. For safety, discard the vial.</p>"
+          }
+        },
+        {
+          "type": "faq",
+          "settings": {
+            "question": "The vial has a vacuum (sucks the plunger in). Is that normal?",
+            "answer": "<p><strong>Yes, this is a sign of a good seal.</strong> Manufacturers often seal vials under negative pressure (vacuum) to ensure sterility. <br><br>If the vacuum makes it difficult to draw liquid, simply inject an amount of air equal to the amount of liquid you intend to withdraw. This equalizes the pressure.</p>"
+          }
+        },
+        {
+          "type": "faq",
+          "settings": {
+            "question": "Can I mix two peptides in one syringe?",
+            "answer": "<p><strong>Generally, yes.</strong> This is common in research to reduce the number of injections. <br><br><strong>Protocol:</strong><br>1. Calculate the units for Peptide A and Peptide B separately.<br>2. Draw Peptide A first.<br>3. Carefully draw Peptide B into the same syringe.<br><em>Note: Be extremely careful not to push liquid from the syringe back into the second vial, as this cross-contaminates your supply.</em></p>"
+          }
+        },
+        {
+          "type": "faq",
+          "settings": {
+            "question": "I added too much water. What do I do?",
+            "answer": "<p><strong>Don't panic.</strong> Your product is safe, but the concentration is now lower (more dilute). <br><br><strong>The Fix:</strong> Scroll up to the calculator and change the <strong>'Water Added'</strong> input to the <em>actual</em> amount you used. The calculator will automatically adjust and give you the new, larger volume you need to draw to achieve your target dose.</p>"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
+
+<div class="faq-wrapper">
+  <div class="faq-container">
+    
+    <div class="faq-header">
+      <h2 class="faq-title">{{ section.settings.heading }}</h2>
+      <p class="faq-subtitle">{{ section.settings.subheading }}</p>
+    </div>
+
+    <div class="faq-list">
+      {% for block in section.blocks %}
+      <details class="faq-item">
+        <summary class="faq-question">
+          <span>{{ block.settings.question }}</span>
+          <div class="faq-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+          </div>
+        </summary>
+        <div class="faq-answer">
+          {{ block.settings.answer }}
+        </div>
+      </details>
+      {% endfor %}
+    </div>
+
+  </div>
+</div>
+
+<style>
+  :root {
+    --faq-bg: {{ section.settings.bg_color }};
+    --faq-accent: {{ section.settings.accent_color }};
+    --faq-text: {{ section.settings.text_color }};
+    --faq-border: #e5e7eb;
+    --faq-muted: #6b7280;
+    --faq-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+
+  .faq-wrapper {
+    background-color: var(--faq-bg);
+    color: var(--faq-text);
+    padding: 60px 20px 80px; /* Extra bottom padding */
+    font-family: var(--faq-font);
+    border-top: 1px solid #f3f4f6;
+  }
+  
+  .faq-container {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  /* HEADER */
+  .faq-header {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+  .faq-title {
+    font-size: 28px;
+    font-weight: 800;
+    margin: 0 0 10px;
+    color: var(--faq-text);
+  }
+  .faq-subtitle {
+    color: var(--faq-muted);
+    font-size: 16px;
+  }
+
+  /* ACCORDION ITEMS */
+  .faq-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .faq-item {
+    background: #ffffff;
+    border: 1px solid var(--faq-border);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: var(--transition-smooth);
+  }
+
+  .faq-item[open] {
+    border-color: var(--faq-accent);
+    box-shadow: var(--shadow-xs);
+  }
+
+  /* QUESTION (Summary) */
+  .faq-question {
+    padding: 20px 24px;
+    font-weight: 600;
+    font-size: 16px;
+    cursor: pointer;
+    list-style: none; /* Hides default marker */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--faq-text);
+  }
+  
+  /* Hide default marker in Webkit */
+  .faq-question::-webkit-details-marker {
+    display: none;
+  }
+
+  .faq-icon {
+    color: var(--faq-muted);
+    transition: transform 0.3s ease;
+    display: flex;
+    align-items: center;
+  }
+
+  .faq-item[open] .faq-icon {
+    transform: rotate(180deg);
+    color: #b45309; /* Dark gold */
+  }
+
+  /* ANSWER */
+  .faq-answer {
+    padding: 0 24px 24px 24px;
+    color: var(--faq-muted);
+    line-height: 1.6;
+    font-size: 15px;
+    animation: fadeIn 0.3s ease-in-out;
+  }
+  
+  .faq-answer strong {
+    color: var(--faq-text);
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>

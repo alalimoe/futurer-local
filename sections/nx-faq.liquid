@@ -1,0 +1,168 @@
+{% comment %} Nootropix — FAQ with animated details + FAQPage JSON-LD (Premium) {% endcomment %}
+{%- assign sid = section.id -%}
+
+{%- style -%}
+#nx-faq-{{ sid }} {
+  max-width: var(--container-width-narrow);
+  margin: 0 auto;
+  padding: 8px var(--page-gutter);
+  font-family: var(--font-body-family, sans-serif);
+  color: var(--color-text-main, #111827);
+  content-visibility: auto;
+}
+#nx-faq-{{ sid }} h2 {
+  font-family: var(--font-heading-family, sans-serif);
+  font-size: clamp(22px, 3vw, 30px);
+  font-weight: 700;
+  line-height: 1.2;
+  margin: 0 0 20px;
+}
+
+#nx-faq-{{ sid }} .nx-faq-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+#nx-faq-{{ sid }} details {
+  border-radius: var(--radius-premium, 14px);
+  border: 1px solid transparent;
+  background: rgba(249, 250, 251, 0.5);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.04));
+  transition: var(--transition-premium, all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1));
+  overflow: hidden;
+}
+#nx-faq-{{ sid }} details:hover {
+  box-shadow: var(--shadow-md, 0 12px 30px rgba(0,0,0,0.06));
+  transform: translateY(-1px);
+}
+#nx-faq-{{ sid }} details[open] {
+  background: rgba(251, 191, 36, 0.04);
+}
+
+#nx-faq-{{ sid }} summary {
+  padding: 14px 18px;
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--color-text-main, #111827);
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 44px;
+}
+#nx-faq-{{ sid }} summary::-webkit-details-marker { display: none; }
+
+#nx-faq-{{ sid }} summary .nx-chevron {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  transition: var(--transition-premium, all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1));
+  color: var(--color-text-muted, #4b5563);
+}
+#nx-faq-{{ sid }} details[open] summary .nx-chevron {
+  transform: rotate(180deg);
+  color: var(--color-accent-primary, #FBBF24);
+}
+
+#nx-faq-{{ sid }} .nx-faq-body {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.4s var(--ease-premium);
+}
+#nx-faq-{{ sid }} details[open] .nx-faq-body {
+  grid-template-rows: 1fr;
+}
+#nx-faq-{{ sid }} .nx-faq-inner {
+  overflow: hidden;
+}
+#nx-faq-{{ sid }} .nx-faq-inner p {
+  padding: 0 18px 16px;
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--color-text-muted, #4b5563);
+}
+
+#nx-faq-{{ sid }} summary:focus-visible {
+  outline: 2px solid var(--color-accent-primary, #FBBF24);
+  outline-offset: -2px;
+  border-radius: var(--radius-premium, 14px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #nx-faq-{{ sid }},
+  #nx-faq-{{ sid }} * {
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
+  }
+}
+{%- endstyle -%}
+
+<section id="nx-faq-{{ sid }}" aria-label="Frequently asked questions">
+  <h2>FAQs</h2>
+  <div class="nx-faq-list">
+    {% for block in section.blocks %}
+      <details {{ block.shopify_attributes }}>
+        <summary>
+          <span>{{ block.settings.q }}</span>
+          <svg class="nx-chevron" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+            <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </summary>
+        <div class="nx-faq-body">
+          <div class="nx-faq-inner">
+            <p>{{ block.settings.a }}</p>
+          </div>
+        </div>
+      </details>
+    {% endfor %}
+  </div>
+</section>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {%- for block in section.blocks -%}
+    {
+      "@type": "Question",
+      "name": {{ block.settings.q | json }},
+      "acceptedAnswer": { "@type": "Answer", "text": {{ block.settings.a | json }} }
+    }{%- unless forloop.last -%},{%- endunless -%}
+    {%- endfor -%}
+  ]
+}
+</script>
+
+{% schema %}
+{
+  "name": "NX — FAQs",
+  "settings": [],
+  "blocks": [
+    { "type": "qa", "name": "Q&A", "settings": [
+      { "type": "text", "id": "q", "label": "Question" },
+      { "type": "textarea", "id": "a", "label": "Answer" }
+    ]}
+  ],
+  "presets": [
+    {
+      "name": "NX — FAQs",
+      "blocks": [
+        { "type": "qa", "settings": { "q": "Are racetams legal in the UAE?", "a": "Regulations vary by region and compound. Ensure compliance with local import laws and professional restrictions. Nootropix ships from Dubai with clear labeling and support." } },
+        { "type": "qa", "settings": { "q": "Which is best for studying?", "a": "For multi-hour retention, Pramiracetam. For shorter sprints and creative flow, Aniracetam. Choose based on your session length and sensitivity." } },
+        { "type": "qa", "settings": { "q": "Do I need choline with racetams?", "a": "Many users add Alpha-GPC or CDP-Choline to support acetylcholine demand and reduce choline-related headaches. Start low and evaluate." } },
+        { "type": "qa", "settings": { "q": "Which feels most stimulating?", "a": "Phenylpiracetam Hydrazide is commonly described as most energizing — best reserved for big days." } },
+        { "type": "qa", "settings": { "q": "When will I feel it?", "a": "Typically within 30-90 minutes depending on the racetam, format (caps or powder), and whether taken with food." } },
+        { "type": "qa", "settings": { "q": "Can I combine racetams?", "a": "Advanced users sometimes pair compounds (e.g., Aniracetam + Pramiracetam), but start with one to learn your response before layering." } }
+      ]
+    }
+  ]
+}
+{% endschema %}

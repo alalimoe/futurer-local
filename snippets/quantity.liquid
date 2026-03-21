@@ -1,0 +1,68 @@
+{% comment %}
+  Renders a quantity selector for a product
+
+  Accepts:
+  - value: {number} value of input number
+
+  Usage:
+  {% render 'quantity', size: 'sm' %}
+{% endcomment %}
+
+{% liquid
+  assign container_class = 'xo-quantity'
+  if size
+    assign container_class = container_class | append: ' xo-quantity--' | append: size
+  endif
+  if settings.enable_border_radius
+    assign container_class = container_class | append: ' xo-quantity--radius'
+  endif
+
+  assign button_plus_class = 'xo-quantity__button xo-quantity__button--plus'
+  assign button_minus_class = 'xo-quantity__button xo-quantity__button--minus'
+  if value < 2
+    assign button_minus_class = button_minus_class | append: ' xo-quantity__button--blur'
+  endif
+  if settings.enable_border_radius
+    assign button_plus_class = button_plus_class | append: ' xo-quantity__button--radius'
+    assign button_minus_class = button_minus_class | append: ' xo-quantity__button--radius'
+  endif
+
+  assign min_value = variant.quantity_rule.min | default: 1
+  assign max_value = variant.quantity_rule.max
+  assign increment_value = variant.quantity_rule.increment
+%}
+
+{%- capture cart_quantity_attr -%}
+  xo-min="{{ min_value }}" xo-max="{{ max_value }}" xo-step="{{ increment_value }}"
+{%- endcapture -%}
+
+<xo-cart-quantity 
+  class="{{ container_class }}"
+  {% if product.quantity_price_breaks_configured? %}
+    {{- cart_quantity_attr -}}
+  {% endif %}
+>
+  <xo-cart-quantity-minus
+    class="{{ button_minus_class }}"
+    tabindex="0"
+    role="button"
+    aria-label="Minus"
+  >
+    {% render 'icon', name: 'minus', size: '1.6rem' %}
+  </xo-cart-quantity-minus>
+  <input
+    class="xo-quantity__number"
+    type="number"
+    name="quantity"
+    {%- if product.quantity_price_breaks_configured? and is_cart == false -%}
+      value="{{ min_value }}"
+    {%- else -%}
+      value="{{ value }}"
+    {%- endif -%}
+    tabindex="-1"
+    aria-label="Quantity input"
+  >
+  <xo-cart-quantity-plus class="{{ button_plus_class }}" tabindex="0" role="button" aria-label="Plus">
+    {% render 'icon', name: 'plus', size: '1.6rem' %}
+  </xo-cart-quantity-plus>
+</xo-cart-quantity>

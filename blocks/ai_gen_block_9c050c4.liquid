@@ -1,0 +1,469 @@
+{% doc %}
+  @prompt
+    A "post‑purchase reference” page template to use across all SKUs designed for educational content. the section should be clean and premium designed, with 7 blocks, each block with a customizable headline + drop down data source selection that will render selected data source as the block's content 
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-reference-block-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    margin-bottom: 32px;
+  }
+
+  .ai-reference-block__container-{{ ai_gen_id }} {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 32px var(--page-gutter);
+    background-color: {{ block.settings.background_color }};
+    border-radius: {{ block.settings.border_radius }}px;
+    border: {{ block.settings.border_width }}px solid {{ block.settings.border_color }};
+  }
+
+  .ai-reference-block__heading-{{ ai_gen_id }} {
+    color: {{ block.settings.heading_color }};
+    margin: 0 0 16px 0;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  .ai-reference-block__content-{{ ai_gen_id }} {
+    color: {{ block.settings.text_color }};
+    font-size: {{ block.settings.text_size }}px;
+    line-height: 1.6;
+  }
+
+  .ai-reference-block__content-{{ ai_gen_id }} p {
+    margin: 0 0 16px 0;
+  }
+
+  .ai-reference-block__content-{{ ai_gen_id }} p:last-child {
+    margin-bottom: 0;
+  }
+
+  .ai-reference-block__content-{{ ai_gen_id }} h1,
+  .ai-reference-block__content-{{ ai_gen_id }} h2,
+  .ai-reference-block__content-{{ ai_gen_id }} h3,
+  .ai-reference-block__content-{{ ai_gen_id }} h4,
+  .ai-reference-block__content-{{ ai_gen_id }} h5,
+  .ai-reference-block__content-{{ ai_gen_id }} h6 {
+    margin: 24px 0 12px 0;
+    font-weight: 600;
+  }
+
+  .ai-reference-block__content-{{ ai_gen_id }} ul,
+  .ai-reference-block__content-{{ ai_gen_id }} ol {
+    margin: 0 0 16px 0;
+    padding-left: 24px;
+  }
+
+  .ai-reference-block__content-{{ ai_gen_id }} li {
+    margin-bottom: 8px;
+  }
+
+  .ai-reference-block__content-{{ ai_gen_id }} a {
+    color: {{ block.settings.link_color }};
+    text-decoration: underline;
+  }
+
+  .ai-reference-block__content-{{ ai_gen_id }} a:hover {
+    opacity: 0.8;
+  }
+
+  .ai-reference-block__image-{{ ai_gen_id }} {
+    width: 100%;
+    height: auto;
+    border-radius: {{ block.settings.image_border_radius }}px;
+    margin-bottom: 16px;
+  }
+
+  .ai-reference-block__product-{{ ai_gen_id }} {
+    display: flex;
+    gap: 16px;
+    padding: 20px;
+    background-color: {{ block.settings.product_bg_color }};
+    border-radius: {{ block.settings.border_radius }}px;
+    border: 1px solid {{ block.settings.border_color }};
+  }
+
+  .ai-reference-block__product-image-{{ ai_gen_id }} {
+    width: 100px;
+    height: 100px;
+    flex-shrink: 0;
+    border-radius: var(--nx-radius-sm);
+    overflow: hidden;
+  }
+
+  .ai-reference-block__product-image-{{ ai_gen_id }} img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .ai-reference-block__product-info-{{ ai_gen_id }} {
+    flex-grow: 1;
+  }
+
+  .ai-reference-block__product-title-{{ ai_gen_id }} {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0 0 8px 0;
+    color: {{ block.settings.heading_color }};
+  }
+
+  .ai-reference-block__product-description-{{ ai_gen_id }} {
+    font-size: 14px;
+    color: {{ block.settings.text_color }};
+    margin-bottom: 12px;
+    line-height: 1.5;
+  }
+
+  .ai-reference-block__product-price-{{ ai_gen_id }} {
+    font-size: 16px;
+    font-weight: 600;
+    color: {{ block.settings.heading_color }};
+  }
+
+  .ai-reference-block__empty-{{ ai_gen_id }} {
+    padding: 40px 20px;
+    text-align: center;
+    color: {{ block.settings.text_color }};
+    opacity: 0.6;
+    font-style: italic;
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-reference-block__container-{{ ai_gen_id }} {
+      padding: 24px var(--page-gutter);
+    }
+
+    .ai-reference-block__product-{{ ai_gen_id }} {
+      flex-direction: column;
+    }
+
+    .ai-reference-block__product-image-{{ ai_gen_id }} {
+      width: 100%;
+      height: 200px;
+    }
+  }
+{% endstyle %}
+
+<div class="ai-reference-block-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="ai-reference-block__container-{{ ai_gen_id }}">
+    {% if block.settings.heading != blank %}
+      <h2 class="ai-reference-block__heading-{{ ai_gen_id }} {{ block.settings.heading_size }}">{{ block.settings.heading }}</h2>
+    {% endif %}
+
+    <div class="ai-reference-block__content-{{ ai_gen_id }}">
+      {% case block.settings.content_source %}
+        {% when 'richtext' %}
+          {% if block.settings.richtext_content != blank %}
+            {{ block.settings.richtext_content }}
+          {% else %}
+            <div class="ai-reference-block__empty-{{ ai_gen_id }}">
+              Add rich text content to display here
+            </div>
+          {% endif %}
+
+        {% when 'page' %}
+          {% if block.settings.page_source != blank %}
+            {{ block.settings.page_source.content }}
+          {% else %}
+            <div class="ai-reference-block__empty-{{ ai_gen_id }}">
+              Select a page to display its content
+            </div>
+          {% endif %}
+
+        {% when 'article' %}
+          {% if block.settings.article_source != blank %}
+            {{ block.settings.article_source.content }}
+          {% else %}
+            <div class="ai-reference-block__empty-{{ ai_gen_id }}">
+              Select an article to display its content
+            </div>
+          {% endif %}
+
+        {% when 'product' %}
+          {% if block.settings.product_source != blank %}
+            <div class="ai-reference-block__product-{{ ai_gen_id }}">
+              {% if block.settings.product_source.featured_image %}
+                <div class="ai-reference-block__product-image-{{ ai_gen_id }}">
+                  <img
+                    src="{{ block.settings.product_source.featured_image | image_url: width: 200 }}"
+                    alt="{{ block.settings.product_source.featured_image.alt | escape }}"
+                    loading="lazy"
+                    width="200"
+                    height="200"
+                  >
+                </div>
+              {% endif %}
+              <div class="ai-reference-block__product-info-{{ ai_gen_id }}">
+                <h3 class="ai-reference-block__product-title-{{ ai_gen_id }}">
+                  {{ block.settings.product_source.title }}
+                </h3>
+                {% if block.settings.product_source.description != blank %}
+                  <div class="ai-reference-block__product-description-{{ ai_gen_id }}">
+                    {{ block.settings.product_source.description | strip_html | truncate: 150 }}
+                  </div>
+                {% endif %}
+                <div class="ai-reference-block__product-price-{{ ai_gen_id }}">
+                  {{ block.settings.product_source.price | money }}
+                </div>
+              </div>
+            </div>
+          {% else %}
+            <div class="ai-reference-block__empty-{{ ai_gen_id }}">
+              Select a product to display
+            </div>
+          {% endif %}
+
+        {% when 'image' %}
+          {% if block.settings.image_source != blank %}
+            <img
+              src="{{ block.settings.image_source | image_url: width: 1200 }}"
+              alt="{{ block.settings.image_source.alt | escape }}"
+              loading="lazy"
+              width="{{ block.settings.image_source.width }}"
+              height="{{ block.settings.image_source.height }}"
+              class="ai-reference-block__image-{{ ai_gen_id }}"
+            >
+            {% if block.settings.image_caption != blank %}
+              <div class="ai-reference-block__content-{{ ai_gen_id }}">
+                {{ block.settings.image_caption }}
+              </div>
+            {% endif %}
+          {% else %}
+            <div class="ai-reference-block__empty-{{ ai_gen_id }}">
+              Add an image to display
+            </div>
+          {% endif %}
+
+        {% when 'video' %}
+          {% if block.settings.video_url != blank %}
+            <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: {{ block.settings.image_border_radius }}px;">
+              <iframe
+                src="{{ block.settings.video_url }}"
+                style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen
+                loading="lazy"
+              ></iframe>
+            </div>
+          {% else %}
+            <div class="ai-reference-block__empty-{{ ai_gen_id }}">
+              Add a video URL (YouTube or Vimeo embed link)
+            </div>
+          {% endif %}
+
+        {% when 'html' %}
+          {% if block.settings.html_content != blank %}
+            {{ block.settings.html_content }}
+          {% else %}
+            <div class="ai-reference-block__empty-{{ ai_gen_id }}">
+              Add custom HTML content
+            </div>
+          {% endif %}
+
+        {% else %}
+          <div class="ai-reference-block__empty-{{ ai_gen_id }}">
+            Select a content source to display
+          </div>
+      {% endcase %}
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Reference content block",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Product Information"
+    },
+    {
+      "type": "select",
+      "id": "content_source",
+      "label": "Content source",
+      "options": [
+        {
+          "value": "richtext",
+          "label": "Rich text"
+        },
+        {
+          "value": "page",
+          "label": "Page"
+        },
+        {
+          "value": "article",
+          "label": "Article"
+        },
+        {
+          "value": "product",
+          "label": "Product"
+        },
+        {
+          "value": "image",
+          "label": "Image"
+        },
+        {
+          "value": "video",
+          "label": "Video"
+        },
+        {
+          "value": "html",
+          "label": "Custom HTML"
+        }
+      ],
+      "default": "richtext"
+    },
+    {
+      "type": "richtext",
+      "id": "richtext_content",
+      "label": "Rich text content",
+      "default": "<p>Add your educational content here. This can include dosage information, usage instructions, benefits, or any other product-related information.</p>"
+    },
+    {
+      "type": "page",
+      "id": "page_source",
+      "label": "Page"
+    },
+    {
+      "type": "article",
+      "id": "article_source",
+      "label": "Article"
+    },
+    {
+      "type": "product",
+      "id": "product_source",
+      "label": "Product"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_source",
+      "label": "Image"
+    },
+    {
+      "type": "richtext",
+      "id": "image_caption",
+      "label": "Image caption"
+    },
+    {
+      "type": "url",
+      "id": "video_url",
+      "label": "Video embed URL"
+    },
+    {
+      "type": "html",
+      "id": "html_content",
+      "label": "Custom HTML"
+    },
+    {
+      "type": "header",
+      "content": "Style"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Heading size",
+      "options": [
+        {"value": "h1", "label": "Display"},
+        {"value": "h2", "label": "XL"},
+        {"value": "h3", "label": "L"},
+        {"value": "h4", "label": "M"},
+        {"value": "h5", "label": "S"},
+        {"value": "h6", "label": "XS"}
+      ],
+      "default": "h5"
+    },
+    {
+      "type": "range",
+      "id": "text_size",
+      "label": "Text size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading",
+      "default": "#2a2a2a"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text",
+      "default": "#666666"
+    },
+    {
+      "type": "color",
+      "id": "link_color",
+      "label": "Links",
+      "default": "#5a9d6f"
+    },
+    {
+      "type": "color",
+      "id": "product_bg_color",
+      "label": "Product card background",
+      "default": "#f9f9f9"
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "image_border_radius",
+      "label": "Image border radius",
+      "min": 0,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "border_width",
+      "label": "Border width",
+      "min": 0,
+      "max": 4,
+      "step": 1,
+      "unit": "px",
+      "default": 1
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Border",
+      "default": "#e8e8e8"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Reference content block"
+    }
+  ]
+}
+{% endschema %}

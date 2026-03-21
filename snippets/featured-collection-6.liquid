@@ -1,0 +1,104 @@
+{% comment %}
+  Renders a feature collection element with a given value
+
+  Accepts:
+  - class: {String} Font size heading (required)
+  - heading: {String} Heading (required)
+  - collection: {Object} Select collection (required)
+  - image: {Object} Select collection (optional)
+  - product_display: {Number} Prduct quantity are display (required)
+  - column_desktop: {Number} Grid column desktop (required)
+  - column_mobile: {Number} Grid column mobile (required)
+
+  Usage:
+  {% render 'featured-collection-6',
+    class: font_size,
+    heading: heading,
+    collection: collection,
+    image: image,
+    product_display: product_display,
+    column_destop: column_destop,
+    column_mobile: column_mobile,
+  %}
+{% endcomment %}
+
+<div class="featured-collection-6">
+  <xo-grid class="featured-collection-6__grid">
+    <div class="featured-collection-6__left" style="--lg: 6; --md: 12; --xs: 12">
+      {% render 'collection-image',
+        collection: collection,
+        image_desktop: image_desktop,
+        image_mobile: image_mobile,
+        media_aspect_ratio_mobile: aspect_ratio_mobile,
+        context: section,
+        heading: heading,
+        show_heading: true,
+        show_button: false,
+        color_schema_collection: color_schema_collection,
+        animate_enabled: false,
+        link_enable: true
+      %}
+    </div>
+    <div
+      class="featured-collection-6__right{% if collection.products.size == 0 %} featured-collection-6__right--dflex{% endif %}"
+      style="--lg: 6; --md: 12; --xs: 12"
+    >
+      {% if collection != blank %}
+        <xo-grid
+          class="featured-collection-6__right-grid"
+          style="{%- if collection.products.size == 0 -%}--lg: 1;{%- else -%} --lg: 2;{%- endif -%} --md: {{  column_mobile }}; --xs: {{ column_mobile }};"
+        >
+          {%- if collection.products.size == 0 -%}
+            {%- assign title = 'sections.featured_collection.empty' | t -%}
+            {% render 'collection-empty', title: title %}
+          {%- else -%}
+            {% for product in collection.products limit: product_display %}
+              {%- assign placeholder_image = 'collection-1' -%}
+              {% render 'product-card',
+                product: product,
+                show_image: settings.product_card_show_image,
+                show_secondary_image: settings.product_card_show_secondary_image,
+                show_vendor: settings.product_card_show_vendor,
+                show_description: settings.product_card_show_description,
+                show_quick_add: settings.product_card_show_quick_add,
+                show_quick_view: settings.product_card_show_quick_view,
+                show_favorite: settings.product_card_show_favorite,
+                show_price: settings.product_card_show_price,
+                show_badge: settings.product_card_show_badge,
+                media_aspect_ratio: section.settings.product_card_aspect_ratio,
+                color_scheme: section.settings.card_color_scheme,
+                placeholder_image: placeholder_image,
+                animate_enabled: true
+              %}
+            {% endfor %}
+          {%- endif -%}
+        </xo-grid>
+      {%- else -%}
+        <xo-grid
+          class="featured-collection-6__right-grid"
+          style="{%- if collection.products.size == 0 -%}--lg: 1;{%- else -%} --lg: 2;{%- endif -%} --md: {{  column_mobile }}; --xs: {{ column_mobile }};"
+        >
+          {% for item in (1..4) %}
+            {%- assign placeholder_image = 'collection-1' -%}
+            {% render 'product-card',
+              product: empty,
+              show_image: settings.product_card_show_image,
+              show_secondary_image: settings.product_card_show_secondary_image,
+              show_vendor: settings.product_card_show_vendor,
+              show_description: settings.product_card_show_description,
+              show_quick_add: settings.product_card_show_quick_add,
+              show_quick_view: settings.product_card_show_quick_view,
+              show_favorite: settings.product_card_show_favorite,
+              show_price: settings.product_card_show_price,
+              show_badge: settings.product_card_show_badge,
+              media_aspect_ratio: section.settings.product_card_aspect_ratio,
+              color_scheme: section.settings.card_color_scheme,
+              placeholder_image: placeholder_image,
+              animate_enabled: true
+            %}
+          {% endfor %}
+        </xo-grid>
+      {% endif %}
+    </div>
+  </xo-grid>
+</div>

@@ -1,0 +1,106 @@
+{% comment %}
+  Accepts:
+  - sub_heading: {String} Subheading (required)
+  - block: {Object} Blocks (required)
+  Usage:
+  {% render 'featured-collection-9', sub_heading: sub_heading, block: block %}
+{% endcomment %}
+
+<div class="featured-collection-9">
+  <xo-tabs class="featured-collection-9__tab">
+    <xo-grid class="featured-collection-9__grid{% if settings.enable_border_radius %} featured-collection-9__grid--radius{% endif %}">
+      <xo-animate xo-cascade style="--lg: 6; --md: 12; --xs: 12">
+        <div class="featured-collection-9__left">
+          {% if sub_heading %}
+            <div class="featured-collection-9__sub-heading">
+              {{ sub_heading }}
+            </div>
+          {% endif %}
+          <div class="featured-collection-9__body">
+            {% for item in block %}
+              {% case item.type %}
+                {% when 'featured' %}
+                  {% liquid
+                    assign heading = item.settings.heading
+                    assign content = item.settings.content
+                  %}
+                  <xo-tabs-trigger
+                    xo-name="tab-{{ forloop.index }}"
+                    {% if forloop.index == 1 %}
+                      xo-active
+                    {% endif %}
+                    class="featured-collection-9__tab"
+                  >
+                    {% render 'collapse-2', tag: 'h5', heading: heading, content: content %}
+                  </xo-tabs-trigger>
+              {% endcase %}
+            {% endfor %}
+          </div>
+        </div>
+      </xo-animate>
+      <div style="--lg: 6; --md: 12; --xs: 12; --start-lg: 7">
+        <div class="featured-collection-9__right">
+          <xo-tabs-content class="featured-collection-9__tab-content">
+            {% for item in block %}
+              {% liquid
+                assign image = item.settings.image
+                assign aspect_ratio = item.settings.aspect_ratio
+                if aspect_ratio == 'custom'
+                  assign aspect_ratio = item.settings.aspect_ratio_width | append: '/' | append: item.settings.aspect_ratio_height
+                endif
+              %}
+              <xo-tabs-pane
+                xo-name="tab-{{ forloop.index }}"
+                {% if forloop.index == 1 %}
+                  xo-active
+                {% endif %}
+                class="featured-collection-9__tab-pane"
+                style="overflow: hidden;"
+              >
+                <xo-animate
+                  xo-cascade
+                  xo-type="zoom-out"
+                  xo-duration="1000"
+                  class="featured-collection-9__image{% if settings.enable_border_radius %} featured-collection-9__image--radius{% endif %}"
+                >
+                  {% render 'image', image: image, aspect_ratio: aspect_ratio %}
+                </xo-animate>
+                {% comment %}
+                  <div class='featured-collection-9__image{% if settings.enable_border_radius %} featured-collection-9__image--radius{% endif %}'>
+                    {% render 'animate-image', image: image, border_radius: 0,  aspect_ratio: aspect_ratio %}
+                  </div>
+                {% endcomment %}
+              </xo-tabs-pane>
+            {% endfor %}
+          </xo-tabs-content>
+        </div>
+      </div>
+    </xo-grid>
+  </xo-tabs>
+  <xo-grid class="featured-collection-9__collection" style="--lg: 2; --md: 2; --xs: 1">
+    {% for item in block %}
+      {% case item.type %}
+        {% when 'collection' %}
+          {% liquid
+            assign button = item.settings
+            assign collection = item.settings.collection
+            assign image_desktop = item.settings.image_collection_desktop
+            assign media_aspect_ratio_desktop = item.settings.aspect_ratio_collection_desktop
+            assign image_mobile = item.settings.image_collection_mobile
+            assign media_aspect_ratio_mobile = item.settings.aspect_ratio_collection_mobile
+          %}
+          <div class="featured-collection-9__column">
+            {% render 'collection-image',
+              collection: collection,
+              show_button: true,
+              button: button,
+              image_desktop: image_desktop,
+              media_aspect_ratio_desktop: media_aspect_ratio_desktop,
+              image_mobile: image_mobile,
+              media_aspect_ratio_mobile: media_aspect_ratio_mobile
+            %}
+          </div>
+      {% endcase %}
+    {% endfor %}
+  </xo-grid>
+</div>

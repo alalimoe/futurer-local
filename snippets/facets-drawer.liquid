@@ -1,0 +1,80 @@
+{% comment %}
+  Renders facets drawer (filtering and sorting)
+
+  Accepts:
+  - results: {Object} Collection or Search object
+  - enable_filtering: {Boolean} Show filtering when true
+  - enable_sorting: {Boolean} Show sorting when true
+  - mobile_only: {Boolean} Show only on mobile when true
+  - color_scheme: {String} Color scheme
+
+  Usage:
+  {% render 'facets-drawer', results: collection, enable_filtering: true, enable_sorting: true %}
+{% endcomment %}
+
+<xo-animate xo-cascade>
+  <div class='xo-facets-drawer{% if mobile_only %} xo-facets-drawer--mobile{% endif %} {% if template contains 'collection-1' or template contains 'collection-2' or template contains 'collection-3' %}xo-facets-drawer--mobile-unborder{% endif %}'>
+    <xo-modal-trigger
+      xo-name='facets-modal'
+      class='xo-facets-drawer__trigger focus-inset {% if settings.enable_border_radius %}xo-facets-drawer__trigger--radius{% endif %}'
+      tabindex='0'
+      role='button'
+    >
+      <div class='xo-facets-drawer__trigger-icon'>
+        {% render 'icon', name: 'filter', size: '2rem' %}
+      </div>
+      <div class='xo-facets-drawer__trigger-text'>
+        {%- if enable_filtering and enable_sorting -%}
+          {{ 'products.facets.filter_by_label' | t }}
+        {%- elsif enable_filtering -%}
+          {{ 'products.facets.filter_button' | t }}
+        {%- elsif enable_sorting -%}
+          {{ 'products.facets.sort_button' | t }}
+        {%- endif -%}
+      </div>
+    </xo-modal-trigger>
+    <xo-modal
+      class='xo-facets-drawer__modal'
+      xo-name='facets-modal'
+      xo-animate='slide-left'
+      xo-duration='300'
+      xo-placement='top-right'
+      xo-portal
+    >
+      <div class='xo-facets-drawer__body'>
+        <div class='xo-facets-drawer__top'>
+          <div class='xo-facets-drawer__heading'>
+            <h2 class='xo-facets-drawer__title h2'>
+              {%- if enable_filtering and enable_sorting -%}
+                {{ 'products.facets.filter_and_sort' | t }}
+              {%- elsif enable_filtering -%}
+                {{ 'products.facets.filter_button' | t }}
+              {%- elsif enable_sorting -%}
+                {{ 'products.facets.sort_button' | t }}
+              {%- endif -%}
+            </h2>
+            <xo-modal-trigger class='xo-facets-drawer__close-button' tabindex='0' role='button'>
+              {% render 'icon-close', size: '2.4rem', color: 'black' %}
+            </xo-modal-trigger>
+          </div>
+          <div class='xo-facets-drawer__filters-refine'>
+            {% render 'filters-refine' %}
+          </div>
+          <div>
+            {% liquid
+              if enable_filtering
+                for filter in results.filters
+                  render 'filters-fieldset', type: 'collapse', filter: filter
+                endfor
+              endif
+              if enable_sorting
+                assign name = 'field-sort-by-drawer-' | append: section.id
+                render 'field-sort-by', type: 'collapse', results: results, name: name, placement: 'bottom-left', filter_type: filter_type
+              endif
+            %}
+          </div>
+        </div>
+      </div>
+    </xo-modal>
+  </div>
+</xo-animate>

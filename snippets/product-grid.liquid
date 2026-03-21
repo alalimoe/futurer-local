@@ -1,0 +1,168 @@
+{% comment %}
+  Renders a product grid
+
+  Accepts:
+  - product_list: {Object} Product list (required)
+  - sub_heading: {String} Sub heading (optional)
+  - blocks: {Object} Blocks (optional)
+
+  Usage:
+  {% render 'product-grid', sub_heading: sub_heading, blocks: blocks, product_list: product_list %}
+{% endcomment %}
+
+<div class="product-grid">
+  <xo-grid class="product-grid__grid">
+    <div class="product-grid__inner" style="--lg: 8; --md: 8; --xs: 12; --start-md: 3; --start-lg: 3;">
+      {% if sub_heading != blank %}
+        <xo-animate xo-cascade>
+          <div class="product-grid__sub-heading">{{ sub_heading }}</div>
+        </xo-animate>
+      {% endif %}
+      <div class="product-grid__content">
+        <xo-grid class="product-grid__product-grid" style="--lg: 2; --md: 2; --xs: 1;">
+          {% if product_list != blank %}
+            {% for product in product_list %}
+              {% assign index_initial = forloop.index %}
+              {% for block in section.blocks %}
+                {% liquid
+                  assign image_type = block.settings.image_type
+                  assign column_span = 1
+                  assign row_span = 1
+                  if image_type == 'wide'
+                    assign column_span = 2
+                  elsif image_type == 'high'
+                    assign row_span = 2
+                  elsif image_type == 'large'
+                    assign column_span = 2
+                    assign row_span = 2
+                  endif
+
+                  assign aspect_ratio_desktop = block.settings.aspect_ratio_desktop
+                  if aspect_ratio_desktop == 'custom'
+                    assign aspect_ratio_desktop = block.settings.aspect_ratio_desktop_width | append: '/' | append: block.settings.aspect_ratio_desktop_height
+                  endif
+                  assign aspect_ratio_mobile = block.settings.aspect_ratio_mobile
+                  if aspect_ratio_mobile == 'custom'
+                    assign aspect_ratio_mobile = block.settings.aspect_ratio_mobile_width | append: '/' | append: block.settings.aspect_ratio_mobile_height
+                  endif
+                %}
+
+                {% if index_initial == block.settings.index %}
+                  <xo-animate
+                    xo-cascade
+                    class="product-grid__promo-banner"
+                    style="--column-span: {{ column_span }}; --row-span: {{ row_span }}; --column-span-mb: 1; --row-span-mb: 1;"
+                  >
+                    {% render 'promo-banner',
+                      desktop_image: block.settings.desktop_image,
+                      aspect_ratio_desktop: aspect_ratio_desktop,
+                      mobile_image: block.settings.mobile_image,
+                      aspect_ratio_mobile: aspect_ratio_mobile,
+                      color_schema: block.settings.color_scheme_box,
+                      background_overlay: block.settings.background_overlay,
+                      sub_title: block.settings.sub_title,
+                      label: block.settings.label,
+                      discount_value: block.settings.discount_value,
+                      placement: block.settings.placement,
+                      alignment: block.settings.alignment,
+                      space_between: block.settings.space_between,
+                      button: block.settings
+                    %}
+                  </xo-animate>
+                {% endif %}
+
+                {% render 'product-card',
+                  product: product,
+                  show_image: settings.product_card_show_image,
+                  show_secondary_image: settings.product_card_show_secondary_image,
+                  show_vendor: settings.product_card_show_vendor,
+                  show_description: settings.product_card_show_description,
+                  show_quick_add: settings.product_card_show_quick_add,
+                  show_quick_view: settings.product_card_show_quick_view,
+                  show_favorite: settings.product_card_show_favorite,
+                  show_price: settings.product_card_show_price,
+                  show_badge: settings.product_card_show_badge,
+                  media_aspect_ratio: section.settings.product_card_aspect_ratio,
+                  color_scheme: section.settings.card_color_scheme,
+                  placeholder_image: placeholder_image,
+                  animate_enabled: true,
+                  lazyload: lazyload
+                %}
+              {% endfor %}
+            {% endfor %}
+          {% else %}
+            {% for item in (1..4) %}
+              {% assign index_initial = forloop.index %}
+              {% for block in section.blocks %}
+                {% liquid
+                  assign image_type = block.settings.image_type
+                  assign column_span = 1
+                  assign row_span = 1
+                  if image_type == 'wide'
+                    assign column_span = 2
+                  elsif image_type == 'high'
+                    assign row_span = 2
+                  elsif image_type == 'large'
+                    assign column_span = 2
+                    assign row_span = 2
+                  endif
+
+                  assign aspect_ratio_desktop = block.settings.aspect_ratio_desktop
+                  if aspect_ratio_desktop == 'custom'
+                    assign aspect_ratio_desktop = block.settings.aspect_ratio_desktop_width | append: '/' | append: block.settings.aspect_ratio_desktop_height
+                  endif
+                  assign aspect_ratio_mobile = block.settings.aspect_ratio_mobile
+                  if aspect_ratio_mobile == 'custom'
+                    assign aspect_ratio_mobile = block.settings.aspect_ratio_mobile_width | append: '/' | append: block.settings.aspect_ratio_mobile_height
+                  endif
+                %}
+
+                {% if index_initial == block.settings.index %}
+                  <xo-animate
+                    xo-cascade
+                    class="product-grid__promo-banner"
+                    style="--column-span: {{ column_span }}; --row-span: {{ row_span }}; --column-span-mb: 1; --row-span-mb: 1;"
+                  >
+                    {% render 'promo-banner',
+                      desktop_image: block.settings.desktop_image,
+                      aspect_ratio_desktop: aspect_ratio_desktop,
+                      mobile_image: block.settings.mobile_image,
+                      aspect_ratio_mobile: aspect_ratio_mobile,
+                      color_schema: block.settings.color_scheme_box,
+                      background_overlay: block.settings.background_overlay,
+                      sub_title: block.settings.sub_title,
+                      label: block.settings.label,
+                      discount_value: block.settings.discount_value,
+                      placement: block.settings.placement,
+                      alignment: block.settings.alignment,
+                      space_between: block.settings.space_between,
+                      button: block.settings
+                    %}
+                  </xo-animate>
+                {% endif %}
+
+                {% render 'product-card',
+                  product: empty,
+                  show_image: settings.product_card_show_image,
+                  show_secondary_image: settings.product_card_show_secondary_image,
+                  show_vendor: settings.product_card_show_vendor,
+                  show_description: settings.product_card_show_description,
+                  show_quick_add: settings.product_card_show_quick_add,
+                  show_quick_view: settings.product_card_show_quick_view,
+                  show_favorite: settings.product_card_show_favorite,
+                  show_price: settings.product_card_show_price,
+                  show_badge: settings.product_card_show_badge,
+                  media_aspect_ratio: section.settings.product_card_aspect_ratio,
+                  color_scheme: section.settings.card_color_scheme,
+                  placeholder_image: placeholder_image,
+                  animate_enabled: true,
+                  lazyload: lazyload
+                %}
+              {% endfor %}
+            {% endfor %}
+          {% endif %}
+        </xo-grid>
+      </div>
+    </div>
+  </xo-grid>
+</div>

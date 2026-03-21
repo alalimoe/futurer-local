@@ -1,0 +1,46 @@
+{% comment %}
+  Outputs FAQPage JSON-LD from up to five metaobject references
+  stored in product metafields custom.faq_1 … custom.faq_5.
+  Works on all Shopify Liquid versions (no push/concat needed).
+{% endcomment %}
+
+{% assign faq_keys = 'faq_1,faq_2,faq_3,faq_4,faq_5' | split: ',' %}
+
+{%- comment -%} Build the JSON for each available FAQ entry {%- endcomment -%}
+{% capture faq_json %}{% endcapture %}
+{% assign printed = false %}
+
+{% for k in faq_keys %}
+  {% assign mf = product.metafields['custom'][k] %}
+  {% if mf and mf.value %}
+    {% capture one_qa %}
+    {
+      "@type": "Question",
+      "name": {{ mf.value.question | json }},
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": {{ mf.value.answer | metafield_tag | strip_html | json }}
+      }
+    }
+    {% endcapture %}
+    {% if printed %}
+      {% capture faq_json %}{{ faq_json }},{{ one_qa | strip_newlines }}{% endcapture %}
+    {% else %}
+      {% capture faq_json %}{{ one_qa | strip_newlines }}{% endcapture %}
+      {% assign printed = true %}
+    {% endif %}
+  {% endif %}
+{% endfor %}
+
+{%- comment -%} Print the FAQPage schema only if we found at least one entry {%- endcomment -%}
+{% if printed %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {{ faq_json }}
+  ]
+}
+</script>
+{% endif %}

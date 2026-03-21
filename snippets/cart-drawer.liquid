@@ -1,0 +1,57 @@
+{% assign cart_title = 'sections.cart.title' | t %}
+{% assign sub_title = 'sections.cart.sub_title' | t %}
+
+{% capture drawer_content %}
+  <xo-animate xo-cascade>
+    {% render 'cart-free-shipping' %}
+  </xo-animate>
+  <xo-cart-will-change xo-unique-id='xo-cart-mini-content'>
+    {% liquid
+      if cart == empty
+        render 'cart-empty'
+      else
+        for item in cart.items
+          if forloop.index < 5
+            render 'cart-mini-item', item: item, animate_enabled: true, index: forloop.index
+          else
+            render 'cart-mini-item', item: item, index: forloop.index
+          endif
+        endfor
+      endif
+    %}
+  </xo-cart-will-change>
+{% endcapture %}
+
+{% capture drawer_footer %}
+  <xo-cart-will-change xo-unique-id='xo-cart-mini-drawer-footer'>
+    {% if cart != empty %}
+      <xo-animate xo-cascade>
+        <div class="xo-cart-mini-drawer-footer__separator">
+          {% liquid
+            if settings.show_cart_drawer_note
+              assign type_note = settings.cart_drawer_note_type
+              render 'cart-note', uid: 'cart-drawer', type: type_note
+            endif
+          %}
+        </div>
+      </xo-animate>
+      {% render 'cart-mini-footer' %}
+    {% endif %}
+  </xo-cart-will-change>
+{% endcapture %}
+
+{% render 'modal-content',
+  content_tag_name: 'xo-cart-scroll',
+  content: drawer_content,
+  title: cart_title,
+  title_class: 'h6',
+  sub_title: sub_title,
+  footer: drawer_footer,
+  width: '54rem',
+  height: '100dvh',
+  full_height: true,
+  animate: true,
+  footer_class: 'flex-v',
+  header_separator: true,
+  footer_separator: true
+%}

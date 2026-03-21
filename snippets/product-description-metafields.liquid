@@ -1,0 +1,108 @@
+{%- comment -%}
+Nootropix — Product description renderer from metafields
+{%- endcomment -%}
+
+{%- assign tldr_src = product.metafields.npx.tl_dr | default: product.metafields.npx.tldr -%}
+{%- assign tldr = nil -%}
+{%- if tldr_src and tldr_src.value -%}
+  {%- assign tldr = tldr_src.value -%}
+{%- elsif tldr_src -%}
+  {%- assign tldr = tldr_src | parse_json -%}
+{%- endif -%}
+
+{%- assign what_it_is = product.metafields.npx.what_it_is.value | default: product.metafields.npx.what_it_is -%}
+{%- assign feel = product.metafields.npx.feel_timeline.value -%}
+{%- assign feel_note = product.metafields.npx.feel_note.value | default: product.metafields.npx.feel_note -%}
+{%- assign how = product.metafields.npx.how_to_use.value -%}
+{%- assign why = product.metafields.npx.why.value -%}
+{%- assign safety_important = product.metafields.npx.safety_important.value | default: product.metafields.npx.safety_important -%}
+{%- assign safety_general = product.metafields.npx.safety_general.value | default: product.metafields.npx.safety_general -%}
+{%- assign disclaimer = product.metafields.npx.disclaimer.value | default: product.metafields.npx.disclaimer -%}
+{%- assign faq = product.metafields.npx.faq.value -%}
+{%- assign how_it_works_text = product.metafields.npx.how_it_works.value | default: product.metafields.npx.how_it_works -%}
+
+{%- comment -%} friendly heading for “Why … ?” {%- endcomment -%}
+{%- assign form_label = 'capsules' -%}
+{%- if product.title contains 'Powder' -%}{% assign form_label = 'powder' %}{%- endif -%}
+
+<div class="product-prose">
+
+  {%- if tldr != blank -%}
+    <h3>TL;DR</h3>
+    <ul>
+      {%- for item in tldr -%}<li>{{ item }}</li>{%- endfor -%}
+    </ul>
+  {%- endif -%}
+
+  {%- if what_it_is != blank -%}
+    <h3>What it is</h3>
+    <p>{{ what_it_is }}</p>
+  {%- endif -%}
+
+  {%- if feel != blank -%}
+    <h3>What you’ll feel (and when)</h3>
+    <ul>
+      {%- for f in feel -%}
+        <li>{% if f.label %}<strong>{{ f.label }}:</strong> {% endif %}{{ f.description }}</li>
+      {%- endfor -%}
+    </ul>
+  {%- endif -%}
+  
+  {%- if feel_note != blank -%}
+  <aside class="npx-note">{{ feel_note }}</aside>
+{%- endif -%}
+
+
+  {%- if product.metafields.npx.how_it_works != blank -%}
+  <h3>How it works (the simple science)</h3>
+  {{ product.metafields.npx.how_it_works | metafield_tag }}
+{%- endif -%}
+
+
+  {%- if how != blank -%}
+    <h3>How to use</h3>
+    <ul>
+      {%- for h in how -%}
+        <li>{% if h.label %}<strong>{{ h.label }}:</strong> {% endif %}{{ h.text }}</li>
+      {%- endfor -%}
+    </ul>
+  {%- endif -%}
+
+  {%- if why != blank -%}
+    <h3>Why {{ form_label }}?</h3>
+    <ul>
+      {%- for w in why -%}<li>{{ w }}</li>{%- endfor -%}
+    </ul>
+  {%- endif -%}
+
+  {%- if safety_important != blank or safety_general != blank or disclaimer != blank -%}
+    <h3>Safety &amp; interactions</h3>
+    {%- if safety_important != blank -%}
+  <aside class="npx-important"><strong>Important:</strong> {{ safety_important }}</aside>
+{%- endif -%}
+
+    {%- if safety_general != blank -%}
+      <p><strong>General safety:</strong> {{ safety_general }}</p>
+    {%- endif -%}
+    
+    {%- if disclaimer != blank -%}
+  <aside class="npx-disclaimer"><strong>Disclaimer:</strong> {{ disclaimer }}</aside>
+{%- endif -%}
+
+  {%- endif -%}
+
+  {%- if faq != blank -%}
+    <h3>FAQ</h3>
+    {%- for i in faq -%}
+      <p><strong>{{ forloop.index }}. {{ i.q }}</strong><br>{{ i.a }}</p>
+    {%- endfor -%}
+  {%- endif -%}
+
+  {%- comment -%}
+  Fallback to Body HTML only if *everything* above is missing.
+  (No parentheses – Liquid evaluates left-to-right.)
+  {%- endcomment -%}
+  {%- if tldr == blank and what_it_is == blank and feel == blank and how_it_works_text == blank and how == blank and why == blank and safety_important == blank and safety_general == blank and disclaimer == blank and faq == blank -%}
+    {{ product.description }}
+  {%- endif -%}
+</div>

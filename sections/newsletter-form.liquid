@@ -1,0 +1,244 @@
+{{ 'section-newsletter-form.css' | asset_url | stylesheet_tag }}
+
+<section {% render 'section-attr' %}>
+  <div class='newsletter-form' id='NewsletterForm'>
+    <xo-container class='newsletter-form__container'>
+      <div class='newsletter-form__content'>
+        {% for block in section.blocks %}
+          {% case block.type %}
+            {% when 'heading' %}
+              {% liquid
+                assign class = block.settings.heading_size
+                assign heading = block.settings.heading
+              %}
+              <xo-animate xo-cascade>
+                <h3 class='newsletter-form__heading {{ class }}'>{{ heading }}</h3>
+              </xo-animate>
+          {% endcase %}
+        {% endfor %}
+        {% for block in section.blocks %}
+          {% case block.type %}
+            {% when 'sub-heading' %}
+              {% liquid
+                assign sub_heading = block.settings.sub_heading
+              %}
+              <xo-animate xo-cascade>
+                <div class='newsletter-form__sub-heading'>{{ sub_heading }}</div>
+              </xo-animate>
+          {% endcase %}
+        {% endfor %}
+        {% for block in section.blocks %}
+          {% case block.type %}
+            {% when 'email-form' %}
+              <xo-animate xo-cascade style='width: 100%;'>
+                <div class='newsletter-form__form'>
+                  {%- form 'customer', id: 'NewsletterForm' -%}
+                    <input type='hidden' name='contact[tags]' value='newsletter'>
+                    <div class='newsletter-form__field-input{% if settings.corner_radius == 'radius' %} newsletter-form__field-input--rounded{% endif %}'>
+                      {% assign value = form.email %}
+                      {% assign label = 'Email' %}
+                      {% capture attr %}
+                          aria-required='true'
+                          autocorrect='off'
+                        {% if form.errors %}
+                          autofocus
+                          aria-invalid='true'
+                          aria-describedby='NewsletterForm-error'
+                        {% elsif form.posted_successfully? %}
+                          aria-describedby='NewsletterForm-success'
+                        {% endif %}
+                        required
+                      {% endcapture %}
+                      {% assign input_id = 'NewsletterForm--' | append: section.id %}
+                      {% render 'field-input', type: 'email', name: 'contact[email]', value: value, label: label, attr: attr, id: input_id %}
+                      <button
+                        type='submit'
+                        class='newsletter-form__field-button'
+                        name='commit'
+                        id='Subscribe'
+                        aria-label='{{ 'newsletter.button_label' | t }}'
+                      >
+                        {% render 'icon', name: 'arrow-with-reer-right', size: 24 %}
+                      </button>
+                    </div>
+                    <!-- error -->
+                    {%- if form.errors -%}
+                      <div class='newsletter-form__message newsletter-form__message--error form__message' id='NewsletterForm-error'>
+                        {%- render 'icon', name: 'error', size: '3rem' -%}
+                        {{- form.errors.translated_fields.email | capitalize }}
+                        {{ form.errors.messages.email -}}
+                      </div>
+                    {%- endif -%}
+                    <!-- success -->
+                    {%- if form.posted_successfully? -%}
+                      <div
+                        class='newsletter-form__message newsletter-form__message--success form__message'
+                        id='NewsletterForm-success'
+                        tabindex='-1'
+                        autofocus
+                      >
+                        {% render 'icon', name: 'success', size: '3rem' -%}
+                        {{- 'newsletter.success' | t }}
+                      </div>
+                    {%- endif -%}
+                  {%- endform -%}
+                </div>
+              </xo-animate>
+          {% endcase %}
+        {% endfor %}
+      </div>
+    </xo-container>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "t:sections.newsletter_form.name",
+  "disabled_on": {
+    "groups": [
+      "header",
+      "footer",
+      "custom.overlay",
+      "custom.popups",
+      "custom.features"
+    ]
+  },
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Section color scheme"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color"
+    },
+    {
+      "type": "color_background",
+      "id": "background_gradient",
+      "label": "Background gradient"
+    },
+    {
+      "type": "number",
+      "id": "padding_top_desktop",
+      "label": "Padding top desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_desktop",
+      "label": "Padding bottom desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_top_mobile",
+      "label": "Padding top mobile",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_mobile",
+      "label": "Padding bottom mobile",
+      "default": 50
+    }
+  ],
+  "blocks": [
+    {
+      "name": "t:sections.newsletter_form.blocks.name_1",
+      "type": "heading",
+      "settings": [
+        {
+          "type": "select",
+          "id": "heading_size",
+          "label": "t:sections.newsletter_form.blocks.settings.heading_size.label",
+          "default": "h4",
+          "options": [
+            {
+              "value": "h1",
+              "label": "t:sections.newsletter_form.blocks.settings.heading_size.option__1.label"
+            },
+            {
+              "value": "h2",
+              "label": "t:sections.newsletter_form.blocks.settings.heading_size.option__2.label"
+            },
+            {
+              "value": "h3",
+              "label": "t:sections.newsletter_form.blocks.settings.heading_size.option__3.label"
+            },
+            {
+              "value": "h4",
+              "label": "t:sections.newsletter_form.blocks.settings.heading_size.option__4.label"
+            },
+            {
+              "value": "h5",
+              "label": "t:sections.newsletter_form.blocks.settings.heading_size.option__5.label"
+            },
+            {
+              "value": "h6",
+              "label": "t:sections.newsletter_form.blocks.settings.heading_size.option__6.label"
+            }
+          ]
+        },
+        {
+          "type": "richtext",
+          "id": "heading",
+          "label": "t:sections.newsletter_form.blocks.settings.heading.label",
+          "default": "<p>Subscribe to our emails</p>"
+        }
+      ]
+    },
+    {
+      "name": "t:sections.newsletter_form.blocks.name_2",
+      "type": "sub-heading",
+      "settings": [
+        {
+          "type": "richtext",
+          "id": "sub_heading",
+          "label": "t:sections.newsletter_form.blocks.settings.sub_heading.label",
+          "default": "<p>Be the first to know about new collections and exclusive offers.</p>"
+        }
+      ]
+    },
+    {
+      "name": "t:sections.newsletter_form.blocks.name_3",
+      "type": "email-form",
+      "settings": []
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.newsletter_form.presets.name",
+      "settings": {
+        "color_scheme": "",
+        "background_color": "",
+        "background_gradient": "",
+        "padding_top_desktop": 50,
+        "padding_bottom_desktop": 50,
+        "padding_top_mobile": 50,
+        "padding_bottom_mobile": 50
+      },
+      "blocks": [
+        {
+          "type": "heading",
+          "settings": {
+            "heading_size": "h4",
+            "heading": "<p>Subscribe to our emails</p>"
+          }
+        },
+        {
+          "type": "sub-heading",
+          "settings": {
+            "sub_heading": "<p>Be the first to know about new collections and exclusive offers.</p>"
+          }
+        },
+        {
+          "type": "email-form",
+          "settings": {}
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

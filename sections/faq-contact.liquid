@@ -1,0 +1,138 @@
+<section id="ntx-faq-contact" class="ntx-contact">
+  <div class="ntx-contact__wrap">
+    <h2>{{ section.settings.heading }}</h2>
+    <p class="ntx-contact__lead">{{ section.settings.subheading }}</p>
+
+    {% if section.settings.use_embed and section.settings.helpdesk_embed != blank %}
+      <!-- Preferred: HelpDesk embed (paste script/iframe in the setting) -->
+      <div class="ntx-contact__embed">
+        {{ section.settings.helpdesk_embed }}
+      </div>
+    {% else %}
+      <!-- Fallback: native Shopify contact form -->
+      <div class="ntx-contact__form">
+        {% form 'contact' %}
+          <div class="ntx-row">
+            <label for="ContactFormName">Name</label>
+            <input id="ContactFormName" type="text" name="contact[name]" required autocomplete="name">
+          </div>
+          <div class="ntx-row">
+            <label for="ContactFormEmail">Email</label>
+            <input id="ContactFormEmail" type="email" name="contact[email]" required autocomplete="email">
+          </div>
+          <div class="ntx-row">
+            <label for="ContactFormOrder">Order # (optional)</label>
+            <input id="ContactFormOrder" type="text" name="contact[Order Number]">
+          </div>
+          <div class="ntx-row">
+            <label for="ContactFormBody">How can we help?</label>
+            <textarea id="ContactFormBody" name="contact[body]" rows="6" required></textarea>
+          </div>
+          <button class="ntx-btn" type="submit">Send message</button>
+          {% if form.posted_successfully? %}
+            <p class="ntx-success" role="status" aria-live="polite">Thanks! We’ll get back to you shortly.</p>
+          {% endif %}
+          {% if form.errors %}
+            <p class="ntx-error" role="alert">Please check the form and try again.</p>
+          {% endif %}
+        {% endform %}
+      </div>
+    {% endif %}
+  </div>
+</section>
+
+<style>
+  .ntx-contact {
+    max-width: var(--container-width-narrow); margin: 24px auto; padding: 20px var(--page-gutter);
+    font-family: var(--font-body-family, sans-serif);
+  }
+  .ntx-contact h2 {
+    font-family: var(--font-heading-family, sans-serif);
+    font-size: clamp(1.2rem, 2.2vw, 1.5rem);
+    font-weight: 800; letter-spacing: -0.02em; line-height: 1.2;
+    color: var(--nx-text, #0B0B0B); margin: 0 0 4px;
+  }
+  .ntx-contact__lead {
+    color: var(--nx-muted, #6B7280); margin-top: 6px;
+    font-size: clamp(0.85rem, 1.2vw, 0.9375rem);
+  }
+  .ntx-contact .ntx-row { display: grid; gap: 6px; margin-bottom: 14px; }
+  .ntx-contact .ntx-row label {
+    font-size: clamp(0.8rem, 1.1vw, 0.875rem);
+    font-weight: 600; color: var(--nx-text, #0B0B0B);
+  }
+  .ntx-contact .ntx-row input,
+  .ntx-contact .ntx-row textarea {
+    border: 1.5px solid var(--nx-pill-border, #e5e7eb); border-radius: 10px;
+    padding: 10px 14px; min-height: 44px; box-sizing: border-box;
+    font-family: var(--font-body-family, sans-serif);
+    font-size: clamp(0.85rem, 1.3vw, 0.9375rem);
+    background: #fff; color: var(--nx-text, #0B0B0B);
+    transition: var(--transition-premium);
+    box-shadow: var(--shadow-xs);
+  }
+  .ntx-contact .ntx-row input:focus,
+  .ntx-contact .ntx-row textarea:focus {
+    outline: none;
+    border-color: var(--nx-accent, #FBBF24);
+    box-shadow: var(--shadow-gold-focus);
+  }
+  .ntx-contact .ntx-row input:focus-visible,
+  .ntx-contact .ntx-row textarea:focus-visible {
+    outline: 2px solid var(--nx-accent, #FBBF24); outline-offset: 2px;
+  }
+  .ntx-contact .ntx-row input::placeholder,
+  .ntx-contact .ntx-row textarea::placeholder { opacity: 0.5; }
+
+  .ntx-contact .ntx-btn {
+    border: none; border-radius: 10px; padding: 12px 20px; min-height: 44px;
+    background: var(--nx-text, #0B0B0B); color: #fff;
+    font-family: var(--font-body-family, sans-serif);
+    font-size: clamp(0.85rem, 1.2vw, 0.9375rem); font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: var(--transition-premium);
+  }
+  .ntx-contact .ntx-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.14);
+  }
+  .ntx-contact .ntx-btn:active { transform: scale(0.97); }
+  .ntx-contact .ntx-btn:focus-visible { outline: 2px solid var(--nx-accent, #FBBF24); outline-offset: 2px; }
+
+  .ntx-success {
+    color: var(--nc-success, #10b981); margin-top: 12px;
+    font-weight: 500; font-size: clamp(0.85rem, 1.2vw, 0.9375rem);
+  }
+  .ntx-error {
+    color: var(--nc-error, #ef4444); margin-top: 12px;
+    font-weight: 500; font-size: clamp(0.85rem, 1.2vw, 0.9375rem);
+  }
+  .ntx-contact__embed iframe { width: 100%; min-height: 560px; height: 660px; border: 0; border-radius: 14px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ntx-contact .ntx-row input,
+    .ntx-contact .ntx-row textarea,
+    .ntx-contact .ntx-btn { transition: none; }
+    .ntx-contact .ntx-btn:hover { transform: none; }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "FAQ – Help & Support",
+  "settings": [
+    { "type":"text", "id":"heading", "label":"Heading", "default":"Still need help?" },
+    { "type":"text", "id":"subheading", "label":"Subheading", "default":"Message us and we’ll jump on it." },
+    { "type":"checkbox", "id":"use_embed", "label":"Use embed form", "default": false },
+    {
+      "type":"html",
+      "id":"helpdesk_embed",
+      "label":"Embed code (iframe/script)",
+      "default":"<!-- paste HelpDesk iframe here, then toggle 'Use embed form' on -->"
+    }
+  ],
+  "presets":[{ "name":"FAQ – Help & Support" }]
+}
+{% endschema %}
+

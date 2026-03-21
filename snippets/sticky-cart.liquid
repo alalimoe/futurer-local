@@ -1,0 +1,143 @@
+{% comment %}
+  Renders a sticky cart
+
+  Accepts:
+  - product: {Object} product object
+
+  Usage:
+  {% render 'sticky-cart', product: product %}
+{% endcomment %}
+
+{% liquid
+  assign variant_color_style = variants_block.settings.variant_color_style
+  assign variant_style = variants_block.settings.variant_style
+  assign featured_media = product.selected_or_first_available_variant.featured_media
+%}
+
+<xo-sticky class="xo-sticky-cart" xo-name="sticky-hidden" xo-direction="down" xo-placement="bottom">
+  <div class="xo-sticky-cart__inner{% if product.has_only_default_variant == false %} xo-sticky-cart__inner--modifier{% endif %}{% if settings.enable_border_radius %} xo-sticky-cart__inner--radius{% endif %}">
+    <xo-grid class="xo-sticky-cart__grid">
+      <!-- product info -->
+      <div style="--lg: 4; --md: 6; --xs: 7">
+        <xo-animate xo-cascade class="xo-sticky-cart__product-info">
+          <div class="xo-sticky-cart__product-wrapper">
+            <div class="xo-sticky-cart__info-image xo-hidden--mobile">
+              <xo-product-will-change xo-unique-id="xo-sticky-cart-{{ section.id }}" style="display: block; width: 100%; height: 100%;">
+                {% if featured_media != null %}
+                  {% render 'media', type: 'image', media: featured_media, image_lazyload: false, image_widths: '375, 550, 750, 900' %}
+                {% else %}
+                  {% render 'media', type: 'image', media: product.featured_image, image_lazyload: false, image_widths: '375, 550, 750, 900' %}
+                {% endif %}
+              </xo-product-will-change>
+            </div>
+            <div class="xo-sticky-cart__info-box">
+              <div class="xo-sticky-cart__info-top">
+                <div class="xo-sticky-cart__info-title xo-line-1">{{ product.title }}</div>
+                <div class="xo-sticky-cart__options xo-hidden--mobile{% if product.has_only_default_variant == false %} xo-sticky-cart__options--pd{% endif %}">
+                  {% if product.has_only_default_variant == false %}
+                    <xo-product-will-change xo-unique-id="sticky-product-variant-{{ section.id }}" class="xo-sticky-cart__option">
+                      {{ product.selected_or_first_available_variant.title }}
+                    </xo-product-will-change>
+                  {% endif %}
+                </div>
+              </div>
+              <div class="xo-sticky-cart__info-bottom">
+                <div class="xo-sticky-cart__info-price">
+                  <xo-product-will-change xo-unique-id="sticky-product-price-{{ section.id }}" xo-morph-selector="[xo-price]">
+                    {% render 'price', product: product, use_variant: true %}
+                  </xo-product-will-change>
+                </div>
+              </div>
+            </div>
+          </div>
+        </xo-animate>
+      </div>
+
+      <!-- actions -->
+      <div class="xo-sticky-cart__product-action" style="--lg: 8; --md: 6; --xs: 5">
+        <div class="xo-sticky-cart__action-group xo-hidden--mobile xo-stack" style="--ai: center; --jc: flex-end; --gap: 18">
+          <!-- variants -->
+          {% if product.has_only_default_variant == false %}
+            <xo-animate xo-cascade>
+              <xo-modal-trigger xo-name="variant-options-{{ product.id }}" class="xo-sticky-cart__product-variant xo-sticky-cart__product-variant--modal">
+                {% assign choose_options = 'products.product.choose_options' | t %}
+                {% render 'button', text: choose_options, style: 'secondary', size: 'md', block: true %}
+              </xo-modal-trigger>
+            </xo-animate>
+          {% endif %}
+
+          <xo-animate xo-cascade class="xo-sticky-cart__action-quantity">
+            {%- render 'quantity', size: 'md', variant: product.selected_or_first_available_variant, product: product, is_cart: false %}
+          </xo-animate>
+
+          <xo-animate xo-cascade class="xo-sticky-cart__action-cart">
+            <xo-product-will-change xo-unique-id="sticky-product-add-cart-{{ section.id }}">
+              <xo-cart-add
+                class="xo-sticky-cart__button-add"
+                {% if product.selected_or_first_available_variant.available == false %}
+                  xo-disabled
+                {% endif %}
+                {% if settings.cart_type == 'page' %}
+                  xo-cart-redirection
+                {% endif %}
+              >
+                {%- if product.selected_or_first_available_variant.available == false -%}
+                  {%- assign button_sold_out = 'products.product.sold_out' | t -%}
+                  <div class="xo-sticky-cart__button-text xo-sticky-cart__button-text--sold-out">
+                    {% render 'button', text: button_sold_out, style: 'primary', loading_type: 'loader-3', size: 'lg', block: true %}
+                  </div>
+                {%- else -%}
+                  {%- assign button_add_cart = 'products.product.add_to_cart' | t -%}
+                  <div class="xo-sticky-cart__button-text">
+                    {% render 'button', text: button_add_cart, style: 'primary', loading_type: 'loader-3', size: 'lg', block: true %}
+                  </div>
+                {%- endif -%}
+              </xo-cart-add>
+            </xo-product-will-change>
+          </xo-animate>
+        </div>
+
+        <div class="xo-sticky-cart__action-group xo-sticky-cart__action-group--mobile xo-hidden--desktop">
+          <!-- variants -->
+          {% if product.variants.size > 1 %}
+            {% if product.has_only_default_variant == false %}
+              <xo-modal-trigger xo-name="variant-options-{{ product.id }}" class="xo-sticky-cart__product-variant xo-sticky-cart__product-variant--modal">
+                {% assign choose_options = 'products.product.add_to_cart' | t %}
+                {% render 'button', text: choose_options, style: 'primary', size: 'md', block: true %}
+              </xo-modal-trigger>
+            {% endif %}
+          {% else %}
+            <xo-animate xo-cascade class="xo-sticky-cart__action-cart">
+              <xo-product-will-change xo-unique-id="sticky-product-add-cart-{{ section.id }}">
+                <xo-cart-add
+                  class="xo-sticky-cart__button-add"
+                  {% if product.selected_or_first_available_variant.available == false %}
+                    xo-disabled
+                  {% endif %}
+                  {% if settings.cart_type == 'page' %}
+                    xo-cart-redirection
+                  {% endif %}
+                >
+                  {%- if product.selected_or_first_available_variant.available == false -%}
+                    {%- assign button_sold_out = 'products.product.sold_out' | t -%}
+                    <div class="xo-sticky-cart__button-text xo-sticky-cart__button-text--sold-out">
+                      {% render 'button', text: button_sold_out, style: 'primary', loading_type: 'loader-3', size: 'md', block: true %}
+                    </div>
+                  {%- else -%}
+                    {%- assign button_add_cart = 'products.product.add_to_cart' | t -%}
+                    <div class="xo-sticky-cart__button-text">
+                      {% render 'button', text: button_add_cart, style: 'primary', loading_type: 'loader-3', size: 'md', block: true %}
+                    </div>
+                  {%- endif -%}
+                </xo-cart-add>
+              </xo-product-will-change>
+            </xo-animate>
+          {% endif %}
+        </div>
+      </div>
+    </xo-grid>
+    <xo-modal xo-name="variant-options-{{ product.id }}" class="xo-sticky-cart__modal">
+      {% render 'sticky-variant-modal', product: product, variant_style: variant_style, variant_color_style: variant_color_style %}
+    </xo-modal>
+  </div>
+</xo-sticky>

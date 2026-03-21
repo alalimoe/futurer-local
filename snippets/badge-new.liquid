@@ -1,0 +1,27 @@
+{% comment %}
+  Renders a list of product's badge new
+
+  Accepts:
+  - product: {Object} Product Liquid object (optional)
+  - class: {String} Adds a price class to the price element (optional)
+
+  Usage:
+  {% render 'badge-new',
+    product: product,
+    class: 'price and more'
+  %}
+{% endcomment %}
+
+{% comment %} FIXME: Thiếu translation New {% endcomment %}
+
+{% liquid
+  assign product_date = product.published_at | date: '%s'
+  assign current_date = 'now' | date: '%s'
+  assign difference = current_date | minus: product_date | divided_by: 86400.0
+%}
+
+{% if difference < 10 %}
+  <div class='xo-badge-new {{ class }}{% if settings.enable_border_radius %} xo-badge-new--radius{% endif %}'>
+    {{ 'products.product.on_new' | t }}
+  </div>
+{% endif %}

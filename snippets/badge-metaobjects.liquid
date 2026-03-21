@@ -1,0 +1,38 @@
+{%- comment -%}
+Renders badges from product.metafields.merchandising.badges
+Works with:
+- Single metaobject reference
+- List of metaobject references
+Metaobject fields: label (text), slug (text), bg_color (Color), text_color (Color), icon (File), priority (Integer)
+{%- endcomment -%}
+
+{%- assign mo = product.metafields.merchandising.badges -%}
+
+{%- assign entries_is_list = false -%}
+{%- if mo and mo.value -%}
+  {%- if mo.value.size -%}{% assign entries_is_list = true %}{%- endif -%}
+{%- endif -%}
+
+{%- if mo and mo.value -%}
+  <div class="xo-badge-custom-wrap">
+    {%- if entries_is_list -%}
+      {%- assign entries = mo.value | sort: 'priority' -%}
+      {%- for b in entries -%}
+        {%- assign bg = b.bg_color | default: '#e9e9e9' -%}
+        {%- assign fg = b.text_color | default: '#111111' -%}
+        <span class="xo-badge xo-badge--custom" style="background: {{ bg }}; color: {{ fg }};">
+          {%- if b.icon -%}<img class="xo-badge__icon" src="{{ b.icon | image_url: width: 24 }}" alt="" loading="lazy">{%- endif -%}
+          <span class="xo-badge__label">{{ b.label }}</span>
+        </span>
+      {%- endfor -%}
+    {%- else -%}
+      {%- assign b = mo.value -%}
+      {%- assign bg = b.bg_color | default: '#e9e9e9' -%}
+      {%- assign fg = b.text_color | default: '#111111' -%}
+      <span class="xo-badge xo-badge--custom" style="background: {{ bg }}; color: {{ fg }};">
+        {%- if b.icon -%}<img class="xo-badge__icon" src="{{ b.icon | image_url: width: 24 }}" alt="" loading="lazy">{%- endif -%}
+        <span class="xo-badge__label">{{ b.label }}</span>
+      </span>
+    {%- endif -%}
+  </div>
+{%- endif -%}

@@ -1,0 +1,58 @@
+{% comment %}
+  Featured/Pinned hero card. If no pinned article set, falls back to latest.
+{% endcomment %}
+{% assign pinned = section.settings.pinned_article %}
+{% assign article_hero = pinned | default: blog.articles.first %}
+
+{% if article_hero %}
+<section class="np-surface">
+  <div class="np-wrap">
+    <article class="np-hero-card">
+      {% if article_hero.image %}
+        <a class="np-hero-card__media" href="{{ article_hero.url }}">
+          <img src="{{ article_hero.image | image_url: width: 1600 }}"
+               alt="{{ article_hero.image.alt | escape }}"
+               loading="eager" fetchpriority="high" decoding="async"
+               width="{{ article_hero.image.width }}" height="{{ article_hero.image.height }}">
+        </a>
+      {% endif %}
+      <div class="np-hero-card__body">
+        <div class="np-meta">
+          <span>{{ article_hero.published_at | date: format: "date" }}</span>
+          {% if section.settings.show_reading_time %}
+            {% assign words = article_hero.content | strip_html | replace: '&nbsp;', ' ' | split: ' ' | size %}
+            {% assign minutes = words | plus: 199 | divided_by: 200 %}
+            <span>{{ minutes }} min read</span>
+          {% endif %}
+        </div>
+        <h2 style="margin:.25rem 0 0 0;">
+          <a href="{{ article_hero.url }}" style="text-decoration:none; color:inherit;">
+            {{ article_hero.title }}
+          </a>
+        </h2>
+        {% if article_hero.excerpt != blank %}
+          <p style="color:var(--np-dim); max-width:var(--np-measure);">{{ article_hero.excerpt | strip_html }}</p>
+        {% endif %}
+        <div class="np-card__actions" style="margin-top:.5rem;">
+          <a class="btn btn--primary" href="{{ article_hero.url }}">Read guide</a>
+          {% if section.settings.related_stack_url != blank %}
+            <a class="btn btn--secondary" href="{{ section.settings.related_stack_url }}">Explore related stack</a>
+          {% endif %}
+        </div>
+      </div>
+    </article>
+  </div>
+</section>
+{% endif %}
+
+{% schema %}
+{
+  "name": "Featured Hero",
+  "settings": [
+    { "type":"article", "id":"pinned_article", "label":"Pinned article (optional)" },
+    { "type":"checkbox", "id":"show_reading_time", "label":"Show reading time", "default": true },
+    { "type":"url", "id":"related_stack_url", "label":"Optional link: Related stack" }
+  ],
+  "presets":[{ "name":"NP • Featured Hero" }]
+}
+{% endschema %}

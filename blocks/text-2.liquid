@@ -1,0 +1,78 @@
+{% liquid
+  assign text = block.settings.text
+  assign alignment = block.settings.alignment
+  assign padding_top_dt = block.settings.padding_top_dt | divided_by: 10.0
+  assign padding_bottom_dt = block.settings.padding_bottom_dt | divided_by: 10.0
+  assign padding_top_mb = block.settings.padding_top_mb | divided_by: 10.0
+  assign padding_bottom_mb = block.settings.padding_bottom_mb | divided_by: 10.0
+
+  assign container_class = 'xo-text-body'
+  assign container_style = '--padding-top-dt: ' | append: padding_top_dt | append: 'rem; --padding-bottom-dt: ' | append: padding_bottom_dt | append: 'rem; --padding-top-mb: ' | append: padding_top_mb | append: 'rem; --padding-bottom-mb: ' | append: padding_bottom_mb | append: 'rem;'
+
+  case alignment
+    when 'left'
+      assign container_class = container_class | append: ' xo-text-body--left'
+    when 'center'
+      assign container_class = container_class | append: ' xo-text-body--center'
+    when 'right'
+      assign container_class = container_class | append: ' xo-text-body--right'
+  endcase
+%}
+
+<div {{ block.shopify_attributes }} class="{{ container_class }}" style="{{ container_style }}">
+  {{ text }}
+</div>
+
+
+{% schema %}
+{
+  "tag": null,
+  "name": "t:blocks.text_2.name",
+  "settings": [
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "t:blocks.text_2.settings.text.label",
+      "default": "<p>Use this text to share information about your brand with your customers. Describe a product, share announcements, or welcome customers to your store.</p>"
+    },
+    {
+      "type": "text_alignment",
+      "id": "alignment",
+      "label": "t:blocks.text_2.settings.alignment.label"
+    },
+    {
+      "type": "header",
+      "content": "t:blocks.text_2.settings.padding.content"
+    },
+    {
+      "type": "number",
+      "id": "padding_top_dt",
+      "label": "t:blocks.text_2.settings.top_dt.label",
+      "default": 0
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_dt",
+      "label": "t:blocks.text_2.settings.bottom_dt.label",
+      "default": 0
+    },
+    {
+      "type": "number",
+      "id": "padding_top_mb",
+      "label": "t:blocks.text_2.settings.top_mb.label",
+      "default": 0
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_mb",
+      "label": "t:blocks.text_2.settings.bottom_mb.label",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:blocks.text_2.name"
+    }
+  ]
+}
+{% endschema %}

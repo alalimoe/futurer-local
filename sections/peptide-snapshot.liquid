@@ -1,0 +1,165 @@
+{% comment %}
+SECTION: Evidence Snapshot — QC badges row (safe boolean flags)
+{% endcomment %}
+
+{%- liquid
+  assign pep_ref = product.metafields.pep.reference
+  assign pep = nil
+  if pep_ref and pep_ref.value
+    assign pep = pep_ref.value
+  endif
+
+  # --- Resolve COA URL (pdp.coa_url → pep.coa_pdf → peptide.coa_file[0])
+  assign pdp_coa_override = product.metafields.pdp.coa_url
+  assign coa_pdf_mf       = product.metafields.pep.coa_pdf
+  assign coa_files_mf     = product.metafields.peptide.coa_file
+
+  assign coa_url = nil
+  if pdp_coa_override and pdp_coa_override != blank
+    assign coa_url = pdp_coa_override
+  elsif coa_pdf_mf and coa_pdf_mf.value and coa_pdf_mf.value.url
+    assign coa_url = coa_pdf_mf.value.url
+  elsif coa_files_mf and coa_files_mf.value and coa_files_mf.value.size > 0
+    assign first_file = coa_files_mf.value.first
+    if first_file and first_file.url
+      assign coa_url = first_file.url
+    endif
+  endif
+
+  # --- Resolve HPLC / MS
+  assign hplc_mf = product.metafields.pep.hplc_image
+  assign ms_mf   = product.metafields.pep.ms_image
+
+  assign hplc_img = nil
+  if hplc_mf and hplc_mf.value
+    assign hplc_img = hplc_mf.value
+  elsif pep and pep.hplc_image
+    assign hplc_img = pep.hplc_image
+  endif
+
+  assign ms_img = nil
+  if ms_mf and ms_mf.value
+    assign ms_img = ms_mf.value
+  elsif pep and pep.ms_image
+    assign ms_img = pep.ms_image
+  endif
+
+  assign assay = product.metafields.pdp.assay_percent
+
+  # --- SAFE boolean flags
+  assign has_coa = false
+  if coa_url and coa_url != blank
+    assign has_coa = true
+  endif
+
+  assign has_hplc = false
+  if hplc_img
+    assign has_hplc = true
+  endif
+
+  assign has_ms = false
+  if ms_img
+    assign has_ms = true
+  endif
+-%}
+
+<section id="evidence-snapshot" class="evs-wrap reveal-up-premium">
+  <style>
+    #evidence-snapshot{
+      --ev-maxw: {{ section.settings.max_width | default: 1200 }}px;
+      --ev-border:#E7E9ED; --ev-text:#111; --ev-muted:#6B7280;
+      --ev-accent: {{ section.settings.accent_color | default: '#FBBF24' }};
+      --ev-radius: 12px; --ev-shadow: 0 1px 6px rgba(16,24,40,.06);
+    }
+    .evs-wrap{padding:8px var(--page-gutter);font-family:var(--font-body-family,sans-serif)}
+    .evs-inner{
+      max-width:var(--ev-maxw);margin:0 auto;
+      border:none;border-radius:var(--ev-radius);
+      background:rgba(255,255,255,0.72);
+      -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
+      box-shadow:var(--shadow-sm); padding:10px 12px;
+    }
+    .evs-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+
+    .ev-chip{
+      display:inline-flex;align-items:center;gap:8px;
+      border:none; border-radius:999px;
+      padding:8px 14px; min-height:44px; box-sizing:border-box;
+      background:rgba(255,255,255,0.6); color:var(--ev-text);
+      font-weight:700; font-size:clamp(0.8rem,1.2vw,0.875rem); line-height:1.1; text-decoration:none;
+      box-shadow:var(--shadow-xs);
+      transition:var(--transition-premium);
+    }
+    .ev-chip:focus-visible{outline:2px solid var(--ev-accent);outline-offset:2px}
+    .ev-chip .ico{width:14px;height:14px;display:block}
+    .ev-chip.is-on{ background:rgba(255,253,241,0.85); box-shadow:0 2px 10px rgba(251,191,36,0.12); }
+    .ev-chip.is-off{ color:var(--ev-muted); opacity:0.65; }
+    .ev-chip:hover{ background:rgba(251,191,36,0.12); transform:translateY(-2px); box-shadow:var(--shadow-sm-hover); }
+
+    .ev-chip.evs-link{ position:relative; }
+    .ev-chip.evs-link::after{
+      content:""; position:absolute; left:50%; right:50%; bottom:-2px; height:1px; background: currentColor;
+      transition:left .18s ease,right .18s ease;
+    }
+    .ev-chip.evs-link:hover::after{ left:10px; right:10px; }
+
+    @media (prefers-reduced-motion:no-preference){
+      .ev-chip.is-on.evs-pulse{ animation: evPulse 520ms cubic-bezier(0.22,1,0.36,1) 1; }
+      @keyframes evPulse{ 0%{transform:scale(.96);opacity:.9}60%{transform:scale(1.02)}100%{transform:scale(1);opacity:1} }
+    }
+    @media (prefers-reduced-motion:reduce){
+      .ev-chip{transition:none}
+      .ev-chip:hover{transform:none}
+    }
+  </style>
+
+  <div class="evs-inner" role="status" aria-label="Quality evidence snapshot">
+    <div class="evs-row">
+      <a {% if has_coa %}href="{{ coa_url }}" target="_blank" rel="noopener"{% endif %}
+         class="ev-chip evs-link {% if has_coa %}is-on evs-pulse{% else %}is-off{% endif %}"
+         aria-label="Certificate of Analysis {% if has_coa %}available{% else %}not available{% endif %}">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M6 4h12v16H6z" stroke="currentColor" stroke-width="1.6"/>
+          <path d="M9 8h6M9 12h6M9 16h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+        <span>COA</span>{% if has_coa %}<span aria-hidden="true">✓</span>{% endif %}
+      </a>
+
+      <span class="ev-chip {% if has_hplc %}is-on evs-pulse{% else %}is-off{% endif %}"
+            aria-label="HPLC {% if has_hplc %}verified{% else %}not attached{% endif %}">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M5 17h14M7 17V7m4 10V9m4 8V5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+        <span>HPLC</span>{% if has_hplc %}<span aria-hidden="true">✓</span>{% endif %}
+      </span>
+
+      <span class="ev-chip {% if has_ms %}is-on evs-pulse{% else %}is-off{% endif %}"
+            aria-label="Mass spectrometry {% if has_ms %}available{% else %}not attached{% endif %}">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M4 12h4l2 6 3-12 2 6h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>MS</span>{% if has_ms %}<span aria-hidden="true">✓</span>{% endif %}
+      </span>
+
+      {% if assay %}
+      <span class="ev-chip is-on evs-pulse" aria-label="Assay">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M8 5h8l1 3-9 11H6l9-11H7l1-3z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>Assay</span><span aria-hidden="true">≥{{ assay }}%</span>
+      </span>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Evidence snapshot",
+  "settings": [
+    { "type":"range","id":"max_width","min":800,"max":1600,"step":10,"unit":"px","label":"Container max width","default":1200 },
+    { "type":"color","id":"accent_color","label":"Accent color","default":"#FBBF24" }
+  ],
+  "presets":[{"name":"Evidence snapshot"}]
+}
+{% endschema %}

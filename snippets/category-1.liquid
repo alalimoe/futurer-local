@@ -1,0 +1,170 @@
+{% comment %}
+  Renders a category
+
+  @param {string} sub_heading - Subheading
+  @param {string} heading - Heading
+  @param {object} collection - Collection
+  @param {string} layout - Layout
+
+  @example
+  {% render 'category-1', collection: collection, layout: layout %}
+{% endcomment %}
+
+{% liquid
+  assign variable = canonical_url | split: '/'
+  assign url = variable.last | split: '?page' | first
+  assign active_index = 0
+  for item in block
+    assign colection = item.settings.collection
+    assign get_handle = colection.handle
+    if url == get_handle
+      assign active_index = forloop.index0
+    endif
+  endfor
+%}
+
+{% if layout == 'vertical' %}
+  {% capture style %}
+    xo-breakpoints='
+    {
+      400: {
+        perView: 2,
+        perMove: 1,
+        gap: 10
+      },
+      768: {
+        perView: 3,
+        perMove: 1,
+        gap: 20
+      },
+      992: {
+        perView: 4,
+        perMove: 1,
+        gap: 30
+      },
+      1200: {
+        perView: {{ collection_per_view | minus: 1 }},
+        gap: 30
+      },
+      1400: {
+        gap: 40
+      },
+      1600: {
+        gap: 50
+      },
+    }
+  '
+  {% endcapture %}
+{% else %}
+  {% capture style %}
+    xo-overflow='visible'
+    xo-breakpoints='
+        {
+          600: {
+            perView: 1,
+            perMove: 1,
+          },
+          768: {
+            perView: 2,
+            perMove: 1,
+          },
+          992: {
+            perView: 3,
+            perMove: 1,
+          },
+          1200: {
+            perView: 5,
+            perMove: 1,
+          },
+          1400: {
+            perView: 5,
+            perMove: 1,
+          },
+        }
+      '
+    {% endcapture %}
+{% endif %}
+
+<div class="category-1">
+  <div class="category-1__head">
+    {% if heading %}
+      <div class="category-1__heading">
+        {% render 'text', text: heading, context: section %}
+      </div>
+    {% endif %}
+    {% if sub_heading != blank %}
+      <xo-animate xo-cascade>
+        <div class="category-1__sub-heading">{{ sub_heading }}</div>
+      </xo-animate>
+    {% endif %}
+  </div>
+  <div class="category-1__content">
+    <div class="category-1__collection-list">
+      <xo-carousel
+        class="category-1__carousel"
+        xo-per-view="{{ collection_per_view }}"
+        xo-gap="{{ space_between }}"
+        {% if layout == 'vertical' %}
+          xo-column-width="100"
+        {% endif %}
+        {% if layout == 'horizontal' %}
+          xo-active-index="{{ active_index }}"
+        {% endif %}
+        {{ style }}
+      >
+        {% if layout == 'vertical' %}
+          <div class="category-1__d-flex">
+            <xo-carousel-prev class="category-1__prev">
+              <xo-animate xo-cascade xo-type="zoom-in">
+                {%- render 'button-slide', icon: 'arrow-left', icon_size: '2.4rem', size: '3.5rem', direction: 'left', style: 'dark' -%}
+              </xo-animate>
+            </xo-carousel-prev>
+        {% endif %}
+        <xo-carousel-inner>
+          <xo-carousel-list>
+            {% for item in block %}
+              {% liquid
+                assign collection = item.settings.collection
+                assign collection_card_padding_vertical = item.settings.collection_card_padding_vertical
+                assign collection_card_padding_horizontal = item.settings.collection_card_padding_horizontal
+                assign color_schema_card = item.settings.color_schema_card
+                assign image_size = item.settings.image_size
+                assign get_handle = collection.handle
+                assign active = ''
+                if url == get_handle
+                  assign active = ' category-1__item--active'
+                endif
+              %}
+              <xo-carousel-slide>
+                <div class="category-1__item{{ active }}">
+                  {% render 'collection-card-v2',
+                    collection: collection,
+                    padding_vertical: collection_card_padding_vertical,
+                    padding_horizontal: collection_card_padding_horizontal,
+                    image_size: image_size,
+                    layout: layout,
+                    color_schema_card: color_schema_card,
+                    animated_enable: true
+                  %}
+                </div>
+              </xo-carousel-slide>
+            {% endfor %}
+          </xo-carousel-list>
+        </xo-carousel-inner>
+        {% if layout == 'horizontal' %}
+          <div class="category-1__paginate">
+            {% render 'carousel-pagination', align: 'center', style: 'sticks' %}
+          </div>
+        {% endif %}
+        {% if layout == 'vertical' %}
+          <xo-carousel-next class="category-1__next">
+            <xo-animate xo-cascade xo-type="zoom-in">
+              {%- render 'button-slide', icon: 'arrow-right', icon_size: '2.4rem', size: '3.5rem', direction: 'right', style: 'dark' -%}
+            </xo-animate>
+          </xo-carousel-next>
+          </div>
+        {% endif %}
+      </xo-carousel>
+    </div>
+  </div>
+</div>

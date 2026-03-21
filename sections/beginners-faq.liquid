@@ -1,0 +1,162 @@
+{% schema %}
+{
+  "name": "Beginners FAQ",
+  "tag": "section",
+  "class": "section-beginners-faq",
+  "settings": [
+    { "type": "text", "id": "title", "label": "Heading", "default": "Frequently Asked Questions" },
+    { "type": "color", "id": "bg_color", "label": "Background", "default": "#ffffff" },
+    { "type": "color", "id": "accent_color", "label": "Accent", "default": "#FBBF24" }
+  ],
+  "blocks": [
+    {
+      "type": "faq",
+      "name": "FAQ",
+      "settings": [
+        { "type": "text", "id": "question", "label": "Question" },
+        { "type": "textarea", "id": "answer", "label": "Answer" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Beginners FAQ",
+      "blocks": [
+        { "type": "faq", "settings": { "question": "How fast will I feel it?", "answer": "Some items (Caffeine + Theanine) are felt same-day; others (Lion's Mane, Bacopa) build with consistent use over 2–4 weeks." } },
+        { "type": "faq", "settings": { "question": "Capsules vs. powder — what's better for beginners?", "answer": "Capsules are simpler and consistent; powders allow fine-tuning. Most beginners start with capsules." } }
+      ]
+    }
+  ]
+}
+{% endschema %}
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {%- for block in section.blocks -%}
+    {
+      "@type": "Question",
+      "name": {{ block.settings.question | json }},
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": {{ block.settings.answer | strip_html | json }}
+      }
+    }{%- unless forloop.last -%},{%- endunless -%}
+    {%- endfor -%}
+  ]
+}
+</script>
+
+<div class="bgq-wrapper" id="bgq-{{ section.id }}">
+  <div class="bgq-container">
+    <h2 class="bgq-title">{{ section.settings.title }}</h2>
+    <div class="bgq-list">
+      {% for block in section.blocks %}
+        <details class="bgq-item" {{ block.shopify_attributes }}>
+          <summary class="bgq-q">
+            {{ block.settings.question }}
+            <span class="bgq-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+            </span>
+          </summary>
+          <div class="bgq-a"><div class="bgq-a-inner">{{ block.settings.answer }}</div></div>
+        </details>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<style>
+  #bgq-{{ section.id }} {
+    --bgq-bg: {{ section.settings.bg_color }};
+    --bgq-accent: {{ section.settings.accent_color }};
+    --bgq-text: var(--color-text-main, #111827);
+    --bgq-muted: var(--color-text-muted, #4b5563);
+    --bgq-border: var(--nx-pill-border, #E5E7EB);
+    --bgq-font: var(--font-body-family, sans-serif);
+    --bgq-font-heading: var(--font-heading-family, sans-serif);
+    --bgq-transition: var(--transition-smooth, all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1));
+  }
+
+  .bgq-wrapper {
+    padding: 80px var(--page-gutter);
+    background: var(--bgq-bg);
+    font-family: var(--bgq-font);
+  }
+  .bgq-container {
+    max-width: 750px;
+    margin: 0 auto;
+  }
+  .bgq-title {
+    text-align: center;
+    font-family: var(--bgq-font-heading);
+    font-size: clamp(1.75rem, 3vw, 2.25rem);
+    font-weight: 800;
+    color: var(--bgq-text);
+    margin: 0 0 48px;
+    letter-spacing: -0.02em;
+  }
+
+  .bgq-list { display: flex; flex-direction: column; }
+  .bgq-item {
+    border-bottom: 1px solid var(--bgq-border);
+    transition: var(--bgq-transition);
+  }
+  .bgq-item:first-child { border-top: 1px solid var(--bgq-border); }
+
+  .bgq-q {
+    padding: 24px 0;
+    font-weight: 700;
+    font-size: 1.0625rem;
+    color: var(--bgq-text);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    list-style: none;
+    transition: color 0.2s;
+    min-height: var(--touch-min, 44px);
+  }
+  .bgq-q::-webkit-details-marker { display: none; }
+  .bgq-q:hover { color: var(--bgq-accent); }
+
+  .bgq-icon {
+    width: 24px;
+    height: 24px;
+    color: var(--bgq-muted);
+    transition: transform 0.3s ease;
+    flex-shrink: 0;
+  }
+  .bgq-item[open] .bgq-icon { transform: rotate(180deg); color: var(--bgq-accent); }
+
+  .bgq-a {
+    padding: 0 0 28px 0;
+    color: var(--bgq-muted);
+    font-size: 1rem;
+    line-height: 1.75;
+    animation: bgqSlide 0.3s ease-out;
+  }
+  .bgq-a-inner {
+    border-left: 2px solid var(--bgq-accent);
+    padding-left: 16px;
+  }
+
+  @keyframes bgqSlide {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .bgq-wrapper :focus-visible {
+    outline: 2px solid var(--bgq-accent);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .bgq-wrapper *, .bgq-wrapper *::before, .bgq-wrapper *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+</style>

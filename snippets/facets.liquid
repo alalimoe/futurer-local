@@ -1,0 +1,28 @@
+{% comment %}
+  Renders facets (filtering and sorting)
+
+  Accepts:
+  - results: {Object} Collection or Search object
+  - enable_filtering: {Boolean} Show filtering when true
+  - enable_sorting: {Boolean} Show sorting when true
+  - filter_type: {String} Type of filter
+  - color_scheme: {String} Color scheme
+
+  Usage:
+  {% render 'facets', results: collection, enable_filtering: true, enable_sorting: true, filter_type: 'vertical' %}
+{% endcomment %}
+
+<aside aria-labelledby='verticalTitle' class='main-collection-filters' id='main-collection-filters'>
+  {% liquid
+    case filter_type
+      when 'vertical'
+        render 'facets-vertical', results: results, enable_filtering: enable_filtering, enable_sorting: enable_sorting, filter_type: filter_type
+        render 'facets-drawer', mobile_only: true, results: results, enable_filtering: enable_filtering, enable_sorting: enable_sorting, filter_type: filter_type
+      when 'horizontal'
+        render 'facets-horizontal', results: results, enable_filtering: enable_filtering, enable_sorting: enable_sorting, facets_horizontal: true, filter_type: filter_type
+        render 'facets-drawer', mobile_only: true, results: results, enable_filtering: enable_filtering, enable_sorting: enable_sorting, filter_type: filter_type
+      when 'drawer'
+        render 'facets-drawer', results: results, enable_filtering: enable_filtering, enable_sorting: enable_sorting, filter_type: filter_type
+    endcase
+  %}
+</aside>

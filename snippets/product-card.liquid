@@ -1,0 +1,211 @@
+{% comment %}
+  Renders a product card
+
+  Accepts:
+  - product: {Object} Product Liquid object (optional)
+  - media_aspect_ratio: {String} The setting changes the aspect ratio of the article image, if shown
+  - show_image: {Boolean} The setting either show the article image or not. If it's not included it will show the image by
+  default
+  - show_secondary_image: {Boolean} Show the secondary image on hover. Default: false (optional)
+  - show_vendor: {Boolean} Show the product vendor. Default: false (optional)
+  - show_description: {Boolean} Show the description. Default: false (optional)
+  - show_quick_add: {Boolean} Show the quick add button. Default: false (optional)
+  - show_quick_view: {Boolean} Show the quick view button. Default: false (optional)
+  - show_price: {Boolean} Show the product price. Default: true (optional)
+  - show_badge: {Boolean} Show the product badge. Default: true (optional)
+  - show_rating: {Boolean} Show the product rating. Default: false (optional)
+  - placeholder_image: {String} The placeholder image to use when no product exists. Default: 'product-apparel-1'
+  (optional)
+  - color_scheme: {String} The color scheme to use (optional)
+  - animate_enabled: {Boolean} Enable animation. Default: true (optional)
+  - is_bundle: {Boolean} Is bundle. Default: false (optional)
+  - is_select_options: {Boolean} Is select options. Default: false (optional)
+  - lazyload: {Boolean} Lazyload image. Default: true (optional)
+
+  Usage:
+  {% render 'product-card',
+    product: product,
+    show_image: settings.product_card_show_image,
+    show_secondary_image: settings.product_card_show_secondary_image,
+    show_vendor: settings.product_card_show_vendor,
+    show_description: settings.product_card_show_description,
+    show_quick_add: settings.product_card_show_quick_add,
+    show_quick_view: settings.product_card_show_quick_view,
+    show_favorite: settings.product_card_show_favorite,
+    show_price: settings.product_card_show_price,
+    show_badge: settings.product_card_show_badge,
+    position_badge: settings.position_badge,
+    media_aspect_ratio: section.settings.product_card_aspect_ratio,
+    color_scheme: section.settings.card_color_scheme,
+    placeholder_image: placeholder_image,
+    animate_enabled: true,
+    is_bundle: false
+  %}
+{% endcomment %}
+
+{% liquid
+  assign container_class = 'xo-product-card'
+  if class
+    assign container_class = container_class | append: ' ' | append: class
+  endif
+  if color_scheme
+    assign container_class = container_class | append: ' color-' | append: color_scheme
+  endif
+  if settings.product_card_style
+    assign container_class = container_class | append: ' xo-product-card--' | append: settings.product_card_style
+  endif
+  if settings.product_card_text_alignment
+    assign container_class = container_class | append: ' xo-product-card--' | append: settings.product_card_text_alignment
+  endif
+  if settings.enable_border_radius
+    assign container_class = container_class | append: ' xo-product-card--radius'
+  endif
+
+  if animate_focus == null
+    assign animate_focus = false
+  endif
+
+  if animate_enabled == null
+    assign animate_enabled = false
+  endif
+
+  assign final_aspect_ratio = media_aspect_ratio | default: '3/4'
+
+  assign bundle_style = bundle_style | default: 'style-1'
+%}
+
+{% if product and product != empty %}
+  <xo-product xo-selected-or-first-available-variant-id="{{ product.selected_or_first_available_variant.id }}" xo-product-id="{{ product.id }}" xo-section-id="{{ section.id }}">
+    {% comment %} product header {% endcomment %}
+    {% capture render_header %}
+      <div class="xo-product-card__header">
+        {% if show_image %}
+          <a href="{%- render 'product-card-variant-url', product: product -%}" aria-label="{{ product.title }}" class="xo-product-card__image-link">
+            {% render 'product-image', product: product, show_secondary_image: show_secondary_image, aspect_ratio: final_aspect_ratio, lazyload: lazyload %}
+          </a>
+        {% endif %}
+
+        {% if is_bundle %}
+          {% render 'product-bundle-content', product: product, bundle_style: bundle_style %}
+        {% endif %}
+
+        <div class="xo-product-card__actions">
+          {% if show_quick_add %}
+            <div class="xo-product-card__add">
+              {% render 'add-to-cart', product: product, is_select_options: is_select_options, is_bundle: is_bundle %}
+            </div>
+          {% endif %}
+
+          {% if show_quick_view %}
+            <div class="xo-product-card__quick-view">
+              {% render 'action-quick-view', product: product, is_bundle: is_bundle %}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    {% endcapture %}
+
+    {% comment %} product information {% endcomment %}
+    {% capture render_information %}
+      <div class="xo-product-card__information">
+        {% comment %} vendor {% endcomment %}
+        {% if show_vendor %}
+          <div class="xo-product-card__vendor">
+            {{ product.vendor }}
+          </div>
+        {% endif %}
+        {% comment %} title {% endcomment %}
+        <a href="{%- render 'product-card-variant-url', product: product -%}" aria-label="{{ product.title }}" class="xo-product-card__title">
+          {{ product.title | escape }}
+        </a>
+        {% comment %} price, badge {% endcomment %}
+        {% if show_price or show_badge %}
+          <div class="xo-product-card__price-badge">
+            {% comment %} price {% endcomment %}
+            {% if show_price %}
+              <div class="xo-product-card__price">
+                <div class="xo-product-card__price-inner">
+                  {% if product.price_varies %}
+                    <div class="xo-product-card__price-varies">
+                      {% if settings.currency_code_enabled %}
+                        <span>{{ product.price_min | money_with_currency }} - {{ product.price_max | money_with_currency }}</span>
+                      {% else %}
+                        <span>{{ product.price_min | money }} - {{ product.price_max | money }}</span>
+                      {% endif %}
+                    </div>
+                    {% render 'unit-price', product: product %}
+                  {% else %}
+                    {% render 'price', product: product, show_badge: show_badge, use_variant: true, reverse: true %}
+                  {% endif %}
+                </div>
+              </div>
+            {% endif %}
+            {% comment %} badge {% endcomment %}
+            {% if show_badge %}
+              <div class="xo-product-card__badge">
+                {% render 'badge-sale', product: product, use_variant: true %}
+                {% render 'badge-sold-out', product: product, use_variant: true %}
+                {% render 'badge-new', product: product, use_variant: true %}
+              </div>
+            {% endif %}
+          </div>
+        {% endif %}
+        {% comment %} description {% endcomment %}
+        {% if show_description %}
+          <div class="xo-product-card__description xo-line-2">
+            {{ product.description }}
+          </div>
+        {% endif %}
+        {% comment %} variant link {% endcomment %}
+        {%- assign has_variant_color = product.options_with_values | has: 'name', settings.product_card_color_option_name -%}
+        {% if has_variant_color %}
+          <div class="xo-product-card__variants">
+            {% if product.has_only_default_variant == false and settings.product_card_color_style != 'hidden' %}
+              {% for option in product.options_with_values %}
+                {% if option.name == settings.product_card_color_option_name %}
+                  {%- render 'product-variant-link', option: option, product: product, is_bundle: is_bundle, is_select_options: is_select_options -%}
+                  {% break %}
+                {% break %}
+                {% endif %}
+              {% endfor %}
+            {% endif %}
+          </div>
+        {% endif %}
+      </div>
+    {% endcapture %}
+
+    {% capture final_content %}
+      {{ render_header }}
+      {{ render_information }}
+      {% render 'product-data', product: product %}
+    {% endcapture %}
+
+    {% if animate_enabled %}
+      <xo-animate
+        xo-cascade
+        {% if animate_focus %}
+          xo-scroll-forced
+        {% endif %}
+        class="{{ container_class }}"
+      >
+        {{ final_content }}
+      </xo-animate>
+    {% else %}
+      <div class="{{ container_class }}">
+        {{ final_content }}
+      </div>
+    {% endif %}
+  </xo-product>
+{% else %}
+  {% render 'product-card-placeholder',
+    product: product,
+    animate_focus: animate_focus,
+    animate_enabled: animate_enabled,
+    color_scheme: color_scheme,
+    aspect_ratio: media_aspect_ratio,
+    is_bundle: is_bundle,
+    is_select_options: is_select_options,
+    placeholder_image: placeholder_image,
+    container_class: container_class
+  %}
+{% endif %}

@@ -1,0 +1,370 @@
+{{ 'section-announcement-bar.css' | asset_url | stylesheet_tag }}
+{{ 'announcement-text.css' | asset_url | stylesheet_tag }}
+{{ 'countdown.css' | asset_url | stylesheet_tag }}
+
+{% liquid
+  assign announcement_bar_style = section.settings.announcement_style
+  assign hide_button_close = section.settings.hide_button_close
+  assign carousel_width = section.settings.carousel_width
+  assign carousel_height = section.settings.carousel_height
+  assign carousel_style = section.settings.carousel_style
+  assign carousel_autoplay = section.settings.carousel_autoplay
+  assign carousel_speed = section.settings.carousel_speed
+  assign marquee_speed = section.settings.marquee_speed
+  assign marquee_rtl = section.settings.marquee_rtl
+  assign marquee_stop = section.settings.marquee_stop
+%}
+
+{% if carousel_style == 'vertical' %}
+  {% capture carousel_style %}
+    xo-vertical
+  {% endcapture %}
+{% endif %}
+
+{% if carousel_autoplay %}
+  {% capture carousel_autoplay_time %}
+    xo-autoplay="{{ carousel_speed }}"
+  {% endcapture %}
+{% endif %}
+
+{% assign block_announcement_index = -1 %}
+{% for block in section.blocks %}
+  {% if block.type == 'announcement' %}
+    {% assign block_announcement_index = forloop.index %}
+    {% break %}
+  {% endif %}
+{% endfor %}
+
+<div class='xo-announcement-bar' id='xo-announcement-bar'>
+  <section {% render 'section-attr' %}>
+    <xo-animate xo-cascade xo-type='fade-down' class='xo-announcement-bar__body'>
+      {% if announcement_bar_style != 'marquee' %}
+        <xo-container class='xo-announcement-bar__container'>
+      {% endif %}
+      {% if announcement_bar_style == 'carousel' %}
+        <div class='xo-announcement-bar__inline'>
+          <div class='xo-announcement-bar__inner' style='--carousel-width: {{ carousel_width }}px; order: {{ block_announcement_index }}'>
+            <xo-carousel xo-loop xo-per-view='1' class='xo-announcement-bar__carousel' {{ carousel_style }} {{ carousel_autoplay_time }}>
+              <xo-carousel-inner class='xo-announcement-bar__carousel-inner' style='--height-vertical: {{ carousel_height }}px'>
+                <xo-carousel-list>
+                  {% for block in section.blocks %}
+                    {% case block.type %}
+                      {% when 'announcement' %}
+                        <xo-carousel-slide>
+                          {% render 'announcement-text', block: block, announcement_bar_style: announcement_bar_style %}
+                        </xo-carousel-slide>
+                    {% endcase %}
+                  {% endfor %}
+                </xo-carousel-list>
+              </xo-carousel-inner>
+              <xo-carousel-prev class='xo-announcement-bar__prev'>
+                {% render 'icon', name: 'arrow-left', size: 24 %}
+              </xo-carousel-prev>
+              <xo-carousel-next class='xo-announcement-bar__next'>
+                {% render 'icon', name: 'arrow-right', size: 24 %}
+              </xo-carousel-next>
+            </xo-carousel>
+          </div>
+          {% for block in section.blocks %}
+            {% case block.type %}
+              {% when 'button' %}
+                <div class='xo-announcement-bar__item' style='order: {{ forloop.index }}'>
+                  {% render 'button',
+                    text: block.settings.button_text,
+                    link: block.settings.button_link,
+                    style: 'secondary',
+                    size: 'xs',
+                    radius: settings.button_radius,
+                    padding: settings.button_padding
+                  %}
+                </div>
+              {% when 'count-down' %}
+                <div class='xo-announcement-bar__item' style='order: {{ forloop.index }}'>
+                  {% render 'countdown', time: block.settings.time %}
+                </div>
+            {% endcase %}
+          {% endfor %}
+        </div>
+      {% elsif announcement_bar_style == 'marquee' %}
+        <xo-marquee
+          class='xo-announcement-bar__marquee'
+          xo-speed='{{ marquee_speed }}'
+          {% if marquee_rtl %}
+            xo-rtl
+          {% endif %}
+          {% if marquee_stop %}
+            xo-pause-on-hover
+          {% endif %}
+        >
+          {% for block in section.blocks %}
+            {% case block.type %}
+              {% when 'announcement' %}
+                {% render 'announcement-text', block: block, announcement_bar_style: announcement_bar_style %}
+            {% endcase %}
+          {% endfor %}
+        </xo-marquee>
+      {% elsif announcement_bar_style == 'text-inline' %}
+        <div class='xo-announcement-bar__inline'>
+          {% for block in section.blocks %}
+            {% case block.type %}
+              {% when 'announcement' %}
+                {% render 'announcement-text', block: block, announcement_bar_style: announcement_bar_style %}
+              {% when 'button' %}
+                <div class='xo-announcement-bar__item'>
+                  {% render 'button',
+                    text: block.settings.button_text,
+                    link: block.settings.button_link,
+                    style: 'secondary',
+                    size: 'xs',
+                    radius: settings.button_radius,
+                    padding: settings.button_padding
+                  %}
+                </div>
+              {% when 'count-down' %}
+                <div class='xo-announcement-bar__item'>
+                  {% render 'countdown', time: block.settings.time %}
+                </div>
+            {% endcase %}
+          {% endfor %}
+        </div>
+      {% endif %}
+      {% if announcement_bar_style != 'marquee' %}
+        </xo-container>
+      {% endif %}
+      {% if hide_button_close == 'on' %}
+        <div class='xo-announcement-bar__button' id='xo-announcement-bar__button'>
+          <div class='xo-announcement-bar__icon'>
+            {% render 'icon', name: 'close', size: 24 %}
+          </div>
+        </div>
+      {% endif %}
+    </xo-animate>
+  </section>
+</div>
+
+{% schema %}
+{
+  "name": "t:sections.announcement_bar.name",
+  "enabled_on": {
+    "groups": [
+      "header"
+    ]
+  },
+  "max_blocks": 12,
+  "settings": [
+    {
+      "type": "select",
+      "id": "announcement_style",
+      "label": "t:sections.announcement_bar.settings.announcement_style.label",
+      "options": [
+        {
+          "value": "text-inline",
+          "label": "t:sections.announcement_bar.settings.announcement_style.options_1.label"
+        },
+        {
+          "value": "carousel",
+          "label": "t:sections.announcement_bar.settings.announcement_style.options_2.label"
+        },
+        {
+          "value": "marquee",
+          "label": "t:sections.announcement_bar.settings.announcement_style.options_3.label"
+        }
+      ],
+      "default": "carousel"
+    },
+    {
+      "type": "select",
+      "id": "hide_button_close",
+      "label": "t:sections.announcement_bar.settings.hide_button_close.label",
+      "options": [
+        {
+          "value": "off",
+          "label": "t:sections.announcement_bar.settings.hide_button_close.option__1.label"
+        },
+        {
+          "value": "on",
+          "label": "t:sections.announcement_bar.settings.hide_button_close.option__2.label"
+        }
+      ],
+      "default": "off"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.announcement_bar.settings.carousel_header.content"
+    },
+    {
+      "type": "range",
+      "id": "carousel_width",
+      "label": "t:sections.announcement_bar.settings.carousel_width.label",
+      "default": 400,
+      "min": 300,
+      "max": 800,
+      "step": 10,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "carousel_height",
+      "label": "t:sections.announcement_bar.settings.carousel_height.label",
+      "default": 24,
+      "min": 20,
+      "max": 100,
+      "step": 1,
+      "unit": "px"
+    },
+    {
+      "type": "select",
+      "id": "carousel_style",
+      "label": "t:sections.announcement_bar.settings.carousel_style.label",
+      "options": [
+        {
+          "value": "horizontal",
+          "label": "t:sections.announcement_bar.settings.carousel_style.options_1.label"
+        },
+        {
+          "value": "vertical",
+          "label": "t:sections.announcement_bar.settings.carousel_style.options_2.label"
+        }
+      ],
+      "default": "horizontal"
+    },
+    {
+      "type": "checkbox",
+      "id": "carousel_autoplay",
+      "label": "t:sections.announcement_bar.settings.carousel_autoplay.label",
+      "default": true
+    },
+    {
+      "type": "number",
+      "id": "carousel_speed",
+      "label": "t:sections.announcement_bar.settings.carousel_speed.label",
+      "default": 4000
+    },
+    {
+      "type": "header",
+      "content": "t:sections.announcement_bar.settings.marquee_header.content"
+    },
+    {
+      "type": "range",
+      "id": "marquee_speed",
+      "label": "t:sections.announcement_bar.settings.marquee_speed.label",
+      "default": 6,
+      "min": 1,
+      "max": 20,
+      "step": 1
+    },
+    {
+      "type": "checkbox",
+      "id": "marquee_rtl",
+      "label": "t:sections.announcement_bar.settings.marquee_rtl.label",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "marquee_stop",
+      "label": "t:sections.announcement_bar.settings.marquee_stop.label",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "General settings"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Section color scheme"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color"
+    },
+    {
+      "type": "color_background",
+      "id": "background_gradient",
+      "label": "Background gradient"
+    },
+    {
+      "type": "number",
+      "id": "padding_top_desktop",
+      "label": "Padding top desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_desktop",
+      "label": "Padding bottom desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_top_mobile",
+      "label": "Padding top mobile",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_mobile",
+      "label": "Padding bottom mobile",
+      "default": 50
+    }
+  ],
+  "blocks": [
+    {
+      "type": "announcement",
+      "name": "t:sections.announcement_bar.blocks.announcement.name",
+      "settings": [
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "t:sections.announcement_bar.blocks.announcement.settings.text.label",
+          "default": "<p>Announce something here</p>"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "t:sections.announcement_bar.blocks.announcement.settings.link.label"
+        }
+      ]
+    },
+    {
+      "type": "button",
+      "name": "t:sections.announcement_bar.blocks.button.name",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "button_text",
+          "default": "Button",
+          "label": "t:sections.announcement_bar.blocks.button.settings.button_text.label"
+        },
+        {
+          "type": "url",
+          "id": "button_link",
+          "label": "t:sections.announcement_bar.blocks.button.settings.button_link.label"
+        }
+      ]
+    },
+    {
+      "type": "count-down",
+      "name": "t:sections.announcement_bar.blocks.count_down.name",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "time",
+          "label": "t:sections.announcement_bar.blocks.count_down.settings.time.label",
+          "info": "t:sections.announcement_bar.blocks.count_down.settings.time.info"
+        }
+      ]
+    }
+  ],
+  "default": {
+    "blocks": [
+      {
+        "type": "announcement"
+      }
+    ]
+  }
+}
+{% endschema %}

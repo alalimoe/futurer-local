@@ -1,0 +1,27 @@
+{% comment %}
+  Renders a scroll to top
+
+  Accepts:
+  - style: {String} Style (optional)
+  - icon_name: {String} Icon name (optional)
+  - icon_size: {String} Icon size (optional)
+
+  Usage:
+  {% render 'scroll-to-top', style: style, icon_name: icon_name, icon_size: icon_size %}
+{% endcomment %}
+
+{% liquid
+  assign scroll_to_top = 'general.tooltip.scroll_to_top' | t
+  assign icon_size = icon_size | append: 'em'
+%}
+
+<xo-tooltip xo-mobile-disabled xo-title='{{ scroll_to_top }}' xo-placement='top-center' class='tooltip{% if settings.enable_border_radius %} tooltip--radius{% endif %}'>
+  <div
+    class='xo-scroll-to-top xo-stack{% if box_style %} xo-scroll-to-top--{{ box_style }}{% endif %}{% if settings.enable_border_radius %} xo-scroll-to-top--radius{% endif %}'
+    style='--ai: center; --jc: center; --box-size: {{ box_size }}em'
+  >
+    <a xo-scroll-to href='#top' class='xo-scroll-to-top__trigger xo-stack' style='--ai: center; --jc: center' aria-label='{{ 'general.tooltip.scroll_to_top' | t }}'>
+      {% render 'button-slide', icon: icon_name, icon_size: icon_size, direction: 'up' %}
+    </a>
+  </div>
+</xo-tooltip>

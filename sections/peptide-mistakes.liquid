@@ -1,0 +1,110 @@
+{% schema %}
+{
+  "name": "Dos & Donts (Premium)",
+  "tag": "section",
+  "class": "section-peptide-mistakes",
+  "settings": [
+    { "type": "color", "id": "bg_color", "label": "Background", "default": "#fafafb" },
+    { "type": "text", "id": "title", "label": "Heading", "default": "3 Rookie Mistakes to Avoid" },
+    {
+      "type": "range",
+      "id": "padding_y",
+      "label": "Vertical Padding (px)",
+      "min": 40,
+      "max": 160,
+      "step": 4,
+      "default": 80
+    }
+  ],
+  "blocks": [
+    {
+      "type": "mistake",
+      "name": "Rule",
+      "settings": [
+        { "type": "textarea", "id": "dont", "label": "DON'T Text", "default": "Use plain bottled water." },
+        { "type": "textarea", "id": "do", "label": "DO Text", "default": "Use only BAC Water." }
+      ]
+    }
+  ],
+  "presets": [{
+    "name": "Dos & Donts (Premium)",
+    "blocks": [
+      { "type": "mistake", "settings": { "dont": "Use plain bottled, tap, or distilled water (bacteria will grow!).", "do": "Use only Bacteriostatic (BAC) Water." } },
+      { "type": "mistake", "settings": { "dont": "Guess your math or try to calculate it in your head.", "do": "Double-check your dose using our calculator above." } },
+      { "type": "mistake", "settings": { "dont": "Ever reuse a needle. It dulls the tip instantly.", "do": "Use a brand-new dosing syringe every single time." } }
+    ]
+  }]
+}
+{% endschema %}
+
+{%- assign s = section.settings -%}
+{%- assign sid = section.id -%}
+
+<div class="pm-wrapper" id="pm-{{ sid }}">
+  <div class="pm-container">
+    <h2 class="pm-title">{{ s.title }}</h2>
+
+    <div class="pm-list">
+      {% for block in section.blocks %}
+        <div class="pm-row" {{ block.shopify_attributes }}>
+          <div class="pm-box pm-dont">
+            <div class="pm-icon pm-icon--dont"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
+            <div class="pm-text"><span class="pm-tag pm-tag--dont">DON'T</span> {{ block.settings.dont }}</div>
+          </div>
+          <div class="pm-box pm-do">
+            <div class="pm-icon pm-icon--do"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <div class="pm-text"><span class="pm-tag pm-tag--do">DO</span> {{ block.settings.do }}</div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+{%- style -%}
+  #pm-{{ sid }} {
+    --pm-bg: {{ s.bg_color }};
+    --pm-py: {{ s.padding_y | default: 80 }}px;
+    --pm-text: var(--color-text-primary);
+    --pm-muted: var(--color-text-secondary);
+    --pm-font: var(--font-body-family, sans-serif);
+    --pm-heading: var(--font-heading-family, sans-serif);
+    --pm-radius: var(--nx-radius, 14px);
+    --pm-shadow-sm: var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.04));
+    --pm-shadow-md: var(--shadow-md, 0 12px 30px rgba(0,0,0,0.06));
+    --pm-transition: var(--transition-premium);
+    content-visibility: auto;
+  }
+
+  .pm-wrapper { padding: var(--pm-py) 20px; font-family: var(--pm-font); background: var(--pm-bg); }
+  .pm-container { max-width: var(--container-width-narrow); margin: 0 auto; }
+  .pm-title { text-align: center; font-size: 32px; font-weight: 800; color: var(--pm-text); margin: 0 0 48px; letter-spacing: -0.5px; font-family: var(--pm-heading); }
+
+  .pm-list { display: flex; flex-direction: column; gap: 20px; }
+  .pm-list:hover .pm-row:not(:hover) { opacity: 0.6; }
+  .pm-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; transition: var(--pm-transition); }
+
+  .pm-box { display: flex; align-items: flex-start; gap: 16px; padding: 24px; border-radius: var(--pm-radius); font-size: 15px; line-height: 1.6; color: var(--pm-text); background: var(--color-surface-primary); box-shadow: var(--pm-shadow-sm); transition: var(--pm-transition); position: relative; padding-left: 28px; }
+  .pm-box:hover { transform: translateY(-2px); box-shadow: var(--pm-shadow-md); }
+
+  .pm-dont::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--color-error); border-radius: var(--pm-radius) 0 0 var(--pm-radius); }
+  .pm-do::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--color-success); border-radius: var(--pm-radius) 0 0 var(--pm-radius); }
+
+  .pm-icon { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+  .pm-icon--dont { background: var(--color-error-bg); color: var(--color-error); }
+  .pm-icon--do { background: var(--color-success-bg); color: var(--color-success); }
+  .pm-icon svg { width: 14px; height: 14px; }
+
+  .pm-text { padding-top: 2px; }
+  .pm-tag { font-size: 11px; font-weight: 800; display: block; margin-bottom: 4px; letter-spacing: 0.5px; }
+  .pm-tag--dont { color: var(--color-error); }
+  .pm-tag--do { color: var(--color-success); }
+
+  .pm-wrapper :focus-visible { outline: 2px solid var(--color-accent-primary); outline-offset: 2px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pm-wrapper *, .pm-wrapper *::before, .pm-wrapper *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  }
+
+  @media (max-width: 768px) { .pm-row { grid-template-columns: 1fr; gap: 12px; } .pm-box { padding: 20px 20px 20px 24px; } }
+{%- endstyle -%}

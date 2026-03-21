@@ -1,0 +1,297 @@
+{{ 'section-main-list-collections.css' | asset_url | stylesheet_tag }}
+{{ 'collection-list.css' | asset_url | stylesheet_tag }}
+
+{% liquid
+  assign show_breadcrumb = section.settings.show_breadcrumb
+  assign sort = section.settings.sort
+  assign background_overlay = section.settings.background_overlay
+  assign color_scheme_collection = section.settings.color_scheme_collection
+  assign column_desktop = section.settings.column_desktop
+  assign column_mobile = section.settings.column_mobile
+  assign aspect_ratio_dt = section.settings.aspect_ratio_dt
+  if aspect_ratio_dt == 'custom'
+    assign aspect_ratio_dt = section.settings.aspect_ratio_dt_width | append: '/' | append: section.settings.aspect_ratio_dt_height
+  endif
+  assign aspect_ratio_mb = section.settings.aspect_ratio_mb
+  if aspect_ratio_mb == 'custom'
+    assign aspect_ratio_mb = section.settings.aspect_ratio_mb_width | append: '/' | append: section.settings.aspect_ratio_mb_height
+  endif
+%}
+
+{% liquid
+  case sort
+    when 'products_high', 'products_low'
+      assign collections = collections | sort: 'all_products_count'
+    when 'date', 'date_reversed'
+      assign collections = collections | sort: 'published_at'
+  endcase
+
+  if sort == 'products_high' or sort == 'date_reversed' or sort == 'alphabetical_reversed'
+    assign collections = collections | reverse
+  endif
+%}
+
+<section {% render 'section-attr' %}>
+  <div class="main-list-collections">
+    <xo-container class="main-list-collections__container">
+      {% if show_breadcrumb == 'show' %}
+        <div class="main-list-collections__breadcrumb">
+          {% render 'breadcrumb' %}
+        </div>
+      {% endif %}
+      <xo-grid class="main-list-collections__grid" style="--lg: {{ column_desktop }}; --md: {{ column_mobile }}; --xs: {{ column_mobile }};">
+        {%- for collection in collections -%}
+          {% liquid
+            assign collection_image = collection.featured_image
+            assign collection_name = collection.title
+            assign collection_link = collection.url
+          %}
+          <div class="main-list-collections__item">
+            {% render 'collection-list',
+              collection_image: collection_image,
+              collection_name: collection_name,
+              collection_link: collection_link,
+              button_link: collection_link,
+              aspect_ratio_dt: aspect_ratio_dt,
+              aspect_ratio_mb: aspect_ratio_mb,
+              color_scheme_collection: color_scheme_collection,
+              background_overlay: background_overlay
+            %}
+          </div>
+        {%- endfor -%}
+      </xo-grid>
+    </xo-container>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "t:sections.main_list_collections.name",
+  "settings": [
+    {
+      "type": "select",
+      "id": "show_breadcrumb",
+      "label": "t:sections.main_list_collections.settings.show_breadcrumb.label",
+      "options": [
+        {
+          "value": "hidden",
+          "label": "t:sections.main_list_collections.settings.show_breadcrumb.options__1.label"
+        },
+        {
+          "value": "show",
+          "label": "t:sections.main_list_collections.settings.show_breadcrumb.options__2.label"
+        }
+      ],
+      "default": "hidden"
+    },
+    {
+      "type": "select",
+      "id": "sort",
+      "label": "t:sections.main_list_collections.settings.sort.label",
+      "options": [
+        {
+          "value": "alphabetical",
+          "label": "t:sections.main_list_collections.settings.sort.options__1.label"
+        },
+        {
+          "value": "alphabetical_reversed",
+          "label": "t:sections.main_list_collections.settings.sort.options__2.label"
+        },
+        {
+          "value": "date_reversed",
+          "label": "t:sections.main_list_collections.settings.sort.options__3.label"
+        },
+        {
+          "value": "date",
+          "label": "t:sections.main_list_collections.settings.sort.options__4.label"
+        },
+        {
+          "value": "products_high",
+          "label": "t:sections.main_list_collections.settings.sort.options__5.label"
+        },
+        {
+          "value": "products_low",
+          "label": "t:sections.main_list_collections.settings.sort.options__6.label"
+        }
+      ],
+      "default": "alphabetical"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme_collection",
+      "default": "backround-2",
+      "label": "t:sections.main_list_collections.settings.color_schema_collection.label"
+    },
+    {
+      "type": "range",
+      "id": "background_overlay",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "default": 0,
+      "label": "t:sections.main_list_collections.settings.background_overlay.label"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.main_list_collections.settings.header_grid.content"
+    },
+    {
+      "type": "range",
+      "id": "column_desktop",
+      "min": 2,
+      "max": 4,
+      "step": 1,
+      "default": 2,
+      "label": "t:sections.main_list_collections.settings.column_desktop.label"
+    },
+    {
+      "type": "select",
+      "id": "column_mobile",
+      "label": "t:sections.main_list_collections.settings.column_mobile.label",
+      "options": [
+        {
+          "value": "1",
+          "label": "t:sections.main_list_collections.settings.column_mobile.options__1.label"
+        },
+        {
+          "value": "2",
+          "label": "t:sections.main_list_collections.settings.column_mobile.options__2.label"
+        }
+      ],
+      "default": "1"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.main_list_collections.settings.header_desktop.content"
+    },
+    {
+      "type": "select",
+      "id": "aspect_ratio_dt",
+      "label": "Aspect ratio",
+      "default": "auto",
+      "options": [
+        {
+          "value": "auto",
+          "label": "Auto"
+        },
+        {
+          "value": "2/3",
+          "label": "2:3"
+        },
+        {
+          "value": "3/4",
+          "label": "3:4"
+        },
+        {
+          "value": "3/2",
+          "label": "3:2"
+        },
+        {
+          "value": "1",
+          "label": "1:1"
+        },
+        {
+          "value": "4/3",
+          "label": "4:3"
+        },
+        {
+          "value": "16/9",
+          "label": "16:9"
+        },
+        {
+          "value": "21/9",
+          "label": "21:9"
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "t:sections.main_list_collections.settings.header_mobile.content"
+    },
+    {
+      "type": "select",
+      "id": "aspect_ratio_mb",
+      "label": "Aspect ratio",
+      "default": "auto",
+      "options": [
+        {
+          "value": "auto",
+          "label": "Auto"
+        },
+        {
+          "value": "2/3",
+          "label": "2:3"
+        },
+        {
+          "value": "3/4",
+          "label": "3:4"
+        },
+        {
+          "value": "3/2",
+          "label": "3:2"
+        },
+        {
+          "value": "1",
+          "label": "1:1"
+        },
+        {
+          "value": "4/3",
+          "label": "4:3"
+        },
+        {
+          "value": "16/9",
+          "label": "16:9"
+        },
+        {
+          "value": "21/9",
+          "label": "21:9"
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "General settings"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Section color scheme"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color"
+    },
+    {
+      "type": "color_background",
+      "id": "background_gradient",
+      "label": "Background gradient"
+    },
+    {
+      "type": "number",
+      "id": "padding_top_desktop",
+      "label": "Padding top desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_desktop",
+      "label": "Padding bottom desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_top_mobile",
+      "label": "Padding top mobile",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_mobile",
+      "label": "Padding bottom mobile",
+      "default": 50
+    }
+  ],
+  "blocks": []
+}
+{% endschema %}

@@ -1,0 +1,275 @@
+/* ══════════════════════════════════════════════════════════
+   PRODUCT CARD MASTER COMPONENT — BEM (.product-card)
+   Single source of truth for all product card styling.
+   Schema tokens are emitted by snippets/product-cards-adapter.liquid.
+   The xo-product-card class is preserved as a secondary alias so
+   any existing theme-engine CSS continues to apply without conflict.
+   ══════════════════════════════════════════════════════════ */
+
+/* ── Base block ─────────────────────────────────────────── */
+.product-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1),
+              box-shadow 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  will-change: transform;
+}
+
+.product-card:hover {
+  transform: translateY(-4px);
+}
+
+/* ── Style modifiers ─────────────────────────────────────── */
+.product-card--standard {
+  background: transparent;
+}
+
+.product-card--boxed {
+  background: var(--color-surface-primary, #fff);
+  border-radius: 12px;
+  border: var(--product-card-border-width, 0.1rem) solid
+    rgba(var(--color-foreground), var(--product-card-border-opacity, 0.05));
+  padding: var(--product-card-image-padding, 0);
+  overflow: hidden;
+}
+
+.product-card--boxed:hover {
+  box-shadow:
+    var(--product-card-shadow-horizontal-offset, 0)
+    var(--product-card-shadow-vertical-offset, 0.4rem)
+    var(--product-card-shadow-blur-radius, 1.2rem)
+    rgba(0, 0, 0, calc(var(--product-card-shadow-opacity, 0.06) * var(--product-card-shadow-visible, 1)));
+}
+
+/* ── Radius modifier (from settings.enable_border_radius) ── */
+.product-card--radius .product-card__media-wrapper {
+  border-radius: 12px;
+}
+
+/* ── Media wrapper ───────────────────────────────────────── */
+.product-card__media-wrapper {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  background: var(--color-surface-secondary, #F9FAFB);
+}
+
+/* Boxed cards: parent clips the image, no separate radius needed */
+.product-card--boxed .product-card__media-wrapper {
+  border-radius: 0;
+}
+
+/* ── Images (target output of product-image snippet) ───────
+   The product-image snippet renders <img> tags inside the wrapper.
+   First child = primary, second child = secondary hover image.    */
+.product-card__media-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: transform;
+}
+
+.product-card:hover .product-card__media-wrapper img:first-child {
+  transform: scale(1.03);
+}
+
+/* Secondary image cross-fade on hover */
+.product-card__media-wrapper img:nth-child(2) {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.product-card:hover .product-card__media-wrapper img:nth-child(2) {
+  opacity: 1;
+}
+
+/* ── Badges ──────────────────────────────────────────────── */
+.product-card__badges {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  pointer-events: none;
+}
+
+.product-card__badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.product-card__badge--sale {
+  background: var(--color-warning, #EA580C);
+  color: var(--color-text-inverse, #fff);
+}
+
+.product-card__badge--sold-out {
+  background: var(--color-surface-elevated, #1F2937);
+  color: var(--color-text-inverse, #fff);
+}
+
+/* ── Quick view overlay ──────────────────────────────────── */
+.product-card__quick-view {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  opacity: 0;
+  transition: opacity 0.3s cubic-bezier(0.25, 0.8, 0.25, 1),
+              transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  z-index: 3;
+  white-space: nowrap;
+}
+
+.product-card:hover .product-card__quick-view,
+.product-card:focus-within .product-card__quick-view {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ── Info block ──────────────────────────────────────────── */
+.product-card__info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding-top: var(--product-card-content-padding-vertical, 1.25rem);
+  padding-left: var(--product-card-content-padding-horizontal, 0);
+  padding-right: var(--product-card-content-padding-horizontal, 0);
+  text-align: var(--product-card-text-alignment, left);
+}
+
+/* ── Vendor ──────────────────────────────────────────────── */
+.product-card__vendor {
+  font-size: var(--font-size-body-sm, 0.875rem);
+  color: var(--color-text-tertiary, #9CA3AF);
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* ── Title ───────────────────────────────────────────────── */
+.product-card__title {
+  font-size: var(--font-size-body-md, 1.0625rem);
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--color-text-primary, #111827);
+  text-decoration: none;
+  display: block;
+  transition: color 0.2s ease;
+  margin-bottom: 6px;
+}
+
+.product-card__title:hover,
+.product-card__title:focus-visible {
+  color: var(--color-accent-hover, #D97706);
+  text-decoration: none;
+}
+
+/* ── Description ─────────────────────────────────────────── */
+.product-card__description {
+  font-size: var(--font-size-body-sm, 0.875rem);
+  color: var(--color-text-secondary, #4B5563);
+  line-height: 1.55;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+/* ── Price wrapper ───────────────────────────────────────── */
+.product-card__price {
+  margin-top: auto;
+  padding-top: 8px;
+}
+
+/* ── Color swatches ──────────────────────────────────────── */
+.product-card__swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+/* ── Quick add actions ───────────────────────────────────── */
+.product-card__actions {
+  margin-top: 12px;
+  opacity: 1;
+  transform: none;
+}
+
+/* Enforce minimum touch target and full-width on action buttons */
+.product-card__actions .btn,
+.product-card__actions .button,
+.product-card__actions .xo-btn {
+  width: 100%;
+  min-height: var(--touch-min, 44px);
+}
+
+/* Always visible on touch devices — no hover capability */
+@media (pointer: coarse) {
+  .product-card__actions {
+    opacity: 1;
+    transform: none;
+  }
+  .product-card__quick-view {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* ── Text alignment variants ─────────────────────────────── */
+.product-card--center .product-card__info {
+  align-items: center;
+  text-align: center;
+}
+
+.product-card--right .product-card__info {
+  align-items: flex-end;
+  text-align: right;
+}
+
+/* ── Reduced motion ──────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .product-card,
+  .product-card__media-wrapper img,
+  .product-card__actions,
+  .product-card__quick-view,
+  .product-card__title {
+    transition: none;
+    animation: none;
+  }
+
+  .product-card:hover {
+    transform: none;
+  }
+
+  .product-card__actions,
+  .product-card__quick-view {
+    opacity: 1;
+    transform: none;
+  }
+
+  .product-card:hover .product-card__media-wrapper img:first-child {
+    transform: none;
+  }
+}

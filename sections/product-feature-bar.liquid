@@ -1,0 +1,181 @@
+{% comment %}
+SECTION: Product feature bar (refined) — index fix
+{% endcomment %}
+
+{% # theme-check-disable UnknownFilter %}
+{%- liquid
+  assign pep_ref = product.metafields.pep.reference
+  assign pep = nil
+  if pep_ref and pep_ref.value
+    assign pep = pep_ref.value
+  endif
+
+  assign bio = nil
+  if pep and pep.bioavailability
+    assign bio = pep.bioavailability
+  endif
+
+  assign cat = nil
+  if pep and pep.category_research
+    assign cat = pep.category_research
+  elsif pep and pep.category
+    assign cat = pep.category
+  endif
+
+  assign app = nil
+  if pep and pep.appearance
+    assign app = pep.appearance
+  endif
+
+  assign form = nil
+  if product.metafields.peptide.form
+    assign form = product.metafields.peptide.form | metafield_tag | strip_html | strip
+  elsif pep and pep.form
+    assign form = pep.form
+  endif
+
+  assign chips = '' | split: ','
+  if bio
+    assign chips = chips | push: 'Bioavailability' | push: bio
+  endif
+  if cat
+    assign chips = chips | push: 'Category' | push: cat
+  endif
+  if app
+    assign chips = chips | push: 'Appearance' | push: app
+  endif
+  if form
+    assign chips = chips | push: 'Form' | push: form
+  endif
+  assign built_count = chips.size | divided_by: 2
+
+  assign manual_pairs = '' | split: ','
+  if built_count == 0 and section.settings.items != blank
+    assign items = section.settings.items | replace: '—', '::' | split: '|'
+    for raw in items
+      assign t = raw | strip
+      if t contains '::'
+        assign parts = t | split: '::'
+        assign first_part = parts | first  | strip
+        assign last_part  = parts | last   | strip
+        assign manual_pairs = manual_pairs | push: first_part
+        assign manual_pairs = manual_pairs | push: last_part
+      else
+        assign manual_pairs = manual_pairs | push: t
+        assign manual_pairs = manual_pairs | push: ''
+      endif
+    endfor
+  endif
+-%}
+{% # theme-check-enable UnknownFilter %}
+
+<section id="product-feature-bar" class="pfb-wrap">
+  <style>
+    #product-feature-bar{
+      --pfb-maxw: {{ section.settings.max_width | default: 1200 }}px;
+      --pfb-border:#E7E9ED;
+      --pfb-bg:#FFFFFF;
+      --pfb-text:#111;
+      --pfb-muted:#6B7280;
+      --pfb-accent: {{ section.settings.accent_color | default: '#FBBF24' }};
+      --pfb-radius: 14px;
+      --pfb-shadow: 0 1px 6px rgba(16,24,40,.06);
+    }
+    .pfb-wrap{padding:12px var(--page-gutter)}
+    .pfb-container{max-width:var(--pfb-maxw);margin:0 auto}
+    .pfb-card{border:1px solid var(--pfb-border);border-radius:var(--pfb-radius);background:var(--pfb-bg);padding:12px;box-shadow:var(--pfb-shadow)}
+    .pfb-row{display:flex;flex-wrap:wrap;gap:10px}
+    .pfb-chip{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--pfb-border);border-radius:10px;background:#fff;padding:8px 12px;line-height:1.2}
+    .pfb-chip .ico{width:15px;height:15px;color:var(--color-text-primary)}
+    .pfb-chip .label{font-weight:700;color:var(--pfb-text)}
+    .pfb-chip .value{color:#1f2937}
+    .pfb-chip:hover{background:rgba(251,191,36,0.12);border-color:var(--pfb-accent)}
+    @media (max-width:760px){ .pfb-chip{padding:7px 10px} }
+    @media (prefers-reduced-motion:no-preference){
+      .pfb-chip{opacity:0; transform:translateY(6px);}
+      .pfb-chip.is-in{opacity:1; transform:none; transition:opacity .22s ease, transform .22s ease;}
+    }
+  </style>
+
+  <div class="pfb-container">
+    <div class="pfb-card">
+      <div class="pfb-row" data-pfb-row>
+
+        {%- if built_count > 0 -%}
+          {%- assign end = built_count | minus: 1 -%}
+          {%- for i in (0..end) -%}
+            {%- assign idx = forloop.index0 | times: 2 -%}
+            {%- assign idx_next = idx | plus: 1 -%}
+            {%- assign label = chips[idx] -%}
+            {%- assign val   = chips[idx_next] -%}
+            <div class="pfb-chip">
+              {% if section.settings.show_icons %}
+                {% assign icon = 'dot' %}
+                {% if label == 'Bioavailability' %}{% assign icon = 'bio' %}{% elsif label == 'Category' %}{% assign icon = 'cat' %}{% elsif label == 'Appearance' %}{% assign icon = 'app' %}{% elsif label == 'Form' %}{% assign icon = 'form' %}{% endif %}
+                {% case icon %}
+                  {% when 'bio' %}<svg class="ico" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 7c3 0 3 10 6 10s3-10 6-10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+                  {% when 'cat' %}<svg class="ico" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M5 7h8M5 17h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+                  {% when 'app' %}<svg class="ico" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 4a8 8 0 100 16 8 8 0 000-16z" stroke="currentColor" stroke-width="1.6"/><path d="M12 8v8M8 12h8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+                  {% when 'form' %}<svg class="ico" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="4" y="6" width="16" height="12" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M8 10h8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+                  {% else %}<span class="ico" aria-hidden="true">•</span>
+                {% endcase %}
+              {% endif %}
+              <span class="label">{{ label }}</span>
+              <span class="value">{{ val }}</span>
+            </div>
+          {%- endfor -%}
+
+        {%- elsif manual_pairs.size > 0 -%}
+          {%- assign count_m = manual_pairs.size | divided_by: 2 | minus: 1 -%}
+          {%- for i in (0..count_m) -%}
+            {%- assign idx = forloop.index0 | times: 2 -%}
+            {%- assign idx_next = idx | plus: 1 -%}
+            {%- assign label = manual_pairs[idx] -%}
+            {%- assign val   = manual_pairs[idx_next] -%}
+            <div class="pfb-chip">
+              {% if section.settings.show_icons %}<span class="ico" aria-hidden="true">•</span>{% endif %}
+              <span class="label">{{ label }}</span>
+              {% if val %}<span class="value">{{ val }}</span>{% endif %}
+            </div>
+          {%- endfor -%}
+        {%- endif -%}
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  var row = document.querySelector('#product-feature-bar [data-pfb-row]');
+  if(!row) return;
+  try{
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      var io = new IntersectionObserver(function(entries){
+        entries.forEach(function(e){
+          if(e.isIntersecting){ e.target.classList.add('is-in'); io.unobserve(e.target); }
+        });
+      }, { threshold: 0.2 });
+      row.querySelectorAll('.pfb-chip').forEach(function(chip, i){
+        chip.style.transitionDelay = (i * 35) + 'ms';
+        io.observe(chip);
+      });
+    } else {
+      row.querySelectorAll('.pfb-chip').forEach(function(chip){ chip.classList.add('is-in'); });
+    }
+  }catch(e){}
+});
+</script>
+
+{% schema %}
+{
+  "name": "Product feature bar",
+  "settings": [
+    { "type": "range", "id": "max_width", "min": 800, "max": 1600, "step": 10, "unit": "px", "label": "Container max width", "default": 1200 },
+    { "type": "color", "id": "accent_color", "label": "Accent color", "default": "#FBBF24" },
+    { "type": "text", "id": "items", "label": "Manual items (Title — Value | ...)", "default": "Lab Tested — Independent COA | RUO Only — Not for human use" },
+    { "type": "checkbox", "id": "show_icons", "label": "Show small icons", "default": true }
+  ],
+  "presets": [{ "name": "Product feature bar" }]
+}
+{% endschema %}

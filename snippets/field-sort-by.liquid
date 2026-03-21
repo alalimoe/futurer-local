@@ -1,0 +1,51 @@
+{% comment %}
+  Renders a sort by field for a collection or search object
+
+  Accepts:
+  - results: {Object} Collection or Search object
+  - type: {String} Type of field to render. Default: 'select' (optional)
+  - name: {String} Name of the field (optional)
+
+  Usage:
+  {% render 'field-sort-by', type: 'select' %}
+{% endcomment %}
+
+{% liquid
+  assign type = type | default: 'select'
+  assign sort_by = results.sort_by | default: results.default_sort_by
+%}
+
+{% if type == 'select' or type == 'radio' %}
+  {% liquid
+    capture options
+      for option in results.sort_options
+        assign checked = false
+        if option.value == sort_by
+          assign checked = true
+        endif
+        render 'field-select-custom-option', label: option.name, name: 'sort_by', value: option.value, checked: checked
+      endfor
+    endcapture
+    render 'field-select-custom', use_with: 'filters', name: name, value: results.sort_options[2].name, options: options
+  %}
+{% elsif type == 'collapse' %}
+  {% capture content %}
+    {% if filter_type != "drawer" %}
+      <xo-filters-mobile xo-mobile-max-width="992">
+    {% endif %}
+      {%- for option in results.sort_options -%}
+        {% assign checked = false %}
+        {% if option.value == sort_by %}
+          {% assign checked = true %}
+        {% endif %}
+        <xo-filters-field>
+          {% render 'field-radio-2', name: 'sort_by', value: option.value, label: option.name, checked: checked,  %}
+        </xo-filters-field>
+      {%- endfor -%}
+    {% if filter_type != "drawer" %}
+      </xo-filters-mobile>
+    {% endif %}
+  {% endcapture %}
+
+  {% render 'collapse', name: name, title: 'Sort by', content: content, show_icon_arrow: true, style: true %}
+{% endif %}

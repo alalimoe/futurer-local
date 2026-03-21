@@ -1,0 +1,30 @@
+{% comment %}
+  Renders a countdown block
+
+  Accepts:
+  - class: {String} Class (optional)
+  - time: {Date} Time (required)
+
+  Usage:
+  {% render 'countdown-block',
+    time: 2024-12-30 00:00
+  %}
+{% endcomment %}
+
+{% if time != blank %}
+  {% assign time_input = time | date: '%s' | append: '000' %}
+{% else %}
+  {% assign add_day = 3 | times: 86400 %}
+  {% assign time_input = 'now' | date: '%s' | plus: add_day | append: '000' %}
+{% endif %}
+
+<xo-countdown xo-timestamp='{{ time_input }}' class='xo-countdown-block{% if class %} {{ class }}{% endif %}'>
+  <xo-countdown-day></xo-countdown-day>
+  <span>{{ 'general.popup.day' | t }}</span>
+  <xo-countdown-hour></xo-countdown-hour>
+  <span>{{ 'general.popup.hour' | t }}</span>
+  <xo-countdown-minute></xo-countdown-minute>
+  <span>{{ 'general.popup.minus' | t }}</span>
+  <xo-countdown-second></xo-countdown-second>
+  <span>{{ 'general.popup.second' | t }}</span>
+</xo-countdown>

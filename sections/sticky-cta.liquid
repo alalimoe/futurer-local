@@ -1,0 +1,51 @@
+<section id="phb-sticky-cta-{{ section.id }}" class="phb-sticky-cta" aria-label="Page actions">
+  <a href="{{ section.settings.primary_href | escape }}" class="btn btn--primary">{{ section.settings.primary_label | escape }}</a>
+  <a href="{{ section.settings.secondary_href | escape }}" class="btn btn--ghost">{{ section.settings.secondary_label | escape }}</a>
+</section>
+
+<style>
+  /* Hidden by default; shown only on mobile */
+  #phb-sticky-cta-{{ section.id }}{
+    display:none;
+    position:fixed; left:0; right:0; bottom:0; z-index:50;
+    gap:10px;
+    padding:10px 14px calc(10px + env(safe-area-inset-bottom));
+    background:rgba(10,35,66,.96);
+    -webkit-backdrop-filter:saturate(140%) blur(4px);
+    backdrop-filter:saturate(140%) blur(4px);
+  }
+  #phb-sticky-cta-{{ section.id }} .btn{
+    flex:1; display:inline-block; text-align:center;
+    padding:12px 16px; border-radius:10px; font-weight:700;
+    text-decoration:none; border:2px solid #fff;
+  }
+  #phb-sticky-cta-{{ section.id }} .btn--primary{ background:#fff; color:#0A2342; }
+  #phb-sticky-cta-{{ section.id }} .btn--ghost{ background:transparent; color:#fff; }
+
+  /* Reserve a bit of space so the bar doesn't cover bottom content (toggleable in schema) */
+  @media (max-width: 989px){
+    #phb-sticky-cta-{{ section.id }}{ display:flex; }
+    {% if section.settings.reserve_space_mobile %}
+    body{ padding-bottom: calc(64px + env(safe-area-inset-bottom)); }
+    {% endif %}
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Sticky CTA (Mobile)",
+  "tag": "section",
+  "class": "section-phb-sticky-cta",
+  "settings": [
+    { "type": "text", "id": "primary_label", "label": "Primary label", "default": "Shop Phenibut" },
+    { "type": "text", "id": "primary_href", "label": "Primary link (URL or #anchor)", "default": "#shop-phenibut" },
+
+    { "type": "text", "id": "secondary_label", "label": "Secondary label", "default": "Safety" },
+    { "type": "text", "id": "secondary_href", "label": "Secondary link (URL or #anchor)", "default": "#safety" },
+
+    { "type": "checkbox", "id": "reserve_space_mobile", "label": "Reserve bottom space on mobile", "default": true }
+  ],
+  "blocks": [],
+  "presets": [ { "name": "Sticky CTA (Mobile)" } ]
+}
+{% endschema %}

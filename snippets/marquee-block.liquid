@@ -1,0 +1,34 @@
+{% comment %}
+  Renders a marquee block
+
+  Accepts:
+  - content: {String} Content (required)
+  - marquee_speed: {Number} Marquee speed (required)
+  - item_space: {Number} Item space (required)
+  - stop_marquee: {Boolean} Stop marquee on hover (required)
+  - marquee_right_to_left: {Boolean} Marquee right to left (required)
+  - class: {String} Class (optional)
+
+  Usage:
+  {% render 'marquee-block',
+    marquee_speed: 1,
+    item_space: 20,
+    stop_marquee: false,
+    marquee_right_to_left: false,
+    content: content
+  %}
+{% endcomment %}
+
+<xo-marquee
+  class='xo-marquee-block{% if class %} {{ class }}{% endif %}'
+  xo-speed='{{ marquee_speed }}'
+  {% if stop_marquee %}
+    xo-pause-on-hover='true'
+  {% endif %}
+  {%- if marquee_right_to_left -%}
+    xo-rtl='true'
+  {%- endif -%}
+  style='{%- if item_space -%}--space: {{ item_space -}}rem;{%- endif -%}'
+>
+  {{- content -}}
+</xo-marquee>

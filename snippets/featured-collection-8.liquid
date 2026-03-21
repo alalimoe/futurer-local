@@ -1,0 +1,132 @@
+{% comment %}
+  Renders a feature collection
+
+  Accepts:
+  - image: {String} Image (required)
+  - product: {Object} Products (required)
+  - column_dekstop: {Number} Grid column desktop (required)
+  - column_mobile: {Number} Grid column mobile (required)
+  - product_display: {Number} Product quantity to show (required)
+  - block: {Object} Block (required)
+
+  Usage:
+    {% render 'featured-collection-8',
+      image: image,
+      product: product,
+      column_desktop: column_desktop,
+      column_mobile: column_mobile,
+      product_display: product_display,
+      block: block
+    %}
+  %}
+{% endcomment %}
+
+<div class="featured-collection-8">
+  <xo-grid class="featured-collection-8__grid">
+    <div class="featured-collection-8__item" style="--lg: 6; --md: 12; --xs: 12">
+      {% for item in block %}
+        {% case item.type %}
+          {% when 'feature' %}
+            {% render 'product-featured',
+              class: 'h5',
+              heading: item.settings.heading,
+              show_button: true,
+              button: item.settings,
+              image_1: item.settings.image_1,
+              title_1: item.settings.title_1,
+              image_2: item.settings.image_2,
+              title_2: item.settings.title_2,
+              image_3: item.settings.image_3,
+              title_3: item.settings.title_3
+            %}
+        {% endcase %}
+      {% endfor %}
+    </div>
+    {% if layout == 'style-2' %}
+      <xo-animate xo-cascade style="--lg: 6; --md: 12; --xs: 12">
+        <div class="featured-collection-8__image">
+          {% render 'image', image: image, aspect_ratio: aspect_ratio %}
+        </div>
+      </xo-animate>
+    {%- else -%}
+      {% for item in block %}
+        {% case item.type %}
+          {% when 'product' %}
+            {%- assign placeholder_image = 'collection-1' -%}
+            <div class="featured-collection-8__item" style="--lg: 3; --md: 12; --xs: 12">
+              <div class="featured-collection-8__product">
+                {% render 'product-card',
+                  product: item.settings.product,
+                  show_image: settings.product_card_show_image,
+                  show_secondary_image: settings.product_card_show_secondary_image,
+                  show_vendor: settings.product_card_show_vendor,
+                  show_description: settings.product_card_show_description,
+                  show_quick_add: settings.product_card_show_quick_add,
+                  show_quick_view: settings.product_card_show_quick_view,
+                  show_favorite: settings.product_card_show_favorite,
+                  show_price: settings.product_card_show_price,
+                  show_badge: settings.product_card_show_badge,
+                  position_badge: settings.position_badge,
+                  media_aspect_ratio: section.settings.product_card_aspect_ratio,
+                  color_scheme: section.settings.card_color_scheme,
+                  placeholder_image: placeholder_image,
+                  animate_enabled: true
+                %}
+              </div>
+            </div>
+        {% endcase %}
+      {% endfor %}
+    {% endif %}
+    {% if layout == 'style-2' %}
+      <div class="featured-collection-8__product" style="--lg: 12; --md: 12; --xs: 12">
+        {% if collection != blank %}
+          <xo-grid
+            class="featured-collection-8__product-grid"
+            style="{%- if collection.products.size == 0 -%}--lg: 1;{%- else -%} --lg: {{ column_desktop }};{%- endif -%} --md: {{  column_mobile }}; --xs: {{ column_mobile }};"
+          >
+            {%- if collection.products.size == 0 -%}
+              {%- assign title = 'sections.featured_collection.empty' | t -%}
+              {% render 'collection-empty', title: title %}
+            {%- else -%}
+              {% for product in collection.products limit: product_display %}
+                {% comment %}
+                  {%- assign placeholder_image_index = forloop.index0 | modulo: 4 | plus: 1 -%}
+                  {%- assign placeholder_image = 'product-apparel-' | append: placeholder_image_index -%}
+                {% endcomment %}
+                {%- assign placeholder_image = 'collection-1' -%}
+                {% render 'product-card',
+                  product: product,
+                  show_image: settings.product_card_show_image,
+                  show_secondary_image: settings.product_card_show_secondary_image,
+                  show_vendor: settings.product_card_show_vendor,
+                  show_description: settings.product_card_show_description,
+                  show_quick_add: settings.product_card_show_quick_add,
+                  show_quick_view: settings.product_card_show_quick_view,
+                  show_favorite: settings.product_card_show_favorite,
+                  show_price: settings.product_card_show_price,
+                  show_badge: settings.product_card_show_badge,
+                  media_aspect_ratio: section.settings.product_card_aspect_ratio,
+                  color_scheme: section.settings.card_color_scheme,
+                  placeholder_image: placeholder_image,
+                  animate_enabled: true
+                %}
+              {% endfor %}
+            {%- endif -%}
+          </xo-grid>
+        {%- else -%}
+          <xo-animate xo-cascade>
+            <xo-grid
+              class="featured-collection-8__product-grid"
+              style="{%- if collection.products.size == 0 -%}--lg: 1;{%- else -%} --lg: {{ column_desktop }};{%- endif -%} --md: {{  column_mobile }}; --xs: {{ column_mobile }};"
+            >
+              {% render 'product-card-placeholder', placeholder_image: placeholder_image, color_scheme: section.settings.card_color_scheme %}
+              {% render 'product-card-placeholder', placeholder_image: placeholder_image, color_scheme: section.settings.card_color_scheme %}
+              {% render 'product-card-placeholder', placeholder_image: placeholder_image, color_scheme: section.settings.card_color_scheme %}
+              {% render 'product-card-placeholder', placeholder_image: placeholder_image, color_scheme: section.settings.card_color_scheme %}
+            </xo-grid>
+          </xo-animate>
+        {% endif %}
+      </div>
+    {% endif %}
+  </xo-grid>
+</div>

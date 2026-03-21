@@ -1,0 +1,66 @@
+{% comment %}
+  Renders the action quick view button
+
+  Accepts:
+  - product: {Object} Product object
+  - is_select_options: {Boolean} Show select options. Default: true (optional)
+  - is_bundle: {Boolean} Is bundle. Default: false (optional)
+  - is_tooltip: {Boolean} Show tooltip. Default: false (optional)
+
+  Usage:
+  {% render 'action-quick-view', product: product, is_tooltip: true, is_bundle: false %}
+{% endcomment %}
+
+{% liquid
+  assign is_tooltip = is_tooltip | default: true, allow_false: true
+  assign is_bundle = is_bundle | default: false
+  assign combined_listing_count = product.options_with_values | map: 'values' | map: 'product_url' | compact | size
+  assign quick_view_text = 'products.product.quick_view' | t
+
+  if combined_listing_count > 0
+  assign product_handle = product.selected_or_first_available_variant.product.handle
+  assign product_url = shop.url | append: '/products/' | append: product_handle | append: '/?section_id=quick-view-content'
+  if is_bundle
+    assign product_url = shop.url | append: '/products/' | append: product_handle | append: '/?section_id=quick-view-content-bundle'
+  endif
+else
+  assign product_url = shop.url | append: '/products/' | append: product.handle | append: '/?section_id=quick-view-content'
+  if is_bundle
+    assign product_url = shop.url | append: '/products/' | append: product.handle | append: '/?section_id=quick-view-content-bundle'
+  endif
+endif
+%}
+
+{% capture button_content %}
+  <div class="xo-add-to-cart__icon focus-inset" aria-label="{{ quick_view_text }}">
+    {% render 'button-icon', size: 'sm', style: 'primary', type: 'circle', icon: 'quick-view', icon_size: '1.7rem', effect: 'slide-up' %}
+  </div>
+{% endcapture %}
+
+{% capture content %}
+  {% if is_tooltip %}
+    <xo-tooltip
+      xo-mobile-disabled
+      xo-title="{{ quick_view_text }}"
+      xo-placement="top-center"
+      class="tooltip{% if settings.enable_border_radius %} tooltip--radius{% endif %}"
+    >
+      {{ button_content }}
+    </xo-tooltip>
+  {% else %}
+    {{ button_content }}
+  {% endif %}
+{% endcapture %}
+
+{% if product != blank %}
+  <xo-product-quick-view-trigger
+    xo-modal-name="quick-view"
+    class="xo-action-quick-view"
+    xo-product-url="{{ product_url }}"
+    tabindex="0"
+    role="button"
+    aria-label="{{ quick_view_text }}"
+  >
+    {{ content }}
+  </xo-product-quick-view-trigger>
+{% endif %}

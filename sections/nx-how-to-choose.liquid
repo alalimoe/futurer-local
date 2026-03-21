@@ -1,0 +1,124 @@
+{%- assign s = section.settings -%}
+{%- assign sid = section.id -%}
+{%- assign a_caps = s.aniracetam_caps -%}
+{%- assign f_caps = s.fasoracetam_caps -%}
+{%- assign ph_caps = s.phenyl_hydrazide_caps -%}
+{%- assign pr_caps = s.pramiracetam_caps -%}
+{%- assign novice = s.novice_stack -%}
+
+{%- style -%}
+#nx-choose-{{ sid }} {
+  max-width: var(--container-width-narrow);
+  margin: 0 auto;
+  padding: 8px var(--page-gutter);
+  font-family: var(--font-body-family, sans-serif);
+  color: var(--color-text-main, #111827);
+  line-height: 1.7;
+  content-visibility: auto;
+}
+#nx-choose-{{ sid }} h2 {
+  font-family: var(--font-heading-family, sans-serif);
+  font-size: clamp(22px, 3vw, 30px);
+  font-weight: 700;
+  line-height: 1.2;
+  margin: 0 0 12px;
+}
+#nx-choose-{{ sid }} ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+#nx-choose-{{ sid }} li {
+  padding: 12px 16px;
+  border-radius: var(--radius-premium, 14px);
+  border: 1px solid transparent;
+  background: rgba(249, 250, 251, 0.5);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  transition: var(--transition-premium, all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1));
+  color: var(--color-text-muted, #4b5563);
+  font-size: 15px;
+}
+#nx-choose-{{ sid }} li:hover {
+  background: rgba(251, 191, 36, 0.06);
+  transform: translateX(4px);
+  box-shadow: var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.04));
+}
+#nx-choose-{{ sid }} li strong { color: var(--color-text-main, #111827); }
+#nx-choose-{{ sid }} li a {
+  color: var(--color-accent-dark, #92400e);
+  text-decoration: none;
+  font-weight: 600;
+  transition: var(--transition-premium, all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1));
+}
+#nx-choose-{{ sid }} li a:hover { color: var(--color-text-main, #111827); }
+
+#nx-choose-{{ sid }} .nx-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 18px;
+  border-radius: var(--nx-radius-md);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  min-height: 44px;
+  margin-top: 16px;
+  border: 1.5px solid var(--color-accent-primary, #FBBF24);
+  background: transparent;
+  color: var(--color-text-main, #111827);
+  transition: var(--transition-premium, all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1));
+}
+#nx-choose-{{ sid }} .nx-btn:hover {
+  background: var(--color-accent-primary, #FBBF24);
+  color: var(--color-text-primary);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-gold-glow, 0 4px 14px rgba(251,191,36,0.25));
+}
+#nx-choose-{{ sid }} .nx-btn:active { transform: scale(0.98); }
+
+#nx-choose-{{ sid }} a:focus-visible {
+  outline: 2px solid var(--color-accent-primary, #FBBF24);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #nx-choose-{{ sid }},
+  #nx-choose-{{ sid }} * {
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
+  }
+}
+{%- endstyle -%}
+
+<section id="nx-choose-{{ sid }}" aria-label="How to choose a racetam">
+  <h2>How to Choose</h2>
+  <ul>
+    {% if a_caps != blank %}<li><strong>Fast focus + smoother mood?</strong> <a href="{{ a_caps.url }}">Aniracetam</a>.</li>{% endif %}
+    {% if f_caps != blank %}<li><strong>Calm clarity (stimulus-sensitive)?</strong> <a href="{{ f_caps.url }}">Fasoracetam</a>.</li>{% endif %}
+    {% if ph_caps != blank %}<li><strong>Big day performance?</strong> <a href="{{ ph_caps.url }}">Phenylpiracetam Hydrazide</a> (use selectively).</li>{% endif %}
+    {% if pr_caps != blank %}<li><strong>Long study &amp; retention?</strong> <a href="{{ pr_caps.url }}">Pramiracetam</a>.</li>{% endif %}
+  </ul>
+
+  {% if novice != blank %}
+  <a class="nx-btn" href="{{ novice.url }}">Not sure? Start with the Novice Stack</a>
+  {% endif %}
+</section>
+
+{% schema %}
+{
+  "name": "NX — How to Choose",
+  "settings": [
+    { "type": "product", "id": "aniracetam_caps", "label": "Aniracetam (capsules)" },
+    { "type": "product", "id": "fasoracetam_caps", "label": "Fasoracetam (capsules)" },
+    { "type": "product", "id": "phenyl_hydrazide_caps", "label": "Phenylpiracetam Hydrazide (capsules)" },
+    { "type": "product", "id": "pramiracetam_caps", "label": "Pramiracetam (capsules)" },
+    { "type": "product", "id": "novice_stack", "label": "Novice Nootropic Stack (optional)" }
+  ],
+  "presets": [{ "name": "NX — How to Choose" }]
+}
+{% endschema %}

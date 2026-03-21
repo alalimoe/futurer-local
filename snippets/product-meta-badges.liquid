@@ -1,0 +1,30 @@
+{%- assign mo = product.metafields.merchandising.badges -%}
+
+{%- assign entries_is_list = false -%}
+{%- if mo and mo.value -%}
+  {%- if mo.value.size -%}{% assign entries_is_list = true %}{%- endif -%}
+{%- endif -%}
+
+{%- if mo and mo.value -%}
+  <div class="xo-pdp-badges">
+    {%- if entries_is_list -%}
+      {%- assign entries = mo.value | sort: 'priority' -%}
+      {%- for b in entries -%}
+        {%- render 'badge-block',
+          image: b.icon,
+          text: b.label,
+          bg_color: b.bg_color | default: '#e9e9e9',
+          text_color: b.text_color | default: '#111111'
+        -%}
+      {%- endfor -%}
+    {%- else -%}
+      {%- assign b = mo.value -%}
+      {%- render 'badge-block',
+        image: b.icon,
+        text: b.label,
+        bg_color: b.bg_color | default: '#e9e9e9',
+        text_color: b.text_color | default: '#111111'
+      -%}
+    {%- endif -%}
+  </div>
+{%- endif -%}

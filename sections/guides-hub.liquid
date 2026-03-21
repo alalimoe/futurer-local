@@ -1,0 +1,1153 @@
+{% comment %}
+  =============================================
+  Section: Guides Hub — Nootropix Knowledge Center
+  File: sections/guides-hub.liquid
+  Purpose: Premium hub page — CRO / SEO / UX / A11y
+  Theme: Futurer 2.x (OS 2.0) — cascades from global tokens
+  =============================================
+{% endcomment %}
+
+{%- assign s = section.settings -%}
+{%- assign sid = section.id -%}
+
+{%- comment -%} ── JSON-LD: CollectionPage ── {%- endcomment -%}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  "name": {{ s.hero_title | strip_html | default: "Nootropix Guides" | json }},
+  "description": {{ s.hero_subtitle | strip_html | truncate: 160 | default: "Evidence-based nootropic guides for focus, memory, stacking, and more." | json }},
+  "url": {{ canonical_url | json }},
+  "publisher": {
+    "@type": "Organization",
+    "name": "Nootropix",
+    "url": {{ shop.url | json }}
+  }
+}
+</script>
+
+{%- comment -%} ── JSON-LD: BreadcrumbList ── {%- endcomment -%}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": {{ shop.url | json }} },
+    { "@type": "ListItem", "position": 2, "name": "Guides", "item": {{ canonical_url | json }} }
+  ]
+}
+</script>
+
+{%- comment -%} ── JSON-LD: ItemList (guide blocks) ── {%- endcomment -%}
+{%- assign guide_blocks = section.blocks | where: 'type', 'guide' -%}
+{% if guide_blocks.size > 0 %}
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "name": "Nootropix Guides",
+    "numberOfItems": {{ guide_blocks.size }},
+    "itemListElement": [
+      {%- for b in guide_blocks -%}
+        {
+          "@type": "ListItem",
+          "position": {{ forloop.index }},
+          "name": {{ b.settings.title | json }},
+          "url": {{ b.settings.url | json }}
+        }{%- unless forloop.last -%},{%- endunless -%}
+      {%- endfor -%}
+    ]
+  }
+  </script>
+{% endif %}
+
+<section id="nx-gh-{{ sid }}" class="nx-gh-section" aria-labelledby="nx-gh-title-{{ sid }}">
+  <div class="nx-gh-inner">
+
+    {%- comment -%} ── HERO ── {%- endcomment -%}
+    <header class="nx-gh-hero">
+      {% if s.hero_pill_text != blank %}
+        <div class="nx-gh-pill" role="note">
+          <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M11 2l1.7 3.4L16 6l-3 2.9.7 4.1L11 11l-3.7 2L8 8.9 5 6l3.3-.6L11 2z"/></svg>
+          <span>{{ s.hero_pill_text }}</span>
+        </div>
+      {% endif %}
+
+      <nav class="nx-gh-breadcrumbs" aria-label="Breadcrumb">
+        <a href="{{ routes.root_url }}">Home</a>
+        <span aria-hidden="true">/</span>
+        <span aria-current="page">Guides</span>
+      </nav>
+
+      <h1 id="nx-gh-title-{{ sid }}" class="nx-gh-title">{{ s.hero_title | escape }}</h1>
+      {% if s.hero_subtitle != blank %}
+        <p class="nx-gh-sub">{{ s.hero_subtitle }}</p>
+      {% endif %}
+
+      <div class="nx-gh-quick">
+        <a class="nx-gh-btn nx-gh-btn--primary" href="{{ s.start_here_url | default: '/pages/guides-beginners-nootropics' }}">Start here (Beginner's Guide)</a>
+        <a class="nx-gh-btn nx-gh-btn--ghost" href="{{ s.shipping_url | default: '/pages/nootropics-dubai-shipping' }}">Shipping & delivery</a>
+        <a class="nx-gh-btn nx-gh-btn--ghost" href="{{ s.contact_url | default: '/pages/help-faq' }}">Help / FAQs</a>
+      </div>
+    </header>
+
+    {%- comment -%} ── SEARCH + FILTERS (glassmorphism bar) ── {%- endcomment -%}
+    <section class="nx-gh-filters" aria-label="Search and filters">
+      <div class="nx-gh-search">
+        <label for="nx-gh-search-{{ sid }}" class="visually-hidden">Search guides</label>
+        <input id="nx-gh-search-{{ sid }}" type="search" class="nx-gh-search-input" placeholder="{{ s.search_placeholder | default: 'Search guides…' | escape }}" autocomplete="off" />
+        <button class="nx-gh-clear" type="button" aria-label="Clear search" title="Clear">&times;</button>
+      </div>
+
+      {% assign tags_raw = '' %}
+      {% for block in section.blocks %}
+        {% if block.type == 'guide' and block.settings.tag != blank %}
+          {% assign taglist = block.settings.tag | split: ',' %}
+          {% for tg in taglist %}
+            {% assign tags_raw = tags_raw | append: tg | append: ',' %}
+          {% endfor %}
+        {% endif %}
+      {% endfor %}
+      {% assign tags = tags_raw | split: ',' | uniq | sort %}
+
+      {% if s.show_tags and tags.size > 0 %}
+        <div class="nx-gh-chips" role="tablist" aria-label="Filter by topic">
+          <button class="nx-gh-chip is-active" data-chip="all" role="tab" aria-selected="true">All</button>
+          {% for t in tags %}
+            {% assign t_trim = t | strip %}
+            {% if t_trim != blank %}
+              <button class="nx-gh-chip" data-chip="{{ t_trim | escape }}" role="tab" aria-selected="false">{{ t_trim }}</button>
+            {% endif %}
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      {% if s.show_sort %}
+        <div class="nx-gh-sort">
+          <label class="visually-hidden" for="nx-gh-sort-{{ sid }}">Sort guides</label>
+          <select id="nx-gh-sort-{{ sid }}" class="nx-gh-sort-select" aria-label="Sort guides">
+            <option value="featured">Featured</option>
+            <option value="az">A–Z</option>
+          </select>
+        </div>
+      {% endif %}
+    </section>
+
+    {%- comment -%} ── FEATURED HERO CARD ── {%- endcomment -%}
+    {% assign featured_block = nil %}
+    {% for b in section.blocks %}
+      {% if b.type == 'guide' and b.settings.featured %}
+        {% assign featured_block = b %}
+        {% break %}
+      {% endif %}
+    {% endfor %}
+
+    {% if featured_block %}
+      {% assign f = featured_block %}
+      {% assign f_tags = f.settings.tag | default: 'Guide' %}
+      <section class="nx-gh-feature" aria-label="Featured guide">
+        <article class="nx-gh-hero-card" data-title="{{ f.settings.title | escape }}" data-desc="{{ f.settings.desc | strip_html | escape }}" data-tags="{{ f_tags | downcase }}">
+          <div class="nx-gh-hero-content">
+            <div class="nx-gh-hero-meta">
+              <span class="nx-gh-badge-pop">{{ f.settings.badge | default: 'Most Popular' }}</span>
+            </div>
+            <h2 class="nx-gh-hero-heading">{{ f.settings.title | escape }}</h2>
+            {% if f.settings.desc != blank %}<p class="nx-gh-hero-desc">{{ f.settings.desc }}</p>{% endif %}
+            <div class="nx-gh-hero-cta">
+              <a class="nx-gh-btn nx-gh-btn--primary" href="{{ f.settings.url | default: '#' }}">Read the Guide</a>
+              {% if f.settings.read_time != blank %}<span class="nx-gh-time">{{ f.settings.read_time }} min read</span>{% endif %}
+            </div>
+          </div>
+          <div class="nx-gh-hero-illu">
+            {% if f.settings.image != blank %}
+              <div class="nx-gh-illu-wrap">
+                <img loading="lazy" src="{{ f.settings.image | image_url: width: 800 }}" alt="{{ f.settings.image_alt | default: f.settings.title | escape }}" width="800" height="533">
+              </div>
+            {% else %}
+              <div class="nx-gh-illu-placeholder" aria-hidden="true">
+                <svg viewBox="0 0 48 48" width="80" height="80" aria-hidden="true"><circle cx="24" cy="24" r="22" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".3"/><path d="M16 26h16M16 20h16M16 32h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity=".3"/></svg>
+              </div>
+            {% endif %}
+          </div>
+        </article>
+      </section>
+    {% endif %}
+
+    {%- comment -%} ── GUIDE CARDS GRID ── {%- endcomment -%}
+    <section class="nx-gh-grid" aria-label="All guides">
+      {% for block in section.blocks %}
+        {% if block.type == 'guide' %}
+          {% assign tags_attr = block.settings.tag | replace: ' ,', ',' | replace: ', ', ',' | downcase %}
+          <article
+            class="nx-gh-card{% if block.settings.featured %} is-featured{% endif %}"
+            data-title="{{ block.settings.title | escape }}"
+            data-desc="{{ block.settings.desc | strip_html | escape }}"
+            data-tags="{{ tags_attr | escape }}"
+            data-weight="{% if block.settings.featured %}1{% else %}9{% endif %}"
+            {{ block.shopify_attributes }}
+          >
+            <a href="{{ block.settings.url | default: '#' }}" class="nx-gh-card-link" aria-label="{{ block.settings.title | escape }}">
+              <div class="nx-gh-card-media">
+                {% if block.settings.image != blank %}
+                  <img loading="lazy" src="{{ block.settings.image | image_url: width: 540 }}" alt="{{ block.settings.image_alt | default: block.settings.title | escape }}" width="540" height="360">
+                {% else %}
+                  <svg viewBox="0 0 48 48" class="nx-gh-icon" aria-hidden="true"><circle cx="24" cy="24" r="22" fill="none" stroke="currentColor" stroke-width="2"/><path d="M16 26h16M16 20h16M16 32h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                {% endif %}
+                {% if block.settings.featured %}
+                  <span class="nx-gh-card-badge">Featured</span>
+                {% endif %}
+              </div>
+              <div class="nx-gh-card-body">
+                {% assign primary_tag = block.settings.tag | split: ',' | first | strip %}
+                <div class="nx-gh-card-top">
+                  <span class="nx-gh-tag">{{ primary_tag }}</span>
+                  {% if block.settings.read_time != blank %}<span class="nx-gh-read-time">{{ block.settings.read_time }} min</span>{% endif %}
+                </div>
+                <h3 class="nx-gh-card-title">{{ block.settings.title }}</h3>
+                {% if block.settings.desc != blank %}
+                  <p class="nx-gh-card-desc">{{ block.settings.desc }}</p>
+                {% endif %}
+                <span class="nx-gh-card-cta">Read guide<span aria-hidden="true"> &rarr;</span></span>
+              </div>
+            </a>
+          </article>
+        {% endif %}
+      {% endfor %}
+    </section>
+
+    {%- comment -%} ── BUNDLES / STACKS ── {%- endcomment -%}
+    {% assign bundle_blocks = section.blocks | where: 'type', 'bundle' %}
+    {% if bundle_blocks.size > 0 %}
+      <section class="nx-gh-bundles" aria-label="Recommended stacks">
+        <h2 class="nx-gh-section-heading">Recommended Stacks</h2>
+        <div class="nx-gh-bundle-grid">
+          {% for block in bundle_blocks %}
+            <article class="nx-gh-bundle-card" {{ block.shopify_attributes }}>
+              <div class="nx-gh-bundle-media">
+                {% if block.settings.image != blank %}
+                  <img loading="lazy" src="{{ block.settings.image | image_url: width: 540 }}" alt="{{ block.settings.image_alt | default: block.settings.title | escape }}" width="540" height="360">
+                {% else %}
+                  <svg viewBox="0 0 48 48" class="nx-gh-icon" aria-hidden="true"><rect x="8" y="10" width="32" height="24" rx="3" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+                {% endif %}
+              </div>
+              <div class="nx-gh-bundle-body">
+                <h3 class="nx-gh-bundle-title">{{ block.settings.title }}</h3>
+                {% if block.settings.desc != blank %}
+                  <p class="nx-gh-bundle-desc">{{ block.settings.desc }}</p>
+                {% endif %}
+                <div class="nx-gh-bundle-ctas">
+                  <a class="nx-gh-btn nx-gh-btn--primary" href="{{ block.settings.url | default: '/collections/all' }}">Shop now</a>
+                  {% if block.settings.learn_url != blank %}
+                    <a class="nx-gh-btn nx-gh-btn--ghost" href="{{ block.settings.learn_url }}">Learn more</a>
+                  {% endif %}
+                </div>
+              </div>
+            </article>
+          {% endfor %}
+        </div>
+      </section>
+    {% endif %}
+
+    {%- comment -%} ── TRUST BAR ── {%- endcomment -%}
+    <section class="nx-gh-trust" aria-label="Why Nootropix">
+      <div class="nx-gh-trust-grid">
+        <div class="nx-gh-trust-item">
+          <span class="nx-gh-trust-icon" aria-hidden="true">&#9889;</span>
+          <div><strong>Fast UAE delivery</strong><br><span class="nx-gh-trust-detail">4-hour Dubai city limits; same/next-day UAE.</span></div>
+        </div>
+        <div class="nx-gh-trust-item">
+          <span class="nx-gh-trust-icon" aria-hidden="true">&#128666;</span>
+          <div><strong>Free UAE shipping</strong><br><span class="nx-gh-trust-detail">Orders &ge; 300 AED.</span></div>
+        </div>
+        <div class="nx-gh-trust-item">
+          <span class="nx-gh-trust-icon" aria-hidden="true">&#127758;</span>
+          <div><strong>Express international</strong><br><span class="nx-gh-trust-detail">Same-day dispatch.</span></div>
+        </div>
+        <div class="nx-gh-trust-item">
+          <span class="nx-gh-trust-icon" aria-hidden="true">&#128260;</span>
+          <div><strong>Easy returns</strong><br><span class="nx-gh-trust-detail">Unopened items, quick refunds.</span></div>
+        </div>
+      </div>
+    </section>
+
+    {%- comment -%} ── FOOTER CTA ── {%- endcomment -%}
+    <section class="nx-gh-footer-cta">
+      <h2 class="nx-gh-section-heading">Need a hand choosing?</h2>
+      <p class="nx-gh-footer-desc">Start with the Beginner's Guide or message us — we'll point you to the right path.</p>
+      <div class="nx-gh-footer-btns">
+        <a class="nx-gh-btn nx-gh-btn--primary" href="{{ s.start_here_url | default: '/pages/guides-beginners-nootropics' }}">Beginner's Guide</a>
+        <a class="nx-gh-btn nx-gh-btn--ghost" href="{{ s.contact_url | default: '/pages/help-faq' }}">Chat with us</a>
+      </div>
+    </section>
+
+  </div>
+
+  {%- comment -%} ── STICKY MOBILE CTA ── {%- endcomment -%}
+  <div class="nx-gh-sticky" data-sticky>
+    <a class="nx-gh-sticky-btn" href="{{ s.start_here_url | default: '/pages/guides-beginners-nootropics' }}">Start here</a>
+    <a class="nx-gh-sticky-btn" href="{{ s.shipping_url | default: '/pages/nootropics-dubai-shipping' }}">Shipping</a>
+    <a class="nx-gh-sticky-btn" href="{{ s.contact_url | default: '/pages/help-faq' }}">Help</a>
+  </div>
+</section>
+
+{%- style -%}
+/* ═══════════════════════════════════════════════════════
+   GUIDES HUB — Premium Design Tokens & Styles
+   ═══════════════════════════════════════════════════════ */
+
+#nx-gh-{{ sid }} {
+  --gh-max: {{ s.max_width | default: 1200 }}px;
+  --gh-py: {{ s.padding_y | default: 48 }}px;
+  --gh-accent: var(--color-accent-primary, #FBBF24);
+  --gh-accent-hover: var(--color-accent-hover, #D97706);
+  --gh-accent-dark: var(--color-accent-dark, #92400e);
+  --gh-accent-glass: rgba(251, 191, 36, 0.08);
+  --gh-accent-glass-strong: rgba(251, 191, 36, 0.14);
+  --gh-text: var(--color-text-main, #111827);
+  --gh-muted: var(--color-text-muted, #4b5563);
+  --gh-bg: {{ s.background_color | default: '#ffffff' }};
+  --gh-bg-alt: var(--color-bg-secondary, #f9fafb);
+  --gh-radius: var(--radius-premium, 14px);
+  --gh-radius-sm: var(--nx-radius-md);
+  --gh-transition: var(--transition-premium, all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1));
+  --gh-shadow-rest: var(--shadow-sm, 0 2px 8px rgba(0, 0, 0, 0.04));
+  --gh-shadow-hover: var(--shadow-md, 0 12px 30px rgba(0, 0, 0, 0.06));
+  --gh-shadow-elevated: var(--shadow-lg, 0 20px 46px rgba(0, 0, 0, 0.10));
+  --gh-gold-glow: var(--shadow-gold-glow, 0 4px 14px rgba(251, 191, 36, 0.25));
+  --gh-gold-glow-hover: var(--shadow-gold-glow-hover, 0 8px 24px rgba(251, 191, 36, 0.35));
+  --gh-font: var(--font-body-family, sans-serif);
+  --gh-font-heading: var(--font-heading-family, sans-serif);
+  --gh-gap: 18px;
+
+  background: var(--gh-bg);
+  color: var(--gh-text);
+  font-family: var(--gh-font);
+  line-height: 1.6;
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 4000px;
+}
+
+/* ── Utility ── */
+#nx-gh-{{ sid }} .visually-hidden {
+  position: absolute !important;
+  height: 1px; width: 1px;
+  overflow: hidden;
+  clip: rect(1px, 1px, 1px, 1px);
+  white-space: nowrap;
+}
+
+/* ── Inner container ── */
+#nx-gh-{{ sid }} .nx-gh-inner {
+  max-width: var(--gh-max);
+  margin: 0 auto;
+  padding: var(--gh-py) var(--page-gutter);
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+@media (min-width: 990px) {
+  #nx-gh-{{ sid }} .nx-gh-inner { gap: 48px; }
+}
+
+/* ═══════════════════════════════════════════════════════
+   HERO
+   ═══════════════════════════════════════════════════════ */
+#nx-gh-{{ sid }} .nx-gh-hero {
+  text-align: center;
+  padding-top: 8px;
+}
+#nx-gh-{{ sid }} .nx-gh-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: var(--nx-radius-pill);
+  padding: 5px 14px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  background: var(--gh-accent-glass);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  color: var(--gh-accent-dark);
+  margin-bottom: 10px;
+}
+#nx-gh-{{ sid }} .nx-gh-breadcrumbs {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+  font-size: 0.88rem;
+  color: var(--gh-muted);
+  margin-bottom: 10px;
+}
+#nx-gh-{{ sid }} .nx-gh-breadcrumbs a {
+  color: var(--gh-muted);
+  text-decoration: none;
+  transition: var(--gh-transition);
+}
+#nx-gh-{{ sid }} .nx-gh-breadcrumbs a:hover {
+  color: var(--gh-accent-hover);
+}
+#nx-gh-{{ sid }} .nx-gh-title {
+  font-family: var(--gh-font-heading);
+  font-size: clamp(30px, 4.5vw, 52px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  color: var(--gh-text);
+  margin: 0 0 12px;
+}
+#nx-gh-{{ sid }} .nx-gh-sub {
+  font-size: clamp(15px, 1.5vw, 18px);
+  color: var(--gh-muted);
+  max-width: 720px;
+  margin: 0 auto 16px;
+  line-height: 1.6;
+}
+#nx-gh-{{ sid }} .nx-gh-quick {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* ═══════════════════════════════════════════════════════
+   BUTTONS — Ghost + Primary
+   ═══════════════════════════════════════════════════════ */
+#nx-gh-{{ sid }} .nx-gh-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 11px 20px;
+  border-radius: var(--gh-radius-sm);
+  font-family: var(--gh-font);
+  font-weight: 600;
+  font-size: 15px;
+  text-decoration: none;
+  min-height: var(--touch-min, 44px);
+  transition: var(--gh-transition);
+  cursor: pointer;
+}
+#nx-gh-{{ sid }} .nx-gh-btn--ghost {
+  background: transparent;
+  border: 1.5px solid var(--gh-accent);
+  color: var(--gh-text);
+}
+#nx-gh-{{ sid }} .nx-gh-btn--ghost:hover {
+  background: var(--gh-accent);
+  color: var(--color-text-primary);
+  transform: translateY(-2px);
+  box-shadow: var(--gh-shadow-hover);
+}
+#nx-gh-{{ sid }} .nx-gh-btn--primary {
+  background: var(--gh-accent);
+  color: var(--color-text-primary);
+  border: 1.5px solid var(--gh-accent);
+  box-shadow: var(--gh-gold-glow);
+}
+#nx-gh-{{ sid }} .nx-gh-btn--primary:hover {
+  background: var(--gh-accent-hover);
+  border-color: var(--gh-accent-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--gh-gold-glow-hover);
+}
+#nx-gh-{{ sid }} .nx-gh-btn:active {
+  transform: scale(0.98);
+}
+
+/* ═══════════════════════════════════════════════════════
+   SEARCH + FILTERS — Glassmorphism bar
+   ═══════════════════════════════════════════════════════ */
+#nx-gh-{{ sid }} .nx-gh-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: center;
+  padding: 18px 20px;
+  border-radius: var(--gh-radius);
+  background: rgba(255, 255, 255, 0.65);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  box-shadow: var(--gh-shadow-rest);
+}
+#nx-gh-{{ sid }} .nx-gh-search {
+  position: relative;
+  flex: 1 1 260px;
+}
+#nx-gh-{{ sid }} .nx-gh-search-input {
+  width: 100%;
+  padding: 12px 40px 12px 14px;
+  border: none;
+  border-radius: var(--gh-radius-sm);
+  background: var(--gh-bg);
+  box-shadow: var(--gh-shadow-rest);
+  font-family: var(--gh-font);
+  font-size: 15px;
+  color: var(--gh-text);
+  transition: var(--gh-transition);
+}
+#nx-gh-{{ sid }} .nx-gh-search-input:focus {
+  box-shadow: var(--gh-shadow-hover);
+}
+#nx-gh-{{ sid }} .nx-gh-clear {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: var(--gh-bg-alt);
+  border-radius: var(--nx-radius-sm);
+  padding: 4px 8px;
+  cursor: pointer;
+  font-size: 16px;
+  color: var(--gh-muted);
+  transition: var(--gh-transition);
+  min-height: 32px;
+  min-width: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#nx-gh-{{ sid }} .nx-gh-clear:hover {
+  background: var(--gh-accent-glass-strong);
+  color: var(--gh-text);
+}
+#nx-gh-{{ sid }} .nx-gh-chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  flex: 1 1 100%;
+}
+#nx-gh-{{ sid }} .nx-gh-chip {
+  border: none;
+  border-radius: var(--nx-radius-pill);
+  padding: 8px 16px;
+  background: var(--gh-bg);
+  box-shadow: var(--gh-shadow-rest);
+  cursor: pointer;
+  font-family: var(--gh-font);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--gh-muted);
+  transition: var(--gh-transition);
+  min-height: var(--touch-min, 44px);
+  display: inline-flex;
+  align-items: center;
+}
+#nx-gh-{{ sid }} .nx-gh-chip:hover {
+  box-shadow: var(--gh-shadow-hover);
+  color: var(--gh-text);
+  transform: translateY(-2px);
+}
+#nx-gh-{{ sid }} .nx-gh-chip.is-active {
+  background: var(--gh-accent);
+  color: var(--color-text-primary);
+  font-weight: 600;
+  box-shadow: var(--gh-gold-glow);
+}
+#nx-gh-{{ sid }} .nx-gh-sort {
+  flex-shrink: 0;
+}
+#nx-gh-{{ sid }} .nx-gh-sort-select {
+  padding: 10px 14px;
+  border: none;
+  border-radius: var(--gh-radius-sm);
+  background: var(--gh-bg);
+  box-shadow: var(--gh-shadow-rest);
+  font-family: var(--gh-font);
+  font-size: 14px;
+  color: var(--gh-text);
+  cursor: pointer;
+  min-height: var(--touch-min, 44px);
+  transition: var(--gh-transition);
+}
+#nx-gh-{{ sid }} .nx-gh-sort-select:hover {
+  box-shadow: var(--gh-shadow-hover);
+}
+
+/* ═══════════════════════════════════════════════════════
+   FEATURED HERO CARD
+   ═══════════════════════════════════════════════════════ */
+#nx-gh-{{ sid }} .nx-gh-feature { /* wrapper spacing handled by parent gap */ }
+#nx-gh-{{ sid }} .nx-gh-hero-card {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+  border-radius: var(--nx-radius-lg);
+  padding: 24px;
+  color: #fff;
+  background: linear-gradient(135deg, var(--color-surface-tertiary) 0%, var(--color-surface-tertiary) 100%);
+  box-shadow: var(--gh-shadow-elevated);
+  overflow: hidden;
+  transition: var(--gh-transition);
+}
+#nx-gh-{{ sid }} .nx-gh-hero-card:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+}
+@media (min-width: 990px) {
+  #nx-gh-{{ sid }} .nx-gh-hero-card {
+    grid-template-columns: 1.6fr 1fr;
+    padding: 36px;
+  }
+}
+#nx-gh-{{ sid }} .nx-gh-hero-content {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+#nx-gh-{{ sid }} .nx-gh-badge-pop {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  border-radius: var(--nx-radius-pill);
+  padding: 4px 12px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: rgba(251, 191, 36, 0.18);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  color: var(--gh-accent);
+}
+#nx-gh-{{ sid }} .nx-gh-hero-heading {
+  font-family: var(--gh-font-heading);
+  font-size: clamp(22px, 3vw, 34px);
+  font-weight: 700;
+  line-height: 1.2;
+  margin: 0;
+}
+#nx-gh-{{ sid }} .nx-gh-hero-desc {
+  color: rgba(255, 255, 255, 0.75);
+  line-height: 1.6;
+  font-size: 15px;
+  margin: 0;
+}
+#nx-gh-{{ sid }} .nx-gh-hero-cta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+#nx-gh-{{ sid }} .nx-gh-hero-card .nx-gh-btn--primary {
+  background: var(--gh-accent);
+  color: var(--color-text-primary);
+  border-color: var(--gh-accent);
+}
+#nx-gh-{{ sid }} .nx-gh-time {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.88rem;
+}
+#nx-gh-{{ sid }} .nx-gh-hero-illu {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#nx-gh-{{ sid }} .nx-gh-illu-wrap {
+  border-radius: var(--nx-radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+}
+#nx-gh-{{ sid }} .nx-gh-illu-wrap img {
+  display: block;
+  width: 100%;
+  max-height: 260px;
+  object-fit: cover;
+  transition: var(--gh-transition);
+}
+#nx-gh-{{ sid }} .nx-gh-hero-card:hover .nx-gh-illu-wrap img {
+  transform: scale(1.03);
+}
+#nx-gh-{{ sid }} .nx-gh-illu-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 120px;
+  height: 120px;
+  color: rgba(255, 255, 255, 0.2);
+}
+
+/* ═══════════════════════════════════════════════════════
+   GUIDE CARDS GRID — Borderless elevation, sibling fade
+   ═══════════════════════════════════════════════════════ */
+#nx-gh-{{ sid }} .nx-gh-grid {
+  display: grid;
+  gap: var(--gh-gap);
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+#nx-gh-{{ sid }} .nx-gh-card {
+  background: var(--gh-bg);
+  border: none;
+  border-radius: var(--gh-radius);
+  overflow: hidden;
+  box-shadow: var(--gh-shadow-rest);
+  transition: var(--gh-transition);
+  display: flex;
+  flex-direction: column;
+}
+#nx-gh-{{ sid }} .nx-gh-grid:hover .nx-gh-card {
+  opacity: 0.6;
+}
+#nx-gh-{{ sid }} .nx-gh-grid .nx-gh-card:hover {
+  opacity: 1;
+  transform: translateY(-4px);
+  box-shadow: var(--gh-shadow-hover);
+}
+#nx-gh-{{ sid }} .nx-gh-card.is-featured {
+  box-shadow: 0 0 0 2px var(--gh-accent), var(--gh-shadow-rest);
+}
+#nx-gh-{{ sid }} .nx-gh-grid .nx-gh-card.is-featured:hover {
+  box-shadow: 0 0 0 2px var(--gh-accent), var(--gh-shadow-hover);
+}
+#nx-gh-{{ sid }} .nx-gh-card-link {
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  color: inherit;
+  height: 100%;
+}
+#nx-gh-{{ sid }} .nx-gh-card-media {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  background: var(--gh-bg-alt);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+#nx-gh-{{ sid }} .nx-gh-card-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: var(--gh-transition);
+}
+#nx-gh-{{ sid }} .nx-gh-card:hover .nx-gh-card-media img {
+  transform: scale(1.03);
+}
+#nx-gh-{{ sid }} .nx-gh-icon {
+  width: 56px;
+  height: 56px;
+  color: var(--gh-muted);
+  opacity: 0.35;
+}
+#nx-gh-{{ sid }} .nx-gh-card-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(0, 0, 0, 0.55);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: var(--nx-radius-pill);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+#nx-gh-{{ sid }} .nx-gh-card-body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+#nx-gh-{{ sid }} .nx-gh-card-top {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+}
+#nx-gh-{{ sid }} .nx-gh-tag {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--gh-accent-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+#nx-gh-{{ sid }} .nx-gh-read-time {
+  font-size: 0.8rem;
+  color: var(--gh-muted);
+}
+#nx-gh-{{ sid }} .nx-gh-card-title {
+  font-family: var(--gh-font-heading);
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1.3;
+  margin: 0;
+  color: var(--gh-text);
+}
+#nx-gh-{{ sid }} .nx-gh-card-desc {
+  margin: 0;
+  color: var(--gh-muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+#nx-gh-{{ sid }} .nx-gh-card-cta {
+  margin-top: auto;
+  padding-top: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--gh-accent-dark);
+  transition: var(--gh-transition);
+}
+#nx-gh-{{ sid }} .nx-gh-card:hover .nx-gh-card-cta {
+  color: var(--gh-text);
+}
+
+/* ═══════════════════════════════════════════════════════
+   BUNDLES GRID — Borderless elevation
+   ═══════════════════════════════════════════════════════ */
+#nx-gh-{{ sid }} .nx-gh-bundles { /* spacing from parent gap */ }
+#nx-gh-{{ sid }} .nx-gh-section-heading {
+  font-family: var(--gh-font-heading);
+  font-size: clamp(22px, 3vw, 34px);
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+  color: var(--gh-text);
+  margin: 0 0 20px;
+}
+#nx-gh-{{ sid }} .nx-gh-bundle-grid {
+  display: grid;
+  gap: var(--gh-gap);
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+#nx-gh-{{ sid }} .nx-gh-bundle-card {
+  background: var(--gh-bg);
+  border: none;
+  border-radius: var(--gh-radius);
+  overflow: hidden;
+  box-shadow: var(--gh-shadow-rest);
+  display: flex;
+  flex-direction: column;
+  transition: var(--gh-transition);
+}
+#nx-gh-{{ sid }} .nx-gh-bundle-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--gh-shadow-hover);
+}
+#nx-gh-{{ sid }} .nx-gh-bundle-media {
+  aspect-ratio: 16 / 9;
+  background: var(--gh-bg-alt);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+#nx-gh-{{ sid }} .nx-gh-bundle-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: var(--gh-transition);
+}
+#nx-gh-{{ sid }} .nx-gh-bundle-card:hover .nx-gh-bundle-media img {
+  transform: scale(1.03);
+}
+#nx-gh-{{ sid }} .nx-gh-bundle-body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+#nx-gh-{{ sid }} .nx-gh-bundle-title {
+  font-family: var(--gh-font-heading);
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1.3;
+  margin: 0;
+  color: var(--gh-text);
+}
+#nx-gh-{{ sid }} .nx-gh-bundle-desc {
+  color: var(--gh-muted);
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+}
+#nx-gh-{{ sid }} .nx-gh-bundle-ctas {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: auto;
+  padding-top: 4px;
+}
+
+/* ═══════════════════════════════════════════════════════
+   TRUST BAR — Glass cards
+   ═══════════════════════════════════════════════════════ */
+#nx-gh-{{ sid }} .nx-gh-trust-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+}
+#nx-gh-{{ sid }} .nx-gh-trust-item {
+  border: none;
+  border-radius: var(--gh-radius);
+  padding: 16px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  background: var(--gh-accent-glass);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  box-shadow: var(--gh-shadow-rest);
+  transition: var(--gh-transition);
+  line-height: 1.5;
+}
+#nx-gh-{{ sid }} .nx-gh-trust-item:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--gh-shadow-hover);
+}
+#nx-gh-{{ sid }} .nx-gh-trust-icon {
+  font-size: 22px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+#nx-gh-{{ sid }} .nx-gh-trust-item strong {
+  color: var(--gh-text);
+}
+#nx-gh-{{ sid }} .nx-gh-trust-detail {
+  color: var(--gh-muted);
+  font-size: 14px;
+}
+
+/* ═══════════════════════════════════════════════════════
+   FOOTER CTA
+   ═══════════════════════════════════════════════════════ */
+#nx-gh-{{ sid }} .nx-gh-footer-cta {
+  text-align: center;
+  padding: 24px 0;
+  background: var(--gh-bg-alt);
+  border-radius: var(--gh-radius);
+}
+#nx-gh-{{ sid }} .nx-gh-footer-desc {
+  color: var(--gh-muted);
+  max-width: 520px;
+  margin: 0 auto 16px;
+  line-height: 1.6;
+}
+#nx-gh-{{ sid }} .nx-gh-footer-btns {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* ═══════════════════════════════════════════════════════
+   STICKY MOBILE CTA — Glassmorphism
+   ═══════════════════════════════════════════════════════ */
+#nx-gh-{{ sid }} .nx-gh-sticky {
+  position: sticky;
+  bottom: 0;
+  z-index: 3;
+  display: none;
+  gap: 8px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.8);
+  -webkit-backdrop-filter: saturate(140%) blur(14px);
+  backdrop-filter: saturate(140%) blur(14px);
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.06);
+}
+@media (max-width: 720px) {
+  #nx-gh-{{ sid }} .nx-gh-sticky { display: flex; }
+}
+#nx-gh-{{ sid }} .nx-gh-sticky-btn {
+  flex: 1;
+  text-align: center;
+  text-decoration: none;
+  border: none;
+  border-radius: var(--gh-radius-sm);
+  padding: 10px 12px;
+  font-family: var(--gh-font);
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--gh-text);
+  background: var(--gh-bg);
+  box-shadow: var(--gh-shadow-rest);
+  min-height: var(--touch-min, 44px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--gh-transition);
+}
+#nx-gh-{{ sid }} .nx-gh-sticky-btn:hover {
+  box-shadow: var(--gh-shadow-hover);
+}
+#nx-gh-{{ sid }} .nx-gh-sticky-btn:active {
+  transform: scale(0.98);
+}
+
+/* ═══════════════════════════════════════════════════════
+   ACCESSIBILITY — focus-visible + reduced motion
+   ═══════════════════════════════════════════════════════ */
+#nx-gh-{{ sid }} :focus-visible {
+  outline: 2px solid var(--gh-accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #nx-gh-{{ sid }} *,
+  #nx-gh-{{ sid }} *::before,
+  #nx-gh-{{ sid }} *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+{%- endstyle -%}
+
+<script>
+  (function() {
+    var root = document.getElementById('nx-gh-{{ sid }}');
+    if (!root) return;
+
+    var search = root.querySelector('#nx-gh-search-{{ sid }}');
+    var clearBtn = root.querySelector('.nx-gh-clear');
+    var chips = root.querySelectorAll('.nx-gh-chip');
+    var cards = Array.from(root.querySelectorAll('.nx-gh-card'));
+    var sortSel = root.querySelector('#nx-gh-sort-{{ sid }}');
+
+    var activeTag = 'all';
+    var query = '';
+
+    function norm(s) { return (s || '').toLowerCase().trim(); }
+
+    function matchCard(card, q, tag) {
+      var title = norm(card.dataset.title);
+      var desc = norm(card.dataset.desc);
+      var tags = (card.dataset.tags || '').split(',').map(function(t) { return norm(t); });
+      var qok = !q || title.indexOf(q) !== -1 || desc.indexOf(q) !== -1 || tags.some(function(t) { return t.indexOf(q) !== -1; });
+      var tok = tag === 'all' || tags.indexOf(norm(tag)) !== -1;
+      return qok && tok;
+    }
+
+    function apply() {
+      var q = norm(query);
+      var grid = root.querySelector('.nx-gh-grid');
+      var visible = [];
+
+      cards.forEach(function(card) {
+        var show = matchCard(card, q, activeTag);
+        card.style.display = show ? '' : 'none';
+        if (show) visible.push(card);
+      });
+
+      if (sortSel) {
+        var val = sortSel.value;
+        visible.sort(function(a, b) {
+          if (val === 'az') return a.dataset.title.localeCompare(b.dataset.title);
+          var wa = Number(a.dataset.weight || 9), wb = Number(b.dataset.weight || 9);
+          if (wa !== wb) return wa - wb;
+          return a.dataset.title.localeCompare(b.dataset.title);
+        });
+        visible.forEach(function(el) { grid.appendChild(el); });
+      }
+    }
+
+    if (search) search.addEventListener('input', function(e) { query = e.target.value; apply(); });
+    if (clearBtn) clearBtn.addEventListener('click', function() { query = ''; search.value = ''; apply(); search.focus(); });
+
+    chips.forEach(function(chip) {
+      chip.addEventListener('click', function() {
+        chips.forEach(function(c) {
+          c.classList.remove('is-active');
+          c.setAttribute('aria-selected', 'false');
+        });
+        chip.classList.add('is-active');
+        chip.setAttribute('aria-selected', 'true');
+        activeTag = chip.dataset.chip;
+        apply();
+      });
+    });
+
+    if (sortSel) sortSel.addEventListener('change', apply);
+
+    apply();
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Guides Hub",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Hero"
+    },
+    { "type": "text", "id": "hero_pill_text", "label": "Hero pill text", "default": "Knowledge Hub" },
+    { "type": "text", "id": "hero_title", "label": "Hero title", "default": "Nootropix Guides" },
+    { "type": "richtext", "id": "hero_subtitle", "label": "Hero subtitle", "default": "<p>Start simple, choose your goal, and build a stack that fits your brain and your day.</p>" },
+    { "type": "text", "id": "search_placeholder", "label": "Search placeholder", "default": "Search guides…" },
+    { "type": "checkbox", "id": "show_tags", "label": "Show filter chips", "default": true },
+    { "type": "checkbox", "id": "show_sort", "label": "Show sort dropdown", "default": true },
+    {
+      "type": "header",
+      "content": "Links"
+    },
+    { "type": "url", "id": "start_here_url", "label": "Start here URL (Beginner's Guide)" },
+    { "type": "url", "id": "shipping_url", "label": "Shipping page URL" },
+    { "type": "url", "id": "contact_url", "label": "Help / FAQ URL" },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "max_width",
+      "label": "Max width (px)",
+      "min": 900,
+      "max": 1600,
+      "step": 20,
+      "default": 1200
+    },
+    {
+      "type": "range",
+      "id": "padding_y",
+      "label": "Vertical padding (px)",
+      "min": 24,
+      "max": 120,
+      "step": 4,
+      "default": 48
+    }
+  ],
+  "blocks": [
+    {
+      "type": "guide",
+      "name": "Guide card",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Title" },
+        { "type": "textarea", "id": "desc", "label": "Short description" },
+        { "type": "url", "id": "url", "label": "Guide URL" },
+        { "type": "text", "id": "tag", "label": "Topic tag(s), comma separated (e.g., Beginner, Focus)" },
+        { "type": "text", "id": "read_time", "label": "Read time (minutes, optional)" },
+        { "type": "text", "id": "badge", "label": "Badge label (featured hero, optional)", "default": "Most Popular" },
+        { "type": "image_picker", "id": "image", "label": "Card image" },
+        { "type": "text", "id": "image_alt", "label": "Image alt text" },
+        { "type": "checkbox", "id": "featured", "label": "Mark as featured (used for hero)", "default": false }
+      ]
+    },
+    {
+      "type": "bundle",
+      "name": "Bundle / Stack",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Title" },
+        { "type": "textarea", "id": "desc", "label": "Short description" },
+        { "type": "url", "id": "url", "label": "Shop URL" },
+        { "type": "url", "id": "learn_url", "label": "Learn more URL (optional)" },
+        { "type": "image_picker", "id": "image", "label": "Image" },
+        { "type": "text", "id": "image_alt", "label": "Image alt text" }
+      ]
+    }
+  ],
+  "max_blocks": 48,
+  "presets": [
+    { "name": "Guides Hub (Nootropix)" }
+  ]
+}
+{% endschema %}

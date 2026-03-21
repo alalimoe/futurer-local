@@ -1,0 +1,85 @@
+{% comment %}
+  Render a media showcase component
+
+  @param heading {string} - The heading of the showcase
+  @param image_desktop {string} - The image for desktop
+  @param image_mobile {string} - The image for mobile
+  @param blocks {object} - The blocks of the showcase
+
+  @example
+  {% render 'media-showcase', heading: 'Heading', image_desktop: image_desktop, image_mobile: image_mobile, blocks: blocks %}
+{% endcomment %}
+
+{% liquid
+  assign media_with_product_blocks = blocks | where: 'type', 'media'
+  assign image_text_blocks = blocks | where: 'type', 'image'
+
+  assign container_class = 'media-showcase'
+  if settings.enable_border_radius
+    assign container_class = container_class | append: ' media-showcase--radius'
+  endif
+
+  assign final_video = ''
+  if block.settings.video != blank
+    assign final_video = block.settings.video.sources[1].url
+  else
+    if block.settings.video_url != blank
+      assign final_video = block.settings.video_url
+    endif
+  endif
+  assign aspect_ratio = block.settings.aspect_ratio
+  if aspect_ratio == 'auto'
+    assign aspect_ratio = '9/16'
+  endif
+  if aspect_ratio == 'custom'
+    assign aspect_ratio = block.settings.aspect_ratio_width | append: '/' | append: block.settings.aspect_ratio_height
+  endif
+
+  assign active_index_mobile = 2
+  if active_index > 3
+    assign active_index_mobile = active_index | minus: 1
+  endif
+%}
+
+<div class="{{ container_class }}">
+  <xo-container>
+    <div class="media-showcase__head">
+      <xo-grid class="media-showcase__grid" style="--xo-grid-row-gap: 0;">
+        <div class="media-showcase__heading" style="--lg: 8; --md: 8; --xs: 12; --start-md: 3; --start-lg: 3;">
+          {% render 'text-with-image', text: heading, blocks: image_text_blocks %}
+        </div>
+        <div class="media-showcase__image" style="--lg: 6; --md: 8; --xs: 12; --start-md: 3; --start-lg: 4;">
+          <div class="media-showcase__image media-showcase__image--desktop">
+            {% render 'animate-image', image: image_desktop, border_radius: 0, aspect_ratio: 'auto', disable_alt: true, max_width: 100 %}
+          </div>
+          <div class="media-showcase__image media-showcase__image--mobile">
+            {% render 'animate-image', image: image_mobile, border_radius: 0, aspect_ratio: 'auto', disable_alt: true, max_width: 100 %}
+          </div>
+        </div>
+      </xo-grid>
+    </div>
+  </xo-container>
+  <div class="media-showcase__content">
+    <xo-arc-slider xo-gap="60" xo-draggable="true" xo-snap="true" class="media-showcase__arc-slider">
+      <template>
+        {% for block in media_with_product_blocks %}
+          <div class="media-showcase__item">
+            {% render 'product-video-card', context: block %}
+          </div>
+        {% endfor %}
+      </template>
+      <div class="media-showcase__navigation">
+        <xo-arc-slider-prev class="media-showcase__navigation-button media-showcase__navigation-button--prev" role="button" tabindex="0" aria-label="Previous button">
+          <div class="media-showcase__navi-icon">
+            {% render 'button-slide', icon: 'arrow-left', icon_size: '2rem', size: '3.6rem', direction: 'left', style: 'primary' %}
+          </div>
+        </xo-arc-slider-prev>
+        <xo-arc-slider-next class="media-showcase__navigation-button media-showcase__navigation-button--next" role="button" tabindex="0" aria-label="Next button">
+          <div class="media-showcase__navi-icon">
+            {% render 'button-slide', icon: 'arrow-right', icon_size: '2rem', size: '3.6rem', direction: 'right', style: 'primary' %}
+          </div>
+        </xo-arc-slider-next>
+      </div>
+    </xo-arc-slider>
+  </div>
+</div>

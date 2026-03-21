@@ -1,0 +1,206 @@
+{% schema %}
+{
+  "name": "Editor's Pick",
+  "tag": "section",
+  "class": "section-beginners-editors-pick",
+  "settings": [
+    { "type": "text", "id": "label", "label": "Label", "default": "Editor's Pick" },
+    { "type": "textarea", "id": "description", "label": "Description", "default": "Our most popular starter bundle — everything a first-timer needs in one click." },
+    { "type": "product", "id": "product", "label": "Product" },
+    { "type": "color", "id": "bg_color", "label": "Background", "default": "#f9fafb" },
+    { "type": "color", "id": "accent_color", "label": "Accent", "default": "#FBBF24" }
+  ],
+  "presets": [{ "name": "Editor's Pick" }]
+}
+{% endschema %}
+
+{%- assign bgp_prod = section.settings.product -%}
+{% if bgp_prod != blank %}
+<div class="bgp-wrapper" id="bgp-{{ section.id }}">
+  <div class="bgp-inner">
+    <div class="bgp-card">
+      {% if bgp_prod.featured_image %}
+        <div class="bgp-img-col">
+          <img
+            src="{{ bgp_prod.featured_image | image_url: width: 500 }}"
+            srcset="{{ bgp_prod.featured_image | image_url: width: 250 }} 250w, {{ bgp_prod.featured_image | image_url: width: 500 }} 500w, {{ bgp_prod.featured_image | image_url: width: 750 }} 750w"
+            sizes="(max-width: 768px) 80vw, 280px"
+            alt="{{ bgp_prod.featured_image.alt | default: bgp_prod.title | escape }}"
+            width="500"
+            height="{{ 500 | divided_by: bgp_prod.featured_image.aspect_ratio | round }}"
+            loading="lazy"
+            decoding="async"
+            class="bgp-img"
+          >
+        </div>
+      {% endif %}
+      <div class="bgp-body">
+        {% if section.settings.label != blank %}
+          <span class="bgp-label">{{ section.settings.label }}</span>
+        {% endif %}
+        <h2 class="bgp-title">{{ bgp_prod.title }}</h2>
+        {% if section.settings.description != blank %}
+          <p class="bgp-desc">{{ section.settings.description }}</p>
+        {% endif %}
+        <div class="bgp-price">
+          {%- if bgp_prod.compare_at_price > bgp_prod.price -%}
+            <s class="bgp-price-compare">{{ bgp_prod.compare_at_price | money }}</s>
+          {%- endif -%}
+          {{ bgp_prod.price | money }}
+        </div>
+        <xo-cart-add {% unless bgp_prod.available %}xo-disabled{% endunless %}>
+          <button type="button" class="bgp-btn" {% unless bgp_prod.available %}disabled{% endunless %} aria-label="Add {{ bgp_prod.title | escape }} to cart">
+            {%- if bgp_prod.available -%}Add to Cart{%- else -%}Sold Out{%- endif -%}
+          </button>
+          <input type="hidden" name="id" value="{{ bgp_prod.selected_or_first_available_variant.id }}">
+        </xo-cart-add>
+        <a href="{{ bgp_prod.url }}" class="bgp-link">View full details &rarr;</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<style>
+  #bgp-{{ section.id }} {
+    --bgp-bg: {{ section.settings.bg_color }};
+    --bgp-accent: {{ section.settings.accent_color }};
+    --bgp-text: var(--color-text-main, #111827);
+    --bgp-muted: var(--color-text-muted, #4b5563);
+    --bgp-border: var(--nx-pill-border, #E5E7EB);
+    --bgp-radius: var(--nx-radius, 14px);
+    --bgp-font: var(--font-body-family, sans-serif);
+    --bgp-font-heading: var(--font-heading-family, sans-serif);
+    --bgp-transition: var(--transition-smooth, all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1));
+    --bgp-touch: var(--touch-min, 44px);
+  }
+
+  .bgp-wrapper {
+    background: var(--bgp-bg);
+    padding: 64px var(--page-gutter);
+    font-family: var(--bgp-font);
+  }
+  .bgp-inner {
+    max-width: var(--container-width-narrow);
+    margin: 0 auto;
+  }
+
+  .bgp-card {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 40px;
+    align-items: center;
+    background: var(--color-bg-primary, #fff);
+    border: 1px solid var(--bgp-border);
+    border-radius: var(--bgp-radius);
+    padding: 32px;
+    box-shadow: var(--shadow-md, 0 8px 24px rgba(0,0,0,0.06));
+  }
+
+  .bgp-img {
+    width: 100%;
+    height: auto;
+    border-radius: calc(var(--bgp-radius) - 4px);
+    object-fit: contain;
+  }
+
+  .bgp-label {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--color-accent-dark, #92400e);
+    background: rgba(251, 191, 36, 0.12);
+    padding: 4px 12px;
+    border-radius: 100px;
+    margin-bottom: 12px;
+  }
+
+  .bgp-title {
+    font-family: var(--bgp-font-heading);
+    font-size: clamp(1.5rem, 2.5vw, 2rem);
+    font-weight: 800;
+    color: var(--bgp-text);
+    margin: 0 0 10px;
+    letter-spacing: -0.02em;
+  }
+
+  .bgp-desc {
+    font-size: clamp(0.9375rem, 1.2vw, 1.0625rem);
+    line-height: 1.7;
+    color: var(--bgp-muted);
+    margin: 0 0 16px;
+  }
+
+  .bgp-price {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--bgp-text);
+    margin-bottom: 16px;
+  }
+  .bgp-price-compare {
+    color: var(--bgp-muted);
+    font-weight: 400;
+    margin-right: 8px;
+  }
+
+  .bgp-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: var(--bgp-touch);
+    padding: 0.75rem 2rem;
+    font-family: var(--bgp-font);
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    background: var(--bgp-accent);
+    border: none;
+    border-radius: var(--bgp-radius);
+    cursor: pointer;
+    transition: var(--bgp-transition);
+    box-shadow: var(--shadow-gold-glow, 0 4px 14px rgba(251,191,36,0.25));
+  }
+  .bgp-btn:hover:not(:disabled) {
+    box-shadow: var(--shadow-gold-glow-hover, 0 8px 24px rgba(251,191,36,0.35));
+    transform: translateY(-1px);
+  }
+  .bgp-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .bgp-link {
+    display: inline-block;
+    margin-top: 10px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-accent-dark, #92400e);
+    text-decoration: none;
+    transition: var(--bgp-transition);
+  }
+  .bgp-link:hover { text-decoration: underline; }
+
+  .bgp-wrapper :focus-visible {
+    outline: 2px solid var(--bgp-accent);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .bgp-wrapper *, .bgp-wrapper *::before, .bgp-wrapper *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .bgp-card {
+      grid-template-columns: 1fr;
+      gap: 24px;
+      padding: 24px;
+      text-align: center;
+    }
+    .bgp-img { max-width: 240px; margin: 0 auto; }
+  }
+</style>

@@ -1,0 +1,52 @@
+{% comment %}
+  Renders a shop-look-2
+
+  Accepts:
+  - product: {Object} Product (optional)
+  - placement: {string} Placement (optional)
+  Usage:
+  {% render 'shop-look-2' %}
+{% endcomment %}
+
+{% assign min = 10000 %}
+{% assign max = 99999 %}
+{% assign range = max | minus: min | plus: 1 %}
+{% assign random_offset = 'now' | date: '%N' | modulo: range %}
+{% assign random_number = min | plus: random_offset %}
+{%- assign placeholder_image = 'collection-1' -%}
+
+<div class="shop-look-2">
+  <xo-popover-trigger
+    class="shop-look-2__trigger"
+    xo-name="hotspot-{{ random_number }}"
+    {% if type == 'hover' %}
+      xo-type="hover"
+    {% endif %}
+    style="--color: {{ color }}"
+    tabindex="0"
+    role="button"
+    aria-label="Hotspot trigger"
+  >
+    <div class="shop-look-2__container" style="--size: {{ size }}rem; --color: {{ color }}; --delay: {{ timer_delay }}s">
+      <div class="shop-look-2__point shop-look-2__point--1"></div>
+      <div class="shop-look-2__point shop-look-2__point--2"></div>
+      <div class="shop-look-2__point shop-look-2__point--3"></div>
+    </div>
+  </xo-popover-trigger>
+  <xo-popover
+    class="shop-look-2__popover{% if settings.enable_border_radius %} shop-look-2__popover--radius{% endif %}"
+    xo-name="hotspot-{{ random_number }}"
+    xo-portal
+    xo-placement="{{ placement | default: 'right-center' }}"
+  >
+    {% render 'product-card-custom',
+      product: product,
+      show_image: section.settings.product_card_show_image,
+      show_secondary_image: section.settings.product_card_show_secondary_image,
+      show_price: section.settings.product_card_show_price,
+      media_aspect_ratio: section.settings.product_card_aspect_ratio,
+      card_color_scheme: section.settings.card_color_scheme,
+      placeholder_image: placeholder_image
+    %}
+  </xo-popover>
+</div>

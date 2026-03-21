@@ -1,0 +1,181 @@
+{{ 'product-carousel.css' | asset_url | stylesheet_tag }}
+
+{% liquid
+  assign product_list = section.settings.product_list
+  assign autoplay = section.settings.autoplay
+  assign autoplay_speed = section.settings.autoplay_speed
+  assign enable_pagination = section.settings.enable_pagination
+  assign show_on_pagination = section.settings.show_on_pagination
+  assign enable_navigation = section.settings.enable_navigation
+  assign show_on_navigation = section.settings.show_on_navigation
+%}
+
+<section {% render 'section-attr' %}>
+  <div class="xo-product-carousel">
+    <xo-container class="xo-product-carousel__container">
+      <div class="xo-product-carousel__content">
+        {% render 'product-carousel',
+          product_list: product_list,
+          autoplay: autoplay,
+          autoplay_speed: autoplay_speed,
+          enable_navigation: enable_navigation,
+          show_on_navigation: show_on_navigation,
+          enable_pagination: enable_pagination,
+          show_on_pagination: show_on_pagination
+        %}
+      </div>
+    </xo-container>
+  </div>
+</section>
+
+{% schema %}
+{
+  "tag": "section",
+  "name": "t:sections.product_carousel.name",
+  "class": "section-product-carousel",
+  "settings": [
+    {
+      "type": "product_list",
+      "id": "product_list",
+      "label": "Products"
+    },
+    {
+      "type": "select",
+      "id": "autoplay",
+      "label": "Autoplay",
+      "options": [
+        {
+          "value": "off",
+          "label": "Off"
+        },
+        {
+          "value": "on",
+          "label": "On"
+        }
+      ],
+      "default": "off"
+    },
+    {
+      "type": "range",
+      "id": "autoplay_speed",
+      "min": 500,
+      "max": 9000,
+      "step": 500,
+      "unit": "ms",
+      "label": "Autoplay speed",
+      "default": 3000
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_navigation",
+      "label": "Enable navigation",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "show_on_navigation",
+      "label": "Show on",
+      "options": [
+        {
+          "value": "all",
+          "label": "All"
+        },
+        {
+          "value": "desktop",
+          "label": "Desktop"
+        },
+        {
+          "value": "mobile",
+          "label": "Mobile"
+        }
+      ],
+      "default": "desktop",
+      "visible_if": "{{ section.settings.enable_navigation == true }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_pagination",
+      "label": "Enable pagination",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "show_on_pagination",
+      "label": "Show on",
+      "options": [
+        {
+          "value": "all",
+          "label": "All"
+        },
+        {
+          "value": "desktop",
+          "label": "Desktop"
+        },
+        {
+          "value": "mobile",
+          "label": "Mobile"
+        }
+      ],
+      "default": "mobile",
+      "visible_if": "{{ section.settings.enable_pagination == true }}"
+    },
+    {
+      "type": "header",
+      "content": "General settings"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Section color scheme"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color"
+    },
+    {
+      "type": "color_background",
+      "id": "background_gradient",
+      "label": "Background gradient"
+    },
+    {
+      "type": "number",
+      "id": "padding_top_desktop",
+      "label": "Padding top desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_desktop",
+      "label": "Padding bottom desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_top_mobile",
+      "label": "Padding top mobile",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_mobile",
+      "label": "Padding bottom mobile",
+      "default": 50
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.product_carousel.name"
+    }
+  ],
+  "disabled_on": {
+    "groups": [
+      "header",
+      "footer",
+      "custom.overlay",
+      "custom.popups",
+      "custom.features"
+    ]
+  }
+}
+{% endschema %}

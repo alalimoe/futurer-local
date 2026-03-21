@@ -1,0 +1,632 @@
+{%- style -%}
+  #ProtocolJourney-{{ section.id }} {
+    --pj-primary: {{ section.settings.color_primary }};
+    --pj-bg: {{ section.settings.color_bg }};
+    --pj-text: {{ section.settings.color_text }};
+    --pj-card: {{ section.settings.color_card_bg }};
+    --pj-border: {{ section.settings.color_border }};
+    --pj-warning-bg: #fef2f2;
+    --pj-warning-text: #ef4444;
+    max-width: {{ section.settings.max_width }}px;
+    margin: {{ section.settings.margin_top }}px auto {{ section.settings.margin_bottom }}px auto;
+    font-family: inherit;
+    color: var(--pj-text);
+    padding: 20px var(--page-gutter);
+  }
+  #ProtocolJourney-{{ section.id }} * { box-sizing: border-box; }
+  .pj-header { text-align: center; margin-bottom: 2.5rem; }
+  .pj-header h2 { font-size: 2.25rem; margin-bottom: 0.5rem; font-weight: 800; color: var(--pj-text); line-height: 1.2; }
+  .pj-header p { color: inherit; opacity: 0.7; font-size: 1.05rem; max-width: 650px; margin: 0 auto; }
+  .phase-title { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 800; color: var(--pj-primary); margin-bottom: 16px; border-bottom: 1px solid var(--pj-border); padding-bottom: 8px; }
+  .pj-step { background: var(--pj-bg); border: 1px solid var(--pj-border); border-radius: var(--nx-radius-md); padding: 24px; margin-bottom: 24px; display: none; transition: opacity 0.4s ease; opacity: 0; transform: translateY(10px); }
+  .pj-step.active { display: block; opacity: 1; transform: translateY(0); animation: pjFadeIn 0.5s ease forwards; box-shadow: var(--shadow-sm); }
+  .pj-split-step { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-top: 16px; }
+  .pj-split-col { display: flex; flex-direction: column; gap: 12px; }
+  .pj-split-title { font-size: 0.95rem; font-weight: 700; color: var(--pj-text); border-bottom: 1px solid var(--pj-border); padding-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.8; }
+  .pj-explainer { background: var(--pj-card); border-left: 3px solid var(--pj-primary); padding: 16px 20px; margin: 0 0 24px 20px; font-size: 0.95rem; border-radius: 0 8px 8px 0; line-height: 1.6; display: none; color: var(--pj-text); opacity: 0.9; }
+  .pj-explainer.active { display: block; animation: pjFadeIn 0.5s ease forwards; }
+  .step-title { font-size: 1.15rem; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 12px; }
+  .step-badge { background: var(--pj-primary); color: var(--color-text-primary); width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.875rem; font-weight: 700; flex-shrink: 0; }
+  .pj-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; }
+  .pj-btn { padding: 14px 12px; border: 2px solid var(--pj-border); background: var(--pj-bg); border-radius: var(--nx-radius-sm); cursor: pointer; font-size: 0.95rem; font-weight: 600; transition: var(--transition-fast); text-align: center; color: var(--pj-text); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; position: relative; outline: none; }
+  .pj-btn span.sub { font-size: 0.75rem; opacity: 0.6; font-weight: 500; line-height: 1.2; }
+  .pj-btn:hover { border-color: var(--pj-primary); }
+  .pj-btn.selected { background: var(--pj-primary); color: var(--color-text-primary); border-color: var(--pj-primary); }
+  .pj-btn.selected span.sub { color: var(--color-text-primary); opacity: 0.8; }
+  .pj-btn:focus-visible { box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.4); border-color: var(--pj-primary); }
+  .rec-badge { background: var(--pj-primary); color: var(--color-text-primary); font-size: 0.6rem; padding: 3px 6px; border-radius: 4px; margin-top: 2px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; display: inline-block; }
+  .pj-btn.selected .rec-badge { background: #000; color: var(--pj-primary); }
+  .pj-recipe-card { background: var(--pj-bg); border: 2px solid var(--pj-border); border-radius: var(--nx-radius-md); padding: 0; overflow: hidden; margin-top: 10px; text-align: left; }
+  .pj-formula-banner { background: #fdfbf7; color: var(--pj-text); padding: 20px 24px; text-align: center; font-size: 1.1rem; font-weight: 500; border-bottom: 1px solid var(--pj-border); line-height: 1.5; }
+  .pj-formula-banner .hl { color: var(--pj-primary); font-weight: 800; background: #000; padding: 2px 8px; border-radius: 4px; display: inline-block; }
+  .pj-step-list { display: flex; flex-direction: column; background: var(--pj-bg); }
+  .pj-step-row { display: flex; flex-direction: column; padding: 24px 28px; border-bottom: 1px solid var(--pj-border); position: relative; opacity: 0; transform: translateY(10px); }
+  .pj-step-row:last-child { border-bottom: none; }
+  .pj-row-header { font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 800; color: var(--pj-text); opacity: 0.7; display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+  .pj-row-header span { font-size: 1.15rem; font-weight: 800; color: var(--pj-text); opacity: 1; text-transform: none; letter-spacing: normal;}
+  .pj-row-desc { font-size: 0.95rem; opacity: 0.85; line-height: 1.6; }
+  .pj-step-highlight { background: #fdfbf7; }
+  .pj-step-highlight .pj-row-header { color: #d97706; opacity: 1; }
+  .pj-step-highlight .pj-row-header span { color: #d97706; font-size: 1.35rem; }
+  .pj-step.active .pj-step-row { animation: pjFadeInUp 0.5s ease forwards; }
+  .pj-step.active .pj-step-row:nth-child(1) { animation-delay: 0.1s; }
+  .pj-step.active .pj-step-row:nth-child(2) { animation-delay: 0.25s; }
+  .pj-step.active .pj-step-row:nth-child(3) { animation-delay: 0.4s; }
+  .pj-step.active .pj-step-row:nth-child(4) { animation-delay: 0.55s; }
+  .pj-action-row { padding: 20px; text-align: center; background: var(--pj-bg); border-top: 1px solid var(--pj-border); }
+  .pj-copy-btn { background: var(--pj-text); color: var(--pj-bg); border: none; padding: 14px 28px; border-radius: var(--nx-radius-sm); font-size: 1rem; font-weight: 700; cursor: pointer; transition: var(--transition-fast); display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; outline: none; }
+  .pj-copy-btn:hover { opacity: 0.9; }
+  .pj-copy-btn:focus-visible { box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.4); }
+  .pj-copy-btn.success { background: #10b981; color: #fff; }
+  .pj-warning { color: var(--pj-warning-text); background: var(--pj-warning-bg); border: 1px solid var(--pj-warning-text); padding: 12px; border-radius: var(--nx-radius-sm); font-size: 0.85rem; margin-top: 16px; font-weight: 600; text-align: left; display: none; line-height: 1.4; }
+  .pj-disclaimer { font-size: 0.8rem; opacity: 0.6; text-align: center; margin-top: 24px; line-height: 1.4; }
+  @keyframes pjFadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes pjFadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  @media (max-width: 768px) { 
+    .pj-split-step { grid-template-columns: 1fr; gap: 32px; } 
+    .pj-step-row { padding: 20px; }
+  }
+{%- endstyle -%}
+
+<div id="ProtocolJourney-{{ section.id }}" data-section-id="{{ section.id }}">
+  <div class="pj-header">
+    <h2>{{ section.settings.heading }}</h2>
+    <p>{{ section.settings.subheading }}</p>
+  </div>
+
+  <div id="phase-1-{{ section.id }}">
+    <div class="phase-title">Phase 1: Exploration</div>
+
+    <div class="pj-step active" id="pj-step-1-{{ section.id }}">
+      <div class="step-title"><span class="step-badge">1</span> What is your primary research interest?</div>
+      <div class="pj-grid">
+        {% if section.settings.goal_1 != blank %}<button type="button" class="pj-btn goal-btn" data-goal="goal_1">{{ section.settings.goal_1 }}</button>{% endif %}
+        {% if section.settings.goal_2 != blank %}<button type="button" class="pj-btn goal-btn" data-goal="goal_2">{{ section.settings.goal_2 }}</button>{% endif %}
+        {% if section.settings.goal_3 != blank %}<button type="button" class="pj-btn goal-btn" data-goal="goal_3">{{ section.settings.goal_3 }}</button>{% endif %}
+        {% if section.settings.goal_4 != blank %}<button type="button" class="pj-btn goal-btn" data-goal="goal_4">{{ section.settings.goal_4 }}</button>{% endif %}
+      </div>
+    </div>
+
+    <div class="pj-explainer" id="explainer-1-{{ section.id }}" aria-live="polite">
+      <em>Research objectives dictate compound selection. Based on your goal, these are the clinical standards evaluated globally.</em>
+    </div>
+
+    <div class="pj-step" id="pj-step-2-{{ section.id }}">
+      <div class="step-title"><span class="step-badge">2</span> Associated Peptides</div>
+      <p style="font-size: 0.85rem; opacity: 0.7; margin-top: -8px; margin-bottom: 16px;">Select a compound to learn more about its standard research profile.</p>
+      <div class="pj-grid" id="peptides-container-{{ section.id }}"></div>
+    </div>
+
+    <div class="pj-explainer" id="explainer-2-{{ section.id }}" aria-live="polite"></div>
+  </div>
+
+  <div id="phase-2-{{ section.id }}" style="display: none;">
+    <div class="phase-title" style="margin-top: 20px;">Phase 2: Laboratory Protocol Guide</div>
+
+    <div class="pj-step" id="pj-step-3-{{ section.id }}">
+      <div class="step-title"><span class="step-badge">3</span> Your Physical Inventory</div>
+      <p style="font-size: 0.85rem; opacity: 0.7; margin-top: -8px; margin-bottom: 16px;">Select the vial size you are using, and the capacity of your U-100 insulin syringe.</p>
+      
+      <div class="pj-split-step">
+        <div class="pj-split-col">
+          <div class="pj-split-title">1. Vial Quantity (Powder)</div>
+          <div class="pj-grid" style="grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));" id="vials-container-{{ section.id }}"></div>
+        </div>
+        
+        <div class="pj-split-col">
+          <div class="pj-split-title">2. Syringe Capacity (U-100)</div>
+          <div class="pj-grid" style="grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));">
+            <button type="button" class="pj-btn syringe-btn" data-vol="0.3" data-units="30">0.3 mL <span class="sub">30 U max</span></button>
+            <button type="button" class="pj-btn syringe-btn" data-vol="0.5" data-units="50">0.5 mL <span class="sub">50 U max</span></button>
+            <button type="button" class="pj-btn syringe-btn" data-vol="1.0" data-units="100">1.0 mL <span class="sub">100 U max</span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pj-step" id="pj-step-4-{{ section.id }}" style="opacity: 0.85; padding-bottom: 16px; background: transparent; border: 1px dashed var(--pj-border);">
+      <div class="step-title" style="margin-bottom: 0; font-size: 1.05rem;"><span class="step-badge" style="width:24px; height:24px; font-size:0.75rem;">4</span> Adjustable Lab Variables</div>
+      <p style="font-size: 0.85rem; opacity: 0.8; margin-top: 8px;">We auto-generated your recipe below based on standard protocols. Adjust the dials here to dynamically scale your dose or dilution.</p>
+      
+      <div class="pj-split-step">
+        <div class="pj-split-col">
+          <div class="pj-split-title">1. Target Dose</div>
+          <div class="pj-grid" style="grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));" id="dose-container-{{ section.id }}"></div>
+        </div>
+
+        <div class="pj-split-col">
+          <div class="pj-split-title">2. Amount of BAC Water</div>
+          <div class="pj-grid" style="grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));" id="water-container-{{ section.id }}"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pj-step" id="pj-step-5-{{ section.id }}">
+      <div class="step-title"><span class="step-badge">5</span> Your Final Protocol</div>
+      <div class="pj-recipe-card">
+        
+        <div class="pj-formula-banner" id="recipe-summary-{{ section.id }}">
+          Quick Formula: --
+        </div>
+        
+        <div class="pj-step-list">
+          <div class="pj-step-row">
+            <div class="pj-row-header">Step 1: Preparation &rarr; <span id="out-water-{{ section.id }}">--</span></div>
+            <div class="pj-row-desc" id="exp-water-{{ section.id }}">--</div>
+          </div>
+          <div class="pj-step-row">
+            <div class="pj-row-header">Step 2: Administration &rarr; <span id="out-dose-{{ section.id }}">--</span></div>
+            <div class="pj-row-desc" id="exp-dose-{{ section.id }}">--</div>
+          </div>
+          <div class="pj-step-row pj-step-highlight">
+            <div class="pj-row-header">Step 3: Syringe Draw To &rarr; <span id="out-units-{{ section.id }}">--</span></div>
+            <div class="pj-row-desc" id="exp-units-{{ section.id }}">--</div>
+            <div class="pj-warning" id="capacity-warning-{{ section.id }}"></div>
+          </div>
+          <div class="pj-step-row">
+            <div class="pj-row-header">Step 4: Vial Lifespan &rarr; <span id="out-yield-{{ section.id }}">--</span></div>
+            <div class="pj-row-desc" id="exp-yield-{{ section.id }}">--</div>
+          </div>
+        </div>
+
+        <div class="pj-action-row">
+          <button type="button" class="pj-copy-btn" id="copy-btn-{{ section.id }}">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+            <span id="copy-text-{{ section.id }}">Copy Protocol to Notes</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="pj-disclaimer">{{ section.settings.disclaimer }}</p>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const wrapper = document.getElementById('ProtocolJourney-{{ section.id }}');
+  if (!wrapper) return;
+
+  // Cache all frequently-used nodes once to cut DOM churn
+  const cache = {
+    phase2: wrapper.querySelector('#phase-2-{{ section.id }}'),
+    step: [
+      wrapper.querySelector('#pj-step-1-{{ section.id }}'),
+      wrapper.querySelector('#pj-step-2-{{ section.id }}'),
+      wrapper.querySelector('#pj-step-3-{{ section.id }}'),
+      wrapper.querySelector('#pj-step-4-{{ section.id }}'),
+      wrapper.querySelector('#pj-step-5-{{ section.id }}'),
+    ],
+    explainer1: wrapper.querySelector('#explainer-1-{{ section.id }}'),
+    explainer2: wrapper.querySelector('#explainer-2-{{ section.id }}'),
+    containers: {
+      peptides: wrapper.querySelector('#peptides-container-{{ section.id }}'),
+      vials: wrapper.querySelector('#vials-container-{{ section.id }}'),
+      water: wrapper.querySelector('#water-container-{{ section.id }}'),
+      dose: wrapper.querySelector('#dose-container-{{ section.id }}'),
+    },
+    summary: wrapper.querySelector('#recipe-summary-{{ section.id }}'),
+    outWater: wrapper.querySelector('#out-water-{{ section.id }}'),
+    outDose: wrapper.querySelector('#out-dose-{{ section.id }}'),
+    outUnits: wrapper.querySelector('#out-units-{{ section.id }}'),
+    outYield: wrapper.querySelector('#out-yield-{{ section.id }}'),
+    expWater: wrapper.querySelector('#exp-water-{{ section.id }}'),
+    expDose: wrapper.querySelector('#exp-dose-{{ section.id }}'),
+    expUnits: wrapper.querySelector('#exp-units-{{ section.id }}'),
+    expYield: wrapper.querySelector('#exp-yield-{{ section.id }}'),
+    warning: wrapper.querySelector('#capacity-warning-{{ section.id }}'),
+    copyBtn: wrapper.querySelector('#copy-btn-{{ section.id }}'),
+    copyText: wrapper.querySelector('#copy-text-{{ section.id }}'),
+    syringeButtons: wrapper.querySelectorAll('.syringe-btn'),
+  };
+
+  const db = { goal_1: [], goal_2: [], goal_3: [], goal_4: [] };
+
+  {% for block in section.blocks %}
+    {% if block.type == 'peptide' %}
+      db["{{ block.settings.goal_category }}"].push({
+        id: {{ block.settings.title | json }},
+        sizes: ({{ block.settings.vial_sizes | json }} || "").split(',').map(s => parseFloat(s.trim())).filter(n => !isNaN(n)),
+        waterAmounts: ({{ block.settings.bac_water_amounts | json }} || "").split(',').map(s => parseFloat(s.trim())).filter(n => !isNaN(n)),
+        defaultDose: parseFloat({{ block.settings.target_dose | json }}),
+        availableDoses: ({{ block.settings.available_doses | json }} || "").split(',').map(s => parseFloat(s.trim())).filter(n => !isNaN(n)),
+        hint: {{ block.settings.educational_hint | json }}
+      });
+    {% endif %}
+  {% endfor %}
+
+  const state = { goal: null, peptideObj: null, vialMg: null, waterVol: null, targetDoseMcg: null, syringeMaxUnits: 100, syringeVol: "1.0" };
+
+  function isFiniteNum(v) { return Number.isFinite(v); }
+  function friendlyError(msg) {
+    cache.explainer2.innerHTML = `<p style="color:#b91c1c;font-weight:600;">${msg}</p>`;
+    cache.explainer2.classList.add('active');
+  }
+  function resetSelection(selector) {
+    wrapper.querySelectorAll(selector).forEach(node => node.classList.remove('selected'));
+  }
+  function attachButtonBehavior(node, handler) {
+    node.addEventListener('click', handler);
+    node.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handler(e); }
+    });
+  }
+  function scrollToElem(elem) {
+    if (!elem) return;
+    const y = elem.getBoundingClientRect().top + window.scrollY - 12;
+    window.scrollTo({ top: y, behavior: 'smooth' });
+  }
+
+  // Phase 1 goal buttons
+  wrapper.querySelectorAll('.goal-btn').forEach(btn => {
+    attachButtonBehavior(btn, function() {
+      resetSelection('.goal-btn');
+      this.classList.add('selected');
+      state.goal = this.dataset.goal;
+      state.peptideObj = state.vialMg = state.waterVol = state.targetDoseMcg = null;
+      cache.explainer2.classList.remove('active');
+      cache.phase2.style.display = 'none';
+      cache.step.slice(2).forEach(el => el && el.classList.remove('active'));
+      cache.explainer1.classList.add('active');
+      cache.containers.peptides.innerHTML = '';
+
+      if (db[state.goal] && db[state.goal].length > 0) {
+        db[state.goal].forEach(pep => {
+          const pBtn = document.createElement('button');
+          pBtn.type = 'button';
+          pBtn.className = 'pj-btn peptide-btn';
+          pBtn.innerText = pep.id;
+          attachButtonBehavior(pBtn, () => selectPeptide(pBtn, pep));
+          cache.containers.peptides.appendChild(pBtn);
+        });
+        cache.step[1].classList.add('active');
+        scrollToElem(cache.step[1]);
+      } else {
+        cache.containers.peptides.innerHTML = '<div style="opacity:0.7;">No peptides configured for this category.</div>';
+        cache.step[1].classList.add('active');
+      }
+    });
+  });
+
+  function selectPeptide(btnElement, pepObj) {
+    resetSelection('.peptide-btn');
+    btnElement.classList.add('selected');
+    state.peptideObj = pepObj;
+
+    // Auto-select 1 mL syringe when present
+    resetSelection('.syringe-btn');
+    const defaultSyringe = wrapper.querySelector('.syringe-btn[data-vol="1.0"]');
+    if (defaultSyringe) {
+      defaultSyringe.classList.add('selected');
+      state.syringeMaxUnits = parseInt(defaultSyringe.dataset.units, 10);
+      state.syringeVol = defaultSyringe.dataset.vol;
+    } else if (cache.syringeButtons.length) {
+      const first = cache.syringeButtons[0];
+      first.classList.add('selected');
+      state.syringeMaxUnits = parseInt(first.dataset.units, 10);
+      state.syringeVol = first.dataset.vol;
+    } else {
+      state.syringeMaxUnits = 100;
+      state.syringeVol = "1.0";
+    }
+
+    cache.explainer2.innerHTML = pepObj.hint || '';
+    cache.explainer2.classList.add('active');
+    cache.phase2.style.display = 'block';
+    cache.step[2].classList.add('active');
+    cache.step[3].classList.remove('active');
+    cache.step[4].classList.remove('active');
+    state.vialMg = state.waterVol = state.targetDoseMcg = null;
+    cache.containers.vials.innerHTML = '';
+
+    if (!pepObj.sizes || pepObj.sizes.length === 0) {
+      friendlyError('No vial sizes configured for this peptide. Please add sizes in the section settings.');
+      return;
+    }
+
+    pepObj.sizes.forEach((size, index) => {
+      if (!isFiniteNum(size)) return;
+      const vBtn = document.createElement('button');
+      vBtn.type = 'button';
+      vBtn.className = 'pj-btn size-btn';
+      vBtn.innerText = size + ' mg';
+      attachButtonBehavior(vBtn, () => selectSize(vBtn, size, index));
+      cache.containers.vials.appendChild(vBtn);
+    });
+    setTimeout(() => scrollToElem(cache.step[2]), 150);
+  }
+
+  // Syringe buttons
+  cache.syringeButtons.forEach(btn => {
+    attachButtonBehavior(btn, function() {
+      resetSelection('.syringe-btn');
+      this.classList.add('selected');
+      state.syringeMaxUnits = parseInt(this.dataset.units, 10);
+      state.syringeVol = this.dataset.vol;
+      if (state.vialMg) generateProtocol(false);
+    });
+  });
+
+  // Phase 2 selections
+  function selectSize(btnElement, size, index) {
+    resetSelection('.size-btn');
+    btnElement.classList.add('selected');
+    state.vialMg = size;
+
+    const waterOptions = state.peptideObj.waterAmounts || [];
+    const mappedWater = isFiniteNum(waterOptions[index]) ? waterOptions[index] : waterOptions.find(isFiniteNum);
+    if (!isFiniteNum(mappedWater)) {
+      friendlyError('Water amount is missing or invalid for this vial size. Please update the water mapping.');
+      return;
+    }
+    state.waterVol = mappedWater;
+    state.targetDoseMcg = state.peptideObj.defaultDose;
+
+    renderDoseColumn();
+    renderWaterColumn(mappedWater);
+    generateProtocol(false);
+
+    cache.step[3].classList.add('active');
+    cache.step[4].classList.add('active');
+    cache.step[4].style.display = 'block';
+    cache.step[4].style.opacity = 0.85;
+    cache.step[4].style.transform = 'translateY(0)';
+    cache.step[4].style.animation = 'pjFadeIn 0.5s ease forwards';
+    cache.step[4].classList.add('active');
+    cache.step[4].offsetHeight; // force repaint for animation reset
+    cache.step[4].classList.add('active');
+    setTimeout(() => scrollToElem(cache.step[3]), 150);
+  }
+
+  function renderDoseColumn() {
+    cache.containers.dose.innerHTML = '';
+    const defDose = state.peptideObj.defaultDose;
+    const customOptions = state.peptideObj.availableDoses && state.peptideObj.availableDoses.length > 0
+      ? [...state.peptideObj.availableDoses]
+      : [Math.round(defDose * 0.5), defDose, Math.round(defDose * 1.5), Math.round(defDose * 2)];
+
+    if (!customOptions.includes(defDose)) customOptions.push(defDose);
+    const doseOpts = [...new Set(customOptions.filter(isFiniteNum))].sort((a, b) => a - b);
+
+    doseOpts.forEach(dose => {
+      const dBtn = document.createElement('button');
+      dBtn.type = 'button';
+      dBtn.className = 'pj-btn dose-btn';
+      if (dose === state.targetDoseMcg) dBtn.classList.add('selected');
+      const badgeHtml = dose === defDose ? '<span class="rec-badge">Recommended</span>' : '';
+      const labelText = dose >= 1000 ? `${dose/1000} mg` : `${dose} mcg`;
+      const subText = dose >= 1000 ? `<span class=\"sub\" style=\"font-size:0.75rem;opacity:0.6;\">(${dose} mcg)</span>` : '';
+      dBtn.innerHTML = `${labelText} ${subText} ${badgeHtml}`;
+      attachButtonBehavior(dBtn, () => selectDose(dBtn, dose));
+      cache.containers.dose.appendChild(dBtn);
+    });
+  }
+
+  function renderWaterColumn(recommended) {
+    cache.containers.water.innerHTML = '';
+    const standardWaterOptions = [1, 2, 3, 4, 5];
+    if (!standardWaterOptions.includes(recommended)) standardWaterOptions.push(recommended);
+    standardWaterOptions.filter(isFiniteNum).sort((a, b) => a - b).forEach(vol => {
+      const wBtn = document.createElement('button');
+      wBtn.type = 'button';
+      wBtn.className = 'pj-btn water-btn';
+      if (vol === state.waterVol) wBtn.classList.add('selected');
+      const badgeHtml = vol === recommended ? '<span class="rec-badge">Recommended</span>' : '';
+      wBtn.innerHTML = `${vol} mL ${badgeHtml}`;
+      attachButtonBehavior(wBtn, () => selectWater(wBtn, vol));
+      cache.containers.water.appendChild(wBtn);
+    });
+  }
+
+  function selectWater(btnElement, vol) {
+    resetSelection('.water-btn');
+    btnElement.classList.add('selected');
+    state.waterVol = parseFloat(vol);
+    generateProtocol(false);
+  }
+
+  function selectDose(btnElement, dose) {
+    resetSelection('.dose-btn');
+    btnElement.classList.add('selected');
+    state.targetDoseMcg = parseFloat(dose);
+    generateProtocol(false);
+  }
+
+  function generateProtocol(shouldScroll = false) {
+    const { peptideObj, vialMg, waterVol, targetDoseMcg, syringeMaxUnits, syringeVol } = state;
+    if (!peptideObj || !isFiniteNum(vialMg) || !isFiniteNum(waterVol) || !isFiniteNum(targetDoseMcg) || !isFiniteNum(syringeMaxUnits)) return;
+
+    const totalMcg = vialMg * 1000;
+    const unitsRaw = (targetDoseMcg / totalMcg) * waterVol * 100;
+    if (!isFiniteNum(unitsRaw) || unitsRaw <= 0) {
+      friendlyError('Calculation failed: check that vial size, water volume, and dose are all valid numbers.');
+      return;
+    }
+    const unitsToDraw = Math.round(unitsRaw * 10) / 10;
+    const formattedUnits = Number.isInteger(unitsToDraw) ? unitsToDraw : unitsToDraw.toFixed(1);
+    const doseLabelFormat = targetDoseMcg >= 1000 ? `${targetDoseMcg / 1000} mg` : `${targetDoseMcg} mcg`;
+    const totalDosesNum = totalMcg / targetDoseMcg;
+    const totalDoses = Number.isInteger(totalDosesNum) ? totalDosesNum : parseFloat(totalDosesNum.toFixed(1));
+
+    cache.summary.innerHTML = `<strong>Quick Formula:</strong> Mix <span class="hl">${waterVol} mL</span> Water &rarr; Draw <span class="hl">${formattedUnits} Units</span> = <span class="hl">${doseLabelFormat}</span> Dose`;
+    cache.outWater.innerText = `${waterVol} mL BAC Water`;
+    cache.expWater.innerHTML = `Draw exactly <strong>${waterVol} mL</strong> of sterile bacteriostatic water and inject it slowly down the inner glass wall of your ${vialMg}mg ${peptideObj.id} vial. Swirl gently in a circular motion to dissolve. Never shake. Now you have a properly reconstituted peptide.`;
+    cache.outDose.innerText = `${doseLabelFormat}`;
+    const doseTypeStr = (targetDoseMcg === peptideObj.defaultDose) ? "standard protocol" : "custom selected protocol";
+    cache.expDose.innerHTML = `This step delivers your ${doseTypeStr}'s dose of <strong>${doseLabelFormat}</strong> per administration, based strictly on the dilution volume configured above.`;
+    cache.outUnits.innerText = `${formattedUnits} Units (U-100)`;
+    cache.expUnits.innerHTML = `Using your <strong>${syringeVol}mL U-100 insulin syringe</strong>, draw the fully reconstituted solution exactly to the <strong>${formattedUnits} unit</strong> mark.`;
+
+    if (unitsToDraw > syringeMaxUnits) {
+      cache.warning.innerHTML = `⚠️ <strong>Capacity Warning:</strong> This protocol requires pulling ${formattedUnits} units, which exceeds your selected ${syringeVol}mL syringe limit. Please use a larger syringe or perform multiple draws.`;
+      cache.warning.style.display = 'block';
+    } else {
+      cache.warning.style.display = 'none';
+    }
+
+    cache.outYield.innerText = `${totalDoses} ${totalDoses === 1 ? "Total Dose" : "Total Doses"}`;
+    cache.expYield.innerHTML = `At this specific dose and concentration, this single ${vialMg}mg vial will provide exactly <strong>${totalDoses} complete administrations</strong> for your cycle.`;
+
+    if (!cache.step[4].classList.contains('active')) {
+      cache.step[4].classList.add('active');
+      cache.step[4].classList.add('active');
+    }
+    cache.step[4].classList.add('active');
+    if (shouldScroll) setTimeout(() => scrollToElem(cache.step[4]), 150);
+  }
+
+  // Copy to clipboard with fallback
+  cache.copyBtn.addEventListener('click', function() {
+    const { peptideObj, vialMg, waterVol, targetDoseMcg, syringeMaxUnits } = state;
+    if (!peptideObj || !vialMg || !waterVol || !targetDoseMcg || !syringeMaxUnits) return;
+
+    const doseMcg = targetDoseMcg;
+    const shortDoseText = doseMcg >= 1000 ? `${doseMcg / 1000}mg` : `${doseMcg}mcg`;
+    const totalMcg = vialMg * 1000;
+    const unitsToDraw = Math.round(((doseMcg / totalMcg) * waterVol * 100) * 10) / 10;
+    const totalDosesNum = totalMcg / doseMcg;
+    const totalDoses = Number.isInteger(totalDosesNum) ? totalDosesNum : parseFloat(totalDosesNum.toFixed(1));
+    const dosesLabelText = totalDoses === 1 ? "Total Dose" : "Total Doses";
+
+    const textToCopy = `Reconstitution & Protocol of ${peptideObj.id} ${vialMg}mg:
+Formula Summary: Mix ${waterVol} mL BAC Water → Draw ${unitsToDraw} Units = ${shortDoseText} Dose
+---------------------------------------
+
+Step 1: Preparation -> ${waterVol} mL BAC Water: Draw exactly ${waterVol} mL of sterile bacteriostatic water and inject it slowly down the inner glass wall of your ${vialMg}mg ${peptideObj.id} vial. Swirl gently in a circular motion to dissolve. Never shake. Now you have a properly reconstituted peptide.
+
+Step 2: Administration -> ${shortDoseText}: This configured step delivers your dose of ${shortDoseText}.
+
+Step 3: Syringe Draw To -> ${unitsToDraw} Units (U-100): Using your ${state.syringeVol}mL U-100 Insulin syringe, draw the reconstituted solution exactly to the ${unitsToDraw} unit mark.
+
+Step 4: Vial Lifespan -> ${totalDoses} ${dosesLabelText}: At this specific dose and concentration, this single ${vialMg}mg vial will provide exactly ${totalDoses} complete administrations.
+
+*Note: Store your reconstituted vial immediately in the refrigerator (2°C to 8°C).*`;
+
+    const onSuccess = () => {
+      cache.copyBtn.classList.add('success');
+      cache.copyText.innerText = "Copied to Notes!";
+      setTimeout(() => {
+        cache.copyBtn.classList.remove('success');
+        cache.copyText.innerText = "Copy Protocol to Notes";
+      }, 2500);
+    };
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(textToCopy).then(onSuccess).catch(() => fallbackCopy(textToCopy, onSuccess));
+    } else {
+      fallbackCopy(textToCopy, onSuccess);
+    }
+  });
+
+  function fallbackCopy(text, onSuccess) {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.setAttribute('readonly', '');
+    textarea.style.position = 'absolute';
+    textarea.style.left = '-9999px';
+    document.body.appendChild(textarea);
+    textarea.select();
+    try {
+      document.execCommand('copy');
+      onSuccess();
+    } catch (err) {
+      console.warn('Clipboard copy failed', err);
+    }
+    document.body.removeChild(textarea);
+  }
+});
+</script>
+
+{% schema %}
+{
+  "name": "Protocol Journey Tool",
+  "settings": [
+    { "type": "header", "content": "Text & Headlines" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Research Protocol Journey" },
+    { "type": "textarea", "id": "subheading", "label": "Subheading", "default": "Explore research applications or skip directly to calculating your exact standard laboratory protocol." },
+    { "type": "textarea", "id": "disclaimer", "label": "Disclaimer Text", "default": "Disclaimer: This tool is strictly for educational and laboratory preparation use only. Protocols provided are standard baselines derived from public research and do not constitute medical advice. Calculations strictly assume the use of U-100 Insulin Syringes." },
+    { "type": "header", "content": "Research Goals (Categories)" },
+    { "type": "text", "id": "goal_1", "label": "Goal 1 Label", "default": "Tissue Repair & Recovery" },
+    { "type": "text", "id": "goal_2", "label": "Goal 2 Label", "default": "Skin, Hair & Anti-Aging" },
+    { "type": "text", "id": "goal_3", "label": "Goal 3 Label", "default": "Cognition & Focus" },
+    { "type": "text", "id": "goal_4", "label": "Goal 4 Label", "default": "Mood & Social Wellness" },
+    { "type": "header", "content": "Theme Styling & Colors" },
+    { "type": "range", "id": "max_width", "min": 600, "max": 1200, "step": 50, "unit": "px", "label": "Maximum Width", "default": 850 },
+    { "type": "range", "id": "margin_top", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Margin Top", "default": 40 },
+    { "type": "range", "id": "margin_bottom", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Margin Bottom", "default": 40 },
+    { "type": "color", "id": "color_primary", "label": "Primary Accent (Yellow)", "default": "#FBBF24" },
+    { "type": "color", "id": "color_bg", "label": "Background Color", "default": "#ffffff" },
+    { "type": "color", "id": "color_card_bg", "label": "Inner Card/Hint Background", "default": "#fdfbf7" },
+    { "type": "color", "id": "color_border", "label": "Border Color", "default": "#e5e7eb" },
+    { "type": "color", "id": "color_text", "label": "Text Color", "default": "#111827" }
+  ],
+  "blocks": [
+    {
+      "type": "peptide",
+      "name": "Peptide Profile",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Peptide Name", "default": "BPC-157" },
+        {
+          "type": "select",
+          "id": "goal_category",
+          "label": "Assign to Goal Category",
+          "options": [
+            { "value": "goal_1", "label": "Goal 1" },
+            { "value": "goal_2", "label": "Goal 2" },
+            { "value": "goal_3", "label": "Goal 3" },
+            { "value": "goal_4", "label": "Goal 4" }
+          ],
+          "default": "goal_1"
+        },
+        { "type": "text", "id": "vial_sizes", "label": "Available Vial Sizes (mg)", "info": "Separate with commas", "default": "5, 10, 15" },
+        { "type": "text", "id": "bac_water_amounts", "label": "Recommended Water (mL)", "info": "Matches sizes above.", "default": "2, 2, 3" },
+        { "type": "number", "id": "target_dose", "label": "Standard Target Dose (mcg)", "default": 250 },
+        { "type": "text", "id": "available_doses", "label": "Adjustable Dose Options (mcg)", "info": "Provide custom dose options separated by commas." },
+        { "type": "richtext", "id": "educational_hint", "label": "Educational Hint Text" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Protocol Journey Tool",
+      "blocks": [
+        {
+          "type": "peptide",
+          "settings": {
+            "title": "BPC-157", "goal_category": "goal_1", "vial_sizes": "5, 10, 15", "bac_water_amounts": "2, 2, 3", "target_dose": 250, "available_doses": "125, 250, 500",
+            "educational_hint": "<p><strong>BPC-157:</strong> Extensively researched for joint, tissue, and gut recovery. The standard baseline dose evaluated in clinical literature is <strong>250mcg</strong> per administration.</p>"
+          }
+        },
+        {
+          "type": "peptide",
+          "settings": {
+            "title": "TB-500", "goal_category": "goal_1", "vial_sizes": "2, 5, 10", "bac_water_amounts": "1, 2, 2", "target_dose": 1000, "available_doses": "500, 1000, 2000, 2500",
+            "educational_hint": "<p><strong>TB-500:</strong> A synthetic fraction of Thymosin Beta-4. It is researched for systemic healing and flexibility. Standard protocols evaluate <strong>1mg to 2.5mg</strong> per administration.</p>"
+          }
+        },
+        {
+          "type": "peptide",
+          "settings": {
+            "title": "GHK-Cu", "goal_category": "goal_2", "vial_sizes": "10, 50, 100", "bac_water_amounts": "2, 3, 5", "target_dose": 2000, "available_doses": "1000, 2000, 3000, 5000",
+            "educational_hint": "<p><strong>GHK-Cu:</strong> A copper peptide associated with collagen production and hair growth. Because it is highly concentrated, standard protocols heavily dilute the powder to avoid injection site pain. Standard dose is <strong>2000mcg (2mg)</strong>.</p>"
+          }
+        },
+        {
+          "type": "peptide",
+          "settings": {
+            "title": "Semax", "goal_category": "goal_3", "vial_sizes": "5, 10", "bac_water_amounts": "2, 2", "target_dose": 300, "available_doses": "150, 300, 600",
+            "educational_hint": "<p><strong>Semax:</strong> A nootropic peptide evaluated for cognitive enhancement and BDNF stimulation. Standard research protocols typically evaluate <strong>300mcg</strong> per administration.</p>"
+          }
+        },
+        {
+          "type": "peptide",
+          "settings": {
+            "title": "Oxytocin", "goal_category": "goal_4", "vial_sizes": "5, 10", "bac_water_amounts": "2, 2", "target_dose": 100, "available_doses": "50, 100, 250",
+            "educational_hint": "<p><strong>Oxytocin:</strong> The 'bonding' hormone. In peptide research, it is extremely potent and evaluated strictly in micro-doses. A standard educational dose evaluates just <strong>100mcg</strong>.</p>"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

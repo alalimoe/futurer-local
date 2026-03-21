@@ -1,0 +1,121 @@
+{% comment %}
+  Renders a collection image
+
+  @param {Object} collection - Collection object (required)
+  @param {String} heading - Title of the collection (required)
+  @param {Image} image - Image Liquid object (optional)
+  @param {String} media_aspect_ratio - Size of the image (optional)
+  @param {String} link - Link to the collection (optional)
+  @param {Object} button - Button (optional)
+  @param {Boolean} show_button - Show button to use (optional)
+  @param {String} color_scheme_collection - The color scheme to use (optional)
+  @param {Boolean} animate_enabled - Enable animation. Default: true (optional)
+
+  @example
+  {% render 'collection-image',
+  collection: collection,
+  heading: heading,
+  image: image_desktop,
+  media_aspect_ratio: media_aspect_ratio_desktop,
+  image: image_mobile,
+  media_aspect_ratio: media_aspect_ratio_mobile,
+  link: link,
+  button: button,
+  show_button: show_button,
+  color_schema_collection: color_schema_collection,
+  animate_enable: true
+  %}
+{% endcomment %}
+
+{%- liquid
+  if collection and collection != empty
+    assign image_collection = collection.featured_image
+    assign collection_name = collection.title
+    assign link = collection.url
+  endif
+
+  if animate_enabled == null
+    assign animate_enabled = false
+  endif
+
+  assign tag_name = 'div'
+
+  if animate_enabled
+    assign tag_name = 'xo-animate'
+  endif
+
+  if link_enable == null
+    assign link_enable = false
+  endif
+
+  assign tag_name_2 = 'div'
+  assign disable_alt = false
+  if link_enable
+    assign tag_name_2 = 'a'
+    assign disable_alt = true
+  endif
+-%}
+
+<{{ tag_name }} xo-cascade class="collection-image{% if color_schema_collection %} color-{{ color_schema_collection }}{% endif %}">
+  <{{ tag_name_2 }}
+    {% if link == blank %}
+      role="link"
+      aria-disabled="true"
+    {% else %}
+      href="{{ link }}"
+    {% endif %}
+    class="collection-image__link"
+  >
+    <div class="collection-image__image collection-image__image--desktop {% if settings.enable_border_radius %}collection-image__image--radius{% endif %}">
+      {% if image_collection == blank %}
+        {% render 'animate-image', image: image_desktop, border_radius: 0, aspect_ratio: media_aspect_ratio_desktop, disable_alt: disable_alt %}
+      {% else %}
+        {% if image_desktop != blank %}
+          {% render 'animate-image', image: image_desktop, border_radius: 0, aspect_ratio: media_aspect_ratio_desktop, disable_alt: disable_alt %}
+        {%- else -%}
+          {% render 'animate-image', image: image_collection, border_radius: 0, aspect_ratio: media_aspect_ratio_desktop, disable_alt: disable_alt %}
+        {% endif %}
+      {% endif %}
+    </div>
+    <div class="collection-image__image collection-image__image--mobile {% if settings.enable_border_radius %}collection-image__image--radius{% endif %}">
+      {% if image_collection == blank %}
+        {% render 'animate-image', image: image_mobile, border_radius: 0, aspect_ratio: media_aspect_ratio_mobile, disable_alt: disable_alt %}
+      {% else %}
+        {% if image_mobile != blank %}
+          {% render 'animate-image', image: image_mobile, border_radius: 0, aspect_ratio: media_aspect_ratio_mobile, disable_alt: disable_alt %}
+        {%- else -%}
+          {% render 'animate-image', image: image_collection, border_radius: 0, aspect_ratio: media_aspect_ratio_mobile, disable_alt: disable_alt %}
+        {% endif %}
+      {% endif %}
+    </div>
+    {% if show_heading %}
+      <div class="collection-image__text">
+        {% if heading %}
+          <div class="collection-image__heading">
+            {% render 'text', context: context %}
+          </div>
+        {% else %}
+          <div class="collection-image__heading {{ class }}">{{ collection_name }}</div>
+        {% endif %}
+      </div>
+    {% endif %}
+    {% if show_button %}
+      <xo-magnetic
+        xo-duration="500"
+        xo-radius="150"
+        class="collection-image__button"
+      >
+        <xo-magnetic-content>
+          {% render 'button',
+            text: button.button_text,
+            link: button.button_link,
+            style: button.button_style,
+            size: button.button_size,
+            radius: settings.button_radius,
+            padding: settings.button_padding
+          %}
+        </xo-magnetic-content>
+      </xo-magnetic>
+    {% endif %}
+  </{{ tag_name_2 }}>
+</{{ tag_name }}>

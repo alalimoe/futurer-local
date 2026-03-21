@@ -1,0 +1,113 @@
+{%- comment -%}
+  NP Article Structured Data
+  Types: Article, BreadcrumbList, FAQPage, HowTo
+  NOTE: Keep FAQ answers consistent with on-page content to avoid manual actions.
+{%- endcomment -%}
+{%- assign article_image = article.image | default: blog.image -%}
+{%- assign image_url = article_image | image_url: width: 1600 | prepend: 'https:' -%}
+{%- assign word_count = article.content | strip_html | split: ' ' | size -%}
+{%- assign est_read = word_count | divided_by: 200 | ceil -%}
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "@id": "{{ shop.url }}{{ article.url }}#article",
+  "mainEntityOfPage": { "@type": "WebPage", "@id": "{{ shop.url }}{{ article.url }}" },
+  "headline": {{ article.title | json }},
+  "alternativeHeadline": "Caffeine + L-Theanine Stack: Science, Dosage, Benefits & Side Effects",
+  "description": {{ article.excerpt_or_content | strip_html | truncate: 320 | json }},
+  "image": {{ image_url | json }},
+  "datePublished": "{{ article.published_at | date: "%Y-%m-%d" }}",
+  "dateModified": "{{ article.updated_at | date: "%Y-%m-%d" }}",
+  "author": { "@type": "Person", "name": {{ article.author | json }} },
+  "publisher": {
+    "@type": "Organization",
+    "name": {{ shop.name | json }},
+    "logo": {
+      "@type": "ImageObject",
+      "url": {{ shop.brand.logo | default: settings.logo | image_url: width: 300 | prepend: 'https:' | json }}
+    }
+  },
+  "inLanguage": "{{ request.locale.iso_code | default: 'en' }}",
+  "wordCount": {{ word_count }},
+  "timeRequired": "PT{{ est_read }}M",
+  "isAccessibleForFree": true,
+  "articleSection": "Nootropics, Stacks, Caffeine, L-Theanine"
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "{{ shop.url }}" },
+    { "@type": "ListItem", "position": 2, "name": {{ blog.title | json }}, "item": "{{ shop.url }}{{ blog.url }}" },
+    { "@type": "ListItem", "position": 3, "name": {{ article.title | json }}, "item": "{{ shop.url }}{{ article.url }}" }
+  ]
+}
+</script>
+
+{%- comment -%}
+  FAQ — edit Q&A text so it exactly matches on-page sections.
+{%- endcomment -%}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "@id": "{{ shop.url }}{{ article.url }}#faq",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What are caffeine and L-theanine?",
+      "acceptedAnswer": { "@type": "Answer", "text": {{ "Caffeine is a central stimulant. L-theanine is an amino acid from tea that promotes calm alertness. Together they can support attention and task accuracy with fewer jitters than caffeine alone." | json }} }
+    },
+    {
+      "@type": "Question",
+      "name": "Why stack caffeine with L-theanine?",
+      "acceptedAnswer": { "@type": "Answer", "text": {{ "The pairing balances stimulation with smoothness. Studies report improvements in attention, reaction time and accuracy compared with caffeine alone." | json }} }
+    },
+    {
+      "@type": "Question",
+      "name": "What’s a common starting dose?",
+      "acceptedAnswer": { "@type": "Answer", "text": {{ "A frequently used starting ratio is 100 mg caffeine with 200 mg L-theanine. Adjust based on sensitivity and total daily caffeine intake." | json }} }
+    },
+    {
+      "@type": "Question",
+      "name": "Are there side effects or interactions?",
+      "acceptedAnswer": { "@type": "Answer", "text": {{ "Caffeine may cause jitters or sleep disruption. Avoid late dosing. Check medications and health conditions with a professional. L-theanine is generally well-tolerated." | json }} }
+    }
+  ]
+}
+</script>
+
+{%- comment -%}
+  HowTo — “How to dose the stack”
+  Keep steps aligned with your “How to dose” section.
+{%- endcomment -%}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "@id": "{{ shop.url }}{{ article.url }}#howto-dose",
+  "name": "How to dose a caffeine + L-theanine stack",
+  "description": "Simple dosing workflow for calm, sustained focus.",
+  "totalTime": "PT2M",
+  "estimatedCost": { "@type": "MonetaryAmount", "currency": "{{ shop.currency }}", "value": "0" },
+  "supply": [
+    { "@type": "HowToSupply", "name": "Caffeine (100 mg capsule, tablet, or coffee equivalent)" },
+    { "@type": "HowToSupply", "name": "L-theanine (200 mg capsule or powder)" },
+    { "@type": "HowToSupply", "name": "Water" }
+  ],
+  "tool": [
+    { "@type": "HowToTool", "name": "Timer or watch" }
+  ],
+  "step": [
+    { "@type": "HowToStep", "name": "Assess sensitivity", "text": "If new to caffeine or the stack, start low. Avoid late-evening use to protect sleep." },
+    { "@type": "HowToStep", "name": "Take the ratio", "text": "Use ~100 mg caffeine with 200 mg L-theanine (2:1 theanine:caffeine). Coffee users can approximate 1 small cup for 100 mg caffeine." },
+    { "@type": "HowToStep", "name": "Time it", "text": "Take 30–45 minutes before focus-heavy work. Hydrate." },
+    { "@type": "HowToStep", "name": "Adjust if needed", "text": "If too stimulating, increase theanine by 100–200 mg. If too mild, cautiously increase caffeine while staying within your daily limit." }
+  ]
+}
+</script>

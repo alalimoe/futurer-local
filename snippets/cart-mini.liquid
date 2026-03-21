@@ -1,0 +1,62 @@
+{% comment %}
+  Renders cart drawer
+
+  Usage:
+  {% render 'cart-drawer' %}
+{% endcomment %}
+
+{% liquid
+  if settings.cart_type == 'drawer'
+    if settings.cart_drawer_placement == 'left'
+      assign animate = 'slide-right'
+      assign placement = 'top-left'
+    else
+      assign animate = 'slide-left'
+      assign placement = 'top-right'
+    endif
+  elsif settings.cart_type == 'notification'
+    assign animate = 'fade-up'
+    assign placement = 'center'
+  endif
+%}
+
+{% if settings.cart_type != 'page' %}
+  <xo-modal
+    xo-portal
+    xo-name='cart'
+    xo-animate='{{ animate }}'
+    xo-placement='{{ placement }}'
+    xo-duration='{{ settings.drawer_duration }}'
+    xo-for-cart-mini
+    {% if settings.cart_type == 'notification' %}
+      xo-breakpoints="
+        {
+        992: {
+          disabled: false,
+          placement: 'center',
+          animate: 'fade-up'
+          }
+        }
+      "
+    {% endif %}
+    style='z-index: 9999;'
+  >
+    <xo-cart-mini
+      class='color-{{ settings.cart_color_scheme }}'
+      id='xo-cart-mini'
+      {% if settings.cart_type == 'notification' %}
+        xo-notification
+      {% endif %}
+      class='color-{{ settings.cart_color_scheme }}'
+    >
+      {% case settings.cart_type %}
+        {% when 'drawer' %}
+          {% render 'cart-drawer' %}
+        {% when 'notification' %}
+          {% render 'cart-notification' %}
+        {% else %}
+          {% render 'cart-drawer' %}
+      {% endcase %}
+    </xo-cart-mini>
+  </xo-modal>
+{% endif %}

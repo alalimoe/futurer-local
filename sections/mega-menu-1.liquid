@@ -1,0 +1,754 @@
+{{ 'section-mega-menu-1.css' | asset_url | stylesheet_tag }}
+{{ 'collection-link.css' | asset_url | stylesheet_tag }}
+
+{% liquid
+  assign layout = section.settings.layout
+  assign index = section.settings.index_nav
+%}
+
+{% if layout == 'category' %}
+  {% capture style %}
+    xo-gap='30'
+    xo-per-view='5'
+    xo-breakpoints='
+    {
+      400: {
+        perView: 3,
+        perMove: 1,
+        gap: 10
+      },
+      768: {
+        perView: 3,
+        perMove: 1,
+      },
+      992: {
+        perView: 3,
+        perMove: 1,
+      },
+      1200: {
+        perView: 4,
+        perMove: 1,
+      },
+      1400: {
+        perView: 4,
+        perMove: 1,
+      },
+    }
+  '
+  {% endcapture %}
+{% elsif layout == 'link-list' %}
+  {% capture style %}
+    xo-gap='30'
+    xo-per-view='5'
+    xo-breakpoints='
+    {
+      400: {
+        perView: 2,
+        perMove: 1,
+        gap: 10
+      },
+      768: {
+        perView: 2,
+        perMove: 1,
+      },
+      992: {
+        perView: 3,
+        perMove: 1,
+      },
+      1200: {
+        perView: 3,
+        perMove: 1,
+      },
+      1400: {
+        perView: 3,
+        perMove: 1
+      },
+    }
+  '
+  {% endcapture %}
+{% else %}
+  {% capture style %}
+    xo-gap='98'
+    xo-per-view='2'
+    xo-breakpoints='
+    {
+      400: {
+        perView: 2,
+        perMove: 1,
+        gap: 10
+      },
+      768: {
+        perView: 2,
+        perMove: 1,
+      },
+      992: {
+        perView: 2,
+        perMove: 1,
+      },
+      1200: {
+        perView: 2,
+        perMove: 1,
+      },
+      1400: {
+        perView: 2,
+        perMove: 1
+      },
+    }
+  '
+  {% endcapture %}
+{% endif %}
+
+<template xo-mega-menu-name="header-mega-menu" xo-mega-menu-index="{{ index }}">
+  <div class="mega-menu-1{% if layout %} mega-menu-1--{{ layout }}{% endif %}">
+    <div data-id="{{ section.id }}" {% render 'section-attr' %}>
+      <div class="mega-menu-1__desktop xo-scrollbar">
+        <div class="mega-menu-1__container">
+          <xo-grid class="mega-menu-1__grid">
+            <div class="mega-menu-1__item mega-menu-1__item--left" style="--xl: 2; --lg: 3; --md: 6; --xs: 12">
+              {% for block in section.blocks %}
+                {% case block.type %}
+                  {% when 'text' %}
+                    {% liquid
+                      assign heading = block.settings.heading
+                      assign sub_heading = block.settings.sub_heading
+                    %}
+                    <div class="mega-menu-1__box">
+                      {% if heading %}
+                        <div class="mega-menu-1__heading">{{ heading }}</div>
+                      {% endif %}
+                      {% if sub_heading != blank %}
+                        <div class="mega-menu-1__sub-heading">{{ sub_heading }}</div>
+                      {% endif %}
+                    </div>
+                {% endcase %}
+              {% endfor %}
+              {% if layout == 'both' %}
+                <div class="mega-menu-1__wrapper">
+                  {% for block in section.blocks %}
+                    {% case block.type %}
+                      {% when 'collection-item' %}
+                        {% liquid
+                          assign collection = block.settings.collection
+                          assign color_schema_box = block.settings.color_scheme_box
+                        %}
+                        {% render 'collection-card-v2',
+                          collection: collection,
+                          color_schema_card: color_schema_box,
+                          layout: 'horizontal',
+                          padding_vertical: 7,
+                          padding_horizontal: 7,
+                          image_size: 'sm'
+                        %}
+                    {% endcase %}
+                  {% endfor %}
+                </div>
+              {% endif %}
+            </div>
+
+            <div class="mega-menu-1__item mega-menu-1__item--center" style="--xl: 7; --lg: 6; --md: 12; --xs: 12">
+              {% if layout != 'both' %}
+                <xo-carousel
+                  class="mega-menu-1__carousel"
+                  {{ style }}
+                >
+                  <xo-carousel-inner>
+                    <xo-carousel-list>
+                      {% if layout == 'link-list' %}
+                        {% for block in section.blocks %}
+                          {% case block.type %}
+                            {% when 'link-list' %}
+                              {% liquid
+                                assign heading = block.settings.heading
+                                assign button = block.settings
+                                assign collection_list = block.settings.collection_list
+                              %}
+                              <xo-carousel-slide>
+                                {% render 'collection-link', heading: heading, collection_list: collection_list, button: button %}
+                              </xo-carousel-slide>
+                          {% endcase %}
+                        {% endfor %}
+                      {% elsif layout == 'category' %}
+                        {% for block in section.blocks %}
+                          {% case block.type %}
+                            {% when 'collection-item' %}
+                              <xo-carousel-slide>
+                                {% render 'collection-card-v2',
+                                  collection: block.settings.collection,
+                                  layout: 'vertical',
+                                  padding_vertical: 18,
+                                  padding_horizontal: 18,
+                                  color_schema_card: block.settings.color_scheme_box,
+                                  image_size: 'xl'
+                                %}
+                              </xo-carousel-slide>
+                          {% endcase %}
+                        {% endfor %}
+                      {% endif %}
+                    </xo-carousel-list>
+                  </xo-carousel-inner>
+                  <div class="mega-menu-1__paginate">
+                    {% render 'carousel-pagination', align: 'center', style: 'sticks' %}
+                  </div>
+                </xo-carousel>
+              {% else %}
+                <xo-grid class="mega-menu-1__item-grid" style="--lg: 2; --md: 2; --xs: 1">
+                  {% for block in section.blocks %}
+                    {% case block.type %}
+                      {% when 'link-list' %}
+                        {% liquid
+                          assign heading = block.settings.heading
+                          assign button = block.settings
+                          assign collection_list = block.settings.collection_list
+                        %}
+                        <div class="mega-menu-1__column">
+                          {% render 'collection-link', heading: heading, collection_list: collection_list, button: button %}
+                        </div>
+                    {% endcase %}
+                  {% endfor %}
+                </xo-grid>
+              {% endif %}
+            </div>
+
+            <div class="mega-menu-1__item mega-menu-1__item--right" style="--xl: 3; --lg: 3; --md: 6; --xs: 12">
+              {% for block in section.blocks %}
+                {% case block.type %}
+                  {% when 'introducing-card' %}
+                    {% liquid
+                      assign heading = block.settings.heading
+                      assign sub_heading = block.settings.sub_heading
+                      assign image = block.settings.image
+                      assign aspect_ratio = block.settings.aspect_ratio
+                      if aspect_ratio == 'custom'
+                        assign aspect_ratio = block.settings.aspect_ratio_width | append: '/' | append: block.settings.aspect_ratio_height
+                      endif
+                      assign color_scheme_box = block.settings.color_scheme_box
+                    %}
+                    {% render 'introducing-card',
+                      title: heading,
+                      description: sub_heading,
+                      button: block,
+                      image: image,
+                      aspect_ratio: aspect_ratio,
+                      color_scheme_box: color_scheme_box
+                    %}
+                {% endcase %}
+              {% endfor %}
+            </div>
+          </xo-grid>
+        </div>
+      </div>
+    </div>
+
+    <div class="mega-menu-1__mobile">
+      <div class="mega-menu-1__container">
+        <xo-grid class="mega-menu-1__grid">
+          <div class="mega-menu-1__item mega-menu-1__item--left" style="--lg: 12; --md: 12; --xs: 12">
+            {% for block in section.blocks %}
+              {% case block.type %}
+                {% when 'text' %}
+                  {% liquid
+                    assign heading = block.settings.heading
+                    assign sub_heading = block.settings.sub_heading
+                  %}
+                  <div class="mega-menu-1__box">
+                    {% if heading %}
+                      <div class="mega-menu-1__heading">{{ heading }}</div>
+                    {% endif %}
+                    {% if sub_heading != blank %}
+                      <div class="mega-menu-1__sub-heading">{{ sub_heading }}</div>
+                    {% endif %}
+                  </div>
+              {% endcase %}
+            {% endfor %}
+            {% if layout == 'both' %}
+              <div class="mega-menu-1__wrapper">
+                {% for block in section.blocks %}
+                  {% case block.type %}
+                    {% when 'collection-item' %}
+                      {% liquid
+                        assign collection = block.settings.collection
+                        assign color_schema_box = block.settings.color_scheme_box
+                      %}
+                      {% render 'collection-card-v2',
+                        collection: collection,
+                        color_schema_card: color_schema_box,
+                        layout: 'horizontal',
+                        padding_vertical: 7,
+                        padding_horizontal: 7,
+                        image_size: 'sm'
+                      %}
+                  {% endcase %}
+                {% endfor %}
+              </div>
+            {% endif %}
+          </div>
+
+          <div class="mega-menu-1__item mega-menu-1__item--center" style="--lg: 12; --md: 12; --xs: 12">
+            {% if layout == 'category' %}
+              <xo-carousel
+                class="mega-menu-1__carousel"
+                xo-gap="10"
+                {{ style }}
+              >
+                <xo-carousel-inner>
+                  <xo-carousel-list>
+                    {% for block in section.blocks %}
+                      {% case block.type %}
+                        {% when 'collection-item' %}
+                          <xo-carousel-slide>
+                            {% render 'collection-card-v2',
+                              collection: block.settings.collection,
+                              layout: 'vertical',
+                              padding_vertical: 10,
+                              padding_horizontal: 10,
+                              color_schema_card: block.settings.color_scheme_box,
+                              image_size: 'xl'
+                            %}
+                          </xo-carousel-slide>
+                      {% endcase %}
+                    {% endfor %}
+                  </xo-carousel-list>
+                </xo-carousel-inner>
+              </xo-carousel>
+            {% elsif layout == 'link-list' %}
+              {% for block in section.blocks %}
+                {% case block.type %}
+                  {% when 'link-list' %}
+                    {% liquid
+                      assign heading = block.settings.heading
+                      assign button = block.settings
+                      assign collection_list = block.settings.collection_list
+                    %}
+                    {% render 'collection-link', heading: heading, collection_list: collection_list, button: button %}
+                {% endcase %}
+              {% endfor %}
+            {% else %}
+              {% for block in section.blocks %}
+                {% case block.type %}
+                  {% when 'link-list' %}
+                    {% liquid
+                      assign heading = block.settings.heading
+                      assign button = block.settings
+                      assign collection_list = block.settings.collection_list
+                    %}
+                    {% render 'collection-link', heading: heading, collection_list: collection_list, button: button %}
+                {% endcase %}
+              {% endfor %}
+            {% endif %}
+          </div>
+
+          <div class="mega-menu-1__item mega-menu-1__item--right" style="--lg: 12; --md: 12; --xs: 12">
+            {% for block in section.blocks %}
+              {% case block.type %}
+                {% when 'introducing-card' %}
+                  {% liquid
+                    assign heading = block.settings.heading
+                    assign sub_heading = block.settings.sub_heading
+                    assign image = block.settings.image
+                    assign aspect_ratio = block.settings.aspect_ratio
+                    if aspect_ratio == 'custom'
+                      assign aspect_ratio = block.settings.aspect_ratio_width | append: '/' | append: block.settings.aspect_ratio_height
+                    endif
+                    assign color_scheme_box = block.settings.color_scheme_box
+                  %}
+                  {% render 'introducing-card',
+                    title: heading,
+                    description: sub_heading,
+                    button: block,
+                    image: image,
+                    aspect_ratio: aspect_ratio,
+                    color_scheme_box: color_scheme_box
+                  %}
+              {% endcase %}
+            {% endfor %}
+          </div>
+        </xo-grid>
+      </div>
+    </div>
+  </div>
+</template>
+
+{% schema %}
+{
+  "name": "t:sections.mega_menu_1.name",
+  "enabled_on": {
+    "groups": [
+      "header"
+    ]
+  },
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "t:sections.mega_menu_1.settings.paragraph.content"
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "t:sections.mega_menu_1.settings.layout.label",
+      "options": [
+        {
+          "value": "category",
+          "label": "t:sections.mega_menu_1.settings.layout.option_1.label"
+        },
+        {
+          "value": "link-list",
+          "label": "t:sections.mega_menu_1.settings.layout.option_2.label"
+        },
+        {
+          "value": "both",
+          "label": "t:sections.mega_menu_1.settings.layout.option_3.label"
+        }
+      ],
+      "default": "category"
+    },
+    {
+      "type": "select",
+      "id": "index_nav",
+      "label": "t:sections.mega_menu_1.settings.index_nav.label",
+      "options": [
+        {
+          "value": "0",
+          "label": "t:sections.mega_menu_1.settings.index_nav.option_1.label"
+        },
+        {
+          "value": "1",
+          "label": "t:sections.mega_menu_1.settings.index_nav.option_2.label"
+        },
+        {
+          "value": "2",
+          "label": "t:sections.mega_menu_1.settings.index_nav.option_3.label"
+        },
+        {
+          "value": "3",
+          "label": "t:sections.mega_menu_1.settings.index_nav.option_4.label"
+        },
+        {
+          "value": "4",
+          "label": "t:sections.mega_menu_1.settings.index_nav.option_5.label"
+        },
+        {
+          "value": "5",
+          "label": "t:sections.mega_menu_1.settings.index_nav.option_6.label"
+        },
+        {
+          "value": "6",
+          "label": "t:sections.mega_menu_1.settings.index_nav.option_7.label"
+        },
+        {
+          "value": "7",
+          "label": "t:sections.mega_menu_1.settings.index_nav.option_8.label"
+        },
+        {
+          "value": "8",
+          "label": "t:sections.mega_menu_1.settings.index_nav.option_9.label"
+        },
+        {
+          "value": "9",
+          "label": "t:sections.mega_menu_1.settings.index_nav.option_10.label"
+        }
+      ],
+      "default": "0"
+    },
+    {
+      "type": "header",
+      "content": "General settings"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Section color scheme"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color"
+    },
+    {
+      "type": "color_background",
+      "id": "background_gradient",
+      "label": "Background gradient"
+    },
+    {
+      "type": "number",
+      "id": "padding_top_desktop",
+      "label": "Padding top desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_desktop",
+      "label": "Padding bottom desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_top_mobile",
+      "label": "Padding top mobile",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_mobile",
+      "label": "Padding bottom mobile",
+      "default": 50
+    }
+  ],
+  "blocks": [
+    {
+      "name": "t:sections.mega_menu_1.settings.text.name",
+      "type": "text",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "t:sections.mega_menu_1.settings.heading.label",
+          "default": "Heading"
+        },
+        {
+          "type": "textarea",
+          "id": "sub_heading",
+          "label": "t:sections.mega_menu_1.settings.sub_heading.label",
+          "default": "Use this text to share information about your brand with your customers. Describe a product, share announcements, or welcome customers to your store."
+        }
+      ]
+    },
+    {
+      "name": "t:sections.mega_menu_1.settings.link_list.name",
+      "type": "link-list",
+      "settings": [
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "t:sections.mega_menu_1.settings.heading.label",
+          "default": "Menu item"
+        },
+        {
+          "type": "collection_list",
+          "id": "collection_list",
+          "label": "t:sections.mega_menu_1.settings.link_collection.label"
+        },
+        {
+          "type": "header",
+          "content": "t:sections.mega_menu_1.settings.header_button.content"
+        },
+        {
+          "type": "text",
+          "id": "button_text",
+          "label": "t:sections.mega_menu_1.settings.button_text.label",
+          "default": "Button"
+        },
+        {
+          "type": "url",
+          "id": "button_link",
+          "label": "t:sections.mega_menu_1.settings.button_link.label",
+          "default": "/collections/all"
+        }
+      ]
+    },
+    {
+      "name": "t:sections.mega_menu_1.settings.collection_name.name",
+      "type": "collection-item",
+      "settings": [
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "t:sections.mega_menu_1.settings.collection.label"
+        },
+        {
+          "type": "color_scheme",
+          "id": "color_scheme_box",
+          "label": "t:sections.mega_menu_1.settings.color_scheme_box.label",
+          "default": "scheme_1"
+        }
+      ]
+    },
+    {
+      "name": "t:sections.mega_menu_1.settings.introducing.name",
+      "type": "introducing-card",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "t:sections.mega_menu_1.settings.heading.label",
+          "default": "Introducing"
+        },
+        {
+          "type": "text",
+          "id": "sub_heading",
+          "label": "t:sections.mega_menu_1.settings.sub_heading.label",
+          "default": "Showcase a benefit of your product"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "t:sections.mega_menu_1.settings.image.label"
+        },
+        {
+          "type": "select",
+          "id": "aspect_ratio",
+          "label": "Aspect ratio",
+          "default": "3/2",
+          "options": [
+            {
+              "value": "auto",
+              "label": "Auto"
+            },
+            {
+              "value": "2/3",
+              "label": "2:3"
+            },
+            {
+              "value": "3/4",
+              "label": "3:4"
+            },
+            {
+              "value": "3/2",
+              "label": "3:2"
+            },
+            {
+              "value": "1",
+              "label": "1:1"
+            },
+            {
+              "value": "4/3",
+              "label": "4:3"
+            },
+            {
+              "value": "16/9",
+              "label": "16:9"
+            },
+            {
+              "value": "21/9",
+              "label": "21:9"
+            }
+          ]
+        },
+        {
+          "type": "color_scheme",
+          "id": "color_scheme_box",
+          "label": "t:sections.mega_menu_1.settings.color_scheme_box.label",
+          "default": "scheme_1"
+        },
+        {
+          "type": "header",
+          "content": "t:sections.mega_menu_1.settings.header_button.content"
+        },
+        {
+          "type": "text",
+          "id": "button_text",
+          "label": "Button text",
+          "default": "Button"
+        },
+        {
+          "type": "url",
+          "id": "button_link",
+          "label": "Button link",
+          "default": "/collections/all"
+        },
+        {
+          "type": "select",
+          "id": "button_style",
+          "label": "Button style",
+          "options": [
+            {
+              "value": "primary",
+              "label": "Primary"
+            },
+            {
+              "value": "secondary",
+              "label": "Secondary"
+            },
+            {
+              "value": "link",
+              "label": "Link"
+            }
+          ],
+          "default": "primary"
+        },
+        {
+          "type": "select",
+          "id": "button_size",
+          "label": "Button size",
+          "options": [
+            {
+              "value": "xs",
+              "label": "Extra small"
+            },
+            {
+              "value": "sm",
+              "label": "Small"
+            },
+            {
+              "value": "md",
+              "label": "Medium"
+            },
+            {
+              "value": "lg",
+              "label": "Large"
+            }
+          ],
+          "default": "md"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.mega_menu_1.presets.name",
+      "blocks": [
+        {
+          "type": "text",
+          "settings": {
+            "heading": "Text",
+            "sub_heading": "Use this text to share information about your brand with your customers. Describe a product, share announcements, or welcome customers to your store."
+          }
+        },
+        {
+          "type": "link-list",
+          "settings": {
+            "heading": "Heading",
+            "collection_list": []
+          }
+        },
+        {
+          "type": "link-list",
+          "settings": {
+            "heading": "Heading",
+            "collection_list": []
+          }
+        },
+        {
+          "type": "link-list",
+          "settings": {
+            "heading": "Heading",
+            "collection_list": []
+          }
+        },
+        {
+          "type": "introducing-card",
+          "settings": {
+            "heading": "Heading",
+            "sub_heading": "Showcase a benefit of your product",
+            "image": "",
+            "button_text": "Button",
+            "button_link": "shopify://collections/all",
+            "button_style": "primary",
+            "button_size": "xs"
+          }
+        }
+      ],
+      "settings": {
+        "color_scheme": "",
+        "background_color": "",
+        "background_gradient": "",
+        "padding_top_desktop": 0,
+        "padding_bottom_desktop": 0,
+        "padding_top_mobile": 0,
+        "padding_bottom_mobile": 0
+      }
+    }
+  ]
+}
+{% endschema %}

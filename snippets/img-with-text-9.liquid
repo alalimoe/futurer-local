@@ -1,0 +1,69 @@
+{% comment %}
+  Render a img with text given various parameters.
+
+  @param {String} heading - Main heading text
+  @param {String} sub_heading - Sub-heading text
+  @param {String} description - Description text
+  @param {String} alignment - Alignment of the content
+  @param {Boolean} expand_grid - Whether to expand the grid
+
+  @example
+  {% render 'img-with-text-9',
+    heading: heading,
+    sub_heading: sub_heading,
+    description: description,
+    alignment: alignment,
+    expand_grid: expand_grid
+  %}
+{% endcomment %}
+
+{% liquid
+  assign content_class = 'img-with-text-9__content'
+  assign content_style = '--lg: 4; --md: 4; --xs: 12;'
+  if expand_grid
+    assign content_style = '--lg: 6; --md: 6; --xs: 12;'
+  endif
+  if alignment_desktop == 'center'
+    if expand_grid
+      assign content_style = content_style | append: ' --start-lg: 4; --start-md: 4;'
+    else
+      assign content_style = content_style | append: ' --start-lg: 5; --start-md: 5;'
+    endif
+  elsif alignment_desktop == 'right'
+    if expand_grid
+      assign content_style = content_style | append: ' --start-lg: 7; --start-md: 7;'
+    else
+      assign content_style = content_style | append: ' --start-lg: 8; --start-md: 8;'
+    endif
+  endif
+  if alignment_desktop
+    assign content_class = content_class | append: ' img-with-text-9__content--desktop-' | append: alignment_desktop
+  endif
+  if alignment_mobile
+    assign content_class = content_class | append: ' img-with-text-9__content--mobile-' | append: alignment_mobile
+  endif
+%}
+
+<div class="img-with-text-9">
+  <xo-grid class="img-with-text-9__grid">
+    <div class="{{ content_class }}" style="{{ content_style }}">
+      {% if sub_heading != blank %}
+        <xo-animate xo-cascade>
+          <div class="img-with-text-9__subheading">{{ sub_heading }}</div>
+        </xo-animate>
+      {% endif %}
+      {% if heading != blank %}
+        <div class="img-with-text-9__heading">
+          {% render 'text', context: section %}
+        </div>
+      {% endif %}
+      {% if description != blank %}
+        <xo-animate xo-cascade>
+          <div class="img-with-text-9__description">
+            {{ description }}
+          </div>
+        </xo-animate>
+      {% endif %}
+    </div>
+  </xo-grid>
+</div>

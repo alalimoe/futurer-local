@@ -1,0 +1,83 @@
+{% comment %}
+  Renders a collection list 2
+
+  Accepts:
+  - block: {Object} Block (required)
+
+  Usage:
+  {% render 'collection-list-2',
+    collection_image: collection_image,
+    collection_name: collection_name,
+    collection_link: collection_link,
+    image_dt: image_dt,
+    aspect_ratio_dt: aspect_ratio_dt,
+    image_mb: image_mb,
+    aspect_ratio_mb: aspect_ratio_mb,
+    heading: heading,
+    class: class,
+    button: button
+  %}
+{% endcomment %}
+
+<div class='collection-list-2 {% if settings.enable_border_radius %}collection-list-2--radius{% endif %}' tabindex='0'>
+  <div class='collection-list-2__item {% if color_scheme_collection %} color-{{ color_scheme_collection }} {% endif %}'>
+    <a href='{{ collection_link }}' class='collection-list-2__link' title='Collection link'>
+      {% if collection_image == blank %}
+        {% if image_dt != blank %}
+          <div class='collection-list-2__image collection-list-2__image--desktop'>
+            {% render 'image', image: image_dt, aspect_ratio: aspect_ratio_dt, disable_alt: true %}
+          </div>
+        {%- else -%}
+          <div class='collection-list-2__image collection-list-2__image--desktop'>
+            {% render 'image', image: image, placeholder: placeholder, aspect_ratio: aspect_ratio_dt, disable_alt: true %}
+          </div>
+        {% endif %}
+        {% if image_mb != blank %}
+          <div class='collection-list-2__image collection-list-2__image--mobile'>
+            {% render 'image', image: image_mb, aspect_ratio: aspect_ratio_mb, disable_alt: true %}
+          </div>
+        {%- else -%}
+          <div class='collection-list-2__image collection-list-2__image--mobile'>
+            {% render 'image', image: image, placeholder: placeholder, aspect_ratio: aspect_ratio_mb, disable_alt: true %}
+          </div>
+        {% endif %}
+      {%- else -%}
+        {% if image_dt != blank %}
+          <div class='collection-list-2__image collection-list-2__image--desktop'>
+            {% render 'image', image: image_dt, aspect_ratio: aspect_ratio_dt, disable_alt: true %}
+          </div>
+        {%- else -%}
+          <div class='collection-list-2__image collection-list-2__image--desktop'>
+            {% render 'image', image: collection_image, aspect_ratio: aspect_ratio_dt, disable_alt: true %}
+          </div>
+        {% endif %}
+        {% if image_mb != blank %}
+          <div class='collection-list-2__image collection-list-2__image--mobile'>
+            {% render 'image', image: image_mb, aspect_ratio: aspect_ratio_mb, disable_alt: true %}
+          </div>
+        {%- else -%}
+          <div class='collection-list-2__image collection-list-2__image--mobile'>
+            {% render 'image', image: collection_image, aspect_ratio: aspect_ratio_mb, disable_alt: true %}
+          </div>
+        {% endif %}
+      {% endif %}
+    </a>
+    <div class='collection-list-2__text'>
+      {% if heading != blank %}
+        <h2 class='collection-list-2__heading {{ class }}'>{{ heading }}</h2>
+      {%- else -%}
+        <h2 class='collection-list-2__heading {{ class }}'>{{ collection_name }}</h2>
+      {% endif %}
+      <div class='collection-list-2__button'>
+        {% render 'button',
+          text: button.button_text,
+          link: button.button_link,
+          style: button.button_style,
+          size: button.button_size,
+          radius: settings.button_radius,
+          padding: settings.button_padding
+        %}
+      </div>
+    </div>
+  </div>
+</div>

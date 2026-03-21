@@ -1,0 +1,105 @@
+{% liquid
+  assign products_per_page = section.settings.products_per_page | default: 10
+  assign aspect_ratio_dt = '16/9'
+  assign aspect_ratio_mb = '16/9'
+%}
+
+<xo-filters-content>
+  {%- paginate collection.products by products_per_page -%}
+    {%- if collection.products.size == 0 -%}
+      <div class='xo-filters-content__empty'>
+        {%- assign title = 'sections.featured_collection.empty' | t -%}
+        {% render 'collection-empty', title: title %}
+      </div>
+    {%- else -%}
+      <xo-grid
+        class='filter-content__grid{% if filter_type == 'vertical' %} filter-content__grid--vertical{% endif %}'
+        style='--xs: {{ section.settings.columns_mobile }}; --md: {{ section.settings.columns_mobile }} ; --lg: {{ section.settings.columns_desktop }}'
+      >
+        {%- for product in collection.products -%}
+          {% assign index_initial = forloop.index %}
+          {%- assign placeholder_image = 'collection-1' -%}
+          {%- assign lazyload = true -%}
+          {% if forloop.index0 < 4 %}
+            {%- assign lazyload = false -%}
+          {% endif %}
+
+          {% for block in section.blocks %}
+            {% liquid
+              assign image_type = block.settings.image_type
+              assign column_span = 1
+              assign row_span = 1
+              if image_type == 'wide'
+                assign column_span = 2
+              elsif image_type == 'high'
+                assign row_span = 2
+              elsif image_type == 'large'
+                assign column_span = 2
+                assign row_span = 2
+              endif
+            %}
+            {% if index_initial == block.settings.index %}
+              <xo-animate xo-cascade class='filter-content__box' style='--column-span: {{ column_span }}; --row-span: {{ row_span }}'>
+                {% render 'banner-box',
+                  image_dt: block.settings.image_dt,
+                  aspect_ratio_dt: aspect_ratio_dt,
+                  image_mb: block.settings.image_mb,
+                  aspect_ratio_mb: aspect_ratio_mb,
+                  color_scheme: block.settings.color_scheme_box,
+                  background_overlay: block.settings.background_overlay,
+                  sub_heading: block.settings.sub_heading,
+                  heading: block.settings.heading,
+                  padding: block.settings.padding,
+                  placement: block.settings.placement,
+                  alignment: block.settings.alignment,
+                  space_between: block.settings.space_between,
+                  button: block.settings
+                %}
+              </xo-animate>
+            {% endif %}
+          {% endfor %}
+
+          {% render 'product-card',
+            product: product,
+            show_image: settings.product_card_show_image,
+            show_secondary_image: settings.product_card_show_secondary_image,
+            show_vendor: settings.product_card_show_vendor,
+            show_description: settings.product_card_show_description,
+            show_quick_add: settings.product_card_show_quick_add,
+            show_quick_view: settings.product_card_show_quick_view,
+            show_favorite: settings.product_card_show_favorite,
+            show_price: settings.product_card_show_price,
+            show_badge: settings.product_card_show_badge,
+            media_aspect_ratio: section.settings.product_card_aspect_ratio,
+            color_scheme: section.settings.card_color_scheme,
+            placeholder_image: placeholder_image,
+            animate_enabled: true,
+            lazyload: lazyload
+          -%}
+        {%- endfor -%}
+        <xo-filters-content-anchor></xo-filters-content-anchor>
+      </xo-grid>
+
+      {%- if section.settings.show_more_type == 'paginate' -%}
+        <xo-filters-paginate>
+          {% render 'pagination', paginate: paginate, anchor: '' %}
+        </xo-filters-paginate>
+      {%- elsif section.settings.show_more_type == 'btn_load_more' -%}
+        {%- if paginate.pages > 1 -%}
+          <xo-filters-load-more class="xo-filters-content__load-more" xo-pages="{{ paginate.pages }}">
+            {%- assign button_load_more_text = 'products.facets.load_more' | t -%}
+            {%- render 'button', text: button_load_more_text, size: 'md', style: 'primary' -%}
+          </xo-filters-load-more>
+        {%- endif -%}
+      {%- else -%}
+        {%- if paginate.pages > 1 -%}
+          <xo-filters-load-more class="xo-filters-content__load-more" xo-pages="{{ paginate.pages }}">
+            <div class='xo-filters-content__load-more-loader'>
+              {%- render 'loader-1', size: 40 -%}
+            </div>
+          </xo-filters-load-more>
+        {%- endif -%}
+      {%- endif -%}
+    {%- endif -%}
+  {%- endpaginate -%}
+</xo-filters-content>

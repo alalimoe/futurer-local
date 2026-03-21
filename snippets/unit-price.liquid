@@ -1,0 +1,24 @@
+{% comment %}
+  Renders a product's unit price.
+
+  Accepts:
+  - product: {Object} Product Liquid object (optional)
+
+  Usage:
+  {% render 'unit-price', product: product %}
+{% endcomment %}
+
+<small class='xo-unit-price{% if product.selected_or_first_available_variant.unit_price_measurement == nil %} xo-unit-price--hidden{% endif %}'>
+  <span class='xo-visually-hidden'>{{ 'products.product.price.unit_price' | t }}</span>
+  <span>
+    <span>{{- product.selected_or_first_available_variant.unit_price | money -}}</span>
+    <span aria-hidden='true'>/</span>
+    <div class='xo-visually-hidden xo-visually-hidden--inline'>{{ 'accessibility.unit_price_separator' | t }}</div>
+    <span>
+      {%- if product.selected_or_first_available_variant.unit_price_measurement.reference_value != 1 -%}
+        {{- product.selected_or_first_available_variant.unit_price_measurement.reference_value -}}
+      {%- endif -%}
+      {{ product.selected_or_first_available_variant.unit_price_measurement.reference_unit }}
+    </span>
+  </span>
+</small>

@@ -1,0 +1,78 @@
+{% comment %}
+  Renders a feedback video section
+
+  @param {Array} blocks - An array of blocks to render within the video feedback section (required)
+  @param {String} heading - A string to use as the heading for the video feedback section (required)
+  @param {Number} active_index - An integer to set the active index of the video feedback section (optional)
+  @param {String} autoplay - A boolean to determine if the video should autoplay (optional)
+  @param {Number} autoplay_speed - An integer to set the speed of autoplay in milliseconds (optional)
+  @param {Boolean} enable_navigation - A boolean to enable navigation arrows (optional)
+  @param {Boolean} enable_pagination - A boolean to enable pagination dots (optional)
+
+  @example
+  {% render 'video-feedback',
+    heading: heading,
+    active_index: active_index,
+    autoplay: autoplay,
+    autoplay_speed: autoplay_speed,
+    enable_navigation: enable_navigation,
+    enable_pagination: enable_pagination,
+    blocks: blocks
+  %}
+{% endcomment %}
+
+<div class="video-feedback">
+  <xo-grid class="video-feedback__grid">
+    {% if heading != blank %}
+      <div class="video-feedback__head" style="--lg: 4; --md: 6; --xs: 12; --start-md: 7; --start-lg: 5;">
+        {% render 'text', context: section %}
+      </div>
+      <div class="video-feedback__content" style="--lg: 4; --md: 6; --xs: 12; --start-md: 7; --start-lg: 5;">
+        <xo-carousel
+          class="video-feedback__carousel"
+          xo-active-index="{{ active_index }}"
+          xo-per-view="1"
+          xo-loop
+          {% if autoplay == 'on' %}
+            xo-autoplay="{{ autoplay_speed }}"
+          {% endif %}
+          xo-overflow="visible"
+          xo-render-bullet="<span class='carousel-bullet'></span>"
+        >
+          <xo-carousel-inner>
+            <xo-carousel-list>
+              {% for block in blocks %}
+                <xo-carousel-slide>
+                  <div class="video-feedback__item">
+                    {% render 'video-2', context: block %}
+                  </div>
+                </xo-carousel-slide>
+              {% endfor %}
+            </xo-carousel-list>
+          </xo-carousel-inner>
+          {% if enable_pagination or enable_navigation %}
+            <xo-grid class="video-feedback__grid">
+              <div class="video-feedback__bottom" style="--lg: 4; --md: 6; --xs: 12; --start-md: 7; --start-lg: 5;">
+                {% if enable_pagination %}
+                  <div class="video-feedback__pagination">
+                    {% render 'carousel-pagination', align: 'center', style: 'sticks' %}
+                  </div>
+                {% endif %}
+                {% if enable_navigation %}
+                  <div class="video-feedback__navigation">
+                    <xo-carousel-prev class="video-feedback__button video-feedback__button--prev" tabindex="0" role="button" aria-label="Previous">
+                      {% render 'button-slide', icon: 'arrow-left', icon_size: '2.4rem', size: '3.6rem', direction: 'left', style: 'gray' %}
+                    </xo-carousel-prev>
+                    <xo-carousel-next class="video-feedback__button video-feedback__button--next" tabindex="0" role="button" aria-label="Next">
+                      {% render 'button-slide', icon: 'arrow-right', icon_size: '2.4rem', size: '3.6rem', direction: 'right', style: 'gray' %}
+                    </xo-carousel-next>
+                  </div>
+                {% endif %}
+              </div>
+            </xo-grid>
+          {% endif %}
+        </xo-carousel>
+      </div>
+    {% endif %}
+  </xo-grid>
+</div>

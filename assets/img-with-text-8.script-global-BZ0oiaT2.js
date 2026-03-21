@@ -1,0 +1,1 @@
+function c({element:o,createValue:s,EMPTY:a}){const e=s("widthCustom");e!==a&&o.style.setProperty("width",`${e}%`)}const t=document.querySelector(".parallax-divider");t==null||t.addEventListener("xo:parallax-scroll:init",()=>{t.customEffects(c)});

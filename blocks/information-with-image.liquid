@@ -1,0 +1,159 @@
+{% liquid
+  assign caption = block.settings.caption
+  assign sub_heading = block.settings.sub_heading
+  assign heading = block.settings.heading
+  assign image_desktop = block.settings.image_desktop
+  assign aspect_ratio_desktop = block.settings.aspect_ratio_desktop
+  if aspect_ratio_desktop == 'custom'
+    assign aspect_ratio_desktop = block.settings.aspect_ratio_desktop_width | append: '/' | append: block.settings.aspect_ratio_desktop_height
+  endif
+  assign image_mobile = block.settings.image_mobile
+  assign aspect_ratio_mobile = block.settings.aspect_ratio_mobile
+  if aspect_ratio_mobile == 'custom'
+    assign aspect_ratio_mobile = block.settings.aspect_ratio_mobile_width | append: '/' | append: block.settings.aspect_ratio_mobile_height
+  endif
+%}
+
+{% render 'information-with-image-block',
+  image_desktop: image_desktop,
+  aspect_ratio_desktop: aspect_ratio_desktop,
+  image_mobile: image_mobile,
+  aspect_ratio_mobile: aspect_ratio_mobile,
+  caption: caption,
+  sub_heading: sub_heading,
+  heading: heading
+%}
+
+
+{% schema %}
+{
+  "name": "t:blocks.information_with_image.name",
+  "settings": [
+    {
+      "type": "header",
+      "content": "t:blocks.information_with_image.settings.header_1.content"
+    },
+    {
+      "type": "text",
+      "id": "caption",
+      "label": "t:blocks.information_with_image.settings.caption.label",
+      "default": "Caption"
+    },
+    {
+      "type": "text",
+      "id": "sub_heading",
+      "label": "t:blocks.information_with_image.settings.sub_heading.label",
+      "default": "Subheading"
+    },
+    {
+      "type": "textarea",
+      "id": "heading",
+      "label": "t:blocks.information_with_image.settings.heading.label",
+      "default": "Heading"
+    },
+    {
+      "type": "header",
+      "content": "t:blocks.information_with_image.settings.header_2.content"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_desktop",
+      "label": "t:blocks.information_with_image.settings.image.label"
+    },
+    {
+      "type": "select",
+      "id": "aspect_ratio_desktop",
+      "label": "Aspect ratio",
+      "default": "auto",
+      "options": [
+        {
+          "value": "auto",
+          "label": "Auto"
+        },
+        {
+          "value": "2/3",
+          "label": "2:3"
+        },
+        {
+          "value": "3/4",
+          "label": "3:4"
+        },
+        {
+          "value": "3/2",
+          "label": "3:2"
+        },
+        {
+          "value": "1",
+          "label": "1:1"
+        },
+        {
+          "value": "4/3",
+          "label": "4:3"
+        },
+        {
+          "value": "16/9",
+          "label": "16:9"
+        },
+        {
+          "value": "21/9",
+          "label": "21:9"
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "t:blocks.information_with_image.settings.header_3.content"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_mobile",
+      "label": "t:blocks.information_with_image.settings.image.label"
+    },
+    {
+      "type": "select",
+      "id": "aspect_ratio_mobile",
+      "label": "Aspect ratio",
+      "default": "auto",
+      "options": [
+        {
+          "value": "auto",
+          "label": "Auto"
+        },
+        {
+          "value": "2/3",
+          "label": "2:3"
+        },
+        {
+          "value": "3/4",
+          "label": "3:4"
+        },
+        {
+          "value": "3/2",
+          "label": "3:2"
+        },
+        {
+          "value": "1",
+          "label": "1:1"
+        },
+        {
+          "value": "4/3",
+          "label": "4:3"
+        },
+        {
+          "value": "16/9",
+          "label": "16:9"
+        },
+        {
+          "value": "21/9",
+          "label": "21:9"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:blocks.information_with_image.presets.name"
+    }
+  ]
+}
+{% endschema %}

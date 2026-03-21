@@ -1,0 +1,239 @@
+{% comment %}
+  Renders a bundle collection
+
+  @param {Object} block - Block
+  @param {Object} collection_default_active - Collection default active (optional)
+  @param {Object} collection_list - Collection list (required)
+  @param {String} discount_type - Discount type (required, value: fixed | percent)
+  @param {Number} min_quantity - Min quantity (required)
+  @param {Number} value_discount - Value discount (required)
+
+  @example
+  {% render 'bundle-collection',
+    collection_default_active: collection_default_active,
+    collection_list: collection_list,
+    discount_type: discount_type,
+    min_quantity: min_quantity,
+    value_discount: value_discount,
+  %}
+{% endcomment %}
+
+{% liquid
+  assign bundle_step_blocks = blocks | where: 'type', 'bundle-step'
+  assign collection_blocks = blocks | where: 'type', 'collection'
+  assign first_collection = blocks | where: 'type', 'collection' | first
+  assign current_handle = first_collection.settings.collection.handle
+
+  if request.path contains '/collections/'
+    assign current_handle = request.path | split: '/' | last
+  endif
+%}
+
+{% capture discount_arr %}
+  xo-discounts="
+    [
+      {% for block in blocks %}
+        {% case block.type %}
+          {% when 'collection' %}
+            {% if block.settings.discount_type == 'fixed-amount' %}
+              { type: '{{ block.settings.discount_type }}', minQuantity: {{ block.settings.min_quantity }}, value: {{ block.settings.value_discount | times: 100 }} },
+            {% else %}
+              { type: '{{ block.settings.discount_type }}', minQuantity: {{ block.settings.min_quantity }}, value: {{ block.settings.value_discount }} },
+            {% endif %}
+        {% endcase %}
+      {% endfor %}
+    ]
+  "
+{% endcapture %}
+
+{% capture title_placeholder %}
+  <div class='bundle-collection__trigger bundle-collection__trigger--placeholder'>
+    <span class="bundle-collection__trigger-text">{{ 'general.bundle.set_up_discount' | t }}</span>
+  </div>
+{% endcapture %}
+
+{% capture product_placeholder %}
+  {% for item in (1..6) %}
+    <div class='bundle-collection__product'>
+      {% render 'product-card',
+        product: empty,
+        show_image: settings.product_card_show_image,
+        show_secondary_image: settings.product_card_show_secondary_image,
+        show_vendor: settings.product_card_show_vendor,
+        show_description: settings.product_card_show_description,
+        show_quick_add: settings.product_card_show_quick_add,
+        show_quick_view: settings.product_card_show_quick_view,
+        show_favorite: settings.product_card_show_favorite,
+        show_price: settings.product_card_show_price,
+        show_badge: settings.product_card_show_badge,
+        position_badge: settings.position_badge,
+        media_aspect_ratio: section.settings.product_card_aspect_ratio,
+        color_scheme: section.settings.card_color_scheme,
+        placeholder_image: placeholder_image,
+        animate_enabled: true,
+        is_bundle: true
+      %}
+    </div>
+  {% endfor %}
+{% endcapture %}
+
+<div class="bundle-collection">
+  <xo-collection-tabs xo-section-id="{{ section.id }}">
+    <div class="bundle-collection__head">
+      <div class="bundle-collection__heading bundle-collection__heading--modifier">
+        {% render 'text', context: section %}
+      </div>
+      <xo-animate xo-cascade>
+        <div class="bundle-collection__tab-trigger bundle-collection__tab-trigger--desktop{% if settings.enable_border_radius %} bundle-collection__tab-trigger--radius{% endif %}">
+          {% if collection_blocks.size > 0 %}
+            {% for block in blocks %}
+              {% case block.type %}
+                {% when 'collection' %}
+                  {% liquid
+                    assign collection = block.settings.collection
+                    assign collection_handle = collection.handle
+                    assign collection_title = collection.title
+                  %}
+                  {% if collection != blank %}
+                    <xo-collection-tabs-trigger
+                      xo-handle="{{ collection_handle }}"
+                      {% if collection_handle == current_handle %}
+                        xo-active
+                      {% endif %}
+                      class="bundle-collection__trigger"
+                    >
+                      <span class="bundle-collection__trigger-text">{{ collection_title }}</span>
+                    </xo-collection-tabs-trigger>
+                  {% else %}
+                    {{ title_placeholder }}
+                  {% endif %}
+              {% endcase %}
+            {% endfor %}
+          {% else %}
+            {% for item in (1..3) %}
+              {{ title_placeholder }}
+            {% endfor %}
+          {% endif %}
+        </div>
+        <div class="bundle-collection__tab-trigger bundle-collection__tab-trigger--mobile{% if settings.enable_border_radius %} bundle-collection__tab-trigger--radius{% endif %}">
+          {% if collection_blocks.size > 0 %}
+            <xo-scroll-carousel xo-gap="4">
+              <div class="bundle-collection__scroll">
+                {% for block in blocks %}
+                  {% case block.type %}
+                    {% when 'collection' %}
+                      {% liquid
+                        assign collection = block.settings.collection
+                        assign collection_handle = collection.handle
+                        assign collection_title = collection.title
+                      %}
+                      {% if collection != blank %}
+                        <div class="bundle-collection__slide">
+                          <xo-collection-tabs-trigger
+                            xo-handle="{{ collection_handle }}"
+                            {% if collection_handle == current_handle %}
+                              xo-active
+                            {% endif %}
+                            class="bundle-collection__trigger"
+                          >
+                            <span class="bundle-collection__trigger-text">{{ collection_title }}</span>
+                          </xo-collection-tabs-trigger>
+                        </div>
+                      {% else %}
+                        {{ title_placeholder }}
+                      {% endif %}
+                  {% endcase %}
+                {% endfor %}
+              </div>
+            </xo-scroll-carousel>
+          {% else %}
+            {% for item in (1..3) %}
+              <p>{{ forloop.index }}</p>
+              {{ title_placeholder }}
+            {% endfor %}
+          {% endif %}
+        </div>
+      </xo-animate>
+    </div>
+    <div class="bundle-collection__content">
+      <xo-bundle-provider
+        xo-name="{{ section.id }}"
+        {{ discount_arr }}
+        class="bundle-collection__provider"
+      >
+        <template xo-bundle-property>
+          <div class="bundle-collection__box">
+            <div class="bundle-collection__box-label">{label}:</div>
+            <div class="bundle-collection__box-value">{value}</div>
+          </div>
+        </template>
+        <div class="bundle-collection__sticky-mobile">
+          {% render 'bundle-modal',
+            modal_name: 'bundle-collection',
+            bundle_modal_type: 'collection',
+            bundle_type: 'collection',
+            blocks: blocks,
+            bundle_step_blocks: bundle_step_blocks,
+            collection_blocks: collection_blocks,
+            discount_type: discount_type,
+            empty_text: empty_text
+          %}
+        </div>
+        <xo-grid class="bundle-collection__grid">
+          <div class="bundle-collection__left" style="--xxl: 9; --xl: 8; --lg: 7; --md: 12; --xs: 12">
+            <xo-collection-tabs-content>
+              <xo-grid
+                class="bundle-collection__grid"
+                style="--xxl: {{ column_desktop }}; --xl: {{ column_desktop }}; --lg: 2; --md: 2; --xs: {{ column_mobile }}"
+              >
+                {% if collection_blocks.size > 0 %}
+                  {% assign collection = collections[current_handle] %}
+                  {% if collection != blank %}
+                    {% for product in collection.products limit: product_to_show %}
+                      <div class="bundle-collection__product">
+                        {% render 'product-card',
+                          product: product,
+                          show_image: settings.product_card_show_image,
+                          show_secondary_image: settings.product_card_show_secondary_image,
+                          show_vendor: settings.product_card_show_vendor,
+                          show_description: settings.product_card_show_description,
+                          show_quick_add: settings.product_card_show_quick_add,
+                          show_quick_view: settings.product_card_show_quick_view,
+                          show_favorite: settings.product_card_show_favorite,
+                          show_price: settings.product_card_show_price,
+                          show_badge: settings.product_card_show_badge,
+                          position_badge: settings.position_badge,
+                          media_aspect_ratio: section.settings.product_card_aspect_ratio,
+                          color_scheme: section.settings.card_color_scheme,
+                          placeholder_image: placeholder_image,
+                          animate_enabled: true,
+                          is_bundle: true,
+                          bundle_index: collection.id
+                        %}
+                      </div>
+                    {% endfor %}
+                  {% else %}
+                    {{ product_placeholder }}
+                  {% endif %}
+                {% else %}
+                  {{ product_placeholder }}
+                {% endif %}
+              </xo-grid>
+            </xo-collection-tabs-content>
+          </div>
+          <div class="bundle-collection__right" style="--xxl: 3; --xl: 4; --lg: 5; --md: 12; --xs: 12">
+            {% render 'bundle-box',
+              blocks: blocks,
+              bundle_type: 'collection',
+              discount_type: discount_type,
+              bundle_step_blocks: bundle_step_blocks,
+              collection_blocks: collection_blocks,
+              empty_text: empty_text
+            %}
+          </div>
+        </xo-grid>
+      </xo-bundle-provider>
+    </div>
+  </xo-collection-tabs>
+  <xo-sticky-hidden xo-name="bundle-sticky-hidden"></xo-sticky-hidden>
+</div>

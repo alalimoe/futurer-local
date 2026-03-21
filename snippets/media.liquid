@@ -1,0 +1,91 @@
+{% comment %}
+  Renders a media
+
+  Accepts:
+  - media: {Object or String} Media object or video url
+  - type: {String} Type of media. Example: 'youtube', 'model', 'external_video', 'image', 'video', 'vimeo' (optional)
+  - class: {String} Adds a media class to the media element (optional)
+  - loop: {Boolean} Set looping for video. Default: false (optional)
+  - controls: {Boolean} Set controls for video. Default: false (optional)
+  - muted: {Boolean} Set muted for video. Default: false (optional)
+  - autoplay: {Boolean} Set autoplay for video. Default: false (optional)
+
+  Usage:
+
+  {% render 'media',
+    media: media,
+    type: 'video',
+    class: 'media',
+    loop: true,
+    controls: true,
+    muted: true,
+    autoplay: false
+  %}
+{% endcomment %}
+
+{% liquid
+  assign loop = ''
+  if enable_video_looping
+    assign loop = '&loop=1&playlist=' | append: media.id
+  endif
+  assign controls = controls | default: true, allow_false: true
+  assign muted = muted | default: false
+  assign autoplay = autoplay | default: false
+  assign image_size = image_size | default: '1100x'
+
+  assign video_media = media | video_tag: image_size: image_size, loop: enable_video_looping, controls: controls, muted: muted, autoplay: autoplay, class: 'xo-video--modifier', fetchpriority: 'high'
+  assign video_media = video_media | replace: '<img', '<img alt="Image"'
+%}
+
+<div class="xo-media {{ class }}">
+  {% case type %}
+    {% when 'video' %}
+      <xo-intersection-video style="height: 100%;">
+        <div class="xo-embed-responsive" style="height: 100%;">
+          {{ video_media }}
+        </div>
+      </xo-intersection-video>
+
+    {% when 'vimeo' %}
+      <xo-intersection-video style="height: 100%;">
+        <div class="xo-embed-responsive" style="height: 100%;">
+          <iframe
+            src="https://player.vimeo.com/video/{{ media.id }}?autoplay=0{{ loop }}&muted=0"
+            allow="autoplay; encrypted-media"
+            allowfullscreen
+            title="{{ media.alt | escape }}"
+          ></iframe>
+        </div>
+      </xo-intersection-video>
+
+    {% when 'youtube' %}
+      <xo-intersection-video style="height: 100%;">
+        <div class="xo-embed-responsive" style="height: 100%;">
+          <iframe
+            src="https://www.youtube.com/embed/{{ media.id }}?enablejsapi=1&autoplay=0{{ loop }}&mute=0"
+            allow="autoplay; encrypted-media"
+            allowfullscreen
+            title="{{ media.alt | escape }}"
+          ></iframe>
+        </div>
+      </xo-intersection-video>
+
+    {% when 'image' %}
+      {% render 'image', image: media, placeholder: placeholder, lazyload: image_lazyload, widths: image_widths, disable_alt: true %}
+
+    {% when 'model' %}
+      {{ media | media_tag: image_size: '2048x', toggleable: true }}
+
+    {% when 'external_video' %}
+      <xo-intersection-video style="height: 100%;">
+        <div class="xo-embed-responsive" style="height: 100% !important;">
+          {%- assign video_class = 'js-' | append: media.host -%}
+          {%- if media.host == 'youtube' -%}
+            {{ media | external_video_url: autoplay: false, loop: enable_video_looping, playlist: media.external_id | external_video_tag: class: video_class, loading: 'lazy' }}
+          {%- else -%}
+            {{ media | external_video_url: autoplay: false, loop: enable_video_looping | external_video_tag: class: video_class, loading: 'lazy' }}
+          {%- endif -%}
+        </div>
+      </xo-intersection-video>
+  {% endcase %}
+</div>

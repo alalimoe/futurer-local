@@ -1,0 +1,131 @@
+{% liquid
+  assign low_inventory_threshold = block.settings.low_inventory_threshold
+  assign show_inventory_count = block.settings.show_inventory_count
+  assign color_in_stock = block.settings.color_in_stock
+  assign color_out_stock = block.settings.color_out_stock
+  assign current_variant = product.selected_or_first_available_variant
+
+  assign progress = 100
+  if low_inventory_threshold > 0
+    assign progress = current_variant.inventory_quantity | times: 100.0 | divided_by: low_inventory_threshold
+  endif
+%}
+
+{% comment %} Display content for 'default' layout {% endcomment %}
+{% capture default_content %}
+  {% if current_variant.inventory_quantity == 0 %}
+    <div
+      class='xo-inventory-status__box xo-inventory-status__box--out-stock{% if settings.enable_border_radius %} xo-inventory-status__box--radius{% endif %}'
+      style='--color: {{ color_out_stock }}'
+    >
+      <span class='xo-inventory-status__icon xo-stack' style='--ai: center; --jc: center'>
+        {% render 'icon', name: 'inventory', size: 16, color: color_out_stock %}
+      </span>
+      <span class='xo-inventory-status__label' style='--color: {{ color_out_stock }}'>{{ 'general.inventory_status.out_of_stock' | t }}</span>
+    </div>
+  {% elsif current_variant.inventory_quantity > 0 and current_variant.inventory_quantity < low_inventory_threshold or low_inventory_threshold == 0 %}
+    <div class='xo-inventory-status__box xo-inventory-status__box--left-in-stock{% if settings.enable_border_radius %} xo-inventory-status__box--radius{% endif %}'>
+      <span class='xo-inventory-status__label' style='--color: {{ color_in_stock }}'>
+        {{- 'general.inventory_status.low_stock' | t -}}
+      </span>
+      <span
+        class='xo-inventory-status__progress'
+        data-value='{{ current_variant.inventory_quantity }}'
+        data-max='{{ low_inventory_threshold }}'
+        style='--color: {{ color_in_stock }}; --progress: {{ progress }}%'
+      ></span>
+    </div>
+  {% elsif current_variant.inventory_quantity >= low_inventory_threshold %}
+    <div
+      class='xo-inventory-status__box xo-inventory-status__box--in-stock{% if settings.enable_border_radius %} xo-inventory-status__box--radius{% endif %}'
+      style='--color: {{ color_in_stock }}'
+    >
+      <span class='xo-inventory-status__icon xo-stack' style='--ai: center; --jc: center'>
+        {% render 'icon', name: 'inventory', size: 16, color: color_in_stock %}
+      </span>
+      <span class='xo-inventory-status__label' style='--color: {{ color_in_stock }}'>{{ 'general.inventory_status.ready_to_ship' | t }}</span>
+    </div>
+  {% endif %}
+{% endcapture %}
+
+{% comment %} Display content for 'low inventory threshold' layout {% endcomment %}
+{% capture low_inventory_threshold_content %}
+  {% if current_variant.inventory_quantity == 0 %}
+    <div
+      class='xo-inventory-status__box xo-inventory-status__box--out-stock{% if settings.enable_border_radius %} xo-inventory-status__box--radius{% endif %}'
+      style='--color: {{ color_out_stock }}'
+    >
+      <span class='xo-inventory-status__icon xo-stack' style='--ai: center; --jc: center'>
+        {% render 'icon', name: 'inventory', size: 16, color: color_out_stock %}
+      </span>
+      <span class='xo-inventory-status__label' style='--color: {{ color_out_stock }}'>{{ 'general.inventory_status.out_of_stock' | t }}</span>
+    </div>
+  {% elsif current_variant.inventory_quantity > 0 and current_variant.inventory_quantity < low_inventory_threshold or low_inventory_threshold == 0 %}
+    <div class='xo-inventory-status__box xo-inventory-status__box--left-in-stock{% if settings.enable_border_radius %} xo-inventory-status__box--radius{% endif %}'>
+      <span class='xo-inventory-status__label' style='--color: {{ color_in_stock }}'>
+        {{- 'general.inventory_status.left_in_stock' | t: count: current_variant.inventory_quantity -}}
+      </span>
+      <span
+        class='xo-inventory-status__progress'
+        data-value='{{ current_variant.inventory_quantity }}'
+        data-max='{{ low_inventory_threshold }}'
+        style='--color: {{ color_in_stock }}; --progress: {{ progress }}%'
+      ></span>
+    </div>
+  {% elsif current_variant.inventory_quantity >= low_inventory_threshold %}
+    <div
+      class='xo-inventory-status__box xo-inventory-status__box--in-stock{% if settings.enable_border_radius %} xo-inventory-status__box--radius{% endif %}'
+      style='--color: {{ color_in_stock }}'
+    >
+      <span class='xo-inventory-status__icon xo-stack' style='--ai: center; --jc: center'>
+        {% render 'icon', name: 'inventory', size: 16, color: color_in_stock %}
+      </span>
+      <span class='xo-inventory-status__label' style='--color: {{ color_in_stock }}'>{{ 'general.inventory_status.ready_to_ship' | t }}</span>
+    </div>
+  {% endif %}
+{% endcapture %}
+
+{% comment %} Display content for 'always' layout {% endcomment %}
+{% capture always_content %}
+  {% if current_variant.inventory_quantity == 0 %}
+    <div
+      class='xo-inventory-status__box xo-inventory-status__box--out-stock{% if settings.enable_border_radius %} xo-inventory-status__box--radius{% endif %}'
+      style='--color: {{ color_out_stock }}'
+    >
+      <span class='xo-inventory-status__icon xo-stack' style='--ai: center; --jc: center'>
+        {% render 'icon', name: 'inventory', size: 16, color: color_out_stock %}
+      </span>
+      <span class='xo-inventory-status__label' style='--color: {{ color_out_stock }}'>{{ 'general.inventory_status.out_of_stock' | t }}</span>
+    </div>
+  {% elsif current_variant.inventory_quantity > 0 and current_variant.inventory_quantity <= low_inventory_threshold or low_inventory_threshold == 0 %}
+    <div class='xo-inventory-status__box xo-inventory-status__box--left-in-stock{% if settings.enable_border_radius %} xo-inventory-status__box--radius{% endif %}'>
+      <span class='xo-inventory-status__label' style='--color: {{ color_in_stock }}'>
+        {{- 'general.inventory_status.left_in_stock' | t: count: current_variant.inventory_quantity -}}
+      </span>
+      <span class='xo-inventory-status__progress' data-value="{{ current_variant.inventory_quantity }}" data-max="{{ low_inventory_threshold }}" style='--color: {{ color_in_stock }}; --progress: {{ progress }}%'></span>
+    </div>
+  {% elsif current_variant.inventory_quantity > low_inventory_threshold %}
+    <div
+      class='xo-inventory-status__box xo-inventory-status__box--in-stock{% if settings.enable_border_radius %} xo-inventory-status__box--radius{% endif %}'
+      style='--color: {{ color_in_stock }}'
+    >
+      <span class='xo-inventory-status__icon xo-stack' style='--ai: center; --jc: center'>
+        {% render 'icon', name: 'inventory', size: 16, color: color_in_stock %}
+      </span>
+      <span class='xo-inventory-status__label' style='--color: {{ color_in_stock }}'>{{ 'general.inventory_status.in_stock' | t: count: current_variant.inventory_quantity }}</span>
+    </div>
+  {% endif %}
+{% endcapture %}
+
+<div class='xo-inventory-status' xo-observed='{{ low_inventory_threshold }}'>
+  <div class='xo-inventory-status__wrapper'>
+    {% case show_inventory_count %}
+      {% when 'none' %}
+        {{ default_content }}
+      {% when 'low-inventory-threshold' %}
+        {{ low_inventory_threshold_content }}
+      {% when 'always' %}
+        {{ always_content }}
+    {% endcase %}
+  </div>
+</div>

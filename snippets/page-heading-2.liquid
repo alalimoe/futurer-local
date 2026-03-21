@@ -1,0 +1,113 @@
+{% comment %}
+  Renders a page heading.
+
+  @param {String} class - Font size heading (optional)
+  @param {String} heading - Title of the page (optional)
+  @param {String} sub_heading - Description of the page (optional)
+  @param {String} align - Alignment of the page heading (optional)
+  @param {Number} padding_top_dt - Spacing top desktop (optional)
+  @param {Number} padding_bottom_dt - Spacing bottom desktop (optional)
+  @param {Number} padding_top_mb - Spacing top mobile (optional)
+  @param {Number} padding_bottom_mb - Spacing bottom mobile (optional)
+
+  @example
+  {% render 'page-heading-2',
+    class: class,
+    heading: heading,
+    sub_heading: sub_heading,
+    align: align,
+    padding_top_dt: padding_top_dt,
+    padding_bottom_dt: padding_bottom_dt,
+    padding_top_mb: padding_top_mb,
+    padding_bottom_mb: padding_bottom_mb,
+  %}
+{% endcomment %}
+
+{% liquid
+  assign default_heading = ''
+  assign text = ''
+
+  if template.name == 'collection' and collection.handle
+    if current_tags
+      assign default_heading = current_tags | join: ' + ' | escape
+    else
+      assign default_heading = collection.title | escape
+    endif
+  else
+    assign default_heading = page_title | escape
+  endif
+
+  if heading != blank
+    assign text = heading
+  else
+    assign text = default_heading
+  endif
+%}
+
+<div class="page-heading-2{% if align %} page-heading-2--{{ align }}{% endif %}">
+  {% if enable_effect %}
+    <div class="page-heading-2__heading">
+      {% render 'text', context: section, text: text %}
+      {% if show_count_number %}
+        <div class="page-heading-2__count-inner">
+          <xo-animate xo-cascade xo-delay="{{ duration }}" xo-duration="{{ duration }}">
+            {% if template.name == 'list-collection' %}
+              <span class="page-heading-2__count">({{ collections.size }})</span>
+            {% else %}
+              <span class="page-heading-2__count">({{ collection.all_products_count }})</span>
+            {% endif %}
+          </xo-animate>
+        </div>
+      {% endif %}
+    </div>
+    {% if sub_heading != blank %}
+      <xo-animate xo-cascade xo-constant="150" xo-duration="500">
+        <div class="page-heading-2__sub-heading{% if sub_heading_style %} page-heading-2__sub-heading--{{ sub_heading_style }}{% endif %}">
+          {{ sub_heading }}
+        </div>
+      </xo-animate>
+    {%- else -%}
+      {% if show_description_collection %}
+        <xo-animate xo-cascade xo-constant="150" xo-duration="500">
+          <div class="page-heading-2__sub-heading{% if sub_heading_style %} page-heading-2__sub-heading--{{ sub_heading_style }}{% endif %}">
+            {{ collection.description }}
+          </div>
+        </xo-animate>
+      {% endif %}
+    {% endif %}
+  {%- else -%}
+    <xo-animate xo-cascade xo-constant="150" xo-duration="500">
+      <h3 class="page-heading-2__heading {{ class }}">
+        {% if heading != blank %}
+          {{ heading }}
+        {% else %}
+          {{ default_heading }}
+        {% endif %}
+        {% if show_count_number %}
+          <xo-animate xo-cascade xo-duration="{{ duration }}" xo-delay="{{ duration }}">
+            {% if template.name == 'list-collection' %}
+              <span class="page-heading-2__count">({{ collections.size }})</span>
+            {% else %}
+              <span class="page-heading-2__count">({{ collection.all_products_count }})</span>
+            {% endif %}
+          </xo-animate>
+        {% endif %}
+      </h3>
+    </xo-animate>
+    {% if sub_heading != blank %}
+      <xo-animate xo-cascade xo-constant="150" xo-duration="500">
+        <div class="page-heading-2__sub-heading{% if sub_heading_style %} page-heading-2__sub-heading--{{ sub_heading_style }}{% endif %}">
+          {{ sub_heading }}
+        </div>
+      </xo-animate>
+    {%- else -%}
+      {% if show_description_collection %}
+        <xo-animate xo-cascade xo-constant="150" xo-duration="500">
+          <div class="page-heading-2__sub-heading{% if sub_heading_style %} page-heading-2__sub-heading--{{ sub_heading_style }}{% endif %}">
+            {{ collection.description }}
+          </div>
+        </xo-animate>
+      {% endif %}
+    {% endif %}
+  {% endif %}
+</div>

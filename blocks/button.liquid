@@ -1,0 +1,109 @@
+{% stylesheet %}
+  .button-block {
+    display: flex;
+    align-items: center;
+    justify-content: start;
+  }
+
+  .button-block--center {
+    justify-content: center;
+  }
+
+  .button-block--right {
+    justify-content: end;
+  }
+{% endstylesheet %}
+
+{% liquid
+  assign alignment = block.settings.alignment
+%}
+
+<div class='button-block button-block--{{ alignment }}'>
+  {% render 'button',
+    text: block.settings.button_text,
+    link: block.settings.button_link,
+    style: block.settings.button_style,
+    size: block.settings.button_size,
+    block: block.settings.full_width
+  %}
+</div>
+
+
+{% schema %}
+{
+  "name": "t:blocks.button.name",
+  "settings": [
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "t:blocks.button.settings.button_text.label",
+      "default": "Button"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "t:blocks.button.settings.button_link.label"
+    },
+    {
+      "type": "checkbox",
+      "id": "full_width",
+      "label": "t:blocks.button.settings.full_width.label",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "button_style",
+      "label": "t:blocks.button.settings.button_style.label",
+      "default": "primary",
+      "options": [
+        {
+          "value": "primary",
+          "label": "t:blocks.button.settings.button_style.options_1.label"
+        },
+        {
+          "value": "secondary",
+          "label": "t:blocks.button.settings.button_style.options_2.label"
+        },
+        {
+          "value": "link",
+          "label": "t:blocks.button.settings.button_style.options_3.label"
+        }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "button_size",
+      "label": "t:blocks.button.settings.button_size.label",
+      "default": "md",
+      "options": [
+        {
+          "value": "xs",
+          "label": "t:blocks.button.settings.button_size.options_1.label"
+        },
+        {
+          "value": "sm",
+          "label": "t:blocks.button.settings.button_size.options_2.label"
+        },
+        {
+          "value": "md",
+          "label": "t:blocks.button.settings.button_size.options_3.label"
+        },
+        {
+          "value": "lg",
+          "label": "t:blocks.button.settings.button_size.options_4.label"
+        }
+      ]
+    },
+    {
+      "type": "text_alignment",
+      "id": "alignment",
+      "label": "t:blocks.button.settings.alignment_block.label"
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:blocks.button.presets.name"
+    }
+  ]
+}
+{% endschema %}

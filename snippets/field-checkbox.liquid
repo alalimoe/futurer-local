@@ -1,0 +1,45 @@
+{% comment %}
+  Renders a checkbox button
+
+  Accepts:
+  - name: {string} Name of the checkbox button
+  - value: {string} Value of the checkbox button
+  - label: {string} Label of the checkbox button (optional)
+  - icon_size: {string} Size of the checkbox button. Default: 1.6rem (optional)
+  - count_id: {string} Unique ID for the count element (optional, support filters)
+  - count_value: {string} Value of the count element (optional, support filters)
+  - checked: {Boolean} If the radio button is checked (optional)
+
+  Usage:
+  {% render 'field-checkbox',
+    name: 'checkbox',
+    value: 'checkbox',
+    label: 'Checkbox',
+    icon_size: '1.6rem'
+  %}
+{% endcomment %}
+
+<label class="xo-field-checkbox" style="--icon-size: {{ icon_size | default: '2rem' }}">
+  <input
+    class="xo-field-checkbox__input"
+    type="checkbox"
+    name="{{ name }}"
+    value="{{ value | escape }}"
+    xo-label="{{ label | escape }}"
+    {% if checked %}
+      checked
+    {% endif %}
+    aria-label="{{ label | escape }}"
+  >
+  <span class="xo-field-checkbox__item">
+    <span class="xo-field-checkbox__icon">{% render 'icon', name: 'check', size: '1.6rem', color: '#FFFFFF' %}</span>
+  </span>
+  {% if label != null %}
+    <span class="xo-field-checkbox__label">
+      <span>{{ label | escape }}</span>
+      {% if count_value %}
+        <xo-filters-count xo-unique-id="{{ count_id }}">({{ count_value }})</xo-filters-count>
+      {% endif %}
+    </span>
+  {% endif %}
+</label>

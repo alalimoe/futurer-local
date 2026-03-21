@@ -1,0 +1,110 @@
+{% comment %}
+  Pull Quote (Reviews) — lightweight trust block for above/below-the-fold
+  - Stars + Verified badge
+  - Quote with author/location
+  - Link to Reviews anchor
+{% endcomment %}
+
+<section id="phb-pull-quote-{{ section.id }}" class="phb-pull-quote" aria-labelledby="phb-pull-quote-title-{{ section.id }}">
+  <div class="phb-pull-quote__container">
+    <h2 id="phb-pull-quote-title-{{ section.id }}" class="sr-only">{{ section.settings.heading | escape }}</h2>
+
+    <div class="phb-pull-quote__row">
+      {% if section.settings.show_rating %}
+        <div class="phb-pull-quote__rating" aria-label="{{ section.settings.rating }} out of 5 stars">
+          <span aria-hidden="true">
+            {% for i in (1..5) %}
+              {% if i <= section.settings.rating %}★{% else %}☆{% endif %}
+            {% endfor %}
+          </span>
+        </div>
+      {% endif %}
+
+      <figure class="phb-pull-quote__figure">
+        <blockquote class="phb-pull-quote__quote" dir="auto">“{{ section.settings.quote | escape }}”</blockquote>
+        <figcaption class="phb-pull-quote__meta" dir="auto">
+          — {{ section.settings.author | escape }}{% if section.settings.location != blank %}, {{ section.settings.location | escape }}{% endif %}
+          {% if section.settings.verified %}<span class="phb-badge" aria-label="Verified reviewer">Verified</span>{% endif %}
+        </figcaption>
+      </figure>
+
+      {% if section.settings.link_label != blank and section.settings.link_href != blank %}
+        <a class="phb-pull-quote__link" href="{{ section.settings.link_href | escape }}">
+          {{ section.settings.link_label | escape }} →
+        </a>
+      {% endif %}
+    </div>
+  </div>
+
+  <style>
+    .sr-only{position:absolute!important;height:1px;width:1px;overflow:hidden;clip:rect(1px, 1px, 1px, 1px);white-space:nowrap;}
+
+    #phb-pull-quote-{{ section.id }}{
+      --bg: {{ section.settings.background_color }};
+      --max: {{ section.settings.max_width }}px;
+      --py: {{ section.settings.padding_y }}px;
+      --title: #0A2342;
+      --text: #0b172a;
+      --muted: #6b7280;
+      background: var(--bg);
+    }
+    #phb-pull-quote-{{ section.id }} .phb-pull-quote__container{
+      max-width: var(--max); margin:0 auto; padding: var(--py) var(--page-gutter);
+    }
+    #phb-pull-quote-{{ section.id }} .phb-pull-quote__row{
+      display:flex; flex-wrap:wrap; align-items:center; gap:12px;
+      border:1px solid rgba(0,0,0,.06); border-radius:12px; padding:14px 16px; background:#fff;
+      box-shadow: var(--shadow-xs);
+    }
+    #phb-pull-quote-{{ section.id }} .phb-pull-quote__rating{
+      color:#f59e0b; font-size:16px; letter-spacing:1px; line-height:1; flex:0 0 auto;
+    }
+    #phb-pull-quote-{{ section.id }} .phb-pull-quote__figure{ margin:0; display:flex; flex-direction:column; gap:6px; }
+    #phb-pull-quote-{{ section.id }} .phb-pull-quote__quote{ margin:0; color:var(--text); font-size:16px; line-height:1.6; }
+    #phb-pull-quote-{{ section.id }} .phb-pull-quote__meta{ margin:0; font-size:14px; color:var(--muted); }
+    #phb-pull-quote-{{ section.id }} .phb-badge{
+      display:inline-block; margin-left:6px; padding:2px 8px; font-size:12px; line-height:1.2;
+      border-radius:999px; background:var(--color-surface-tertiary); color:#fff; vertical-align:middle;
+    }
+    #phb-pull-quote-{{ section.id }} .phb-pull-quote__link{
+      margin-left:auto; text-decoration:none; font-weight:700; color:var(--title);
+      border-bottom:2px solid transparent; padding-bottom:2px;
+    }
+    #phb-pull-quote-{{ section.id }} .phb-pull-quote__link:hover{ border-color:var(--title); }
+
+    @media (max-width: 749px){
+      #phb-pull-quote-{{ section.id }} .phb-pull-quote__row{ align-items:flex-start; }
+      #phb-pull-quote-{{ section.id }} .phb-pull-quote__link{ width:100%; margin-left:0; }
+    }
+  </style>
+</section>
+
+{% schema %}
+{
+  "name": "Pull Quote",
+  "tag": "section",
+  "class": "section-phb-pull-quote",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Hidden heading (a11y)", "default": "What customers say" },
+
+    { "type": "checkbox", "id": "show_rating", "label": "Show star rating", "default": true },
+    { "type": "range", "id": "rating", "label": "Rating", "min": 1, "max": 5, "step": 1, "default": 5 },
+
+    { "type": "textarea", "id": "quote", "label": "Quote", "default": "You can get this in a lot of places, but Nootropix's quality is so much better and their customer service is exceptional." },
+    { "type": "text", "id": "author", "label": "Author", "default": "Anonymous" },
+    { "type": "text", "id": "location", "label": "Location", "default": "UAE" },
+    { "type": "checkbox", "id": "verified", "label": "Show Verified badge", "default": true },
+
+    { "type": "text", "id": "link_label", "label": "Link label", "default": "Read reviews" },
+    { "type": "text", "id": "link_href", "label": "Link href (URL or #anchor)", "default": "#reviews" },
+
+    { "type": "color", "id": "background_color", "label": "Background", "default": "#FFFFFF" },
+    { "type": "range", "id": "max_width", "label": "Max width (px)", "min": 720, "max": 1400, "step": 20, "default": 1000 },
+    { "type": "range", "id": "padding_y", "label": "Vertical padding (px)", "min": 8, "max": 80, "step": 4, "default": 16 }
+  ],
+  "blocks": [],
+  "presets": [
+    { "name": "Pull Quote" }
+  ]
+}
+{% endschema %}

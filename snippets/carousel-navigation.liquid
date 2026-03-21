@@ -1,0 +1,46 @@
+{% comment %}
+  Renders a carousel navigation.
+  Prerequisites: The parent carousel must have style: position relative
+
+  Accepts:
+  - style: {String} Style of the carousel navigation button (optional | value: '', 'boxes')
+  - align: {String} Alignment of the carousel navigation button (optional | value: '', 'center', 'right')
+  - icon_name: {String} Icon of the carousel navigation button (optional | default: 'chevron-right')
+  - position: {String} Position of the carousel navigation button (optional | value: '', 'top', 'in-content')
+  - disabled: {boolean} Disable the carousel pagination (optional)
+  - mobile_disabled: {boolean} Disable the carousel pagination when using mobile (optional)
+  Usage:
+  {% render 'carousel-navigation',
+    style: ''
+    align: 'center',
+    icon_name: 'chevron-right' (default),
+    position: '',
+    disabled: false,
+    mobile_disabled: false
+  %}
+{% endcomment %}
+
+{% liquid
+  assign final_icon_name = icon_name | default: 'chevron-right'
+%}
+
+<div class='xo-carousel-navigation {% if disabled == false -%}xo-carousel-navigation--disabled{%- endif %} {% if mobile_disabled -%}xo-carousel-navigation--mobile-disabled{%- endif %} {% if align != blank -%}xo-carousel-navigation--{{ align }} {%- endif %} {% if position != blank -%} xo-carousel-navigation--{{ position }} {%- endif -%}'>
+  <div class='xo-carousel-navigation__nav'>
+    <xo-carousel-prev
+      class='xo-carousel-navigation__button xo-carousel-navigation__button--prev {% if style != blank -%} xo-carousel-navigation__button--{{ style }} {%- endif -%}'
+      role='button'
+      tabindex='0'
+      aria-label='Previous button'
+    >
+      {%- render 'icon', name: final_icon_name , size: '2.4rem', color: 'rgba(var(--color-foreground))' -%}
+    </xo-carousel-prev>
+    <xo-carousel-next
+      class='xo-carousel-navigation__button xo-carousel-navigation__button--next {% if style != blank -%} xo-carousel-navigation__button--{{style}} {%- endif -%}'
+      role='button'
+      tabindex='0'
+      aria-label='Next button'
+    >
+      {%- render 'icon', name: final_icon_name , size: '2.4rem', color: 'rgba(var(--color-foreground))' -%}
+    </xo-carousel-next>
+  </div>
+</div>

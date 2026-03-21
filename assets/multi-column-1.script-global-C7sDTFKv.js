@@ -1,0 +1,1 @@
+import{D as r}from"./index-B3F33_mG.js";const t="xo-active",n=document.querySelectorAll(".multi-column-1__item")||null;function i(){n&&n.forEach(e=>{e.addEventListener("click",()=>{e.setAttribute(`${t}`,"")}),e.addEventListener("mouseover",()=>{e.setAttribute(`${t}`,"")}),e.addEventListener("mouseout",()=>{e.removeAttribute(`${t}`)})})}r(()=>{i()});

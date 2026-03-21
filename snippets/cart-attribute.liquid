@@ -1,0 +1,53 @@
+{% liquid
+  assign form_id = 'cart'
+  assign type = block.settings.attributes_type
+  assign label = block.settings.attributes_label
+  assign checked_value = block.settings.attributes_checked_value
+  assign uncheck_value = block.settings.attributes_uncheck_value
+  assign radio_options = block.settings.attributes_radio_options
+  assign dropdown_options = block.settings.attributes_dropdown_options
+
+  assign name = 'attributes[' | append: label | append: ']'
+%}
+
+<div class='xo-cart-attribute'>
+  {% case type %}
+    {% when 'text' %}
+      <div class='xo-cart-attribute__text'>
+        {% render 'field-input', name: name, id: label, label: label, form_id: form_id %}
+      </div>
+    {% when 'checkbox' %}
+      <div class='xo-cart-attribute__checkbox'>
+        {% render 'field-checkbox-2', name: name, checked_value: checked_value, uncheck_value: uncheck_value, label: label, form_id: form_id %}
+      </div>
+    {% when 'radio' %}
+      {% liquid
+        assign radio_arr = radio_options | split: ','
+      %}
+      <div class='xo-cart-attribute__radio'>
+        <span class='xo-cart-attribute__label'>{{ label }}</span>
+        {% for radio_value in radio_arr %}
+          <div class='xo-cart-attribute__field'>
+            {% render 'field-radio-3', value: radio_value, label: radio_value, name: name, form_id: form_id %}
+          </div>
+        {% endfor %}
+      </div>
+    {% when 'dropdown' %}
+      {% liquid
+        assign dropdown_arr = dropdown_options | split: ','
+      %}
+      <div class='xo-cart-attribute__dropdown'>
+        <select
+          id='{{ label }}'
+          name='attributes[{{ label }}]'
+          class='xo-cart-attribute__select{% if settings.enable_border_radius %} xo-cart-attribute__select--radius{% endif %}'
+          form='{{ form_id }}'
+        >
+          <option value disabled selected class='xo-cart-attribute__option'>{{ label }}</option>
+          {% for dropdown_value in dropdown_arr %}
+            <option value='{{ dropdown_value }}' class='xo-cart-attribute__option'>{{ dropdown_value }}</option>
+          {% endfor %}
+        </select>
+      </div>
+  {% endcase %}
+</div>

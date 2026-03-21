@@ -1,0 +1,74 @@
+{% comment %}
+  Renders a product special element with a given value
+
+  Accepts:
+  - image_dt: {String} Desktop image (required)
+  - image_mb: {String} Mobile image (required)
+  - block: {Object} Block (required)
+
+  Usage:
+  {% render 'product-specification-12', image_dt: image_dt, image_mb: image_mb, block: block %}
+{% endcomment %}
+
+<div class='product-specification-12'>
+  <xo-grid class='product-specification-12__gird'>
+    <div class='product-specification-12__left' style='--lg: 9; --md: 12; --xs: 12'>
+      <xo-animate xo-cascade>
+        <div class='product-specification-12__product-featured'>
+          {% for item in block %}
+            {% case item.type %}
+              {% when 'product-featured' %}
+                {% liquid
+                  assign heading = item.settings.heading
+                  assign image_dt = item.settings.image_dt
+                  assign image_mb = item.settings.image_mb
+                  assign color_config_enable = item.settings.color_config_enable
+                  assign icon_image_1 = item.settings.icon_image_1
+                  assign description_1 = item.settings.description_1
+                  assign icon_image_2 = item.settings.icon_image_2
+                  assign description_2 = item.settings.description_2
+                %}
+                {% render 'product-featured-2',
+                  heading: heading,
+                  image_desktop: image_dt,
+                  image_mobile: image_mb,
+                  color_config_enable: color_config_enable,
+                  icon_image_1: icon_image_1,
+                  description_1: description_1,
+                  icon_image_2: icon_image_2,
+                  description_2: description_2
+                %}
+            {% endcase %}
+          {% endfor %}
+        </div>
+      </xo-animate>
+      <xo-animate xo-cascade>
+        <div class='product-specification-12__perfomance'>
+          <xo-grid class='product-specification-12__perfomance-grid' style='--lg: 3; --md: 1; --xs: 1'>
+            {% for item in block %}
+              {% case item.type %}
+                {% when 'perfomance' %}
+                  {% liquid
+                    assign sub_heading = item.settings.sub_heading
+                    assign percent = item.settings.percent
+                    assign specifications = item.settings.specifications
+                  %}
+                  {% render 'perfomance', title: sub_heading, number: percent, sub_title: specifications %}
+              {% endcase %}
+            {% endfor %}
+          </xo-grid>
+        </div>
+      </xo-animate>
+    </div>
+    <xo-animate xo-cascade style='--lg: 3; --md: 12; --xs: 12'>
+      <div class='product-specification-12__right'>
+        <div class='product-specification-12__image product-specification-12__image--desktop{% if settings.enable_border_radius %} product-specification-12__image--radius{% endif %}'>
+          {% render 'image', image: image_desktop %}
+        </div>
+        <div class='product-specification-12__image product-specification-12__image--mobile{% if settings.enable_border_radius %} product-specification-12__image--radius{% endif %}'>
+          {% render 'image', image: image_mobile %}
+        </div>
+      </div>
+    </xo-animate>
+  </xo-grid>
+</div>

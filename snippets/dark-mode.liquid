@@ -1,0 +1,33 @@
+{% comment %}
+  Renders a dark mode
+
+  Accepts:
+  - style: {String} Style (optional)
+  - icon_size: {String} Icon size (optional)
+
+  Usage:
+  {% render 'dark-mode', style: style, icon_size: icon_size %}
+{% endcomment %}
+
+{% liquid
+  assign dark_mode = 'general.tooltip.dark_mode' | t
+  assign icon_size = icon_size | append: 'em'
+%}
+
+<xo-tooltip xo-mobile-disabled xo-title='{{ dark_mode }}' xo-placement='top-center' class='tooltip{% if settings.enable_border_radius %} tooltip--radius{% endif %}'>
+  <div
+    class='xo-dark-mode xo-stack{% if box_style %} xo-dark-mode--{{ box_style }}{% endif %}{% if settings.enable_border_radius %} xo-dark-mode--radius{% endif %}'
+    style='--ai: center; --jc: center; --box-size: {{ box_size }}em'
+  >
+    <xo-dark-mode class='xo-dark-mode__trigger'>
+      <div class='xo-dark-mode__wrapper xo-stack' xo-name='dark-mode' style='--ai: center; --jc: center'>
+        <div class='xo-dark-mode__icon xo-dark-mode__icon--dark xo-stack' style='--ai: center; --jc: center'>
+          {% render 'icon', name: 'dark', size: icon_size %}
+        </div>
+        <div class='xo-dark-mode__icon xo-dark-mode__icon--light xo-stack' style='--ai: center; --jc: center'>
+          {% render 'icon', name: 'light', size: icon_size %}
+        </div>
+      </div>
+    </xo-dark-mode>
+  </div>
+</xo-tooltip>

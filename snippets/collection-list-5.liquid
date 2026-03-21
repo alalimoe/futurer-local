@@ -1,0 +1,72 @@
+{% comment %}
+  Renders a collection list
+
+  Accepts:
+  - block: (Object) Blocks (required)
+
+  Usage:
+  {% render 'collection-list-5', block: block %}
+{% endcomment %}
+
+<div class='collection-list-5'>
+  <xo-grid class='collection-list-5__grid'>
+    <div class='collection-list-5__left' style='--lg: 6; --md: 6; --xs: 12'>
+      <div class='collection-list-5__box'>
+        {% for item in block %}
+          {% liquid
+            assign default_title = 'onboarding.collection_title' | t
+            assign collection = item.settings.collection
+            assign collection_title = collection.title | default: default_title
+            assign collection_link = collection.url
+          %}
+          <div class='collection-list-5__trigger{% if forloop.index == 1 %} xo-active{% endif %}' data-index='{{ forloop.index }}' data-collection-link='{{ collection_link }}'>
+            <xo-animate xo-cascade>
+              <a href='{{ collection_link }}' class='collection-list-5__d-flex'>
+                <h3 class='collection-list-5__title h5'>
+                  <p>
+                    <span class='collection-list-5__text'>{{ collection_title }}</span>
+                  </p>
+                </h3>
+              </a>
+            </xo-animate>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+    <div class='collection-list-5__right' style='--lg: 6; --md: 6; --xs: 12'>
+      <xo-animate xo-cascade>
+        {% for item in block %}
+          {%- liquid
+            assign collection = item.settings.collection
+            assign collection_image = collection.featured_image
+            assign desktop_image = item.settings.desktop_image
+            assign button = item.settings
+            assign desktop_aspect_ratio = item.settings.desktop_aspect_ratio
+            assign mobile_image = item.settings.mobile_image
+            assign mobile_aspect_ratio = item.settings.mobile_aspect_ratio
+          -%}
+          <div class='collection-list-5__image-container {% if forloop.index == 1 %}xo-active{% endif %}' data-index='{{ forloop.index }}'>
+            {% if desktop_image != blank %}
+              <div class='collection-list-5__image collection-list-5__image--desktop'>
+                {% render 'image-button', image: desktop_image, aspect_ratio: desktop_aspect_ratio, button: button, width_range: '[800, 1920]' %}
+              </div>
+            {% else %}
+              <div class='collection-list-5__image collection-list-5__image--desktop'>
+                {% render 'image-button', image: collection_image, aspect_ratio: desktop_aspect_ratio, button: button, width_range: '[800, 1920]' %}
+              </div>
+            {% endif %}
+            {% if mobile_image != blank %}
+              <div class='collection-list-5__image collection-list-5__image--mobile'>
+                {% render 'image-button', image: mobile_image, aspect_ratio: mobile_aspect_ratio, button: button, width_range: '[800, 1920]' %}
+              </div>
+            {% else %}
+              <div class='collection-list-5__image collection-list-5__image--mobile'>
+                {% render 'image-button', image: collection_image, aspect_ratio: mobile_aspect_ratio, button: button, width_range: '[800, 1920]' %}
+              </div>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </xo-animate>
+    </div>
+  </xo-grid>
+</div>

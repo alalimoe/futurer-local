@@ -1,0 +1,42 @@
+{% comment %}
+  Renders a section attribute
+
+  Usage:
+  {% render 'section-attr' %}
+{% endcomment %}
+
+{% liquid
+  assign class_name = 'xo-section xo-section--' | append: section.id
+
+  if section.settings.background_color != 'rgba(0,0,0,0)' and section.settings.background_color != blank
+    assign background_color = '--bg-color: ' | append: section.settings.background_color | append: ';'
+  endif
+  if section.settings.background_gradient != blank
+    assign background_gradient = '--bg-gradient: ' | append: section.settings.background_gradient | append: ';'
+  endif
+  if section.settings.padding_top_desktop != null
+    assign padding_top_desktop = '--pt_dt: ' | append: section.settings.padding_top_desktop | append: ';'
+  endif
+  if section.settings.padding_bottom_desktop != null
+    assign padding_bottom_desktop = '--pb_dt: ' | append: section.settings.padding_bottom_desktop | append: ';'
+  endif
+  if section.settings.padding_top_mobile != null
+    assign padding_top_mobile = '--pt_mb: ' | append: section.settings.padding_top_mobile | append: ';'
+  endif
+  if section.settings.padding_bottom_mobile != null
+    assign padding_bottom_mobile = '--pb_mb: ' | append: section.settings.padding_bottom_mobile | append: ';'
+  endif
+  unless style
+    assign style = ''
+  endunless
+%}
+
+class="{{ class_name -}}
+{%- if section.settings.color_scheme %} color-{{ section.settings.color_scheme }}{% endif %}" style="{{ background_color -}}
+{{- background_gradient -}}
+{{- background_image -}}
+{{- padding_top_desktop -}}
+{{- padding_bottom_desktop }}
+{{- padding_top_mobile -}}
+{{- padding_bottom_mobile }}
+{{- style }}"

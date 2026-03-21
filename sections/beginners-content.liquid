@@ -1,0 +1,668 @@
+{% schema %}
+{
+  "name": "Beginners Guide Content",
+  "tag": "section",
+  "class": "section-beginners-content",
+  "settings": [
+    { "type": "checkbox", "id": "show_toc", "label": "Show Table of Contents", "default": true },
+    { "type": "checkbox", "id": "show_reading_modes", "label": "Enable Reading Modes", "default": true },
+    { "type": "checkbox", "id": "show_sensitivity_filters", "label": "Show Sensitivity Filters", "default": true },
+    { "type": "checkbox", "id": "show_ai_widget", "label": "Show AI Widget", "default": true },
+    { "type": "text", "id": "ai_placeholder", "label": "AI Widget Placeholder", "default": "Ask the Guide… e.g., Build a caffeine-free stack" },
+    { "type": "color", "id": "bg_color", "label": "Background", "default": "#ffffff" },
+    { "type": "color", "id": "accent_color", "label": "Accent", "default": "#FBBF24" }
+  ],
+  "blocks": [
+    {
+      "type": "heading",
+      "name": "Section Heading",
+      "settings": [
+        { "type": "text", "id": "text", "label": "Heading Text" },
+        { "type": "select", "id": "level", "label": "Heading Level", "options": [{ "value": "h2", "label": "H2" }, { "value": "h3", "label": "H3" }], "default": "h2" },
+        { "type": "text", "id": "anchor_id", "label": "Anchor ID (for TOC links)", "info": "Lowercase, no spaces. e.g. what-are-nootropics" }
+      ]
+    },
+    {
+      "type": "rich_text",
+      "name": "Rich Text",
+      "settings": [
+        { "type": "richtext", "id": "content", "label": "Content" },
+        {
+          "type": "select",
+          "id": "sensitivity",
+          "label": "Sensitivity Tag",
+          "options": [
+            { "value": "none", "label": "None" },
+            { "value": "caffeine", "label": "Caffeine" },
+            { "value": "sleep", "label": "Sleep" },
+            { "value": "gi", "label": "GI" },
+            { "value": "anxiety", "label": "Anxiety-prone" }
+          ],
+          "default": "none"
+        }
+      ]
+    },
+    {
+      "type": "pro_tip",
+      "name": "Pro Tip Callout",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Title", "default": "Pro Tip" },
+        { "type": "richtext", "id": "content", "label": "Content" },
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "Icon",
+          "options": [
+            { "value": "lightbulb", "label": "Lightbulb" },
+            { "value": "warning", "label": "Warning" },
+            { "value": "info", "label": "Info" },
+            { "value": "star", "label": "Star" }
+          ],
+          "default": "lightbulb"
+        }
+      ]
+    },
+    {
+      "type": "blockquote",
+      "name": "Blockquote / Citation",
+      "settings": [
+        { "type": "richtext", "id": "quote", "label": "Quote Text" },
+        { "type": "text", "id": "citation", "label": "Citation / Source" },
+        { "type": "url", "id": "source_url", "label": "Source URL (optional)" }
+      ]
+    },
+    {
+      "type": "ai_prompt",
+      "name": "AI Prompt Chip",
+      "settings": [
+        { "type": "text", "id": "text", "label": "Prompt Text", "default": "Focus at work?" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Beginners Guide Content",
+      "blocks": [
+        { "type": "heading", "settings": { "text": "Quick take", "level": "h2", "anchor_id": "tldr" } },
+        { "type": "rich_text", "settings": { "content": "<p>Nootropics are supplements people use to support focus, memory, mood, or energy. Start with the 3-step method: Base → Choline → Goal-booster.</p>", "sensitivity": "none" } }
+      ]
+    }
+  ]
+}
+{% endschema %}
+
+<div class="bgb-wrapper" id="bgb-{{ section.id }}">
+  <div class="bgb-layout">
+
+    {%- comment -%} ── Sticky TOC sidebar ── {%- endcomment -%}
+    {% if section.settings.show_toc %}
+      <aside class="bgb-toc" aria-label="On this page">
+        <div class="bgb-toc__title">On this page</div>
+        <nav class="bgb-toc__nav" id="bgb-toc-nav-{{ section.id }}"></nav>
+      </aside>
+    {% endif %}
+
+    <div class="bgb-main">
+
+      {%- comment -%} ── Reading mode controls ── {%- endcomment -%}
+      {% if section.settings.show_reading_modes %}
+        <div class="bgb-modes" role="radiogroup" aria-label="Reading mode">
+          <button class="bgb-mode-btn bgb-mode-btn--active" role="radio" aria-checked="true" data-bgb-mode="default" type="button">Default</button>
+          <button class="bgb-mode-btn" role="radio" aria-checked="false" data-bgb-mode="adhd" type="button">ADHD-friendly</button>
+          <button class="bgb-mode-btn" role="radio" aria-checked="false" data-bgb-mode="listen" type="button">Listen</button>
+        </div>
+      {% endif %}
+
+      {%- comment -%} ── AI Widget ── {%- endcomment -%}
+      {% if section.settings.show_ai_widget %}
+        <div class="bgb-ai" aria-label="Ask the Guide">
+          <div class="bgb-ai-input-wrap">
+            <svg class="bgb-ai-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" class="bgb-ai-input" placeholder="{{ section.settings.ai_placeholder }}" aria-label="Ask the Guide" autocomplete="off">
+          </div>
+          {%- assign ai_prompts = section.blocks | where: "type", "ai_prompt" -%}
+          {% if ai_prompts.size > 0 %}
+            <div class="bgb-ai-chips">
+              {%- for block in ai_prompts -%}
+                <button type="button" class="bgb-ai-chip" {{ block.shopify_attributes }}>{{ block.settings.text }}</button>
+              {%- endfor -%}
+            </div>
+          {% endif %}
+          <small class="bgb-ai-disclaimer">Educational content only. Not medical advice.</small>
+        </div>
+      {% endif %}
+
+      {%- comment -%} ── Sensitivity filter chips ── {%- endcomment -%}
+      {% if section.settings.show_sensitivity_filters %}
+        <div class="bgb-sens">
+          <span class="bgb-sens-label">Highlight notes for:</span>
+          <div class="bgb-sens-chips">
+            <button type="button" class="bgb-sens-chip" aria-pressed="false" data-bgb-sens="caffeine">Caffeine</button>
+            <button type="button" class="bgb-sens-chip" aria-pressed="false" data-bgb-sens="sleep">Sleep</button>
+            <button type="button" class="bgb-sens-chip" aria-pressed="false" data-bgb-sens="gi">GI</button>
+            <button type="button" class="bgb-sens-chip" aria-pressed="false" data-bgb-sens="anxiety">Anxiety-prone</button>
+          </div>
+        </div>
+      {% endif %}
+
+      {%- comment -%} ── Content blocks ── {%- endcomment -%}
+      <div class="bgb-content" id="bgb-content-{{ section.id }}">
+        {%- for block in section.blocks -%}
+          {%- case block.type -%}
+
+            {%- when 'heading' -%}
+              {%- assign bgb_tag = block.settings.level | default: 'h2' -%}
+              {%- assign bgb_anchor = block.settings.anchor_id | default: block.id -%}
+              <{{ bgb_tag }} class="bgb-heading bgb-heading--{{ bgb_tag }}" id="{{ bgb_anchor }}" data-bgb-toc {{ block.shopify_attributes }}>
+                {{ block.settings.text }}
+              </{{ bgb_tag }}>
+
+            {%- when 'rich_text' -%}
+              {%- assign bgb_sens = block.settings.sensitivity | default: 'none' -%}
+              <div class="bgb-prose{% if bgb_sens != 'none' %} bgb-sens-block{% endif %}" {% if bgb_sens != 'none' %}data-bgb-sensitivity="{{ bgb_sens }}"{% endif %} {{ block.shopify_attributes }}>
+                {{ block.settings.content }}
+              </div>
+
+            {%- when 'pro_tip' -%}
+              <div class="bgb-callout" {{ block.shopify_attributes }}>
+                <div class="bgb-callout-icon">
+                  {%- case block.settings.icon -%}
+                    {%- when 'lightbulb' -%}
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg>
+                    {%- when 'warning' -%}
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    {%- when 'info' -%}
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                    {%- when 'star' -%}
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                  {%- endcase -%}
+                </div>
+                <div class="bgb-callout-body">
+                  {% if block.settings.title != blank %}<strong class="bgb-callout-title">{{ block.settings.title }}</strong>{% endif %}
+                  <div class="bgb-callout-text">{{ block.settings.content }}</div>
+                </div>
+              </div>
+
+            {%- when 'blockquote' -%}
+              <figure class="bgb-quote" {{ block.shopify_attributes }}>
+                <blockquote class="bgb-quote-text">{{ block.settings.quote }}</blockquote>
+                {% if block.settings.citation != blank %}
+                  <figcaption class="bgb-quote-cite">
+                    — {% if block.settings.source_url != blank %}<a href="{{ block.settings.source_url }}" target="_blank" rel="noopener">{{ block.settings.citation }}</a>{% else %}{{ block.settings.citation }}{% endif %}
+                  </figcaption>
+                {% endif %}
+              </figure>
+
+          {%- endcase -%}
+        {%- endfor -%}
+      </div>
+
+    </div>
+  </div>
+</div>
+
+{%- comment -%} ── Inline JavaScript ── {%- endcomment -%}
+<script>
+(function() {
+  var root = document.getElementById('bgb-{{ section.id }}');
+  if (!root) return;
+  var prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ─ a) TOC auto-generation ─ */
+  var tocNav = document.getElementById('bgb-toc-nav-{{ section.id }}');
+  var headings = root.querySelectorAll('[data-bgb-toc]');
+
+  if (tocNav && headings.length) {
+    headings.forEach(function(h) {
+      var a = document.createElement('a');
+      a.href = '#' + h.id;
+      a.textContent = h.textContent;
+      a.className = 'bgb-toc__link';
+      tocNav.appendChild(a);
+    });
+
+    var tocLinks = tocNav.querySelectorAll('a');
+    if ('IntersectionObserver' in window) {
+      var tocObserver = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            tocLinks.forEach(function(link) {
+              var isMatch = link.getAttribute('href') === '#' + entry.target.id;
+              link.classList.toggle('bgb-toc__link--active', isMatch);
+              if (isMatch) link.setAttribute('aria-current', 'true');
+              else link.removeAttribute('aria-current');
+            });
+          }
+        });
+      }, { rootMargin: '-20% 0px -70% 0px' });
+      headings.forEach(function(h) { tocObserver.observe(h); });
+    }
+
+    tocNav.addEventListener('click', function(e) {
+      var link = e.target.closest('a');
+      if (!link) return;
+      e.preventDefault();
+      var target = document.getElementById(link.getAttribute('href').slice(1));
+      if (target) target.scrollIntoView({ behavior: prefersReduced ? 'auto' : 'smooth', block: 'start' });
+    });
+  }
+
+  /* ─ b) Reading mode controls ─ */
+  var modeButtons = root.querySelectorAll('[data-bgb-mode]');
+  modeButtons.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var mode = btn.getAttribute('data-bgb-mode');
+      document.body.classList.remove('bgb-mode-adhd', 'bgb-mode-listen');
+      modeButtons.forEach(function(b) {
+        b.setAttribute('aria-checked', 'false');
+        b.classList.remove('bgb-mode-btn--active');
+      });
+      btn.setAttribute('aria-checked', 'true');
+      btn.classList.add('bgb-mode-btn--active');
+      if (mode === 'adhd') document.body.classList.add('bgb-mode-adhd');
+      if (mode === 'listen') {
+        document.body.classList.add('bgb-mode-listen');
+        if ('speechSynthesis' in window) {
+          var text = root.querySelector('.bgb-content').innerText.substring(0, 3000);
+          var utter = new SpeechSynthesisUtterance(text);
+          utter.rate = 0.95;
+          window.speechSynthesis.cancel();
+          window.speechSynthesis.speak(utter);
+        }
+      } else {
+        if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+      }
+    });
+
+    btn.addEventListener('keydown', function(e) {
+      var btns = Array.from(modeButtons);
+      var idx = btns.indexOf(btn);
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); btns[(idx + 1) % btns.length].focus(); btns[(idx + 1) % btns.length].click(); }
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); btns[(idx - 1 + btns.length) % btns.length].focus(); btns[(idx - 1 + btns.length) % btns.length].click(); }
+      if (e.key === 'Home') { e.preventDefault(); btns[0].focus(); btns[0].click(); }
+      if (e.key === 'End') { e.preventDefault(); btns[btns.length - 1].focus(); btns[btns.length - 1].click(); }
+    });
+  });
+
+  /* ─ c) Sensitivity filter chips ─ */
+  root.querySelectorAll('[data-bgb-sens]').forEach(function(chip) {
+    chip.addEventListener('click', function() {
+      var pressed = chip.getAttribute('aria-pressed') === 'true';
+      chip.setAttribute('aria-pressed', String(!pressed));
+      chip.classList.toggle('bgb-sens-chip--active', !pressed);
+      updateSensitivityHighlights();
+    });
+  });
+
+  function updateSensitivityHighlights() {
+    var activeFilters = [];
+    root.querySelectorAll('[data-bgb-sens][aria-pressed="true"]').forEach(function(c) {
+      activeFilters.push(c.getAttribute('data-bgb-sens'));
+    });
+    root.querySelectorAll('.bgb-sens-block').forEach(function(block) {
+      var tag = block.getAttribute('data-bgb-sensitivity');
+      block.classList.toggle('bgb-sens-block--highlighted', activeFilters.indexOf(tag) !== -1);
+    });
+  }
+
+  /* ─ d) AI prompt chips ─ */
+  root.querySelectorAll('.bgb-ai-chip').forEach(function(chip) {
+    chip.addEventListener('click', function() {
+      var input = root.querySelector('.bgb-ai-input');
+      if (input) { input.value = chip.textContent; input.focus(); }
+    });
+  });
+})();
+</script>
+
+<style>
+  #bgb-{{ section.id }} {
+    --bgb-bg: {{ section.settings.bg_color }};
+    --bgb-accent: {{ section.settings.accent_color }};
+    --bgb-text: var(--color-text-main, #111827);
+    --bgb-muted: var(--color-text-muted, #4b5563);
+    --bgb-bg-card: var(--color-bg-primary, #fff);
+    --bgb-bg-alt: var(--color-bg-secondary, #f9fafb);
+    --bgb-border: var(--nx-pill-border, #E5E7EB);
+    --bgb-radius: var(--nx-radius, 14px);
+    --bgb-font: var(--font-body-family, sans-serif);
+    --bgb-font-heading: var(--font-heading-family, sans-serif);
+    --bgb-shadow-sm: var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.04));
+    --bgb-shadow-md: var(--shadow-md, 0 8px 24px rgba(0,0,0,0.06));
+    --bgb-transition: var(--transition-smooth, all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1));
+    --bgb-touch: var(--touch-min, 44px);
+    --bgb-glass-bg: var(--glass-bg-strong, rgba(255,255,255,0.72));
+    --bgb-glass-blur: var(--glass-blur-strong, blur(20px));
+  }
+
+  .bgb-wrapper {
+    background: var(--bgb-bg);
+    font-family: var(--bgb-font);
+    color: var(--bgb-text);
+    padding: 48px var(--page-gutter) 80px;
+  }
+
+  /* ── Layout ── */
+  .bgb-layout {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 48px;
+    max-width: var(--container-width-large);
+    margin: 0 auto;
+  }
+
+  /* ── Sticky TOC ── */
+  .bgb-toc {
+    position: sticky;
+    top: 80px;
+    align-self: start;
+    background: var(--bgb-glass-bg);
+    -webkit-backdrop-filter: var(--bgb-glass-blur);
+    backdrop-filter: var(--bgb-glass-blur);
+    border: 1px solid var(--bgb-border);
+    border-radius: var(--bgb-radius);
+    padding: 20px;
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
+  }
+  .bgb-toc__title {
+    font-family: var(--bgb-font-heading);
+    font-weight: 700;
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--bgb-muted);
+    margin-bottom: 12px;
+  }
+  .bgb-toc__link {
+    display: block;
+    padding: 8px 12px;
+    font-size: 0.875rem;
+    color: var(--bgb-muted);
+    text-decoration: none;
+    border-radius: 8px;
+    transition: var(--bgb-transition);
+    line-height: 1.4;
+  }
+  .bgb-toc__link:hover { color: var(--bgb-text); background: var(--bgb-bg-alt); }
+  .bgb-toc__link--active {
+    color: var(--color-accent-dark, #92400e);
+    background: rgba(251, 191, 36, 0.1);
+    font-weight: 600;
+  }
+
+  /* ── Main content ── */
+  .bgb-main { max-width: 70ch; min-width: 0; }
+
+  /* ── Reading modes ── */
+  .bgb-modes {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+  .bgb-mode-btn {
+    min-height: var(--bgb-touch);
+    padding: 8px 16px;
+    font-family: var(--bgb-font);
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--bgb-muted);
+    background: var(--bgb-bg-card);
+    border: 1px solid var(--bgb-border);
+    border-radius: 100px;
+    cursor: pointer;
+    transition: var(--bgb-transition);
+  }
+  .bgb-mode-btn:hover { color: var(--bgb-text); }
+  .bgb-mode-btn--active {
+    color: var(--color-text-primary);
+    background: var(--bgb-accent);
+    border-color: var(--bgb-accent);
+    box-shadow: var(--shadow-gold-sm);
+  }
+
+  /* ADHD mode global overrides */
+  body.bgb-mode-adhd .bgb-prose { line-height: 1.95; }
+  body.bgb-mode-adhd .bgb-prose strong {
+    background: rgba(251, 191, 36, 0.15);
+    box-shadow: inset 0 -6px 0 rgba(251, 191, 36, 0.2);
+    padding: 0 2px;
+    border-radius: 2px;
+  }
+
+  /* ── AI Widget ── */
+  .bgb-ai {
+    margin-bottom: 28px;
+    padding: 20px;
+    background: var(--bgb-bg-alt);
+    border: 1px solid var(--bgb-border);
+    border-radius: var(--bgb-radius);
+  }
+  .bgb-ai-input-wrap {
+    position: relative;
+    margin-bottom: 12px;
+  }
+  .bgb-ai-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--bgb-muted);
+    pointer-events: none;
+  }
+  .bgb-ai-input {
+    width: 100%;
+    padding: 12px 14px 12px 40px;
+    font-size: 0.9375rem;
+    font-family: var(--bgb-font);
+    border: 1.5px solid var(--bgb-border);
+    border-radius: var(--bgb-radius);
+    background: var(--bgb-bg-card);
+    color: var(--bgb-text);
+    min-height: var(--bgb-touch);
+    transition: var(--bgb-transition);
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .bgb-ai-input:focus {
+    outline: none;
+    border-color: var(--bgb-accent);
+    box-shadow: var(--focus-ring);
+  }
+  .bgb-ai-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+  .bgb-ai-chip {
+    padding: 6px 12px;
+    font-size: 0.8125rem;
+    font-family: var(--bgb-font);
+    font-weight: 500;
+    color: var(--bgb-muted);
+    background: var(--bgb-bg-card);
+    border: 1px solid var(--bgb-border);
+    border-radius: 100px;
+    cursor: pointer;
+    transition: var(--bgb-transition);
+    min-height: var(--bgb-touch);
+  }
+  .bgb-ai-chip:hover {
+    color: var(--color-accent-dark, #92400e);
+    border-color: var(--bgb-accent);
+    background: rgba(251, 191, 36, 0.08);
+  }
+  .bgb-ai-disclaimer {
+    font-size: 0.75rem;
+    color: var(--bgb-muted);
+    display: block;
+  }
+
+  /* ── Sensitivity chips ── */
+  .bgb-sens { margin-bottom: 32px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .bgb-sens-label { font-size: 0.875rem; font-weight: 600; color: var(--bgb-muted); white-space: nowrap; }
+  .bgb-sens-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .bgb-sens-chip {
+    padding: 6px 12px;
+    font-size: 0.8125rem;
+    font-family: var(--bgb-font);
+    font-weight: 500;
+    color: var(--bgb-muted);
+    background: var(--bgb-bg-card);
+    border: 1px solid var(--bgb-border);
+    border-radius: 100px;
+    cursor: pointer;
+    transition: var(--bgb-transition);
+    min-height: var(--bgb-touch);
+  }
+  .bgb-sens-chip:hover { border-color: var(--bgb-accent); }
+  .bgb-sens-chip--active {
+    background: rgba(251, 191, 36, 0.12);
+    border-color: var(--bgb-accent);
+    color: var(--color-accent-dark, #92400e);
+    font-weight: 700;
+  }
+
+  /* ── Content typography (prose) ── */
+  .bgb-content { max-width: 70ch; }
+  .bgb-prose {
+    font-size: var(--font-size-body, clamp(1rem, 1.2vw, 1.125rem));
+    line-height: 1.75;
+    color: var(--bgb-text);
+    margin-bottom: 1.5rem;
+    transition: background 0.3s ease, box-shadow 0.3s ease;
+    padding: 2px 0;
+    border-radius: 4px;
+  }
+  .bgb-prose p { margin: 0 0 1em; }
+  .bgb-prose p:last-child { margin-bottom: 0; }
+  .bgb-prose strong { color: var(--bgb-text); font-weight: 700; }
+  .bgb-prose a { color: var(--color-accent-dark, #92400e); text-decoration-color: var(--bgb-accent); text-underline-offset: 3px; }
+  .bgb-prose a:hover { text-decoration-color: var(--color-accent-dark, #92400e); }
+  .bgb-prose ul, .bgb-prose ol { padding-left: 1.25em; margin: 0.75em 0; }
+  .bgb-prose li { margin-bottom: 0.4em; }
+
+  .bgb-sens-block--highlighted {
+    background: rgba(251, 191, 36, 0.08);
+    box-shadow: inset 3px 0 0 var(--bgb-accent);
+    padding: 8px 12px;
+    border-radius: var(--bgb-radius);
+  }
+
+  /* ── Headings ── */
+  .bgb-heading {
+    font-family: var(--bgb-font-heading);
+    color: var(--bgb-text);
+    letter-spacing: -0.02em;
+    scroll-margin-top: 80px;
+  }
+  .bgb-heading--h2 {
+    font-size: calc(var(--font-size-h2) * var(--scale-h2, 1));
+    font-weight: 800;
+    margin: 2.5rem 0 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--bgb-border);
+  }
+  .bgb-heading--h3 {
+    font-size: calc(var(--font-size-h3) * var(--scale-h3, 1));
+    font-weight: 700;
+    margin: 2rem 0 0.75rem;
+  }
+  .bgb-heading:first-child { margin-top: 0; }
+
+  /* ── Pro-Tip Callout ── */
+  .bgb-callout {
+    display: flex;
+    gap: 14px;
+    padding: 20px;
+    background: var(--bgb-bg-alt);
+    border: 1px solid var(--bgb-border);
+    border-left: 4px solid var(--bgb-accent);
+    border-radius: var(--bgb-radius);
+    margin: 1.5rem 0;
+  }
+  .bgb-callout-icon {
+    flex-shrink: 0;
+    color: var(--bgb-accent);
+    margin-top: 2px;
+  }
+  .bgb-callout-title {
+    display: block;
+    font-family: var(--bgb-font-heading);
+    font-size: 0.875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--color-accent-dark, #92400e);
+    margin-bottom: 6px;
+  }
+  .bgb-callout-text {
+    font-size: var(--font-size-body, clamp(1rem, 1.2vw, 1.125rem));
+    line-height: 1.7;
+    color: var(--bgb-muted);
+  }
+  .bgb-callout-text p { margin: 0 0 0.5em; }
+  .bgb-callout-text p:last-child { margin-bottom: 0; }
+
+  /* ── Blockquote ── */
+  .bgb-quote {
+    margin: 2rem 0;
+    padding: 0 0 0 20px;
+    border-left: 3px solid var(--bgb-accent);
+  }
+  .bgb-quote-text {
+    font-style: italic;
+    font-size: var(--font-size-body, clamp(1rem, 1.2vw, 1.125rem));
+    line-height: 1.7;
+    color: var(--bgb-text);
+    margin: 0;
+  }
+  .bgb-quote-text p { margin: 0 0 0.5em; }
+  .bgb-quote-text p:last-child { margin-bottom: 0; }
+  .bgb-quote-cite {
+    font-size: 0.875rem;
+    color: var(--bgb-muted);
+    margin-top: 8px;
+    font-style: normal;
+  }
+  .bgb-quote-cite a { color: var(--color-accent-dark, #92400e); }
+
+  /* ── Accessibility ── */
+  .bgb-wrapper :focus-visible {
+    outline: 2px solid var(--bgb-accent);
+    outline-offset: 2px;
+  }
+  .bgb-ai-input:focus-visible {
+    outline: none;
+    border-color: var(--bgb-accent);
+    box-shadow: var(--focus-ring);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .bgb-wrapper *, .bgb-wrapper *::before, .bgb-wrapper *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 1024px) {
+    .bgb-layout { grid-template-columns: 1fr; gap: 0; }
+    .bgb-toc {
+      position: relative;
+      top: auto;
+      max-height: none;
+      margin-bottom: 32px;
+    }
+    .bgb-toc__nav { display: flex; flex-wrap: wrap; gap: 4px; }
+    .bgb-toc__link { display: inline-flex; }
+  }
+
+  @media (max-width: 640px) {
+    .bgb-wrapper { padding: 32px var(--page-gutter) 60px; }
+    .bgb-ai { padding: 16px; }
+    .bgb-sens { flex-direction: column; align-items: flex-start; }
+  }
+</style>

@@ -1,0 +1,45 @@
+{% liquid
+  assign max_price_amount = filter.range_max | money | strip_html | escape
+  assign reset_label = 'products.facets.reset' | t
+  assign popover_name = filter.param_name
+
+  assign container_class = 'xo-fieldset-popover'
+  if settings.enable_border_radius
+    assign container_class = container_class | append: ' xo-fieldset-popover--radius'
+  endif
+%}
+
+<div class="{{ container_class }}">
+  <xo-popover-trigger class="xo-fieldset-popover__trigger" xo-name="{{ popover_name }}" tabindex="0" role="button">
+    <span class="xo-fieldset-popover__label">
+      {{ filter.label | escape }}
+    </span>
+    <span class="xo-fieldset-popover__icon">
+      {% render 'icon', name: 'arrow-down', size: '2rem', color: 'rgba(var(--color-foreground), 1)' %}
+    </span>
+  </xo-popover-trigger>
+  <xo-popover class="xo-fieldset-popover__popover" xo-name="{{ popover_name }}" xo-portal xo-placement="bottom-left">
+    <div class="xo-fieldset-popover__heading">
+      {% if filter.type == 'price_range' %}
+        <div class="xo-fieldset-popover__caption">
+          {{ 'products.facets.max_price' | t: price: max_price_amount }}
+        </div>
+        <xo-filters-clear xo-name="['{{ filter.min_value.param_name }}', '{{ filter.max_value.param_name }}']" tabindex="0" role="button">
+          {% render 'button', text: reset_label, style: 'link' %}
+        </xo-filters-clear>
+      {% else %}
+        <div class="xo-fieldset-popover__caption">
+          <xo-filters-active-size xo-unique-id="{{ filter.param_name }}-horizontal">
+            {{- 'products.facets.filters_selected' | t: count: filter.active_values.size -}}
+          </xo-filters-active-size>
+        </div>
+        <xo-filters-clear xo-name="{{ filter.param_name }}" tabindex="0" role="button" class="xo-fieldset-popover__caption-icon">
+          {% render 'icon', name: 'line' %}
+        </xo-filters-clear>
+      {% endif %}
+    </div>
+    <div class="xo-fieldset-popover__content xo-scrollbar">
+      {% render 'fieldset-fields', filter: filter, facets_horizontal: facets_horizontal %}
+    </div>
+  </xo-popover>
+</div>

@@ -1,0 +1,620 @@
+{% doc %}
+  @prompt
+    Create a Quickstart Reference Stack section with 7 blocks, each block has Custom heading text
+    
+    Anchor ID (for jump links)
+    
+    A dropdown to choose content source from these keys: tldr, what_it_is, feel_timeline, feel_note, how_it_works, how_to_use, why, safety, faq, custom
+    
+    Layout style setting: card, accordion, plain
+    
+    Pull content from product metafields in namespace npx using this mapping:
+    
+    tldr = npx.tl_dr fallback to npx.tldr (may be JSON list; parse and render as <ul>)
+    
+    what_it_is = npx.what_it_is
+    
+    feel_timeline = npx.feel_timeline (list with label/description)
+    
+    feel_note = npx.feel_note
+    
+    how_it_works = npx.how_it_works (render with metafield_tag if rich text)
+    
+    how_to_use = npx.how_to_use (list with label/text)
+    
+    why = npx.why (list)
+    
+    safety = npx.safety_important, npx.safety_general, npx.disclaimer combined in a styled callout
+    
+    faq = npx.faq (list of Q/A)
+    
+    If any metafield contains legacy JSON string, parse and render readable lists instead of raw JSON.
+    
+    Add editor controls: max width, spacing, colors, typography, accent color for active states.
+    
+    Desktop UX: optional 2-column layout with sticky left nav (scroll spy highlighting active section). Mobile UX: collapsible accordion option.
+    
+    No external libraries; keep JS minimal and accessible. Use section.id to namespace CSS.
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-quickstart-stack-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    max-width: {{ block.settings.max_width }}px;
+    margin: 0 auto;
+    padding: {{ block.settings.spacing_vertical }}px {{ block.settings.spacing_horizontal }}px;
+    background-color: {{ block.settings.background_color }};
+  }
+
+  .ai-quickstart-stack__heading-{{ ai_gen_id }} {
+    font-size: {{ block.settings.heading_font_size }}px;
+    color: {{ block.settings.heading_color }};
+    margin: 0 0 16px 0;
+    font-weight: 600;
+  }
+
+  .ai-quickstart-stack__body-{{ ai_gen_id }} {
+    color: {{ block.settings.text_color }};
+    font-size: {{ block.settings.body_font_size }}px;
+    line-height: 1.6;
+  }
+
+  .ai-quickstart-stack__body-{{ ai_gen_id }} ul {
+    margin: 0;
+    padding-left: 20px;
+  }
+
+  .ai-quickstart-stack__body-{{ ai_gen_id }} li {
+    margin-bottom: 8px;
+  }
+
+  .ai-quickstart-stack__body-{{ ai_gen_id }} p {
+    margin: 0 0 12px 0;
+  }
+
+  .ai-quickstart-stack__body-{{ ai_gen_id }} p:last-child {
+    margin-bottom: 0;
+  }
+
+  .ai-quickstart-stack__timeline-item-{{ ai_gen_id }} {
+    margin-bottom: 16px;
+    padding-left: 20px;
+    border-left: 2px solid {{ block.settings.accent_color }};
+  }
+
+  .ai-quickstart-stack__timeline-label-{{ ai_gen_id }} {
+    font-weight: 600;
+    color: {{ block.settings.heading_color }};
+    margin-bottom: 4px;
+  }
+
+  .ai-quickstart-stack__timeline-desc-{{ ai_gen_id }} {
+    color: {{ block.settings.text_color }};
+  }
+
+  .ai-quickstart-stack__faq-item-{{ ai_gen_id }} {
+    margin-bottom: 16px;
+  }
+
+  .ai-quickstart-stack__faq-q-{{ ai_gen_id }} {
+    font-weight: 600;
+    color: {{ block.settings.heading_color }};
+    margin-bottom: 8px;
+  }
+
+  .ai-quickstart-stack__faq-a-{{ ai_gen_id }} {
+    color: {{ block.settings.text_color }};
+  }
+
+  .ai-quickstart-stack__safety-callout-{{ ai_gen_id }} {
+    background-color: {{ block.settings.callout_bg }};
+    border-left: 4px solid {{ block.settings.accent_color }};
+    padding: 16px;
+    border-radius: 4px;
+    margin-bottom: 16px;
+  }
+
+  .ai-quickstart-stack__safety-title-{{ ai_gen_id }} {
+    font-weight: 600;
+    color: {{ block.settings.heading_color }};
+    margin-bottom: 8px;
+  }
+
+  .ai-quickstart-stack__card-{{ ai_gen_id }} {
+    background-color: {{ block.settings.card_bg }};
+    border: 1px solid {{ block.settings.card_border }};
+    border-radius: var(--nx-radius-sm);
+    padding: 24px;
+  }
+
+  .ai-quickstart-stack__accordion-{{ ai_gen_id }} {
+    border: 1px solid {{ block.settings.card_border }};
+    border-radius: var(--nx-radius-sm);
+    overflow: hidden;
+  }
+
+  .ai-quickstart-stack__accordion-header-{{ ai_gen_id }} {
+    width: 100%;
+    padding: 16px 20px;
+    background-color: {{ block.settings.card_bg }};
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: {{ block.settings.heading_font_size }}px;
+    font-weight: 600;
+    color: {{ block.settings.heading_color }};
+    transition: background-color 0.2s ease;
+  }
+
+  .ai-quickstart-stack__accordion-header-{{ ai_gen_id }}:hover {
+    background-color: {{ block.settings.nav_hover_bg }};
+  }
+
+  .ai-quickstart-stack__accordion-icon-{{ ai_gen_id }} {
+    transition: transform 0.3s ease;
+    flex-shrink: 0;
+    margin-left: 12px;
+  }
+
+  .ai-quickstart-stack__accordion-header-{{ ai_gen_id }}.active .ai-quickstart-stack__accordion-icon-{{ ai_gen_id }} {
+    transform: rotate(180deg);
+  }
+
+  .ai-quickstart-stack__accordion-content-{{ ai_gen_id }} {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+  }
+
+  .ai-quickstart-stack__accordion-content-{{ ai_gen_id }}.active {
+    max-height: 2000px;
+  }
+
+  .ai-quickstart-stack__accordion-body-{{ ai_gen_id }} {
+    padding: 20px;
+    border-top: 1px solid {{ block.settings.card_border }};
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-quickstart-stack-{{ ai_gen_id }} {
+      padding: {{ block.settings.spacing_vertical | times: 0.6 }}px {{ block.settings.spacing_horizontal | times: 0.6 }}px;
+    }
+
+    .ai-quickstart-stack__heading-{{ ai_gen_id }} {
+      font-size: {{ block.settings.heading_font_size | times: 0.9 }}px;
+    }
+
+    .ai-quickstart-stack__body-{{ ai_gen_id }} {
+      font-size: {{ block.settings.body_font_size | times: 0.9 }}px;
+    }
+  }
+{% endstyle %}
+
+<quickstart-stack-{{ ai_gen_id }} class="ai-quickstart-stack-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  {% liquid
+    assign content_source = block.settings.content_source
+    assign layout_style = block.settings.layout_style
+    assign content_html = ''
+
+    if content_source == 'tldr'
+      assign tl_dr = product.metafields.npx.tl_dr | default: product.metafields.npx.tldr
+      if tl_dr != blank
+        assign parsed_content = tl_dr | parse_json
+        if parsed_content
+          assign content_html = '<ul>'
+          for item in parsed_content
+            assign content_html = content_html | append: '<li>' | append: item | append: '</li>'
+          endfor
+          assign content_html = content_html | append: '</ul>'
+        else
+          assign content_html = tl_dr
+        endif
+      endif
+
+    elsif content_source == 'what_it_is'
+      assign content_html = product.metafields.npx.what_it_is
+
+    elsif content_source == 'feel_timeline'
+      assign feel_timeline = product.metafields.npx.feel_timeline
+      if feel_timeline != blank
+        assign parsed_timeline = feel_timeline | parse_json
+        if parsed_timeline
+          assign content_html = ''
+          for item in parsed_timeline
+            assign content_html = content_html | append: '<div class="ai-quickstart-stack__timeline-item-' | append: ai_gen_id | append: '"><div class="ai-quickstart-stack__timeline-label-' | append: ai_gen_id | append: '">' | append: item.label | append: '</div><div class="ai-quickstart-stack__timeline-desc-' | append: ai_gen_id | append: '">' | append: item.description | append: '</div></div>'
+          endfor
+        else
+          assign content_html = feel_timeline
+        endif
+      endif
+
+    elsif content_source == 'feel_note'
+      assign content_html = product.metafields.npx.feel_note
+
+    elsif content_source == 'how_it_works'
+      assign how_it_works = product.metafields.npx.how_it_works
+      if how_it_works.type == 'rich_text_field'
+        assign content_html = how_it_works | metafield_tag
+      else
+        assign content_html = how_it_works
+      endif
+
+    elsif content_source == 'how_to_use'
+      assign how_to_use = product.metafields.npx.how_to_use
+      if how_to_use != blank
+        assign parsed_how_to = how_to_use | parse_json
+        if parsed_how_to
+          assign content_html = '<ul>'
+          for item in parsed_how_to
+            if item.label and item.text
+              assign content_html = content_html | append: '<li><strong>' | append: item.label | append: ':</strong> ' | append: item.text | append: '</li>'
+            elsif item.text
+              assign content_html = content_html | append: '<li>' | append: item.text | append: '</li>'
+            else
+              assign content_html = content_html | append: '<li>' | append: item | append: '</li>'
+            endif
+          endfor
+          assign content_html = content_html | append: '</ul>'
+        else
+          assign content_html = how_to_use
+        endif
+      endif
+
+    elsif content_source == 'why'
+      assign why = product.metafields.npx.why
+      if why != blank
+        assign parsed_why = why | parse_json
+        if parsed_why
+          assign content_html = '<ul>'
+          for item in parsed_why
+            assign content_html = content_html | append: '<li>' | append: item | append: '</li>'
+          endfor
+          assign content_html = content_html | append: '</ul>'
+        else
+          assign content_html = why
+        endif
+      endif
+
+    elsif content_source == 'safety'
+      assign safety_important = product.metafields.npx.safety_important
+      assign safety_general = product.metafields.npx.safety_general
+      assign disclaimer = product.metafields.npx.disclaimer
+      assign content_html = ''
+
+      if safety_important != blank
+        assign content_html = content_html | append: '<div class="ai-quickstart-stack__safety-callout-' | append: ai_gen_id | append: '"><div class="ai-quickstart-stack__safety-title-' | append: ai_gen_id | append: '">Important Safety Information</div>' | append: safety_important | append: '</div>'
+      endif
+
+      if safety_general != blank
+        assign content_html = content_html | append: '<div class="ai-quickstart-stack__safety-callout-' | append: ai_gen_id | append: '"><div class="ai-quickstart-stack__safety-title-' | append: ai_gen_id | append: '">General Safety</div>' | append: safety_general | append: '</div>'
+      endif
+
+      if disclaimer != blank
+        assign content_html = content_html | append: '<div class="ai-quickstart-stack__safety-callout-' | append: ai_gen_id | append: '"><div class="ai-quickstart-stack__safety-title-' | append: ai_gen_id | append: '">Disclaimer</div>' | append: disclaimer | append: '</div>'
+      endif
+
+    elsif content_source == 'faq'
+      assign faq = product.metafields.npx.faq
+      if faq != blank
+        assign parsed_faq = faq | parse_json
+        if parsed_faq
+          assign content_html = ''
+          for item in parsed_faq
+            if item.question and item.answer
+              assign content_html = content_html | append: '<div class="ai-quickstart-stack__faq-item-' | append: ai_gen_id | append: '"><div class="ai-quickstart-stack__faq-q-' | append: ai_gen_id | append: '">Q: ' | append: item.question | append: '</div><div class="ai-quickstart-stack__faq-a-' | append: ai_gen_id | append: '">A: ' | append: item.answer | append: '</div></div>'
+            elsif item.q and item.a
+              assign content_html = content_html | append: '<div class="ai-quickstart-stack__faq-item-' | append: ai_gen_id | append: '"><div class="ai-quickstart-stack__faq-q-' | append: ai_gen_id | append: '">Q: ' | append: item.q | append: '</div><div class="ai-quickstart-stack__faq-a-' | append: ai_gen_id | append: '">A: ' | append: item.a | append: '</div></div>'
+            endif
+          endfor
+        else
+          assign content_html = faq
+        endif
+      endif
+
+    elsif content_source == 'custom'
+      assign content_html = block.settings.custom_content
+    endif
+  %}
+
+  {% if layout_style == 'card' %}
+    <div class="ai-quickstart-stack__card-{{ ai_gen_id }}">
+      {% if block.settings.heading != blank %}
+        <h3 class="ai-quickstart-stack__heading-{{ ai_gen_id }}">{{ block.settings.heading }}</h3>
+      {% endif %}
+      <div class="ai-quickstart-stack__body-{{ ai_gen_id }}">
+        {{ content_html }}
+      </div>
+    </div>
+
+  {% elsif layout_style == 'accordion' %}
+    <div class="ai-quickstart-stack__accordion-{{ ai_gen_id }}">
+      <button
+        class="ai-quickstart-stack__accordion-header-{{ ai_gen_id }}"
+        aria-expanded="false"
+        data-accordion-trigger
+      >
+        <span>{{ block.settings.heading }}</span>
+        <svg
+          class="ai-quickstart-stack__accordion-icon-{{ ai_gen_id }}"
+          width="20"
+          height="20"
+          viewBox="0 0 20 20"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M5 7.5L10 12.5L15 7.5"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </button>
+      <div class="ai-quickstart-stack__accordion-content-{{ ai_gen_id }}" data-accordion-content>
+        <div class="ai-quickstart-stack__accordion-body-{{ ai_gen_id }}">
+          <div class="ai-quickstart-stack__body-{{ ai_gen_id }}">
+            {{ content_html }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+  {% else %}
+    {% if block.settings.heading != blank %}
+      <h3 class="ai-quickstart-stack__heading-{{ ai_gen_id }}">{{ block.settings.heading }}</h3>
+    {% endif %}
+    <div class="ai-quickstart-stack__body-{{ ai_gen_id }}">
+      {{ content_html }}
+    </div>
+  {% endif %}
+</quickstart-stack-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class QuickstartStack{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+        this.accordionTrigger = this.querySelector('[data-accordion-trigger]');
+      }
+
+      connectedCallback() {
+        if (this.accordionTrigger) {
+          this.setupAccordion();
+        }
+      }
+
+      setupAccordion() {
+        this.accordionTrigger.addEventListener('click', () => {
+          const content = this.accordionTrigger.nextElementSibling;
+          const isActive = this.accordionTrigger.classList.contains('active');
+
+          this.accordionTrigger.classList.toggle('active');
+          content.classList.toggle('active');
+          this.accordionTrigger.setAttribute('aria-expanded', !isActive);
+        });
+      }
+    }
+
+    customElements.define('quickstart-stack-{{ ai_gen_id }}', QuickstartStack{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Quickstart block",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Section heading"
+    },
+    {
+      "type": "text",
+      "id": "anchor_id",
+      "label": "Anchor ID",
+      "info": "Used for jump links (e.g., tldr, what-it-is)"
+    },
+    {
+      "type": "select",
+      "id": "content_source",
+      "label": "Content source",
+      "options": [
+        {
+          "value": "tldr",
+          "label": "TL;DR"
+        },
+        {
+          "value": "what_it_is",
+          "label": "What it is"
+        },
+        {
+          "value": "feel_timeline",
+          "label": "Feel timeline"
+        },
+        {
+          "value": "feel_note",
+          "label": "Feel note"
+        },
+        {
+          "value": "how_it_works",
+          "label": "How it works"
+        },
+        {
+          "value": "how_to_use",
+          "label": "How to use"
+        },
+        {
+          "value": "why",
+          "label": "Why"
+        },
+        {
+          "value": "safety",
+          "label": "Safety"
+        },
+        {
+          "value": "faq",
+          "label": "FAQ"
+        },
+        {
+          "value": "custom",
+          "label": "Custom"
+        }
+      ],
+      "default": "tldr"
+    },
+    {
+      "type": "select",
+      "id": "layout_style",
+      "label": "Layout style",
+      "options": [
+        {
+          "value": "plain",
+          "label": "Plain"
+        },
+        {
+          "value": "card",
+          "label": "Card"
+        },
+        {
+          "value": "accordion",
+          "label": "Accordion"
+        }
+      ],
+      "default": "plain"
+    },
+    {
+      "type": "richtext",
+      "id": "custom_content",
+      "label": "Custom content",
+      "info": "Only used when content source is set to Custom"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "max_width",
+      "label": "Maximum width",
+      "min": 800,
+      "max": 1600,
+      "step": 50,
+      "unit": "px",
+      "default": 1200
+    },
+    {
+      "type": "range",
+      "id": "spacing_vertical",
+      "label": "Vertical spacing",
+      "min": 20,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "spacing_horizontal",
+      "label": "Horizontal spacing",
+      "min": 10,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text",
+      "default": "#2a2a2a"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Headings",
+      "default": "#1e1e1e"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent",
+      "default": "#5a9d6f"
+    },
+    {
+      "type": "color",
+      "id": "nav_hover_bg",
+      "label": "Hover background",
+      "default": "#f0f0f0"
+    },
+    {
+      "type": "color",
+      "id": "card_bg",
+      "label": "Card background",
+      "default": "#f9f9f9"
+    },
+    {
+      "type": "color",
+      "id": "card_border",
+      "label": "Card border",
+      "default": "#e8e8e8"
+    },
+    {
+      "type": "color",
+      "id": "callout_bg",
+      "label": "Callout background",
+      "default": "#fff9e6"
+    },
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "range",
+      "id": "heading_font_size",
+      "label": "Heading size",
+      "min": 16,
+      "max": 36,
+      "step": 2,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "body_font_size",
+      "label": "Body size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    }
+  ],
+  "presets": [
+    {
+      "name": "Quickstart block"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,595 @@
+{{ 'section-main-product.css' | asset_url | stylesheet_tag }}
+{{ 'product-info-content.css' | asset_url | stylesheet_tag }}
+{{ 'product-info-media-slide.css' | asset_url | stylesheet_tag }}
+{{ 'product-info-media-tabs.css' | asset_url | stylesheet_tag }}
+{{ 'product-info-media-carousel.css' | asset_url | stylesheet_tag }}
+{{ 'collapse.css' | asset_url | stylesheet_tag }}
+{{ 'line.css' | asset_url | stylesheet_tag }}
+{{ 'pickup-availability-list.css' | asset_url | stylesheet_tag }}
+{{ 'pickup-availability-item.css' | asset_url | stylesheet_tag }}
+{{ 'recipient-form.css' | asset_url | stylesheet_tag }}
+{{ '3d-model.css' | asset_url | stylesheet_tag }}
+{{ 'share-product.css' | asset_url | stylesheet_tag }}
+{{ 'sticky-cart.css' | asset_url | stylesheet_tag }}
+{{ 'sticky-variant-modal.css' | asset_url | stylesheet_tag }}
+{{ 'line-item-property.css' | asset_url | stylesheet_tag }}
+{{ 'volume-discount.css' | asset_url | stylesheet_tag }}
+{{ 'countdown-timer.css' | asset_url | stylesheet_tag }}
+{{ 'inventory-status.css' | asset_url | stylesheet_tag }}
+{{ 'complementary-product.css' | asset_url | stylesheet_tag }}
+{{ 'product-prose.css' | asset_url | stylesheet_tag }}
+{{ 'pdp-ui.css' | asset_url | stylesheet_tag }}
+
+{%- comment -%}
+Nootropics hero — standalone clone of theme main-product.liquid
+Keeps original gallery/content structure and settings while providing:
+• Stable anchor id (#nootropics-hero) for jump chips
+• Scoped CSS variables for quick theme-wide styling
+• Improved ARIA labels and scroll-margin to play nice with sticky jump chips
+{%- endcomment -%}
+
+<section id="nootropics-hero" class="npx-hero" {% render 'section-attr' %} aria-label="Product details">
+  <style>
+    #nootropics-hero{
+      --npx-maxw:  {{ section.settings.max_width | default: 1400 }}px;
+      --npx-pad-t: {{ section.settings.padding_top_desktop | default: 50 }}px;
+      --npx-pad-b: {{ section.settings.padding_bottom_desktop | default: 50 }}px;
+    }
+    @media (max-width: 740px){
+      #nootropics-hero{
+        --npx-pad-t: {{ section.settings.padding_top_mobile | default: 50 }}px;
+        --npx-pad-b: {{ section.settings.padding_bottom_mobile | default: 50 }}px;
+      }
+    }
+    #nootropics-hero .npx-wrap{ max-width: var(--npx-maxw); margin: 0 auto; padding: var(--npx-pad-t) var(--page-gutter) var(--npx-pad-b); }
+    /* So sticky jump chips land cleanly */
+    #nootropics-hero { scroll-margin-top: 84px; }
+    /* Nootropics Quick Facts */
+#nootropics-hero .nh-facts{
+  display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;
+}
+#nootropics-hero .nh-chip{
+  display:inline-flex; align-items:center; gap:6px;
+  padding:6px 10px; border:1px solid var(--color-border-default); border-radius:var(--nx-radius-md); background:var(--color-surface-primary);
+  line-height:1.2; box-shadow:var(--shadow-xs);
+}
+#nootropics-hero .nh-chip .l{ font-weight:700; color:var(--color-text-primary); }
+#nootropics-hero .nh-chip .v{ color:var(--color-text-primary); }
+{%- comment -%} Rating, badges, price-per-serving, delivery notes, low stock {%- endcomment -%}
+{%- liquid
+  assign r_val   = product.metafields.reviews.rating
+  assign r_cnt   = product.metafields.reviews.rating_count
+  assign badges  = product.metafields.supp.badges
+  assign servings_mf  = product.metafields.supp.servings_per_container
+  assign ship_p  = product.metafields.pdp.shipping_promise
+  assign ret_p   = product.metafields.pdp.return_promise
+-%}
+
+{%- comment -%} Rating row (fixed) {%- endcomment -%}
+{%- assign r_val = product.metafields.reviews.rating -%}
+{%- assign r_cnt = product.metafields.reviews.rating_count -%}
+{% if r_val or r_cnt %}
+  <div class="nh-rating" aria-label="Product rating">
+    {%- assign full = r_val | floor -%}
+    {%- assign next = full | plus: 1 -%}
+    <div class="stars" aria-hidden="true">
+      {% for i in (1..5) %}
+        {% if i <= full %}
+          <span class="s s--on">★</span>
+        {% elsif i == next and r_val > full %}
+          <span class="s s--half">★</span>
+        {% else %}
+          <span class="s">★</span>
+        {% endif %}
+      {% endfor %}
+    </div>
+    <div class="rtext">
+      {% if r_val %}{{ r_val | round: 1 }}/5{% endif %}
+      {% if r_cnt %}<span class="rcnt">· {{ r_cnt }} review{% if r_cnt != 1 %}s{% endif %}</span>{% endif %}
+    </div>
+  </div>
+{% endif %}
+
+
+<!-- Badges -->
+{% if badges and badges.value and badges.value.size > 0 %}
+  <div class="nh-badges" role="list">
+    {% for b in badges.value %}
+      {% assign t = b | strip %}
+      {% if t != blank %}<span class="nh-badge" role="listitem">{{ t }}</span>{% endif %}
+    {% endfor %}
+  </div>
+{% endif %}
+
+<!-- Price-per-serving (auto-updates on variant change) -->
+{% if servings_mf %}
+  <div class="nh-per" data-per-serving style="display:none"></div>
+{% endif %}
+
+<!-- Shipping / returns microcopy -->
+{% if ship_p or ret_p %}
+  <ul class="nh-micro">
+    {% if ship_p %}<li>{{ ship_p }}</li>{% endif %}
+    {% if ret_p %}<li>{{ ret_p }}</li>{% endif %}
+  </ul>
+{% endif %}
+
+<!-- Low stock cue -->
+<div class="nh-stock" data-low-stock style="display:none"></div>
+
+#nootropics-hero .nh-disclaimer{
+  margin-top:10px; color:var(--color-text-secondary); font-size:12px; line-height:1.5;
+  background:var(--color-surface-secondary); border:1px solid var(--color-border-default); border-radius:var(--nx-radius-md); padding:8px 10px;
+}
+
+/* gentle enter motion, respects reduced-motion */
+@media (prefers-reduced-motion: no-preference){
+  #nootropics-hero .nh-chip, #nootropics-hero .nh-disclaimer { opacity:0; transform:translateY(6px); }
+  #nootropics-hero .nh-chip.nx_in, #nootropics-hero .nh-disclaimer.nx_in { opacity:1; transform:none; transition:opacity .22s ease, transform .22s ease; }
+}
+/* Rating row */
+#nootropics-hero .nh-rating{display:flex;align-items:center;gap:8px;margin-top:10px}
+#nootropics-hero .nh-rating .stars .s{font-size:16px; color:#D1D5DB; display:inline-block}
+#nootropics-hero .nh-rating .stars .s--on{color:#F59E0B}
+#nootropics-hero .nh-rating .stars .s--half{
+  color: transparent;
+  background: linear-gradient(90deg, #F59E0B 50%, #D1D5DB 50%);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+#nootropics-hero .nh-rating .rtext{color:var(--color-text-primary);font-weight:600}
+#nootropics-hero .nh-rating .rcnt{color:var(--color-text-secondary);font-weight:400;margin-left:4px}
+
+/* Badges */
+#nootropics-hero .nh-badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+#nootropics-hero .nh-badge{border:1px solid var(--color-border-default);background:var(--color-surface-primary);border-radius:var(--nx-radius-pill);padding:6px 10px;font-weight:600;line-height:1.1}
+
+/* Price per serving */
+#nootropics-hero .nh-per{margin-top:8px;color:var(--color-text-primary);font-weight:700}
+#nootropics-hero .nh-per span{color:var(--color-text-secondary);font-weight:500}
+
+/* Shipping/returns microcopy */
+#nootropics-hero .nh-micro{list-style:none;margin:8px 0 0;padding:0;color:var(--color-text-secondary)}
+#nootropics-hero .nh-micro li{margin:4px 0}
+
+/* Low stock */
+#nootropics-hero .nh-stock{margin-top:6px;font-weight:700;color:var(--color-warning-text);background:var(--color-warning-bg);border:1px solid #FED7AA;border-radius:var(--nx-radius-sm);padding:6px 10px;display:inline-block}
+
+/* Motion */
+@media (prefers-reduced-motion:no-preference){
+  #nootropics-hero .nh-badge,#nootropics-hero .nh-per,#nootropics-hero .nh-micro li,#nootropics-hero .nh-stock{
+    opacity:0; transform:translateY(6px)
+  }
+  #nootropics-hero .nx_in2{opacity:1; transform:none; transition:opacity .22s ease, transform .22s ease}
+}
+
+  </style>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  var root = document.getElementById('nootropics-hero'); if(!root) return;
+
+  // ---- price per serving + low stock
+  var perEl  = root.querySelector('[data-per-serving]');
+  var stockEl= root.querySelector('[data-low-stock]');
+  var servings = {{ product.metafields.supp.servings_per_container | default: 0 | json }};
+  var lowThr   = {{ product.metafields.inv.low_stock_threshold | default: 8 | json }};
+  var variants = {{ product.variants | json }};
+  var moneyFormat = {{ shop.money_format | json }};
+
+  function fmt(cents){ try{return Shopify.formatMoney(cents, moneyFormat);}catch(e){return (cents/100).toFixed(2);} }
+
+  function findSelectedVariantId(){
+    // Try native input first
+    var idInput = root.querySelector('input[name="id"]');
+    if(idInput && idInput.value) return parseInt(idInput.value,10);
+    // Fallback: guess by selected options
+    return {{ product.selected_or_first_available_variant.id }};
+  }
+
+  function updateMeta(){
+    var vid = findSelectedVariantId();
+    var v = variants.find(function(x){ return x.id === vid; });
+    if(!v) return;
+
+    // price per serving
+    if(perEl && servings > 0){
+      var per = Math.round(v.price / servings);
+      perEl.style.display = '';
+      perEl.innerHTML = '≈ ' + fmt(per) + ' <span>/ serving</span>';
+      perEl.classList.add('nx_in2');
+    }
+
+    // low stock cue
+    if(stockEl){
+      if(v.inventory_management && v.inventory_policy !== 'continue' && typeof v.inventory_quantity === 'number' && v.inventory_quantity <= lowThr){
+        stockEl.style.display = '';
+        stockEl.textContent = 'Low stock — ' + Math.max(0, v.inventory_quantity) + ' left';
+        stockEl.classList.add('nx_in2');
+      } else {
+        stockEl.style.display = 'none';
+      }
+    }
+  }
+
+  // Listen for variant changes (works with most themes)
+  document.addEventListener('change', function(e){
+    if(e.target && e.target.name && e.target.name.indexOf('options[') === 0) updateMeta();
+  });
+  document.addEventListener('click', function(e){
+    if(e.target && e.target.closest('.product-form__submit')) setTimeout(updateMeta, 0);
+  });
+
+  // Run on entry
+  updateMeta();
+
+  // extend your existing IO for initial animation of new elements
+  try{
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      var io2 = new IntersectionObserver(function(entries){
+        entries.forEach(function(e){
+          if(e.isIntersecting){
+            root.querySelectorAll('.nh-badge,.nh-per,.nh-micro li,.nh-stock').forEach(function(n,i){
+              n.style.transitionDelay = (i*20)+'ms';
+              n.classList.add('nx_in2');
+            });
+            io2.disconnect();
+          }
+        });
+      }, { threshold: 0.35 });
+      io2.observe(root);
+    } else {
+      root.querySelectorAll('.nh-badge,.nh-per,.nh-micro li,.nh-stock').forEach(function(n){ n.classList.add('nx_in2'); });
+    }
+  }catch(e){}
+});
+</script>
+
+  <div class="npx-wrap">
+    <div class="main-product">
+      <xo-product
+        xo-selected-or-first-available-variant-id="{{ product.selected_or_first_available_variant.id }}"
+        xo-product-information
+        xo-product-id="{{ product.id }}"
+        xo-section-id="{{ section.id }}"
+        class="main-product__product"
+      >
+        {% liquid
+          assign product_media_style = section.settings.product_media_style
+          assign enable_image_zoom = section.settings.enable_image_zoom
+          assign columns_mobile = 1
+          assign enable_sticky_cart = section.settings.enable_sticky_cart
+          assign show_image_variants_grouping = section.settings.show_image_variants_grouping
+          assign gallery_type = section.settings.gallery_type
+          assign variant_images = product.images | where: 'attached_to_variant?', true | map: 'src'
+          assign variants_block = section.blocks | where: 'type', 'variants' | first
+
+          assign max_column = 12
+          assign media_column = section.settings.media_column | plus: 0
+          assign content_column = max_column | minus: media_column
+        %}
+
+        <xo-container class="main-product__container" aria-label="Product gallery and purchase options">
+          <xo-grid class="main-product__grid">
+            <!-- LEFT: Media -->
+            <div
+              class="main-product__image"
+              {% if product_media_style == 'style-2' %}
+                style="--xs: 12; --md: 12; --lg: 12"
+              {%- else -%}
+                style="--xs: 12; --md: 12; --lg: {{ media_column }}"
+              {% endif %}
+            >
+              <div class="main-product__image-content">
+                {% if product_media_style == 'style-1' %}
+                  {% render 'product-info-media-carousel',
+                    zoom_enabled: true,
+                    enable_image_zoom: enable_image_zoom,
+                    variant_images: variant_images,
+                    gallery_type: gallery_type,
+                    show_image_variants_grouping: show_image_variants_grouping
+                  %}
+                {%- elsif product_media_style == 'style-2' -%}
+                  {% render 'product-info-media-slide',
+                    zoom_enabled: true,
+                    enable_image_zoom: enable_image_zoom,
+                    variant_images: variant_images,
+                    gallery_type: gallery_type,
+                    show_image_variants_grouping: show_image_variants_grouping
+                  %}
+                {% endif %}
+              </div>
+            </div>
+
+            <!-- RIGHT: Content -->
+            <div
+              class="main-product__content {% if product_media_style == 'style-2' %}main-product__content--pd main-product__content--change{%- endif -%}"
+              {% if product_media_style == 'style-2' %}
+                style="--xs: 12; --md: 12; --lg: 12;"
+              {%- else -%}
+                style="--sm: 12; --md: 12; --lg: {{ content_column }}"
+              {% endif %}
+            >
+              {% render 'product-info-content', product_media_style: product_media_style, columns_mobile: columns_mobile %}
+              {%- comment -%} Nootropics Quick Facts + Compliance {%- endcomment -%}
+{%- liquid
+  assign benefit_mf   = product.metafields.supp.primary_benefit
+  assign serving_mf   = product.metafields.supp.serving_size
+  assign servings_mf  = product.metafields.supp.servings_per_container
+  assign caps_mf      = product.metafields.supp.capsule_count
+  assign compnote_mf  = product.metafields.supp.compliance_note
+
+  # Backward-compat aliases (if you previously stored in pdp.*)
+  if benefit_mf == blank and product.metafields.pdp.benefit_1
+    assign benefit_mf = product.metafields.pdp.benefit_1
+  endif
+-%}
+
+<div class="nh-facts" aria-label="Quick facts">
+  {%- assign has_any_fact = false -%}
+  {%- if benefit_mf and benefit_mf != blank -%}{%- assign has_any_fact = true -%}
+    <div class="nh-chip"><span class="l">Benefit</span><span class="v">{{ benefit_mf }}</span></div>
+  {%- endif -%}
+  {%- if serving_mf and serving_mf != blank -%}{%- assign has_any_fact = true -%}
+    <div class="nh-chip"><span class="l">Serving</span><span class="v">{{ serving_mf }}</span></div>
+  {%- endif -%}
+  {%- if servings_mf and servings_mf != blank -%}{%- assign has_any_fact = true -%}
+    <div class="nh-chip"><span class="l">Servings</span><span class="v">{{ servings_mf }}</span></div>
+  {%- endif -%}
+  {%- if caps_mf and caps_mf != blank -%}{%- assign has_any_fact = true -%}
+    <div class="nh-chip"><span class="l">Capsules</span><span class="v">{{ caps_mf }}</span></div>
+  {%- endif -%}
+
+  {%- if has_any_fact == false -%}
+    {# nothing, keep the block empty to avoid layout shift #}
+  {%- endif -%}
+</div>
+
+<div class="nh-disclaimer">
+  {%- if compnote_mf and compnote_mf != blank -%}
+    {{ compnote_mf | metafield_tag }}
+  {%- else -%}
+    <p>Dietary supplement. Not intended to diagnose, treat, cure, or prevent any disease. Keep out of reach of children. Consult your physician if pregnant, nursing, or taking medication.</p>
+  {%- endif -%}
+</div>
+
+            </div>
+          </xo-grid>
+        </xo-container>
+
+        <!-- Sticky cart (if enabled) -->
+        {% if enable_sticky_cart %}
+          {% render 'sticky-cart', product: product, variants_block: variants_block %}
+        {% endif %}
+
+        <!-- 3D model support (unchanged) -->
+        {%- assign first_3d_model = product.media | where: 'media_type', 'model' | first -%}
+        {%- if first_3d_model -%}
+          <script type="application/json" id="xo-3d-product-json-{{ product.id }}">
+            {{ product.media | where: 'media_type', 'model' | json }}
+          </script>
+        {%- endif -%}
+
+        {% render 'product-data', product: product %}
+      </xo-product>
+
+      {%- comment -%}
+      Keep the theme’s product JSON-LD to avoid SEO regressions.
+      {%- endcomment -%}
+      {% render 'main-product-ld-json' %}
+      {% # theme-check-disable UnknownFilter %}
+      {%- liquid
+  assign benefit  = product.metafields.supp.primary_benefit
+  assign serving  = product.metafields.supp.serving_size
+  assign servings = product.metafields.supp.servings_per_container
+  assign caps     = product.metafields.supp.capsule_count
+  assign extras = '' | split: ','
+
+  if benefit and benefit != blank
+    assign extras = extras | push: '{"@type":"PropertyValue","name":"Primary benefit","value":' | append: benefit | json | append: '}'
+  endif
+  if serving and serving != blank
+    assign extras = extras | push: '{"@type":"PropertyValue","name":"Serving size","value":' | append: serving | json | append: '}'
+  endif
+  if servings and servings != blank
+    assign extras = extras | push: '{"@type":"PropertyValue","name":"Servings per container","value":' | append: servings | json | append: '}'
+  endif
+  if caps and caps != blank
+    assign extras = extras | push: '{"@type":"PropertyValue","name":"Capsules","value":' | append: caps | json | append: '}'
+  endif
+-%}
+{%- if extras.size > 0 -%}
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"Product",
+  "sku": {{ product.selected_or_first_available_variant.sku | json }},
+  "name": {{ product.title | json }},
+  "additionalProperty": [{{ extras | join: ',' }}]
+}
+</script>
+{%- endif -%}
+      {% # theme-check-enable UnknownFilter %}
+
+    </div>
+  </div>
+</section>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  var root = document.getElementById('nootropics-hero'); if(!root) return;
+  try{
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      var io = new IntersectionObserver(function(entries){
+        entries.forEach(function(e){
+          if(e.isIntersecting){
+            root.querySelectorAll('.nh-chip, .nh-disclaimer').forEach(function(n,i){
+              n.style.transitionDelay = (i*30)+'ms';
+              n.classList.add('nx_in');
+            });
+            io.disconnect();
+          }
+        });
+      }, { threshold: 0.35 });
+      io.observe(root);
+    } else {
+      root.querySelectorAll('.nh-chip, .nh-disclaimer').forEach(function(n){ n.classList.add('nx_in'); });
+    }
+  }catch(e){}
+});
+</script>
+
+
+{% schema %}
+{
+  "name": "Nootropics hero",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    { "type": "select", "id": "product_media_style", "label": "Gallery layout", "options": [
+      { "value": "style-1", "label": "Carousel" },
+      { "value": "style-2", "label": "Slide (wide)" }
+    ], "default": "style-1" },
+
+    { "type": "checkbox", "id": "hide_variants", "default": false, "label": "Hide variants" },
+    { "type": "checkbox", "id": "show_image_variants_grouping", "default": false, "label": "Group media by variant" },
+    { "type": "checkbox", "id": "enable_sticky_cart", "default": true, "label": "Enable sticky cart" },
+
+    { "type": "select", "id": "gallery_type", "label": "Gallery type", "options": [
+      { "value": "carousel", "label": "Carousel" },
+      { "value": "scroll", "label": "Scroll" }
+    ], "default": "carousel" },
+
+    { "type": "select", "id": "media_column", "options": [
+      { "value": "3", "label": "3" },
+      { "value": "4", "label": "4" },
+      { "value": "5", "label": "5" },
+      { "value": "6", "label": "6" }
+    ], "label": "Media columns (desktop)", "default": "6" },
+
+    { "type": "header", "content": "General settings" },
+    { "type": "number", "id": "max_width", "label": "Max width (px)", "default": 1400 },
+    { "type": "number", "id": "padding_top_desktop", "label": "Padding top (desktop, px)", "default": 50 },
+    { "type": "number", "id": "padding_bottom_desktop", "label": "Padding bottom (desktop, px)", "default": 50 },
+    { "type": "number", "id": "padding_top_mobile", "label": "Padding top (mobile, px)", "default": 50 },
+    { "type": "number", "id": "padding_bottom_mobile", "label": "Padding bottom (mobile, px)", "default": 50 },
+
+    { "type": "color_scheme", "id": "color_scheme", "label": "Section color scheme" },
+    { "type": "color", "id": "background_color", "label": "Background color" },
+    { "type": "color_background", "id": "background_gradient", "label": "Background gradient" }
+  ],
+  "blocks": [
+    { "type": "@app" },
+    { "type": "custom_liquid", "name": "Custom Liquid", "settings": [ { "type": "liquid", "id": "custom_liquid", "label": "Liquid" } ] },
+    { "type": "vendor", "name": "Vendor", "limit": 1 },
+    { "type": "title", "name": "Title", "limit": 1 },
+    { "type": "price", "name": "Price", "limit": 1 },
+    { "type": "description", "name": "Description", "limit": 1 },
+    {
+      "type": "variants",
+      "name": "Variants",
+      "limit": 1,
+      "settings": [
+        { "type": "paragraph", "content": "Choose how variants are displayed" },
+        { "type": "select", "id": "variant_style", "label": "Variant style", "options": [
+          { "value": "radio", "label": "Radio" },
+          { "value": "boxed", "label": "Boxed" },
+          { "value": "select", "label": "Select" }
+        ], "default": "select" },
+        { "type": "select", "id": "variant_color_style", "label": "Color style", "options": [
+          { "value": "radio", "label": "Radio" },
+          { "value": "boxed", "label": "Boxed" },
+          { "value": "select", "label": "Select" },
+          { "value": "color", "label": "Color swatch" },
+          { "value": "variant_image", "label": "Variant image" }
+        ], "default": "color" }
+      ]
+    },
+    {
+      "type": "buy_button",
+      "name": "Buy buttons",
+      "limit": 1,
+      "settings": [
+        { "type": "checkbox", "id": "show_dynamic_checkout", "label": "Show dynamic checkout", "default": true },
+        { "type": "checkbox", "id": "show_gift_card_recipient", "label": "Gift card recipient", "default": false }
+      ]
+    },
+    { "type": "collapse", "name": "Collapsible tab", "settings": [
+      { "type": "text", "id": "collapse_text", "label": "Heading", "default": "More details" },
+      { "type": "richtext", "id": "collapse_content", "label": "Content", "default": "<p>More information</p>" }
+    ]},
+    { "type": "line", "name": "Line" },
+    { "type": "pickup", "name": "Pickup availability" },
+    { "type": "share", "name": "Share", "limit": 1, "settings": [
+      { "type": "select", "id": "share_option", "label": "Share option", "options": [
+        { "value": "link", "label": "Link" },
+        { "value": "social", "label": "Social" }
+      ], "default": "link" }
+    ]},
+    { "type": "complementary", "name": "Complementary products", "limit": 1, "settings": [
+      { "type": "richtext", "id": "heading", "label": "Heading", "default": "<p>Heading</p>" },
+      { "type": "header", "content": "Carousel" },
+      { "type": "select", "id": "autoplay", "label": "Autoplay", "options": [
+        { "value": "off", "label": "Off" }, { "value": "on", "label": "On" }
+      ], "default": "off" },
+      { "type": "range", "id": "autoplay_time", "min": 1000, "max": 5000, "step": 1000, "unit": "s", "label": "Autoplay interval", "default": 3000 },
+      { "type": "select", "id": "show_paginate", "label": "Pagination", "options": [
+        { "value": "hide", "label": "Hide" }, { "value": "show", "label": "Show" }
+      ], "default": "hide" },
+      { "type": "checkbox", "id": "product_card_show_image", "label": "Show image", "default": true },
+      { "type": "checkbox", "id": "product_card_show_secondary_image", "label": "Show secondary image", "default": true },
+      { "type": "checkbox", "id": "product_card_show_price", "label": "Show price", "default": true },
+      { "type": "color_scheme", "id": "card_color_scheme", "label": "Card color scheme" }
+    ]},
+    { "name": "Line item property", "type": "line_item_property", "settings": [
+      { "type": "paragraph", "content": "Line item property" },
+      { "type": "select", "id": "type", "label": "Type", "options": [
+        { "value": "text", "label": "Text" }, { "value": "checkbox", "label": "Checkbox" },
+        { "value": "radio", "label": "Radio" }, { "value": "dropdown", "label": "Dropdown" }
+      ], "default": "text" },
+      { "type": "text", "id": "label", "label": "Label", "default": "Label" },
+      { "type": "header", "content": "Checkbox options" },
+      { "type": "text", "id": "checked_value", "label": "Checked value", "default": "Yes" },
+      { "type": "text", "id": "uncheck_value", "label": "Unchecked value", "default": "No" },
+      { "type": "header", "content": "Radio options" },
+      { "type": "text", "id": "radio_options", "label": "Options" },
+      { "type": "header", "content": "Dropdown options" },
+      { "type": "text", "id": "dropdown_options", "label": "Options" }
+    ]},
+    { "name": "Volume discount", "type": "volume_discount", "settings": [
+      { "type": "product_list", "id": "product_list", "label": "Products" },
+      { "type": "text", "id": "label", "label": "Label", "default": "Label" },
+      { "type": "number", "id": "quantity", "label": "Quantity", "default": 1 },
+      { "type": "number", "id": "discount_value", "label": "Discount value" },
+      { "type": "select", "id": "discount_type", "label": "Discount type", "options": [
+        { "value": "percentage", "label": "Percentage" },
+        { "value": "fixed-amount", "label": "Fixed amount" }
+      ], "default": "percentage" },
+      { "type": "text", "id": "highlight_text", "label": "Highlight text", "default": "Popular" },
+      { "type": "color", "id": "highlight_background_color", "label": "Highlight bg", "default": "#0F61FF" },
+      { "type": "color", "id": "highlight_text_color", "label": "Highlight text color", "default": "#FFFFFF" },
+      { "type": "select", "id": "highlight_position", "label": "Highlight position", "options": [
+        { "value": "aside", "label": "Aside" }, { "value": "above", "label": "Above" }
+      ], "default": "aside" }
+    ]},
+    { "name": "Countdown timer", "type": "countdown_timer", "limit": 1, "settings": [
+      { "type": "image_picker", "id": "icon_image", "label": "Icon" },
+      { "type": "text", "id": "heading", "label": "Heading", "default": "Heading" },
+      { "type": "text", "id": "sub_heading", "label": "Subheading", "default": "Subheading" },
+      { "type": "header", "content": "Colors" },
+      { "type": "color_background", "id": "background_color", "label": "Background", "default": "#0F61FF" },
+      { "type": "color", "id": "text_color", "label": "Text color", "default": "#FFFFFF" }
+    ]},
+    { "type": "inventory_status", "name": "Inventory status", "limit": 1, "settings": [
+      { "type": "range", "id": "low_inventory_threshold", "label": "Low inventory threshold", "min": 0, "max": 20, "step": 1, "default": 15 },
+      { "type": "select", "id": "show_inventory_count", "label": "Show inventory count", "options": [
+        { "value": "none", "label": "None" },
+        { "value": "low-inventory-threshold", "label": "Only when below threshold" },
+        { "value": "always", "label": "Always" }
+      ], "default": "low-inventory-threshold" },
+      { "type": "color", "id": "color_in_stock", "label": "In stock color", "default": "#10A71F" },
+      { "type": "color", "id": "color_out_stock", "label": "Out of stock color", "default": "#DA1E28" }
+    ]}
+  ],
+  "presets": [{ "name": "Nootropics hero" }]
+}
+{% endschema %}

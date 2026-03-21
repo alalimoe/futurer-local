@@ -1,0 +1,88 @@
+<section id="ntx-faq-kpis" class="ntx-kpis">
+  <div class="ntx-kpis__header">
+    <h2>{{ section.settings.heading }}</h2>
+    <p class="ntx-kpis__sub">Updated {{ section.settings.last_updated }}</p>
+  </div>
+  <div class="ntx-kpis__grid">
+    <div class="ntx-kpi">
+      <div class="ntx-kpi__value">{{ section.settings.on_time_attempt }}%</div>
+      <div class="ntx-kpi__label">On‑time first attempt (Local)</div>
+    </div>
+    <div class="ntx-kpi">
+      <div class="ntx-kpi__value">{{ section.settings.on_time_delivery }}%</div>
+      <div class="ntx-kpi__label">On‑time delivery (Local)</div>
+    </div>
+    <div class="ntx-kpi">
+      <div class="ntx-kpi__value">{{ section.settings.completion_rate }}%</div>
+      <div class="ntx-kpi__label">Delivered successfully</div>
+    </div>
+    <div class="ntx-kpi">
+      <div class="ntx-kpi__value">{{ section.settings.best_days }}</div>
+      <div class="ntx-kpi__label">Best days lately</div>
+    </div>
+  </div>
+  {% if section.settings.note != blank %}
+    <p class="ntx-kpis__note">{{ section.settings.note }}</p>
+  {% endif %}
+</section>
+
+<style>
+  .ntx-kpis {
+    max-width: var(--container-width-narrow); margin: 0 auto 16px; padding: 8px 16px;
+    font-family: var(--font-body-family, sans-serif);
+  }
+  .ntx-kpis__header { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+  .ntx-kpis__header h2 {
+    font-family: var(--font-heading-family, sans-serif);
+    font-size: clamp(1.1rem, 2vw, 1.35rem);
+    font-weight: 800; letter-spacing: -0.02em; line-height: 1.2;
+    color: var(--nx-text, #0B0B0B); margin: 0;
+  }
+  .ntx-kpis__sub { font-size: clamp(0.7rem, 1vw, 0.8rem); color: var(--nx-muted, #6B7280); }
+  .ntx-kpis__grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 12px; }
+  @media(min-width:720px){ .ntx-kpis__grid{ grid-template-columns: repeat(4,1fr);} }
+  .ntx-kpi {
+    border: none; border-radius: var(--nx-radius); padding: 16px; text-align: center;
+    background: #fff;
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition-premium);
+  }
+  .ntx-kpi:hover {
+    box-shadow: var(--shadow-md-hover);
+    transform: translateY(-2px);
+  }
+  .ntx-kpi__value {
+    font-family: var(--font-heading-family, sans-serif);
+    font-size: clamp(1.5rem, 3vw, 1.75rem);
+    font-weight: 800; letter-spacing: -0.025em;
+    color: var(--nx-text, #0B0B0B);
+  }
+  .ntx-kpi__label {
+    font-size: clamp(0.65rem, 1vw, 0.75rem);
+    color: var(--nx-muted, #6B7280); margin-top: 6px;
+  }
+  .ntx-kpis__note {
+    font-size: clamp(0.65rem, 1vw, 0.75rem);
+    color: var(--nx-muted, #6B7280); margin-top: 10px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ntx-kpi { transition: none; }
+    .ntx-kpi:hover { transform: none; }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "FAQ KPI Tiles",
+  "settings": [
+    { "type":"text","id":"heading","label":"Heading","default":"Fast Local Delivery — At a Glance" },
+    { "type":"text","id":"last_updated","label":"Last updated","default":"17 Sep 2025" },
+    { "type":"text","id":"on_time_attempt","label":"On-time first attempt %","default":"83.3" },
+    { "type":"text","id":"on_time_delivery","label":"On-time delivery %","default":"76.2" },
+    { "type":"text","id":"completion_rate","label":"Completion rate %","default":"85.7" },
+    { "type":"text","id":"best_days","label":"Best days","default":"Thu & Fri" },
+    { "type":"text","id":"note","label":"Small note","default":"Based on our latest delivery report. Times can vary on Fridays/holidays and during peak hours." }
+  ],
+  "presets":[{ "name": "FAQ KPI Tiles" }]
+}
+{% endschema %}

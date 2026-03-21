@@ -1,0 +1,248 @@
+{%- liquid
+  if request.page_type != 'page'
+    break
+  endif
+
+  assign mf = page.metafields.custom
+
+  assign show_meta = section.settings.show_meta
+  assign show_tldr = section.settings.show_tldr
+  assign show_takeaways = section.settings.show_takeaways
+  assign show_related = section.settings.show_related
+  assign show_references = section.settings.show_references
+  assign emit_faq_schema = section.settings.emit_faq_schema
+
+  assign tldr = mf.tldr.value | strip
+  assign takeaways_raw = mf.key_takeaways.value | strip
+  assign author = mf.author.value | strip
+  assign date_published = mf.date_published.value
+  assign last_reviewed = mf.last_reviewed.value
+
+  assign schema_type = mf.schema_type.value | strip
+  if schema_type == blank
+    assign schema_type = 'WebPage'
+  endif
+
+  assign related_pages = mf.related_pages.value
+  assign related_products = mf.related_products.value
+  assign related_collections = mf.related_collections.value
+
+  assign references_text = mf.references.value
+  if references_text == blank
+    assign references_text = mf.refrences.value
+  endif
+  assign citation_notes = mf.citation_notes.value | strip
+
+  assign faq_items = mf.faq_json.value
+
+  assign has_any = false
+  assign has_related = false
+  assign has_references = false
+  assign has_meta = false
+
+  if author != blank or last_reviewed != blank or date_published != blank
+    assign has_meta = true
+    assign has_any = true
+  endif
+
+  if tldr != blank or takeaways_raw != blank
+    assign has_any = true
+  endif
+
+  if related_pages != blank or related_products != blank or related_collections != blank
+    assign has_related = true
+    assign has_any = true
+  endif
+
+  if references_text != blank or citation_notes != blank
+    assign has_references = true
+    assign has_any = true
+  endif
+
+  if faq_items != blank and faq_items.size > 0
+    assign has_any = true
+  endif
+
+  assign takeaways = takeaways_raw | split: '•'
+  if takeaways.size == 1
+    assign takeaways = takeaways_raw | split: '|'
+  endif
+-%}
+
+{%- if has_any -%}
+  <section class="nx-page-enrichment" data-section-id="{{ section.id }}">
+
+    {%- if show_meta -%}
+      {%- if has_meta -%}
+        <div class="nx-page-enrichment__meta">
+          {%- if author != blank -%}
+            <span class="nx-page-enrichment__meta-item">By {{ author }}</span>
+          {%- endif -%}
+
+          {%- if date_published != blank -%}
+            <span class="nx-page-enrichment__meta-item">Published {{ date_published | date: "%-d %b %Y" }}</span>
+          {%- endif -%}
+
+          {%- if last_reviewed != blank -%}
+            <span class="nx-page-enrichment__meta-item">Last reviewed {{ last_reviewed | date: "%-d %b %Y" }}</span>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+    {%- endif -%}
+
+    {%- if show_tldr -%}
+      {%- if tldr != blank -%}
+        <div class="nx-page-enrichment__box">
+          <div class="nx-page-enrichment__label">TL;DR</div>
+          <div class="nx-page-enrichment__body rte">
+            {{ tldr | escape | newline_to_br }}
+          </div>
+        </div>
+      {%- endif -%}
+    {%- endif -%}
+
+    {%- if show_takeaways -%}
+      {%- if takeaways_raw != blank -%}
+        <div class="nx-page-enrichment__box">
+          <div class="nx-page-enrichment__label">Key takeaways</div>
+
+          {%- if takeaways.size > 1 -%}
+            <ul class="nx-page-enrichment__list">
+              {%- for item in takeaways -%}
+                {%- assign clean = item | strip -%}
+                {%- if clean != blank -%}
+                  <li>{{ clean }}</li>
+                {%- endif -%}
+              {%- endfor -%}
+            </ul>
+          {%- else -%}
+            <div class="nx-page-enrichment__body">
+              {{ takeaways_raw }}
+            </div>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+    {%- endif -%}
+
+    {%- if show_related -%}
+      {%- if has_related -%}
+        <div class="nx-page-enrichment__related">
+          <h2 class="nx-page-enrichment__h">Related</h2>
+
+          <div class="nx-page-enrichment__related-grid">
+            {%- if related_pages != blank -%}
+              <div class="nx-page-enrichment__related-col">
+                <div class="nx-page-enrichment__related-title">Pages</div>
+                <ul>
+                  {%- for p in related_pages -%}
+                    <li><a href="{{ p.url }}">{{ p.title }}</a></li>
+                  {%- endfor -%}
+                </ul>
+              </div>
+            {%- endif -%}
+
+            {%- if related_products != blank -%}
+              <div class="nx-page-enrichment__related-col">
+                <div class="nx-page-enrichment__related-title">Products</div>
+                <ul>
+                  {%- for pr in related_products -%}
+                    <li><a href="{{ pr.url }}">{{ pr.title }}</a></li>
+                  {%- endfor -%}
+                </ul>
+              </div>
+            {%- endif -%}
+
+            {%- if related_collections != blank -%}
+              <div class="nx-page-enrichment__related-col">
+                <div class="nx-page-enrichment__related-title">Collections</div>
+                <ul>
+                  {%- for c in related_collections -%}
+                    <li><a href="{{ c.url }}">{{ c.title }}</a></li>
+                  {%- endfor -%}
+                </ul>
+              </div>
+            {%- endif -%}
+          </div>
+        </div>
+      {%- endif -%}
+    {%- endif -%}
+
+    {%- if show_references -%}
+      {%- if has_references -%}
+        <div class="nx-page-enrichment__references">
+          <h2 class="nx-page-enrichment__h">References</h2>
+
+          {%- if citation_notes != blank -%}
+            <p class="nx-page-enrichment__notes">{{ citation_notes }}</p>
+          {%- endif -%}
+
+          {%- if references_text != blank -%}
+            <div class="rte">
+              {{ references_text | escape | newline_to_br }}
+            </div>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+    {%- endif -%}
+
+    {%- if emit_faq_schema -%}
+      {%- if faq_items != blank and faq_items.size > 0 -%}
+        <script type="application/ld+json">
+        {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": [
+            {%- assign first = true -%}
+            {%- for item in faq_items -%}
+              {%- assign q = item.q | default: item.question | strip -%}
+              {%- assign a = item.a | default: item.answer | strip -%}
+              {%- if q != blank and a != blank -%}
+                {%- unless first -%},{%- endunless -%}
+                {
+                  "@type": "Question",
+                  "name": {{ q | json }},
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": {{ a | strip_html | json }}
+                  }
+                }
+                {%- assign first = false -%}
+              {%- endif -%}
+            {%- endfor -%}
+          ]
+        }
+        </script>
+      {%- endif -%}
+    {%- endif -%}
+
+  </section>
+
+  <style>
+    .nx-page-enrichment { margin: 1.5rem 0; }
+    .nx-page-enrichment__meta { display: flex; flex-wrap: wrap; gap: .75rem 1rem; font-size: .9rem; opacity: .8; margin-bottom: 1rem; }
+    .nx-page-enrichment__box { border: 1px solid rgba(0,0,0,.08); border-radius: var(--nx-radius-md); padding: 1rem; margin: 0 0 1rem 0; }
+    .nx-page-enrichment__label { font-weight: 700; margin-bottom: .5rem; }
+    .nx-page-enrichment__list { margin: .25rem 0 0 1.25rem; }
+    .nx-page-enrichment__h { margin: 1.5rem 0 .75rem; }
+    .nx-page-enrichment__related-grid { display: grid; grid-template-columns: repeat( auto-fit, minmax(220px, 1fr) ); gap: 1rem; }
+    .nx-page-enrichment__related-title { font-weight: 700; margin-bottom: .25rem; }
+    .nx-page-enrichment__notes { opacity: .85; }
+  </style>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Page enrichment",
+  "settings": [
+    { "type": "checkbox", "id": "show_meta", "label": "Show author + dates", "default": true },
+    { "type": "checkbox", "id": "show_tldr", "label": "Show TL;DR box", "default": true },
+    { "type": "checkbox", "id": "show_takeaways", "label": "Show key takeaways box", "default": true },
+    { "type": "checkbox", "id": "show_related", "label": "Show related links", "default": true },
+    { "type": "checkbox", "id": "show_references", "label": "Show references", "default": true },
+    { "type": "checkbox", "id": "emit_faq_schema", "label": "Emit FAQPage JSON-LD (from custom.faq_json)", "default": true }
+  ],
+  "presets": [
+    { "name": "Page enrichment" }
+  ]
+}
+{% endschema %}

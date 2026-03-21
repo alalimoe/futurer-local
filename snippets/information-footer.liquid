@@ -1,0 +1,29 @@
+{% comment %}
+  Information footer
+
+  Accepts:
+  - label: {String} The label of the information (required)
+  - value: {String} The value of the information (required)
+
+  Usage:
+  {% render 'information-footer', list_info: list_info %}
+{% endcomment %}
+
+{% liquid
+  assign list_arr = list_info | newline_to_br | split: '<br />'
+%}
+
+<div class='xo-information-footer'>
+  <div class='xo-information-footer__wrapper xo-stack' style='--dir: column; --gap: 23; --gap-mobile: 16'>
+    {% for list_item in list_arr %}
+      {% liquid
+        assign label = list_item | split: '::' | first | strip
+        assign value = list_item | split: '::' | last | strip
+      %}
+      <div class='xo-information-footer__item'>
+        <div class='xo-information-footer__label'>{{ label }}</div>
+        <div class='xo-information-footer__value'>{{ value }}</div>
+      </div>
+    {% endfor %}
+  </div>
+</div>

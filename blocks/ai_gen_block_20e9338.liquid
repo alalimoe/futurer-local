@@ -1,0 +1,687 @@
+{% doc %}
+  @prompt
+    Create a theme section “Quickstart Header + Navigation” with product picker + page metafield fallback quickstart_product, includes hero + jump-link chips, modern card design, responsive and accessible.
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% liquid
+  if block.settings.quickstart_product != blank
+    assign quickstart_product = block.settings.quickstart_product
+  elsif page.metafields.custom.quickstart_product != blank
+    assign quickstart_product = page.metafields.custom.quickstart_product
+  else
+    assign quickstart_product = null
+  endif
+%}
+
+{% style %}
+  .ai-quickstart-header-{{ ai_gen_id }} {
+    width: 100%;
+    display: block;
+    background: {{ block.settings.background_color }};
+    padding: {{ block.settings.section_padding_top }}px var(--page-gutter) {{ block.settings.section_padding_bottom }}px;
+  }
+
+  .ai-quickstart-header__container-{{ ai_gen_id }} {
+    max-width: {{ block.settings.max_width }}px;
+    margin: 0 auto;
+  }
+
+  .ai-quickstart-header__hero-{{ ai_gen_id }} {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: {{ block.settings.hero_gap }}px;
+    align-items: center;
+    margin-bottom: {{ block.settings.hero_margin_bottom }}px;
+  }
+
+  .ai-quickstart-header__content-{{ ai_gen_id }} {
+    display: flex;
+    flex-direction: column;
+    gap: {{ block.settings.content_gap }}px;
+  }
+
+  .ai-quickstart-header__heading-{{ ai_gen_id }} {
+    line-height: 1.2;
+    color: {{ block.settings.heading_color }};
+    margin: 0;
+    font-weight: 600;
+  }
+
+  .ai-quickstart-header__description-{{ ai_gen_id }} {
+    font-size: {{ block.settings.description_size }}px;
+    line-height: 1.6;
+    color: {{ block.settings.description_color }};
+    margin: 0;
+  }
+
+  .ai-quickstart-header__image-wrapper-{{ ai_gen_id }} {
+    position: relative;
+    width: 100%;
+    border-radius: {{ block.settings.image_border_radius }}px;
+    overflow: hidden;
+    background: {{ block.settings.image_background }};
+  }
+
+  .ai-quickstart-header__image-{{ ai_gen_id }} {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: cover;
+  }
+
+  .ai-quickstart-header__image-placeholder-{{ ai_gen_id }} {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-surface-secondary);
+  }
+
+  .ai-quickstart-header__image-placeholder-{{ ai_gen_id }} svg {
+    width: 100%;
+    height: 100%;
+    max-width: 400px;
+    max-height: 400px;
+    opacity: 0.3;
+  }
+
+  .ai-quickstart-header__nav-{{ ai_gen_id }} {
+    display: flex;
+    flex-wrap: wrap;
+    gap: {{ block.settings.chip_gap }}px;
+    justify-content: {{ block.settings.chip_alignment }};
+  }
+
+  .ai-quickstart-header__chip-{{ ai_gen_id }} {
+    display: inline-flex;
+    align-items: center;
+    padding: {{ block.settings.chip_padding_vertical }}px {{ block.settings.chip_padding_horizontal }}px;
+    background: {{ block.settings.chip_background }};
+    color: {{ block.settings.chip_text_color }};
+    border: {{ block.settings.chip_border_width }}px solid {{ block.settings.chip_border_color }};
+    border-radius: {{ block.settings.chip_border_radius }}px;
+    font-size: {{ block.settings.chip_font_size }}px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: var(--transition-smooth);
+    cursor: pointer;
+  }
+
+  .ai-quickstart-header__chip-{{ ai_gen_id }}:hover {
+    background: {{ block.settings.chip_hover_background }};
+    color: {{ block.settings.chip_hover_text_color }};
+    border-color: {{ block.settings.chip_hover_border_color }};
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .ai-quickstart-header__empty-state-{{ ai_gen_id }} {
+    text-align: center;
+    padding: 40px 20px;
+    color: #666;
+    font-size: 14px;
+  }
+
+  @media screen and (max-width: 768px) {
+    .ai-quickstart-header__hero-{{ ai_gen_id }} {
+      grid-template-columns: 1fr;
+      gap: {{ block.settings.hero_gap | times: 0.75 }}px;
+    }
+
+    .ai-quickstart-header__description-{{ ai_gen_id }} {
+      font-size: {{ block.settings.description_size | times: 0.9 }}px;
+    }
+
+    .ai-quickstart-header__nav-{{ ai_gen_id }} {
+      justify-content: center;
+    }
+  }
+{% endstyle %}
+
+<quickstart-header-{{ ai_gen_id }}
+  class="ai-quickstart-header-{{ ai_gen_id }}"
+  {{ block.shopify_attributes }}
+>
+  <div class="ai-quickstart-header__container-{{ ai_gen_id }}">
+    {% if quickstart_product != blank %}
+      <div class="ai-quickstart-header__hero-{{ ai_gen_id }}">
+        <div class="ai-quickstart-header__content-{{ ai_gen_id }}">
+          {% if block.settings.heading != blank %}
+            <h1 class="ai-quickstart-header__heading-{{ ai_gen_id }} {{ block.settings.heading_size }}">
+              {{ block.settings.heading }}
+            </h1>
+          {% endif %}
+
+          {% if block.settings.description != blank %}
+            <div class="ai-quickstart-header__description-{{ ai_gen_id }}">
+              {{ block.settings.description }}
+            </div>
+          {% endif %}
+        </div>
+
+        <div class="ai-quickstart-header__image-wrapper-{{ ai_gen_id }}">
+          {% if quickstart_product.featured_image %}
+            <img
+              src="{{ quickstart_product.featured_image | image_url: width: 1200 }}"
+              alt="{{ quickstart_product.featured_image.alt | escape }}"
+              loading="lazy"
+              width="{{ quickstart_product.featured_image.width }}"
+              height="{{ quickstart_product.featured_image.height }}"
+              class="ai-quickstart-header__image-{{ ai_gen_id }}"
+            >
+          {% else %}
+            <div class="ai-quickstart-header__image-placeholder-{{ ai_gen_id }}">
+              {{ 'product-1' | placeholder_svg_tag }}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      {% if block.settings.show_navigation %}
+        <nav
+          class="ai-quickstart-header__nav-{{ ai_gen_id }}"
+          aria-label="Quick navigation"
+        >
+          {% for i in (1..6) %}
+            {% liquid
+              assign section_enabled_key = 'section_' | append: i | append: '_enabled'
+              assign section_label_key = 'section_' | append: i | append: '_label'
+              assign section_anchor_key = 'section_' | append: i | append: '_anchor'
+
+              assign section_enabled = block.settings[section_enabled_key]
+              assign section_label = block.settings[section_label_key]
+              assign section_anchor = block.settings[section_anchor_key]
+            %}
+
+            {% if section_enabled and section_label != blank and section_anchor != blank %}
+              <a
+                href="#{{ section_anchor }}"
+                class="ai-quickstart-header__chip-{{ ai_gen_id }}"
+                data-anchor="{{ section_anchor }}"
+              >
+                {{ section_label }}
+              </a>
+            {% endif %}
+          {% endfor %}
+        </nav>
+      {% endif %}
+    {% else %}
+      <div class="ai-quickstart-header__empty-state-{{ ai_gen_id }}">
+        <p>Select a product in the block settings or set the page metafield "quickstart_product" to display the quickstart header.</p>
+      </div>
+    {% endif %}
+  </div>
+</quickstart-header-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class QuickstartHeader{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+      }
+
+      connectedCallback() {
+        this.setupSmoothScroll();
+      }
+
+      setupSmoothScroll() {
+        const chips = this.querySelectorAll('.ai-quickstart-header__chip-{{ ai_gen_id }}');
+
+        chips.forEach((chip) => {
+          chip.addEventListener('click', (e) => {
+            e.preventDefault();
+            const anchor = chip.getAttribute('data-anchor');
+            const targetElement = document.getElementById(anchor);
+
+            if (targetElement) {
+              const offset = {{ block.settings.scroll_offset }};
+              const elementPosition = targetElement.getBoundingClientRect().top;
+              const offsetPosition = elementPosition + window.pageYOffset - offset;
+
+              window.scrollTo({
+                top: offsetPosition,
+                behavior: 'smooth'
+              });
+
+              targetElement.focus({ preventScroll: true });
+            }
+          });
+        });
+      }
+    }
+
+    customElements.define('quickstart-header-{{ ai_gen_id }}', QuickstartHeader{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Quickstart header",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Product"
+    },
+    {
+      "type": "product",
+      "id": "quickstart_product",
+      "label": "Quickstart product",
+      "info": "Falls back to page metafield 'quickstart_product' if not set"
+    },
+    {
+      "type": "header",
+      "content": "Hero content"
+    },
+    {
+      "type": "richtext",
+      "id": "heading",
+      "label": "Heading",
+      "default": "<p>Quick Start Guide</p>"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Heading size",
+      "options": [
+        {"value": "h1", "label": "Display"},
+        {"value": "h2", "label": "XL"},
+        {"value": "h3", "label": "L"},
+        {"value": "h4", "label": "M"},
+        {"value": "h5", "label": "S"},
+        {"value": "h6", "label": "XS"}
+      ],
+      "default": "h1"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading color",
+      "default": "#2a2a2a"
+    },
+    {
+      "type": "richtext",
+      "id": "description",
+      "label": "Description",
+      "default": "<p>Everything you need to know to get started with this product.</p>"
+    },
+    {
+      "type": "range",
+      "id": "description_size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Description size",
+      "default": 16
+    },
+    {
+      "type": "color",
+      "id": "description_color",
+      "label": "Description color",
+      "default": "#666666"
+    },
+    {
+      "type": "header",
+      "content": "Navigation chips"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_navigation",
+      "label": "Show navigation",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "chip_alignment",
+      "label": "Alignment",
+      "options": [
+        {
+          "value": "flex-start",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "flex-end",
+          "label": "Right"
+        }
+      ],
+      "default": "flex-start"
+    },
+    {
+      "type": "range",
+      "id": "chip_gap",
+      "min": 4,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "label": "Gap between chips",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "chip_font_size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Font size",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "chip_padding_vertical",
+      "min": 4,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "label": "Vertical padding",
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "chip_padding_horizontal",
+      "min": 8,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "label": "Horizontal padding",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "chip_border_radius",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Border radius",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "chip_border_width",
+      "min": 0,
+      "max": 4,
+      "step": 1,
+      "unit": "px",
+      "label": "Border width",
+      "default": 1
+    },
+    {
+      "type": "color",
+      "id": "chip_background",
+      "label": "Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "chip_text_color",
+      "label": "Text color",
+      "default": "#2a2a2a"
+    },
+    {
+      "type": "color",
+      "id": "chip_border_color",
+      "label": "Border color",
+      "default": "#e8e8e8"
+    },
+    {
+      "type": "color",
+      "id": "chip_hover_background",
+      "label": "Hover background",
+      "default": "#5a9d6f"
+    },
+    {
+      "type": "color",
+      "id": "chip_hover_text_color",
+      "label": "Hover text color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "chip_hover_border_color",
+      "label": "Hover border color",
+      "default": "#5a9d6f"
+    },
+    {
+      "type": "range",
+      "id": "scroll_offset",
+      "min": 0,
+      "max": 200,
+      "step": 10,
+      "unit": "px",
+      "label": "Scroll offset",
+      "default": 80,
+      "info": "Space from top when scrolling to anchors"
+    },
+    {
+      "type": "header",
+      "content": "Section 1"
+    },
+    {
+      "type": "checkbox",
+      "id": "section_1_enabled",
+      "label": "Enable section 1",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "section_1_label",
+      "label": "Label",
+      "default": "Overview"
+    },
+    {
+      "type": "text",
+      "id": "section_1_anchor",
+      "label": "Anchor ID",
+      "default": "overview",
+      "info": "Must match the ID of the target section"
+    },
+    {
+      "type": "header",
+      "content": "Section 2"
+    },
+    {
+      "type": "checkbox",
+      "id": "section_2_enabled",
+      "label": "Enable section 2",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "section_2_label",
+      "label": "Label",
+      "default": "Benefits"
+    },
+    {
+      "type": "text",
+      "id": "section_2_anchor",
+      "label": "Anchor ID",
+      "default": "benefits"
+    },
+    {
+      "type": "header",
+      "content": "Section 3"
+    },
+    {
+      "type": "checkbox",
+      "id": "section_3_enabled",
+      "label": "Enable section 3",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "section_3_label",
+      "label": "Label",
+      "default": "How to Use"
+    },
+    {
+      "type": "text",
+      "id": "section_3_anchor",
+      "label": "Anchor ID",
+      "default": "how-to-use"
+    },
+    {
+      "type": "header",
+      "content": "Section 4"
+    },
+    {
+      "type": "checkbox",
+      "id": "section_4_enabled",
+      "label": "Enable section 4",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "section_4_label",
+      "label": "Label",
+      "default": "Ingredients"
+    },
+    {
+      "type": "text",
+      "id": "section_4_anchor",
+      "label": "Anchor ID",
+      "default": "ingredients"
+    },
+    {
+      "type": "header",
+      "content": "Section 5"
+    },
+    {
+      "type": "checkbox",
+      "id": "section_5_enabled",
+      "label": "Enable section 5",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "section_5_label",
+      "label": "Label",
+      "default": "FAQ"
+    },
+    {
+      "type": "text",
+      "id": "section_5_anchor",
+      "label": "Anchor ID",
+      "default": "faq"
+    },
+    {
+      "type": "header",
+      "content": "Section 6"
+    },
+    {
+      "type": "checkbox",
+      "id": "section_6_enabled",
+      "label": "Enable section 6",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "section_6_label",
+      "label": "Label"
+    },
+    {
+      "type": "text",
+      "id": "section_6_anchor",
+      "label": "Anchor ID"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "max_width",
+      "min": 1000,
+      "max": 1680,
+      "step": 40,
+      "unit": "px",
+      "label": "Maximum width",
+      "default": 1400
+    },
+    {
+      "type": "range",
+      "id": "section_padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Top padding",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "section_padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Bottom padding",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "hero_gap",
+      "min": 20,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "label": "Hero gap",
+      "default": 48
+    },
+    {
+      "type": "range",
+      "id": "hero_margin_bottom",
+      "min": 20,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "label": "Hero bottom margin",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "content_gap",
+      "min": 8,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Content gap",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "image_border_radius",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Image border radius",
+      "default": 12
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background",
+      "default": "#f9f9f9"
+    },
+    {
+      "type": "color",
+      "id": "image_background",
+      "label": "Image background",
+      "default": "#ffffff"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Quickstart header"
+    }
+  ]
+}
+{% endschema %}

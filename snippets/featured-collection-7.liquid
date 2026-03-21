@@ -1,0 +1,74 @@
+{% comment %}
+  Renders a feature collection
+
+  Accepts:
+  - class: {String} Font size heading (required)
+  - heading: {String} Heading (required)
+  - button: {Object} Button (required)
+  - image: {String} Image featured (required)
+  - title: {String} Title featured (required)
+  - block: {Object} Block (required)
+
+  Usage:
+  {% render 'featured-collection-7', class: "h5", heading: heading, button: button, image_1: image_1, title_1: title_1, image_2: image_2, title_2: title_2, image_3: image_3, title_3: title_3, block: block
+  %}
+{% endcomment %}
+
+<div class="featured-collection-7">
+  <xo-grid class="featured-collection-7__grid">
+    <div class="featured-collection-7__item" style="--lg: 6; --md: 12; --xs: 12">
+      {% render 'product-featured',
+        class: 'h5',
+        heading: heading,
+        show_button: true,
+        button: button,
+        color_config_enable: color_config_enable,
+        image_1: image_1,
+        title_1: title_1,
+        image_2: image_2,
+        title_2: title_2,
+        image_3: image_3,
+        title_3: title_3
+      %}
+    </div>
+    {% for item in block %}
+      {% case item.type %}
+        {% when 'image' %}
+          {% liquid
+            assign aspect_ratio = item.settings.aspect_ratio
+            if aspect_ratio == 'custom'
+              assign aspect_ratio = item.settings.aspect_ratio_width | append: '/' | append: item.settings.aspect_ratio_height
+            endif
+          %}
+          <xo-animate xo-cascade style="--lg: 6; --md: 12; --xs: 12">
+            <div class="featured-collection-7__image">
+              {% render 'image', image: item.settings.image, aspect_ratio: aspect_ratio %}
+            </div>
+          </xo-animate>
+        {% when 'product' %}
+          {%- assign placeholder_image = 'collection-1' -%}
+          <div class="featured-collection-7__item" style="--lg: 3; --md: 6; --xs: 6">
+            <div class="featured-collection-7__product">
+              {% render 'product-card',
+                product: item.settings.product,
+                show_image: settings.product_card_show_image,
+                show_secondary_image: settings.product_card_show_secondary_image,
+                show_vendor: settings.product_card_show_vendor,
+                show_description: settings.product_card_show_description,
+                show_quick_add: settings.product_card_show_quick_add,
+                show_quick_view: settings.product_card_show_quick_view,
+                show_favorite: settings.product_card_show_favorite,
+                show_price: settings.product_card_show_price,
+                show_badge: settings.product_card_show_badge,
+                position_badge: settings.position_badge,
+                media_aspect_ratio: section.settings.product_card_aspect_ratio,
+                color_scheme: section.settings.card_color_scheme,
+                placeholder_image: placeholder_image,
+                animate_enabled: true
+              %}
+            </div>
+          </div>
+      {% endcase %}
+    {% endfor %}
+  </xo-grid>
+</div>

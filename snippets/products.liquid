@@ -1,0 +1,45 @@
+{% comment %}
+  layout: grid | carousel | ...
+  products: search.result | collection.products | ...
+  is_limit: true | false
+  is_order: true | false
+  product_to_show: 10 | 20 | ...
+  columns_desktop: 3 | 4 | ...
+  columns_mobile: 1 | 2
+  per_view: 3 | 4 | ...
+  per_move: 1 | 2 | ...
+  autoplay: off | on
+  autoplay_speed: 1000 | 2000 | ...
+{% endcomment %}
+
+{% case layout %}
+  {% when 'grid' %}
+    {% render 'products-grid',
+      products: products,
+      product_to_show: product_to_show,
+      columns_desktop: columns_desktop,
+      columns_mobile: columns_mobile,
+      is_limit: is_limit,
+      is_order: is_order
+    %}
+  {% when 'carousel' %}
+    {% render 'products-carousel',
+      products: products,
+      per_view: per_view,
+      per_move: per_move,
+      autoplay: autoplay,
+      autoplay_speed: autoplay_speed,
+      product_to_show: product_to_show,
+      is_limit: is_limit,
+      is_order: is_order
+    %}
+  {% else %}
+    {% render 'products-grid',
+      products: products,
+      columns_desktop: columns_desktop,
+      columns_mobile: columns_mobile,
+      product_to_show: product_to_show,
+      is_limit: is_limit,
+      is_order: is_order
+    %}
+{% endcase %}

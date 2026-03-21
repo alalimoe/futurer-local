@@ -1,0 +1,72 @@
+{% comment %}
+  Latest posts grid with pagination. Optionally skip the pinned hero (same article id).
+  Note: Skipping the featured may reduce items per page by 1; acceptable trade-off for simplicity.
+{% endcomment %}
+{% assign featured_id = section.settings.featured_article_id | default: 0 %}
+
+<section class="np-surface">
+  <div class="np-wrap">
+    <div class="np-grid np-grid--3">
+      {% paginate blog.articles by section.settings.per_page %}
+        {% for article in paginate.items %}
+          {% if section.settings.exclude_featured and article.id == featured_id %}
+            {% continue %}
+          {% endif %}
+          <article class="np-card">
+            {% if article.image %}
+              <a class="np-card__media" href="{{ article.url }}">
+                <img src="{{ article.image | image_url: width: 900 }}" alt="{{ article.image.alt | escape }}" width="900" height="{{ 900 | divided_by: article.image.aspect_ratio | round }}" loading="lazy">
+              </a>
+            {% endif %}
+            <div class="np-card__body">
+              <h3 class="np-card__title"><a href="{{ article.url }}" style="text-decoration:none; color:inherit;">{{ article.title }}</a></h3>
+              {% if article.excerpt != blank %}
+                <p class="np-card__deck">{{ article.excerpt | strip_html }}</p>
+              {% endif %}
+              <div class="np-meta">
+                <span>{{ article.published_at | date: format: "date" }}</span>
+                {% if section.settings.show_reading_time %}
+                  {% assign words = article.content | strip_html | replace: '&nbsp;', ' ' | split: ' ' | size %}
+                  {% assign minutes = words | plus: 199 | divided_by: 200 %}
+                  <span>{{ minutes }} min read</span>
+                {% endif %}
+              </div>
+            </div>
+            <div class="np-card__footer">
+              <div class="np-card__actions">
+                <a class="btn btn--secondary" href="{{ article.url }}">Read</a>
+                {% if section.settings.enable_save %}
+                  <button class="btn btn--secondary" type="button" data-save-article="{{ article.id }}" aria-pressed="false">Save for later</button>
+                {% endif %}
+              </div>
+            </div>
+          </article>
+        {% endfor %}
+        {% if paginate.pages > 1 %}
+          <nav class="np-meta" aria-label="Pagination" style="justify-content:flex-end; margin-top:1rem;">
+            {% if paginate.previous %}
+              <a class="btn btn--secondary" href="{{ paginate.previous.url }}">&larr; Newer</a>
+            {% endif %}
+            {% if paginate.next %}
+              <a class="btn btn--secondary" href="{{ paginate.next.url }}">Older &rarr;</a>
+            {% endif %}
+          </nav>
+        {% endif %}
+      {% endpaginate %}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Posts Grid",
+  "settings": [
+    { "type":"range", "id":"per_page", "label":"Posts per page", "min":6, "max":24, "step":3, "default":12 },
+    { "type":"checkbox", "id":"show_reading_time", "label":"Show reading time", "default":true },
+    { "type":"checkbox", "id":"enable_save", "label":"Enable “Save for later” buttons", "default":true },
+    { "type":"checkbox", "id":"exclude_featured", "label":"Skip article used in Featured Hero", "default":true },
+    { "type":"text", "id":"featured_article_id", "label":"Featured article ID (paste from Featured Hero inspector)", "info":"Helps the grid skip the hero article." }
+  ],
+  "presets":[{ "name":"NP • Posts Grid" }]
+}
+{% endschema %}

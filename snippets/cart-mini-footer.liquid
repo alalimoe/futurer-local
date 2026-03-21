@@ -1,0 +1,77 @@
+<div class='xo-cart-mini-footer__separator-pd'>
+  <div class='xo-cart-mini-footer__separator'></div>
+</div>
+<div class='xo-cart-mini-footer'>
+  <xo-animate xo-cascade>
+    <div class='xo-cart-mini-footer__price'>
+      <div class='xo-cart-mini__price-text' xo-cascade>{{ 'sections.cart.subtotal' | t }}</div>
+      <div class='xo-cart-mini__price-number h6'>{{ cart.total_price | money_with_currency }}</div>
+    </div>
+  </xo-animate>
+
+  {%- if cart.cart_level_discount_applications.size > 0 -%}
+    <xo-animate xo-cascade>
+      <ul class='xo-cart-mini-footer__discounts list-unstyled' role='list'>
+        {%- for discount in cart.cart_level_discount_applications -%}
+          <li class='xo-cart-mini-footer__discount'>
+            {% render 'badge-discount', label: discount.title, discount: discount %}
+          </li>
+        {%- endfor -%}
+      </ul>
+    </xo-animate>
+  {%- endif -%}
+
+  <xo-animate xo-cascade>
+    <div class='xo-cart-mini-footer__taxes{% if settings.enable_border_radius %} xo-cart-mini-footer__taxes--radius{% endif %}'>
+      <small class='xo-cart-mini-footer__taxes-text'>
+        {%- if cart.taxes_included and shop.shipping_policy.body != blank -%}
+          {{ 'sections.cart.taxes_included_and_shipping_policy_html' | t: link: shop.shipping_policy.url }}
+        {%- elsif cart.taxes_included -%}
+          {{ 'sections.cart.taxes_included_but_shipping_at_checkout' | t }}
+        {%- elsif shop.shipping_policy.body != blank -%}
+          {{ 'sections.cart.taxes_and_shipping_policy_at_checkout_html' | t: link: shop.shipping_policy.url }}
+        {%- else -%}
+          {{ 'sections.cart.taxes_and_shipping_at_checkout' | t }}
+        {%- endif -%}
+      </small>
+    </div>
+  </xo-animate>
+
+  <div class='xo-cart-mini-footer__separator-pd xo-cart-mini-footer__separator-pd--pt'>
+    <div class='xo-cart-mini-footer__separator'></div>
+  </div>
+
+  <div class='xo-cart-mini-footer__group'>
+    <xo-animate xo-cascade style='width: 50%;'>
+      <div class='xo-cart-mini-footer__button'>
+        {% liquid
+          assign text = 'sections.cart.view_cart' | t
+          if cart != empty
+            render 'button', text: text, link: '/cart', style: 'secondary', block: true, size: 'md'
+          endif
+        %}
+      </div>
+    </xo-animate>
+
+    <xo-animate xo-cascade style='width: 50%;'>
+      <div class='xo-cart-mini-footer__button'>
+        <noscript>
+          {% assign text = 'sections.cart.update' | t %}
+          {% capture attrs %}form='CartDrawer-Form'{% endcapture %}
+          {% render 'button', text: text, style: 'dark', type: 'submit', attrs: attrs, block: true, size: 'md' %}
+        </noscript>
+        <form action='/checkout' method='post'>
+          {% liquid
+            assign text = 'sections.cart.checkout' | t
+            if cart == empty
+              assign disabled = true
+            else
+              assign disabled = false
+            endif
+          %}
+          {% render 'button', type: 'submit', text: text, block: true, disabled: disabled, size: 'md', style: 'primary' %}
+        </form>
+      </div>
+    </xo-animate>
+  </div>
+</div>

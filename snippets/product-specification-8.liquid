@@ -1,0 +1,94 @@
+{% comment %}
+  Renders a product special element with a given value
+
+  Accepts:
+  - block: {Object} Block (required)
+
+  Usage:
+  {% render 'product-specification-8', block: block %}
+{% endcomment %}
+
+<div class='product-specification-8'>
+  <xo-grid class='product-specification-8__grid'>
+    <xo-animate xo-cascade style='--lg: 4; --md: 12; --xs: 12'>
+      <div class='product-specification-8__item'>
+        {% for item in block %}
+          {% case item.type %}
+            {% when 'image-with-text' %}
+              {% liquid
+                assign sub_heading = item.settings.sub_heading
+                assign heading = item.settings.heading
+                assign image = item.settings.image
+              %}
+              <div class='product-specification-8__image-text'>
+                <div class='product-specification-8__image'>
+                  {% render 'image', image: image %}
+                </div>
+                {% if sub_heading %}
+                  <div class='product-specification-8__sub-heading'>
+                    <p>{{ sub_heading }}</p>
+                  </div>
+                {% endif %}
+                {% if heading %}
+                  <h3 class='product-specification-8__heading h1'>{{ heading }}</h3>
+                {% endif %}
+              </div>
+          {% endcase %}
+        {% endfor %}
+      </div>
+    </xo-animate>
+    <div class='product-specification-8__item' style='--lg: 8; --md: 12; --xs: 12'>
+      {% for item in block %}
+        {% case item.type %}
+          {% when 'detail-information-1' %}
+            {% liquid
+              assign heading = item.settings.heading
+              assign sub_title_1 = item.settings.sub_title_1
+              assign title_1 = item.settings.title_1
+              assign sub_title_2 = item.settings.sub_title_2
+              assign title_2 = item.settings.title_2
+              assign image_desktop = item.settings.image_desktop
+              assign image_mobile = item.settings.image_mobile
+            %}
+            {% render 'product-featured-1',
+              heading: heading,
+              sub_title_1: sub_title_1,
+              title_1: title_1,
+              sub_title_2: sub_title_2,
+              title_2: title_2,
+              image_desktop: image_desktop,
+              image_mobile: image_mobile
+            %}
+        {% endcase %}
+      {% endfor %}
+    </div>
+    <xo-animate xo-cascade style='--lg: 8; --md: 12; --xs: 12'>
+      <div class='product-specification-8__item'>
+        {% for item in block %}
+          {% case item.type %}
+            {% when 'image' %}
+              {%- assign image = item.settings.image -%}
+              <div class='product-specification-8__image'>
+                {% render 'image', image: image %}
+              </div>
+          {% endcase %}
+        {% endfor %}
+      </div>
+    </xo-animate>
+    <xo-animate xo-cascade style='--lg: 4; --md: 12; --xs: 12'>
+      <div class='product-specification-8__item'>
+        {% for item in block %}
+          {% case item.type %}
+            {% when 'detail-information-2' %}
+              {% liquid
+                assign sub_heading = item.settings.caption
+                assign title_list = item.settings.title_list
+                assign content_list = item.settings.content_list
+              %}
+              {% render 'product-information', caption: sub_heading, title_list: title_list, content_list: content_list %}
+          {% endcase %}
+        {% endfor %}
+      </div>
+    </xo-animate>
+  </xo-grid>
+</div>

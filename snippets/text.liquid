@@ -1,0 +1,122 @@
+{% comment %}
+  Renders a text element with a given value
+
+  @param {String} text - The heading (required)
+  @param {String} class - Font size of the heading (optional)
+  @param {String} tag_name - Tag name (optional)
+  @param {Number} duration - Duration for animate text (optional)
+  @param {String} effect - Animate style (optional)
+  @param {Number} line_height - Line height of the heading (optional)
+  @param {Number} heading_width_desktop - Desktop heading width (optional)
+  @param {Number} heading_width_mobile - Mobile heading width (optional)
+
+  @example
+  {% render 'text',
+    text: text,
+    class: class,
+    tag_name: tag_name,
+    duration: duration,
+    effect: effect,
+    line_height: line_height,
+    heading_width_desktop: heading_width_desktop,
+    heading_width_mobile: heading_width_mobile
+  %}
+{% endcomment %}
+
+{% liquid
+  assign final_context = null
+  if context != blank
+    assign final_context = context | default: section
+  endif
+
+  if final_context != null
+    assign class = final_context.settings.font_size_heading | default: 'h2'
+    assign line_height = final_context.settings.text_line_height | default: 1.2
+    if final_context.settings.text_heading != blank
+      assign text = final_context.settings.text_heading
+    else
+      assign text = text
+    endif
+    assign duration = final_context.settings.text_duration | default: 1000
+    assign effect = final_context.settings.text_effect | default: 'split'
+    assign tag_name = final_context.settings.text_tag_name | default: 'h2'
+    assign heading_width_desktop = final_context.settings.text_heading_width_desktop | default: 100
+    assign heading_width_mobile = final_context.settings.text_heading_width_mobile | default: 100
+  else
+    assign tag_name = tag_name | default: 'div'
+    assign text = text
+    assign class = class
+    assign line_height = line_height | default: 1.24
+    assign duration = duration | default: 1000
+    assign effect = effect | default: 'split'
+    assign heading_width_desktop = heading_width_desktop | default: 100
+    assign heading_width_mobile = heading_width_mobile | default: 100
+  endif
+
+  assign duration_initial = duration | divided_by: 3.00
+  assign constant_initial = duration | minus: duration_initial
+  assign words = text | split: ' '
+  assign words_length = text | split: ''
+  assign constant = constant_initial | divided_by: words_length.size
+  assign count = 0
+
+  assign container_class = 'xo-text'
+  assign container_style = ''
+
+  if effect
+    assign container_class = container_class | append: ' xo-text--' | append: effect
+  endif
+
+  if line_height != blank
+    assign container_style = container_style | append: '--line-height: ' | append: line_height | append: ';'
+  endif
+
+  if heading_width_desktop != blank
+    assign container_style = container_style | append: '--width-desktop: ' | append: heading_width_desktop | append: '%;'
+  endif
+
+  if heading_width_mobile != blank
+    assign container_style = container_style | append: '--width-mobile: ' | append: heading_width_mobile | append: '%;'
+  endif
+%}
+
+<div class="{{ container_class }}" style="{{ container_style }}">
+  {% if effect == 'reveal' or effect == 'split' %}
+    <xo-animate
+      xo-cascade
+      xo-item-used
+      xo-duration="{{ duration_initial }}"
+      {% if effect == 'reveal' %}
+        xo-type="blur"
+      {% endif -%}
+      {% if effect == 'split' %}
+        xo-easing="spring"
+        xo-strength="3"
+      {% endif %}
+    >
+      <{{ tag_name }} class="xo-text__heading {{ class }}">
+        {% for word in words %}
+          {% assign word_index = forloop.index %}
+          <span class="xo-text__word">
+            {% assign chars = word | split: '' %}
+            {% for char in chars %}
+              {%- assign count = count | plus: 1 -%}
+              <xo-animate-item style="--xo-constant: {{ constant }}; --xo-order: {{ count }}">
+                <span class="xo-text__char">{{ char }}</span>
+              </xo-animate-item>
+              {% if forloop.index == chars.size and word_index != words.size %}
+                <span class="xo-text__char">&nbsp;</span>
+              {% endif %}
+            {% endfor %}
+          </span>
+        {% endfor %}
+      </{{ tag_name }}>
+    </xo-animate>
+  {%- else -%}
+    <{{ tag_name }} class="xo-text__heading {{ class }}">
+      <xo-animate xo-cascade>
+        <span>{{ text }}</span>
+      </xo-animate>
+    </{{ tag_name }}>
+  {% endif %}
+</div>

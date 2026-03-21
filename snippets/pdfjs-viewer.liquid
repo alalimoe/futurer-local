@@ -1,0 +1,27 @@
+<div class="np-pdf-container" data-pdf="{{ pdf_url }}">
+  <link rel="stylesheet" href="{{ 'pdfjs/web/viewer.css' | asset_url }}">
+<button class="np-pdf-launch" aria-expanded="false">
+  View COA (loads viewer)
+</button>
+<div class="np-pdf-shell" hidden></div>
+
+<script>
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('.np-pdf-launch');
+  if (!btn) return;
+  const shell = btn.nextElementSibling;
+  if (shell.getAttribute('data-loaded')) return;
+  const pdfUrl = btn.closest('.np-pdf-container').dataset.pdf;
+  const src = "{{ 'pdfjs/web/viewer.html' | asset_url }}" + "?file=" + encodeURIComponent(pdfUrl);
+  shell.innerHTML = `<iframe class="np-pdf-frame" src="${src}" allow="fullscreen" style="width:100%;height:80vh;border:0"></iframe>`;
+  shell.hidden = false;
+  shell.setAttribute('data-loaded','1');
+  btn.setAttribute('aria-expanded','true');
+  btn.hidden = true;
+});
+</script>
+
+  <div class="np-pdf-actions">
+    <a href="{{ pdf_url }}" download rel="noopener">Download PDF</a>
+  </div>
+</div>

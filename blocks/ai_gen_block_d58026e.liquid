@@ -1,0 +1,980 @@
+{% doc %}
+  @prompt
+    16:9 hero section with background image, breadcrumbs, headline, sub headline, 4 badges, 2 CTA buttons. all styling customizable, align breadcrumbs, headline, subheadline, badges, and buttons to the left, reduce cta buttons padding by 40%
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-hero-section-{{ ai_gen_id }} {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    display: flex;
+    align-items: {{ block.settings.content_vertical_alignment }};
+    justify-content: {{ block.settings.content_horizontal_alignment }};
+  }
+
+  .ai-hero-background-{{ ai_gen_id }} {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+  }
+
+  .ai-hero-background-{{ ai_gen_id }} img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .ai-hero-background-placeholder-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    background-color: var(--color-surface-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ai-hero-background-placeholder-{{ ai_gen_id }} svg {
+    width: 100%;
+    height: 100%;
+    max-width: 500px;
+    max-height: 500px;
+  }
+
+  .ai-hero-overlay-{{ ai_gen_id }} {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: {{ block.settings.overlay_color }};
+    opacity: {{ block.settings.overlay_opacity | divided_by: 100.0 }};
+    z-index: 2;
+  }
+
+  .ai-hero-content-{{ ai_gen_id }} {
+    position: relative;
+    z-index: 3;
+    max-width: {{ block.settings.content_max_width }}px;
+    padding: {{ block.settings.content_padding }}px;
+    text-align: left;
+    width: 100%;
+  }
+
+  .ai-hero-breadcrumbs-{{ ai_gen_id }} {
+    margin-bottom: {{ block.settings.breadcrumb_spacing }}px;
+    font-size: {{ block.settings.breadcrumb_font_size }}px;
+    color: {{ block.settings.breadcrumb_color }};
+  }
+
+  .ai-hero-breadcrumbs-{{ ai_gen_id }} a {
+    color: {{ block.settings.breadcrumb_link_color }};
+    text-decoration: none;
+  }
+
+  .ai-hero-breadcrumbs-{{ ai_gen_id }} a:hover {
+    text-decoration: underline;
+  }
+
+  .ai-hero-breadcrumbs-{{ ai_gen_id }} span {
+    margin: 0 8px;
+  }
+
+  .ai-hero-headline-{{ ai_gen_id }} {
+    margin: 0 0 {{ block.settings.headline_spacing }}px;
+    font-size: {{ block.settings.headline_font_size }}px;
+    font-weight: {{ block.settings.headline_font_weight }};
+    color: {{ block.settings.headline_color }};
+    line-height: 1.2;
+  }
+
+  .ai-hero-subheadline-{{ ai_gen_id }} {
+    margin: 0 0 {{ block.settings.subheadline_spacing }}px;
+    font-size: {{ block.settings.subheadline_font_size }}px;
+    color: {{ block.settings.subheadline_color }};
+    line-height: 1.5;
+  }
+
+  .ai-hero-badges-{{ ai_gen_id }} {
+    display: flex;
+    gap: {{ block.settings.badge_gap }}px;
+    margin-bottom: {{ block.settings.badge_spacing }}px;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+
+  .ai-hero-badge-{{ ai_gen_id }} {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: {{ block.settings.badge_padding_vertical }}px {{ block.settings.badge_padding_horizontal }}px;
+    background-color: {{ block.settings.badge_background_color }};
+    color: {{ block.settings.badge_text_color }};
+    border-radius: {{ block.settings.badge_border_radius }}px;
+    font-size: {{ block.settings.badge_font_size }}px;
+    font-weight: {{ block.settings.badge_font_weight }};
+  }
+
+  .ai-hero-badge-icon-{{ ai_gen_id }} {
+    width: {{ block.settings.badge_icon_size }}px;
+    height: {{ block.settings.badge_icon_size }}px;
+    flex-shrink: 0;
+  }
+
+  .ai-hero-badge-icon-{{ ai_gen_id }} svg {
+    width: 100%;
+    height: 100%;
+    fill: currentColor;
+  }
+
+  .ai-hero-buttons-{{ ai_gen_id }} {
+    display: flex;
+    gap: {{ block.settings.button_gap }}px;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+
+  .ai-hero-button-{{ ai_gen_id }} {
+    display: inline-block;
+    padding: {{ block.settings.button_padding_vertical | times: 0.6 }}px {{ block.settings.button_padding_horizontal | times: 0.6 }}px;
+    font-size: {{ block.settings.button_font_size }}px;
+    font-weight: {{ block.settings.button_font_weight }};
+    text-decoration: none;
+    border-radius: {{ block.settings.button_border_radius }}px;
+    transition: var(--transition-smooth);
+    border: {{ block.settings.button_border_width }}px solid transparent;
+  }
+
+  .ai-hero-button-primary-{{ ai_gen_id }} {
+    background-color: {{ block.settings.button_primary_bg_color }};
+    color: {{ block.settings.button_primary_text_color }};
+    border-color: {{ block.settings.button_primary_border_color }};
+  }
+
+  .ai-hero-button-primary-{{ ai_gen_id }}:hover {
+    background-color: {{ block.settings.button_primary_hover_bg_color }};
+    color: {{ block.settings.button_primary_hover_text_color }};
+    border-color: {{ block.settings.button_primary_hover_border_color }};
+  }
+
+  .ai-hero-button-secondary-{{ ai_gen_id }} {
+    background-color: {{ block.settings.button_secondary_bg_color }};
+    color: {{ block.settings.button_secondary_text_color }};
+    border-color: {{ block.settings.button_secondary_border_color }};
+  }
+
+  .ai-hero-button-secondary-{{ ai_gen_id }}:hover {
+    background-color: {{ block.settings.button_secondary_hover_bg_color }};
+    color: {{ block.settings.button_secondary_hover_text_color }};
+    border-color: {{ block.settings.button_secondary_hover_border_color }};
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-hero-section-{{ ai_gen_id }} {
+      aspect-ratio: {{ block.settings.mobile_aspect_ratio }};
+    }
+
+    .ai-hero-content-{{ ai_gen_id }} {
+      padding: {{ block.settings.mobile_content_padding }}px;
+    }
+
+    .ai-hero-headline-{{ ai_gen_id }} {
+      font-size: {{ block.settings.headline_font_size | times: 0.7 }}px;
+    }
+
+    .ai-hero-subheadline-{{ ai_gen_id }} {
+      font-size: {{ block.settings.subheadline_font_size | times: 0.85 }}px;
+    }
+
+    .ai-hero-buttons-{{ ai_gen_id }} {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .ai-hero-button-{{ ai_gen_id }} {
+      text-align: center;
+    }
+  }
+{% endstyle %}
+
+<div class="ai-hero-section-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="ai-hero-background-{{ ai_gen_id }}">
+    {% if block.settings.background_image %}
+      <img
+        src="{{ block.settings.background_image | image_url: width: 2000 }}"
+        alt="{{ block.settings.background_image.alt | escape }}"
+        loading="lazy"
+        width="{{ block.settings.background_image.width }}"
+        height="{{ block.settings.background_image.height }}"
+      >
+    {% else %}
+      <div class="ai-hero-background-placeholder-{{ ai_gen_id }}">
+        {{ 'hero-apparel-1' | placeholder_svg_tag }}
+      </div>
+    {% endif %}
+  </div>
+
+  {% if block.settings.show_overlay %}
+    <div class="ai-hero-overlay-{{ ai_gen_id }}"></div>
+  {% endif %}
+
+  <div class="ai-hero-content-{{ ai_gen_id }}">
+    {% if block.settings.show_breadcrumbs %}
+      <div class="ai-hero-breadcrumbs-{{ ai_gen_id }}">
+        <a href="{{ routes.root_url }}">Home</a>
+        <span>/</span>
+        <span>{{ block.settings.breadcrumb_current }}</span>
+      </div>
+    {% endif %}
+
+    {% if block.settings.headline != blank %}
+      <h1 class="ai-hero-headline-{{ ai_gen_id }}">{{ block.settings.headline }}</h1>
+    {% endif %}
+
+    {% if block.settings.subheadline != blank %}
+      <div class="ai-hero-subheadline-{{ ai_gen_id }}">{{ block.settings.subheadline }}</div>
+    {% endif %}
+
+    {% if block.settings.show_badges %}
+      <div class="ai-hero-badges-{{ ai_gen_id }}">
+        {% if block.settings.badge_1_text != blank %}
+          <div class="ai-hero-badge-{{ ai_gen_id }}">
+            {% if block.settings.badge_1_show_icon %}
+              <span class="ai-hero-badge-icon-{{ ai_gen_id }}">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                </svg>
+              </span>
+            {% endif %}
+            {{ block.settings.badge_1_text }}
+          </div>
+        {% endif %}
+
+        {% if block.settings.badge_2_text != blank %}
+          <div class="ai-hero-badge-{{ ai_gen_id }}">
+            {% if block.settings.badge_2_show_icon %}
+              <span class="ai-hero-badge-icon-{{ ai_gen_id }}">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                </svg>
+              </span>
+            {% endif %}
+            {{ block.settings.badge_2_text }}
+          </div>
+        {% endif %}
+
+        {% if block.settings.badge_3_text != blank %}
+          <div class="ai-hero-badge-{{ ai_gen_id }}">
+            {% if block.settings.badge_3_show_icon %}
+              <span class="ai-hero-badge-icon-{{ ai_gen_id }}">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                </svg>
+              </span>
+            {% endif %}
+            {{ block.settings.badge_3_text }}
+          </div>
+        {% endif %}
+
+        {% if block.settings.badge_4_text != blank %}
+          <div class="ai-hero-badge-{{ ai_gen_id }}">
+            {% if block.settings.badge_4_show_icon %}
+              <span class="ai-hero-badge-icon-{{ ai_gen_id }}">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                </svg>
+              </span>
+            {% endif %}
+            {{ block.settings.badge_4_text }}
+          </div>
+        {% endif %}
+      </div>
+    {% endif %}
+
+    <div class="ai-hero-buttons-{{ ai_gen_id }}">
+      {% if block.settings.button_1_text != blank %}
+        <a
+          href="{{ block.settings.button_1_link }}"
+          class="ai-hero-button-{{ ai_gen_id }} ai-hero-button-primary-{{ ai_gen_id }}"
+        >
+          {{ block.settings.button_1_text }}
+        </a>
+      {% endif %}
+
+      {% if block.settings.button_2_text != blank %}
+        <a
+          href="{{ block.settings.button_2_link }}"
+          class="ai-hero-button-{{ ai_gen_id }} ai-hero-button-secondary-{{ ai_gen_id }}"
+        >
+          {{ block.settings.button_2_text }}
+        </a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Hero section",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Background"
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image",
+      "label": "Background image"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_overlay",
+      "label": "Show overlay",
+      "default": true
+    },
+    {
+      "type": "color",
+      "id": "overlay_color",
+      "label": "Overlay color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "label": "Overlay opacity",
+      "default": 40
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "content_vertical_alignment",
+      "label": "Vertical alignment",
+      "options": [
+        {
+          "value": "flex-start",
+          "label": "Top"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "flex-end",
+          "label": "Bottom"
+        }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "select",
+      "id": "content_horizontal_alignment",
+      "label": "Horizontal alignment",
+      "options": [
+        {
+          "value": "flex-start",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "flex-end",
+          "label": "Right"
+        }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "range",
+      "id": "content_max_width",
+      "min": 400,
+      "max": 1200,
+      "step": 50,
+      "unit": "px",
+      "label": "Content max width",
+      "default": 800
+    },
+    {
+      "type": "range",
+      "id": "content_padding",
+      "min": 20,
+      "max": 100,
+      "step": 10,
+      "unit": "px",
+      "label": "Content padding",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "mobile_content_padding",
+      "min": 10,
+      "max": 50,
+      "step": 5,
+      "unit": "px",
+      "label": "Mobile content padding",
+      "default": 20
+    },
+    {
+      "type": "select",
+      "id": "mobile_aspect_ratio",
+      "label": "Mobile aspect ratio",
+      "options": [
+        {
+          "value": "16 / 9",
+          "label": "16:9"
+        },
+        {
+          "value": "4 / 3",
+          "label": "4:3"
+        },
+        {
+          "value": "1 / 1",
+          "label": "1:1"
+        },
+        {
+          "value": "3 / 4",
+          "label": "3:4"
+        }
+      ],
+      "default": "4 / 3"
+    },
+    {
+      "type": "header",
+      "content": "Breadcrumbs"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_breadcrumbs",
+      "label": "Show breadcrumbs",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "breadcrumb_current",
+      "label": "Current page",
+      "default": "Current Page"
+    },
+    {
+      "type": "range",
+      "id": "breadcrumb_font_size",
+      "min": 10,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Font size",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "breadcrumb_spacing",
+      "min": 0,
+      "max": 40,
+      "step": 4,
+      "unit": "px",
+      "label": "Bottom spacing",
+      "default": 16
+    },
+    {
+      "type": "color",
+      "id": "breadcrumb_color",
+      "label": "Text color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "breadcrumb_link_color",
+      "label": "Link color",
+      "default": "#FBBF24"
+    },
+    {
+      "type": "header",
+      "content": "Headline"
+    },
+    {
+      "type": "text",
+      "id": "headline",
+      "label": "Headline",
+      "default": "Welcome to Our Store"
+    },
+    {
+      "type": "range",
+      "id": "headline_font_size",
+      "min": 24,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Font size",
+      "default": 56
+    },
+    {
+      "type": "select",
+      "id": "headline_font_weight",
+      "label": "Font weight",
+      "options": [
+        {
+          "value": "400",
+          "label": "Normal"
+        },
+        {
+          "value": "500",
+          "label": "Medium"
+        },
+        {
+          "value": "600",
+          "label": "Semi-bold"
+        },
+        {
+          "value": "700",
+          "label": "Bold"
+        },
+        {
+          "value": "800",
+          "label": "Extra bold"
+        }
+      ],
+      "default": "700"
+    },
+    {
+      "type": "color",
+      "id": "headline_color",
+      "label": "Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "headline_spacing",
+      "min": 0,
+      "max": 60,
+      "step": 4,
+      "unit": "px",
+      "label": "Bottom spacing",
+      "default": 20
+    },
+    {
+      "type": "header",
+      "content": "Subheadline"
+    },
+    {
+      "type": "textarea",
+      "id": "subheadline",
+      "label": "Subheadline",
+      "default": "Discover our amazing products and exclusive offers"
+    },
+    {
+      "type": "range",
+      "id": "subheadline_font_size",
+      "min": 14,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "label": "Font size",
+      "default": 18
+    },
+    {
+      "type": "color",
+      "id": "subheadline_color",
+      "label": "Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "subheadline_spacing",
+      "min": 0,
+      "max": 60,
+      "step": 4,
+      "unit": "px",
+      "label": "Bottom spacing",
+      "default": 24
+    },
+    {
+      "type": "header",
+      "content": "Badges"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_badges",
+      "label": "Show badges",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "badge_gap",
+      "min": 4,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "label": "Gap between badges",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "badge_spacing",
+      "min": 0,
+      "max": 60,
+      "step": 4,
+      "unit": "px",
+      "label": "Bottom spacing",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "badge_font_size",
+      "min": 10,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Font size",
+      "default": 14
+    },
+    {
+      "type": "select",
+      "id": "badge_font_weight",
+      "label": "Font weight",
+      "options": [
+        {
+          "value": "400",
+          "label": "Normal"
+        },
+        {
+          "value": "500",
+          "label": "Medium"
+        },
+        {
+          "value": "600",
+          "label": "Semi-bold"
+        },
+        {
+          "value": "700",
+          "label": "Bold"
+        }
+      ],
+      "default": "500"
+    },
+    {
+      "type": "range",
+      "id": "badge_padding_vertical",
+      "min": 4,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "label": "Vertical padding",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "badge_padding_horizontal",
+      "min": 8,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "label": "Horizontal padding",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "badge_border_radius",
+      "min": 0,
+      "max": 30,
+      "step": 2,
+      "unit": "px",
+      "label": "Border radius",
+      "default": 20
+    },
+    {
+      "type": "color",
+      "id": "badge_background_color",
+      "label": "Background color",
+      "default": "#FBBF24"
+    },
+    {
+      "type": "color",
+      "id": "badge_text_color",
+      "label": "Text color",
+      "default": "#1e1e1e"
+    },
+    {
+      "type": "range",
+      "id": "badge_icon_size",
+      "min": 12,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "label": "Icon size",
+      "default": 16
+    },
+    {
+      "type": "header",
+      "content": "Badge 1"
+    },
+    {
+      "type": "text",
+      "id": "badge_1_text",
+      "label": "Text",
+      "default": "Free Shipping"
+    },
+    {
+      "type": "checkbox",
+      "id": "badge_1_show_icon",
+      "label": "Show icon",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Badge 2"
+    },
+    {
+      "type": "text",
+      "id": "badge_2_text",
+      "label": "Text",
+      "default": "30-Day Returns"
+    },
+    {
+      "type": "checkbox",
+      "id": "badge_2_show_icon",
+      "label": "Show icon",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Badge 3"
+    },
+    {
+      "type": "text",
+      "id": "badge_3_text",
+      "label": "Text",
+      "default": "Secure Checkout"
+    },
+    {
+      "type": "checkbox",
+      "id": "badge_3_show_icon",
+      "label": "Show icon",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Badge 4"
+    },
+    {
+      "type": "text",
+      "id": "badge_4_text",
+      "label": "Text",
+      "default": "24/7 Support"
+    },
+    {
+      "type": "checkbox",
+      "id": "badge_4_show_icon",
+      "label": "Show icon",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Buttons"
+    },
+    {
+      "type": "range",
+      "id": "button_gap",
+      "min": 8,
+      "max": 32,
+      "step": 4,
+      "unit": "px",
+      "label": "Gap between buttons",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "button_font_size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Font size",
+      "default": 16
+    },
+    {
+      "type": "select",
+      "id": "button_font_weight",
+      "label": "Font weight",
+      "options": [
+        {
+          "value": "400",
+          "label": "Normal"
+        },
+        {
+          "value": "500",
+          "label": "Medium"
+        },
+        {
+          "value": "600",
+          "label": "Semi-bold"
+        },
+        {
+          "value": "700",
+          "label": "Bold"
+        }
+      ],
+      "default": "600"
+    },
+    {
+      "type": "range",
+      "id": "button_padding_vertical",
+      "min": 8,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "label": "Vertical padding",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "button_padding_horizontal",
+      "min": 16,
+      "max": 60,
+      "step": 4,
+      "unit": "px",
+      "label": "Horizontal padding",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "button_border_radius",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Border radius",
+      "default": 4
+    },
+    {
+      "type": "range",
+      "id": "button_border_width",
+      "min": 0,
+      "max": 4,
+      "step": 1,
+      "unit": "px",
+      "label": "Border width",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Primary button"
+    },
+    {
+      "type": "text",
+      "id": "button_1_text",
+      "label": "Text",
+      "default": "Shop Now"
+    },
+    {
+      "type": "url",
+      "id": "button_1_link",
+      "label": "Link"
+    },
+    {
+      "type": "color",
+      "id": "button_primary_bg_color",
+      "label": "Background color",
+      "default": "#FBBF24"
+    },
+    {
+      "type": "color",
+      "id": "button_primary_text_color",
+      "label": "Text color",
+      "default": "#1e1e1e"
+    },
+    {
+      "type": "color",
+      "id": "button_primary_border_color",
+      "label": "Border color",
+      "default": "#FBBF24"
+    },
+    {
+      "type": "color",
+      "id": "button_primary_hover_bg_color",
+      "label": "Hover background color",
+      "default": "#f8c500"
+    },
+    {
+      "type": "color",
+      "id": "button_primary_hover_text_color",
+      "label": "Hover text color",
+      "default": "#1e1e1e"
+    },
+    {
+      "type": "color",
+      "id": "button_primary_hover_border_color",
+      "label": "Hover border color",
+      "default": "#f8c500"
+    },
+    {
+      "type": "header",
+      "content": "Secondary button"
+    },
+    {
+      "type": "text",
+      "id": "button_2_text",
+      "label": "Text",
+      "default": "Learn More"
+    },
+    {
+      "type": "url",
+      "id": "button_2_link",
+      "label": "Link"
+    },
+    {
+      "type": "color",
+      "id": "button_secondary_bg_color",
+      "label": "Background color",
+      "default": "rgba(255, 255, 255, 0)"
+    },
+    {
+      "type": "color",
+      "id": "button_secondary_text_color",
+      "label": "Text color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "button_secondary_border_color",
+      "label": "Border color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "button_secondary_hover_bg_color",
+      "label": "Hover background color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "button_secondary_hover_text_color",
+      "label": "Hover text color",
+      "default": "#1e1e1e"
+    },
+    {
+      "type": "color",
+      "id": "button_secondary_hover_border_color",
+      "label": "Hover border color",
+      "default": "#ffffff"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Hero section"
+    }
+  ]
+}
+{% endschema %}

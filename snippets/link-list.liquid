@@ -1,0 +1,41 @@
+{% comment %}
+  Accepts:
+  - title: {Text} Title (required)
+  - nav: {Button} Nav link (required)
+  Usage:
+  {% render 'link-list', title: title, nav: link %}
+{% endcomment %}
+
+<div class='link-list'>
+  <div class='link-list__desktop'>
+    <div class='link-list__item'>
+      <div class='link-list__title'>{{ title }}</div>
+      <ul class='link-list__nav list-unstyled'>
+        {% for link in menu.links %}
+          <li class='link-list__nav-item'>
+            <a href='{{ link.url }}' class='link-list__nav-link'>{{ link.title }}</a>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  <div class='link-list__mobile'>
+    <div class='link-list__item'>
+      <xo-collapse-trigger class='link-list__header' xo-name='{{ title }}{{ index }}'>
+        <div class='link-list__title'>{{ title }}</div>
+        <div class='link-list__icon'>
+          {% render 'icon', name: 'arrow-down', size: '2.4rem' %}
+        </div>
+      </xo-collapse-trigger>
+      <xo-collapse xo-name='{{ title }}{{ index }}'>
+        <ul class='link-list__nav list-unstyled'>
+          {% for link in menu.links %}
+            <li class='link-list__nav-item'>
+              <a href='{{ link.url }}' class='link-list__nav-link'>{{ link.title }}</a>
+            </li>
+          {% endfor %}
+        </ul>
+      </xo-collapse>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,71 @@
+{% assign products_per_page = section.settings.products_per_page | default: 20 %}
+
+<xo-filters-content class='filters-search-content'>
+  {% paginate search.results by products_per_page %}
+    <div class='filters-search-content__content{% if search.results.size == 0 and search.filters != empty %} filters-search-content__content--modifier{% endif %}'>
+      {%- if search.results.size == 0 and search.filters != empty -%}
+        {% assign empty_title = 'sections.collection_template.empty' | t %}
+        {% assign empty_content = 'sections.collection_template.use_fewer_filters_html_2' | t %}
+        {% assign button_text = 'sections.collection_template.button_text' | t %}
+        {% render 'empty', title: empty_title, content: empty_content, button_link: routes.search_url, button_text: button_text, button_enable: true %}
+      {% else %}
+        <xo-grid class='filters-search-content__grid' style='--xs: 1; --md: 2; --lg: {{ section.settings.columns_desktop }}'>
+          {%- for item in search.results -%}
+            <div class='filters-search-content__item'>
+              {%- case item.object_type -%}
+                {%- when 'product' -%}
+                  {%- assign placeholder_image = 'collection-1' -%}
+                  {% render 'product-card',
+                    product: item,
+                    show_image: settings.product_card_show_image,
+                    show_secondary_image: settings.product_card_show_secondary_image,
+                    show_vendor: settings.product_card_show_vendor,
+                    show_description: settings.product_card_show_description,
+                    show_quick_add: settings.product_card_show_quick_add,
+                    show_quick_view: settings.product_card_show_quick_view,
+                    show_favorite: settings.product_card_show_favorite,
+                    show_price: settings.product_card_show_price,
+                    show_badge: settings.product_card_show_badge,
+                    position_badge: settings.position_badge,
+                    media_aspect_ratio: section.settings.product_card_aspect_ratio,
+                    color_scheme: section.settings.card_color_scheme,
+                    placeholder_image: placeholder_image
+                  -%}
+                {%- when 'article' -%}
+                  {%- assign placeholder_image_index = forloop.index0 | modulo: 4 | plus: 1 -%}
+                  {%- assign placeholder_image = 'product-apparel-' | append: placeholder_image_index -%}
+                  {% render 'article-card',
+                    article: item,
+                    media_aspect_ratio: section.settings.article_card_media_aspect_ratio,
+                    show_image: section.settings.article_card_show_image,
+                    show_date: section.settings.article_card_show_date,
+                    show_author: section.settings.article_card_show_author,
+                    show_excerpt: section.settings.article_card_show_excerpt,
+                    show_tags: section.settings.article_card_show_tags,
+                    placeholder_image: placeholder_image,
+                    color_scheme: section.settings.card_color_scheme
+                  %}
+                {%- when 'page' -%}
+                  <div class='filters-search-content__page color-{{ section.settings.card_color_scheme }} {%- if settings.enable_border_radius -%}filters-search-content__page--radius{%- endif -%}'>
+                    <div class='filters-search-content__info'>
+                      <a href='{{ item.url }}' class='filters-search-content__link'>
+                        {{ item.title | truncate: 50 | escape }}
+                      </a>
+                    </div>
+                    <div class='filters-search-content__badge'>
+                      <span class='filters-search-content__text'>
+                        {{- 'templates.search.page' | t -}}
+                      </span>
+                    </div>
+                  </div>
+              {%- endcase -%}
+            </div>
+          {%- endfor -%}
+        </xo-grid>
+        <xo-filters-paginate>
+          {% render 'pagination', paginate: paginate, anchor: '' %}
+        </xo-filters-paginate>
+      {%- endif -%}
+    </div>
+  {% endpaginate %}
+</xo-filters-content>

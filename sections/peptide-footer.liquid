@@ -1,0 +1,179 @@
+{% schema %}
+{
+  "name": "Footer CTA (Premium)",
+  "tag": "section",
+  "class": "section-peptide-footer",
+  "settings": [
+    { "type": "color", "id": "bg_color", "label": "Page Background", "default": "#ffffff" },
+    { "type": "color", "id": "accent_color", "label": "Brand Accent (Gold)", "default": "#FBBF24" },
+    { "type": "text", "id": "title", "label": "Heading", "default": "Ready to Reconstitute Your Peptide?" },
+    { "type": "textarea", "id": "text", "label": "Text", "default": "Bookmark this page on your phone so you never have to guess your peptides dosage again." },
+    { "type": "url", "id": "water_url", "label": "BAC Water Link (fallback)" },
+    { "type": "url", "id": "kit_url", "label": "Prep Kits Link (fallback)" },
+    {
+      "type": "header",
+      "content": "Shoppable Products"
+    },
+    { "type": "product", "id": "product_1", "label": "Product 1 (e.g. BAC Water)" },
+    { "type": "product", "id": "product_2", "label": "Product 2 (e.g. Prep Kit)" },
+    { "type": "product", "id": "product_3", "label": "Product 3 (optional)" },
+    { "type": "textarea", "id": "disclaimer", "label": "Disclaimer", "default": "This guide and calculator are strictly for educational purposes." },
+    {
+      "type": "range",
+      "id": "padding_y",
+      "label": "Vertical Padding (px)",
+      "min": 40,
+      "max": 160,
+      "step": 4,
+      "default": 80
+    }
+  ],
+  "presets": [{"name": "Footer CTA (Premium)"}]
+}
+{% endschema %}
+
+{%- assign s = section.settings -%}
+{%- assign sid = section.id -%}
+
+<div class="pft-wrapper" id="pft-{{ sid }}">
+  <div class="pft-container">
+    <div class="pft-glow"></div>
+
+    <div class="pft-content">
+      <div class="pft-badge">Complete Your Protocol</div>
+      <h2 class="pft-title">{{ s.title }}</h2>
+      <p class="pft-desc">{{ s.text }}</p>
+
+      {%- assign has_products = false -%}
+      {%- if s.product_1 != blank or s.product_2 != blank or s.product_3 != blank -%}
+        {%- assign has_products = true -%}
+      {%- endif -%}
+
+      {% if has_products %}
+        <div class="pft-products">
+          {%- for i in (1..3) -%}
+            {%- case i -%}
+              {%- when 1 -%}{%- assign prod = s.product_1 -%}
+              {%- when 2 -%}{%- assign prod = s.product_2 -%}
+              {%- when 3 -%}{%- assign prod = s.product_3 -%}
+            {%- endcase -%}
+            {%- if prod != blank -%}
+              <article class="pft-product-card">
+                {% if prod.featured_image != blank %}
+                  <img
+                    src="{{ prod.featured_image | image_url: width: 200 }}"
+                    srcset="{{ prod.featured_image | image_url: width: 100 }} 100w, {{ prod.featured_image | image_url: width: 200 }} 200w"
+                    sizes="100px"
+                    width="100" height="100"
+                    alt="{{ prod.featured_image.alt | default: prod.title | escape }}"
+                    loading="lazy" decoding="async"
+                    class="pft-product-img">
+                {% endif %}
+                <div class="pft-product-info">
+                  <a href="{{ prod.url }}" class="pft-product-title">{{ prod.title }}</a>
+                  <div class="pft-product-price">
+                    {%- if prod.compare_at_price > prod.price -%}
+                      <s class="pft-product-compare">{{ prod.compare_at_price | money }}</s>
+                    {%- endif -%}
+                    {{ prod.price | money }}
+                  </div>
+                  <form method="post" action="{{ routes.cart_add_url }}">
+                    <input type="hidden" name="id" value="{{ prod.selected_or_first_available_variant.id }}">
+                    <button type="submit" class="pft-btn pft-btn-add" {% unless prod.available %}disabled{% endunless %} aria-label="Add {{ prod.title | escape }} to cart">
+                      {%- if prod.available -%}Add to Cart{%- else -%}Sold Out{%- endif -%}
+                    </button>
+                  </form>
+                </div>
+              </article>
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+      {% endif %}
+
+      <div class="pft-actions">
+        <a href="#pc-calculator-section" class="pft-btn pft-btn-primary">
+          Return to Calculator
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+        </a>
+
+        {% unless has_products %}
+          {% if s.water_url != blank %}
+            <a href="{{ s.water_url }}" class="pft-btn pft-btn-ghost">Shop BAC Water</a>
+          {% endif %}
+          {% if s.kit_url != blank %}
+            <a href="{{ s.kit_url }}" class="pft-btn pft-btn-ghost">Shop Prep Kits</a>
+          {% endif %}
+        {% endunless %}
+      </div>
+
+      <div class="pft-disclaimer">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        {{ s.disclaimer }}
+      </div>
+    </div>
+  </div>
+</div>
+
+{%- style -%}
+  #pft-{{ sid }} {
+    --pft-bg: {{ s.bg_color }};
+    --pft-accent: {{ s.accent_color }};
+    --pft-py: {{ s.padding_y | default: 80 }}px;
+    --pft-font: var(--font-body-family, sans-serif);
+    --pft-heading: var(--font-heading-family, sans-serif);
+    --pft-radius: var(--nx-radius, 14px);
+    --pft-shadow-sm: var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.04));
+    --pft-shadow-md: var(--shadow-md, 0 12px 30px rgba(0,0,0,0.06));
+    --pft-shadow-lg: var(--shadow-lg, 0 20px 46px rgba(0,0,0,0.10));
+    --pft-transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    content-visibility: auto;
+  }
+
+  .pft-wrapper { padding: var(--pft-py) var(--page-gutter) 100px; background: var(--pft-bg); font-family: var(--pft-font); }
+  .pft-container { max-width: 950px; margin: 0 auto; background: linear-gradient(180deg, var(--color-surface-elevated), var(--color-surface-tertiary)); border-radius: var(--pft-radius); position: relative; overflow: hidden; box-shadow: var(--pft-shadow-lg); }
+
+  .pft-glow { position: absolute; bottom: -50px; left: 50%; transform: translateX(-50%); width: 80%; height: 150px; background: radial-gradient(ellipse at center, var(--pft-accent) 0%, transparent 60%); opacity: 0.15; filter: blur(40px); pointer-events: none; }
+
+  .pft-content { padding: 70px 40px; text-align: center; position: relative; z-index: 1; }
+
+  .pft-badge { display: inline-block; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--pft-accent); background: rgba(251,191,36,0.1); padding: 6px 14px; border-radius: var(--nx-radius-pill); margin-bottom: 24px; box-shadow: inset 0 0 0 1px rgba(251,191,36,0.2); }
+  .pft-title { font-size: 36px; font-weight: 800; color: #ffffff; margin: 0 0 16px; letter-spacing: -0.5px; font-family: var(--pft-heading); }
+  .pft-desc { font-size: 18px; color: #94a3b8; margin: 0 auto 40px; max-width: 600px; line-height: 1.6; }
+
+  .pft-actions { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; margin-bottom: 40px; }
+  .pft-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 16px 28px; border-radius: var(--nx-radius-md); font-size: 15px; font-weight: 700; cursor: pointer; transition: var(--pft-transition); text-decoration: none; border: none; font-family: inherit; min-height: var(--touch-min, 44px); }
+
+  .pft-btn-primary { background: var(--pft-accent); color: #000000; box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), var(--pft-shadow-sm); }
+  .pft-btn-primary:hover { transform: translateY(-2px); box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), var(--pft-shadow-md); filter: brightness(1.05); }
+  .pft-btn-primary:active { transform: scale(0.98); }
+
+  .pft-btn-ghost { background: transparent; color: #ffffff; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.15); backdrop-filter: blur(8px); }
+  .pft-btn-ghost:hover { background: rgba(255,255,255,0.1); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.3); transform: translateY(-2px); }
+  .pft-btn-ghost:active { transform: scale(0.98); }
+
+  .pft-products { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 32px; max-width: 700px; margin-left: auto; margin-right: auto; }
+  .pft-products:hover .pft-product-card:not(:hover) { opacity: 0.6; }
+  .pft-product-card { display: flex; align-items: center; gap: 14px; background: rgba(255,255,255,0.06); border-radius: var(--pft-radius); padding: 14px; text-align: left; backdrop-filter: blur(8px); transition: var(--pft-transition); }
+  .pft-product-card:hover { background: rgba(255,255,255,0.1); transform: translateY(-2px); opacity: 1 !important; }
+  .pft-product-img { width: 64px; height: 64px; object-fit: cover; border-radius: var(--nx-radius-md); flex-shrink: 0; }
+  .pft-product-info { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+  .pft-product-title { color: #fff; font-size: 13px; font-weight: 700; text-decoration: none; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+  .pft-product-title:hover { text-decoration: underline; }
+  .pft-product-price { font-size: 13px; color: var(--pft-accent); font-weight: 700; }
+  .pft-product-compare { color: #94a3b8; font-weight: 400; margin-right: 4px; }
+  .pft-btn-add { background: var(--pft-accent); color: var(--color-text-primary); border: none; border-radius: var(--nx-radius-sm); padding: 8px 14px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit; transition: var(--pft-transition); min-height: var(--touch-min, 44px); }
+  .pft-btn-add:hover { filter: brightness(1.06); transform: translateY(-1px); }
+  .pft-btn-add:active { transform: scale(0.98); }
+  .pft-btn-add:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .pft-disclaimer { display: inline-flex; align-items: flex-start; gap: 8px; font-size: 12px; color: var(--color-text-muted, #4b5563); padding-top: 24px; margin: 0 auto; max-width: 700px; line-height: 1.6; text-align: left; box-shadow: inset 0 1px 0 rgba(255,255,255,0.06); }
+  .pft-disclaimer svg { width: 14px; height: 14px; flex-shrink: 0; margin-top: 2px; }
+
+  .pft-wrapper :focus-visible { outline: 2px solid var(--pft-accent, #FBBF24); outline-offset: 2px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pft-wrapper *, .pft-wrapper *::before, .pft-wrapper *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  }
+
+  @media (max-width: 600px) { .pft-content { padding: 50px 20px; } .pft-title { font-size: 30px; } .pft-btn { width: 100%; } }
+{%- endstyle -%}

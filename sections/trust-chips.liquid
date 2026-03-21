@@ -1,0 +1,104 @@
+{% comment %}
+Trust Chips — small pill row beneath hero
+- Input: freeform string “COA on page | Same-day Dubai | …” OR up to 6 manual chips
+- Optional icon toggle
+- One-time gentle glow on entry
+{% endcomment %}
+
+{%- assign sid = section.id | replace: '_','' | downcase -%}
+
+<style>
+#trust-{{ sid }}{
+  --t-b:#E7E9ED; --t-text:#111; --t-bg:#fff; --t-muted:#6B7280; --t-accent:{{ section.settings.accent | default: '#FBBF24' }};
+}
+#trust-{{ sid }} .t-wrap{ padding:16px var(--page-gutter); border-top:1px solid var(--t-b); background:#FAFAFB; }
+#trust-{{ sid }} .t-container{ max-width:{{ section.settings.maxw | default: 1200 }}px; margin:0 auto; }
+#trust-{{ sid }} .t-row{ display:flex; gap:8px; flex-wrap:wrap; }
+#trust-{{ sid }} .t-chip{
+  display:inline-flex; align-items:center; gap:6px;
+  padding:6px 10px; border:1px solid var(--t-b); border-radius:var(--nx-radius-pill); background:var(--t-bg); color:var(--t-text);
+  font-weight:600; line-height:1; box-shadow:var(--shadow-xs);
+}
+#trust-{{ sid }} .t-ico{ width:14px; height:14px; color:currentColor; display:inline-block; }
+@media (prefers-reduced-motion:no-preference){
+  #trust-{{ sid }} .t-chip{ opacity:0; transform:translateY(6px); }
+  #trust-{{ sid }} .t-chip.in{ opacity:1; transform:none; transition:opacity .22s ease, transform .22s ease; }
+}
+</style>
+
+<section id="trust-{{ sid }}" aria-label="Trust badges" class="pdp-section">
+  <div class="t-wrap">
+    <div class="t-container">
+      <div class="t-row" data-trust-row>
+        {%- assign chips = section.settings.chips -%}
+        {%- if chips -%}
+          {%- if chips contains '|' -%}{% assign chips = chips | split:'|' %}{% else %}{% assign chips = chips | split:',' %}{% endif -%}
+          {%- for c in chips -%}
+            {% assign t = c | strip %}
+            {% if t != blank %}
+              <span class="t-chip">
+                {% if section.settings.show_icons %}
+                <span class="t-ico" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </span>
+                {% endif %}
+                {{ t }}
+              </span>
+            {% endif %}
+          {%- endfor -%}
+        {%- endif -%}
+
+        {%- for i in (1..6) -%}
+          {%- assign k = 'm' | append:i -%}
+          {% assign v = section.settings[k] %}
+          {% if v != blank %}
+            <span class="t-chip">
+              {% if section.settings.show_icons %}
+              <span class="t-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              {% endif %}
+              {{ v }}
+            </span>
+          {% endif %}
+        {%- endfor -%}
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  var row = document.querySelector('#trust-{{ sid }} [data-trust-row]'); if(!row) return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    row.querySelectorAll('.t-chip').forEach(function(c){ c.classList.add('in'); });
+    return;
+  }
+  var io = new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if(e.isIntersecting){
+        row.querySelectorAll('.t-chip').forEach(function(c,i){ c.style.transitionDelay = (i*25)+'ms'; c.classList.add('in'); });
+        io.disconnect();
+      }
+    });
+  }, { threshold:.35 });
+  io.observe(row);
+});
+</script>
+
+{% schema %}
+{
+  "name":"Trust chips",
+  "settings":[
+    { "type":"range","id":"maxw","min":800,"max":1600,"step":10,"unit":"px","label":"Max width","default":1200 },
+    { "type":"color","id":"accent","label":"Accent","default":"#FBBF24" },
+    { "type":"text","id":"chips","label":"Chips (comma or | separated)","default":"COA on page | Same-day Dubai delivery | Free intl. shipping $120+ | Research use only" },
+    { "type":"checkbox","id":"show_icons","label":"Show check icons","default":true },
+    { "type":"text","id":"m1","label":"Manual chip 1" },
+    { "type":"text","id":"m2","label":"Manual chip 2" },
+    { "type":"text","id":"m3","label":"Manual chip 3" },
+    { "type":"text","id":"m4","label":"Manual chip 4" },
+    { "type":"text","id":"m5","label":"Manual chip 5" },
+    { "type":"text","id":"m6","label":"Manual chip 6" }
+  ],
+  "presets":[{ "name":"Trust chips" }]
+}
+{% endschema %}

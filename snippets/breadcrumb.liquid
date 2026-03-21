@@ -1,0 +1,89 @@
+{% comment %}
+  Renders a breadcrumb
+
+  Usage:
+  {% render 'breadcrumb' %}
+{% endcomment %}
+
+{%- unless template == 'index' or template == 'cart' or template == '404' -%}
+  {%- assign t = template | split: '.' | first -%}
+  <nav class='xo-breadcrumb' role='navigation' aria-label='breadcrumb'>
+    <ol class='xo-breadcrumb__list' style="--align: {{ align }}">
+      <li class='xo-breadcrumb__item'>
+        <a class='xo-breadcrumb__link' href='{{ routes.root_url }}'>{{ 'general.home' | t }}</a>
+        <span class='xo-breadcrumb__separator'>
+          {%- render 'icon', name: 'arrow-1', size: '1.4rem' -%}
+        </span>
+      </li>
+      {%- case t -%}
+        {%- when 'page' -%}
+          <li class='xo-breadcrumb__item'>
+            <a class='xo-breadcrumb__link xo-breadcrumb--current' href='{{ page.url }}' aria-current='page'>{{ page.title }}</a>
+            <span class='xo-breadcrumb__separator'> </span>
+          </li>
+        {%- when 'product' -%}
+          {%- if collection.url -%}
+            <li class='xo-breadcrumb__item'>
+              {{ collection.title | link_to: collection.url }}
+              <span class='xo-breadcrumb__separator'>
+                {%- render 'icon', name: 'arrow-1', size: '1.4rem' -%}
+              </span>
+            </li>
+          {%- endif -%}
+          <li class='xo-breadcrumb__item'>
+            <a class='xo-breadcrumb__link xo-breadcrumb--current' href='{{ product.url }}' aria-current='page'>{{ product.title }}</a>
+          </li>
+        {%- when 'collection' -%}
+          {% if collection.handle %}
+            {%- if current_tags -%}
+              <li class='xo-breadcrumb__item'>
+                {{ collection.title | link_to: collection.url }}
+                <span class='xo-breadcrumb__separator'>
+                  {%- render 'icon', name: 'arrow-1', size: '1.4rem' -%}
+                </span>
+              </li>
+              <li class='xo-breadcrumb__item'>
+                {%- capture tag_url -%}{{ collection.url }}/{{ current_tags | join: "+" }}{%- endcapture -%}
+                <a class='xo-breadcrumb__link xo-breadcrumb--current' href='{{ tag_url }}' aria-current='page'>{{ current_tags | join: ' + ' }}</a>
+              </li>
+            {%- else -%}
+              <li class='xo-breadcrumb__item'>
+                <a class='xo-breadcrumb__link xo-breadcrumb--current' href='{{ collection.url }}' aria-current='page'>{{ collection.title }}</a>
+              </li>
+            {%- endif -%}
+          {% endif %}
+        {%- when 'blog' -%}
+          {%- if current_tags -%}
+            <li class='xo-breadcrumb__item'>
+              {{ blog.title | link_to: blog.url }}
+              <span class='xo-breadcrumb__separator'>
+                {%- render 'icon', name: 'arrow-1', size: '1.4rem' -%}
+              </span>
+            </li>
+            <li class='xo-breadcrumb__item'>
+              {%- capture tag_url -%}{{ blog.url }}/tagged/{{ current_tags | join: "+" }}{%- endcapture -%}
+              <a class='xo-breadcrumb__link xo-breadcrumb--current' href='{{ tag_url }}' aria-current='page'>{{ current_tags | join: ' + ' }}</a>
+            </li>
+          {%- else -%}
+            <li class='xo-breadcrumb__item'>
+              <a class='xo-breadcrumb__link xo-breadcrumb--current' href='{{ blog.url }}' aria-current='page'>{{ blog.title }}</a>
+            </li>
+          {%- endif -%}
+        {%- when 'article' -%}
+          <li class='xo-breadcrumb__item'>
+            {{ blog.title | link_to: blog.url }}
+            <span class='xo-breadcrumb__separator'>
+              {%- render 'icon', name: 'arrow-1', size: '1.4rem' -%}
+            </span>
+          </li>
+          <li class='xo-breadcrumb__item'>
+            <a class='xo-breadcrumb__link xo-breadcrumb--current' href='{{ article.url }}' aria-current='page'>{{ article.title }}</a>
+          </li>
+        {%- else -%}
+          <li class='xo-breadcrumb__item'>
+            <a class='xo-breadcrumb__link xo-breadcrumb--current' href='{{ request.path }}' aria-current='page'>{{ page_title }}</a>
+          </li>
+      {%- endcase -%}
+    </ol>
+  </nav>
+{%- endunless -%}

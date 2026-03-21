@@ -1,0 +1,90 @@
+{% comment %}
+  Renders a product image
+
+  Accepts:
+  - product: {Object} Product Liquid object (optional)
+  - show_secondary_image: {Boolean} Whether to show the secondary image (optional)
+  - aspect_ratio: {Number} Aspect ratio of the image (optional)
+  - placeholder_image: {String} Placeholder image (optional)
+
+  Usage:
+  {% render 'product-image', product: product, show_secondary_image: true %}
+{% endcomment %}
+
+{% liquid
+  assign container_class = 'xo-product-image'
+  if settings.product_card_image_config
+    assign container_class = container_class | append: ' xo-product-image--' | append: settings.product_card_image_config
+  endif
+  if show_secondary_image and product.media[1] != null
+    assign container_class = container_class | append: ' xo-product-image--modifier'
+  endif
+%}
+
+<div class="{{ container_class }}" tabindex="-1" xo-binding="img:.xo-product-first-image[srcset]">
+  {% if product %}
+    <div class="xo-product-image__first">
+      {% if variant %}
+        {% render 'image',
+          image: variant.featured_image,
+          aspect_ratio: aspect_ratio,
+          lazyload: lazyload,
+          show_placeholder_product: true,
+          disable_alt: true,
+          class: 'xo-product-first-image'
+        %}
+      {% else %}
+          {%- if product.featured_image != blank -%}
+            {% render 'image',
+              image: product.featured_image,
+              aspect_ratio: aspect_ratio,
+              lazyload: lazyload,
+              show_placeholder_product: true,
+              disable_alt: true,
+              class: 'xo-product-first-image'
+            %}
+          {%- else -%}
+            {% render 'image',
+              image: product.selected_or_first_available_variant.featured_image,
+              aspect_ratio: aspect_ratio,
+              lazyload: lazyload,
+              show_placeholder_product: true,
+              disable_alt: true,
+              class: 'xo-product-first-image'
+            %}
+          {%- endif -%}
+      {% endif %}
+    </div>
+    {%- if product.media[1] != null and show_secondary_image -%}
+      {% if product.media[1].media_type == 'image' %}
+        <div class="xo-product-image__secondary" tabindex="-1">
+          {%- render 'image',
+            image: product.media[1].preview_image,
+            aspect_ratio: aspect_ratio,
+            show_placeholder_product: true,
+            disable_alt: true,
+            class: 'xo-product-first-image'
+          -%}
+        </div>
+      {% else %}
+        <div class="xo-product-image__secondary" tabindex="-1">
+          {% render 'media',
+            type: product.media[1].media_type,
+            media: product.media[1],
+            enable_video_looping: true,
+            controls: false,
+            muted: true,
+            autoplay: true,
+            class: 'xo-product-first-image'
+          %}
+        </div>
+      {% endif %}
+    {%- endif -%}
+  {% else %}
+    {% if placeholder_image %}
+      {{ placeholder | default: placeholder_image | placeholder_svg_tag: 'placeholder-svg' }}
+    {% else %}
+      {{ placeholder | default: 'collection-2' | placeholder_svg_tag: 'placeholder-svg' }}
+    {% endif %}
+  {% endif %}
+</div>

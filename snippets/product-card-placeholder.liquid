@@ -1,0 +1,83 @@
+{% comment %}
+  Renders a product card placeholder.
+
+  Accepts:
+  - placeholder_image: {String} The placeholder image to use when no product exists. Default: 'product-apparel-1' (optional)
+  - color_scheme: {String} The color scheme to use (optional)
+  - animate_enabled: {Boolean} Enable animation. Default: true (optional)
+  - animate_focus: {Boolean} Enable animation on focus. Default: false (optional)
+  - media_aspect_ratio: {String} The setting changes the aspect ratio of the article image, if shown
+  - is_bundle: {Boolean} Is bundle. Default: false (optional)
+  - is_select_options: {Boolean} Is select options. Default: false (optional)
+  - container_class: {String} The class to apply to the container. Default: 'xo-product-card' (optional)
+
+  Usage:
+   {% render 'product-card-placeholder',
+    product: product,
+    animate_focus: animate_focus,
+    animate_enabled: animate_enabled,
+    color_scheme: color_scheme,
+    aspect_ratio: media_aspect_ratio,
+    is_bundle: is_bundle,
+    is_select_options: is_select_options,
+    placeholder_image: placeholder_image,
+    container_class: container_class
+  %}
+{% endcomment %}
+
+{% capture header_content %}
+  <div class="xo-product-card__header">
+    <div class="xo-product-card__image">
+      {% render 'product-image', placeholder_image: placeholder_image, aspect_ratio: aspect_ratio, product: porduct %}
+    </div>
+
+    <div class="xo-product-card__actions">
+      {% if show_quick_add %}
+        <div class="xo-product-card__add">
+          {% render 'add-to-cart', product: product, is_select_options: is_select_options, is_bundle: is_bundle %}
+        </div>
+      {% endif %}
+
+      {% if show_quick_view %}
+        <div class="xo-product-card__quick-view">
+          {% render 'action-quick-view', product: product, is_bundle: is_bundle %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+{% endcapture %}
+
+{% capture info_content %}
+  <div class="xo-product-card__information">
+    <span class="xo-product-card__vendor">
+      {{ 'products.product.vendor' | t }}
+    </span>
+    <span class="xo-product-card__title">
+      {{ 'onboarding.product_title' | t }}
+    </span>
+    <div class="xo-product-card__price">
+      {% render 'price', product: product %}
+    </div>
+  </div>
+{% endcapture %}
+
+{% capture content %}
+  {{ header_content }}
+  {{ info_content }}
+{% endcapture %}
+
+{% if animate_enabled %}
+  <xo-animate
+    xo-cascade
+    {% if animate_focus %}
+      xo-scroll-forced
+    {% endif %}
+    class="{{ container_class }}"
+  >
+    {{ content }}
+  </xo-animate>
+{% else %}
+  <div class="{{ container_class }}">
+    {{ content }}
+  </div>
+{% endif %}

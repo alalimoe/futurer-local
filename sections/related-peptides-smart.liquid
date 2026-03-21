@@ -1,0 +1,187 @@
+{% comment %}
+SECTION: Related Peptides (smart) — PDP-polished style
+Behavior:
+- Try Shopify recommendations API.
+- If empty, fallback to primary collection:
+  (collection on page) → pdp.primary_collection handle → product.collections.first
+- Excludes current product.
+Design:
+- Rounded cards, soft shadow, accent hover; equal-height content.
+{% endcomment %}
+
+{%- liquid
+  assign primary_collection = collection
+  if primary_collection == nil
+    assign pc_handle = product.metafields.pdp.primary_collection
+    if pc_handle and collections[pc_handle]
+      assign primary_collection = collections[pc_handle]
+    endif
+  endif
+  if primary_collection == nil and product.collections.size > 0
+    assign primary_collection = product.collections.first
+  endif
+
+  # Simple JSON seed for fallback
+  assign fallback = '' 
+  if primary_collection
+    assign count = 0
+    for p in primary_collection.products
+      if p.id != product.id
+        assign img = ''
+        if p.featured_image
+          assign img = p.featured_image | image_url: width: 640
+        endif
+        assign item = '{"title":' | append: p.title | json | append: ',"url":' | append: p.url | json | append: ',"price":' | append: p.price | json | append: ',"image":' | append: img | json | append: '}' 
+        if fallback != '' 
+          assign fallback = fallback | append: ','
+        endif
+        assign fallback = fallback | append: item
+        assign count = count | plus: 1
+        if count >= section.settings.limit
+          break
+        endif
+      endif
+    endfor
+  endif
+-%}
+
+<section id="related-{{ section.id }}" class="relp-wrap">
+  <style>
+    #related-{{ section.id }}{
+      --relp-maxw: {{ section.settings.max_width | default: 1200 }}px;
+      --relp-b: #E7E9ED;
+      --relp-bg: #FFFFFF;
+      --relp-muted: #6B7280;
+      --relp-text: #111111;
+      --relp-accent: {{ section.settings.accent_color | default: '#FBBF24' }};
+      --relp-r: 14px;
+      --relp-sh: 0 1px 6px rgba(16,24,40,.06);
+    }
+    #related-{{ section.id }} .relp-outer{ padding:24px var(--page-gutter); border-top:1px solid var(--relp-b); }
+    #related-{{ section.id }} .relp-container{ max-width:var(--relp-maxw); margin:0 auto; }
+    #related-{{ section.id }} .relp-title{ font-weight:800; margin:0 0 12px; color:var(--relp-text); }
+
+    #related-{{ section.id }} .relp-grid{
+      display:grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap:12px;
+    }
+    @media(max-width:1020px){ #related-{{ section.id }} .relp-grid{ grid-template-columns:repeat(3,1fr); } }
+    @media(max-width:900px){ #related-{{ section.id }} .relp-grid{ grid-template-columns:repeat(2,1fr); } }
+
+    /* Card */
+    #related-{{ section.id }} .relp-card{
+      display:flex; flex-direction:column;
+      border:1px solid var(--relp-b); border-radius:var(--relp-r);
+      background:var(--relp-bg); padding:12px; box-shadow:var(--relp-sh);
+      min-height: 100%; transition: box-shadow .18s ease, transform .18s ease, border-color .18s ease;
+    }
+    #related-{{ section.id }} .relp-card:hover{
+      border-color: var(--relp-accent);
+      box-shadow: var(--shadow-sm-hover);
+      transform: translateY(-1px);
+    }
+
+    /* Media */
+    #related-{{ section.id }} .relp-media{
+      display:block; border:1px solid #ECEEF2; border-radius:10px; overflow:hidden; background:#fff;
+      aspect-ratio: 4 / 3; margin-bottom:10px;
+    }
+    #related-{{ section.id }} .relp-media img{ width:100%; height:100%; object-fit:cover; display:block; }
+
+    /* Text */
+    #related-{{ section.id }} .relp-name{ font-weight:700; color:var(--relp-text); margin:0 0 6px; line-height:1.35; }
+    #related-{{ section.id }} .relp-price{ font-weight:700; color:var(--relp-text); margin:0 0 10px; }
+
+    /* Action */
+    #related-{{ section.id }} .relp-actions{ margin-top:auto; }
+    #related-{{ section.id }} .relp-btn{
+      display:inline-flex; align-items:center; justify-content:center; width:100%;
+      border:1px solid var(--relp-b); border-radius:10px; padding:10px 12px; font-weight:700;
+      color:var(--relp-text); text-decoration:none; background:#fff; transition:background .18s ease, border-color .18s ease;
+    }
+    #related-{{ section.id }} .relp-btn:hover{ background:rgba(251,191,36,0.12); border-color:var(--relp-accent); }
+
+    /* Empty */
+    #related-{{ section.id }} .relp-empty{ color:var(--relp-muted); }
+
+    /* Disable default blue link style inside cards */
+    #related-{{ section.id }} a{ color:inherit; }
+  </style>
+
+  <div class="relp-outer">
+    <div class="relp-container">
+      <h2 class="relp-title">{{ section.settings.heading | default: 'Related peptides' }}</h2>
+      <div class="relp-grid" data-relp-grid></div>
+      <script type="application/json" id="relp-fallback-{{ section.id }}">[{{ fallback }}]</script>
+    </div>
+  </div>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', async function(){
+  const root = document.getElementById('related-{{ section.id }}');
+  if(!root) return;
+  const grid = root.querySelector('[data-relp-grid]');
+  const limit = {{ section.settings.limit | default: 8 }};
+  const moneyFormat = {{ shop.money_format | json }};
+  const fmt = (cents)=> (window.Shopify && Shopify.formatMoney) ? Shopify.formatMoney(cents, moneyFormat) : (cents/100).toFixed(2);
+
+  async function fetchRecommendations(){
+    try{
+      const url = `/recommendations/products.json?product_id={{ product.id }}&limit=${limit}`;
+      const res = await fetch(url, { credentials: 'same-origin' });
+      if(!res.ok) throw new Error('no recs');
+      const data = await res.json();
+      return (data && Array.isArray(data.products)) ? data.products : [];
+    }catch(e){ return []; }
+  }
+
+  function render(items){
+    if(!items || !items.length){
+      const empty = document.createElement('div');
+      empty.className = 'relp-empty';
+      empty.textContent = 'No related items to show.';
+      grid.appendChild(empty);
+      return;
+    }
+    items.forEach(p=>{
+      const card = document.createElement('div');
+      card.className = 'relp-card';
+      const img = p.image || (p.images && p.images[0] && p.images[0].src);
+      const price = p.price || (p.variants && p.variants[0] && p.variants[0].price);
+      const url = p.url || ('/products/' + (p.handle || ''));
+      card.innerHTML = `
+        <a class="relp-media" href="${url}">${img ? `<img loading="lazy" src="${img}${img.includes('://') ? '' : '?width=640'}" alt="${p.title || ''}">` : ''}</a>
+        <div class="relp-name">${p.title || ''}</div>
+        <div class="relp-price">${fmt(parseInt(price,10)||0)}</div>
+        <div class="relp-actions">
+          <a class="relp-btn" href="${url}">View</a>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+  }
+
+  let items = await fetchRecommendations();
+  if(!items.length){
+    try {
+      const json = JSON.parse(document.getElementById('relp-fallback-{{ section.id }}').textContent || '[]');
+      render(json.slice(0, limit));
+    } catch(e) { render([]); }
+  } else {
+    render(items);
+  }
+});
+</script>
+
+{% schema %}
+{
+  "name":"Related peptides (smart)",
+  "settings":[
+    { "type":"range","id":"max_width","min":800,"max":1600,"step":10,"unit":"px","label":"Container max width","default":1200 },
+    { "type":"color","id":"accent_color","label":"Accent color","default":"#FBBF24" },
+    { "type":"text","id":"heading","label":"Heading","default":"Related peptides" },
+    { "type":"range","id":"limit","min":2,"max":12,"step":1,"label":"Max products","default":8 }
+  ],
+  "presets":[{"name":"Related peptides (smart)"}]
+}
+{% endschema %}

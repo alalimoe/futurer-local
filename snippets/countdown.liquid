@@ -1,0 +1,45 @@
+{% comment %}
+  Renders a countdown
+
+  Accepts:
+  - class: {String} Class (optional)
+  - time: {Date} Time (required)
+
+  Usage:
+  {% render 'countdown', time: "2024-12-30 00:00" %}
+{% endcomment %}
+
+{% if time != blank %}
+  {% assign timestamp = time | date: '%s' | append: '000' %}
+{% else %}
+  {% assign add_day = 3 | times: 86400 %}
+  {% assign timestamp = 'now' | date: '%s' | plus: add_day | append: '000' %}
+{% endif %}
+
+<xo-countdown xo-timestamp='{{ timestamp }}' class='xo-countdown xo-stack' style='--ai: center; --jc: center; --gap: 5; --gap-mobile: 5'>
+  <div class='xo-countdown__item xo-stack' style='--ai: center; --jc: center; --gap: 4; --gap-mobile: 4'>
+    <xo-countdown-day class='xo-countdown__number'></xo-countdown-day>
+    <span class='xo-countdown__text'>{{ 'general.popup.day' | t }}</span>
+  </div>
+  <div class='xo-countdown__item xo-stack' style='--ai: center; --jc: center; --gap: 4; --gap-mobile: 4'>
+    <div class='xo-countdown__number xo-countdown__number--dot'>:</div>
+  </div>
+  <div class='xo-countdown__item xo-stack' style='--ai: center; --jc: center; --gap: 4; --gap-mobile: 4'>
+    <xo-countdown-hour class='xo-countdown__number'></xo-countdown-hour>
+    <span class='xo-countdown__text'>{{ 'general.popup.hour' | t }}</span>
+  </div>
+  <div class='xo-countdown__item xo-stack' style='--ai: center; --jc: center; --gap: 4; --gap-mobile: 4'>
+    <div class='xo-countdown__number xo-countdown__number--dot'>:</div>
+  </div>
+  <div class='xo-countdown__item xo-stack' style='--ai: center; --jc: center; --gap: 4; --gap-mobile: 4'>
+    <xo-countdown-minute class='xo-countdown__number'></xo-countdown-minute>
+    <span class='xo-countdown__text'>{{ 'general.popup.minus' | t }}</span>
+  </div>
+  <div class='xo-countdown__item xo-stack' style='--ai: center; --jc: center; --gap: 4; --gap-mobile: 4'>
+    <div class='xo-countdown__number xo-countdown__number--dot'>:</div>
+  </div>
+  <div class='xo-countdown__item xo-stack' style='--ai: center; --jc: center; --gap: 4; --gap-mobile: 4'>
+    <xo-countdown-second class='xo-countdown__number'></xo-countdown-second>
+    <span class='xo-countdown__text'>{{ 'general.popup.second' | t }}</span>
+  </div>
+</xo-countdown>

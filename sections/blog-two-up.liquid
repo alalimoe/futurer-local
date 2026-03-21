@@ -1,0 +1,72 @@
+{% comment %} Blog two-up (or one-up on mobile) {% endcomment %}
+{%- assign sid = section.id | replace:'_','' | downcase -%}
+<style>
+#b2-{{ sid }}{ --b:#E7E9ED; --text:#111; }
+#b2-{{ sid }} .b-wrap{ padding:24px var(--page-gutter); border-top:1px solid var(--b); background:#FAFAFB; }
+#b2-{{ sid }} .b-container{ max-width:{{ section.settings.maxw | default:1200 }}px; margin:0 auto; }
+#b2-{{ sid }} .b-head{ display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:8px; }
+#b2-{{ sid }} .b-title{ margin:0; color:var(--text); font-weight:800; }
+#b2-{{ sid }} .b-grid{ display:grid; gap:14px; grid-template-columns:1fr 1fr; }
+@media(max-width:780px){ #b2-{{ sid }} .b-grid{ grid-template-columns:1fr; } }
+#b2-{{ sid }} .post{ border:1px solid var(--b); border-radius:14px; background:#fff; overflow:hidden; display:flex; flex-direction:column; }
+#b2-{{ sid }} .media{ display:block; background:#fff; }
+#b2-{{ sid }} .media img{ width:100%; height:220px; object-fit:cover; }
+#b2-{{ sid }} .body{ padding:12px; }
+#b2-{{ sid }} .ptitle{ margin:0 0 6px; font-size:1.05rem; font-weight:800; }
+#b2-{{ sid }} .plink{ display:inline-block; margin-top:8px; border-bottom:1px solid #D5DAE0; color:var(--color-text-primary); text-decoration:none; }
+</style>
+
+{%- assign blog_obj = nil -%}
+{%- if section.settings.blog != blank -%}
+  {%- assign blog_obj = blogs[section.settings.blog] -%}
+{%- endif -%}
+
+<section id="b2-{{ sid }}" class="pdp-section" aria-label="{{ section.settings.title | escape }}">
+  <div class="b-wrap">
+    <div class="b-container">
+      <div class="b-head">
+        <h2 class="b-title">{{ section.settings.title | default: 'Peptide insights' }}</h2>
+        {% if section.settings.sub %}<p class="g-sub">{{ section.settings.sub }}</p>{% endif %}
+      </div>
+
+      <div class="b-grid">
+        {%- assign count = 0 -%}
+        {% if blog_obj %}
+          {% for art in blog_obj.articles %}
+            {% if section.settings.tag == blank or art.tags contains section.settings.tag %}
+              <article class="post">
+                <a class="media" href="{{ art.url }}">
+                  {% if art.image %}{{ art.image | image_url: width: 900 | image_tag: loading:'lazy', alt: art.title }}{% else %}
+                  <div style="height:220px;display:flex;align-items:center;justify-content:center;background:#F5F7FA;color:#9AA3AE;">Article</div>
+                  {% endif %}
+                </a>
+                <div class="body">
+                  <h3 class="ptitle"><a href="{{ art.url }}">{{ art.title }}</a></h3>
+                  <p>{{ art.excerpt_or_content | strip_html | truncate: 140 }}</p>
+                  <a class="plink" href="{{ art.url }}">Read more</a>
+                </div>
+              </article>
+              {%- assign count = count | plus: 1 -%}
+              {% if count >= section.settings.limit %}{% break %}{% endif %}
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name":"Blog two-up",
+  "settings":[
+    { "type":"range","id":"maxw","min":800,"max":1600,"step":10,"unit":"px","label":"Max width","default":1200 },
+    { "type":"blog","id":"blog","label":"Blog" },
+    { "type":"text","id":"tag","label":"Filter by tag (optional)","default":"peptides" },
+    { "type":"text","id":"title","label":"Title","default":"Peptide insights" },
+    { "type":"text","id":"sub","label":"Subtext" },
+    { "type":"range","id":"limit","label":"Max articles","min":2,"max":8,"step":1,"default":2 }
+  ],
+  "presets":[{ "name":"Blog two-up" }]
+}
+{% endschema %}

@@ -1,0 +1,563 @@
+{% doc %}
+  @prompt
+    Create a Quickstart Header + Navigation section for a product guide with clean, premium, modern UX featuring max-width layout, card surfaces, subtle borders, responsive spacing, and accessible typography. Include 
+    - Product selector in section settings 
+    - Renders: eyebrow "Quickstart guide", H1 product title, short intro text, optional product image, optional "Back to product" button
+    - Quick actions jump-link row with chips anchoring to: TLDR, What it is, Feel timeline, How it works, How to use, Why, Safety, FAQ, Support
+    - Editor controls: toggles for sticky nav, show/hide image, show/hide buttons, padding, max width, colors
+    
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-quickstart-header-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    background-color: {{ block.settings.background_color }};
+    padding: {{ block.settings.padding_top }}px var(--page-gutter) {{ block.settings.padding_bottom }}px;
+  }
+
+  .ai-quickstart-header__container-{{ ai_gen_id }} {
+    max-width: {{ block.settings.max_width }}px;
+    margin: 0 auto;
+  }
+
+  .ai-quickstart-header__card-{{ ai_gen_id }} {
+    background-color: {{ block.settings.card_background }};
+    border: 1px solid {{ block.settings.border_color }};
+    border-radius: var(--nx-radius-md);
+    padding: 40px;
+    margin-bottom: 24px;
+  }
+
+  .ai-quickstart-header__content-{{ ai_gen_id }} {
+    display: flex;
+    gap: 32px;
+    align-items: flex-start;
+  }
+
+  .ai-quickstart-header__text-{{ ai_gen_id }} {
+    flex: 1;
+  }
+
+  .ai-quickstart-header__eyebrow-{{ ai_gen_id }} {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: {{ block.settings.eyebrow_color }};
+    margin-bottom: 12px;
+  }
+
+  .ai-quickstart-header__title-{{ ai_gen_id }} {
+    font-size: 36px;
+    font-weight: 600;
+    line-height: 1.2;
+    color: {{ block.settings.heading_color }};
+    margin: 0 0 16px;
+  }
+
+  .ai-quickstart-header__intro-{{ ai_gen_id }} {
+    font-size: 16px;
+    line-height: 1.6;
+    color: {{ block.settings.text_color }};
+    margin-bottom: 24px;
+  }
+
+  .ai-quickstart-header__image-wrapper-{{ ai_gen_id }} {
+    flex-shrink: 0;
+    width: 200px;
+  }
+
+  .ai-quickstart-header__image-{{ ai_gen_id }} {
+    width: 100%;
+    height: auto;
+    border-radius: var(--nx-radius-sm);
+    object-fit: cover;
+  }
+
+  .ai-quickstart-header__image-placeholder-{{ ai_gen_id }} {
+    width: 100%;
+    aspect-ratio: 1;
+    background-color: var(--color-surface-secondary);
+    border-radius: var(--nx-radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ai-quickstart-header__image-placeholder-{{ ai_gen_id }} svg {
+    width: 60%;
+    height: 60%;
+    opacity: 0.3;
+  }
+
+  .ai-quickstart-header__button-{{ ai_gen_id }} {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background-color: {{ block.settings.button_background }};
+    color: {{ block.settings.button_text_color }};
+    border: 1px solid {{ block.settings.button_border_color }};
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: var(--transition-fast);
+  }
+
+  .ai-quickstart-header__button-{{ ai_gen_id }}:hover {
+    background-color: {{ block.settings.button_hover_background }};
+    border-color: {{ block.settings.button_hover_border }};
+  }
+
+  .ai-quickstart-header__nav-{{ ai_gen_id }} {
+    background-color: {{ block.settings.nav_background }};
+    border: 1px solid {{ block.settings.border_color }};
+    border-radius: var(--nx-radius-md);
+    padding: 20px;
+  }
+
+  .ai-quickstart-header__nav-{{ ai_gen_id }}.sticky {
+    position: sticky;
+    top: 20px;
+    z-index: 10;
+  }
+
+  .ai-quickstart-header__nav-title-{{ ai_gen_id }} {
+    font-size: 14px;
+    font-weight: 600;
+    color: {{ block.settings.heading_color }};
+    margin-bottom: 16px;
+  }
+
+  .ai-quickstart-header__nav-list-{{ ai_gen_id }} {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .ai-quickstart-header__nav-chip-{{ ai_gen_id }} {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 16px;
+    background-color: {{ block.settings.chip_background }};
+    color: {{ block.settings.chip_text_color }};
+    border: 1px solid {{ block.settings.chip_border_color }};
+    border-radius: var(--nx-radius-lg);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    transition: var(--transition-fast);
+  }
+
+  .ai-quickstart-header__nav-chip-{{ ai_gen_id }}:hover {
+    background-color: {{ block.settings.chip_hover_background }};
+    border-color: {{ block.settings.chip_hover_border }};
+    transform: translateY(-1px);
+  }
+
+  @media screen and (max-width: 768px) {
+    .ai-quickstart-header__card-{{ ai_gen_id }} {
+      padding: 24px;
+    }
+
+    .ai-quickstart-header__content-{{ ai_gen_id }} {
+      flex-direction: column;
+    }
+
+    .ai-quickstart-header__image-wrapper-{{ ai_gen_id }} {
+      width: 100%;
+      max-width: 200px;
+    }
+
+    .ai-quickstart-header__title-{{ ai_gen_id }} {
+      font-size: 28px;
+    }
+
+    .ai-quickstart-header__nav-{{ ai_gen_id }}.sticky {
+      position: relative;
+      top: 0;
+    }
+  }
+{% endstyle %}
+
+<quickstart-header-{{ ai_gen_id }} class="ai-quickstart-header-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="ai-quickstart-header__container-{{ ai_gen_id }}">
+    <div class="ai-quickstart-header__card-{{ ai_gen_id }}">
+      <div class="ai-quickstart-header__content-{{ ai_gen_id }}">
+        <div class="ai-quickstart-header__text-{{ ai_gen_id }}">
+          <div class="ai-quickstart-header__eyebrow-{{ ai_gen_id }}">
+            {{ block.settings.eyebrow_text }}
+          </div>
+
+          {% if block.settings.product %}
+            <h1 class="ai-quickstart-header__title-{{ ai_gen_id }}">
+              {{ block.settings.product.title }}
+            </h1>
+          {% else %}
+            <h1 class="ai-quickstart-header__title-{{ ai_gen_id }}">
+              Select a product
+            </h1>
+          {% endif %}
+
+          {% if block.settings.intro_text != blank %}
+            <div class="ai-quickstart-header__intro-{{ ai_gen_id }}">
+              {{ block.settings.intro_text }}
+            </div>
+          {% endif %}
+
+          {% if block.settings.show_button and block.settings.product %}
+            <a href="{{ block.settings.product.url }}" class="ai-quickstart-header__button-{{ ai_gen_id }}">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M10 12L6 8L10 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              {{ block.settings.button_text }}
+            </a>
+          {% endif %}
+        </div>
+
+        {% if block.settings.show_image %}
+          <div class="ai-quickstart-header__image-wrapper-{{ ai_gen_id }}">
+            {% if block.settings.product and block.settings.product.featured_image %}
+              <img
+                src="{{ block.settings.product.featured_image | image_url: width: 400 }}"
+                alt="{{ block.settings.product.featured_image.alt | escape }}"
+                class="ai-quickstart-header__image-{{ ai_gen_id }}"
+                loading="lazy"
+                width="400"
+                height="400"
+              >
+            {% else %}
+              <div class="ai-quickstart-header__image-placeholder-{{ ai_gen_id }}">
+                {{ 'product-1' | placeholder_svg_tag }}
+              </div>
+            {% endif %}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <nav class="ai-quickstart-header__nav-{{ ai_gen_id }} {% if block.settings.sticky_nav %}sticky{% endif %}">
+      <div class="ai-quickstart-header__nav-title-{{ ai_gen_id }}">
+        Quick navigation
+      </div>
+      <ul class="ai-quickstart-header__nav-list-{{ ai_gen_id }}">
+        <li>
+          <a href="#tldr" class="ai-quickstart-header__nav-chip-{{ ai_gen_id }}">
+            TL;DR
+          </a>
+        </li>
+        <li>
+          <a href="#what-it-is" class="ai-quickstart-header__nav-chip-{{ ai_gen_id }}">
+            What it is
+          </a>
+        </li>
+        <li>
+          <a href="#feel-timeline" class="ai-quickstart-header__nav-chip-{{ ai_gen_id }}">
+            Feel timeline
+          </a>
+        </li>
+        <li>
+          <a href="#how-it-works" class="ai-quickstart-header__nav-chip-{{ ai_gen_id }}">
+            How it works
+          </a>
+        </li>
+        <li>
+          <a href="#how-to-use" class="ai-quickstart-header__nav-chip-{{ ai_gen_id }}">
+            How to use
+          </a>
+        </li>
+        <li>
+          <a href="#why" class="ai-quickstart-header__nav-chip-{{ ai_gen_id }}">
+            Why
+          </a>
+        </li>
+        <li>
+          <a href="#safety" class="ai-quickstart-header__nav-chip-{{ ai_gen_id }}">
+            Safety
+          </a>
+        </li>
+        <li>
+          <a href="#faq" class="ai-quickstart-header__nav-chip-{{ ai_gen_id }}">
+            FAQ
+          </a>
+        </li>
+        <li>
+          <a href="#support" class="ai-quickstart-header__nav-chip-{{ ai_gen_id }}">
+            Support
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</quickstart-header-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class QuickstartHeader{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+      }
+
+      connectedCallback() {
+        this.setupSmoothScroll();
+      }
+
+      setupSmoothScroll() {
+        const links = this.querySelectorAll('.ai-quickstart-header__nav-chip-{{ ai_gen_id }}');
+        
+        links.forEach(link => {
+          link.addEventListener('click', (e) => {
+            const href = link.getAttribute('href');
+            if (href && href.startsWith('#')) {
+              const targetId = href.substring(1);
+              const targetElement = document.getElementById(targetId);
+              
+              if (targetElement) {
+                e.preventDefault();
+                const offset = 100;
+                const elementPosition = targetElement.getBoundingClientRect().top;
+                const offsetPosition = elementPosition + window.pageYOffset - offset;
+
+                window.scrollTo({
+                  top: offsetPosition,
+                  behavior: 'smooth'
+                });
+              }
+            }
+          });
+        });
+      }
+    }
+
+    customElements.define('quickstart-header-{{ ai_gen_id }}', QuickstartHeader{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Quickstart header",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Product"
+    },
+    {
+      "type": "product",
+      "id": "product",
+      "label": "Product"
+    },
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow_text",
+      "label": "Eyebrow text",
+      "default": "Quickstart guide"
+    },
+    {
+      "type": "richtext",
+      "id": "intro_text",
+      "label": "Introduction text",
+      "default": "<p>Everything you need to know to get started with this product.</p>"
+    },
+    {
+      "type": "header",
+      "content": "Product image"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_image",
+      "label": "Show product image",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Back button"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_button",
+      "label": "Show back to product button",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button text",
+      "default": "Back to product"
+    },
+    {
+      "type": "header",
+      "content": "Navigation"
+    },
+    {
+      "type": "checkbox",
+      "id": "sticky_nav",
+      "label": "Enable sticky navigation",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "max_width",
+      "label": "Maximum width",
+      "min": 800,
+      "max": 1600,
+      "step": 100,
+      "unit": "px",
+      "default": 1200
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Top padding",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background",
+      "default": "#f9f9f9"
+    },
+    {
+      "type": "color",
+      "id": "card_background",
+      "label": "Card background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "nav_background",
+      "label": "Navigation background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Border",
+      "default": "#e8e8e8"
+    },
+    {
+      "type": "color",
+      "id": "eyebrow_color",
+      "label": "Eyebrow text",
+      "default": "#5a9d6f"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading",
+      "default": "#2a2a2a"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Body text",
+      "default": "#666666"
+    },
+    {
+      "type": "header",
+      "content": "Button colors"
+    },
+    {
+      "type": "color",
+      "id": "button_background",
+      "label": "Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Text",
+      "default": "#2a2a2a"
+    },
+    {
+      "type": "color",
+      "id": "button_border_color",
+      "label": "Border",
+      "default": "#e8e8e8"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_background",
+      "label": "Hover background",
+      "default": "#f9f9f9"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_border",
+      "label": "Hover border",
+      "default": "#d4d4d4"
+    },
+    {
+      "type": "header",
+      "content": "Navigation chip colors"
+    },
+    {
+      "type": "color",
+      "id": "chip_background",
+      "label": "Background",
+      "default": "#f9f9f9"
+    },
+    {
+      "type": "color",
+      "id": "chip_text_color",
+      "label": "Text",
+      "default": "#2a2a2a"
+    },
+    {
+      "type": "color",
+      "id": "chip_border_color",
+      "label": "Border",
+      "default": "#e8e8e8"
+    },
+    {
+      "type": "color",
+      "id": "chip_hover_background",
+      "label": "Hover background",
+      "default": "#5a9d6f"
+    },
+    {
+      "type": "color",
+      "id": "chip_hover_border",
+      "label": "Hover border",
+      "default": "#5a9d6f"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Quickstart header"
+    }
+  ]
+}
+{% endschema %}

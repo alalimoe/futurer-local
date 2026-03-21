@@ -1,0 +1,130 @@
+{% comment %}
+  Renders a collection list 3
+
+  Accepts:
+  - block: {Object} Block (required)
+
+  Usage:
+  {% render 'collection-list-3' %}
+{% endcomment %}
+
+{%- assign collection_name_default = 'onboarding.collection_title' | t -%}
+
+<div class="collection-list-3">
+  <xo-tabs>
+    <xo-grid class="collection-list-3__grid">
+      <xo-animate xo-cascade style="--xl: 4; --lg: 5; --md: 6; --xs: 12">
+        <div class="collection-list-3__left">
+          {% if caption != blank %}
+            <div class="collection-list-3__caption">
+              <p>{{ caption }}</p>
+            </div>
+          {% endif %}
+          <div class="collection-list-3__tab">
+            {% for item in block %}
+              {% liquid
+                assign collection = item.settings.collection
+                assign collection_name = collection.title
+                assign heading = item.settings.heading
+                assign class = item.settings.font_size_heading
+              %}
+              {% if heading != blank %}
+                <xo-tabs-trigger
+                  xo-name="tab-{{ forloop.index }}"
+                  {% if forloop.index == 1 %}
+                    xo-active
+                  {% endif %}
+                  class="collection-list-3__tab-trigger"
+                >
+                  <h3 class="collection-list-3__tab-item {{ class }}">{{ heading }}</h3>
+                </xo-tabs-trigger>
+              {%- else -%}
+                <xo-tabs-trigger
+                  xo-name="tab-{{ forloop.index }}"
+                  {% if forloop.index == 1 %}
+                    xo-active
+                  {% endif %}
+                  class="collection-list-3__tab-trigger"
+                >
+                  <h3 class="collection-list-3__tab-item {{ class }}">{{ collection_name | default: collection_name_default, allow_false: true }}</h3>
+                </xo-tabs-trigger>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+      </xo-animate>
+      <xo-animate xo-cascade style="--lg: 6; --md: 6; --xs: 12; --start-lg: 7">
+        <div class="collection-list-3__right">
+          <div class="collection-list-3__tab-pane">
+            <xo-tabs-content>
+              {% for item in block %}
+                {% liquid
+                  assign collection = item.settings.collection
+                  assign collection_name = collection.title
+                  assign collection_image = collection.featured_image
+                  assign collection_link = collection.url
+                  assign image_custom = item.settings.image_custom
+                  assign aspect_ratio = item.settings.aspect_ratio
+                  if aspect_ratio == 'custom'
+                    assign aspect_ratio = item.settings.aspect_ratio_width | append: '/' | append: item.settings.aspect_ratio_height
+                  endif
+                %}
+                <xo-tabs-pane
+                  xo-name="tab-{{ forloop.index }}"
+                  {% if forloop.index == 1 %}
+                    xo-active
+                  {% endif %}
+                  class="collection-list-3__tab-pane-item"
+                >
+                  <a href="{{ collection_link }}" class="collection-list-3__link">
+                    {% if collection_image == blank %}
+                      {% if image != blank %}
+                        <xo-animate
+                          xo-cascade
+                          xo-type="zoom-out"
+                          xo-duration="500"
+                          class="collection-list-3__image {% if settings.enable_border_radius %}collection-list-3__image--radius{% endif %}"
+                        >
+                          {% render 'image', image: image_custom, aspect_ratio: aspect_ratio, disable_alt: true %}
+                        </xo-animate>
+                      {%- else -%}
+                        <xo-animate
+                          xo-cascade
+                          xo-type="zoom-out"
+                          xo-duration="500"
+                          class="collection-list-3__image {% if settings.enable_border_radius %}collection-list-3__image--radius{% endif %}"
+                        >
+                          {% render 'image', image: image, placeholder: placeholder, aspect_ratio: aspect_ratio %}
+                        </xo-animate>
+                      {% endif %}
+                    {%- else -%}
+                      {% if image != blank %}
+                        <xo-animate
+                          xo-cascade
+                          xo-type="zoom-out"
+                          xo-duration="500"
+                          class="collection-list-3__image {% if settings.enable_border_radius %}collection-list-3__image--radius{% endif %}"
+                        >
+                          {% render 'image', image: image_custom, aspect_ratio: aspect_ratio %}
+                        </xo-animate>
+                      {%- else -%}
+                        <xo-animate
+                          xo-cascade
+                          xo-type="zoom-out"
+                          xo-duration="500"
+                          class="collection-list-3__image {% if settings.enable_border_radius %}collection-list-3__image--radius{% endif %}"
+                        >
+                          {% render 'image', image: collection_image, aspect_ratio: aspect_ratio %}
+                        </xo-animate>
+                      {% endif %}
+                    {% endif %}
+                  </a>
+                </xo-tabs-pane>
+              {% endfor %}
+            </xo-tabs-content>
+          </div>
+        </div>
+      </xo-animate>
+    </xo-grid>
+  </xo-tabs>
+</div>

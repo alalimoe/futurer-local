@@ -1,0 +1,398 @@
+{{ 'testimonial-box.css' | asset_url | stylesheet_tag }}
+{{ 'testimonial-box-8.css' | asset_url | stylesheet_tag }}
+{{ 'image-button.css' | asset_url | stylesheet_tag }}
+
+<section {% render 'section-attr' %}>
+  <div class="testimonial-style-8">
+    <xo-container class="testimonial-style-8__container">
+      <div class="testimonial-style-8__content">
+        {% liquid
+          assign layout = section.settings.layout
+          assign autoplay_time = section.settings.autoplay_time
+          assign autoplay = section.settings.autoplay
+          assign blocks = section.blocks
+        %}
+        {% render 'testimonial-box-8', layout: layout, autoplay: autoplay, autoplay_time: autoplay_time, blocks: blocks %}
+      </div>
+    </xo-container>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "t:sections.testimonial_style_8.name",
+  "disabled_on": {
+    "groups": [
+      "header",
+      "footer",
+      "custom.overlay",
+      "custom.popups",
+      "custom.features"
+    ]
+  },
+  "settings": [
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "t:sections.testimonial_style_8.settings.layout.label",
+      "options": [
+        {
+          "value": "default",
+          "label": "t:sections.testimonial_style_8.settings.layout.option__0.label"
+        },
+        {
+          "value": "image",
+          "label": "t:sections.testimonial_style_8.settings.layout.option__1.label"
+        },
+        {
+          "value": "product",
+          "label": "t:sections.testimonial_style_8.settings.layout.option__2.label"
+        }
+      ],
+      "default": "product"
+    },
+    {
+      "type": "select",
+      "id": "autoplay",
+      "label": "t:sections.testimonial_style_8.settings.autoplay.label",
+      "options": [
+        {
+          "value": "off",
+          "label": "t:sections.testimonial_style_8.settings.autoplay.option__1.label"
+        },
+        {
+          "value": "on",
+          "label": "t:sections.testimonial_style_8.settings.autoplay.option__2.label"
+        }
+      ],
+      "default": "off"
+    },
+    {
+      "type": "range",
+      "id": "autoplay_time",
+      "min": 1000,
+      "max": 5000,
+      "step": 1000,
+      "label": "t:sections.testimonial_style_8.settings.autoplay_time.label",
+      "default": 3000
+    },
+    {
+      "type": "header",
+      "content": "General settings"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Section color scheme"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color"
+    },
+    {
+      "type": "color_background",
+      "id": "background_gradient",
+      "label": "Background gradient"
+    },
+    {
+      "type": "number",
+      "id": "padding_top_desktop",
+      "label": "Padding top desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_desktop",
+      "label": "Padding bottom desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_top_mobile",
+      "label": "Padding top mobile",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_mobile",
+      "label": "Padding bottom mobile",
+      "default": 50
+    }
+  ],
+  "blocks": [
+    {
+      "name": "t:sections.testimonial_style_8.blocks.name",
+      "type": "testimonial-box",
+      "settings": [
+        {
+          "type": "header",
+          "content": "t:sections.testimonial_style_8.blocks.settings.header_text.content"
+        },
+        {
+          "type": "richtext",
+          "id": "content",
+          "label": "t:sections.testimonial_style_8.blocks.settings.content.label",
+          "default": "<p>Share what your customers are saying about your products, customer service or shipping rates.</p>"
+        },
+        {
+          "type": "text",
+          "id": "customer_name",
+          "label": "t:sections.testimonial_style_8.blocks.settings.customer_name.label",
+          "default": "Customer name"
+        },
+        {
+          "type": "header",
+          "content": "t:sections.testimonial_style_8.blocks.settings.header_image.content"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "t:sections.testimonial_style_8.blocks.settings.image.label"
+        },
+        {
+          "type": "select",
+          "id": "aspect_ratio",
+          "label": "Aspect ratio",
+          "default": "auto",
+          "options": [
+            {
+              "value": "auto",
+              "label": "Auto"
+            },
+            {
+              "value": "2/3",
+              "label": "2:3"
+            },
+            {
+              "value": "3/4",
+              "label": "3:4"
+            },
+            {
+              "value": "3/2",
+              "label": "3:2"
+            },
+            {
+              "value": "1",
+              "label": "1:1"
+            },
+            {
+              "value": "4/3",
+              "label": "4:3"
+            },
+            {
+              "value": "16/9",
+              "label": "16:9"
+            },
+            {
+              "value": "21/9",
+              "label": "21:9"
+            }
+          ]
+        },
+        {
+          "type": "header",
+          "content": "t:sections.testimonial_style_8.blocks.settings.header_button.content",
+          "info": "t:sections.testimonial_style_8.blocks.settings.header_button.info",
+          "visible_if": "{{ section.settings.layout == 'image' }}"
+        },
+        {
+          "type": "text",
+          "id": "button_text",
+          "label": "Button text",
+          "default": "Button",
+          "visible_if": "{{ section.settings.layout == 'image' }}"
+        },
+        {
+          "type": "url",
+          "id": "button_link",
+          "label": "Button link",
+          "default": "/collections/all",
+          "visible_if": "{{ section.settings.layout == 'image' }}"
+        },
+        {
+          "type": "select",
+          "id": "button_style",
+          "label": "Button style",
+          "options": [
+            {
+              "value": "primary",
+              "label": "Primary"
+            },
+            {
+              "value": "secondary",
+              "label": "Secondary"
+            },
+            {
+              "value": "link",
+              "label": "Link"
+            }
+          ],
+          "default": "primary",
+          "visible_if": "{{ section.settings.layout == 'image' }}"
+        },
+        {
+          "type": "select",
+          "id": "button_size",
+          "label": "Button size",
+          "options": [
+            {
+              "value": "xs",
+              "label": "Extra small"
+            },
+            {
+              "value": "sm",
+              "label": "Small"
+            },
+            {
+              "value": "md",
+              "label": "Medium"
+            },
+            {
+              "value": "lg",
+              "label": "Large"
+            }
+          ],
+          "default": "md",
+          "visible_if": "{{ section.settings.layout == 'image' }}"
+        },
+        {
+          "type": "header",
+          "content": "t:sections.testimonial_style_8.blocks.settings.header_product.content",
+          "info": "t:sections.testimonial_style_8.blocks.settings.header_button.info"
+        },
+        {
+          "type": "product",
+          "id": "product",
+          "label": "t:sections.testimonial_style_8.blocks.settings.product.label"
+        },
+        {
+          "type": "select",
+          "id": "product_card_aspect_ratio",
+          "label": "Aspect ratio",
+          "options": [
+            {
+              "value": "auto",
+              "label": "Adapt to image"
+            },
+            {
+              "value": "2/3",
+              "label": "2:3"
+            },
+            {
+              "value": "3/4",
+              "label": "3:4"
+            },
+            {
+              "value": "3/2",
+              "label": "3:2"
+            },
+            {
+              "value": "1",
+              "label": "1:1"
+            },
+            {
+              "value": "4/3",
+              "label": "4:3"
+            },
+            {
+              "value": "16/9",
+              "label": "16:9"
+            },
+            {
+              "value": "21/9",
+              "label": "21:9"
+            }
+          ],
+          "default": "1",
+          "visible_if": "{{ section.settings.layout == 'product' }}"
+        },
+        {
+          "type": "color_scheme",
+          "id": "card_color_scheme",
+          "label": "Color scheme",
+          "visible_if": "{{ section.settings.layout == 'product' }}"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.testimonial_style_8.presets.name",
+      "settings": {
+        "autoplay": "off",
+        "autoplay_time": 3000,
+        "color_scheme": "",
+        "background_color": "",
+        "background_gradient": "",
+        "padding_top_desktop": 50,
+        "padding_bottom_desktop": 50,
+        "padding_top_mobile": 50,
+        "padding_bottom_mobile": 50
+      },
+      "blocks": [
+        {
+          "type": "testimonial-box",
+          "settings": {
+            "content": "<p>Share what your customers are saying about your products, customer service or shipping rates.</p>",
+            "customer_name": "Customer name",
+            "aspect_ratio": "auto",
+            "button_text": "Button",
+            "button_link": "shopify://collections/all",
+            "button_style": "primary",
+            "button_size": "sm",
+            "product_card_aspect_ratio": "1",
+            "card_color_scheme": "inverse",
+            "product": ""
+          }
+        },
+        {
+          "type": "testimonial-box",
+          "settings": {
+            "content": "<p>Share what your customers are saying about your products, customer service or shipping rates.</p>",
+            "customer_name": "Customer name",
+            "aspect_ratio": "auto",
+            "button_text": "Button",
+            "button_link": "shopify://collections/all",
+            "button_style": "primary",
+            "button_size": "sm",
+            "product_card_aspect_ratio": "1",
+            "card_color_scheme": "inverse",
+            "product": ""
+          }
+        },
+        {
+          "type": "testimonial-box",
+          "settings": {
+            "content": "<p>Share what your customers are saying about your products, customer service or shipping rates.</p>",
+            "customer_name": "Customer name",
+            "aspect_ratio": "auto",
+            "button_text": "Button",
+            "button_link": "shopify://collections/all",
+            "button_style": "primary",
+            "button_size": "sm",
+            "product_card_aspect_ratio": "1",
+            "card_color_scheme": "inverse",
+            "product": ""
+          }
+        },
+        {
+          "type": "testimonial-box",
+          "settings": {
+            "content": "<p>Share what your customers are saying about your products, customer service or shipping rates.</p>",
+            "customer_name": "Customer name",
+            "aspect_ratio": "auto",
+            "button_text": "Button",
+            "button_link": "shopify://collections/all",
+            "button_style": "primary",
+            "button_size": "sm",
+            "product_card_aspect_ratio": "1",
+            "card_color_scheme": "inverse",
+            "product": ""
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,104 @@
+{% comment %}
+  Renders a cart item
+
+  Accepts:
+  - item: {Object} cart item
+
+  Usage:
+  {% render 'cart-item',
+    item: item
+  %}
+{% endcomment %}
+
+<div class="xo-cart-item">
+  {% if item.image != blank %}
+    <a href="{{ item.url }}" class="xo-cart-item__img" aria-label="Product URL">
+      {% render 'image', image: item.image, disable_alt: true %}
+    </a>
+  {% endif %}
+  <div class="xo-cart-item__content">
+    <div class="xo-cart-item__info">
+      {%- if settings.show_vendor -%}
+        <span class="xo-cart-item__vendor">{{ item.product.vendor }}</span>
+      {%- endif -%}
+      <a href="{{ item.url }}" class="xo-cart-item__title focus-inset">
+        <p>{{ item.title | escape }}</p>
+      </a>
+      <div class="xo-cart-item__price">
+        {% comment %} {% render 'price', product: item.product %} {% endcomment %}
+        {%- if item.original_price != item.final_price -%}
+          <div class="xo-cart-item__discounted-prices">
+            <span class="xo-visually-hidden">
+              {{ 'products.product.price.sale_price' | t }}
+            </span>
+            <strong class="xo-cart-item__final-price">
+              {{ item.final_price | money_with_currency }}
+            </strong>
+            <span class="xo-visually-hidden">
+              {{ 'products.product.price.regular_price' | t }}
+            </span>
+            <s class="xo-cart-item__old-price">
+              {{- item.original_price | money_with_currency -}}
+            </s>
+          </div>
+        {%- else -%}
+          <div class="xo-cart-item__final-price">
+            {{ item.original_price | money_with_currency }}
+          </div>
+        {%- endif -%}
+        {% render 'unit-price', product: item.product %}
+        <xo-cart-change-fallback class="xo-cart-item__loading">{% render 'loader-2' %}</xo-cart-change-fallback>
+      </div>
+      {%- if item.product.has_only_default_variant == false or item.properties.size != 0 or item.selling_plan_allocation != null -%}
+        <div class="xo-cart-item__options{% if item.product.has_only_default_variant == false %} xo-cart-item__options--pd{% endif %}">
+          {% if item.product.has_only_default_variant == false %}
+            {%- for option in item.options_with_values -%}
+              <div class="xo-cart-item__options-item">
+                <span class="xo-cart-item__options-name">{{ option.name }}: </span>
+                <span class="xo-cart-item__options-value">{{ option.value -}}</span>
+              </div>
+            {%- endfor -%}
+          {% endif %}
+          {% if item.properties.size != 0 %}
+            {%- for property in item.properties -%}
+              {%- assign property_first_char = property.first | slice: 0 -%}
+              {%- if property.last != blank and property_first_char != '_' -%}
+                <div class="xo-cart-item__options-item">
+                  <span class="xo-cart-item__options-name">{{ property.first }}: </span>
+                  <span class="xo-cart-item__options-value">
+                    {%- if property.last contains '/uploads/' -%}
+                      {% assign text = property.last | split: '/' | last %}
+                      {% capture attrs %}target='_blank' aria-describedby='a11y-new-window-message'{% endcapture %}
+                      {% render 'button', text: text, link: property.last, style: 'link', attrs: attrs %}
+                    {%- else -%}
+                      {{ property.last }}
+                    {%- endif -%}
+                  </span>
+                </div>
+              {%- endif -%}
+            {%- endfor -%}
+          {% endif %}
+        </div>
+        <p class="xo-cart-item__selling-plan">{{ item.selling_plan_allocation.selling_plan.name }}</p>
+      {%- endif -%}
+      {% if item.line_level_discount_allocations != blank %}
+        <div class="xo-cart-item__discount-list">
+          <ul class="xo-cart-item__detail-discounts list-unstyled" role="list" aria-label="{{ 'customer.order.discount' | t }}">
+            {%- for discount in item.line_level_discount_allocations -%}
+              <li class="xo-cart-item__detail-discount">
+                {% render 'badge-discount', label: discount.discount_application.title %}
+              </li>
+            {%- endfor -%}
+          </ul>
+        </div>
+      {% endif %}
+    </div>
+    <div class="xo-cart-item__quantity-item">
+      {% render 'quantity', value: item.quantity, variant: item.variant, product: item.product, is_cart: true %}
+    </div>
+    <xo-cart-remove class="xo-cart-item__remove">
+      {% assign button_text = 'sections.cart.delete' | t %}
+      {% render 'button', text: button_text, style: 'link' %}
+    </xo-cart-remove>
+  </div>
+</div>

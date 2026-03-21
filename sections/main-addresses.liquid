@@ -1,0 +1,86 @@
+{{ 'section-main-addresses.css' | asset_url | stylesheet_tag }}
+{{ 'address-detail.css' | asset_url | stylesheet_tag }}
+{{ 'address-table.css' | asset_url | stylesheet_tag }}
+{{ 'address-form.css' | asset_url | stylesheet_tag }}
+
+<section {% render 'section-attr' %}>
+  <xo-container class='xo-address-list'>
+    <xo-animate xo-cascade>
+      <div class='xo-address-list__head'>
+        <h4 class='xo-address-list__heading h4'>
+          {{ 'customer.addresses.address' | t }}
+        </h4>
+        <div class='xo-address-list__return-account'>
+          {% assign account_return = 'customer.account.return' | t %}
+          <div class='xo-address-list__button-link'>
+            {% render 'button', text: account_return, link: routes.account_url, style: 'link', size: 'sm', icon: 'return', icon_size: 16, icon_position: 'left' %}
+          </div>
+        </div>
+      </div>
+    </xo-animate>
+
+    <xo-animate xo-cascade>
+      <xo-grid class='xo-address-list__grid'>
+        {% if customer.default_address != null %}
+          <div style='--xs: 12; --md: 12; --lg: 9'>
+            {% render 'address-table' %}
+          </div>
+          <div style='--xs: 12; --md: 12; --lg: 3'>
+            {% render 'address-detail' %}
+          </div>
+        {% else %}
+          <div style='--xs: 12; --md: 12; --lg: 12'>
+            {% render 'address-table' %}
+          </div>
+        {% endif %}
+      </xo-grid>
+    </xo-animate>
+  </xo-container>
+</section>
+
+{% schema %}
+{
+  "name": "t:sections.main_addresses.name",
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Section color scheme"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color"
+    },
+    {
+      "type": "color_background",
+      "id": "background_gradient",
+      "label": "Background gradient"
+    },
+    {
+      "type": "number",
+      "id": "padding_top_desktop",
+      "label": "Padding top desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_desktop",
+      "label": "Padding bottom desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_top_mobile",
+      "label": "Padding top mobile",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_mobile",
+      "label": "Padding bottom mobile",
+      "default": 50
+    }
+  ]
+}
+{% endschema %}

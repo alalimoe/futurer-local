@@ -1,0 +1,405 @@
+{% comment %}
+Beginner's Guide Section
+Template: templates/page.beginners-guide.json
+Assets expected: assets/beginners-guide.css, assets/beginners-guide.js
+This section renders a complete long-form guide with IDs for a sticky TOC & progress bar.
+Replace placeholder links (e.g., #, /products/...) with your actual handles.
+{% endcomment %}
+
+{{ 'beginners-guide.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'beginners-guide.js' | asset_url }}" defer></script>
+
+<section class="guide" data-guide>
+  {% if section.settings.show_progress %}
+    <div class="guide-progress" aria-hidden="true">
+      <div class="guide-progress__bar" id="guideProgressBar"></div>
+    </div>
+  {% endif %}
+
+  <div class="guide-layout">
+    {% if section.settings.show_sticky_toc %}
+    <aside class="guide-toc" id="guideTOC" aria-label="On this page">
+      <div class="guide-toc__title">On this page</div>
+      <nav class="guide-toc__nav" id="guideTOCNav">
+        <!-- Auto-populated by JS -->
+      </nav>
+    </aside>
+    {% endif %}
+
+    <main class="guide-content" id="guideMain">
+      <!-- Reading mode controls -->
+      {% if section.settings.enable_reading_modes %}
+      <div class="guide-modes" role="group" aria-label="Reading mode">
+        <button class="btn btn--sm" data-mode="default">Default</button>
+        <button class="btn btn--sm" data-mode="adhd">ADHD‑friendly</button>
+        <button class="btn btn--sm" data-mode="listen" data-listen>Listen</button>
+      </div>
+      {% endif %}
+
+      <!-- HERO -->
+      <section id="hero" class="guide-section hero" data-toc>
+        <h1>Beginner’s Guide to Nootropics</h1>
+        <p class="lead">Start smarter—not stronger. Learn the basics, personalize a safe starting stack, and feel more focused with fewer unknowns.</p>
+        <div class="hero-ctas">
+          <a href="#quick-start" class="btn btn--primary">Build My Starter Stack</a>
+          <a href="#tldr" class="btn btn--secondary">See the 60‑Second Summary</a>
+          <a href="#starter-stacks" class="btn btn--text">Prefer caffeine‑free?</a>
+        </div>
+        <ul class="trust-strip">
+          <li><strong>5,763+ orders</strong> shipped to 17 countries</li>
+          <li><strong>4‑hour</strong> Dubai delivery; UAE same/next day</li>
+          <li><strong>Free international express</strong> on 300 AED+ | Easy 3‑day refunds</li>
+        </ul>
+        <div class="ai-widget" data-component="ask-the-guide" aria-label="Ask the Guide (placeholder)">
+          <input type="text" placeholder="Ask the Guide… e.g., Build a caffeine‑free stack" aria-label="Ask the Guide">
+          <div class="prompt-chips">
+            <button type="button">Focus at work?</button>
+            <button type="button">Caffeine‑free stack</button>
+            <button type="button">Compare Alpha‑GPC vs CDP</button>
+            <button type="button">Is Phenibut okay for beginners?</button>
+          </div>
+          <small class="disclaimer">Educational content only. Not medical advice.</small>
+        </div>
+      </section>
+
+      <!-- TL;DR -->
+      <section id="tldr" class="guide-section tldr" data-toc>
+        <h2>Quick take</h2>
+        <ul class="tldr-list">
+          <li><strong>What it is:</strong> Supplements people use to support focus, memory, mood, or energy.</li>
+          <li><strong>Who it’s for:</strong> Beginners who want simple, safe‑minded starts—no complex stacks required.</li>
+          <li><strong>How to start:</strong> Use 3 steps—Base → Choline support → Goal‑specific booster.</li>
+        </ul>
+        <div class="archetypes">
+          <article class="card">
+            <h3>Focus</h3>
+            <p>Task‑friendly clarity. Add this trio.</p>
+            <a class="btn btn--sm" href="#quick-start">Show me the 3‑step plan</a>
+          </article>
+          <article class="card">
+            <h3>Calm</h3>
+            <p>Smoother attention on stress‑heavy days.</p>
+            <a class="btn btn--sm" href="#quick-start">Show me the 3‑step plan</a>
+          </article>
+          <article class="card">
+            <h3>Memory</h3>
+            <p>Learning + recall that builds with consistency.</p>
+            <a class="btn btn--sm" href="#quick-start">Show me the 3‑step plan</a>
+          </article>
+        </div>
+        <div class="toggle-simplify">
+          <label><input type="checkbox" id="simplifyToggle"> Simplify reading</label>
+        </div>
+      </section>
+
+      <!-- WHAT ARE NOOTROPICS -->
+      <section id="what-are-nootropics" class="guide-section" data-toc>
+        <h2>What are nootropics?</h2>
+        <p>Nootropics are substances—often dietary supplements—that people use to support mental performance such as focus, memory, motivation, or stress resilience. They are not magic, and effects vary. They work best alongside good sleep, nutrition, and movement.</p>
+        <ul class="bullets two-col">
+          <li>May support attention, learning, clarity, or stress balance.</li>
+          <li>Not medical treatment. Consult your clinician if you have a condition or take meds.</li>
+          <li>Start low, add slowly; some items require cycling.</li>
+        </ul>
+        <div class="glossary-chips">
+          <span class="chip" title="Supports stress balance over time.">Adaptogen</span>
+          <span class="chip" title="Relates to acetylcholine pathways.">Cholinergic</span>
+          <span class="chip" title="A family of synthetic compounds explored for cognition.">Racetam</span>
+          <span class="chip" title="The brain’s ability to adapt and rewire.">Neuroplasticity</span>
+        </div>
+      </section>
+
+      <!-- HOW TO CHOOSE -->
+      <section id="how-to-choose" class="guide-section" data-toc>
+        <h2>How to choose</h2>
+        <ol class="numbered">
+          <li>Pick your primary goal (Focus, Calm, Memory, Energy)</li>
+          <li>Choose caffeine‑friendly or caffeine‑free</li>
+          <li>Note sensitivities (stimulants, sleep)</li>
+        </ol>
+        <div class="matrix-note banner banner--warn">
+          Some compounds (e.g., Phenylpiracetam, Phenibut) are not beginner daily tools.
+        </div>
+        <div class="ai-quiz" data-component="guided-quiz">
+          <button class="btn btn--primary">Personalize my plan (AI)</button>
+        </div>
+      </section>
+
+      <!-- 3-STEP QUICK START -->
+      <section id="quick-start" class="guide-section" data-toc>
+        <h2>The 3‑Step Quick‑Start</h2>
+        <div class="steps">
+          <article class="step">
+            <h3>1) Choose your Base</h3>
+            <ul>
+              <li><strong>Caffeine + L‑Theanine</strong> — smooth focus for task sprints.</li>
+              <li><strong>Lion’s Mane</strong> — caffeine‑free clarity; long‑game support.</li>
+              <li><strong>L‑Theanine (solo)</strong> — calm clarity; pairs with coffee/tea.</li>
+            </ul>
+          </article>
+          <article class="step">
+            <h3>2) Add a Choline Source</h3>
+            <p>Alpha‑GPC or CDP‑Choline; pick one.</p>
+          </article>
+          <article class="step">
+            <h3>3) Layer a Goal‑Booster</h3>
+            <ul>
+              <li><strong>Bacopa Monnieri</strong> — memory & calm; consistent use.</li>
+              <li><strong>Rhodiola Rosea</strong> — resilience on stressful days.</li>
+              <li><strong>Noopept</strong> — occasional situational clarity.</li>
+            </ul>
+          </article>
+        </div>
+        <div class="compat banner banner--info" id="compatNotice" hidden>
+          Smart check: your stack already includes a choline source—no need to double up.
+        </div>
+        <div class="cta-row">
+          <a href="{{ routes.collections_url }}/stacks" class="btn btn--primary">Add Starter Trio to Cart</a>
+          <a href="#starter-stacks" class="btn btn--secondary">See presets</a>
+        </div>
+      </section>
+
+      <!-- SAFETY -->
+      <section id="safety" class="guide-section subtle" data-toc>
+        <h2>Safety, tolerance & expectations</h2>
+        <div class="columns two-col">
+          <ul class="checklist">
+            <li>Start low; one change at a time.</li>
+            <li>Journal your response (focus, mood, sleep, timing).</li>
+            <li>Cycle as needed.</li>
+            <li>Mind interactions; talk to a clinician if unsure.</li>
+          </ul>
+          <div class="lead-magnet card">
+            <h3>Beginner Safety Checklist</h3>
+            <p>Download a one‑page guide + 7‑day tracker.</p>
+            <a href="#email-capture" class="btn btn--primary">Get the checklist</a>
+          </div>
+        </div>
+        <div class="sensitivity">
+          <span>Highlight notes for:</span>
+          <div class="chips">
+            <button class="chip" data-sens="caffeine">Caffeine</button>
+            <button class="chip" data-sens="sleep">Sleep</button>
+            <button class="chip" data-sens="gi">GI</button>
+            <button class="chip" data-sens="anxiety">Anxiety‑prone</button>
+          </div>
+        </div>
+        <small class="disclaimer">Educational only — not medical advice.</small>
+      </section>
+
+      <!-- STARTER STACKS -->
+      <section id="starter-stacks" class="guide-section" data-toc>
+        <h2>Starter stacks</h2>
+        <div class="cards grid">
+          <article class="card stack">
+            <h3>Novice Nootropic Stack</h3>
+            <p class="muted">Lion’s Mane • L‑Theanine • Alpha‑GPC</p>
+            <p>Calm, simple clarity for first‑time users.</p>
+            <a class="btn btn--primary" href="/products/novice-nootropic-stack">Add Novice Stack</a>
+          </article>
+          <article class="card stack">
+            <h3>Enhanced Focus Stack</h3>
+            <p class="muted">Caffeine+NALT • L‑Theanine • CDP‑Choline</p>
+            <p>Work sprints and study sessions—clean focus.</p>
+            <a class="btn btn--primary" href="/products/enhanced-focus-stack">Add Enhanced Focus</a>
+          </article>
+          <article class="card stack">
+            <h3>Memory Master</h3>
+            <p class="muted">Lion’s Mane • Bacopa • Alpha‑GPC</p>
+            <p>Learning & recall that build with consistency.</p>
+            <a class="btn btn--primary" href="/products/cognitive-elite-stack">Add Memory Master</a>
+          </article>
+          <article class="card stack">
+            <h3>Calm Clarity</h3>
+            <p class="muted">L‑Theanine • Ashwagandha • Lion’s Mane</p>
+            <p>Focus without the buzz; smoother days.</p>
+            <a class="btn btn--primary" href="/products/novice-nootropic-stack">Add Calm Clarity</a>
+          </article>
+        </div>
+      </section>
+
+      <!-- PRODUCT SPOTLIGHTS -->
+      <section id="product-spotlights" class="guide-section" data-toc>
+        <h2>Product spotlights</h2>
+        <div class="cards grid grid-4">
+          <article class="card product">
+            <h3>Alpha‑GPC</h3>
+            <p>Choline, simplified—steady support for focus & memory.</p>
+            <a class="btn btn--sm" href="/products/alpha-gpc">View PDP</a>
+          </article>
+          <article class="card product">
+            <h3>CDP‑Choline</h3>
+            <p>Smooth, steady choline for learning blocks.</p>
+            <a class="btn btn--sm" href="/products/cdp-choline-250mg-capsules">View PDP</a>
+          </article>
+          <article class="card product">
+            <h3>L‑Theanine</h3>
+            <p>Calm clarity—solo or with your coffee.</p>
+            <a class="btn btn--sm" href="/products/l-theanine-200mg-capsules">View PDP</a>
+          </article>
+          <article class="card product">
+            <h3>Caffeine + NALT</h3>
+            <p>Clean alertness for high‑demand mornings.</p>
+            <a class="btn btn--sm" href="/products/caffeine-nalt-capsules">View PDP</a>
+          </article>
+          <article class="card product">
+            <h3>Lion’s Mane</h3>
+            <p>Caffeine‑free clarity for consistent days.</p>
+            <a class="btn btn--sm" href="/products/lion-mane-mushroom-capsules">View PDP</a>
+          </article>
+          <article class="card product">
+            <h3>Bacopa Monnieri</h3>
+            <p>Memory that builds with consistency.</p>
+            <a class="btn btn--sm" href="/products/bacopa-monnieri-300mg-capsules">View PDP</a>
+          </article>
+          <article class="card product">
+            <h3>Rhodiola Rosea</h3>
+            <p>Resilience on demanding days.</p>
+            <a class="btn btn--sm" href="/products/rhodiola-rosea-500mg-capsules">View PDP</a>
+          </article>
+          <article class="card product">
+            <h3>Noopept</h3>
+            <p>Occasional clarity—keep it minimal, keep it mindful.</p>
+            <a class="btn btn--sm" href="/products/noopept-20mg-capsules">View PDP</a>
+          </article>
+        </div>
+      </section>
+
+      <!-- REAL-WORLD USE -->
+      <section id="real-world-use" class="guide-section" data-toc>
+        <h2>Real‑world use</h2>
+        <div class="cards grid">
+          <article class="card routine">
+            <h3>Deep‑work morning</h3>
+            <p>Coffee + Theanine, CDP‑Choline, 90‑min focus block.</p>
+            <a href="{{ routes.cart_url }}" class="btn btn--sm">Copy this routine</a>
+          </article>
+          <article class="card routine">
+            <h3>Evening study</h3>
+            <p>Lion’s Mane AM; Theanine PM; Bacopa with dinner.</p>
+            <a href="{{ routes.cart_url }}" class="btn btn--sm">Copy this routine</a>
+          </article>
+          <article class="card routine">
+            <h3>Presentation day</h3>
+            <p>Caffeine+NALT + Theanine pre‑meeting; CDP earlier.</p>
+            <a href="{{ routes.cart_url }}" class="btn btn--sm">Copy this routine</a>
+          </article>
+        </div>
+        <blockquote class="quote">“Went from scattered to shipped. The Theanine + CDP combo is my new default.” — M., Dubai</blockquote>
+        <blockquote class="quote">“Lion’s Mane + Bacopa gave me calm confidence in study sessions.” — R., Abu Dhabi</blockquote>
+      </section>
+
+      <!-- FAQ -->
+      <section id="faq" class="guide-section" data-toc>
+        <h2>FAQ</h2>
+        <details>
+          <summary>How fast will I feel it?</summary>
+          <p>Some items (Caffeine + Theanine) are felt same‑day; others (Lion’s Mane, Bacopa) build with consistent use.</p>
+        </details>
+        <details>
+          <summary>Capsules vs. powder—what’s better for beginners?</summary>
+          <p>Capsules are simpler and consistent; powders allow fine‑tuning. Most beginners start with capsules.</p>
+        </details>
+        <details>
+          <summary>Can I stack Alpha‑GPC with CDP‑Choline?</summary>
+          <p>Choose one choline donor at a time to keep things simple.</p>
+        </details>
+        <details>
+          <summary>I’m caffeine‑sensitive. Do I have options?</summary>
+          <p>Yes—Lion’s Mane, Theanine, Bacopa, and Ashwagandha enable caffeine‑free stacks.</p>
+        </details>
+        <details>
+          <summary>What about Phenibut or Phenylpiracetam?</summary>
+          <p>Not beginner daily tools. Understand risks and consult a clinician first.</p>
+        </details>
+        <details>
+          <summary>Do you ship to my country?</summary>
+          <p>We ship internationally with free express on 300 AED+ orders. See Shipping at checkout.</p>
+        </details>
+        <details>
+          <summary>What if a product doesn’t suit me?</summary>
+          <p>Eligible unopened items can be refunded within 3 days. See our Returns page.</p>
+        </details>
+        <details>
+          <summary>How do I journal results?</summary>
+          <p>Track timing, sleep, mood, focus, and notes. Use our 7‑day tracker.</p>
+        </details>
+        <details>
+          <summary>Can I take nootropics with my medication?</summary>
+          <p>Always ask your healthcare provider first.</p>
+        </details>
+        <details>
+          <summary>Are your products lab‑tested?</summary>
+          <p>We source from leading manufacturers and share lab results on PDPs.</p>
+        </details>
+      </section>
+
+      <!-- RESOURCES -->
+      <section id="resources" class="guide-section" data-toc>
+        <h2>Resources & next steps</h2>
+        <ul class="links">
+          <li><a href="/blogs/posts/5-best-racetams">Racetams Overview</a></li>
+          <li><a href="/pages/choline-101">Choline 101</a></li>
+          <li><a href="/blogs/posts/best-nootropics-for-focus">Nootropics for Focus</a></li>
+          <li><a href="{{ routes.collections_url }}/mushroom-extracts">Mushroom Extracts</a></li>
+        </ul>
+        <div class="tools">
+          <a href="#journal" class="btn btn--secondary">Beginner 7‑Day Journal</a>
+          <a href="#stack-builder" class="btn btn--secondary">Stack Builder Worksheet</a>
+          <a href="#onboarding" class="btn btn--primary">Start your 7‑Day Beginner Plan</a>
+        </div>
+      </section>
+
+      <!-- TRUST -->
+      <section id="trust" class="guide-section trust subtle" data-toc>
+        <h2>Trust & policies</h2>
+        <ul class="bullets two-col">
+          <li>Dubai ~4 hours (city), UAE same/next day</li>
+          <li>International express available; 300 AED+ ships free</li>
+          <li>Unopened returns accepted; refunds within 3 days</li>
+          <li>Support: Chat, Email, WhatsApp</li>
+        </ul>
+        <small class="disclaimer">This guide is educational and not medical advice. Nootropix products are not intended to diagnose, treat, cure, or prevent disease.</small>
+      </section>
+
+      <!-- JSON-LD -->
+      <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              {"@type": "ListItem","position": 1,"name": "Guides","item": "{{ shop.url }}/guides"},
+              {"@type": "ListItem","position": 2,"name": "Beginner’s Guide to Nootropics","item": "{{ shop.url }}/guides/beginners-nootropics"}
+            ]
+          },
+          {
+            "@type": "Article",
+            "headline": "Beginner’s Guide to Nootropics",
+            "description": "Start smarter—not stronger. Learn the basics, personalize a safe starting stack, and feel more focused with fewer unknowns.",
+            "author": {"@type": "Organization","name": "Nootropix"},
+            "publisher": {"@type": "Organization","name": "Nootropix"},
+            "datePublished": "2025-08-23",
+            "mainEntityOfPage": "{{ shop.url }}/guides/beginners-nootropics"
+          }
+        ]
+      }
+      </script>
+    </main>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Beginner's Guide",
+  "settings": [
+    { "type": "checkbox", "id": "show_sticky_toc", "label": "Show sticky Table of Contents", "default": true },
+    { "type": "checkbox", "id": "show_progress", "label": "Show reading progress bar", "default": true },
+    { "type": "checkbox", "id": "enable_reading_modes", "label": "Enable reading modes (ADHD / Listen)", "default": true }
+  ],
+  "presets": [
+    { "name": "Beginner's Guide (Nootropix)" }
+  ]
+}
+{% endschema %}

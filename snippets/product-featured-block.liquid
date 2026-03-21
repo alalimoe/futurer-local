@@ -1,0 +1,82 @@
+{% comment %}
+  Renders a product featured element with a given value
+
+  @param {Object} block - Block
+  @param {String} heading - Heading (optional)
+  @param {Object} button - Button (optional)
+  @param {String} image_1 - Image 1 (required)
+  @param {String} image_2 - Image 2 (required)
+  @param {String} image_3 - Image 3 (required)
+  @param {String} title_1 - Title 1 (required)
+  @param {String} title_2 - Title 2 (required)
+  @param {String} title_3 - Title 3 (required)
+
+  @example
+  {% render 'product-featured-block',
+    block: block,
+    button: button,
+    heading: heading,
+    image_1: image_1,
+    image_2: image_2,
+    image_3: image_3,
+    title_1: title_1,
+    title_2: title_2,
+    title_3: title_3,
+  %}
+{% endcomment %}
+
+<xo-animate xo-cascade style="height: 100%;">
+  <div class="product-featured-block{% if settings.enable_border_radius %} product-featured-block--radius{% endif %}">
+    <div class="product-featured-block__head">
+      {% if heading %}
+        <div class="product-featured-block__heading">
+          {% render 'text', context: block %}
+        </div>
+      {% endif %}
+      {% if show_button %}
+        <div class="product-featured-block__button">
+          {% render 'button',
+            text: button.button_text,
+            link: button.button_link,
+            style: button.button_style,
+            size: button.button_size,
+            radius: settings.button_radius,
+            padding: settings.button_padding
+          %}
+        </div>
+      {% endif %}
+    </div>
+    <div class="product-featured-block__bottom">
+      <div class="product-featured-block__item">
+        <div class="product-featured-block__image{% if color_config_enable %} product-featured-block__image--modifier{% endif %}">
+          {% render 'image', image: image_1 %}
+        </div>
+        {% if title_1 %}
+          <div class="product-featured-block__title">
+            {{ title_1 }}
+          </div>
+        {% endif %}
+      </div>
+      <div class="product-featured-block__item">
+        <div class="product-featured-block__image{% if color_config_enable %} product-featured-block__image--modifier{% endif %}">
+          {% render 'image', image: image_2 %}
+        </div>
+        {% if title_2 %}
+          <div class="product-featured-block__title">
+            {{ title_2 }}
+          </div>
+        {% endif %}
+      </div>
+      <div class="product-featured-block__item">
+        <div class="product-featured-block__image{% if color_config_enable %} product-featured-block__image--modifier{% endif %}">
+          {% render 'image', image: image_3 %}
+        </div>
+        {% if title_3 %}
+          <div class="product-featured-block__title">
+            {{ title_3 }}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</xo-animate>

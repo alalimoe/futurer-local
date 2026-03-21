@@ -1,0 +1,76 @@
+{% comment %}
+  Renders a testimonial element with a given value
+
+  Accepts:
+  - autoplay: {String} Autoplay slide (required)
+  - autoplay_time: {String} Set time for autoplay slide (required)
+
+  Usage:
+  {% render 'testimonial-box-4', autoplay: autoplay, autoplay_time: autoplay_time %}
+{% endcomment %}
+
+<div class='testimonial-box-4'>
+  <xo-carousel
+    xo-per-view='1'
+    xo-per-move='1'
+    xo-overflow='visible'
+    {% if autoplay == 'on' %}
+      xo-autoplay='{{ autoplay_time }}'
+      xo-loop
+    {% endif %}
+    xo-breakpoints='
+      {
+        768: {
+          perView: 1,
+          perMove: 1,
+        },
+      }
+    '
+    xo-render-bullet="<span class='carousel-bullet'></span>"
+    class='testimonial-box-4__carousel'
+  >
+    <div class='testimonial-box-4__head'>
+      {% if sub_heading %}
+        <div class='testimonial-box-4__sub-heading'>{{ sub_heading }}</div>
+      {% endif %}
+      <div class='testimonial-box-4__navigation'>
+        <xo-carousel-prev role='button' tabindex='0' aria-label='Previous button'>
+          <div class='testimonial-box-4__navi-icon testimonial-box-4__navi-icon--prev{% if settings.enable_border_radius %} testimonial-box-4__navi-icon--radius{% endif %}'>
+            {% comment %} {% render 'icon', name: 'arrow-left', size: '2.4rem' %} {% endcomment %}
+            {% render 'button-slide', icon: 'arrow-left', icon_size: '2.4rem', size: '3.6rem', direction: 'left', style: 'dark' %}
+          </div>
+        </xo-carousel-prev>
+        <xo-carousel-next role='button' tabindex='0' aria-label='Next button'>
+          <div class='testimonial-box-4__navi-icon testimonial-box-4__navi-icon--next{% if settings.enable_border_radius %} testimonial-box-4__navi-icon--radius{% endif %}'>
+            {% comment %} {% render 'icon', name: 'arrow-right', size: '2.4rem' %} {% endcomment %}
+            {% render 'button-slide', icon: 'arrow-right', icon_size: '2.4rem', size: '3.6rem', direction: 'right', style: 'dark' %}
+          </div>
+        </xo-carousel-next>
+      </div>
+    </div>
+    <xo-carousel-inner>
+      <xo-carousel-list>
+        {% for item in block %}
+          {% liquid
+            assign content = item.settings.content
+            assign name = item.settings.customer_name
+            assign image = item.settings.image
+          %}
+          <xo-carousel-slide class='testimonial-box-4__slide'>
+            <div class='testimonial-box-4__content {% if settings.enable_border_radius %}testimonial-box-4__content--radius{% endif %}'>
+              <div class='testimonial-box-4__left {% if settings.enable_border_radius %}testimonial-box-4__left--radius{% endif %}'>
+                {% render 'image', image: image %}
+              </div>
+              <div class='testimonial-box-4__right'>
+                {% render 'testimonial-box', content: content, name: name, show_navigation: 'false', enable_show_icon: 'false', tag_1: 'div', tag_2: 'div' %}
+              </div>
+            </div>
+          </xo-carousel-slide>
+        {% endfor %}
+      </xo-carousel-list>
+    </xo-carousel-inner>
+    <div class='testimonial-box-4__paginate'>
+      {% render 'carousel-pagination', align: 'center', style: 'sticks' %}
+    </div>
+  </xo-carousel>
+</div>

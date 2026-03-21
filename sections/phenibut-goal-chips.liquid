@@ -1,0 +1,96 @@
+<section id="phb-gc-{{ section.id }}" class="phb-goal-chips" aria-label="Benefit shortcuts">
+  {% if section.settings.show_heading %}
+    <h2 class="phb-goal-chips__title">{{ section.settings.heading | escape }}</h2>
+  {% endif %}
+
+  <nav class="phb-goal-chips__row" role="navigation" aria-label="Jump to benefit">
+    {% for block in section.blocks %}
+      {% if block.type == 'chip' %}
+        <a class="phb-gc-chip" href="{{ block.settings.href | escape }}" {{ block.shopify_attributes }}>
+          {{ block.settings.label | escape }}
+        </a>
+      {% endif %}
+    {% endfor %}
+  </nav>
+</section>
+
+{%- style -%}
+#phb-gc-{{ section.id }} {
+  --phb-bg: {{ section.settings.background_color }};
+  --phb-max: {{ section.settings.max_width }}px;
+  --phb-py: {{ section.settings.padding_y }}px;
+  --phb-accent: var(--color-accent-primary, #FBBF24);
+  --phb-heading: var(--color-text-main, #0A2342);
+  --phb-chip-bg: var(--color-bg-secondary, #F2F6F9);
+  --phb-chip-text: var(--color-text-main, #0b172a);
+  --phb-chip-border: var(--nx-pill-border, rgba(0,0,0,.06));
+  --phb-font: var(--font-body-family, sans-serif);
+  --phb-font-heading: var(--font-heading-family, sans-serif);
+  background: var(--phb-bg);
+  font-family: var(--phb-font);
+}
+#phb-gc-{{ section.id }} .phb-goal-chips__title {
+  font-family: var(--phb-font-heading);
+  font-size: clamp(18px, 3.2vw, 22px); margin: 0 0 8px;
+  color: var(--phb-heading);
+  text-align: {% if section.settings.center_on_mobile %}center{% else %}left{% endif %};
+}
+#phb-gc-{{ section.id }} .phb-goal-chips__row {
+  max-width: var(--phb-max); margin: 0 auto; padding: var(--phb-py) 16px;
+  display: flex; flex-wrap: wrap; gap: 10px;
+  justify-content: {% if section.settings.center_on_mobile %}center{% else %}flex-start{% endif %};
+}
+#phb-gc-{{ section.id }} .phb-gc-chip {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 8px 12px; border-radius: 999px;
+  background: var(--phb-chip-bg); color: var(--phb-chip-text);
+  text-decoration: none; font-weight: 700; font-size: 14px;
+  border: 1px solid var(--phb-chip-border);
+}
+#phb-gc-{{ section.id }} .phb-gc-chip:focus-visible {
+  outline: 2px solid var(--phb-accent); outline-offset: 2px;
+}
+[id^="benefit-"] { scroll-margin-top: 96px; }
+@media (max-width: 989px) { [id^="benefit-"] { scroll-margin-top: 80px; } }
+@media (prefers-reduced-motion: reduce) {
+  #phb-gc-{{ section.id }} *,
+  #phb-gc-{{ section.id }} *::before,
+  #phb-gc-{{ section.id }} *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+{%- endstyle -%}
+
+{% schema %}
+{
+  "name": "Goal Chips",
+  "tag": "section",
+  "class": "section-phb-goal-chips",
+  "settings": [
+    { "type": "checkbox", "id": "show_heading", "label": "Show small heading", "default": false },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Find your goal" },
+    { "type": "color", "id": "background_color", "label": "Background", "default": "#FFFFFF" },
+    { "type": "range", "id": "max_width", "label": "Max width (px)", "min": 720, "max": 1400, "step": 20, "default": 1200 },
+    { "type": "range", "id": "padding_y", "label": "Vertical padding (px)", "min": 0, "max": 40, "step": 2, "default": 12 },
+    { "type": "checkbox", "id": "center_on_mobile", "label": "Center chips on mobile", "default": true }
+  ],
+  "blocks": [
+    { "type": "chip", "name": "Chip", "settings": [
+      { "type": "text", "id": "label", "label": "Label", "default": "Calm" },
+      { "type": "text", "id": "href", "label": "Link (anchor or URL)", "default": "#benefit-calm-relaxation" }
+    ] }
+  ],
+  "max_blocks": 6,
+  "presets": [
+    {
+      "name": "Goal Chips",
+      "blocks": [
+        { "type": "chip", "settings": { "label": "Calm", "href": "#benefit-calm-relaxation" } },
+        { "type": "chip", "settings": { "label": "Sleep", "href": "#benefit-better-sleep-quality" } },
+        { "type": "chip", "settings": { "label": "Social Ease", "href": "#benefit-social-ease-confidence" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,57 @@
+{% liquid
+  assign heading = block.settings.heading
+  assign sub_heading = block.settings.sub_heading
+  assign icon_image = block.settings.icon_image
+  assign background_color = block.settings.background_color
+  assign text_color = block.settings.text_color
+
+  if timer != blank
+    assign time_input = timer | date: '%s' | append: '000'
+  endif
+%}
+
+<div class='xo-countdown-timer'>
+  <div
+    class='xo-countdown-timer__content xo-stack{% if settings.enable_border_radius %} xo-countdown-timer__content--radius{% endif %}'
+    style='--ai: center; --jc: space-between; --gap: 20; --gap-mobile: 20; --bg-color: {{ background_color }}; --text-color: {{ text_color }}'
+  >
+    <div class='xo-countdown-timer__wrapper xo-stack' style='--ai: center; --gap: 13; --gap-mobile: 10'>
+      {% if icon_image != blank %}
+        <div class='xo-countdown-timer__icon'>
+          {% render 'image', image: icon_image %}
+        </div>
+      {% endif %}
+      <div class='xo-countdown-timer__text xo-stack' style='--ai: start; --dir: column; --gap: 0; --gap-mobile: 0'>
+        {% if heading != blank %}
+          <span class='xo-countdown-timer__heading'>{{ heading }}</span>
+        {% endif %}
+        {% if sub_heading != blank %}
+          <span class='xo-countdown-timer__sub-heading'>{{ sub_heading }}</span>
+        {% endif %}
+      </div>
+    </div>
+    <div class='xo-countdown-timer__timer'>
+      <xo-countdown xo-timestamp='{{ time_input }}' class='xo-countdown-timer__countdown'>
+        <div class='xo-countdown-timer__box xo-stack' style='--ai: center; --dir: column; --gap: 0; --gap-mobile: 0'>
+          <xo-countdown-day class='xo-countdown-timer__number h6'></xo-countdown-day>
+          <span class='xo-countdown-timer__label'>Days</span>
+        </div>
+        <div class='xo-countdown-timer__dot'>:</div>
+        <div class='xo-countdown-timer__box xo-stack' style='--ai: center; --dir: column; --gap: 0; --gap-mobile: 0'>
+          <xo-countdown-hour class='xo-countdown-timer__number h6'></xo-countdown-hour>
+          <span class='xo-countdown-timer__label'>Hours</span>
+        </div>
+        <div class='xo-countdown-timer__dot'>:</div>
+        <div class='xo-countdown-timer__box xo-stack' style='--ai: center; --dir: column; --gap: 0; --gap-mobile: 0'>
+          <xo-countdown-minute class='xo-countdown-timer__number h6'></xo-countdown-minute>
+          <span class='xo-countdown-timer__label'>Minutes</span>
+        </div>
+        <div class='xo-countdown-timer__dot'>:</div>
+        <div class='xo-countdown-timer__box xo-stack' style='--ai: center; --dir: column; --gap: 0; --gap-mobile: 0'>
+          <xo-countdown-second class='xo-countdown-timer__number h6'></xo-countdown-second>
+          <span class='xo-countdown-timer__label'>Seconds</span>
+        </div>
+      </xo-countdown>
+    </div>
+  </div>
+</div>

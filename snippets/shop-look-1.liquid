@@ -1,0 +1,51 @@
+{% comment %}
+  Renders a shop-look-1
+
+  @param {String} heading - A string to use as the heading for the shop-look-1 element (optional)
+  @param {Object} block - An object to use as the blocks for the shop-look-1 element (optional)
+
+  @example
+  {% render 'shop-look-1', heading: heading, block: block %}
+{% endcomment %}
+
+<div class="shop-look-1">
+  <xo-animate xo-cascade xo-order="1" style="height: 100%;">
+    <div class="shop-look-1__content{% if settings.enable_border_radius %} shop-look-1__content--radius{% endif %}">
+      {% if heading %}
+        <div class="shop-look-1__head">
+          {% render 'text', context: section %}
+        </div>
+      {% endif %}
+      <div class="shop-look-1__bottom">
+        <div class="shop-look-1__feature">
+          {% for item in block %}
+            {% case item.type %}
+              {% when 'feature' %}
+                {% liquid
+                  assign image = item.settings.image
+                  assign color_config_enable = item.settings.color_config_enable
+                  assign content = item.settings.content
+                %}
+                <div class="shop-look-1__feature-item">
+                  <div class="shop-look-1__image{% if color_config_enable %} shop-look-1__image--modifier{% endif %}">
+                    {% render 'image', image: image %}
+                  </div>
+                  <div class="shop-look-1__info">{{ content }}</div>
+                </div>
+            {% endcase %}
+          {% endfor %}
+        </div>
+        <div class="shop-look-1__button">
+          {% render 'button',
+            text: section.settings.button_text,
+            link: section.settings.button_link,
+            style: section.settings.button_style,
+            size: section.settings.button_size,
+            radius: section.settings.button_radius,
+            padding: section.settings.button_padding
+          %}
+        </div>
+      </div>
+    </div>
+  </xo-animate>
+</div>

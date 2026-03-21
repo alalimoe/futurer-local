@@ -1,0 +1,139 @@
+{% comment %}
+  Renders a product video card
+
+  @param video {Object} Video object
+  @param product {Object} Product object
+  @param aspect_ratio {String} Aspect ratio
+  @param loop {Boolean} Loop
+
+  @example
+  {% render 'product-video-card' %}
+{% endcomment %}
+
+{% liquid
+  assign context = context | default: block
+  assign text = context.settings.text
+  assign avatar = context.settings.avatar
+  assign video = context.settings.video
+  assign product = context.settings.product
+  assign color_scheme = context.settings.color_scheme
+  assign card_color_scheme = context.settings.card_color_scheme
+  assign aspect_ratio = context.settings.aspect_ratio
+  if aspect_ratio == 'custom'
+    assign aspect_ratio = context.settings.aspect_ratio_width | append: '/' | append: context.settings.aspect_ratio_height
+  endif
+
+  assign container_class = 'xo-product-video-card'
+  if settings.enable_border_radius
+    assign container_class = container_class | append: ' xo-product-video-card--radius'
+  endif
+  if color_scheme
+    assign container_class = container_class | append: ' color-' | append: color_scheme
+  endif
+
+  assign product_class = 'xo-product-video-card__product-wrap'
+  if card_color_scheme
+    assign product_class = product_class | append: ' color-' | append: card_color_scheme
+  endif
+%}
+
+{% capture video_content %}
+  {% if video == blank and request.design_mode %}
+    {% render 'image', aspect_ratio: aspect_ratio, lazyload: true %}
+    {% elsif video != blank %}
+      <div class="xo-product-video-card__video xo-product-video-card__video--preview" style="--ratio-percent: {{ aspect_ratio }}">
+        {% render 'image', image: video.preview_image, aspect_ratio: aspect_ratio, lazyload: true %}
+    </div>
+    <div class="xo-product-video-card__video" style="--ratio-percent: {{ aspect_ratio }}">
+      {% assign video_content = video | video_tag: image_size: '500x', loop: block.settings.loop, controls: false, muted: true, autoplay: false %}
+      {{ video_content |  replace: '<img ', '<img alt="Image video"' }}
+    </div>
+  {% endif %}
+{% endcapture %}
+
+<div class="{{ container_class }}">
+  <xo-product-video-card class="xo-product-video-card__video-card">
+    {{ video_content }}
+    <div class="xo-product-video-card__controls">
+      <xo-product-video-card-play class="xo-product-video-card__play">
+        <xo-tooltip
+          xo-title="{{ 'accessibility.play' | t }}"
+          xo-mobile-disabled
+          xo-placement="top-center"
+          class="xo-product-video-card__icon xo-product-video-card__icon--play tooltip{% if settings.enable_border_radius %} tooltip--radius{% endif %}"
+        >
+          {% render 'icon', name: 'play', size: '1.8rem' %}
+        </xo-tooltip>
+        <xo-tooltip
+          xo-title="{{ 'accessibility.pause' | t }}"
+          xo-mobile-disabled
+          xo-placement="top-center"
+          class="xo-product-video-card__icon xo-product-video-card__icon--pause tooltip{% if settings.enable_border_radius %} tooltip--radius{% endif %}"
+        >
+          {% render 'icon', name: 'pause', size: '1.8rem' %}
+        </xo-tooltip>
+      </xo-product-video-card-play>
+      <xo-product-video-card-mute class="xo-product-video-card__mute">
+        <xo-tooltip
+          xo-title="{{ 'accessibility.unmute' | t }}"
+          xo-mobile-disabled
+          xo-placement="top-center"
+          class="xo-product-video-card__icon xo-product-video-card__icon--unmute tooltip{% if settings.enable_border_radius %} tooltip--radius{% endif %}"
+        >
+          {% render 'icon', name: 'unmute', size: '1.8rem' %}
+        </xo-tooltip>
+        <xo-tooltip
+          xo-title="{{ 'accessibility.mute' | t }}"
+          xo-mobile-disabled
+          xo-placement="top-center"
+          class="xo-product-video-card__icon xo-product-video-card__icon--mute tooltip{% if settings.enable_border_radius %} tooltip--radius{% endif %}"
+        >
+          {% render 'icon', name: 'mute', size: '1.8rem' %}
+        </xo-tooltip>
+      </xo-product-video-card-mute>
+    </div>
+    <div class="xo-product-video-card__time-bar-inner">
+      <xo-product-video-card-time-bar class="xo-product-video-card__time-bar-wrap">
+        <span class="xo-product-video-card__time-bar-track"></span>
+        <span class="xo-product-video-card__time-bar-thumb"></span>
+      </xo-product-video-card-time-bar>
+    </div>
+    <div class="xo-product-video-card__customer">
+      <div class="xo-product-video-card__customer-avatar">
+        {% render 'image', image: avatar, aspect_ratio: '1' %}
+      </div>
+      <span class="xo-product-video-card__customer-name">
+        {{ text }}
+      </span>
+    </div>
+  </xo-product-video-card>
+  <div class="xo-product-video-card__product-card">
+    <xo-product
+      xo-product-id="{{ product.id }}"
+      xo-section-id="{{ section.id }}"
+      xo-selected-or-first-available-variant-id="{{ product.selected_or_first_available_variant.id }}"
+    >
+      <div class="{{ product_class }}">
+        <div class="xo-product-video-card__product-image">
+          {% render 'image', image: product.featured_image, aspect_ratio: aspect_ratio, disable_alt: true %}
+        </div>
+        <div class="xo-product-video-card__product-content">
+          {% if product and product != empty %}
+            <a href="{%- render 'product-card-variant-url', product: product -%}" class="xo-product-video-card__title" xo-animate-text-normal-hover>
+              {% render 'animate-text-normal', text: product.title, effect: 'underline-in' %}
+            </a>
+          {% else %}
+            <div class="xo-product-video-card__title" xo-animate-text-normal-hover>
+              {% assign text = 'onboarding.product_title' | t %}
+              {% render 'animate-text-normal', text: text, effect: 'underline-in' %}
+            </div>
+          {% endif %}
+          <div class="xo-product-video-card__price">
+            {% render 'price', product: product, show_badge: show_badge, use_variant: true, reverse: true %}
+          </div>
+        </div>
+      </div>
+      {% render 'product-data', product: product %}
+    </xo-product>
+  </div>
+</div>

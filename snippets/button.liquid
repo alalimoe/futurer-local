@@ -1,0 +1,150 @@
+{% comment %}
+  Renders a button
+
+  @param attrs: {String} additional attributes to add to the button
+  @param class: {String} additional classes to add to the button
+  @param disabled: {Boolean} whether the button is disabled
+  @param form_id: {String} form id to submit
+  @param icon_name: {String} icon name
+  @param icon_position: {String} icon position. Default: right (optional)
+  @param icon_size: {String} icon size
+  @param icon_spacing: {String} icon spacing
+  @param link: {String} link href of button
+  @param loading: {Boolean} whether the button is loading
+  @param loading_type: {String} loading type. Default: 'loader-3' (optional)
+  @param name: {String} name of the button
+  @param open_in_new_tab: {Boolean} whether to open the link in a new tab
+  @param text: {String} button content
+  @param type: {String} type of button
+  @param variant: {String} variant of the button. Default: 'primary' (optional)
+  @param width: {Number} width of the button
+
+  @example
+  {% render 'button', text: button.button_text, link: button.button_link, style: button.button_style, size: button.button_size, radius: settings.button_radius, padding: settings.button_padding %}
+{% endcomment %}
+
+{% liquid
+  assign icon_position = icon_position | default: 'right'
+  assign loading_type = loading_type | default: settings.buttons_loading
+  assign container_class = 'xo-btn'
+  assign container_style = ''
+  # Button classes
+  if settings.enable_border_radius
+    assign container_class = container_class | append: ' xo-btn--radius'
+  endif
+  if class
+    assign container_class = container_class | append: ' ' | append: class
+  endif
+  if style
+    assign container_class = container_class | append: ' xo-btn--' | append: style
+  endif
+  if style != 'link' and settings.buttons_effect != 'slide-up'
+    assign container_class = container_class | append: ' xo-btn--animation'
+  endif
+  if size
+    assign container_class = container_class | append: ' xo-btn--' | append: size
+  endif
+  if settings.buttons_effect
+    assign container_class = container_class | append: ' xo-btn--' | append: settings.buttons_effect
+  endif
+  if loading
+    assign container_class = container_class | append: ' xo-btn--loading'
+  endif
+  if block
+    assign container_class = container_class | append: ' xo-btn--block'
+  endif
+  if icon == null and style == 'link'
+    assign container_class = container_class | append: ' xo-btn--link-hover'
+  endif
+  # Button styles
+  if width != null
+    assign container_style = container_style | append: '--width: ' | append: width | append: ';'
+  endif
+  if height != null
+    assign container_style = container_style | append: '--height: ' | append: height | append: ';'
+  endif
+  if radius != null
+    assign container_style = container_style | append: 'border-radius: ' | append: radius | append: 'rem;'
+  endif
+  if padding != null
+    assign container_style = container_style | append: 'padding-inline-start: ' | append: padding | append: 'rem; padding-inline-end: ' | append: padding | append: 'rem;'
+  endif
+
+  assign button_content_class = 'xo-btn__content'
+  if icon != null and icon_position == 'right'
+    assign button_content_class = button_content_class | append: ' xo-btn__content--reverse'
+  endif
+%}
+
+{% capture general_attr %}
+  class='{{ container_class }}'
+  style='{{ container_style }}'
+  {% if disabled %}
+    disabled
+  {% endif %}
+  {% if attrs %}
+    {{ attrs }}
+  {% endif %}
+{% endcapture %}
+
+{% capture button_text_attr %}
+  {% if settings.buttons_effect == 'slide-up' %}
+    data-text='{{ text | strip }}'
+  {% endif %}
+  {% if text_unavailable != blank %}
+    data-text-unavailable='{{ text_unavailable | strip }}'
+  {% endif %}
+{% endcapture %}
+
+{% capture content %}
+  <span class="{{ button_content_class }}">
+    {% if icon != nil %}
+      <span class="xo-btn__icon">
+        {% render 'icon', name: icon, size: icon_size %}
+      </span>
+    {% endif %}
+    {% if text != nil %}
+      <span class="xo-btn__text" {{ button_text_attr }}>
+        {{ text }}
+      </span>
+    {% endif %}
+  </span>
+  <span class="xo-btn__loading">
+    {% liquid
+      case loading_type
+        when 'loader-1'
+          render 'loader-1', size: 20
+        when 'loader-2'
+          render 'loader-2', size: 16
+        when 'loader-3'
+          render 'loader-3', size: 8
+        else
+          render 'loader-3', size: 8
+      endcase
+    %}
+  </span>
+{% endcapture %}
+
+{% if text != '' %}
+  {% if link %}
+    <a {{ general_attr }} href="{{ link }}" title="{{ text }}" class="focus-inset">
+      {{ content }}
+    </a>
+  {% else %}
+    <button
+      {{ general_attr -}}
+      {% if type != blank %}
+        type="{{ type }}"
+      {% endif %}
+      {% if form_id != blank %}
+        form="{{ form_id }}"
+      {% endif %}
+      {% if name != blank %}
+        name="{{ name }}"
+      {% endif %}
+      aria-label="{{ text | default: 'Button' }}"
+    >
+      {{ content }}
+    </button>
+  {% endif %}
+{% endif %}

@@ -1,0 +1,403 @@
+{% comment %}
+  Main Article • Clean (Sticky TOC)
+  - Clean reading layout with a sticky upper-left TOC
+  - Inherits typography (H1–H6, body, links) from NP tokens (same as your NP Article section)
+  - Self-contained: inline JS for TOC + scroll spy + progress bar
+  - Futurer 2.1 compatible (OS 2.0 sections)
+{% endcomment %}
+
+{%- if section.settings.heading_font != blank -%}
+  {{ section.settings.heading_font | font_face: font_display: 'swap' }}
+{%- endif -%}
+{%- if section.settings.body_font != blank -%}
+  {{ section.settings.body_font | font_face: font_display: 'swap' }}
+{%- endif -%}
+
+<section
+  id="clean-article"
+  class="np-clean-article np-blog"
+  data-header-offset="{{ section.settings.header_offset_px }}"
+  style="
+    /* ——— Typography tokens (match NP Article) ——— */
+    --line-height: {{ section.settings.line_height }};
+    --title-size: {{ section.settings.title_size }}px;
+    --h1: {{ section.settings.h1_size }}px;
+    --h2: {{ section.settings.h2_size }}px;
+    --h3: {{ section.settings.h3_size }}px;
+    --h4: {{ section.settings.h4_size }}px;
+    --h5: {{ section.settings.h5_size }}px;
+    --h6: {{ section.settings.h6_size }}px;
+    --body-size: {{ section.settings.body_size }}px;
+
+    --color-bg: {{ section.settings.background_color }};
+    --color-text: {{ section.settings.text_color }};
+    --color-heading: {{ section.settings.heading_color }};
+    --color-accent: {{ section.settings.accent_color }};
+    --color-link: {{ section.settings.link_color }};
+    --color-link-hover: {{ section.settings.link_hover_color }};
+  "
+>
+  <style>
+    /* ===== Bridge: apply NP typography variables (same behavior as your NP Article section) ===== */
+
+    .np-clean-article {
+      background: var(--color-bg);
+      color: var(--color-text);
+      line-height: var(--line-height);
+      {% if section.settings.body_font != blank %}
+      font-family: {{ section.settings.body_font.family }}, {{ section.settings.body_font.fallback_families }};
+      {% endif %}
+    }
+
+    /* Layout scaffolding (safe if blog-clean.css is absent) */
+    .np-wrap { max-width: min(var(--np-max-content, 960px), 100%); margin-inline:auto; padding: clamp(1rem, 2vw, 2rem) var(--page-gutter); }
+    .np-grid { display:grid; grid-template-columns: 260px minmax(0,1fr); gap: clamp(1.25rem, 3vw, 2.25rem); align-items:start; }
+    @media (max-width: 1100px) { .np-grid { grid-template-columns: 1fr; } }
+
+    /* TOC column (sticky) */
+    .np-toc-col { position: relative; }
+    .np-toc {
+      position: sticky;
+      top: {{ section.settings.header_offset_px }}px;
+      padding: 16px 14px;
+      border: none;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.7);
+      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+      max-height: calc(100vh - {{ section.settings.header_offset_px }}px - 24px);
+      overflow:auto;
+    }
+    .np-toc__title {
+      margin: 0 0 8px 0;
+      {% if section.settings.heading_font != blank %}
+      font-family: {{ section.settings.heading_font.family }}, {{ section.settings.heading_font.fallback_families }};
+      {% endif %}
+      font-weight: 600; font-size: 14px; letter-spacing: .02em; text-transform: uppercase; color: var(--color-text-muted, #6B7280);
+    }
+    .np-toc__list { list-style:none; margin:0; padding:0; }
+    .np-toc__item { margin: 2px 0; }
+    .np-toc__link {
+      display:block; text-decoration:none;
+      color: var(--color-heading, #0B0B0B); font-weight:600; font-size: 14px;
+      padding:6px 8px; border-left:3px solid transparent; border-radius:6px;
+    }
+    .np-toc__link:hover { background: var(--color-bg-primary, #fff); border-left-color: var(--color-accent); }
+    .np-toc__link.active { background: var(--color-bg-primary, #fff); border-left-color: var(--color-accent); }
+    .np-toc__link:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; border-radius: 4px; }
+
+    /* Article column */
+    .np-article { max-width: min(var(--np-max-content, 960px), 100%); margin-inline:auto; }
+    .np-article__title {
+      {% if section.settings.heading_font != blank %}
+      font-family: {{ section.settings.heading_font.family }}, {{ section.settings.heading_font.fallback_families }};
+      {% endif %}
+      color: var(--color-heading);
+      font-size: var(--title-size);
+      line-height: 1.2;
+      letter-spacing: -.01em;
+      margin: 0 0 .25rem 0;
+    }
+    .np-article__meta { display:flex; flex-wrap:wrap; gap:.7rem 1rem; color: var(--color-text-muted, #6B7280); font-size: .95rem; margin-bottom: 1rem; }
+
+    /* Body + headings (inherit NP tokens) */
+    .np-article__content { font-size: var(--body-size); line-height: var(--line-height); }
+    .np-article__content h1,
+    .np-article__content h2,
+    .np-article__content h3,
+    .np-article__content h4,
+    .np-article__content h5,
+    .np-article__content h6 {
+      {% if section.settings.heading_font != blank %}
+      font-family: {{ section.settings.heading_font.family }}, {{ section.settings.heading_font.fallback_families }};
+      {% endif %}
+      color: var(--color-heading);
+      line-height: 1.3;
+      margin: 1.5rem 0 .75rem 0;
+      scroll-margin-top: calc({{ section.settings.header_offset_px }}px + 16px);
+    }
+    .np-article__content h1 { font-size: var(--h1); }
+    .np-article__content h2 { font-size: var(--h2); }
+    .np-article__content h3 { font-size: var(--h3); }
+    .np-article__content h4 { font-size: var(--h4); }
+    .np-article__content h5 { font-size: var(--h5); }
+    .np-article__content h6 { font-size: var(--h6); }
+
+    /* Body links (underline with accent, same as NP Article) */
+    .np-article__content a {
+      color: var(--color-link);
+      text-decoration: underline;
+      text-decoration-color: var(--color-accent);
+      text-underline-offset: 3px;
+      transition: color .2s ease;
+    }
+    .np-article__content a:hover { color: var(--color-link-hover); }
+
+    /* Progress bar (thin, sticky) */
+    .np-progress { position: sticky; top: 0; height: 3px; background: transparent; z-index: 3; }
+    .np-progress__bar { display:block; width:0%; height:100%; background: currentColor; opacity:.25; }
+
+    /* Images, quotes, code (light touch) */
+    .np-article__figure img { width:100%; height:auto; border-radius: 12px; }
+    .np-article__content blockquote {
+      border-left:4px solid var(--color-accent);
+      background: var(--color-bg-secondary, #f9fafb); color: var(--color-text-muted, #6B7280);
+      padding: 14px 16px; border-radius: 12px; margin: 1rem 0;
+    }
+    .np-article__content code { background: var(--color-bg-secondary, #f9fafb); color: var(--color-text-main, #0B0B0B); padding: 2px 6px; border-radius: 4px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; font-size: .95em; }
+    .np-article__content pre { background: var(--color-code-bg, #0e1116); color: var(--color-code-text, #e6edf3); padding:16px; border-radius:12px; overflow:auto; }
+
+    /* Mobile TOC: collapsible drawer under header */
+    @media (max-width:1100px) {
+      .np-toc-col { order: -1; }
+      .np-toc { position: relative; top: 0; max-height: none; }
+      .np-toc.is-collapsible .np-toc__title { display:flex; align-items:center; justify-content:space-between; cursor:pointer; }
+      .np-toc.is-collapsible:not(.is-open) .np-toc__list { display: none; }
+      .np-toc.is-collapsible .np-toc__title::after { content:'▾'; opacity:.7; }
+      .np-toc.is-collapsible:not(.is-open) .np-toc__title::after { transform: rotate(-90deg); }
+    }
+  </style>
+
+  <div class="np-wrap" style="--np-max-content: {{ section.settings.max_content_width_px }}px;">
+    <div class="np-grid">
+      <!-- Sticky TOC (upper-left) -->
+      {% if section.settings.show_toc %}
+      <aside class="np-toc-col">
+        <nav class="np-toc" aria-label="Table of contents" data-depth="{{ section.settings.toc_depth }}">
+          <h3 class="np-toc__title">{{ section.settings.toc_title }}</h3>
+          <ul class="np-toc__list"></ul>
+        </nav>
+      </aside>
+      {% endif %}
+
+      <!-- Main reading column -->
+      <article class="np-article" itemscope itemtype="https://schema.org/Article">
+        {% if section.settings.enable_progress %}
+          <div class="np-progress" aria-hidden="true"><span class="np-progress__bar"></span></div>
+        {% endif %}
+
+        <header class="np-article__header">
+          {% if section.settings.show_featured_image and article.image %}
+            <figure class="np-article__figure">
+              <img src="{{ article.image | image_url: width: 1600 }}" alt="{{ article.image.alt | escape }}" loading="eager" fetchpriority="high" decoding="async" itemprop="image" width="{{ article.image.width }}" height="{{ article.image.height }}">
+              {% if article.image.alt != blank %}<figcaption class="np-article__figcap">{{ article.image.alt }}</figcaption>{% endif %}
+            </figure>
+          {% endif %}
+
+          <h1 class="np-article__title" itemprop="headline">{{ article.title }}</h1>
+
+          <div class="np-article__meta">
+            {% if section.settings.show_author %}
+              <span class="np-article__author" itemprop="author" itemscope itemtype="https://schema.org/Person">
+                <span itemprop="name">{{ article.author }}</span>
+              </span>
+            {% endif %}
+            {% if section.settings.show_date %}
+              <time class="np-article__date" itemprop="datePublished" datetime="{{ article.published_at | date: "%Y-%m-%d" }}">
+                {{ article.published_at | date: format: "date" }}
+              </time>
+            {% endif %}
+            {% if section.settings.show_reading_time %}
+              {% assign words = article.content | strip_html | replace: '&nbsp;', ' ' | split: ' ' | size %}
+              {% assign minutes = words | plus: 199 | divided_by: 200 %}
+              <span class="np-article__reading-time">{{ minutes }} min read</span>
+            {% endif %}
+          </div>
+
+          {% if article.excerpt != blank and section.settings.show_excerpt %}
+            <p class="np-article__excerpt" style="color:#555; font-style:italic; margin:.25rem 0 1rem 0;">{{ article.excerpt }}</p>
+          {% endif %}
+        </header>
+
+        <div class="np-article__content rte np-body" itemprop="articleBody">
+          {{ article.content }}
+        </div>
+
+        {% if section.settings.show_tags and article.tags.size > 0 %}
+          <footer class="np-article__footer" style="margin-top:1.25rem;">
+            <ul class="np-article__tags" aria-label="Tags" style="list-style:none; display:flex; gap:.5rem; padding:0;">
+              {% for tag in article.tags %}
+                <li><a style="text-decoration:none; border:none; padding:.3rem .7rem; border-radius:999px; color:#444; background:rgba(0,0,0,0.04); box-shadow:0 1px 3px rgba(0,0,0,0.03); transition:all 0.4s cubic-bezier(0.25,0.8,0.25,1);" href="{{ blog.url }}/tagged/{{ tag | handleize }}">{{ tag }}</a></li>
+              {% endfor %}
+            </ul>
+          </footer>
+        {% endif %}
+
+        {% comment %}
+          Optional: include your JSON-LD snippet if present.
+          {% render 'article-json-ld', article: article %}
+        {% endcomment %}
+      </article>
+    </div>
+  </div>
+
+  {% if section.settings.enable_toc_js %}
+  <script>
+    (function(){
+      var root = document.getElementById('clean-article');
+      if(!root) return;
+
+      var headerOffset = parseInt(root.getAttribute('data-header-offset') || '80', 10);
+      var articleBody = root.querySelector('.np-article__content') || root.querySelector('.np-body') || root;
+      var toc = root.querySelector('.np-toc');
+      var list = toc ? toc.querySelector('.np-toc__list') : null;
+      if(!toc || !list) return;
+
+      var depth = toc.getAttribute('data-depth') || 'h2h3';
+      var selectors = depth === 'h2' ? ['H2'] : (depth === 'h2h3' ? ['H2','H3'] : ['H2','H3','H4']);
+      var headings = Array.from(articleBody.querySelectorAll(selectors.join(','))).filter(function(h){
+        return (h.textContent || '').trim().length > 0;
+      });
+
+      // Ensure unique IDs (slugify)
+      var slugCounts = {};
+      function slugify(text){
+        var base = text.toLowerCase()
+          .replace(/[`~!@#$%^&*()\-=+{}[\]|\\:;"'<>,.?/]/g,'')
+          .trim()
+          .replace(/\s+/g,'-')
+          .substring(0,80);
+        var count = (slugCounts[base] = (slugCounts[base] || 0) + 1);
+        return count === 1 ? base : base + '-' + count;
+      }
+      headings.forEach(function(h){ if(!h.id) h.id = slugify(h.textContent.trim()); });
+
+      // Build TOC
+      if(!headings.length){ toc.style.display='none'; return; }
+      list.innerHTML = '';
+      var links = [];
+      headings.forEach(function(h){
+        var li = document.createElement('li');
+        li.className = 'np-toc__item';
+        var a = document.createElement('a');
+        a.className = 'np-toc__link';
+        a.href = '#' + h.id;
+        a.textContent = (h.textContent || '').trim();
+        var tag = parseInt(h.tagName.replace('H',''), 10);
+        var indentLevel = Math.max(0, tag - 2); // H2=0, H3=1, H4=2
+        a.style.paddingLeft = (indentLevel * 12 + 12) + 'px';
+        a.addEventListener('click', function(e){
+          e.preventDefault();
+          var y = h.getBoundingClientRect().top + window.scrollY - (headerOffset + 8);
+          var prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+          if(prefersReduced) { window.scrollTo(0, y); } else { window.scrollTo({ top: y, behavior: 'smooth' }); }
+          setActive(h.id);
+          try { history.replaceState(null,'', a.href); } catch(err) {}
+        });
+        li.appendChild(a);
+        list.appendChild(li);
+        links.push(a);
+      });
+
+      // Scroll spy
+      var activeId = null;
+      function setActive(id){
+        if(id === activeId) return;
+        activeId = id;
+        links.forEach(function(l){ l.classList.remove('active'); });
+        var act = links.find(function(l){ return l.getAttribute('href') === '#' + id; });
+        if(act) act.classList.add('active');
+      }
+      var io = new IntersectionObserver(function(entries){
+        entries.forEach(function(entry){
+          if(entry.isIntersecting) setActive(entry.target.id);
+        });
+      }, { rootMargin: '-' + (headerOffset + 12) + 'px 0px -70% 0px', threshold: [0, 1.0] });
+      headings.forEach(function(h){ io.observe(h); });
+
+      // Progress bar
+      var progress = root.querySelector('.np-progress__bar');
+      if(progress){
+        var onScroll = function() {
+          var elTop = articleBody.getBoundingClientRect().top + window.scrollY;
+          var total = articleBody.scrollHeight - window.innerHeight + (elTop || 0);
+          var cur = Math.max(0, Math.min(1, (window.scrollY - (elTop - headerOffset)) / total));
+          progress.style.width = (cur * 100).toFixed(2) + '%';
+        };
+        document.addEventListener('scroll', onScroll, { passive: true });
+        window.addEventListener('resize', onScroll);
+        onScroll();
+      }
+
+      // Mobile collapsible TOC
+      function applyCollapsible(){
+        if(window.matchMedia('(max-width:1100px)').matches){
+          toc.classList.add('is-collapsible');
+          toc.classList.remove('is-open');
+        } else {
+          toc.classList.remove('is-collapsible','is-open');
+        }
+      }
+      applyCollapsible();
+      window.addEventListener('resize', applyCollapsible);
+      var title = toc.querySelector('.np-toc__title');
+      if(title){
+        title.setAttribute('tabindex','0'); title.setAttribute('role','button'); title.setAttribute('aria-expanded','false');
+        function toggle(){ if(!toc.classList.contains('is-collapsible')) return; var open = toc.classList.toggle('is-open'); title.setAttribute('aria-expanded', open ? 'true':'false'); }
+        title.addEventListener('click', toggle);
+        title.addEventListener('keydown', function(e){ if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); toggle(); }});
+        list.addEventListener('click', function(e){ if(e.target.closest('a') && toc.classList.contains('is-collapsible')) { toc.classList.remove('is-open'); title.setAttribute('aria-expanded','false'); }});
+      }
+    })();
+  </script>
+  {% endif %}
+</section>
+
+{% schema %}
+{
+  "name": "Main Article • Clean",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    { "type": "header", "content": "Layout & TOC" },
+    { "type": "checkbox", "id": "show_toc", "label": "Show TOC column", "default": true },
+    { "type": "text", "id": "toc_title", "label": "TOC title", "default": "Contents" },
+    { "type": "select", "id": "toc_depth", "label": "TOC depth", "options": [
+      { "value": "h2", "label": "H2 only" },
+      { "value": "h2h3", "label": "H2 + H3" },
+      { "value": "h2h3h4", "label": "H2 + H3 + H4" }
+    ], "default": "h2h3" },
+    { "type": "range", "id": "max_content_width_px", "label": "Max content width (px)", "min": 720, "max": 1200, "step": 10, "default": 960 },
+    { "type": "range", "id": "header_offset_px", "label": "Sticky offset (header height, px)", "min": 40, "max": 140, "step": 2, "default": 80 },
+    { "type": "checkbox", "id": "enable_progress", "label": "Show reading progress bar", "default": true },
+    { "type": "checkbox", "id": "show_featured_image", "label": "Show featured image", "default": true },
+    { "type": "checkbox", "id": "show_excerpt", "label": "Show excerpt (if available)", "default": true },
+
+    { "type": "header", "content": "Meta" },
+    { "type": "checkbox", "id": "show_author", "label": "Show author", "default": true },
+    { "type": "checkbox", "id": "show_date", "label": "Show date", "default": true },
+    { "type": "checkbox", "id": "show_reading_time", "label": "Show reading time", "default": true },
+    { "type": "checkbox", "id": "show_tags", "label": "Show tags", "default": false },
+
+    { "type": "header", "content": "Typography (inherits NP tokens)" },
+    { "type": "font_picker", "id": "heading_font", "label": "Heading font", "default": "inter_n6" },
+    { "type": "font_picker", "id": "body_font", "label": "Body font", "default": "inter_n4" },
+
+    { "type": "range", "id": "title_size", "label": "Title size", "min": 24, "max": 60, "step": 2, "unit": "px", "default": 42 },
+    { "type": "range", "id": "h1_size", "label": "H1 size", "min": 20, "max": 48, "step": 2, "unit": "px", "default": 36 },
+    { "type": "range", "id": "h2_size", "label": "H2 size", "min": 18, "max": 40, "step": 2, "unit": "px", "default": 30 },
+    { "type": "range", "id": "h3_size", "label": "H3 size", "min": 16, "max": 32, "step": 2, "unit": "px", "default": 24 },
+    { "type": "range", "id": "h4_size", "label": "H4 size", "min": 14, "max": 28, "step": 2, "unit": "px", "default": 20 },
+    { "type": "range", "id": "h5_size", "label": "H5 size", "min": 12, "max": 24, "step": 2, "unit": "px", "default": 18 },
+    { "type": "range", "id": "h6_size", "label": "H6 size", "min": 12, "max": 20, "step": 1, "unit": "px", "default": 16 },
+    { "type": "range", "id": "body_size", "label": "Body text size", "min": 14, "max": 22, "step": 1, "unit": "px", "default": 16 },
+    { "type": "range", "id": "line_height", "label": "Line height", "min": 1.3, "max": 2.0, "step": 0.1, "default": 1.6 },
+
+    { "type": "header", "content": "Colors" },
+    { "type": "color", "id": "background_color", "label": "Background", "default": "#ffffff" },
+    { "type": "color", "id": "text_color", "label": "Body text", "default": "#1e1e1e" },
+    { "type": "color", "id": "heading_color", "label": "Headings", "default": "#1e1e1e" },
+    { "type": "color", "id": "accent_color", "label": "Accent (underline/blockquote)", "default": "#FBBF24" },
+    { "type": "color", "id": "link_color", "label": "Links", "default": "#1e1e1e" },
+    { "type": "color", "id": "link_hover_color", "label": "Link hover", "default": "#FBBF24" },
+
+    { "type": "header", "content": "Scripting" },
+    { "type": "checkbox", "id": "enable_toc_js", "label": "Enable auto TOC + scroll spy", "default": true }
+  ],
+  "blocks": [],
+  "presets": [
+    { "name": "Article • Clean" }
+  ]
+}
+{% endschema %}

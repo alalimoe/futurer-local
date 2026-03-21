@@ -1,0 +1,948 @@
+{% doc %}
+  @prompt
+    create clean, modern "Related guides"
+    
+    Use a 2x2 grid of cards:
+    
+    How to Read a COA (HPLC & LC‑MS)
+    
+    UAE Quality & Trust Guide (Checklist)
+    
+    Shipping in UAE Heat
+    
+    Storage & Handling
+    
+    (Each card links to the targets in the link map above.) followed by FAQs (accordion)
+    
+    Add 6–8 accordions:
+    
+    FAQ 1: Are COAs batch-specific?
+    COAs only matter when they match a real batch/lot. Always match the lot on your unit to the lot shown on the COA.
+    
+    FAQ 2: Do COAs guarantee legality or regulatory status?
+    No. A COA is a lab document about analysis results. Legality depends on ingredient classification, labeling, and import context.
+    
+    FAQ 3: What if my label and COA don’t match?
+    Pause. Take photos of the label + packaging and contact support with your order number. Don’t “assume” a mismatch is fine.
+    
+    FAQ 4: Why do some COAs look different?
+    Different labs and methods produce different report formats. What matters is: batch match, methods stated, and real results.
+    
+    FAQ 5: What methods should I expect to see?
+    Commonly HPLC for purity/assay and LC‑MS/MS or similar methods for identity confirmation (varies by compound and lab).
+    
+    FAQ 6: I’m in the UAE—does shipping heat matter?
+    Heat and last‑mile delivery conditions can matter. Receive parcels quickly and store as directed. & Small text disclaimer:
+    Educational information only. Not medical advice. Follow product labeling, storage guidance, and local regulations. Where products are labeled for research use, they are not intended for human consumption.
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-related-guides-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    padding: {{ block.settings.section_padding_top }}px var(--page-gutter) {{ block.settings.section_padding_bottom }}px;
+    background-color: {{ block.settings.background_color }};
+  }
+
+  .ai-related-guides__container-{{ ai_gen_id }} {
+    max-width: {{ block.settings.max_width }}px;
+    margin: 0 auto;
+  }
+
+  .ai-related-guides__heading-{{ ai_gen_id }} {
+    color: {{ block.settings.heading_color }};
+    margin: 0 0 {{ block.settings.heading_spacing }}px;
+    text-align: {{ block.settings.text_alignment }};
+  }
+
+  .ai-related-guides__grid-{{ ai_gen_id }} {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: {{ block.settings.card_gap }}px;
+    margin-bottom: {{ block.settings.section_spacing }}px;
+  }
+
+  .ai-related-guides__card-{{ ai_gen_id }} {
+    display: flex;
+    flex-direction: column;
+    padding: {{ block.settings.card_padding }}px;
+    background-color: {{ block.settings.card_background }};
+    border: {{ block.settings.card_border_width }}px solid {{ block.settings.card_border_color }};
+    border-radius: {{ block.settings.card_border_radius }}px;
+    text-decoration: none;
+    transition: var(--transition-smooth);
+    min-height: 120px;
+  }
+
+  .ai-related-guides__card-{{ ai_gen_id }}:hover {
+    background-color: {{ block.settings.card_hover_background }};
+    border-color: {{ block.settings.card_hover_border_color }};
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .ai-related-guides__card-title-{{ ai_gen_id }} {
+    font-size: {{ block.settings.card_title_size }}px;
+    font-weight: 600;
+    color: {{ block.settings.card_title_color }};
+    margin: 0;
+    line-height: 1.4;
+  }
+
+  .ai-related-guides__card-{{ ai_gen_id }}:hover .ai-related-guides__card-title-{{ ai_gen_id }} {
+    color: {{ block.settings.card_title_hover_color }};
+  }
+
+  .ai-related-guides__faq-heading-{{ ai_gen_id }} {
+    font-size: {{ block.settings.faq_heading_size }}px;
+    color: {{ block.settings.heading_color }};
+    margin: 0 0 {{ block.settings.faq_heading_spacing }}px;
+    text-align: {{ block.settings.text_alignment }};
+  }
+
+  .ai-related-guides__accordion-{{ ai_gen_id }} {
+    display: flex;
+    flex-direction: column;
+    gap: {{ block.settings.accordion_gap }}px;
+  }
+
+  .ai-related-guides__accordion-item-{{ ai_gen_id }} {
+    border: {{ block.settings.accordion_border_width }}px solid {{ block.settings.accordion_border_color }};
+    border-radius: {{ block.settings.accordion_border_radius }}px;
+    overflow: hidden;
+    background-color: {{ block.settings.accordion_background }};
+  }
+
+  .ai-related-guides__accordion-button-{{ ai_gen_id }} {
+    width: 100%;
+    padding: {{ block.settings.accordion_padding }}px;
+    background: none;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    transition: background-color 0.3s ease;
+  }
+
+  .ai-related-guides__accordion-button-{{ ai_gen_id }}:hover {
+    background-color: {{ block.settings.accordion_hover_background }};
+  }
+
+  .ai-related-guides__accordion-question-{{ ai_gen_id }} {
+    font-size: {{ block.settings.accordion_question_size }}px;
+    font-weight: 600;
+    color: {{ block.settings.accordion_question_color }};
+    margin: 0;
+    line-height: 1.4;
+  }
+
+  .ai-related-guides__accordion-icon-{{ ai_gen_id }} {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    transition: transform 0.3s ease;
+    color: {{ block.settings.accordion_icon_color }};
+  }
+
+  .ai-related-guides__accordion-item-{{ ai_gen_id }}.active .ai-related-guides__accordion-icon-{{ ai_gen_id }} {
+    transform: rotate(180deg);
+  }
+
+  .ai-related-guides__accordion-content-{{ ai_gen_id }} {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+  }
+
+  .ai-related-guides__accordion-answer-{{ ai_gen_id }} {
+    padding: 0 {{ block.settings.accordion_padding }}px {{ block.settings.accordion_padding }}px;
+    font-size: {{ block.settings.accordion_answer_size }}px;
+    color: {{ block.settings.accordion_answer_color }};
+    line-height: 1.6;
+  }
+
+  .ai-related-guides__disclaimer-{{ ai_gen_id }} {
+    margin-top: {{ block.settings.disclaimer_spacing }}px;
+    padding: {{ block.settings.disclaimer_padding }}px;
+    background-color: {{ block.settings.disclaimer_background }};
+    border-radius: {{ block.settings.disclaimer_border_radius }}px;
+    font-size: {{ block.settings.disclaimer_size }}px;
+    color: {{ block.settings.disclaimer_color }};
+    line-height: 1.5;
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-related-guides__grid-{{ ai_gen_id }} {
+      grid-template-columns: 1fr;
+    }
+
+    .ai-related-guides__faq-heading-{{ ai_gen_id }} {
+      font-size: calc({{ block.settings.faq_heading_size }}px * 0.85);
+    }
+
+    .ai-related-guides__card-title-{{ ai_gen_id }} {
+      font-size: calc({{ block.settings.card_title_size }}px * 0.9);
+    }
+  }
+{% endstyle %}
+
+<related-guides-{{ ai_gen_id }} class="ai-related-guides-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="ai-related-guides__container-{{ ai_gen_id }}">
+    {% if block.settings.heading != blank %}
+      <h2 class="ai-related-guides__heading-{{ ai_gen_id }} {{ block.settings.heading_size }}">{{ block.settings.heading }}</h2>
+    {% endif %}
+
+    <div class="ai-related-guides__grid-{{ ai_gen_id }}">
+      {% if block.settings.guide_1_title != blank %}
+        <a href="{{ block.settings.guide_1_url }}" class="ai-related-guides__card-{{ ai_gen_id }}">
+          <h3 class="ai-related-guides__card-title-{{ ai_gen_id }}">{{ block.settings.guide_1_title }}</h3>
+        </a>
+      {% endif %}
+
+      {% if block.settings.guide_2_title != blank %}
+        <a href="{{ block.settings.guide_2_url }}" class="ai-related-guides__card-{{ ai_gen_id }}">
+          <h3 class="ai-related-guides__card-title-{{ ai_gen_id }}">{{ block.settings.guide_2_title }}</h3>
+        </a>
+      {% endif %}
+
+      {% if block.settings.guide_3_title != blank %}
+        <a href="{{ block.settings.guide_3_url }}" class="ai-related-guides__card-{{ ai_gen_id }}">
+          <h3 class="ai-related-guides__card-title-{{ ai_gen_id }}">{{ block.settings.guide_3_title }}</h3>
+        </a>
+      {% endif %}
+
+      {% if block.settings.guide_4_title != blank %}
+        <a href="{{ block.settings.guide_4_url }}" class="ai-related-guides__card-{{ ai_gen_id }}">
+          <h3 class="ai-related-guides__card-title-{{ ai_gen_id }}">{{ block.settings.guide_4_title }}</h3>
+        </a>
+      {% endif %}
+    </div>
+
+    {% if block.settings.faq_heading != blank %}
+      <h2 class="ai-related-guides__faq-heading-{{ ai_gen_id }}">{{ block.settings.faq_heading }}</h2>
+    {% endif %}
+
+    <div class="ai-related-guides__accordion-{{ ai_gen_id }}">
+      {% if block.settings.faq_1_question != blank %}
+        <div class="ai-related-guides__accordion-item-{{ ai_gen_id }}">
+          <button class="ai-related-guides__accordion-button-{{ ai_gen_id }}" aria-expanded="false">
+            <h3 class="ai-related-guides__accordion-question-{{ ai_gen_id }}">{{ block.settings.faq_1_question }}</h3>
+            <svg class="ai-related-guides__accordion-icon-{{ ai_gen_id }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </button>
+          <div class="ai-related-guides__accordion-content-{{ ai_gen_id }}">
+            <div class="ai-related-guides__accordion-answer-{{ ai_gen_id }}">{{ block.settings.faq_1_answer }}</div>
+          </div>
+        </div>
+      {% endif %}
+
+      {% if block.settings.faq_2_question != blank %}
+        <div class="ai-related-guides__accordion-item-{{ ai_gen_id }}">
+          <button class="ai-related-guides__accordion-button-{{ ai_gen_id }}" aria-expanded="false">
+            <h3 class="ai-related-guides__accordion-question-{{ ai_gen_id }}">{{ block.settings.faq_2_question }}</h3>
+            <svg class="ai-related-guides__accordion-icon-{{ ai_gen_id }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </button>
+          <div class="ai-related-guides__accordion-content-{{ ai_gen_id }}">
+            <div class="ai-related-guides__accordion-answer-{{ ai_gen_id }}">{{ block.settings.faq_2_answer }}</div>
+          </div>
+        </div>
+      {% endif %}
+
+      {% if block.settings.faq_3_question != blank %}
+        <div class="ai-related-guides__accordion-item-{{ ai_gen_id }}">
+          <button class="ai-related-guides__accordion-button-{{ ai_gen_id }}" aria-expanded="false">
+            <h3 class="ai-related-guides__accordion-question-{{ ai_gen_id }}">{{ block.settings.faq_3_question }}</h3>
+            <svg class="ai-related-guides__accordion-icon-{{ ai_gen_id }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </button>
+          <div class="ai-related-guides__accordion-content-{{ ai_gen_id }}">
+            <div class="ai-related-guides__accordion-answer-{{ ai_gen_id }}">{{ block.settings.faq_3_answer }}</div>
+          </div>
+        </div>
+      {% endif %}
+
+      {% if block.settings.faq_4_question != blank %}
+        <div class="ai-related-guides__accordion-item-{{ ai_gen_id }}">
+          <button class="ai-related-guides__accordion-button-{{ ai_gen_id }}" aria-expanded="false">
+            <h3 class="ai-related-guides__accordion-question-{{ ai_gen_id }}">{{ block.settings.faq_4_question }}</h3>
+            <svg class="ai-related-guides__accordion-icon-{{ ai_gen_id }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </button>
+          <div class="ai-related-guides__accordion-content-{{ ai_gen_id }}">
+            <div class="ai-related-guides__accordion-answer-{{ ai_gen_id }}">{{ block.settings.faq_4_answer }}</div>
+          </div>
+        </div>
+      {% endif %}
+
+      {% if block.settings.faq_5_question != blank %}
+        <div class="ai-related-guides__accordion-item-{{ ai_gen_id }}">
+          <button class="ai-related-guides__accordion-button-{{ ai_gen_id }}" aria-expanded="false">
+            <h3 class="ai-related-guides__accordion-question-{{ ai_gen_id }}">{{ block.settings.faq_5_question }}</h3>
+            <svg class="ai-related-guides__accordion-icon-{{ ai_gen_id }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </button>
+          <div class="ai-related-guides__accordion-content-{{ ai_gen_id }}">
+            <div class="ai-related-guides__accordion-answer-{{ ai_gen_id }}">{{ block.settings.faq_5_answer }}</div>
+          </div>
+        </div>
+      {% endif %}
+
+      {% if block.settings.faq_6_question != blank %}
+        <div class="ai-related-guides__accordion-item-{{ ai_gen_id }}">
+          <button class="ai-related-guides__accordion-button-{{ ai_gen_id }}" aria-expanded="false">
+            <h3 class="ai-related-guides__accordion-question-{{ ai_gen_id }}">{{ block.settings.faq_6_question }}</h3>
+            <svg class="ai-related-guides__accordion-icon-{{ ai_gen_id }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </button>
+          <div class="ai-related-guides__accordion-content-{{ ai_gen_id }}">
+            <div class="ai-related-guides__accordion-answer-{{ ai_gen_id }}">{{ block.settings.faq_6_answer }}</div>
+          </div>
+        </div>
+      {% endif %}
+
+      {% if block.settings.faq_7_question != blank %}
+        <div class="ai-related-guides__accordion-item-{{ ai_gen_id }}">
+          <button class="ai-related-guides__accordion-button-{{ ai_gen_id }}" aria-expanded="false">
+            <h3 class="ai-related-guides__accordion-question-{{ ai_gen_id }}">{{ block.settings.faq_7_question }}</h3>
+            <svg class="ai-related-guides__accordion-icon-{{ ai_gen_id }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </button>
+          <div class="ai-related-guides__accordion-content-{{ ai_gen_id }}">
+            <div class="ai-related-guides__accordion-answer-{{ ai_gen_id }}">{{ block.settings.faq_7_answer }}</div>
+          </div>
+        </div>
+      {% endif %}
+
+      {% if block.settings.faq_8_question != blank %}
+        <div class="ai-related-guides__accordion-item-{{ ai_gen_id }}">
+          <button class="ai-related-guides__accordion-button-{{ ai_gen_id }}" aria-expanded="false">
+            <h3 class="ai-related-guides__accordion-question-{{ ai_gen_id }}">{{ block.settings.faq_8_question }}</h3>
+            <svg class="ai-related-guides__accordion-icon-{{ ai_gen_id }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </button>
+          <div class="ai-related-guides__accordion-content-{{ ai_gen_id }}">
+            <div class="ai-related-guides__accordion-answer-{{ ai_gen_id }}">{{ block.settings.faq_8_answer }}</div>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+
+    {% if block.settings.disclaimer != blank %}
+      <div class="ai-related-guides__disclaimer-{{ ai_gen_id }}">{{ block.settings.disclaimer }}</div>
+    {% endif %}
+  </div>
+</related-guides-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class RelatedGuides{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+      }
+
+      connectedCallback() {
+        this.accordionButtons = this.querySelectorAll('.ai-related-guides__accordion-button-{{ ai_gen_id }}');
+        this.setupAccordion();
+      }
+
+      setupAccordion() {
+        this.accordionButtons.forEach((button) => {
+          button.addEventListener('click', () => {
+            const item = button.closest('.ai-related-guides__accordion-item-{{ ai_gen_id }}');
+            const content = item.querySelector('.ai-related-guides__accordion-content-{{ ai_gen_id }}');
+            const isActive = item.classList.contains('active');
+
+            if (isActive) {
+              item.classList.remove('active');
+              content.style.maxHeight = null;
+              button.setAttribute('aria-expanded', 'false');
+            } else {
+              item.classList.add('active');
+              content.style.maxHeight = content.scrollHeight + 'px';
+              button.setAttribute('aria-expanded', 'true');
+            }
+          });
+        });
+      }
+    }
+
+    customElements.define('related-guides-{{ ai_gen_id }}', RelatedGuides{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Related guides",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section"
+    },
+    {
+      "type": "range",
+      "id": "max_width",
+      "label": "Maximum width",
+      "min": 600,
+      "max": 1400,
+      "step": 100,
+      "unit": "px",
+      "default": 1200
+    },
+    {
+      "type": "range",
+      "id": "section_padding_top",
+      "label": "Top padding",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "section_padding_bottom",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 60
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "Text alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "header",
+      "content": "Guides heading"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Related guides"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Heading size",
+      "options": [
+        {"value": "h1", "label": "Display"},
+        {"value": "h2", "label": "XL"},
+        {"value": "h3", "label": "L"},
+        {"value": "h4", "label": "M"},
+        {"value": "h5", "label": "S"},
+        {"value": "h6", "label": "XS"}
+      ],
+      "default": "h4"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading color",
+      "default": "#1e1e1e"
+    },
+    {
+      "type": "range",
+      "id": "heading_spacing",
+      "label": "Heading spacing",
+      "min": 8,
+      "max": 48,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "header",
+      "content": "Guide cards"
+    },
+    {
+      "type": "text",
+      "id": "guide_1_title",
+      "label": "Guide 1 title",
+      "default": "How to Read a COA (HPLC & LC‑MS)"
+    },
+    {
+      "type": "url",
+      "id": "guide_1_url",
+      "label": "Guide 1 link"
+    },
+    {
+      "type": "text",
+      "id": "guide_2_title",
+      "label": "Guide 2 title",
+      "default": "UAE Quality & Trust Guide (Checklist)"
+    },
+    {
+      "type": "url",
+      "id": "guide_2_url",
+      "label": "Guide 2 link"
+    },
+    {
+      "type": "text",
+      "id": "guide_3_title",
+      "label": "Guide 3 title",
+      "default": "Shipping in UAE Heat"
+    },
+    {
+      "type": "url",
+      "id": "guide_3_url",
+      "label": "Guide 3 link"
+    },
+    {
+      "type": "text",
+      "id": "guide_4_title",
+      "label": "Guide 4 title",
+      "default": "Storage & Handling"
+    },
+    {
+      "type": "url",
+      "id": "guide_4_url",
+      "label": "Guide 4 link"
+    },
+    {
+      "type": "range",
+      "id": "card_gap",
+      "label": "Card gap",
+      "min": 8,
+      "max": 40,
+      "step": 4,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "card_padding",
+      "label": "Card padding",
+      "min": 12,
+      "max": 40,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "card_border_radius",
+      "label": "Card border radius",
+      "min": 0,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "card_border_width",
+      "label": "Card border width",
+      "min": 0,
+      "max": 4,
+      "step": 1,
+      "unit": "px",
+      "default": 1
+    },
+    {
+      "type": "color",
+      "id": "card_background",
+      "label": "Card background",
+      "default": "#f9f9f9"
+    },
+    {
+      "type": "color",
+      "id": "card_hover_background",
+      "label": "Card hover background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "card_border_color",
+      "label": "Card border",
+      "default": "#e8e8e8"
+    },
+    {
+      "type": "color",
+      "id": "card_hover_border_color",
+      "label": "Card hover border",
+      "default": "#5a9d6f"
+    },
+    {
+      "type": "range",
+      "id": "card_title_size",
+      "label": "Card title size",
+      "min": 14,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "color",
+      "id": "card_title_color",
+      "label": "Card title",
+      "default": "#2a2a2a"
+    },
+    {
+      "type": "color",
+      "id": "card_title_hover_color",
+      "label": "Card title hover",
+      "default": "#5a9d6f"
+    },
+    {
+      "type": "range",
+      "id": "section_spacing",
+      "label": "Spacing to FAQs",
+      "min": 24,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 48
+    },
+    {
+      "type": "header",
+      "content": "FAQ section"
+    },
+    {
+      "type": "text",
+      "id": "faq_heading",
+      "label": "FAQ heading",
+      "default": "Frequently asked questions"
+    },
+    {
+      "type": "range",
+      "id": "faq_heading_size",
+      "label": "FAQ heading size",
+      "min": 16,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 28
+    },
+    {
+      "type": "range",
+      "id": "faq_heading_spacing",
+      "label": "FAQ heading spacing",
+      "min": 8,
+      "max": 48,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "header",
+      "content": "FAQ 1"
+    },
+    {
+      "type": "text",
+      "id": "faq_1_question",
+      "label": "Question",
+      "default": "Are COAs batch-specific?"
+    },
+    {
+      "type": "textarea",
+      "id": "faq_1_answer",
+      "label": "Answer",
+      "default": "COAs only matter when they match a real batch/lot. Always match the lot on your unit to the lot shown on the COA."
+    },
+    {
+      "type": "header",
+      "content": "FAQ 2"
+    },
+    {
+      "type": "text",
+      "id": "faq_2_question",
+      "label": "Question",
+      "default": "Do COAs guarantee legality or regulatory status?"
+    },
+    {
+      "type": "textarea",
+      "id": "faq_2_answer",
+      "label": "Answer",
+      "default": "No. A COA is a lab document about analysis results. Legality depends on ingredient classification, labeling, and import context."
+    },
+    {
+      "type": "header",
+      "content": "FAQ 3"
+    },
+    {
+      "type": "text",
+      "id": "faq_3_question",
+      "label": "Question",
+      "default": "What if my label and COA don't match?"
+    },
+    {
+      "type": "textarea",
+      "id": "faq_3_answer",
+      "label": "Answer",
+      "default": "Pause. Take photos of the label + packaging and contact support with your order number. Don't \"assume\" a mismatch is fine."
+    },
+    {
+      "type": "header",
+      "content": "FAQ 4"
+    },
+    {
+      "type": "text",
+      "id": "faq_4_question",
+      "label": "Question",
+      "default": "Why do some COAs look different?"
+    },
+    {
+      "type": "textarea",
+      "id": "faq_4_answer",
+      "label": "Answer",
+      "default": "Different labs and methods produce different report formats. What matters is: batch match, methods stated, and real results."
+    },
+    {
+      "type": "header",
+      "content": "FAQ 5"
+    },
+    {
+      "type": "text",
+      "id": "faq_5_question",
+      "label": "Question",
+      "default": "What methods should I expect to see?"
+    },
+    {
+      "type": "textarea",
+      "id": "faq_5_answer",
+      "label": "Answer",
+      "default": "Commonly HPLC for purity/assay and LC‑MS/MS or similar methods for identity confirmation (varies by compound and lab)."
+    },
+    {
+      "type": "header",
+      "content": "FAQ 6"
+    },
+    {
+      "type": "text",
+      "id": "faq_6_question",
+      "label": "Question",
+      "default": "I'm in the UAE—does shipping heat matter?"
+    },
+    {
+      "type": "textarea",
+      "id": "faq_6_answer",
+      "label": "Answer",
+      "default": "Heat and last‑mile delivery conditions can matter. Receive parcels quickly and store as directed."
+    },
+    {
+      "type": "header",
+      "content": "FAQ 7"
+    },
+    {
+      "type": "text",
+      "id": "faq_7_question",
+      "label": "Question"
+    },
+    {
+      "type": "textarea",
+      "id": "faq_7_answer",
+      "label": "Answer"
+    },
+    {
+      "type": "header",
+      "content": "FAQ 8"
+    },
+    {
+      "type": "text",
+      "id": "faq_8_question",
+      "label": "Question"
+    },
+    {
+      "type": "textarea",
+      "id": "faq_8_answer",
+      "label": "Answer"
+    },
+    {
+      "type": "header",
+      "content": "Accordion style"
+    },
+    {
+      "type": "range",
+      "id": "accordion_gap",
+      "label": "Gap between items",
+      "min": 4,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "accordion_padding",
+      "label": "Item padding",
+      "min": 12,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "accordion_border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "accordion_border_width",
+      "label": "Border width",
+      "min": 0,
+      "max": 4,
+      "step": 1,
+      "unit": "px",
+      "default": 1
+    },
+    {
+      "type": "color",
+      "id": "accordion_background",
+      "label": "Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "accordion_hover_background",
+      "label": "Hover background",
+      "default": "#f9f9f9"
+    },
+    {
+      "type": "color",
+      "id": "accordion_border_color",
+      "label": "Border",
+      "default": "#e8e8e8"
+    },
+    {
+      "type": "range",
+      "id": "accordion_question_size",
+      "label": "Question size",
+      "min": 14,
+      "max": 22,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "color",
+      "id": "accordion_question_color",
+      "label": "Question color",
+      "default": "#2a2a2a"
+    },
+    {
+      "type": "range",
+      "id": "accordion_answer_size",
+      "label": "Answer size",
+      "min": 12,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "color",
+      "id": "accordion_answer_color",
+      "label": "Answer color",
+      "default": "#666666"
+    },
+    {
+      "type": "color",
+      "id": "accordion_icon_color",
+      "label": "Icon color",
+      "default": "#2a2a2a"
+    },
+    {
+      "type": "header",
+      "content": "Disclaimer"
+    },
+    {
+      "type": "textarea",
+      "id": "disclaimer",
+      "label": "Disclaimer text",
+      "default": "Educational information only. Not medical advice. Follow product labeling, storage guidance, and local regulations. Where products are labeled for research use, they are not intended for human consumption."
+    },
+    {
+      "type": "range",
+      "id": "disclaimer_spacing",
+      "label": "Top spacing",
+      "min": 16,
+      "max": 60,
+      "step": 4,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "disclaimer_padding",
+      "label": "Padding",
+      "min": 8,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "disclaimer_border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "default": 6
+    },
+    {
+      "type": "range",
+      "id": "disclaimer_size",
+      "label": "Text size",
+      "min": 10,
+      "max": 16,
+      "step": 1,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "color",
+      "id": "disclaimer_background",
+      "label": "Background",
+      "default": "#f0f0f0"
+    },
+    {
+      "type": "color",
+      "id": "disclaimer_color",
+      "label": "Text color",
+      "default": "#666666"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Related guides"
+    }
+  ]
+}
+{% endschema %}

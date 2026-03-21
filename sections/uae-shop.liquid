@@ -1,0 +1,162 @@
+{% schema %}
+{
+  "name": "UAE Shop",
+  "tag": "section",
+  "class": "section-uae-shop",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Buy Nootropics Online in the UAE" },
+    { "type": "textarea", "id": "intro", "label": "Intro Text", "default": "Order from Nootropix with same-/next-day UAE delivery and express international shipping. Track every order from checkout to doorstep." },
+    { "type": "header", "content": "Editor's Picks" },
+    { "type": "text", "id": "picks_heading", "label": "Picks Heading", "default": "Editor's Picks" },
+    { "type": "header", "content": "Colors" },
+    { "type": "color", "id": "bg_color", "label": "Background", "default": "#ffffff" },
+    { "type": "color", "id": "accent_color", "label": "Accent", "default": "#FBBF24" }
+  ],
+  "blocks": [
+    {
+      "type": "category",
+      "name": "Category Card",
+      "settings": [
+        { "type": "collection", "id": "collection", "label": "Collection" },
+        { "type": "text", "id": "title", "label": "Title" },
+        { "type": "text", "id": "tagline", "label": "Tagline" },
+        { "type": "url", "id": "url", "label": "Link" }
+      ]
+    },
+    {
+      "type": "pick",
+      "name": "Editor's Pick",
+      "settings": [
+        { "type": "product", "id": "product", "label": "Product" },
+        { "type": "text", "id": "label", "label": "Label (e.g. Smooth Alertness)" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "UAE Shop",
+      "blocks": [
+        { "type": "category", "settings": { "title": "Focus & Energy", "tagline": "Clean energy and task focus." } },
+        { "type": "category", "settings": { "title": "Memory & Learning", "tagline": "Learning, recall, clarity." } },
+        { "type": "category", "settings": { "title": "Mood & Stress", "tagline": "Calm balance for busy days." } },
+        { "type": "category", "settings": { "title": "Sleep & Recovery", "tagline": "Rest & digest essentials." } }
+      ]
+    }
+  ]
+}
+{% endschema %}
+
+{%- assign uas_categories = section.blocks | where: "type", "category" -%}
+{%- assign uas_picks = section.blocks | where: "type", "pick" -%}
+
+<div class="uas-wrapper" id="uae-shop">
+  <div class="uas-inner">
+    {% if section.settings.heading != blank %}
+      <h2 class="uas-heading">{{ section.settings.heading }}</h2>
+    {% endif %}
+
+    {% if section.settings.intro != blank %}
+      <p class="uas-intro">{{ section.settings.intro }}</p>
+    {% endif %}
+
+    {% if uas_categories.size > 0 %}
+      <div class="uas-cats">
+        {% for block in uas_categories %}
+          <a href="{{ block.settings.url | default: block.settings.collection.url | default: '#' }}" class="uas-cat" {{ block.shopify_attributes }}>
+            {%- if block.settings.collection != blank and block.settings.collection.image != blank -%}
+              <img src="{{ block.settings.collection.image | image_url: width: 400 }}" alt="{{ block.settings.title | escape }}" width="400" height="{{ 400 | divided_by: block.settings.collection.image.aspect_ratio | round }}" loading="lazy" decoding="async" class="uas-cat-img">
+            {%- endif -%}
+            <div class="uas-cat-body">
+              <h3 class="uas-cat-title">{{ block.settings.title | default: block.settings.collection.title }}</h3>
+              {% if block.settings.tagline != blank %}<p class="uas-cat-tag">{{ block.settings.tagline }}</p>{% endif %}
+            </div>
+            <span class="uas-cat-arrow"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg></span>
+          </a>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {% if uas_picks.size > 0 %}
+      {% if section.settings.picks_heading != blank %}
+        <h3 class="uas-picks-heading">{{ section.settings.picks_heading }}</h3>
+      {% endif %}
+      <div class="uas-picks">
+        {% for block in uas_picks %}
+          {%- assign pick_prod = block.settings.product -%}
+          <div class="uas-pick" {{ block.shopify_attributes }}>
+            {%- if pick_prod != blank and pick_prod.featured_image != blank -%}
+              <a href="{{ pick_prod.url }}" class="uas-pick-link">
+                <img src="{{ pick_prod.featured_image | image_url: width: 300 }}" alt="{{ pick_prod.title | escape }}" width="300" height="{{ 300 | divided_by: pick_prod.featured_image.aspect_ratio | round }}" loading="lazy" decoding="async" class="uas-pick-img">
+              </a>
+            {%- endif -%}
+            {% if block.settings.label != blank %}
+              <span class="uas-pick-label">{{ block.settings.label }}</span>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<style>
+  .uas-wrapper {
+    --uas-bg: {{ section.settings.bg_color }};
+    --uas-accent: {{ section.settings.accent_color }};
+    --uas-text: var(--color-text-main, #111827);
+    --uas-muted: var(--color-text-muted, #4b5563);
+    --uas-border: var(--nx-pill-border, #E5E7EB);
+    --uas-radius: var(--nx-radius, 14px);
+    --uas-font: var(--font-body-family, sans-serif);
+    --uas-font-heading: var(--font-heading-family, sans-serif);
+    --uas-transition: var(--transition-smooth, all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1));
+    background: var(--uas-bg); padding: 80px var(--page-gutter); font-family: var(--uas-font);
+  }
+  .uas-inner { max-width: var(--container-width-narrow); margin: 0 auto; }
+  .uas-heading {
+    font-family: var(--uas-font-heading); font-size: clamp(1.75rem, 3vw, 2.25rem);
+    font-weight: 800; color: var(--uas-text); margin: 0 0 12px; text-align: center; letter-spacing: -0.02em;
+  }
+  .uas-intro { font-size: 1rem; line-height: 1.7; color: var(--uas-muted); margin: 0 0 40px; text-align: center; max-width: 640px; margin-inline: auto; }
+
+  .uas-cats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 48px; }
+  .uas-cat {
+    display: flex; align-items: center; gap: 16px; padding: 20px;
+    background: var(--color-bg-secondary, #f9fafb); border: 1px solid var(--uas-border);
+    border-radius: var(--uas-radius); text-decoration: none; color: inherit;
+    transition: var(--uas-transition);
+  }
+  .uas-cat:hover { border-color: var(--uas-accent); box-shadow: var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.04)); transform: translateY(-1px); }
+  .uas-cat-img { width: 56px; height: 56px; border-radius: var(--nx-radius-md); object-fit: cover; flex-shrink: 0; }
+  .uas-cat-body { flex: 1; min-width: 0; }
+  .uas-cat-title { font-family: var(--uas-font-heading); font-size: 1rem; font-weight: 700; color: var(--uas-text); margin: 0 0 2px; }
+  .uas-cat-tag { font-size: 0.8125rem; color: var(--uas-muted); margin: 0; line-height: 1.4; }
+  .uas-cat-arrow { flex-shrink: 0; color: var(--uas-muted); transition: color 0.2s, transform 0.2s; }
+  .uas-cat:hover .uas-cat-arrow { color: var(--uas-accent); transform: translateX(2px); }
+
+  .uas-picks-heading {
+    font-family: var(--uas-font-heading); font-size: clamp(1.125rem, 2vw, 1.375rem);
+    font-weight: 700; color: var(--uas-text); margin: 0 0 20px; text-align: center;
+  }
+  .uas-picks { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .uas-pick { text-align: center; }
+  .uas-pick-link { display: block; }
+  .uas-pick-img {
+    width: 100%; aspect-ratio: 1; object-fit: contain; border-radius: var(--uas-radius);
+    background: var(--color-bg-secondary, #f9fafb); border: 1px solid var(--uas-border);
+    transition: var(--uas-transition);
+  }
+  .uas-pick-img:hover { box-shadow: var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.04)); }
+  .uas-pick-label {
+    display: inline-block; margin-top: 8px; font-size: 0.75rem; font-weight: 700;
+    background: var(--uas-accent); color: var(--color-text-primary); padding: 2px 8px; border-radius: 4px;
+  }
+
+  .uas-wrapper :focus-visible { outline: 2px solid var(--uas-accent); outline-offset: 2px; }
+  @media (prefers-reduced-motion: reduce) { .uas-wrapper *, .uas-wrapper *::before, .uas-wrapper *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
+  @media (max-width: 640px) {
+    .uas-wrapper { padding: 56px var(--page-gutter); }
+    .uas-cats { grid-template-columns: 1fr; }
+    .uas-picks { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>

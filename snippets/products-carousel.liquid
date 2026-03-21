@@ -1,0 +1,87 @@
+{% comment %}
+  Renders a products-carousel element with a given value
+
+  Accepts:
+  - per_view: {Number} Number of product per view (optional)
+  - per_move: {Number} Number of product per move (optional)
+  - autoplay: {Boolean} Enable autoplay (optional)
+  - autoplay_speed: {Number} Autoplay time (optional)
+
+  Usage:
+  {% render 'products-carousel',
+    products: products,
+    per_view: per_view,
+    per_move: per_move,
+    autoplay: autoplay,
+    autoplay_speed: autoplay_speed,
+    product_to_show: product_to_show,
+    is_limit: is_limit,
+  %}
+{% endcomment %}
+
+{% liquid
+  assign placeholder_image = 'collection-1'
+
+  if is_limit
+    assign limit_count = product_to_show
+  endif
+%}
+
+<div class="products-carousel">
+  <xo-carousel
+    xo-per-view="{{ per_view }}"
+    xo-per-move="{{ per_move }}"
+    {% if autoplay == 'on' %}
+      xo-autoplay="{{ autoplay_speed }}"
+      xo-loop
+    {% endif %}
+    xo-breakpoints="
+      {
+        600: {
+          perView: 1,
+        },
+        768: {
+          perView: 2,
+        },
+      }
+    "
+    xo-render-bullet="<span class='carousel-bullet'></span>"
+    class="products-carousel__carousel"
+  >
+    <xo-carousel-inner>
+      <xo-carousel-list>
+        {% for product in products limit: limit_count %}
+          <xo-carousel-slide>
+            <div
+              class="products-carousel__item"
+              {% if is_order %}
+                xo-products-fetcher-order="{{ product.id }}"
+              {% endif %}
+            >
+              {% render 'product-card',
+                product: product,
+                show_image: settings.product_card_show_image,
+                show_secondary_image: settings.product_card_show_secondary_image,
+                show_vendor: settings.product_card_show_vendor,
+                show_description: settings.product_card_show_description,
+                show_quick_add: settings.product_card_show_quick_add,
+                show_quick_view: settings.product_card_show_quick_view,
+                show_favorite: settings.product_card_show_favorite,
+                show_price: settings.product_card_show_price,
+                show_badge: settings.product_card_show_badge,
+                position_badge: settings.position_badge,
+                media_aspect_ratio: section.settings.product_card_aspect_ratio,
+                color_scheme: section.settings.card_color_scheme,
+                placeholder_image: placeholder_image,
+                animate_enabled: true
+              %}
+            </div>
+          </xo-carousel-slide>
+        {% endfor %}
+      </xo-carousel-list>
+    </xo-carousel-inner>
+    <div class="products-carousel__paginate">
+      {% render 'carousel-pagination', align: 'center', style: 'sticks' %}
+    </div>
+  </xo-carousel>
+</div>

@@ -1,0 +1,45 @@
+{% comment %} Discount banner — reusable {% endcomment %}
+{%- assign sid = section.id | replace:'_','' | downcase -%}
+<style>
+#disc-{{ sid }}{ --b:var(--color-border-default); }
+#disc-{{ sid }} .d-wrap{ padding:18px var(--page-gutter); border-top:1px solid var(--b); background:var(--color-surface-secondary); }
+#disc-{{ sid }} .d-container{ max-width:{{ section.settings.maxw | default:1200 }}px; margin:0 auto; }
+#disc-{{ sid }} .d-box{
+  display:flex; justify-content:space-between; align-items:center; gap:12px;
+  border:1px solid var(--b); border-radius:14px; background:rgba(251,191,36,.12); padding:12px 14px;
+}
+#disc-{{ sid }} .d-code{ background:var(--color-surface-primary); border:1px dashed var(--color-border-default); border-radius:8px; padding:2px 6px; margin-left:6px; }
+#disc-{{ sid }} .d-btn{ display:inline-flex; align-items:center; justify-content:center; height:44px; padding:0 14px; border-radius:12px; border:0; background:var(--color-accent-primary); color:var(--color-text-primary); font-weight:800; text-decoration:none; }
+</style>
+
+<section id="disc-{{ sid }}" class="pdp-section" aria-label="First-order discount">
+  <div class="d-wrap">
+    <div class="d-container">
+      <div class="d-box">
+        <div>
+          <strong>{{ section.settings.heading | default: 'Get 10% off your first order' }}</strong>
+          <span>{{ section.settings.sub | default: 'Use code at checkout' }}</span>
+          {% if section.settings.code %}<code class="d-code">{{ section.settings.code }}</code>{% endif %}
+        </div>
+        {% if section.settings.cta_label and section.settings.cta_link %}
+          <a class="d-btn" href="{{ section.settings.cta_link }}">{{ section.settings.cta_label }}</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name":"Discount banner",
+  "settings":[
+    { "type":"range","id":"maxw","min":800,"max":1600,"step":10,"unit":"px","label":"Max width","default":1200 },
+    { "type":"text","id":"heading","label":"Heading","default":"Get 10% off your first order" },
+    { "type":"text","id":"sub","label":"Subtext","default":"Use code at checkout" },
+    { "type":"text","id":"code","label":"Discount code","default":"PEPTIDE10" },
+    { "type":"text","id":"cta_label","label":"CTA label","default":"Apply at checkout" },
+    { "type":"url","id":"cta_link","label":"CTA link","default":"/" }
+  ],
+  "presets":[{ "name":"Discount banner" }]
+}
+{% endschema %}

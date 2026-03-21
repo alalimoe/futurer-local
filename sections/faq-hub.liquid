@@ -1,0 +1,353 @@
+{% comment %}
+  Nootropix FAQ Hub Section (customer-friendly copy)
+{% endcomment %}
+<section id="ntx-faq-hub" class="ntx-faq" data-faq-group="{{ section.settings.group_label | escape }}">
+  <div class="ntx-faq__header">
+    <h1>{{ section.settings.heading }}</h1>
+
+    {% unless section.settings.hide_local_controls %}
+      <input id="faqSearch" type="search" placeholder="{{ section.settings.search_placeholder }}" aria-label="Search FAQs">
+      <div class="ntx-faq__chips">
+        {% assign cats = section.blocks | map: 'settings' | map: 'category' | uniq %}
+        {% for c in cats %}
+          {% if c != blank %}
+            <button class="ntx-chip" data-chip="{{ c | escape }}">{{ c }}</button>
+          {% endif %}
+        {% endfor %}
+        <button class="ntx-chip ntx-chip--clear" data-chip="*">All</button>
+      </div>
+    {% endunless %}
+  </div>
+
+  <div id="faqList" class="ntx-faq__list">
+    {% for block in section.blocks %}
+      {% if block.type == 'faq' %}
+        <details class="ntx-faq__item"
+                 data-category="{{ block.settings.category | escape }}"
+                 data-tags="{{ block.settings.tags | downcase | escape }}">
+          <summary class="ntx-faq__q">
+            <span class="ntx-faq__cat">{{ block.settings.category }}</span>
+            <span class="ntx-faq__question">{{ block.settings.question }}</span>
+          </summary>
+          <div class="ntx-faq__a rte">
+            {{ block.settings.answer }}
+            {% if section.settings.show_sources_to_staff and customer and customer.tags contains 'Staff' and block.settings.sources != blank %}
+              <div class="ntx-faq__sources">
+                <strong>Internal sources:</strong>
+                <ul>
+                  {% assign lines = block.settings.sources | split: '\n' %}
+                  {% for s in lines %}
+                    {% assign url = s | strip %}
+                    {% if url != blank %}
+                      <li><a href="{{ url }}" target="_blank" rel="noopener">Reference</a></li>
+                    {% endif %}
+                  {% endfor %}
+                </ul>
+              </div>
+            {% endif %}
+          </div>
+        </details>
+      {% endif %}
+    {% endfor %}
+  </div>
+</section>
+
+{%- comment -%}
+  FAQPage JSON-LD (curated top Q&As: Dubai → UAE-wide → International)
+{%- endcomment -%}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "@id": "{{ request.origin }}{{ request.path }}#faq",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How fast is delivery in Dubai?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Usually same-day, with a 4-hour option shown at checkout during the day. Order before the cut-off and we’ll deliver by evening."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What are the cut-offs for same-day and the 4-hour service in Dubai?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Same-day deliveries aim to arrive by ~10pm when you order before the daily cut-off. The 4-hour service is typically available for orders placed before ~6pm."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Will the courier call or WhatsApp me in Dubai?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Keep your phone available during your window and add building or gate notes at checkout so the driver can reach you easily."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I pay Cash on Delivery (COD) in Dubai?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes—COD is available for eligible Dubai addresses and appears at checkout. Please prepare the exact amount; proof of delivery is provided."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Do you cover the whole UAE?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes—next-day coverage across the UAE. Order before the cut-off to receive by evening; orders after the cut-off are booked for the next window."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "When should I expect my UAE order?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Plan for delivery by end-of-day when ordered before the cut-off. If anything changes, we’ll update you and rebook the earliest window."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How should I format my UAE address?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Use: Building/Community → Street → Area → Emirate, plus phone number with country code. Add entrance or reception details for faster access."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How long do international DHL deliveries take?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Most arrive in about 4–6 business days. Customs may add time depending on the country."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Do DHL tracking dates ever change?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "They’re estimates and can shift with flights or customs. If your parcel goes beyond your expected window, contact us and we’ll escalate with DHL."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What does a DHL “Exception” status mean?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "It’s a temporary stop—often a customs check or local delivery event. We monitor exceptions and update you; if an item can’t clear, we’ll offer a reship, split shipment, or a refund."
+      }
+    }
+  ]
+}
+</script>
+
+{%- comment -%}
+  BreadcrumbList (Home → Help & FAQ)
+{%- endcomment -%}
+{% # theme-check-disable UnknownFilter %}
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"BreadcrumbList",
+  "itemListElement":[
+    { "@type":"ListItem","position":1,"name":"Home","item":"{{ routes.root_url | absolute_url }}" },
+    { "@type":"ListItem","position":2,"name":"Help & FAQ","item":"{{ request.origin }}{{ request.path }}" }
+  ]
+}
+</script>
+{% # theme-check-enable UnknownFilter %}
+
+{%- comment -%}
+  Optional: WebSite SearchAction (sitelinks search box)
+{%- endcomment -%}
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"WebSite",
+  "url":"{{ request.origin }}",
+  "potentialAction":{
+    "@type":"SearchAction",
+    "target":"{{ request.origin }}/search?q={search_term_string}",
+    "query-input":"required name=search_term_string"
+  }
+}
+</script>
+
+<style>
+  .ntx-faq {
+    max-width: var(--container-width-narrow); margin: 0 auto; padding: clamp(20px, 4vw, 40px) var(--page-gutter);
+    font-family: var(--font-body-family, sans-serif);
+  }
+  .ntx-faq h1 {
+    font-family: var(--font-heading-family, sans-serif);
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    font-weight: 800; letter-spacing: -0.025em; line-height: 1.2;
+    color: var(--nx-text, #0B0B0B);
+  }
+  .ntx-faq__header { display: grid; gap: 14px; }
+
+  #faqSearch {
+    width: 100%; padding: 12px 16px; min-height: 44px;
+    border: 1.5px solid var(--nx-pill-border, #e5e7eb); border-radius: var(--nx-radius-md);
+    font-family: var(--font-body-family, sans-serif);
+    font-size: clamp(0.85rem, 1.3vw, 0.9375rem);
+    background: #fff; color: var(--nx-text, #0B0B0B);
+    transition: var(--transition-premium);
+    box-shadow: var(--shadow-xs);
+  }
+  #faqSearch:focus {
+    outline: none;
+    border-color: var(--nx-accent, #FBBF24);
+    box-shadow: var(--shadow-gold-focus);
+  }
+  #faqSearch:focus-visible {
+    outline: 2px solid var(--nx-accent, #FBBF24); outline-offset: 2px;
+  }
+  #faqSearch::placeholder { opacity: 0.5; }
+
+  .ntx-faq__chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .ntx-chip {
+    border: 1.5px solid var(--nx-pill-border, #e5e7eb); border-radius: var(--nx-radius-pill);
+    padding: 8px 14px; min-height: 44px; box-sizing: border-box;
+    background: #fff; cursor: pointer; font-size: clamp(0.8rem, 1.2vw, 0.875rem);
+    font-family: var(--font-body-family, sans-serif);
+    display: inline-flex; align-items: center;
+    box-shadow: var(--shadow-xs);
+    transition: var(--transition-premium);
+  }
+  .ntx-chip:hover {
+    border-color: var(--nx-accent, #FBBF24);
+    box-shadow: var(--shadow-sm-hover);
+    transform: translateY(-1px);
+  }
+  .ntx-chip:active { transform: translateY(1px); }
+  .ntx-chip:focus-visible { outline: 2px solid var(--nx-accent, #FBBF24); outline-offset: 2px; }
+  .ntx-chip--active {
+    border-color: var(--nx-accent, #FBBF24); font-weight: 600;
+    background: rgba(251,191,36,0.08);
+    box-shadow: 0 0 0 1.5px var(--nx-accent, #FBBF24), 0 2px 12px rgba(251,191,36,0.18);
+  }
+  .ntx-chip--active:hover { filter: brightness(0.96); }
+
+  .ntx-faq__list { margin-top: 12px; display: grid; gap: 10px; }
+  .ntx-faq__item {
+    border: none; border-radius: 12px; padding: 0 16px;
+    background: #fff;
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition-premium);
+  }
+  .ntx-faq__item:hover {
+    box-shadow: var(--shadow-md-hover);
+    transform: translateY(-1px);
+  }
+
+  .ntx-faq__q {
+    list-style: none; display: grid; grid-template-columns: 1fr auto;
+    gap: 4px; padding: 14px 0; cursor: pointer; min-height: 44px;
+    align-items: center;
+  }
+  .ntx-faq__q::-webkit-details-marker { display: none; }
+  .ntx-faq__q::after {
+    content: '';
+    width: 20px; height: 20px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") no-repeat center;
+    transition: transform 0.3s var(--ease-premium);
+    flex-shrink: 0;
+  }
+  .ntx-faq__item[open] .ntx-faq__q::after { transform: rotate(180deg); }
+  .ntx-faq__q:focus-visible { outline: 2px solid var(--nx-accent, #FBBF24); outline-offset: 2px; border-radius: var(--nx-radius-sm); }
+
+  .ntx-faq__cat {
+    font-size: clamp(0.65rem, 1vw, 0.75rem); text-transform: uppercase;
+    letter-spacing: .06em; color: var(--nx-muted, #6B7280);
+    grid-column: 1;
+  }
+  .ntx-faq__question {
+    font-family: var(--font-heading-family, sans-serif);
+    font-weight: 600; font-size: clamp(0.875rem, 1.3vw, 1rem);
+    letter-spacing: -0.01em; color: var(--nx-text, #0B0B0B);
+    grid-column: 1;
+  }
+
+  .ntx-faq__a {
+    padding-bottom: 16px; line-height: 1.6;
+    color: var(--nx-text, #0B0B0B); opacity: 0.85;
+    font-size: clamp(0.85rem, 1.2vw, 0.9375rem);
+  }
+  .ntx-faq__a a { color: var(--nx-accent, #FBBF24); text-decoration: underline; text-underline-offset: 3px; }
+  .ntx-faq__a a:hover { opacity: 0.8; }
+  .ntx-faq__sources { margin-top: 12px; font-size: 13px; opacity: .7; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ntx-faq__item, .ntx-chip, #faqSearch, .ntx-faq__q::after { transition: none; }
+    .ntx-faq__item:hover, .ntx-chip:hover { transform: none; }
+  }
+</style>
+
+<script>
+  (function() {
+    var q = document.getElementById('faqSearch');
+    var chips = document.querySelectorAll('.ntx-chip');
+    var list = document.getElementById('faqList');
+    var items = list ? list.querySelectorAll('.ntx-faq__item') : [];
+
+    function applyFilters() {
+      var term = (q && q.value ? q.value.toLowerCase() : '').trim();
+      var activeChip = document.querySelector('.ntx-chip--active');
+      var cat = activeChip ? activeChip.getAttribute('data-chip') : '*';
+
+      items.forEach(function(el){
+        var t = (el.getAttribute('data-tags') || '').toLowerCase();
+        var c = el.getAttribute('data-category') || '';
+        var qtext = (el.querySelector('.ntx-faq__question')?.textContent || '').toLowerCase();
+        var content = (el.querySelector('.ntx-faq__a')?.textContent || '').toLowerCase();
+        var matchTerm = !term || t.includes(term) || qtext.includes(term) || content.includes(term);
+        var matchCat = (cat === '*') || (c === cat);
+        el.style.display = (matchTerm && matchCat) ? '' : 'none';
+      });
+    }
+
+    if (q) q.addEventListener('input', applyFilters);
+    chips.forEach(function(b){
+      b.addEventListener('click', function(){
+        chips.forEach(function(x){ x.classList.remove('ntx-chip--active'); });
+        b.classList.add('ntx-chip--active');
+        applyFilters();
+      });
+    });
+
+    var allBtn = document.querySelector('[data-chip="*"]');
+    if (allBtn) allBtn.classList.add('ntx-chip--active');
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "FAQ Hub (Nootropix)",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Nootropix Help & FAQ" },
+    { "type": "text", "id": "group_label", "label": "Group label (for global filter)", "default": "General" },
+    { "type": "checkbox", "id": "hide_local_controls", "label": "Hide this section’s search & chips", "default": true },
+    { "type": "text", "id": "search_placeholder", "label": "Search placeholder", "default": "Type a question… e.g., same-day, COD, address" },
+    { "type": "checkbox", "id": "show_sources_to_staff", "label": "Show internal sources to Staff users", "default": true }
+  ],
+  "blocks": [
+    {
+      "type": "faq",
+      "name": "FAQ item",
+      "settings": [
+        { "type": "text", "id": "category", "label": "Category (chip)", "default": "Local Delivery (UAE – Quiqup)" },
+        { "type": "text", "id": "tags", "label": "Search tags", "default": "same day,next day,4-hour,cutoff,cod,reattempt" },
+        { "type": "text", "id": "question", "label": "Question", "default": "How fast will my order arrive in the UAE?" },
+        { "type": "richtext", "id": "answer", "label": "Answer", "default": "<p><strong>Usually the same day or next day.</strong> At checkout, you’ll see the fastest options available for your address.</p><p><a href=\"/pages/track-order\" target=\"_blank\" rel=\"noopener\">Track your order</a></p>" },
+        { "type": "textarea", "id": "sources", "label": "Internal source URLs (one per line, Staff-only)" }
+      ]
+    }
+  ],
+  "presets": [{ "name": "Nootropix FAQ Hub" }]
+}
+{% endschema %}

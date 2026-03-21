@@ -1,0 +1,76 @@
+{% comment %}
+  Renders a radio button
+
+  Accepts:
+  - name: {string} Name of the radio button
+  - value: {string} Value of the radio button
+  - label: {string} Label of the radio button
+  - size: {string} Size of the radio button. Default: 16px (optional)
+  - count_id: {string} Unique ID for the count element (optional, support filters)
+  - count_value: {string} Value of the count element (optional, support filters)
+  - checked: {Boolean} If the radio button is checked (optional)
+  - style: {String} Style class to add to the radio button (optional)
+  - icon_size: {String} Size of the icon (optional)
+  - use_image: {Boolean} If the image should be used (optional)
+  - image: {Image} Image of the radio button (optional)
+  - use_with: {String} Use with (optional)
+
+  Usage:
+  {% render 'field-radio', style: style, name: option.name, value: value, label: value, checked: value.selected, use_with: 'product-variant' %}
+{% endcomment %}
+
+{% liquid
+  assign icon_size = icon_size | default: '1.6rem'
+  assign container_class = 'xo-field-radio'
+  assign container_style = '--icon-size: ' | append: icon_size
+  if style
+    assign container_class = container_class | append: ' xo-field-radio--' | append: style
+  endif
+  if settings.enable_border_radius
+    assign container_class = container_class | append: ' xo-field-radio--radius'
+  endif
+%}
+
+<label
+  class="{{ container_class }}"
+  style="{{ container_style }}"
+  data-button="true"
+  tabindex="0"
+  aria-label="{{ value.name | escape }}"
+>
+  <input
+    class="xo-field-radio__input"
+    type="radio"
+    name="{{ option.name | escape }}"
+    value="{{ value | escape }}"
+    aria-label="{{ value.name | escape }}"
+    xo-label="{{ value.name | escape }}"
+    xo-option-value-id="{{ value.id }}"
+    xo-variant-id="{{ value.variant.id }}"
+    {% if value.product_url != blank %}
+      xo-connected-product-url="{{ shop.url }}{{ value.product_url }}"
+    {% endif %}
+    {%- if value.available == false and value.variant.id == blank -%}
+      xo-unavailable
+    {%- endif -%}
+    {% if value.variant.available == false and value.variant.id != blank %}
+      xo-disabled
+    {%- endif -%}
+    {% if value.selected %}
+      checked
+    {% endif %}
+  >
+  {% if style != 'boxed' %}
+    <span class="xo-field-radio__item">
+      <span class="xo-field-radio__icon"></span>
+    </span>
+  {% endif %}
+  {% if value.name != null %}
+    <span class="xo-field-radio__label">
+      <span>{{ value.name | escape }}</span>
+      {% if count_value %}
+        <xo-filters-count xo-unique-id="{{ count_id }}">({{ count_value }})</xo-filters-count>
+      {% endif %}
+    </span>
+  {% endif %}
+</label>

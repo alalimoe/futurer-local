@@ -1,0 +1,532 @@
+{{ 'video-button.css' | asset_url | stylesheet_tag }}
+
+{% liquid
+  assign layout = block.settings.layout
+  assign image_dt = block.settings.image_dt
+  assign aspect_ratio_dt = block.settings.aspect_ratio_dt
+  if aspect_ratio_dt == 'custom'
+    assign aspect_ratio_dt = block.settings.aspect_ratio_dt_width | append: '/' | append: block.settings.aspect_ratio_dt_height
+  endif
+  assign image_mb = block.settings.image_mb
+  assign aspect_ratio_mb = block.settings.aspect_ratio_mb
+  if aspect_ratio_mb == 'custom'
+    assign aspect_ratio_mb = block.settings.aspect_ratio_mb_width | append: '/' | append: block.settings.aspect_ratio_mb_height
+  endif
+  assign color_scheme_collection = block.settings.color_scheme_collection
+  assign background_overlay = block.settings.background_overlay
+  assign heading = block.settings.text_heading
+  assign placement = block.settings.placement
+  assign alignment = block.settings.alignment
+  assign space_between = block.settings.space_between
+  assign button = block.settings
+  assign video = block.settings.video
+  assign video_url = block.settings.video_url
+  assign enable_video_looping = block.settings.enable_video_looping
+  assign cover_image = block.settings.cover_image
+  assign border_radius = block.settings.border_radius
+
+  assign video_enable = false
+  if layout == 'video'
+    assign video_enable = true
+  endif
+%}
+
+{% render 'image-with-text-block',
+  layout: layout,
+  video_enable: video_enable,
+  image_dt: image_dt,
+  aspect_ratio_dt: aspect_ratio_dt,
+  image_mb: image_mb,
+  aspect_ratio_mb: aspect_ratio_mb,
+  color_scheme: color_scheme_collection,
+  heading: heading,
+  placement: placement,
+  alignment: alignment,
+  space_between: space_between,
+  button: button,
+  background_overlay: background_overlay,
+  video: video,
+  video_url: video_url,
+  enable_video_looping: enable_video_looping,
+  cover_image: cover_image,
+  border_radius: border_radius
+%}
+
+
+{% schema %}
+{
+  "name": "t:blocks.image_with_text.name",
+  "settings": [
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "t:blocks.image_with_text.settings.layout.label",
+      "options": [
+        {
+          "value": "image",
+          "label": "t:blocks.image_with_text.settings.layout.options.option__1.label"
+        },
+        {
+          "value": "video",
+          "label": "t:blocks.image_with_text.settings.layout.options.option__2.label"
+        }
+      ],
+      "default": "image"
+    },
+    {
+      "type": "header",
+      "content": "Text"
+    },
+    {
+      "type": "select",
+      "id": "text_tag_name",
+      "label": "Tag name",
+      "options": [
+        {
+          "value": "h1",
+          "label": "H1"
+        },
+        {
+          "value": "h2",
+          "label": "H2"
+        },
+        {
+          "value": "h3",
+          "label": "H3"
+        },
+        {
+          "value": "h4",
+          "label": "H4"
+        },
+        {
+          "value": "h5",
+          "label": "H5"
+        },
+        {
+          "value": "h6",
+          "label": "H6"
+        }
+      ],
+      "default": "h2"
+    },
+    {
+      "type": "textarea",
+      "id": "text_heading",
+      "label": "Text",
+      "default": "Image with text"
+    },
+    {
+      "type": "select",
+      "id": "font_size_heading",
+      "label": "Font size heading",
+      "default": "h5",
+      "options": [
+        {
+          "value": "h1",
+          "label": "Extra extra large"
+        },
+        {
+          "value": "h2",
+          "label": "Extra large"
+        },
+        {
+          "value": "h3",
+          "label": "Large"
+        },
+        {
+          "value": "h4",
+          "label": "Medium"
+        },
+        {
+          "value": "h5",
+          "label": "Small"
+        },
+        {
+          "value": "h6",
+          "label": "Extra small"
+        }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "text_line_height",
+      "label": "Line height",
+      "min": 0,
+      "max": 3,
+      "step": 0.1,
+      "default": 1.2
+    },
+    {
+      "type": "select",
+      "id": "text_effect",
+      "label": "Effect",
+      "options": [
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "reveal",
+          "label": "Blur"
+        },
+        {
+          "value": "split",
+          "label": "Split"
+        }
+      ],
+      "default": "split"
+    },
+    {
+      "type": "number",
+      "id": "text_duration",
+      "label": "Duration (milliseconds)",
+      "default": 1000
+    },
+    {
+      "type": "range",
+      "id": "text_heading_width_desktop",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "label": "Desktop heading width",
+      "default": 100
+    },
+    {
+      "type": "range",
+      "id": "text_heading_width_mobile",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "label": "Mobile heading width",
+      "default": 100
+    },
+    {
+      "type": "select",
+      "id": "placement",
+      "label": "t:blocks.image_with_text.settings.placement.label",
+      "options": [
+        {
+          "value": "top",
+          "label": "t:blocks.image_with_text.settings.placement.option_1.label"
+        },
+        {
+          "value": "middle",
+          "label": "t:blocks.image_with_text.settings.placement.option_2.label"
+        },
+        {
+          "value": "bottom",
+          "label": "t:blocks.image_with_text.settings.placement.option_3.label"
+        }
+      ],
+      "default": "top"
+    },
+    {
+      "type": "select",
+      "id": "alignment",
+      "label": "t:blocks.image_with_text.settings.alignment.label",
+      "options": [
+        {
+          "value": "left",
+          "label": "t:blocks.image_with_text.settings.alignment.option_1.label"
+        },
+        {
+          "value": "center",
+          "label": "t:blocks.image_with_text.settings.alignment.option_2.label"
+        },
+        {
+          "value": "right",
+          "label": "t:blocks.image_with_text.settings.alignment.option_3.label"
+        }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "checkbox",
+      "id": "space_between",
+      "label": "t:blocks.image_with_text.settings.space_between.label",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "t:blocks.image_with_text.settings.header_image.content"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_dt",
+      "label": "t:blocks.image_with_text.settings.image_dt.label"
+    },
+    {
+      "type": "select",
+      "id": "aspect_ratio_dt",
+      "label": "Aspect ratio",
+      "default": "auto",
+      "options": [
+        {
+          "value": "auto",
+          "label": "Auto"
+        },
+        {
+          "value": "2/3",
+          "label": "2:3"
+        },
+        {
+          "value": "3/4",
+          "label": "3:4"
+        },
+        {
+          "value": "3/2",
+          "label": "3:2"
+        },
+        {
+          "value": "1",
+          "label": "1:1"
+        },
+        {
+          "value": "4/3",
+          "label": "4:3"
+        },
+        {
+          "value": "16/9",
+          "label": "16:9"
+        },
+        {
+          "value": "21/9",
+          "label": "21:9"
+        }
+      ]
+    },
+    {
+      "type": "image_picker",
+      "id": "image_mb",
+      "label": "t:blocks.image_with_text.settings.image_mb.label"
+    },
+    {
+      "type": "select",
+      "id": "aspect_ratio_mb",
+      "label": "Aspect ratio",
+      "default": "auto",
+      "options": [
+        {
+          "value": "auto",
+          "label": "Auto"
+        },
+        {
+          "value": "2/3",
+          "label": "2:3"
+        },
+        {
+          "value": "3/4",
+          "label": "3:4"
+        },
+        {
+          "value": "3/2",
+          "label": "3:2"
+        },
+        {
+          "value": "1",
+          "label": "1:1"
+        },
+        {
+          "value": "4/3",
+          "label": "4:3"
+        },
+        {
+          "value": "16/9",
+          "label": "16:9"
+        },
+        {
+          "value": "21/9",
+          "label": "21:9"
+        }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "border_radius",
+      "label": "Border radius",
+      "options": [
+        {
+          "value": "auto",
+          "label": "Auto"
+        },
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "4",
+          "label": "Size 1"
+        },
+        {
+          "value": "6",
+          "label": "Size 2"
+        },
+        {
+          "value": "8",
+          "label": "Size 3"
+        },
+        {
+          "value": "10",
+          "label": "Size 4"
+        },
+        {
+          "value": "12",
+          "label": "Size 5"
+        },
+        {
+          "value": "16",
+          "label": "Size 6"
+        },
+        {
+          "value": "20",
+          "label": "Size 7"
+        },
+        {
+          "value": "24",
+          "label": "Size 8"
+        },
+        {
+          "value": "32",
+          "label": "Size 9"
+        },
+        {
+          "value": "40",
+          "label": "Size 10"
+        },
+        {
+          "value": "max",
+          "label": "Max"
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "t:blocks.image_with_text.settings.header_video.content"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_video_looping",
+      "label": "t:blocks.image_with_text.settings.enable_video_looping.label",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "t:blocks.image_with_text.settings.header_1.content"
+    },
+    {
+      "type": "video",
+      "id": "video",
+      "label": "t:blocks.image_with_text.settings.video.label"
+    },
+    {
+      "type": "header",
+      "content": "t:blocks.image_with_text.settings.header_2.content"
+    },
+    {
+      "type": "paragraph",
+      "content": "t:blocks.image_with_text.settings.paragraph.content"
+    },
+    {
+      "type": "video_url",
+      "id": "video_url",
+      "label": "t:blocks.image_with_text.settings.video_url.label",
+      "accept": [
+        "youtube",
+        "vimeo"
+      ],
+      "default": "https://www.youtube.com/watch?v=_9VUPq3SxOc"
+    },
+    {
+      "type": "image_picker",
+      "id": "cover_image",
+      "label": "t:blocks.image_with_text.settings.cover_image.label"
+    },
+    {
+      "type": "header",
+      "content": "t:blocks.image_with_text.settings.header_button.content"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button text",
+      "default": "Button"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link",
+      "default": "/collections/all"
+    },
+    {
+      "type": "select",
+      "id": "button_style",
+      "label": "Button style",
+      "options": [
+        {
+          "value": "primary",
+          "label": "Primary"
+        },
+        {
+          "value": "secondary",
+          "label": "Secondary"
+        },
+        {
+          "value": "link",
+          "label": "Link"
+        }
+      ],
+      "default": "primary"
+    },
+    {
+      "type": "select",
+      "id": "button_size",
+      "label": "Button size",
+      "options": [
+        {
+          "value": "xs",
+          "label": "Extra small"
+        },
+        {
+          "value": "sm",
+          "label": "Small"
+        },
+        {
+          "value": "md",
+          "label": "Medium"
+        },
+        {
+          "value": "lg",
+          "label": "Large"
+        }
+      ],
+      "default": "md"
+    },
+    {
+      "type": "header",
+      "content": "t:blocks.image_with_text.settings.header_general.content"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme_collection",
+      "default": "scheme_1",
+      "label": "t:blocks.image_with_text.settings.color_schema_collection.label"
+    },
+    {
+      "type": "range",
+      "id": "background_overlay",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "default": 0,
+      "label": "t:blocks.image_with_text.settings.background_overlay.label"
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:blocks.image_with_text.presets.name"
+    }
+  ]
+}
+{% endschema %}

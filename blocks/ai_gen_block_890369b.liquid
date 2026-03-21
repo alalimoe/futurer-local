@@ -1,0 +1,558 @@
+{% doc %}
+  @prompt
+    create a premium, clean Section 2: “Find your COA in 30 seconds”
+    
+    Heading: Find your COA (fast)
+    Copy:
+    
+    Locate the batch/lot on your product label (a quick photo is fine).
+    
+    Match the lot to the COA in the library below (or use the COA link on the product page).
+    
+    Save the PDF for your records—especially in the UAE, where shipping conditions can vary.
+    
+    Mini note (small text):
+    If your label is missing a batch/lot number or the COA link doesn’t load, don’t guess—contact support with your order number + a label photo.
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-coa-finder-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    padding: {{ block.settings.padding_top }}px {{ block.settings.padding_horizontal }}px {{ block.settings.padding_bottom }}px;
+    background-color: {{ block.settings.background_color }};
+  }
+
+  .ai-coa-finder__container-{{ ai_gen_id }} {
+    max-width: {{ block.settings.max_width }}px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .ai-coa-finder__heading-{{ ai_gen_id }} {
+    font-weight: 600;
+    color: {{ block.settings.heading_color }};
+    margin: 0 0 {{ block.settings.heading_spacing }}px;
+    text-align: {{ block.settings.text_alignment }};
+    line-height: 1.2;
+  }
+
+  .ai-coa-finder__steps-{{ ai_gen_id }} {
+    display: flex;
+    flex-direction: column;
+    gap: {{ block.settings.step_spacing }}px;
+    margin-bottom: {{ block.settings.note_spacing }}px;
+  }
+
+  .ai-coa-finder__step-{{ ai_gen_id }} {
+    display: flex;
+    align-items: flex-start;
+    gap: {{ block.settings.step_gap }}px;
+    padding: {{ block.settings.step_padding }}px;
+    background-color: {{ block.settings.step_background }};
+    border-radius: {{ block.settings.step_border_radius }}px;
+    border: {{ block.settings.step_border_width }}px solid {{ block.settings.step_border_color }};
+  }
+
+  .ai-coa-finder__step-number-{{ ai_gen_id }} {
+    flex-shrink: 0;
+    width: {{ block.settings.number_size }}px;
+    height: {{ block.settings.number_size }}px;
+    border-radius: 50%;
+    background-color: {{ block.settings.number_background }};
+    color: {{ block.settings.number_color }};
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: {{ block.settings.number_font_size }}px;
+    font-weight: 600;
+  }
+
+  .ai-coa-finder__step-content-{{ ai_gen_id }} {
+    flex: 1;
+    color: {{ block.settings.text_color }};
+    font-size: {{ block.settings.text_size }}px;
+    line-height: 1.6;
+  }
+
+  .ai-coa-finder__note-{{ ai_gen_id }} {
+    padding: {{ block.settings.note_padding }}px;
+    background-color: {{ block.settings.note_background }};
+    border-left: {{ block.settings.note_border_width }}px solid {{ block.settings.note_border_color }};
+    border-radius: {{ block.settings.note_border_radius }}px;
+  }
+
+  .ai-coa-finder__note-title-{{ ai_gen_id }} {
+    font-size: {{ block.settings.note_title_size }}px;
+    font-weight: 600;
+    color: {{ block.settings.note_title_color }};
+    margin: 0 0 8px;
+  }
+
+  .ai-coa-finder__note-text-{{ ai_gen_id }} {
+    font-size: {{ block.settings.note_text_size }}px;
+    color: {{ block.settings.note_text_color }};
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-coa-finder-{{ ai_gen_id }} {
+      padding: {{ block.settings.padding_top | times: 0.7 }}px {{ block.settings.padding_horizontal | times: 0.7 }}px {{ block.settings.padding_bottom | times: 0.7 }}px;
+    }
+
+    .ai-coa-finder__step-{{ ai_gen_id }} {
+      gap: {{ block.settings.step_gap | times: 0.8 }}px;
+      padding: {{ block.settings.step_padding | times: 0.8 }}px;
+    }
+
+    .ai-coa-finder__step-number-{{ ai_gen_id }} {
+      width: {{ block.settings.number_size | times: 0.85 }}px;
+      height: {{ block.settings.number_size | times: 0.85 }}px;
+      font-size: {{ block.settings.number_font_size | times: 0.85 }}px;
+    }
+
+    .ai-coa-finder__step-content-{{ ai_gen_id }} {
+      font-size: {{ block.settings.text_size | times: 0.9 }}px;
+    }
+
+    .ai-coa-finder__note-{{ ai_gen_id }} {
+      padding: {{ block.settings.note_padding | times: 0.8 }}px;
+    }
+
+    .ai-coa-finder__note-title-{{ ai_gen_id }} {
+      font-size: {{ block.settings.note_title_size | times: 0.9 }}px;
+    }
+
+    .ai-coa-finder__note-text-{{ ai_gen_id }} {
+      font-size: {{ block.settings.note_text_size | times: 0.9 }}px;
+    }
+  }
+{% endstyle %}
+
+<div class="ai-coa-finder-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="ai-coa-finder__container-{{ ai_gen_id }}">
+    {% if block.settings.heading != blank %}
+      <h2 class="ai-coa-finder__heading-{{ ai_gen_id }} {{ block.settings.heading_size }}">{{ block.settings.heading }}</h2>
+    {% endif %}
+
+    <div class="ai-coa-finder__steps-{{ ai_gen_id }}">
+      {% if block.settings.step_1_text != blank %}
+        <div class="ai-coa-finder__step-{{ ai_gen_id }}">
+          <div class="ai-coa-finder__step-number-{{ ai_gen_id }}">1</div>
+          <div class="ai-coa-finder__step-content-{{ ai_gen_id }}">
+            {{ block.settings.step_1_text }}
+          </div>
+        </div>
+      {% endif %}
+
+      {% if block.settings.step_2_text != blank %}
+        <div class="ai-coa-finder__step-{{ ai_gen_id }}">
+          <div class="ai-coa-finder__step-number-{{ ai_gen_id }}">2</div>
+          <div class="ai-coa-finder__step-content-{{ ai_gen_id }}">
+            {{ block.settings.step_2_text }}
+          </div>
+        </div>
+      {% endif %}
+
+      {% if block.settings.step_3_text != blank %}
+        <div class="ai-coa-finder__step-{{ ai_gen_id }}">
+          <div class="ai-coa-finder__step-number-{{ ai_gen_id }}">3</div>
+          <div class="ai-coa-finder__step-content-{{ ai_gen_id }}">
+            {{ block.settings.step_3_text }}
+          </div>
+        </div>
+      {% endif %}
+    </div>
+
+    {% if block.settings.show_note %}
+      <div class="ai-coa-finder__note-{{ ai_gen_id }}">
+        {% if block.settings.note_title != blank %}
+          <div class="ai-coa-finder__note-title-{{ ai_gen_id }}">{{ block.settings.note_title }}</div>
+        {% endif %}
+        {% if block.settings.note_text != blank %}
+          <div class="ai-coa-finder__note-text-{{ ai_gen_id }}">{{ block.settings.note_text }}</div>
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "COA finder instructions",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Find your COA (fast)"
+    },
+    {
+      "type": "richtext",
+      "id": "step_1_text",
+      "label": "Step 1",
+      "default": "<p>Locate the batch/lot on your product label (a quick photo is fine).</p>"
+    },
+    {
+      "type": "richtext",
+      "id": "step_2_text",
+      "label": "Step 2",
+      "default": "<p>Match the lot to the COA in the library below (or use the COA link on the product page).</p>"
+    },
+    {
+      "type": "richtext",
+      "id": "step_3_text",
+      "label": "Step 3",
+      "default": "<p>Save the PDF for your records—especially in the UAE, where shipping conditions can vary.</p>"
+    },
+    {
+      "type": "header",
+      "content": "Note"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_note",
+      "label": "Show note",
+      "default": true
+    },
+    {
+      "type": "inline_richtext",
+      "id": "note_title",
+      "label": "Note title",
+      "default": "Important"
+    },
+    {
+      "type": "richtext",
+      "id": "note_text",
+      "label": "Note text",
+      "default": "<p>If your label is missing a batch/lot number or the COA link doesn't load, don't guess—contact support with your order number + a label photo.</p>"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "max_width",
+      "label": "Maximum width",
+      "min": 600,
+      "max": 1400,
+      "step": 50,
+      "unit": "px",
+      "default": 900
+    },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "Heading alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Top padding",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "padding_horizontal",
+      "label": "Horizontal padding",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "header",
+      "content": "Heading style"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Heading size",
+      "options": [
+        {"value": "h1", "label": "Display"},
+        {"value": "h2", "label": "XL"},
+        {"value": "h3", "label": "L"},
+        {"value": "h4", "label": "M"},
+        {"value": "h5", "label": "S"},
+        {"value": "h6", "label": "XS"}
+      ],
+      "default": "h3"
+    },
+    {
+      "type": "range",
+      "id": "heading_spacing",
+      "label": "Bottom spacing",
+      "min": 10,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Color",
+      "default": "#1e1e1e"
+    },
+    {
+      "type": "header",
+      "content": "Step style"
+    },
+    {
+      "type": "range",
+      "id": "step_spacing",
+      "label": "Spacing between steps",
+      "min": 8,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "step_gap",
+      "label": "Gap between number and text",
+      "min": 8,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "step_padding",
+      "label": "Step padding",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "step_border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "step_border_width",
+      "label": "Border width",
+      "min": 0,
+      "max": 4,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "color",
+      "id": "step_background",
+      "label": "Background",
+      "default": "#f9f9f9"
+    },
+    {
+      "type": "color",
+      "id": "step_border_color",
+      "label": "Border color",
+      "default": "#e8e8e8"
+    },
+    {
+      "type": "header",
+      "content": "Step number"
+    },
+    {
+      "type": "range",
+      "id": "number_size",
+      "label": "Circle size",
+      "min": 30,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "number_font_size",
+      "label": "Font size",
+      "min": 14,
+      "max": 28,
+      "step": 1,
+      "unit": "px",
+      "default": 18
+    },
+    {
+      "type": "color",
+      "id": "number_background",
+      "label": "Background",
+      "default": "#5a9d6f"
+    },
+    {
+      "type": "color",
+      "id": "number_color",
+      "label": "Text color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "header",
+      "content": "Step text"
+    },
+    {
+      "type": "range",
+      "id": "text_size",
+      "label": "Font size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Color",
+      "default": "#2a2a2a"
+    },
+    {
+      "type": "header",
+      "content": "Note style"
+    },
+    {
+      "type": "range",
+      "id": "note_spacing",
+      "label": "Top spacing",
+      "min": 16,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "note_padding",
+      "label": "Padding",
+      "min": 12,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "note_border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "note_border_width",
+      "label": "Border width",
+      "min": 2,
+      "max": 8,
+      "step": 1,
+      "unit": "px",
+      "default": 3
+    },
+    {
+      "type": "color",
+      "id": "note_background",
+      "label": "Background",
+      "default": "#fffbf0"
+    },
+    {
+      "type": "color",
+      "id": "note_border_color",
+      "label": "Border color",
+      "default": "#f39f1f"
+    },
+    {
+      "type": "range",
+      "id": "note_title_size",
+      "label": "Title size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "color",
+      "id": "note_title_color",
+      "label": "Title color",
+      "default": "#2a2a2a"
+    },
+    {
+      "type": "range",
+      "id": "note_text_size",
+      "label": "Text size",
+      "min": 11,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "default": 13
+    },
+    {
+      "type": "color",
+      "id": "note_text_color",
+      "label": "Text color",
+      "default": "#666666"
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background",
+      "default": "#ffffff"
+    }
+  ],
+  "presets": [
+    {
+      "name": "COA finder instructions"
+    }
+  ]
+}
+{% endschema %}

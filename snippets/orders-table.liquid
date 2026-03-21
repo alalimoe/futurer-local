@@ -1,0 +1,71 @@
+{% liquid
+  assign order_history_title = 'customer.orders.title' | t
+  assign order_empty = 'customer.orders.empty' | t
+  assign order_empty_info = 'customer.orders.empty_info' | t
+  assign shopping_now = 'customer.orders.shopping_now' | t
+
+  assign container_class = 'xo-orders-table'
+  if settings.enable_border_radius
+    assign container_class = container_class | append: ' xo-orders-table--radius'
+  endif
+%}
+
+<div class="{{ container_class }}">
+  <xo-animate xo-cascade>
+    <div class="xo-orders-table__title">
+      <p>{{ order_history_title }}</p>
+    </div>
+  </xo-animate>
+  {% paginate customer.orders by 10 %}
+    {%- if customer.orders.size > 0 -%}
+      <xo-animate xo-cascade>
+        <table class="xo-orders-table__table">
+          <thead>
+            <tr class="xo-orders-table__head-row">
+              <th class="xo-orders-table__head-row-item">{{ 'customer.orders.order_number' | t }}</th>
+              <th class="xo-orders-table__head-row-item">{{ 'customer.orders.date' | t }}</th>
+              <th class="xo-orders-table__head-row-item">{{ 'customer.orders.payment_status' | t }}</th>
+              <th class="xo-orders-table__head-row-item">{{ 'customer.orders.fulfillment_status' | t }}</th>
+              <th class="xo-orders-table__head-row-item">{{ 'customer.orders.total' | t }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {%- for order in customer.orders -%}
+              <tr class="xo-orders-table__body-row">
+                <td class="xo-orders-table__body-row-item" data-th="{{ 'customer.orders.order_number' | t }}">
+                  <a href="{{ order.customer_url }}" class="xo-orders-table__order-number">{{ order.name }}</a>
+                </td>
+                <td class="xo-orders-table__body-row-item" data-th="{{ 'customer.orders.date' | t }}">
+                  {{ order.created_at | time_tag: format: 'date' }}
+                </td>
+                <td class="xo-orders-table__body-row-item" data-th="{{ 'customer.orders.payment_status' | t }}">
+                  {{ order.financial_status_label }}
+                </td>
+                <td class="xo-orders-table__body-row-item" data-th="{{ 'customer.orders.fulfillment_status' | t }}">
+                  {{ order.fulfillment_status_label }}
+                </td>
+                <td class="xo-orders-table__body-row-item" data-th="{{ 'customer.orders.total' | t }}">
+                  {% if settings.currency_code_enabled %}
+                    {{ order.total_price | money_with_currency }}
+                  {% else %}
+                    {{ order.total_price | money }}
+                  {% endif %}
+                </td>
+              </tr>
+            {%- endfor -%}
+          </tbody>
+        </table>
+      </xo-animate>
+    {% else %}
+      <xo-animate xo-cascade>
+        <div class="xo-orders-table__empty">
+          {% render 'empty', title: order_empty, content: order_empty_info, icon_name: 'cart-empty-1', icon_size: '11.2rem' %}
+          <div class="xo-orders-table__btn">
+            {% render 'button', text: shopping_now, link: routes.all_products_collection_url, style: 'primary', size: 'md', icon: 'chevron-right', icon_size: '24' %}
+          </div>
+        </div>
+      </xo-animate>
+    {%- endif -%}
+    {% render 'pagination', paginate: paginate %}
+  {% endpaginate %}
+</div>

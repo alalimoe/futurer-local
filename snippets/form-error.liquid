@@ -1,0 +1,45 @@
+{% comment %}
+  Renders a form error
+
+  Accepts:
+  - form: {Object} Form object (optional)
+  - with_recipient_form: {Boolean} Whether to render the form with the recipient form (optional)
+
+  Usage:
+  {% render 'form-error',
+    form: form
+  %}
+{% endcomment %}
+
+{% if with_recipient_form %}
+  <div class='xo-form-error'>
+    {% render 'icon', name: 'error' %}
+    {% if form.errors %}
+      <div class='xo-form-error__message'>{{ form.errors | default_errors }}</div>
+    {% else %}
+      <xo-product-recipient-form-error class='xo-form-error__message'></xo-product-recipient-form-error>
+    {% endif %}
+  </div>
+{% else %}
+  {% if form.errors %}
+    <div class='xo-form-error'>
+      <div class='xo-form-error__message'>{{ form.errors | default_errors }}</div>
+    </div>
+  {% endif %}
+{% endif %}
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const errorEls = document.querySelectorAll('.errors li');
+
+    errorEls.forEach(function (item) {
+      // Kiểm tra xem biểu tượng đã được thêm vào chưa
+      if (!item.querySelector('.error-icon')) {
+        const iconDiv = document.createElement('div');
+        iconDiv.className = 'error-icon';
+        iconDiv.innerHTML = `{% render 'icon', name: 'error' %}`;
+        item.insertBefore(iconDiv, item.firstChild);
+      }
+    });
+  });
+</script>

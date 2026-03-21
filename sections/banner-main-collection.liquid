@@ -1,0 +1,277 @@
+{{ 'section-banner-main-collection.css' | asset_url | stylesheet_tag }}
+
+{% liquid
+  assign show_count_number = section.settings.show_count_number
+  assign class = section.settings.font_size_heading
+  assign heading = section.settings.heading
+  assign alignment = section.settings.alignment
+  assign img_desktop = section.settings.background_image_desktop | image_url
+  assign img_mobile = section.settings.background_image_mobile | image_url
+  assign banner_height = section.settings.banner_height
+  assign image_overlay_opacity = section.settings.image_overlay_opacity
+  assign image_overlay_color = section.settings.image_overlay_color
+  assign text = heading
+  assign chars = text | split: ''
+  assign words = text | split: ' '
+  assign percent_initial_1 = 64
+  assign percent_initial_2 = 74
+  assign char_index = 0
+%}
+
+<section {% render 'section-attr' %}>
+  <div
+    class="banner-main-collection{% if banner_height %} banner-main-collection--{{ banner_height }}{% endif %}"
+    style="--overlay-opacity: {{ image_overlay_opacity }}; --overlay-color: {{ image_overlay_color }}"
+  >
+    {% if img_desktop != blank or img_mobile != blank %}
+      <div class="banner-main-collection__pr">
+        <div class="banner-main-collection__pr-2">
+          <xo-animate
+            xo-cascade
+            xo-type="zoom-out"
+            xo-duration="2000"
+            class="banner-main-collection__bg banner-main-collection__bg--desktop"
+          >
+            {% render 'image', image: img_desktop %}
+          </xo-animate>
+          <xo-animate
+            xo-cascade
+            xo-type="zoom-out"
+            xo-duration="2000"
+            class="banner-main-collection__bg banner-main-collection__bg--mobile"
+          >
+            {% render 'image', image: img_mobile %}
+          </xo-animate>
+        </div>
+      </div>
+    {%- else -%}
+      <div class="banner-main-collection__pr">
+        <div class="banner-main-collection__pr-2">
+          <xo-animate xo-cascade xo-type="zoom-out" xo-duration="2000" class="banner-main-collection__bg">
+            {{ 'hero-apparel-1' | placeholder_svg_tag: 'placeholder-svg' }}
+          </xo-animate>
+        </div>
+      </div>
+    {% endif %}
+
+    <xo-container class="banner-main-collection__container">
+      <div class="banner-main-collection__content{% if alignment %} banner-main-collection__content--{{ alignment }}{% endif %}">
+        <xo-animate xo-cascade>
+          <div class="banner-main-collection__head">
+            <h3 class="banner-main-collection__heading {{ class }}">
+              {% for word in words %}
+                {% if forloop.index != 1 %}
+                  <span class="banner-main-collection__char">&nbsp;</span>
+                {% endif %}
+                {% assign chars = word | split: '' %}
+                <span class="banner-main-collection__chars">
+                  {% for char in chars %}
+                    {% assign char_index = char_index | plus: 1 %}
+                    {% assign percent_3 = percent_initial_1 | minus: char_index %}
+                    {% assign percent_4 = percent_initial_2 | minus: char_index %}
+                    <xo-animate xo-cascade xo-duration="1000" xo-strength="3" xo-easing="easeOutExpo">
+                      <xo-parallax-scroll xo-keyframes="{ '{{ percent_3 }}%': { y: '0%' }, '{{ percent_4 }}%': { y: '200%' } }">{{ char }}</xo-parallax-scroll>
+                    </xo-animate>
+                  {% endfor %}
+                </span>
+              {% endfor %}
+            </h3>
+            {% if show_count_number %}
+              <xo-animate xo-cascade>
+                <div class="banner-main-collection__count">
+                  <span>({{ shop.collections_count }})</span>
+                </div>
+              </xo-animate>
+            {% endif %}
+          </div>
+        </xo-animate>
+      </div>
+    </xo-container>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "t:sections.banner_main_collection.name",
+  "class": "section-hero",
+  "disabled_on": {
+    "groups": [
+      "header",
+      "footer",
+      "custom.overlay",
+      "custom.popups",
+      "custom.features"
+    ]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "t:sections.banner_main_collection.settings.header_text.content"
+    },
+    {
+      "type": "select",
+      "id": "font_size_heading",
+      "label": "Font size heading",
+      "default": "h1",
+      "options": [
+        {
+          "value": "h1",
+          "label": "Extra extra large"
+        },
+        {
+          "value": "h2",
+          "label": "Extra large"
+        },
+        {
+          "value": "h3",
+          "label": "Large"
+        },
+        {
+          "value": "h4",
+          "label": "Medium"
+        },
+        {
+          "value": "h5",
+          "label": "Small"
+        },
+        {
+          "value": "h6",
+          "label": "Extra small"
+        }
+      ]
+    },
+    {
+      "type": "textarea",
+      "id": "heading",
+      "label": "t:sections.banner_main_collection.settings.heading.label",
+      "default": "Banner main collection"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_count_number",
+      "label": "t:sections.banner_main_collection.settings.show_count_number.label",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "alignment",
+      "label": "Alignment",
+      "default": "left",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "t:sections.banner_main_collection.settings.header_image.content"
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image_desktop",
+      "label": "t:sections.banner_main_collection.settings.image_dt.label"
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image_mobile",
+      "label": "t:sections.banner_main_collection.settings.image_mb.label"
+    },
+    {
+      "type": "select",
+      "id": "banner_height",
+      "label": "Aspect ratio",
+      "default": "medium",
+      "options": [
+        {
+          "value": "small",
+          "label": "Small"
+        },
+        {
+          "value": "medium",
+          "label": "Medium"
+        },
+        {
+          "value": "large",
+          "label": "Large"
+        }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "image_overlay_opacity",
+      "min": 0,
+      "max": 1,
+      "step": 0.1,
+      "label": "t:sections.banner_main_collection.settings.image_overlay_opacity.label",
+      "default": 0
+    },
+    {
+      "type": "color",
+      "id": "image_overlay_color",
+      "label": "t:sections.banner_main_collection.settings.image_overlay_color.label",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "General settings"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Section color scheme"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color"
+    },
+    {
+      "type": "color_background",
+      "id": "background_gradient",
+      "label": "Background gradient"
+    },
+    {
+      "type": "number",
+      "id": "padding_top_desktop",
+      "label": "Padding top desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_desktop",
+      "label": "Padding bottom desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_top_mobile",
+      "label": "Padding top mobile",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_mobile",
+      "label": "Padding bottom mobile",
+      "default": 50
+    }
+  ],
+  "blocks": [],
+  "presets": [
+    {
+      "name": "t:sections.banner_main_collection.presets.name",
+      "settings": {},
+      "blocks": []
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,117 @@
+.xo-inventory-status {
+  --bg-progress: #E7E7E7;
+  width: 100%;
+  margin: 1.6rem 0;
+  display: block;
+}
+@media (min-width: 768px) {
+  .xo-inventory-status {
+    margin: 2rem 0;
+  }
+}
+
+.xo-inventory-status__box {
+  position: relative;
+  z-index: 0;
+  width: fit-content;
+  padding: 1.4rem 2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  overflow: hidden;
+}
+.xo-inventory-status__box::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--color);
+  opacity: 0.085;
+  z-index: -1;
+}
+
+.xo-inventory-status__box--radius {
+  border-radius: 10rem;
+  overflow: hidden;
+}
+
+.xo-inventory-status__box--left-in-stock {
+  width: 100%;
+  padding: 0;
+  flex-direction: column;
+  align-items: start;
+  gap: 0;
+}
+.xo-inventory-status__box--left-in-stock::before {
+  background: transparent;
+}
+.xo-inventory-status__box--left-in-stock .xo-inventory-status__label {
+  padding-bottom: 1rem;
+}
+
+.xo-inventory-status__box--left-in-stock.xo-inventory-status__box--radius {
+  border-radius: 0;
+}
+.xo-inventory-status__box--left-in-stock.xo-inventory-status__box--radius .xo-inventory-status__progress {
+  border-radius: 3.5rem;
+}
+.xo-inventory-status__box--left-in-stock.xo-inventory-status__box--radius .xo-inventory-status__progress::before {
+  border-radius: 3.5rem;
+}
+
+.xo-inventory-status__label {
+  color: var(--color);
+  font-size: calc(var(--font-body-scale) * 1.4rem);
+  font-weight: 500;
+  line-height: calc(1 + 0.5 / var(--font-body-scale));
+}
+@media (min-width: 768px) {
+  .xo-inventory-status__label {
+    font-size: calc(var(--font-body-scale) * 1.5rem);
+    line-height: calc(1 + 0.4 / var(--font-body-scale));
+  }
+}
+
+.xo-inventory-status__progress {
+  position: relative;
+  width: 100%;
+  height: 0.4rem;
+  background: var(--bg-progress);
+}
+.xo-inventory-status__progress::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  background: var(--color);
+  transition: width 0.7s cubic-bezier(0.7, 0, 0.3, 1) 0.1s;
+  animation: progress 0.5s linear forwards;
+}
+
+.xo-inventory-status__icon {
+  position: relative;
+  transform: scale(1);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(0.9);
+    opacity: 0.8;
+  }
+  70% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.9);
+    opacity: 0.8;
+  }
+}
+@keyframes progress {
+  from {
+    width: 100%;
+  }
+  to {
+    width: var(--progress, 100%);
+  }
+}

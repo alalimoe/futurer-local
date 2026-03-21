@@ -1,0 +1,42 @@
+{% assign random_number = 'now' | date: '%N' | modulo: 100 %}
+{% assign id = 'localization_form_' | append: random_number %}
+
+<xo-currency-select class='xo-currency-select'>
+  {% if localization.available_countries.size > 1 %}
+    {%- form 'localization', id: id, class: 'xo-currency-select__form' -%}
+      <xo-popover-trigger xo-name='{{ id }}' class='xo-currency-select__trigger' tabindex='0' role='button'>
+        <div class='xo-currency-select__trigger-name'>
+          <span>{{ localization.country.name -}}</span>
+          <span>|</span>
+          <span>
+            {{- localization.country.currency.iso_code }}
+            {{ localization.country.currency.symbol }}
+          </span>
+        </div>
+        {% render 'icon', name: 'arrow-down', size: '20' %}
+      </xo-popover-trigger>
+      <xo-popover xo-name='{{ id }}' xo-placement='{% if selector_position == 'footer' %}top-center{% else %}bottom-center{% endif %}' class='xo-currency-select__content'>
+        {%- for country in localization.available_countries -%}
+          {% assign input_id = 'Country--' | append: country.iso_code %}
+          <label class='xo-currency-select__item' tabindex='0' role='button' for='{{ input_id }}-{{ section.id }}'>
+            <input
+              class='xo-currency-select__input'
+              type='radio'
+              name='country_code'
+              value='{{ country.iso_code }}'
+              id='{{ input_id }}-{{ section.id }}'
+              {%- if country.iso_code == localization.country.iso_code %}
+                checked
+              {% endif %}
+            >
+            <span class='xo-currency-select__name'>
+              {{ country | image_url: width: 16 | image_tag }}
+              {{ country.name }} | {{ country.currency.iso_code }}
+              {{ country.currency.symbol }}
+            </span>
+          </label>
+        {%- endfor -%}
+      </xo-popover>
+    {%- endform -%}
+  {% endif %}
+</xo-currency-select>

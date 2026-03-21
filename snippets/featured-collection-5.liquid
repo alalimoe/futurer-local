@@ -1,0 +1,228 @@
+{% comment %}
+  Renders a feature collection element with a given value
+
+  @param {String} class - Font size heading (required)
+  @param {String} heading - Heading (required)
+  @param {Object} collection - Select collection (required)
+  @param {String} autoplay - Autoplay (optional)
+  @param {Number} autoplay_time - Autoplay speed (seconds) (required)
+  @param {Number} product_per_view - Product per view (required)
+  @param {Number} product_pre_move - Product per move (required)
+  @param {Object} button - Button (required)
+
+  @example
+  {% render 'featured-collection-5',
+    class: font_size,
+    heading: heading,
+    collection: collection,
+    autoplay: autoplay,
+    autoplay_time: autoplay_time,
+    product_per_view: product_per_view,
+    product_per_move: product_per_move,
+    button: button
+  %}
+{% endcomment %}
+
+{% liquid
+  assign placeholder_image = 'collection-1'
+  assign heading_default = default_heading
+  assign heading = heading | default: heading_default
+%}
+
+<div class="featured-collection-5">
+  <div class="featured-collection-5__head {% if layout %}featured-collection-5__head--{{ layout }}{% endif %}">
+    {% if heading %}
+      <div class="featured-collection-5__heading">
+        {% render 'text', context: section, text: heading %}
+      </div>
+    {% endif %}
+    <xo-animate xo-cascade>
+      <div class="featured-collection-5__button">
+        {% render 'button',
+          text: button.button_text,
+          link: button.button_link,
+          style: button.button_style,
+          size: button.button_size,
+          radius: settings.button_radius,
+          padding: settings.button_padding
+        %}
+      </div>
+    </xo-animate>
+  </div>
+  <div class="featured-collection-5__content">
+    {% if product_list != blank %}
+      {% if layout == 'grid' %}
+        <xo-grid
+          class="featured-collection-5__grid"
+          style="{%- if product_list.size == 0 -%}--lg: 1;{%- else -%} --lg: {{ column_desktop }};{%- endif -%} --md: {{  column_mobile }}; --xs: {{ column_mobile }};"
+        >
+          {%- if product_list.size == 0 -%}
+            {%- assign title = 'sections.featured_collection.empty' | t -%}
+            {% render 'collection-empty', title: title %}
+          {%- else -%}
+            {% for product in product_list limit: product_display %}
+              {% render 'product-card',
+                product: product,
+                show_image: settings.product_card_show_image,
+                show_secondary_image: settings.product_card_show_secondary_image,
+                show_vendor: settings.product_card_show_vendor,
+                show_description: settings.product_card_show_description,
+                show_quick_add: settings.product_card_show_quick_add,
+                show_quick_view: settings.product_card_show_quick_view,
+                show_favorite: settings.product_card_show_favorite,
+                show_price: settings.product_card_show_price,
+                show_badge: settings.product_card_show_badge,
+                media_aspect_ratio: section.settings.product_card_aspect_ratio,
+                color_scheme: section.settings.card_color_scheme,
+                placeholder_image: placeholder_image,
+                animate_enabled: true
+              %}
+            {% endfor %}
+          {%- endif -%}
+        </xo-grid>
+      {%- else -%}
+        <xo-carousel
+          xo-per-view="{{ product_per_view }}"
+          xo-per-move="1"
+          {% if autoplay == 'on' %}
+            xo-autoplay="{{ autoplay_time }}"
+            xo-loop
+          {% endif %}
+          xo-breakpoints='
+            {
+              768: {
+                perView: 2,
+                perMove: 1,
+                gap: 10,
+                overflow: "visible"
+              },
+            }
+          '
+          xo-render-bullet="<span class='carousel-bullet'></span>"
+          class="featured-collection-5__carousel"
+        >
+          <xo-carousel-inner>
+            <xo-carousel-list>
+              {% for product in product_list %}
+                <xo-carousel-slide>
+                  {% render 'product-card',
+                    product: product,
+                    show_image: settings.product_card_show_image,
+                    show_secondary_image: settings.product_card_show_secondary_image,
+                    show_vendor: settings.product_card_show_vendor,
+                    show_description: settings.product_card_show_description,
+                    show_quick_add: settings.product_card_show_quick_add,
+                    show_quick_view: settings.product_card_show_quick_view,
+                    show_favorite: settings.product_card_show_favorite,
+                    show_price: settings.product_card_show_price,
+                    show_badge: settings.product_card_show_badge,
+                    position_badge: settings.position_badge,
+                    media_aspect_ratio: section.settings.product_card_aspect_ratio,
+                    color_scheme: section.settings.card_color_scheme,
+                    placeholder_image: placeholder_image,
+                    animate_enabled: true
+                  %}
+                </xo-carousel-slide>
+              {% endfor %}
+            </xo-carousel-list>
+          </xo-carousel-inner>
+          <div class="featured-collection-5__paginate">
+            {% render 'carousel-pagination', align: 'center', style: 'sticks' %}
+          </div>
+        </xo-carousel>
+      {% endif %}
+    {%- else -%}
+      {% if layout == 'grid' %}
+        <xo-animate xo-cascade>
+          <xo-grid
+            class="featured-collection-5__grid"
+            style="{%- if product_list.size == 0 -%}--lg: 1;{%- else -%} --lg: {{ column_desktop }};{%- endif -%} --md: {{  column_mobile }}; --xs: {{ column_mobile }};"
+          >
+            {% for i in (1..4) %}
+              {% render 'product-card',
+                product: item,
+                show_image: settings.product_card_show_image,
+                show_secondary_image: settings.product_card_show_secondary_image,
+                show_vendor: settings.product_card_show_vendor,
+                show_description: settings.product_card_show_description,
+                show_quick_add: settings.product_card_show_quick_add,
+                show_quick_view: settings.product_card_show_quick_view,
+                show_favorite: settings.product_card_show_favorite,
+                show_price: settings.product_card_show_price,
+                show_badge: settings.product_card_show_badge,
+                position_badge: settings.position_badge,
+                media_aspect_ratio: section.settings.product_card_aspect_ratio,
+                color_scheme: section.settings.card_color_scheme,
+                placeholder_image: placeholder_image,
+                animate_enabled: true
+              %}
+            {% endfor %}
+          </xo-grid>
+        </xo-animate>
+      {%- else -%}
+        <xo-carousel
+          xo-per-view="{{ product_per_view }}"
+          xo-per-move="{{  product_per_move }}"
+          {% if autoplay == 'on' %}
+            xo-autoplay="{{ autoplay_time }}"
+            xo-loop
+          {% endif %}
+          xo-breakpoints='
+            {
+              768: {
+                perView: 1,
+                perMove: 1,
+                gap: 10,
+                overflow: "visible"
+              },
+            }
+          '
+          xo-render-bullet="<span class='carousel-bullet'></span>"
+          class="featured-collection-5__carousel"
+        >
+          <xo-carousel-inner>
+            <xo-carousel-list>
+              {% for i in (1..4) %}
+                <xo-carousel-slide>
+                  {% render 'product-card',
+                    product: item,
+                    show_image: settings.product_card_show_image,
+                    show_secondary_image: settings.product_card_show_secondary_image,
+                    show_vendor: settings.product_card_show_vendor,
+                    show_description: settings.product_card_show_description,
+                    show_quick_add: settings.product_card_show_quick_add,
+                    show_quick_view: settings.product_card_show_quick_view,
+                    show_favorite: settings.product_card_show_favorite,
+                    show_price: settings.product_card_show_price,
+                    show_badge: settings.product_card_show_badge,
+                    position_badge: settings.position_badge,
+                    media_aspect_ratio: section.settings.product_card_aspect_ratio,
+                    color_scheme: section.settings.card_color_scheme,
+                    placeholder_image: placeholder_image,
+                    animate_enabled: true
+                  %}
+                </xo-carousel-slide>
+              {% endfor %}
+            </xo-carousel-list>
+          </xo-carousel-inner>
+          <div class="featured-collection-5__paginate">
+            {% render 'carousel-pagination', align: 'center', style: 'sticks' %}
+          </div>
+        </xo-carousel>
+      {% endif %}
+    {% endif %}
+  </div>
+  <div class="featured-collection-5__banner" style="--aspect-ratio-desktop: {{ aspect_ratio_desktop }}; --aspect-ratio-mobile: {{ aspect_ratio_mobile }}">
+    {% render 'collection-image-1',
+      collection: collection,
+      image_desktop: image_desktop,
+      media_aspect_ratio_desktop: aspect_ratio_desktop,
+      image_mobile: image_mobile,
+      media_aspect_ratio_mobile: aspect_ratio_mobile,
+      show_heading: false,
+      color_schema_collection: color_schema_collection,
+      show_button: true,
+      animate_enabled: false
+    %}
+  </div>
+</div>

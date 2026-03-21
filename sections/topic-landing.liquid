@@ -1,0 +1,36 @@
+{% comment %} Nootropix topic landing section {% endcomment %}
+{% assign topic = shop.metaobjects.topic[page.handle] %}
+
+{% if topic %}
+  <section class="topic-hero">
+    <div class="wrapper">
+      <img
+        src="{{ topic.hero_image | image_url: width: 1600 }}"
+        alt="{{ topic.title | escape }}"
+        loading="eager" fetchpriority="high"
+        width="{{ topic.hero_image.width }}" height="{{ topic.hero_image.height }}"
+      >
+      <h1>{{ topic.title }}</h1>
+      <p>{{ topic.promise }}</p>
+    </div>
+  </section>
+
+  {% assign topic_posts = blogs.posts.articles | where: 'tags', topic.slug %}
+  <section class="topic-grid wrapper">
+    {% for article in topic_posts limit: 8 %}
+      <article class="card">
+        <a href="{{ article.url }}">
+          <img src="{{ article.image | image_url: width: 600 }}" alt="{{ article.title }}" loading="lazy" width="600" height="{{ 600 | divided_by: article.image.aspect_ratio | round }}">
+          <h2>{{ article.title }}</h2>
+        </a>
+        <p>{{ article.excerpt | strip_html | truncate: 120 }}</p>
+      </article>
+    {% endfor %}
+  </section>
+
+  <section class="topic-cta wrapper">
+    <a class="btn btn--secondary" href="/blogs/posts/tagged/{{ topic.slug }}"> View all {{ topic.title }} posts → </a>
+  </section>
+{% else %}
+  <p>No topic data found. Check metaobject slug.</p>
+{% endif %}

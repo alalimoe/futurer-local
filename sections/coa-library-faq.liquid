@@ -1,0 +1,167 @@
+{% schema %}
+{
+  "name": "COA Library FAQ",
+  "tag": "section",
+  "class": "section-coa-library-faq",
+  "settings": [
+    { "type": "text", "id": "title", "label": "Heading", "default": "Frequently Asked Questions" },
+    { "type": "color", "id": "bg_color", "label": "Background", "default": "#ffffff" },
+    { "type": "color", "id": "accent_color", "label": "Accent", "default": "#FBBF24" }
+  ],
+  "blocks": [
+    {
+      "type": "faq",
+      "name": "FAQ",
+      "settings": [
+        { "type": "text", "id": "question", "label": "Question" },
+        { "type": "textarea", "id": "answer", "label": "Answer" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "COA Library FAQ",
+      "blocks": [
+        { "type": "faq", "settings": { "question": "Are COAs batch-specific?", "answer": "COAs only matter when they match a real batch/lot. Always match the lot on your unit to the lot shown on the COA." } },
+        { "type": "faq", "settings": { "question": "Do COAs guarantee legality or regulatory status?", "answer": "No. A COA is a lab document about analysis results. Legality depends on ingredient classification, labeling, and import context." } }
+      ]
+    }
+  ]
+}
+{% endschema %}
+
+{%- comment -%} ── FAQPage JSON-LD ── {%- endcomment -%}
+{% if section.blocks.size > 0 %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {%- for block in section.blocks -%}
+    {
+      "@type": "Question",
+      "name": {{ block.settings.question | json }},
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": {{ block.settings.answer | strip_html | json }}
+      }
+    }{%- unless forloop.last -%},{%- endunless -%}
+    {%- endfor -%}
+  ]
+}
+</script>
+{% endif %}
+
+<div class="clq-wrapper" id="clq-{{ section.id }}">
+  <div class="clq-container">
+    {% if section.settings.title != blank %}
+      <h2 class="clq-title">{{ section.settings.title }}</h2>
+    {% endif %}
+    <div class="clq-list">
+      {% for block in section.blocks %}
+        <details class="clq-item" {{ block.shopify_attributes }}>
+          <summary class="clq-q">
+            {{ block.settings.question }}
+            <span class="clq-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+            </span>
+          </summary>
+          <div class="clq-a"><div class="clq-a-inner">{{ block.settings.answer }}</div></div>
+        </details>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<style>
+  #clq-{{ section.id }} {
+    --clq-bg: {{ section.settings.bg_color }};
+    --clq-accent: {{ section.settings.accent_color }};
+    --clq-text: var(--color-text-main, #111827);
+    --clq-muted: var(--color-text-muted, #4b5563);
+    --clq-border: var(--nx-pill-border, #E5E7EB);
+    --clq-font: var(--font-body-family, sans-serif);
+    --clq-font-heading: var(--font-heading-family, sans-serif);
+    --clq-transition: var(--transition-smooth, all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1));
+  }
+
+  .clq-wrapper {
+    padding: 80px var(--page-gutter);
+    background: var(--clq-bg);
+    font-family: var(--clq-font);
+  }
+  .clq-container {
+    max-width: 750px;
+    margin: 0 auto;
+  }
+  .clq-title {
+    text-align: center;
+    font-family: var(--clq-font-heading);
+    font-size: clamp(1.75rem, 3vw, 2.25rem);
+    font-weight: 800;
+    color: var(--clq-text);
+    margin: 0 0 48px;
+    letter-spacing: -0.02em;
+  }
+
+  .clq-list { display: flex; flex-direction: column; }
+  .clq-item {
+    border-bottom: 1px solid var(--clq-border);
+    transition: var(--clq-transition);
+  }
+  .clq-item:first-child { border-top: 1px solid var(--clq-border); }
+
+  .clq-q {
+    padding: 24px 0;
+    font-weight: 700;
+    font-size: 1.0625rem;
+    color: var(--clq-text);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    list-style: none;
+    transition: color 0.2s;
+    min-height: var(--touch-min, 44px);
+  }
+  .clq-q::-webkit-details-marker { display: none; }
+  .clq-q:hover { color: var(--clq-accent); }
+
+  .clq-icon {
+    width: 24px;
+    height: 24px;
+    color: var(--clq-muted);
+    transition: transform 0.3s ease;
+    flex-shrink: 0;
+  }
+  .clq-item[open] .clq-icon { transform: rotate(180deg); color: var(--clq-accent); }
+
+  .clq-a {
+    padding: 0 0 28px 0;
+    color: var(--clq-muted);
+    font-size: 1rem;
+    line-height: 1.75;
+    animation: clqSlide 0.3s ease-out;
+  }
+  .clq-a-inner {
+    border-left: 2px solid var(--clq-accent);
+    padding-left: 16px;
+  }
+
+  @keyframes clqSlide {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .clq-wrapper :focus-visible {
+    outline: 2px solid var(--clq-accent);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .clq-wrapper *, .clq-wrapper *::before, .clq-wrapper *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+</style>

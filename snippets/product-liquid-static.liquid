@@ -1,0 +1,38 @@
+{% comment %}
+  Renders a product liquid static
+
+  Accepts:
+  - product: {Object} Product Liquid object
+
+  Usage:
+  {% render 'product-liquid-static', product: product %}
+{% endcomment %}
+
+{% liquid
+  assign final_aspect_ratio = media_aspect_ratio | default: '3/4'
+%}
+
+<xo-product-liquid-static>
+  <template>
+    <script type="application/json">
+      {
+        {% for variant in product.variants
+        %}
+          {{ variant.id }}: {
+            price: `{% render 'price', product: variant, reverse: false %}`,
+            img: `<a href='{%- render 'product-card-variant-url', product: product -%}' aria-label='{{ product.title }}'>{% render 'product-image', product: product, variant: variant, show_secondary_image: show_secondary_image, aspect_ratio: final_aspect_ratio %}
+            </a>`,
+            addToCartText: `{% if variant.inventory_quantity > 0 %}{{ 'products.product.add_to_cart' | t }}{% else %}{{ 'products.product.sold_out' | t }}{% endif %}`,
+            addToBundleText: `{% if variant.inventory_quantity > 0 %}{{ 'products.product.button_bundle_text' | t }}{% else %}{{ 'products.product.sold_out' | t }}{% endif %}`,
+            soldOut: `{% if variant.inventory_quantity > 0 %}false{% else %}true{% endif %}`,
+            variantId: {{ variant.id }},
+            bundleImg: `{% render 'product-image', product: product, variant: variant, aspect_ratio: '1', lazyload: lazyload %}`,
+            bundlePrice: `{{ variant.price | money_with_currency }}`,
+            bundleVariantLabel: `<div class='xo-product-bundle-content__variant-label'>{{ variant.title }}</div>`,
+            variantPrice: {{ variant.price }},
+          },
+        {% endfor %}
+      }
+    </script>
+  </template>
+</xo-product-liquid-static>

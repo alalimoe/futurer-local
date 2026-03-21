@@ -1,0 +1,172 @@
+{% schema %}
+{
+  "name": "COA Related Guides",
+  "tag": "section",
+  "class": "section-coa-related-guides",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Related Guides" },
+    { "type": "textarea", "id": "disclaimer", "label": "Disclaimer", "default": "Educational information only. Not medical advice." },
+    { "type": "color", "id": "bg_color", "label": "Background", "default": "#ffffff" },
+    { "type": "color", "id": "accent_color", "label": "Accent", "default": "#FBBF24" }
+  ],
+  "blocks": [
+    {
+      "type": "guide",
+      "name": "Guide Card",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Title" },
+        { "type": "url", "id": "url", "label": "URL" },
+        { "type": "textarea", "id": "desc", "label": "Short Description" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "COA Related Guides",
+      "blocks": [
+        { "type": "guide", "settings": { "title": "How to Read a COA", "desc": "Learn what each section of a Certificate of Analysis means and how to interpret results." } },
+        { "type": "guide", "settings": { "title": "UAE Quality & Trust Guide", "desc": "Understand quality assurance, regulatory context, and what to expect when buying in the UAE." } },
+        { "type": "guide", "settings": { "title": "Shipping in UAE Heat", "desc": "Temperature-sensitive products need care. Learn how we handle last-mile delivery in hot climates." } },
+        { "type": "guide", "settings": { "title": "Storage & Handling", "desc": "Best practices for storing peptides, nootropics, and supplements after delivery." } }
+      ]
+    }
+  ]
+}
+{% endschema %}
+
+<div class="clr-wrapper" id="clr-{{ section.id }}">
+  <div class="clr-inner">
+    {% if section.settings.heading != blank %}
+      <h2 class="clr-heading">{{ section.settings.heading }}</h2>
+    {% endif %}
+
+    {% if section.blocks.size > 0 %}
+      <div class="clr-grid">
+        {% for block in section.blocks %}
+          <a href="{{ block.settings.url | default: '#' }}" class="clr-card" {{ block.shopify_attributes }}>
+            <div class="clr-card-arrow" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </div>
+            <h3 class="clr-card-title">{{ block.settings.title }}</h3>
+            {% if block.settings.desc != blank %}
+              <p class="clr-card-desc">{{ block.settings.desc }}</p>
+            {% endif %}
+          </a>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {% if section.settings.disclaimer != blank %}
+      <div class="clr-disclaimer">{{ section.settings.disclaimer }}</div>
+    {% endif %}
+  </div>
+</div>
+
+<style>
+  #clr-{{ section.id }} {
+    --clr-bg: {{ section.settings.bg_color }};
+    --clr-accent: {{ section.settings.accent_color }};
+    --clr-text: var(--color-text-main, #111827);
+    --clr-muted: var(--color-text-muted, #4b5563);
+    --clr-border: var(--nx-pill-border, #E5E7EB);
+    --clr-radius: var(--nx-radius, 14px);
+    --clr-font: var(--font-body-family, sans-serif);
+    --clr-font-heading: var(--font-heading-family, sans-serif);
+    --clr-transition: var(--transition-smooth, all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1));
+  }
+
+  .clr-wrapper {
+    background: var(--clr-bg);
+    padding: 64px var(--page-gutter);
+    font-family: var(--clr-font);
+  }
+  .clr-inner {
+    max-width: var(--container-width-large);
+    margin: 0 auto;
+  }
+
+  .clr-heading {
+    font-family: var(--clr-font-heading);
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    font-weight: 800;
+    color: var(--clr-text);
+    margin: 0 0 28px;
+    letter-spacing: -0.02em;
+  }
+
+  .clr-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+  .clr-card {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 24px;
+    background: var(--color-bg-secondary, #f9fafb);
+    border: 1px solid var(--clr-border);
+    border-radius: var(--clr-radius);
+    text-decoration: none;
+    transition: var(--clr-transition);
+    position: relative;
+  }
+  .clr-card:hover {
+    border-color: var(--clr-accent);
+    box-shadow: var(--shadow-md, 0 8px 24px rgba(0,0,0,0.06));
+    transform: translateY(-2px);
+  }
+  .clr-card-arrow {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    color: var(--clr-muted);
+    transition: var(--clr-transition);
+  }
+  .clr-card:hover .clr-card-arrow {
+    color: var(--clr-accent);
+    transform: translateX(3px);
+  }
+  .clr-card-title {
+    font-family: var(--clr-font-heading);
+    font-size: 1.0625rem;
+    font-weight: 700;
+    color: var(--clr-text);
+    margin: 0;
+    padding-right: 28px;
+  }
+  .clr-card:hover .clr-card-title { color: var(--color-accent-dark, #92400e); }
+  .clr-card-desc {
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: var(--clr-muted);
+    margin: 0;
+  }
+
+  .clr-disclaimer {
+    padding: 16px 20px;
+    background: var(--color-bg-secondary, #f9fafb);
+    border-radius: 8px;
+    font-size: 0.8125rem;
+    color: var(--clr-muted);
+    text-align: center;
+  }
+
+  .clr-wrapper :focus-visible {
+    outline: 2px solid var(--clr-accent);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .clr-wrapper *, .clr-wrapper *::before, .clr-wrapper *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .clr-wrapper { padding: 48px var(--page-gutter); }
+    .clr-grid { grid-template-columns: 1fr; }
+  }
+</style>

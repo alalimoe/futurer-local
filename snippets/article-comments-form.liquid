@@ -1,0 +1,61 @@
+{%- assign message = 'newsletter.success_message' | t -%}
+
+<div class='xo-article-comments-form'>
+  {% form 'new_comment', article %}
+    {% render 'form-success', form: form, message: message %}
+    {% render 'form-error', form: form %}
+    <div>
+      <xo-animate xo-cascade>
+        <div class='xo-article-comments-form__title'>{{ 'blogs.article.comment_form_title' | t }}</div>
+      </xo-animate>
+      <xo-grid class='xo-article-comments-form__grid'>
+        <xo-animate xo-cascade style='--lg: 6; --md: 12; --xs: 12'>
+          <div class='xo-article-comments-form__input'>
+            {% assign author_id = 'author--' | append: section.id %}
+            {% assign name = 'blogs.article.name' | t %}
+            {% render 'field-input', type: 'text', name: 'comment[author]', label: name, value: form.author, id: author_id, required: 'required' %}
+          </div>
+        </xo-animate>
+        <xo-animate xo-cascade style='--lg: 6; --md: 12; --xs: 12'>
+          <div class='xo-article-comments-form__input'>
+            {% assign email_id = 'email--' | append: section.id %}
+            {% assign email = 'blogs.article.email' | t %}
+            {% render 'field-input', type: 'text', name: 'comment[email]', label: email, value: form.email, id: email_id, required: 'required' %}
+          </div>
+        </xo-animate>
+        <xo-animate xo-cascade style='--lg: 12; --md: 12; --xs: 12'>
+          <div class='xo-article-comments-form__input xo-article-comments-form__input--textarea'>
+            {% capture attrs %}
+              onkeyup='countCharacterMessage()'
+              maxlength='200'
+              rows='5'
+              aria-required='true'
+              required
+            {% endcapture %}
+            {% assign message_id = 'comment--' | append: section.id %}
+            {% assign message = 'blogs.article.message' | t %}
+            {% render 'field-textarea', name: 'comment[body]', value: form.body, label: message, attrs: attrs, id: message_id, placeholder: message, required: true %}
+          </div>
+        </xo-animate>
+        {%- if blog.moderated? -%}
+          <xo-animate xo-cascade style='--lg: 12; --md: 12; --xs: 12'>
+            <div class='xo-article-comments-form__info'>
+              <div class='xo-article-comments-form__info-icon'>
+                {% render 'icon', name: 'info', size: '2.4rem' %}
+              </div>
+              <div class='xo-article-comments-form__info-text'>
+                <p>{{ 'blogs.article.moderated' | t }}</p>
+              </div>
+            </div>
+          </xo-animate>
+        {%- endif -%}
+      </xo-grid>
+      <xo-animate xo-cascade>
+        <div class='xo-article-comments-form__btn'>
+          {% assign button_text = 'blogs.article.post' | t %}
+          {% render 'button', text: button_text, type: 'submit', size: 'md', style: 'primary' %}
+        </div>
+      </xo-animate>
+    </div>
+  {% endform %}
+</div>

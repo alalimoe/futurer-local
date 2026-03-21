@@ -1,0 +1,60 @@
+{% comment %}
+  Renders a video
+
+  Accepts:
+  - video: {Object} video object (optional)
+  - video_url: {String} Url of video, only accept youtube, vimeo (optional)
+  - class: {String} Adds a video class to the video element (optional)
+  - enable_video_looping: {Boolean} Set looping for video. Default: false (optional)
+  - cover_image: {String} Image cover for video (optional)
+
+  Usage:
+
+  {% render 'video',
+    video: video,
+    video_url: 'https://www.youtube.com/watch?v=_9VUPq3SxOc',
+    class: 'video',
+    enable_video_looping: true
+  %}
+{% endcomment %}
+{%- liquid
+  assign video_id = video.id | default: video_url.id
+  assign poster = video.preview_image | default: cover_image
+  assign show_poster = show_poster | default: true, allow_false: true
+-%}
+<xo-video-custom>
+  <div class='xo-video' style='aspect-ratio: {{ poster.aspect_ratio | default: video.aspect_ratio | default: 'auto' }};'>
+    {% if show_poster %}
+      <div class='xo-video__poster'>
+        {%- if poster != null -%}
+          {% render 'image', image: poster %}
+        {%- else -%}
+          {{ 'hero-apparel-3' | placeholder_svg_tag: 'placeholder-svg placeholder' }}
+        {%- endif -%}
+      </div>
+      <div class='xo-video__button'>
+        {% render 'icon', name: 'play', size: '20' %}
+      </div>
+    {% endif %}
+
+    {% if video == null and video_url != null %}
+      {% comment %} Video url {% endcomment %}
+      {%- liquid
+        assign loop = ''
+        if enable_video_looping
+          assign loop = '&loop=1&playlist=' | append: video_id
+        endif
+      -%}
+
+      {% if video_url.type == 'youtube' %}
+        {% render 'media', media: video_url, type: 'youtube', loop: loop, autoplay: autoplay, class: class, video_alt_text: video_alt_text %}
+      {% else %}
+        {% render 'media', media: video_url, type: 'vimeo', loop: loop, autoplay: autoplay, class: class, video_alt_text: video_alt_text %}
+      {% endif %}
+
+      {% comment %} Video {% endcomment %}
+    {% else %}
+      {% render 'media', media: video, type: 'video', loop: loop, autoplay: autoplay, class: class, controls: controls, enable_video_looping: enable_video_looping %}
+    {% endif %}
+  </div>
+</xo-video-custom>

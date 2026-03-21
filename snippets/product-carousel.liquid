@@ -1,0 +1,163 @@
+{% comment %}
+  Renders a product carousel
+
+  Accepts:
+  - product_list: {Object} Product list (required)
+  - autoplay: {Boolean} Autoplay (default: false)
+  - autoplay_speed: {Number} Autoplay speed (default: 5000)
+
+  Usage:
+  {% render 'product-carousel', autoplay: autoplay, autoplay_speed: autoplay_speed, product_list: product_list %}
+{% endcomment %}
+
+<div class="product-carousel">
+  <xo-grid class="product-carousel__grid">
+    <div class="product-carousel__inner" style="--lg: 6; --md: 8; --xs: 12; --start-md: 3; --start-lg: 4;">
+      <xo-carousel
+        class="product-carousel__carousel"
+        xo-active-index="1"
+        {% if autoplay == 'on' %}
+          xo-autoplay="{{ autoplay_speed }}"
+        {% endif %}
+        xo-gap="20"
+        xo-per-view="1"
+        xo-overflow="visible"
+        xo-easing="linear"
+        xo-speed="300"
+        xo-render-bullet="<span class='carousel-bullet'></span>"
+        xo-breakpoints="
+          {
+            768: {
+              activeIndex: 0,
+              overflow: 'visible'
+            },
+            992: {
+              activeIndex: 1,
+              overflow: 'visible'
+            }
+          }
+        "
+      >
+        <xo-carousel-inner>
+          <xo-carousel-list>
+            {% if product_list != blank %}
+              {% for product in product_list %}
+                <xo-carousel-slide class="product-carousel__slide">
+                  <div class="product-carousel__item">
+                    <xo-product
+                      xo-selected-or-first-available-variant-id="{{ product.selected_or_first_available_variant.id }}"
+                      xo-product-id="{{ product.id }}"
+                      xo-section-id="{{ section.id }}"
+                      xo-product-url="{{ shop.url }}{{ product.url }}"
+                      class="product-carousel__product"
+                    >
+                      <div class="product-carousel__product-wrap">
+                        <div class="product-carousel__media">
+                          <a href="{%- render 'product-card-variant-url', product: product -%}" class="product-carousel__product-link">
+                            {% render 'product-image', product: product, aspect_ratio: '3/2' %}
+                          </a>
+                        </div>
+                        <div class="product-carousel__product-info">
+                          <xo-animate xo-cascade>
+                            <a href="{%- render 'product-card-variant-url', product: product -%}" class="product-carousel__product-link">
+                              <h3 class="product-carousel__product-title h4">{{ product.title }}</h3>
+                            </a>
+                          </xo-animate>
+                          <xo-animate xo-cascade>
+                            <div class="product-carousel__product-description">{{ product.description | truncatewords: 30 }}</div>
+                          </xo-animate>
+                          <xo-animate xo-cascade>
+                            <div class="product-carousel__product-price">
+                              <xo-product-will-change xo-unique-id="xo-product-price-{{ section.id }}" xo-morph-selector="[xo-price]">
+                                {% render 'price', product: product, use_variant: true %}
+                              </xo-product-will-change>
+                            </div>
+                          </xo-animate>
+                          {% unless product.has_only_default_variant %}
+                            <xo-animate xo-cascade>
+                              <xo-product-variants>
+                                <div class="product-carousel__product-variant">
+                                  {% for option in product.options_with_values %}
+                                    <div class="product-carousel__variant-option">
+                                      {% if option.name == settings.product_card_color_option_name %}
+                                        {% render 'product-variant', option: option, style: 'color', product: product %}
+                                      {% else %}
+                                        {% render 'product-variant', option: option, style: 'select', product: product %}
+                                      {% endif %}
+                                    </div>
+                                  {% endfor %}
+                                </div>
+                              </xo-product-variants>
+                            </xo-animate>
+                          {% endunless %}
+                          <xo-animate xo-cascade style="width: 100%;">
+                            <div class="product-carousel__buy-now">
+                              {% render 'buy-button', product: product, show_gift_card_recipient: false, show_dynamic_checkout: true %}
+                            </div>
+                          </xo-animate>
+                        </div>
+                      </div>
+                      {% render 'product-data', product: product %}
+                    </xo-product>
+                  </div>
+                </xo-carousel-slide>
+              {% endfor %}
+            {% else %}
+              {% for item in (1..3) %}
+                <xo-carousel-slide class="product-carousel__slide">
+                  <div class="product-carousel__item">
+                    <div class="product-carousel__product">
+                      <div class="product-carousel__product-wrap">
+                        <div class="product-carousel__media">
+                          <div class="product-carousel__product-link">
+                            {% render 'product-image', product: empty, aspect_ratio: '3/2' %}
+                          </div>
+                        </div>
+                        <div class="product-carousel__product-info">
+                          <xo-animate xo-cascade>
+                            <h3 class="product-carousel__product-title h4">{{ 'onboarding.product_title' | t }}</h3>
+                          </xo-animate>
+                          <xo-animate xo-cascade>
+                            <div class="product-carousel__product-description">{{ 'onboarding.product_description' | t }}</div>
+                          </xo-animate>
+                          <xo-animate xo-cascade>
+                            <div class="product-carousel__product-price">
+                              {% render 'price', product: empty, use_variant: true %}
+                            </div>
+                          </xo-animate>
+                          <xo-animate xo-cascade style="width: 100%;">
+                            {% assign button_text = 'products.product.buy_now' | t %}
+                            <div class="product-carousel__buy-now">
+                              {% render 'button', style: 'primary', text: button_text, size: 'md', block: true %}
+                            </div>
+                          </xo-animate>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </xo-carousel-slide>
+              {% endfor %}
+            {% endif %}
+          </xo-carousel-list>
+        </xo-carousel-inner>
+        {% if enable_navigation %}
+          <div class="product-carousel__navigation{% if show_on_navigation == 'desktop' %} product-carousel__show-on-desktop{% elsif show_on_navigation == 'mobile' %} product-carousel__show-on-mobile{% endif %}">
+            <xo-carousel-prev class="product-carousel__button product-carousel__button--prev">
+              {% render 'button-slide', icon: 'arrow-left', icon_size: '2.4rem', size: '3.6rem', direction: 'left', style: 'gray' %}
+            </xo-carousel-prev>
+            <xo-carousel-next class="product-carousel__button product-carousel__button--next">
+              {% render 'button-slide', icon: 'arrow-right', icon_size: '2.4rem', size: '3.6rem', direction: 'right', style: 'gray' %}
+            </xo-carousel-next>
+          </div>
+        {% endif %}
+        {% if enable_pagination %}
+          <div class="product-carousel__pagination{% if show_on_pagination == 'desktop' %} product-carousel__show-on-desktop{% else %} product-carousel__show-on-mobile{% endif %}">
+            <xo-animate xo-cascade>
+              {% render 'carousel-pagination', align: 'center', style: 'sticks' %}
+            </xo-animate>
+          </div>
+        {% endif %}
+      </xo-carousel>
+    </div>
+  </xo-grid>
+</div>

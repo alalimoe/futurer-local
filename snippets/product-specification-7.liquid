@@ -1,0 +1,81 @@
+{% comment %}
+  Renders a product special element with a given value
+
+  Accepts:
+  - block: {Object} Block (required)
+
+  Usage:
+  {% render 'product-specification-7', block: block %}
+{% endcomment %}
+
+<div class="product-specification-7">
+  <div class="product-specification-7__content">
+    <xo-grid class="product-specification-7__grid">
+      <xo-animate xo-cascade style="--lg: 4; --md: 12; --xs: 12">
+        <div class="product-specification-7__left">
+          {% for item in block %}
+            {% case item.type %}
+              {% when 'detail-infomation-1' %}
+                {% liquid
+                  assign heading = item.settings.heading
+                  assign sub_heading_1 = item.settings.sub_heading_1
+                  assign heading_1 = item.settings.heading_1
+                  assign sub_heading_2 = item.settings.sub_heading_2
+                  assign heading_2 = item.settings.heading_2
+                %}
+                {% render 'product-special',
+                  heading: heading,
+                  class: 'h1',
+                  sub_heading_1: sub_heading_1,
+                  heading_1: heading_1,
+                  sub_heading_2: sub_heading_2,
+                  heading_2: heading_2
+                %}
+            {% endcase %}
+          {% endfor %}
+        </div>
+      </xo-animate>
+      <xo-animate xo-cascade style="--xl: 3; --lg: 4; --md: 12; --xs: 12; --start-xl: 6">
+        <div class="product-specification-7__center">
+          {% for item in block %}
+            {% case item.type %}
+              {% when 'product' %}
+                {%- assign placeholder_image = 'collection-1' -%}
+                {% render 'product-card',
+                  product: item.settings.product,
+                  show_image: settings.product_card_show_image,
+                  show_secondary_image: settings.product_card_show_secondary_image,
+                  show_vendor: settings.product_card_show_vendor,
+                  show_description: settings.product_card_show_description,
+                  show_quick_add: settings.product_card_show_quick_add,
+                  show_quick_view: settings.product_card_show_quick_view,
+                  show_favorite: settings.product_card_show_favorite,
+                  show_price: settings.product_card_show_price,
+                  show_badge: settings.product_card_show_badge,
+                  media_aspect_ratio: item.settings.product_card_aspect_ratio,
+                  color_scheme: item.settings.card_color_scheme,
+                  placeholder_image: placeholder_image
+                -%}
+            {% endcase %}
+          {% endfor %}
+        </div>
+      </xo-animate>
+      <xo-animate xo-cascade style="--lg: 4; --md: 12; --xs: 12">
+        <div class="product-specification-7__right">
+          {% for item in block %}
+            {% case item.type %}
+              {% when 'detail-infomation-2' %}
+                {% liquid
+                  assign caption = item.settings.caption
+                  assign color_schema_box = item.settings.color_schema_box
+                  assign title_list = item.settings.title_list
+                  assign content_list = item.settings.content_list
+                %}
+                {% render 'product-information', caption: caption, color_schema_box: color_schema_box, title_list: title_list, content_list: content_list %}
+            {% endcase %}
+          {% endfor %}
+        </div>
+      </xo-animate>
+    </xo-grid>
+  </div>
+</div>

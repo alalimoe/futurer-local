@@ -1,0 +1,42 @@
+{% comment %}
+  Renders a column block
+
+  @param content: {String} Content (required)
+  @param desktop_row_span: {Number} Desktop row span (required)
+  @param desktop_col_span: {Number} Desktop column span (required)
+  @param mobile_row_span: {Number} Mobile row span (required)
+  @param mobile_col_span: {Number} Mobile column span (required)
+
+  @example
+  {% render 'column-block',
+    content: content,
+    desktop_row_span: 1,
+    desktop_col_span: 1,
+    mobile_row_span: 1,
+    mobile_col_span: 1
+  %}
+{% endcomment %}
+
+{% liquid
+  assign container_class = 'xo-column-2'
+  assign container_style = ''
+  assign content_class = 'xo-column-2__content'
+  if request.design_mode
+    assign content_class = content_class | append: ' xo-column-2__content--modifier'
+  endif
+
+  assign tablet_row_span = desktop_row_span | minus: 1
+  assign tablet_col_span = desktop_col_span | minus: 1
+  assign container_style = container_style | append: '--xo-row-span-desktop:' | append: desktop_row_span | append: ';'
+  assign container_style = container_style | append: '--xo-col-span-desktop:' | append: desktop_col_span | append: ';'
+  assign container_style = container_style | append: '--xo-row-span-tablet:' | append: tablet_row_span | append: ';'
+  assign container_style = container_style | append: '--xo-col-span-tablet:' | append: tablet_col_span | append: ';'
+  assign container_style = container_style | append: '--xo-row-span-mobile:' | append: mobile_row_span | append: ';'
+  assign container_style = container_style | append: '--xo-col-span-mobile:' | append: mobile_col_span | append: ';'
+%}
+
+<xo-item class="{{ container_class }}" style="{{ container_style }}">
+  <div class="{{ content_class }}">
+    {{- content -}}
+  </div>
+</xo-item>

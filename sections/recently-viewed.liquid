@@ -1,0 +1,367 @@
+{{ 'collection-empty.css' | asset_url | stylesheet_tag }}
+{{ 'section-recently-viewed.css' | asset_url | stylesheet_tag }}
+
+{% liquid
+  assign autoplay = section.settings.autoplay
+  assign autoplay_time = section.settings.autoplay_time
+  assign product_per_view = section.settings.product_per_view
+  assign product_per_move = section.settings.product_per_move
+  assign product_to_show = section.settings.product_to_show
+%}
+
+<section {% render 'section-attr' %}>
+  <div class="recently-viewed">
+    <xo-container class="recently-viewed__container">
+      <div class="recently-viewed__inner">
+        {% if heading %}
+          <div class="recently-viewed__head">
+            {% render 'text', context: section %}
+          </div>
+        {% endif %}
+        <div class="recently-viewed__content">
+          <xo-products-fetcher xo-type="viewed" xo-section-id="{{ section.id }}">
+            {% if search.results %}
+              {% render 'products',
+                layout: 'carousel',
+                products: search.results,
+                per_view: product_per_view,
+                per_move: product_per_move,
+                autoplay: autoplay,
+                autoplay_speed: autoplay_time,
+                product_to_show: product_to_show,
+                is_limit: true,
+                is_order: true
+              %}
+            {% endif %}
+          </xo-products-fetcher>
+        </div>
+      </div>
+    </xo-container>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "t:sections.recently_viewed.name",
+  "disabled_on": {
+    "groups": [
+      "header",
+      "footer",
+      "custom.overlay",
+      "custom.popups",
+      "custom.features"
+    ]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "Text"
+    },
+    {
+      "type": "select",
+      "id": "text_tag_name",
+      "label": "Tag name",
+      "options": [
+        {
+          "value": "h1",
+          "label": "H1"
+        },
+        {
+          "value": "h2",
+          "label": "H2"
+        },
+        {
+          "value": "h3",
+          "label": "H3"
+        },
+        {
+          "value": "h4",
+          "label": "H4"
+        },
+        {
+          "value": "h5",
+          "label": "H5"
+        },
+        {
+          "value": "h6",
+          "label": "H6"
+        }
+      ],
+      "default": "h2"
+    },
+    {
+      "type": "textarea",
+      "id": "text_heading",
+      "label": "Text",
+      "default": "Recently viewed"
+    },
+    {
+      "type": "select",
+      "id": "font_size_heading",
+      "label": "Font size heading",
+      "default": "h5",
+      "options": [
+        {
+          "value": "h1",
+          "label": "Extra extra large"
+        },
+        {
+          "value": "h2",
+          "label": "Extra large"
+        },
+        {
+          "value": "h3",
+          "label": "Large"
+        },
+        {
+          "value": "h4",
+          "label": "Medium"
+        },
+        {
+          "value": "h5",
+          "label": "Small"
+        },
+        {
+          "value": "h6",
+          "label": "Extra small"
+        }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "text_line_height",
+      "label": "Line height",
+      "min": 0,
+      "max": 3,
+      "step": 0.1,
+      "default": 1.2
+    },
+    {
+      "type": "select",
+      "id": "text_effect",
+      "label": "Effect",
+      "options": [
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "reveal",
+          "label": "Blur"
+        },
+        {
+          "value": "split",
+          "label": "Split"
+        }
+      ],
+      "default": "split"
+    },
+    {
+      "type": "number",
+      "id": "text_duration",
+      "label": "Duration (milliseconds)",
+      "default": 1000
+    },
+    {
+      "type": "range",
+      "id": "text_heading_width_desktop",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "label": "Desktop heading width",
+      "default": 100
+    },
+    {
+      "type": "range",
+      "id": "text_heading_width_mobile",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "label": "Mobile heading width",
+      "default": 100
+    },
+    {
+      "type": "header",
+      "content": "t:sections.recently_viewed.settings.header_carousel.content"
+    },
+    {
+      "type": "range",
+      "id": "product_per_view",
+      "min": 2,
+      "max": 5,
+      "step": 1,
+      "unit": "col",
+      "label": "t:sections.recently_viewed.settings.product_per_view.label",
+      "default": 4
+    },
+    {
+      "type": "select",
+      "id": "autoplay",
+      "label": "t:sections.recently_viewed.settings.autoplay.label",
+      "options": [
+        {
+          "value": "off",
+          "label": "t:sections.recently_viewed.settings.autoplay.option__1.label"
+        },
+        {
+          "value": "on",
+          "label": "t:sections.recently_viewed.settings.autoplay.option__2.label"
+        }
+      ],
+      "default": "off"
+    },
+    {
+      "type": "range",
+      "id": "product_per_move",
+      "min": 1,
+      "max": 4,
+      "step": 1,
+      "unit": "col",
+      "label": "t:sections.recently_viewed.settings.product_per_move.label",
+      "default": 1
+    },
+    {
+      "type": "range",
+      "id": "product_to_show",
+      "min": 1,
+      "max": 50,
+      "step": 1,
+      "label": "t:sections.recently_viewed.settings.product_to_show.label",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "autoplay_time",
+      "min": 1000,
+      "max": 5000,
+      "step": 1000,
+      "unit": "s",
+      "label": "t:sections.recently_viewed.settings.autoplay_time.label",
+      "default": 3000
+    },
+    {
+      "type": "header",
+      "content": "Product card"
+    },
+    {
+      "type": "select",
+      "id": "product_card_aspect_ratio",
+      "label": "Aspect ratio",
+      "options": [
+        {
+          "value": "auto",
+          "label": "Adapt to image"
+        },
+        {
+          "value": "2/3",
+          "label": "2:3"
+        },
+        {
+          "value": "3/4",
+          "label": "3:4"
+        },
+        {
+          "value": "3/2",
+          "label": "3:2"
+        },
+        {
+          "value": "1",
+          "label": "1:1"
+        },
+        {
+          "value": "4/3",
+          "label": "4:3"
+        },
+        {
+          "value": "16/9",
+          "label": "16:9"
+        },
+        {
+          "value": "21/9",
+          "label": "21:9"
+        }
+      ],
+      "default": "1"
+    },
+    {
+      "type": "color_scheme",
+      "id": "card_color_scheme",
+      "label": "Color scheme"
+    },
+    {
+      "type": "header",
+      "content": "General settings"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Section color scheme"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color"
+    },
+    {
+      "type": "color_background",
+      "id": "background_gradient",
+      "label": "Background gradient"
+    },
+    {
+      "type": "number",
+      "id": "padding_top_desktop",
+      "label": "Padding top desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_desktop",
+      "label": "Padding bottom desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_top_mobile",
+      "label": "Padding top mobile",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_mobile",
+      "label": "Padding bottom mobile",
+      "default": 50
+    }
+  ],
+  "blocks": [],
+  "presets": [
+    {
+      "name": "t:sections.recently_viewed.presets.name",
+      "settings": {
+        "font_size_heading": "h5",
+        "text_heading": "Recently viewed",
+        "text_effect": "split",
+        "text_duration": 1000,
+        "text_heading_width_desktop": 100,
+        "text_heading_width_mobile": 100,
+        "product_per_view": 4,
+        "autoplay": "off",
+        "product_per_move": 1,
+        "product_to_show": 20,
+        "autoplay_time": 3000,
+        "product_card_aspect_ratio": "1",
+        "card_color_scheme": "inverse",
+        "color_scheme": "",
+        "background_color": "",
+        "background_gradient": "",
+        "padding_top_desktop": 50,
+        "padding_bottom_desktop": 50,
+        "padding_top_mobile": 50,
+        "padding_bottom_mobile": 50
+      },
+      "blocks": []
+    }
+  ]
+}
+{% endschema %}

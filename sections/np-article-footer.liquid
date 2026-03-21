@@ -1,0 +1,395 @@
+<style>
+  #Section-{{ section.id }} {
+    --bg-color: {{ section.settings.bg_color }};
+    --text-color: var(--color-text-primary);
+    --meta-color: var(--color-text-secondary);
+    --accent-gold: var(--color-accent-primary);
+    --accent-amber: #b45309;
+    --success-green: #10b981;
+    --border-color: #e5e7eb;
+    
+    background-color: var(--bg-color);
+    padding: 5rem var(--page-gutter);
+    border-top: 1px solid var(--border-color);
+  }
+
+  /* Dynamic Grid Layout based on Toggles */
+  #Section-{{ section.id }} .np-footer-container {
+    max-width: var(--container-width-max);
+    margin: 0 auto;
+    display: grid;
+    {% if section.settings.show_author_bio and section.settings.show_slider %}
+      grid-template-columns: 350px 1fr;
+    {% elsif section.settings.show_author_bio %}
+      grid-template-columns: minmax(auto, 600px);
+      justify-content: center;
+    {% else %}
+      grid-template-columns: 1fr;
+    {% endif %}
+    gap: 4rem;
+    align-items: center;
+  }
+
+  /* --- E-E-A-T Author Bio --- */
+  .np-author-card {
+    background: #ffffff;
+    padding: 2.5rem;
+    border-radius: 16px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-color);
+    height: 100%;
+  }
+
+  .np-author-card__header {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .np-author-card__avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--accent-gold);
+    padding: 2px;
+  }
+
+  .np-author-card__title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-color);
+    margin: 0 0 0.25rem 0;
+  }
+
+  .np-author-card__role {
+    font-size: 0.875rem;
+    color: var(--meta-color);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0;
+  }
+
+  .np-author-card__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(251, 191, 36, 0.15);
+    color: var(--accent-amber);
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+  }
+
+  .np-author-card__bio {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--text-color);
+    margin: 0;
+  }
+
+  /* --- Shop the Post Slider --- */
+  .np-slider-wrapper {
+    position: relative;
+    width: 100%;
+    min-width: 0; 
+  }
+
+  .np-slider-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 2rem;
+  }
+
+  .np-slider-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+    color: var(--text-color);
+    letter-spacing: -0.02em;
+  }
+
+  /* Native CSS Scroll Snap */
+  .np-product-track {
+    display: flex;
+    gap: 1.5rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none; 
+    -ms-overflow-style: none; 
+    padding-bottom: 1rem;
+  }
+  
+  .np-product-track::-webkit-scrollbar { display: none; }
+
+  .np-product-card {
+    {% if section.settings.show_author_bio %}
+      flex: 0 0 calc(50% - 0.75rem);
+    {% else %}
+      flex: 0 0 calc(33.333% - 1rem);
+    {% endif %}
+    scroll-snap-align: start;
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .np-product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--accent-gold);
+  }
+
+  .np-product-card__image-wrapper {
+    position: relative;
+    padding-top: 100%; 
+    background: #f9fafb;
+    display: block;
+  }
+
+  .np-product-card__image {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    object-fit: contain;
+    padding: 1rem;
+    transition: transform 0.5s ease;
+  }
+
+  .np-product-card:hover .np-product-card__image {
+    transform: scale(1.05);
+  }
+
+  .np-product-card__info {
+    padding: 1.5rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+  }
+
+  .np-product-card__title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-color);
+    margin: 0 0 0.5rem 0;
+    text-decoration: none;
+  }
+
+  .np-product-card__price {
+    font-size: 1rem;
+    color: var(--meta-color);
+    font-weight: 500;
+    margin-bottom: 1.5rem;
+  }
+
+  /* Slider Controls */
+  .np-slider-controls { display: flex; gap: 0.5rem; }
+
+  .np-control-btn {
+    background: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: 50%;
+    width: 40px; height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: var(--text-color);
+  }
+
+  .np-control-btn:hover {
+    border-color: var(--accent-gold);
+    color: var(--accent-amber);
+  }
+
+  @media (max-width: 1024px) {
+    #Section-{{ section.id }} .np-footer-container { grid-template-columns: 1fr; }
+    .np-product-card { flex: 0 0 85%; }
+    .np-slider-title { font-size: 1.5rem; }
+  }
+</style>
+
+<section id="Section-{{ section.id }}">
+  <div class="np-footer-container">
+    
+    {% if section.settings.show_author_bio %}
+      <aside class="np-author-card">
+        <div class="np-author-card__badge">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+          Scientifically Reviewed
+        </div>
+        
+        <div class="np-author-card__header">
+          {% if section.settings.author_image %}
+            {{ section.settings.author_image | image_url: width: 160 | image_tag: class: 'np-author-card__avatar', alt: section.settings.author_name, loading: 'lazy' }}
+          {% else %}
+            <div class="np-author-card__avatar" style="background:#f9fafb; display:flex; align-items:center; justify-content:center; font-weight:bold;">NP</div>
+          {% endif %}
+          <div>
+            <h4 class="np-author-card__title">{{ section.settings.author_name }}</h4>
+            <p class="np-author-card__role">{{ section.settings.author_role }}</p>
+          </div>
+        </div>
+        
+        <p class="np-author-card__bio">{{ section.settings.author_bio }}</p>
+      </aside>
+    {% endif %}
+
+    {% if section.settings.show_slider %}
+      {%- assign featured_products = article.metafields.custom.featured_products.value | default: section.settings.fallback_products -%}
+      
+      {% if featured_products != blank %}
+        <div class="np-slider-wrapper">
+          <div class="np-slider-header">
+            <h3 class="np-slider-title">{{ section.settings.slider_title }}</h3>
+            <div class="np-slider-controls">
+              <button class="np-control-btn" id="np-prev-{{ section.id }}" aria-label="Previous Products">
+                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+              </button>
+              <button class="np-control-btn" id="np-next-{{ section.id }}" aria-label="Next Products">
+                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="np-product-track" id="np-track-{{ section.id }}">
+            {% for product in featured_products limit: 6 %}
+              <div class="np-product-card">
+                <a href="{{ product.url }}" class="np-product-card__image-wrapper">
+                  {{ product.featured_image | image_url: width: 600 | image_tag: class: 'np-product-card__image', alt: product.title, loading: 'lazy' }}
+                </a>
+                <div class="np-product-card__info">
+                  <a href="{{ product.url }}" class="np-product-card__title">{{ product.title }}</a>
+                  <span class="np-product-card__price">{{ product.price | money }}</span>
+                  
+                  <form method="post" action="{{ routes.cart_add_url }}" class="{% if section.settings.enable_ajax_cart %}np-quick-add-form{% endif %}" accept-charset="UTF-8" enctype="multipart/form-data">
+                    <input type="hidden" name="form_type" value="product">
+                    <input type="hidden" name="utf8" value="✓">
+                    <input type="hidden" name="id" value="{{ product.variants.first.id }}" />
+                    <button type="submit" class="btn btn--secondary" {% unless product.available %}disabled{% endunless %}>
+                      <span class="np-btn-text">{% if product.available %}Add to Regimen{% else %}Sold Out{% endif %}</span>
+                    </button>
+                  </form>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+    {% endif %}
+
+  </div>
+</section>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // 1. Slider Logic (Only runs if slider is toggled ON)
+    const track = document.getElementById('np-track-{{ section.id }}');
+    const prevBtn = document.getElementById('np-prev-{{ section.id }}');
+    const nextBtn = document.getElementById('np-next-{{ section.id }}');
+
+    if (track && prevBtn && nextBtn) {
+      const scrollAmount = track.querySelector('.np-product-card')?.offsetWidth + 24 || 350; // Dynamic scroll amount based on card size
+      prevBtn.addEventListener('click', () => track.scrollBy({ left: -scrollAmount, behavior: 'smooth' }));
+      nextBtn.addEventListener('click', () => track.scrollBy({ left: scrollAmount, behavior: 'smooth' }));
+    }
+
+    // 2. AJAX Add To Cart Logic (Only targets forms with the dynamically added class)
+    const ajaxForms = document.querySelectorAll('#Section-{{ section.id }} .np-quick-add-form');
+    
+    if (ajaxForms.length > 0) {
+      ajaxForms.forEach(form => {
+        form.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          
+          const btn = form.querySelector('button[type="submit"]');
+          const textSpan = btn.querySelector('.np-btn-text');
+          const originalText = textSpan.textContent;
+          
+          // Loading State
+          btn.disabled = true;
+          btn.classList.add('np-btn--loading');
+          textSpan.textContent = 'Adding...';
+
+          const formData = new FormData(form);
+
+          try {
+            const response = await fetch(window.Shopify.routes.root + 'cart/add.js', {
+              method: 'POST',
+              body: formData
+            });
+            
+            const data = await response.json();
+            
+            if (data.status) {
+              throw new Error(data.description || 'Error adding to cart');
+            }
+
+            // Success State
+            btn.classList.remove('np-btn--loading');
+            btn.classList.add('np-btn--success');
+            textSpan.textContent = 'Added!';
+
+            // Trigger Theme-Specific Cart Update Events
+            document.documentElement.dispatchEvent(new CustomEvent('cart:change', { bubbles: true }));
+            document.dispatchEvent(new CustomEvent('ajaxProduct:added', { detail: { product: data } })); 
+
+            // Reset Button
+            setTimeout(() => {
+              btn.classList.remove('np-btn--success');
+              textSpan.textContent = originalText;
+              btn.disabled = false;
+            }, 2500);
+
+          } catch (error) {
+            console.error('Add to cart failed:', error);
+            btn.classList.remove('np-btn--loading');
+            textSpan.textContent = 'Try Again';
+            setTimeout(() => {
+              textSpan.textContent = originalText;
+              btn.disabled = false;
+            }, 2500);
+          }
+        });
+      });
+    }
+  });
+</script>
+
+{% schema %}
+{
+  "name": "NP Article Footer",
+  "settings": [
+    { "type": "color", "id": "bg_color", "label": "Background Color", "default": "#f9fafb" },
+    
+    { "type": "header", "content": "Component Toggles" },
+    { "type": "checkbox", "id": "show_author_bio", "label": "Show Author Bio", "default": true },
+    { "type": "checkbox", "id": "show_slider", "label": "Show Product Slider", "default": true },
+    { "type": "checkbox", "id": "enable_ajax_cart", "label": "Enable AJAX Add to Cart", "info": "If unchecked, adding to cart will redirect to the cart page.", "default": true },
+
+    { "type": "header", "content": "E-E-A-T Author Bio" },
+    { "type": "image_picker", "id": "author_image", "label": "Author Headshot" },
+    { "type": "text", "id": "author_name", "label": "Name", "default": "Jane Doe" },
+    { "type": "text", "id": "author_role", "label": "Title/Role", "default": "Founder & Lead Reviewer" },
+    { "type": "textarea", "id": "author_bio", "label": "Biography", "default": "Since 2018, leading our rigorous editorial process alongside biochem scholars to ensure every piece is grounded in peer-reviewed science." },
+
+    { "type": "header", "content": "Shop The Post Slider" },
+    { "type": "text", "id": "slider_title", "label": "Slider Title", "default": "Optimize Your Routine" },
+    { "type": "product_list", "id": "fallback_products", "label": "Fallback Products", "info": "Will show if no Article Metafield is set." }
+  ],
+  "presets": [
+    { "name": "NP Article Footer" }
+  ]
+}
+{% endschema %}

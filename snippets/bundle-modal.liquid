@@ -1,0 +1,136 @@
+{% comment %}
+  Renders a bundle modal
+
+  Usage:
+  {% render 'bundle-modal' %}
+{% endcomment %}
+
+{% liquid
+  assign bundle_title = 'general.bundle.title' | t
+%}
+
+<div class='xo-bundle-modal{% if settings.enable_border_radius %} xo-bundle-modal--radius{% endif %}{% if bundle_modal_type %} xo-bundle-modal--{{ bundle_modal_type }}{% endif %}'>
+  <xo-sticky xo-direction='down' xo-placement='bottom' class='xo-bundle-modal__wrapper' xo-name='bundle-sticky-hidden'>
+    <div class='xo-bundle-modal__inner'>
+      <div class='xo-bundle-modal__box'>
+        <div class='xo-bundle-modal__header'>
+          <div class='xo-bundle-modal__col'>
+            <h3 class='xo-bundle-modal__title h6'>{{ bundle_title }}</h3>
+          </div>
+          <div class='xo-bundle-modal__col xo-stack' style='ai:center; jc:center'>
+            <xo-modal-trigger
+              xo-name='{{ modal_name }}'
+              class='xo-bundle-modal__modal-trigger'
+              tabindex='0'
+              role='button'
+              aria-label='Modal trigger'
+            >
+              {% render 'button-icon', size: 'unset', style: 'transparent', type: 'circle', icon: 'cart', icon_size: '2rem', effect: 'slide-up' %}
+              <xo-bundle-size class='xo-bundle-modal__size'></xo-bundle-size>
+            </xo-modal-trigger>
+            <xo-modal xo-name='{{ modal_name }}' xo-animate='slide-up' xo-placement='bottom-center' xo-scroll-disabled xo-portal>
+              <xo-modal-pan class='xo-bundle-modal__pan'><span></span></xo-modal-pan>
+              <div class='xo-bundle-modal__close'>
+                <xo-modal-trigger
+                  xo-name='{{ modal_name }}'
+                  class='xo-stack'
+                  style='ai: center; jc: center'
+                  tabindex='0'
+                  role='button'
+                  aria-label='Modal trigger'
+                >
+                  <xo-animate xo-cascade xo-type='zoom-in' xo-delay='300'>
+                    {% render 'button-icon', size: 'sm', style: 'transparent', type: 'circle', icon: 'close', icon_size: '2.4rem', effect: 'rotate' %}
+                  </xo-animate>
+                </xo-modal-trigger>
+              </div>
+              {% case bundle_type %}
+                {% when 'collection' %}
+                  <div class='xo-bundle-modal__modal-inner'>
+                    {% render 'bundle-box',
+                      bundle_type: 'collection',
+                      discount_type: discount_type,
+                      bundle_step_blocks: bundle_step_blocks,
+                      collection_blocks: collection_blocks,
+                      empty_text: empty_text,
+                      blocks: blocks,
+                      is_mobile: true
+                    %}
+                  </div>
+                {% when 'product' %}
+                  <div class='xo-bundle-modal__modal-inner'>
+                    {% render 'bundle-box',
+                      bundle_type: 'product',
+                      discount_type: discount_type,
+                      min_quantity: min_quantity,
+                      value_discount: value_discount,
+                      empty_text: empty_text,
+                      blocks: blocks,
+                      discount_blocks: discount_blocks,
+                      is_mobile: true
+                    %}
+                  </div>
+              {% endcase %}
+            </xo-modal>
+          </div>
+        </div>
+        <div class='xo-bundle-modal__footer'>
+          {% case bundle_modal_type %}
+            {% when 'collection' %}
+              {% if bundle_step_blocks.size > 0 %}
+                {% if bundle_step_blocks.size == 1 %}
+                  <div class='xo-bundle-modal__sub-title'>{{ bundle_step_blocks[0].settings.label }}</div>
+                  <xo-bundle-progress class='xo-bundle-modal__progress'>
+                    <div class='xo-bundle-modal__progress-inner'></div>
+                  </xo-bundle-progress>
+                {% else %}
+                  <div class='xo-bundle-modal__step'>
+                    {% for block in blocks %}
+                      {% case block.type %}
+                        {% when 'bundle-step' %}
+                          {% liquid
+                            assign label = block.settings.label
+                            assign quantity = block.settings.quantity
+                          %}
+                          <div class='xo-bundle-modal__step-item-wrap'>
+                            <xo-bundle-step xo-min-quantity='{{ quantity }}' class='xo-bundle-modal__step-item'>
+                              <span class='xo-bundle-modal__step-text'>{{ label }}</span>
+                            </xo-bundle-step>
+                          </div>
+                      {% endcase %}
+                    {% endfor %}
+                  </div>
+                {% endif %}
+              {% endif %}
+            {% when 'product' %}
+              {% if discount_blocks.size > 0 %}
+                {% if discount_blocks.size == 1 %}
+                  <div class='xo-bundle-modal__sub-title'>{{ discount_blocks[0].settings.label }}</div>
+                  <xo-bundle-progress class='xo-bundle-modal__progress'>
+                    <div class='xo-bundle-modal__progress-inner'></div>
+                  </xo-bundle-progress>
+                {% else %}
+                  <div class='xo-bundle-modal__step'>
+                    {% for block in blocks %}
+                      {% case block.type %}
+                        {% when 'discount' %}
+                          {% liquid
+                            assign label = block.settings.label
+                            assign quantity = block.settings.min_quantity
+                          %}
+                          <div class='xo-bundle-modal__step-item-wrap'>
+                            <xo-bundle-step xo-min-quantity='{{ quantity }}' class='xo-bundle-modal__step-item'>
+                              <span class='xo-bundle-modal__step-text'>{{ label }}</span>
+                            </xo-bundle-step>
+                          </div>
+                      {% endcase %}
+                    {% endfor %}
+                  </div>
+                {% endif %}
+              {% endif %}
+          {% endcase %}
+        </div>
+      </div>
+    </div>
+  </xo-sticky>
+</div>

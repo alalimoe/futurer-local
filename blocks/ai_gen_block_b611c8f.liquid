@@ -1,0 +1,629 @@
+{% doc %}
+  @prompt
+    Quick Actions / Jump Links (new block)
+    
+    A horizontal “pill” nav that anchors to sections below:
+    
+    TL;DR
+    
+    How to use
+    
+    What you’ll feel
+    
+    Safety
+    
+    FAQ
+    
+    Support
+    
+    Controls:
+    
+    Toggle: “Sticky on scroll” (desktop on; mobile optional)
+    
+    Toggle: show icons
+    
+    Editable labels (but with good defaults)
+    
+    UX notes:
+    
+    On mobile, make it a horizontally scrollable row of chips.
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-jump-links-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    background-color: {{ block.settings.background_color }};
+    border-bottom: 1px solid {{ block.settings.border_color }};
+    z-index: 100;
+  }
+
+  .ai-jump-links-{{ ai_gen_id }}.sticky {
+    position: sticky;
+    top: 0;
+  }
+
+  .ai-jump-links-container-{{ ai_gen_id }} {
+    display: flex;
+    gap: {{ block.settings.gap }}px;
+    padding: {{ block.settings.padding_vertical }}px {{ block.settings.padding_horizontal }}px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .ai-jump-links-container-{{ ai_gen_id }}::-webkit-scrollbar {
+    display: none;
+  }
+
+  .ai-jump-links-item-{{ ai_gen_id }} {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: {{ block.settings.pill_padding_vertical }}px {{ block.settings.pill_padding_horizontal }}px;
+    background-color: {{ block.settings.pill_background }};
+    color: {{ block.settings.pill_text_color }};
+    border: 1px solid {{ block.settings.pill_border_color }};
+    border-radius: {{ block.settings.pill_border_radius }}px;
+    text-decoration: none;
+    white-space: nowrap;
+    font-size: {{ block.settings.font_size }}px;
+    font-weight: 500;
+    transition: var(--transition-fast);
+    cursor: pointer;
+  }
+
+  .ai-jump-links-item-{{ ai_gen_id }}:hover {
+    background-color: {{ block.settings.pill_hover_background }};
+    color: {{ block.settings.pill_hover_text_color }};
+    border-color: {{ block.settings.pill_hover_border_color }};
+  }
+
+  .ai-jump-links-item-{{ ai_gen_id }}.active {
+    background-color: {{ block.settings.pill_active_background }};
+    color: {{ block.settings.pill_active_text_color }};
+    border-color: {{ block.settings.pill_active_border_color }};
+  }
+
+  .ai-jump-links-icon-{{ ai_gen_id }} {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-jump-links-{{ ai_gen_id }}.sticky-mobile {
+      position: sticky;
+      top: 0;
+    }
+
+    .ai-jump-links-container-{{ ai_gen_id }} {
+      padding: {{ block.settings.padding_vertical_mobile }}px {{ block.settings.padding_horizontal_mobile }}px;
+    }
+  }
+{% endstyle %}
+
+<jump-links-{{ ai_gen_id }}
+  class="ai-jump-links-{{ ai_gen_id }} {% if block.settings.sticky_desktop %}sticky{% endif %} {% if block.settings.sticky_mobile %}sticky-mobile{% endif %}"
+  {{ block.shopify_attributes }}
+  data-offset="{{ block.settings.scroll_offset }}"
+>
+  <nav class="ai-jump-links-container-{{ ai_gen_id }}" role="navigation" aria-label="Quick navigation">
+    {% if block.settings.show_link_1 %}
+      <a
+        href="#{{ block.settings.anchor_1 }}"
+        class="ai-jump-links-item-{{ ai_gen_id }}"
+        data-anchor="{{ block.settings.anchor_1 }}"
+      >
+        {% if block.settings.show_icons %}
+          <svg class="ai-jump-links-icon-{{ ai_gen_id }}" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+        {% endif %}
+        {{ block.settings.label_1 }}
+      </a>
+    {% endif %}
+
+    {% if block.settings.show_link_2 %}
+      <a
+        href="#{{ block.settings.anchor_2 }}"
+        class="ai-jump-links-item-{{ ai_gen_id }}"
+        data-anchor="{{ block.settings.anchor_2 }}"
+      >
+        {% if block.settings.show_icons %}
+          <svg class="ai-jump-links-icon-{{ ai_gen_id }}" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+        {% endif %}
+        {{ block.settings.label_2 }}
+      </a>
+    {% endif %}
+
+    {% if block.settings.show_link_3 %}
+      <a
+        href="#{{ block.settings.anchor_3 }}"
+        class="ai-jump-links-item-{{ ai_gen_id }}"
+        data-anchor="{{ block.settings.anchor_3 }}"
+      >
+        {% if block.settings.show_icons %}
+          <svg class="ai-jump-links-icon-{{ ai_gen_id }}" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        {% endif %}
+        {{ block.settings.label_3 }}
+      </a>
+    {% endif %}
+
+    {% if block.settings.show_link_4 %}
+      <a
+        href="#{{ block.settings.anchor_4 }}"
+        class="ai-jump-links-item-{{ ai_gen_id }}"
+        data-anchor="{{ block.settings.anchor_4 }}"
+      >
+        {% if block.settings.show_icons %}
+          <svg class="ai-jump-links-icon-{{ ai_gen_id }}" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+          </svg>
+        {% endif %}
+        {{ block.settings.label_4 }}
+      </a>
+    {% endif %}
+
+    {% if block.settings.show_link_5 %}
+      <a
+        href="#{{ block.settings.anchor_5 }}"
+        class="ai-jump-links-item-{{ ai_gen_id }}"
+        data-anchor="{{ block.settings.anchor_5 }}"
+      >
+        {% if block.settings.show_icons %}
+          <svg class="ai-jump-links-icon-{{ ai_gen_id }}" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        {% endif %}
+        {{ block.settings.label_5 }}
+      </a>
+    {% endif %}
+
+    {% if block.settings.show_link_6 %}
+      <a
+        href="#{{ block.settings.anchor_6 }}"
+        class="ai-jump-links-item-{{ ai_gen_id }}"
+        data-anchor="{{ block.settings.anchor_6 }}"
+      >
+        {% if block.settings.show_icons %}
+          <svg class="ai-jump-links-icon-{{ ai_gen_id }}" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
+          </svg>
+        {% endif %}
+        {{ block.settings.label_6 }}
+      </a>
+    {% endif %}
+  </nav>
+</jump-links-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class JumpLinks{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+        this.links = this.querySelectorAll('.ai-jump-links-item-{{ ai_gen_id }}');
+        this.offset = parseInt(this.dataset.offset) || 0;
+      }
+
+      connectedCallback() {
+        this.setupSmoothScroll();
+        this.setupActiveState();
+      }
+
+      setupSmoothScroll() {
+        this.links.forEach(link => {
+          link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const targetId = link.getAttribute('data-anchor');
+            const targetElement = document.getElementById(targetId);
+
+            if (targetElement) {
+              const elementPosition = targetElement.getBoundingClientRect().top;
+              const offsetPosition = elementPosition + window.pageYOffset - this.offset;
+
+              window.scrollTo({
+                top: offsetPosition,
+                behavior: 'smooth'
+              });
+
+              this.setActiveLink(link);
+            }
+          });
+        });
+      }
+
+      setupActiveState() {
+        const observerOptions = {
+          root: null,
+          rootMargin: `-${this.offset + 50}px 0px -50% 0px`,
+          threshold: 0
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              const id = entry.target.getAttribute('id');
+              const correspondingLink = this.querySelector(`[data-anchor="${id}"]`);
+              if (correspondingLink) {
+                this.setActiveLink(correspondingLink);
+              }
+            }
+          });
+        }, observerOptions);
+
+        this.links.forEach(link => {
+          const targetId = link.getAttribute('data-anchor');
+          const targetElement = document.getElementById(targetId);
+          if (targetElement) {
+            observer.observe(targetElement);
+          }
+        });
+      }
+
+      setActiveLink(activeLink) {
+        this.links.forEach(link => {
+          link.classList.remove('active');
+        });
+        activeLink.classList.add('active');
+      }
+    }
+
+    customElements.define('jump-links-{{ ai_gen_id }}', JumpLinks{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Quick jump links",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Sticky behavior"
+    },
+    {
+      "type": "checkbox",
+      "id": "sticky_desktop",
+      "label": "Sticky on desktop",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "sticky_mobile",
+      "label": "Sticky on mobile",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "scroll_offset",
+      "min": 0,
+      "max": 200,
+      "step": 10,
+      "unit": "px",
+      "label": "Scroll offset",
+      "default": 80
+    },
+    {
+      "type": "header",
+      "content": "Display"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_icons",
+      "label": "Show icons",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "font_size",
+      "min": 12,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "label": "Font size",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "gap",
+      "min": 4,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "label": "Gap between pills",
+      "default": 8
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_vertical",
+      "min": 8,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Vertical padding (desktop)",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "padding_horizontal",
+      "min": 8,
+      "max": 60,
+      "step": 4,
+      "unit": "px",
+      "label": "Horizontal padding (desktop)",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "padding_vertical_mobile",
+      "min": 8,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Vertical padding (mobile)",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "padding_horizontal_mobile",
+      "min": 8,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Horizontal padding (mobile)",
+      "default": 16
+    },
+    {
+      "type": "header",
+      "content": "Pill style"
+    },
+    {
+      "type": "range",
+      "id": "pill_padding_vertical",
+      "min": 4,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "label": "Pill vertical padding",
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "pill_padding_horizontal",
+      "min": 8,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "label": "Pill horizontal padding",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "pill_border_radius",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Pill border radius",
+      "default": 20
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Border",
+      "default": "#e8e8e8"
+    },
+    {
+      "type": "color",
+      "id": "pill_background",
+      "label": "Pill background",
+      "default": "#f9f9f9"
+    },
+    {
+      "type": "color",
+      "id": "pill_text_color",
+      "label": "Pill text",
+      "default": "#2a2a2a"
+    },
+    {
+      "type": "color",
+      "id": "pill_border_color",
+      "label": "Pill border",
+      "default": "#e8e8e8"
+    },
+    {
+      "type": "color",
+      "id": "pill_hover_background",
+      "label": "Pill hover background",
+      "default": "#5a9d6f"
+    },
+    {
+      "type": "color",
+      "id": "pill_hover_text_color",
+      "label": "Pill hover text",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "pill_hover_border_color",
+      "label": "Pill hover border",
+      "default": "#5a9d6f"
+    },
+    {
+      "type": "color",
+      "id": "pill_active_background",
+      "label": "Pill active background",
+      "default": "#5a9d6f"
+    },
+    {
+      "type": "color",
+      "id": "pill_active_text_color",
+      "label": "Pill active text",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "pill_active_border_color",
+      "label": "Pill active border",
+      "default": "#5a9d6f"
+    },
+    {
+      "type": "header",
+      "content": "Link 1"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_link_1",
+      "label": "Show link",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "label_1",
+      "label": "Label",
+      "default": "TL;DR"
+    },
+    {
+      "type": "text",
+      "id": "anchor_1",
+      "label": "Anchor ID",
+      "default": "tldr"
+    },
+    {
+      "type": "header",
+      "content": "Link 2"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_link_2",
+      "label": "Show link",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "label_2",
+      "label": "Label",
+      "default": "How to use"
+    },
+    {
+      "type": "text",
+      "id": "anchor_2",
+      "label": "Anchor ID",
+      "default": "how-to-use"
+    },
+    {
+      "type": "header",
+      "content": "Link 3"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_link_3",
+      "label": "Show link",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "label_3",
+      "label": "Label",
+      "default": "What you'll feel"
+    },
+    {
+      "type": "text",
+      "id": "anchor_3",
+      "label": "Anchor ID",
+      "default": "what-youll-feel"
+    },
+    {
+      "type": "header",
+      "content": "Link 4"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_link_4",
+      "label": "Show link",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "label_4",
+      "label": "Label",
+      "default": "Safety"
+    },
+    {
+      "type": "text",
+      "id": "anchor_4",
+      "label": "Anchor ID",
+      "default": "safety"
+    },
+    {
+      "type": "header",
+      "content": "Link 5"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_link_5",
+      "label": "Show link",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "label_5",
+      "label": "Label",
+      "default": "FAQ"
+    },
+    {
+      "type": "text",
+      "id": "anchor_5",
+      "label": "Anchor ID",
+      "default": "faq"
+    },
+    {
+      "type": "header",
+      "content": "Link 6"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_link_6",
+      "label": "Show link",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "label_6",
+      "label": "Label",
+      "default": "Support"
+    },
+    {
+      "type": "text",
+      "id": "anchor_6",
+      "label": "Anchor ID",
+      "default": "support"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Quick jump links"
+    }
+  ]
+}
+{% endschema %}

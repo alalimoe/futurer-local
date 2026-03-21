@@ -1,0 +1,49 @@
+{% comment %}
+  Renders a products-grid element with a given value
+
+  Accepts:
+  - products: {Number} Products (required)
+  - columns_desktop: {Number} Columns desktop grid (optional)
+  - columns_mobile: {Number} Columns mobile grid (optional)
+
+  Usage:
+  {% render 'products-grid', products: products, columns_desktop: columns_desktop, columns_mobile: columns_mobile %}
+{% endcomment %}
+
+{% liquid
+  assign placeholder_image = 'collection-1'
+
+  if is_limit
+    assign limit_count = product_to_show
+  endif
+%}
+
+<div class="products-grid">
+  <xo-grid class="products-grid__grid" style="--lg: {{ columns_desktop }}; --md: {{  columns_desktop | minus: 1 }}; --xs: {{ columns_mobile }};">
+    {% for product in products limit: limit_count %}
+      <div
+        class="products-grid__item"
+        {% if is_order %}
+          xo-products-fetcher-order="{{ product.id }}"
+        {% endif %}
+      >
+        {% render 'product-card',
+          product: product,
+          show_image: settings.product_card_show_image,
+          show_secondary_image: settings.product_card_show_secondary_image,
+          show_vendor: settings.product_card_show_vendor,
+          show_description: settings.product_card_show_description,
+          show_quick_add: settings.product_card_show_quick_add,
+          show_quick_view: settings.product_card_show_quick_view,
+          show_favorite: settings.product_card_show_favorite,
+          show_price: settings.product_card_show_price,
+          show_badge: settings.product_card_show_badge,
+          media_aspect_ratio: section.settings.product_card_aspect_ratio,
+          color_scheme: section.settings.card_color_scheme,
+          placeholder_image: placeholder_image,
+          animate_enabled: true
+        %}
+      </div>
+    {% endfor %}
+  </xo-grid>
+</div>

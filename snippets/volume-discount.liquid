@@ -1,0 +1,77 @@
+{% liquid
+  assign product_current_id = product.id
+  assign product_list = block.settings.product_list
+  assign label = block.settings.label
+  assign quantity = block.settings.quantity
+  assign discount_type = block.settings.discount_type
+  assign discount_value = block.settings.discount_value
+  assign highlight_text = block.settings.highlight_text
+  assign highlight_background_color = block.settings.highlight_background_color
+  assign highlight_text_color = block.settings.highlight_text_color
+  assign highlight_position = block.settings.highlight_position
+
+  assign product_is_in_list = false
+  for product in product_list
+    if product.id == product_current_id
+      assign product_is_in_list = true
+      break
+    endif
+  endfor
+%}
+
+{% if product_is_in_list %}
+  <div class='xo-volume-discount' xo-discount-value='{{ discount_value }}'>
+    <xo-cart-quantity-trigger
+      xo-value='{{ quantity }}'
+      xo-discount="{ type: '{{ discount_type }}', value: '{{ discount_value }}' }"
+      class='xo-volume-discount__trigger{% if settings.enable_border_radius %} xo-volume-discount__trigger--radius{% endif %}'
+    >
+      <div class='xo-volume-discount__wrapper xo-stack' style='--ai: center; --jc: space-between; --gap: 20; --gap-mobile: 20'>
+        <div class='xo-volume-discount__text xo-stack' style='--ai: center; --gap: 8; --gap-mobile: 8'>
+          {% if label != blank %}
+            <div class='xo-volume-discount__box'>
+              <div class='xo-volume-discount__check'></div>
+            </div>
+            <span class='xo-volume-discount__label'>{{ label }}</span>
+          {% endif %}
+          {% if highlight_text != blank %}
+            {% if highlight_position == 'aside' %}
+              <span
+                class='xo-volume-discount__highlight xo-volume-discount__highlight--aside{% if settings.enable_border_radius %} xo-volume-discount__highlight--radius{% endif %}'
+                style='--bg-color: {{ highlight_background_color }}; --text-color: {{ highlight_text_color }};'
+              >
+                {{- highlight_text -}}
+              </span>
+            {% else %}
+              <span
+                class='xo-volume-discount__highlight xo-volume-discount__highlight--above{% if settings.enable_border_radius %} xo-volume-discount__highlight--radius{% endif %}'
+                style='--bg-color: {{ highlight_background_color }}; --text-color: {{ highlight_text_color }};'
+              >
+                {{- highlight_text -}}
+              </span>
+            {% endif %}
+          {% endif %}
+        </div>
+        <xo-product-will-change xo-unique-id='volume-discount-{{ section.id }}' class='xo-volume-discount__price'>
+          {% for product_discount in product_list %}
+            {% liquid
+              assign product_discount_id = product_discount.id
+              assign target = product_discount.selected_or_first_available_variant
+              assign original_price = target.price
+            %}
+
+            {% if product_discount_id == product_current_id %}
+              <div class='xo-volume-discount__reduced xo-stack' style='--ai: end; --jc: space-between; --dir: column; --gap: 2; --gap-mobile: 2'>
+                <xo-price-reduced xo-price='{{ original_price | times: quantity }}' class='xo-volume-discount__price-item'></xo-price-reduced>
+                <span class='xo-volume-discount__price-item xo-volume-discount__price-item--del'>{{ original_price | times: quantity | money }}</span>
+              </div>
+              <div class='xo-volume-discount__original'>
+                <span class='xo-volume-discount__price-item'>{{ original_price | money }}</span>
+              </div>
+            {% endif %}
+          {% endfor %}
+        </xo-product-will-change>
+      </div>
+    </xo-cart-quantity-trigger>
+  </div>
+{% endif %}

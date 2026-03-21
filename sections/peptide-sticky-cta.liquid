@@ -1,0 +1,177 @@
+{% schema %}
+{
+  "name": "Peptide Sticky CTA",
+  "tag": "section",
+  "class": "section-peptide-sticky-cta",
+  "settings": [
+    {
+      "type": "text",
+      "id": "cta_text",
+      "label": "CTA Button Text",
+      "default": "Jump to Calculator"
+    },
+    {
+      "type": "text",
+      "id": "cta_url",
+      "label": "CTA Link",
+      "info": "Use #pc-calculator-section for same-page anchor, or any full URL."
+    },
+    {
+      "type": "product",
+      "id": "product_1",
+      "label": "Product Link 1 (optional)"
+    },
+    {
+      "type": "product",
+      "id": "product_2",
+      "label": "Product Link 2 (optional)"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Peptide Sticky CTA"
+    }
+  ]
+}
+{% endschema %}
+
+{%- assign p1 = section.settings.product_1 -%}
+{%- assign p2 = section.settings.product_2 -%}
+
+<div class="psc-bar" id="psc-{{ section.id }}" aria-label="Quick actions">
+  <div class="psc-inner">
+    <a href="{{ section.settings.cta_url | default: '#pc-calculator-section' }}" class="psc-btn psc-btn--primary">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="10" y2="10"/><line x1="14" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="10" y2="14"/><line x1="14" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="16" y2="18"/></svg>
+      {{ section.settings.cta_text }}
+    </a>
+    {% if p1 != blank %}
+      <a href="{{ p1.url }}" class="psc-btn psc-btn--ghost">{{ p1.title }}</a>
+    {% endif %}
+    {% if p2 != blank %}
+      <a href="{{ p2.url }}" class="psc-btn psc-btn--ghost">{{ p2.title }}</a>
+    {% endif %}
+  </div>
+</div>
+
+<script>
+  (function(){
+    var bar = document.getElementById('psc-{{ section.id }}');
+    if (!bar) return;
+    var visible = false;
+    var ticking = false;
+
+    function update() {
+      var docH = document.documentElement.scrollHeight - window.innerHeight;
+      var pct = docH > 0 ? (window.scrollY / docH) : 0;
+      if (pct > 0.15 && pct < 0.92 && !visible) {
+        bar.classList.add('psc-bar--visible');
+        visible = true;
+      } else if ((pct <= 0.15 || pct >= 0.92) && visible) {
+        bar.classList.remove('psc-bar--visible');
+        visible = false;
+      }
+      ticking = false;
+    }
+
+    window.addEventListener('scroll', function() {
+      if (!ticking) { requestAnimationFrame(update); ticking = true; }
+    }, { passive: true });
+  })();
+</script>
+
+<style>
+  #psc-{{ section.id }} {
+    --psc-accent: var(--color-accent-primary, #FBBF24);
+    --psc-text: var(--color-text-main, #111827);
+    --psc-radius: var(--nx-radius, 14px);
+  }
+
+  .psc-bar {
+    position: fixed;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%) translateY(calc(100% + 24px));
+    z-index: 50;
+    opacity: 0;
+    pointer-events: none;
+    transition: var(--transition-premium, all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1));
+  }
+
+  .psc-bar--visible {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .psc-inner {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--glass-bg-strong, rgba(255,255,255,0.72));
+    backdrop-filter: var(--glass-blur-strong, blur(20px));
+    -webkit-backdrop-filter: var(--glass-blur-strong, blur(20px));
+    border: 1px solid var(--glass-border, rgba(255,255,255,0.12));
+    border-radius: var(--nx-radius-pill);
+    padding: 6px 8px;
+    box-shadow: var(--shadow-lg, 0 20px 46px rgba(0,0,0,0.10));
+  }
+
+  .psc-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 20px;
+    border-radius: var(--nx-radius-pill);
+    font-size: 14px;
+    font-weight: 700;
+    font-family: var(--font-body-family, sans-serif);
+    text-decoration: none;
+    white-space: nowrap;
+    transition: var(--transition-smooth, all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1));
+    min-height: var(--touch-min, 44px);
+    box-sizing: border-box;
+  }
+
+  .psc-btn--primary {
+    background: var(--psc-accent);
+    color: var(--color-text-primary);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.4);
+  }
+
+  .psc-btn--primary:hover {
+    filter: brightness(1.06);
+    transform: translateY(-1px);
+  }
+
+  .psc-btn--ghost {
+    background: transparent;
+    color: var(--psc-text);
+    border: 1px solid var(--nx-pill-border, #E5E7EB);
+  }
+
+  .psc-btn--ghost:hover {
+    background: var(--color-bg-secondary, #f9fafb);
+    border-color: var(--psc-text);
+  }
+
+  .psc-bar :focus-visible {
+    outline: 2px solid var(--psc-accent);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .psc-bar { transition-duration: 0.01ms !important; }
+    .psc-bar *, .psc-bar *::before, .psc-bar *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .psc-bar { left: 8px; right: 8px; transform: translateX(0) translateY(calc(100% + 24px)); bottom: 8px; }
+    .psc-bar--visible { transform: translateX(0) translateY(0); }
+    .psc-inner { width: 100%; justify-content: center; }
+    .psc-btn--ghost { display: none; }
+    .psc-btn--primary { flex: 1; justify-content: center; }
+  }
+</style>

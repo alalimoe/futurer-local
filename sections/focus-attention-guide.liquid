@@ -1,0 +1,1172 @@
+{% comment %}
+  =============================================
+  Section: Focus & Attention Guide
+  File: sections/focus-attention-guide.liquid
+  Purpose: Education-first LP — CRO / SEO / UX / A11y
+  Theme: Futurer 2.x (OS 2.0) — cascades from global tokens
+  =============================================
+{% endcomment %}
+
+{%- assign s = section.settings -%}
+{%- assign sid = section.id -%}
+
+{%- comment -%} ── Product resolution (picker → handle → known fallback) ── {%- endcomment -%}
+{%- assign product_theanine = s.theanine_product -%}
+{%- if product_theanine == blank and s.theanine_handle != blank -%}
+  {%- assign product_theanine = all_products[s.theanine_handle] -%}
+{%- endif -%}
+{%- if product_theanine == blank -%}
+  {%- assign product_theanine = all_products['caffeine-l-theanine-capsules'] -%}
+{%- endif -%}
+
+{%- assign product_choline = s.choline_product -%}
+{%- if product_choline == blank and s.choline_handle != blank -%}
+  {%- assign product_choline = all_products[s.choline_handle] -%}
+{%- endif -%}
+{%- if product_choline == blank -%}
+  {%- assign product_choline = all_products['alpha-gpc'] -%}
+{%- endif -%}
+
+{%- assign product_lion = s.lion_product -%}
+{%- if product_lion == blank and s.lion_handle != blank -%}
+  {%- assign product_lion = all_products[s.lion_handle] -%}
+{%- endif -%}
+{%- if product_lion == blank -%}
+  {%- assign product_lion = all_products['lion-mane-mushroom-capsules'] -%}
+{%- endif -%}
+
+{%- assign bundle = s.stack_product -%}
+{%- if bundle == blank and s.stack_product_handle != blank -%}
+  {%- assign bundle = all_products[s.stack_product_handle] -%}
+{%- endif -%}
+{%- if bundle == blank -%}
+  {%- assign bundle = all_products['enhanced-focus-stack'] -%}
+{%- endif -%}
+
+{%- comment -%} ── JSON-LD: Article ── {%- endcomment -%}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": {{ s.hero_title | default: "Sharper Focus, Naturally." | json }},
+  "description": {{ s.hero_subtitle | strip_html | truncate: 160 | json }},
+  "author": { "@type": "Organization", "name": "Nootropix" },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Nootropix",
+    "url": {{ shop.url | json }},
+    "logo": {
+      "@type": "ImageObject",
+      "url": {{ shop.url | append: '/cdn/shop/files/nootropix-logo.png' | json }}
+    }
+  },
+  "datePublished": {{ s.date_published | default: "2025-06-01" | json }},
+  "dateModified": {{ page.updated_at | date: "%Y-%m-%d" | default: "2025-06-01" | json }},
+  "mainEntityOfPage": {{ canonical_url | json }},
+  "about": ["Focus", "Attention", "Nootropics", "L-Theanine", "Alpha-GPC", "Lion's Mane"]
+}
+</script>
+
+{%- comment -%} ── JSON-LD: ItemList (3 stack products) ── {%- endcomment -%}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "name": "Focus & Attention Stack",
+  "numberOfItems": 3,
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Caffeine + L-Theanine", "description": "Calm, clean energy — pairing L-Theanine with caffeine for focused alertness." },
+    { "@type": "ListItem", "position": 2, "name": "Alpha-GPC", "description": "A choline donor that supports acetylcholine for attention, learning, and memory." },
+    { "@type": "ListItem", "position": 3, "name": "Lion's Mane Mushroom", "description": "Daily staple for long-term brain support; researched for NGF and memory." }
+  ]
+}
+</script>
+
+{%- comment -%} ── JSON-LD: FAQPage (dynamic from blocks) ── {%- endcomment -%}
+{%- assign faq_blocks = section.blocks | where: 'type', 'faq' -%}
+{% if faq_blocks.size > 0 %}
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {%- for block in faq_blocks -%}
+        {
+          "@type": "Question",
+          "name": {{ block.settings.q | json }},
+          "acceptedAnswer": { "@type": "Answer", "text": {{ block.settings.a | json }} }
+        }{%- unless forloop.last -%},{%- endunless -%}
+      {%- endfor -%}
+    ]
+  }
+  </script>
+{% endif %}
+
+<section id="focus-guide-{{ sid }}" class="fg-section" aria-labelledby="fg-title-{{ sid }}">
+  <div class="fg-inner">
+
+    {%- comment -%} ── HERO ── {%- endcomment -%}
+    <header class="fg-hero">
+      <div class="fg-hero-grid">
+        <div class="fg-hero-content">
+          <h1 id="fg-title-{{ sid }}" class="fg-hero-title">{{ s.hero_title | default: "Sharper Focus, Naturally." }}</h1>
+          <p class="fg-hero-sub">{{ s.hero_subtitle | default: "Understand the science behind distraction and build a simple, effective Focus Stack that helps you feel calm, clear, and in control." }}</p>
+          <div class="fg-hero-actions">
+            <a href="#focus-stack" class="fg-btn fg-btn--primary" aria-label="Jump to Focus Stack">Start Your Focus Stack</a>
+            <span class="fg-hero-note">No hype. Just what works for your brain.</span>
+          </div>
+        </div>
+        <div class="fg-hero-aside">
+          {% if s.hero_image != blank %}
+            <div class="fg-hero-img-wrap">
+              <img src="{{ s.hero_image | image_url: width: 900 }}" alt="{{ s.hero_image.alt | default: 'Nootropix Focus Stack illustration' }}" loading="eager" fetchpriority="high" width="900" height="{{ 900 | divided_by: s.hero_image.aspect_ratio | round }}">
+            </div>
+          {% else %}
+            <div class="fg-science-card">
+              <span class="fg-chip">Science Snapshot</span>
+              <p class="fg-science-text">Focus isn't "willpower." It's chemistry. Stress ramps cortisol; adenosine builds up and you feel heavy; low acetylcholine makes thoughts slippery. The right routine supports calmer, more consistent attention.</p>
+              <ul class="fg-check-list">
+                <li>L-Theanine may promote relaxed, alert alpha waves.</li>
+                <li>Caffeine blocks adenosine to lift alertness.</li>
+                <li>Choline donors (Alpha-GPC) support acetylcholine for focus & memory.</li>
+                <li>Lion's Mane is researched for long-term brain support.</li>
+              </ul>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </header>
+
+    {%- comment -%} ── EDUCATION ── {%- endcomment -%}
+    <div class="fg-edu-grid" aria-label="Education">
+      <div class="fg-card">
+        <span class="fg-kicker">Why focus feels hard</span>
+        <h2 class="fg-heading">It's not laziness — it's load.</h2>
+        <p class="fg-body-muted">When stress, sleep debt, and constant pings pile up, your brain leans toward distraction. That's normal. Instead of fighting your biology, support it: calm the noise, smooth your energy, and give your attention systems the raw materials they use every day.</p>
+        <div class="fg-banner">
+          <strong>Respect the basics:</strong> hydration, daylight, and consistent sleep timing. Nootropics work best in a solid routine.
+        </div>
+      </div>
+      <div class="fg-card">
+        <span class="fg-kicker">How this guide helps</span>
+        <h3 class="fg-heading">A simple 3-part Focus Stack</h3>
+        <p class="fg-body-muted">Short-term calm + clean energy, mid-term focus chemistry, long-term brain support.</p>
+        <ul class="fg-check-list">
+          <li><strong>Calm Energy:</strong> L-Theanine + Caffeine for smooth alertness without the jitters.</li>
+          <li><strong>Focus Chemistry:</strong> Alpha-GPC to support acetylcholine — the "pay attention" neurotransmitter.</li>
+          <li><strong>Long-Term Support:</strong> Lion's Mane, featured in research on nerve growth factor (NGF) and memory.</li>
+        </ul>
+      </div>
+    </div>
+
+    {%- comment -%} ── 3-PRODUCT STACK GRID ── {%- endcomment -%}
+    <section id="focus-stack" class="fg-stack-section" aria-label="The Focus & Attention Stack">
+      <span class="fg-kicker">Your Stack</span>
+      <h2 class="fg-heading">The Focus & Attention Stack</h2>
+      <p class="fg-body-muted">Built from proven basics. Start small, notice, then personalize.</p>
+
+      <div class="fg-stack-grid">
+        {%- comment -%} Card 1: L-Theanine + Caffeine {%- endcomment -%}
+        <article class="fg-product-card">
+          <span class="fg-chip">Calm Energy</span>
+          <h3 class="fg-product-title">L-Theanine + Caffeine</h3>
+          <p class="fg-product-desc">Pairing L-Theanine with Caffeine can promote focused alertness and smoother energy.</p>
+          {% if product_theanine != blank and product_theanine.featured_image %}
+            <div class="fg-product-img">
+              <img src="{{ product_theanine.featured_image | image_url: width: 600 }}" alt="{{ product_theanine.title }}" loading="lazy" width="600" height="600">
+            </div>
+          {% endif %}
+          <div class="fg-product-footer">
+            {% if product_theanine != blank %}
+              <div class="fg-product-ctas">
+                <a class="fg-btn fg-btn--ghost" href="{{ product_theanine.url }}" aria-label="View {{ product_theanine.title }}">View Product</a>
+                <form method="post" action="{{ routes.cart_add_url }}">
+                  <input type="hidden" name="id" value="{{ product_theanine.selected_or_first_available_variant.id }}">
+                  <button type="submit" class="fg-btn fg-btn--primary">Add to Cart</button>
+                </form>
+              </div>
+              <div class="fg-product-meta">From {{ product_theanine.price | money }}</div>
+            {% else %}
+              <div class="fg-product-ctas">
+                <a class="fg-btn fg-btn--ghost" href="/products/caffeine-l-theanine-capsules">View Product</a>
+              </div>
+            {% endif %}
+          </div>
+        </article>
+
+        {%- comment -%} Card 2: Alpha-GPC {%- endcomment -%}
+        <article class="fg-product-card">
+          <span class="fg-chip">Focus Chemistry</span>
+          <h3 class="fg-product-title">Alpha-GPC</h3>
+          <p class="fg-product-desc">A choline donor that supports acetylcholine — key for attention, learning, and memory.</p>
+          {% if product_choline != blank and product_choline.featured_image %}
+            <div class="fg-product-img">
+              <img src="{{ product_choline.featured_image | image_url: width: 600 }}" alt="{{ product_choline.title }}" loading="lazy" width="600" height="600">
+            </div>
+          {% endif %}
+          <div class="fg-product-footer">
+            {% if product_choline != blank %}
+              <div class="fg-product-ctas">
+                <a class="fg-btn fg-btn--ghost" href="{{ product_choline.url }}" aria-label="View {{ product_choline.title }}">View Product</a>
+                <form method="post" action="{{ routes.cart_add_url }}">
+                  <input type="hidden" name="id" value="{{ product_choline.selected_or_first_available_variant.id }}">
+                  <button type="submit" class="fg-btn fg-btn--primary">Add to Cart</button>
+                </form>
+              </div>
+              <div class="fg-product-meta">From {{ product_choline.price | money }}</div>
+            {% else %}
+              <div class="fg-product-ctas">
+                <a class="fg-btn fg-btn--ghost" href="/products/alpha-gpc">View Product</a>
+              </div>
+            {% endif %}
+          </div>
+        </article>
+
+        {%- comment -%} Card 3: Lion's Mane {%- endcomment -%}
+        <article class="fg-product-card">
+          <span class="fg-chip">Long-Term Support</span>
+          <h3 class="fg-product-title">Lion's Mane Mushroom</h3>
+          <p class="fg-product-desc">A daily staple for long-term brain support; often chosen for memory and learning.</p>
+          {% if product_lion != blank and product_lion.featured_image %}
+            <div class="fg-product-img">
+              <img src="{{ product_lion.featured_image | image_url: width: 600 }}" alt="{{ product_lion.title }}" loading="lazy" width="600" height="600">
+            </div>
+          {% endif %}
+          <div class="fg-product-footer">
+            {% if product_lion != blank %}
+              <div class="fg-product-ctas">
+                <a class="fg-btn fg-btn--ghost" href="{{ product_lion.url }}" aria-label="View {{ product_lion.title }}">View Product</a>
+                <form method="post" action="{{ routes.cart_add_url }}">
+                  <input type="hidden" name="id" value="{{ product_lion.selected_or_first_available_variant.id }}">
+                  <button type="submit" class="fg-btn fg-btn--primary">Add to Cart</button>
+                </form>
+              </div>
+              <div class="fg-product-meta">From {{ product_lion.price | money }}</div>
+            {% else %}
+              <div class="fg-product-ctas">
+                <a class="fg-btn fg-btn--ghost" href="/products/lion-mane-mushroom-capsules">View Product</a>
+              </div>
+            {% endif %}
+          </div>
+        </article>
+      </div>
+    </section>
+
+    {%- comment -%} ── BUNDLE CTA + DOSING TABLE ── {%- endcomment -%}
+    <div class="fg-bundle-grid">
+      <div class="fg-card fg-bundle-main">
+        <span class="fg-kicker">One-Click Option</span>
+        <h2 class="fg-heading">{{ s.bundle_title | default: "Enhanced Focus Stack" }}</h2>
+        <p class="fg-body-muted">Prefer the simple route? Grab the full Focus Stack in one go. Subscribe & Save {{ s.subscribe_discount | default: 15 }}% with easy skip/pause.</p>
+        {% if bundle != blank %}
+          {% if bundle.featured_image %}
+            <div class="fg-bundle-img">
+              <img src="{{ bundle.featured_image | image_url: width: 800 }}" alt="{{ bundle.title }}" loading="lazy" width="800" height="800">
+            </div>
+          {% endif %}
+          <div class="fg-bundle-ctas">
+            <a class="fg-btn fg-btn--ghost" href="{{ bundle.url }}" aria-label="View {{ bundle.title }}">View Stack</a>
+            <form method="post" action="{{ routes.cart_add_url }}">
+              <input type="hidden" name="id" value="{{ bundle.selected_or_first_available_variant.id }}">
+              <button type="submit" class="fg-btn fg-btn--primary">Add to Cart</button>
+            </form>
+          </div>
+          <div class="fg-bundle-price">From {{ bundle.price | money }}</div>
+          <div class="fg-kpi-row">
+            <span class="fg-kpi">Ships from Dubai daily</span>
+            <span class="fg-kpi">Same/next-day UAE delivery</span>
+            <span class="fg-kpi">Free UAE shipping &ge; 300 AED</span>
+          </div>
+        {% else %}
+          <div class="fg-bundle-ctas">
+            <a class="fg-btn fg-btn--primary" href="/products/enhanced-focus-stack">View Stack</a>
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="fg-card fg-routine-card">
+        <span class="fg-kicker">How to Use</span>
+        <h3 class="fg-heading">Suggested Routine</h3>
+        <div class="fg-table-wrap">
+          <table class="fg-table" aria-label="Daily Focus Routine">
+            <thead>
+              <tr>
+                <th scope="col">Timing</th>
+                <th scope="col">What</th>
+                <th scope="col">Purpose</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td data-label="Timing"><strong>Morning</strong></td>
+                <td data-label="What">1 capsule Caffeine + L-Theanine</td>
+                <td data-label="Purpose">Calm, clean energy</td>
+              </tr>
+              <tr>
+                <td data-label="Timing"><strong>Mid-morning</strong></td>
+                <td data-label="What">1 serving Alpha-GPC (per label)</td>
+                <td data-label="Purpose">Attention during deep work</td>
+              </tr>
+              <tr>
+                <td data-label="Timing"><strong>Daily</strong></td>
+                <td data-label="What">Lion's Mane with food</td>
+                <td data-label="Purpose">Long-term brain support</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="fg-routine-note">Start low, go slow. Listen to your body and adjust timing. Not medical advice; consult your clinician if you have any condition, are pregnant, or take medication.</p>
+      </div>
+    </div>
+
+    {%- comment -%} ── SOCIAL PROOF ── {%- endcomment -%}
+    <section aria-label="Customer testimonials">
+      <span class="fg-kicker">Real routines</span>
+      <h2 class="fg-heading">What customers say</h2>
+      <div class="fg-testimonial-grid">
+        <div class="fg-card fg-testimonial">
+          <p>"Swapped my third coffee for the Focus Stack. Calm, steady energy and I actually finish tasks."</p>
+          <div class="fg-testimonial-author">— M., Dubai</div>
+        </div>
+        <div class="fg-card fg-testimonial">
+          <p>"Alpha-GPC + Lion's Mane has become my study ritual. Fewer tabs open in my brain."</p>
+          <div class="fg-testimonial-author">— A., Sharjah</div>
+        </div>
+        <div class="fg-card fg-testimonial">
+          <p>"Didn't want jitters. L-Theanine + Caffeine feels like clean focus without the crash."</p>
+          <div class="fg-testimonial-author">— R., Abu Dhabi</div>
+        </div>
+      </div>
+    </section>
+
+    {%- comment -%} ── SHIPPING / TRUST ── {%- endcomment -%}
+    <section aria-label="Shipping and trust">
+      <span class="fg-kicker">Nootropix advantage</span>
+      <h2 class="fg-heading">Fast. Local. Reliable.</h2>
+      <div class="fg-trust-grid">
+        <div class="fg-trust-item">
+          <span class="fg-trust-icon" aria-hidden="true">&#9889;</span>
+          <div>
+            <strong>Lightning delivery</strong>
+            <span class="fg-trust-detail">Within Dubai: ~4 hours in city limits. Rest of UAE: same or next day. International express available.</span>
+          </div>
+        </div>
+        <div class="fg-trust-item">
+          <span class="fg-trust-icon" aria-hidden="true">&#128666;</span>
+          <div>
+            <strong>Fair shipping</strong>
+            <span class="fg-trust-detail">Free UAE shipping on orders &ge; 300 AED. Simple and transparent.</span>
+          </div>
+        </div>
+        <div class="fg-trust-item">
+          <span class="fg-trust-icon" aria-hidden="true">&#128260;</span>
+          <div>
+            <strong>Easy returns</strong>
+            <span class="fg-trust-detail">Unopened items returnable within 3 days. Your satisfaction matters.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {%- comment -%} ── FAQ (animated disclosure) ── {%- endcomment -%}
+    <section aria-label="Frequently asked questions">
+      <span class="fg-kicker">Questions</span>
+      <h2 class="fg-heading">Focus Stack FAQ</h2>
+
+      {% if faq_blocks.size > 0 %}
+        {% for block in faq_blocks %}
+          <details class="fg-faq" {{ block.shopify_attributes }}>
+            <summary class="fg-faq-q">{{ block.settings.q }}<span class="fg-faq-chevron" aria-hidden="true"></span></summary>
+            <div class="fg-faq-answer"><div class="fg-faq-inner"><p>{{ block.settings.a }}</p></div></div>
+          </details>
+        {% endfor %}
+      {% else %}
+        <details class="fg-faq">
+          <summary class="fg-faq-q">Will this make me jittery?<span class="fg-faq-chevron" aria-hidden="true"></span></summary>
+          <div class="fg-faq-answer"><div class="fg-faq-inner"><p>The L-Theanine + Caffeine combo is chosen specifically to smooth out stimulation. Start low and see how you feel.</p></div></div>
+        </details>
+        <details class="fg-faq">
+          <summary class="fg-faq-q">How long until I notice a difference?<span class="fg-faq-chevron" aria-hidden="true"></span></summary>
+          <div class="fg-faq-answer"><div class="fg-faq-inner"><p>Many people notice cleaner energy on day one. Focus chemistry (Alpha-GPC) and long-term support (Lion's Mane) can take consistent use to appreciate.</p></div></div>
+        </details>
+        <details class="fg-faq">
+          <summary class="fg-faq-q">Can I stack this with my coffee?<span class="fg-faq-chevron" aria-hidden="true"></span></summary>
+          <div class="fg-faq-answer"><div class="fg-faq-inner"><p>Yes — adjust caffeine intake to avoid over-stimulation. If you use prescription meds or have a condition, talk to your clinician first.</p></div></div>
+        </details>
+        <details class="fg-faq">
+          <summary class="fg-faq-q">Is this safe long-term?<span class="fg-faq-chevron" aria-hidden="true"></span></summary>
+          <div class="fg-faq-answer"><div class="fg-faq-inner"><p>Generally used as daily supplements, but individual needs vary. Review labels and consult your clinician for long-term protocols.</p></div></div>
+        </details>
+      {% endif %}
+    </section>
+
+    {%- comment -%} ── FINAL CTA + LEGAL ── {%- endcomment -%}
+    <section class="fg-final-cta" aria-label="Get started">
+      <div class="fg-final-grid">
+        <div>
+          <h2 class="fg-heading">Ready when you are.</h2>
+          <p class="fg-body-muted">Respect your biology. Build a routine that supports calm, clear focus — then go do the work that matters.</p>
+          <a class="fg-btn fg-btn--primary" href="#focus-stack">Build My Focus Stack</a>
+        </div>
+        <div>
+          <p class="fg-legal">*Information here is for educational purposes only and isn't a substitute for professional medical advice. These products aren't intended to diagnose, treat, cure, or prevent any disease. Always read labels and consult your clinician if you're pregnant, nursing, on medication, or have a medical condition.</p>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</section>
+
+{%- style -%}
+/* ═══════════════════════════════════════════════════════
+   FOCUS & ATTENTION GUIDE — Premium Design Tokens
+   ═══════════════════════════════════════════════════════ */
+
+#focus-guide-{{ sid }} {
+  --section-max-width: {{ s.max_width | default: 1100 }}px;
+  --fg-py: {{ s.padding_y | default: 56 }}px;
+  --fg-accent: var(--color-accent-primary, #FBBF24);
+  --fg-accent-hover: var(--color-accent-hover, #D97706);
+  --fg-accent-dark: var(--color-accent-dark, #92400e);
+  --fg-accent-glass: rgba(251, 191, 36, 0.08);
+  --fg-accent-glass-strong: rgba(251, 191, 36, 0.14);
+  --fg-text: var(--color-text-main, #111827);
+  --fg-muted: var(--color-text-muted, #4b5563);
+  --fg-bg: {{ s.background_color | default: '#ffffff' }};
+  --fg-bg-alt: var(--color-bg-secondary, #f9fafb);
+  --fg-radius: var(--radius-premium, 14px);
+  --fg-transition: var(--transition-premium, all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1));
+  --fg-shadow-rest: var(--shadow-sm, 0 2px 8px rgba(0, 0, 0, 0.04));
+  --fg-shadow-hover: var(--shadow-md, 0 12px 30px rgba(0, 0, 0, 0.06));
+  --fg-gold-glow: var(--shadow-gold-glow, 0 4px 14px rgba(251, 191, 36, 0.25));
+  --fg-gold-glow-hover: var(--shadow-gold-glow-hover, 0 8px 24px rgba(251, 191, 36, 0.35));
+  --fg-font: var(--font-body-family, sans-serif);
+  --fg-font-heading: var(--font-heading-family, sans-serif);
+
+  background: var(--fg-bg);
+  color: var(--fg-text);
+  font-family: var(--fg-font);
+  line-height: 1.6;
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 5000px;
+}
+
+/* ── Inner container ── */
+#focus-guide-{{ sid }} .fg-inner {
+  max-width: var(--section-max-width);
+  margin: 0 auto;
+  padding: var(--fg-py) var(--page-gutter);
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+@media (min-width: 990px) {
+  #focus-guide-{{ sid }} .fg-inner { gap: 56px; }
+}
+
+/* ── Shared typography ── */
+#focus-guide-{{ sid }} .fg-kicker {
+  display: block;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 700;
+  font-size: 12px;
+  color: var(--fg-accent-dark);
+  margin-bottom: 6px;
+}
+#focus-guide-{{ sid }} .fg-heading {
+  font-family: var(--fg-font-heading);
+  font-size: clamp(22px, 3vw, 34px);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--fg-text);
+  margin: 0 0 10px;
+}
+#focus-guide-{{ sid }} .fg-body-muted {
+  color: var(--fg-muted);
+  line-height: 1.6;
+  margin: 0 0 8px;
+}
+
+/* ── Cards (borderless elevation) ── */
+#focus-guide-{{ sid }} .fg-card {
+  background: var(--fg-bg);
+  border: none;
+  border-radius: var(--fg-radius);
+  padding: 24px;
+  box-shadow: var(--fg-shadow-rest);
+  transition: var(--fg-transition);
+}
+#focus-guide-{{ sid }} .fg-card:hover {
+  box-shadow: var(--fg-shadow-hover);
+}
+
+/* ── Chip (glassmorphism) ── */
+#focus-guide-{{ sid }} .fg-chip {
+  display: inline-block;
+  padding: 5px 12px;
+  border-radius: var(--nx-radius-pill);
+  background: var(--fg-accent-glass);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  color: var(--fg-accent-dark);
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  margin-bottom: 8px;
+}
+
+/* ── Banner callout (glass, no dashed border) ── */
+#focus-guide-{{ sid }} .fg-banner {
+  background: var(--fg-accent-glass);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  border: none;
+  border-radius: var(--nx-radius-md);
+  padding: 16px;
+  margin-top: 14px;
+  line-height: 1.5;
+  font-size: 14px;
+}
+
+/* ── Check list ── */
+#focus-guide-{{ sid }} .fg-check-list {
+  list-style: none;
+  padding: 0;
+  margin: 10px 0 0;
+  display: grid;
+  gap: 8px;
+}
+#focus-guide-{{ sid }} .fg-check-list li {
+  padding-left: 28px;
+  position: relative;
+  font-size: 14px;
+  line-height: 1.6;
+}
+#focus-guide-{{ sid }} .fg-check-list li::before {
+  content: "\2713";
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: #059669;
+  font-weight: 700;
+}
+
+/* ═══════════════════════════════════════════════════════
+   BUTTONS — Ghost + Primary
+   ═══════════════════════════════════════════════════════ */
+#focus-guide-{{ sid }} .fg-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 11px 20px;
+  border-radius: var(--nx-radius-md);
+  font-family: var(--fg-font);
+  font-weight: 600;
+  font-size: 15px;
+  text-decoration: none;
+  min-height: var(--touch-min, 44px);
+  transition: var(--fg-transition);
+  cursor: pointer;
+}
+#focus-guide-{{ sid }} .fg-btn--ghost {
+  background: transparent;
+  border: 1.5px solid var(--fg-accent);
+  color: var(--fg-text);
+}
+#focus-guide-{{ sid }} .fg-btn--ghost:hover {
+  background: var(--fg-accent);
+  color: var(--color-text-primary);
+  transform: translateY(-2px);
+  box-shadow: var(--fg-shadow-hover);
+}
+#focus-guide-{{ sid }} .fg-btn--primary {
+  background: var(--fg-accent);
+  color: var(--color-text-primary);
+  border: 1.5px solid var(--fg-accent);
+  box-shadow: var(--fg-gold-glow);
+}
+#focus-guide-{{ sid }} .fg-btn--primary:hover {
+  background: var(--fg-accent-hover);
+  border-color: var(--fg-accent-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--fg-gold-glow-hover);
+}
+#focus-guide-{{ sid }} .fg-btn:active {
+  transform: scale(0.98);
+}
+
+/* ═══════════════════════════════════════════════════════
+   HERO
+   ═══════════════════════════════════════════════════════ */
+#focus-guide-{{ sid }} .fg-hero {
+  background: linear-gradient(135deg, rgba(251,191,36,0.08) 0%, rgba(251,191,36,0.18) 50%, rgba(251,191,36,0.08) 100%);
+  border-radius: var(--nx-radius-lg);
+  padding: 36px 24px;
+  overflow: hidden;
+}
+@media (min-width: 990px) {
+  #focus-guide-{{ sid }} .fg-hero { padding: 48px 36px; }
+}
+#focus-guide-{{ sid }} .fg-hero-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+@media (min-width: 900px) {
+  #focus-guide-{{ sid }} .fg-hero-grid { grid-template-columns: 1.2fr 0.8fr; }
+}
+#focus-guide-{{ sid }} .fg-hero-title {
+  font-family: var(--fg-font-heading);
+  font-size: clamp(30px, 5vw, 52px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  color: var(--fg-text);
+  margin: 0 0 12px;
+}
+#focus-guide-{{ sid }} .fg-hero-sub {
+  color: var(--fg-muted);
+  font-size: clamp(16px, 2vw, 18px);
+  line-height: 1.6;
+  margin: 0 0 20px;
+}
+#focus-guide-{{ sid }} .fg-hero-actions {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+#focus-guide-{{ sid }} .fg-hero-note {
+  font-size: 14px;
+  color: var(--fg-muted);
+}
+#focus-guide-{{ sid }} .fg-hero-img-wrap {
+  border-radius: var(--fg-radius);
+  overflow: hidden;
+  box-shadow: var(--fg-shadow-hover);
+}
+#focus-guide-{{ sid }} .fg-hero-img-wrap img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+#focus-guide-{{ sid }} .fg-science-card {
+  background: rgba(255, 255, 255, 0.7);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  border: none;
+  border-radius: var(--fg-radius);
+  padding: 20px;
+  box-shadow: var(--fg-shadow-rest);
+}
+#focus-guide-{{ sid }} .fg-science-text {
+  font-size: 14px;
+  color: var(--fg-muted);
+  line-height: 1.6;
+  margin: 8px 0 0;
+}
+
+/* ═══════════════════════════════════════════════════════
+   EDUCATION GRID
+   ═══════════════════════════════════════════════════════ */
+#focus-guide-{{ sid }} .fg-edu-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+@media (min-width: 900px) {
+  #focus-guide-{{ sid }} .fg-edu-grid { grid-template-columns: 1.2fr 0.8fr; }
+}
+
+/* ═══════════════════════════════════════════════════════
+   PRODUCT STACK GRID — Sibling fade, image scale
+   ═══════════════════════════════════════════════════════ */
+#focus-guide-{{ sid }} .fg-stack-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+  margin-top: 16px;
+}
+@media (min-width: 900px) {
+  #focus-guide-{{ sid }} .fg-stack-grid { grid-template-columns: repeat(3, 1fr); }
+}
+#focus-guide-{{ sid }} .fg-product-card {
+  background: var(--fg-bg);
+  border: none;
+  border-radius: var(--fg-radius);
+  padding: 22px;
+  box-shadow: var(--fg-shadow-rest);
+  display: flex;
+  flex-direction: column;
+  transition: var(--fg-transition);
+}
+#focus-guide-{{ sid }} .fg-stack-grid:hover .fg-product-card {
+  opacity: 0.6;
+}
+#focus-guide-{{ sid }} .fg-stack-grid .fg-product-card:hover {
+  opacity: 1;
+  transform: translateY(-4px);
+  box-shadow: var(--fg-shadow-hover);
+}
+#focus-guide-{{ sid }} .fg-product-title {
+  font-family: var(--fg-font-heading);
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1.3;
+  margin: 4px 0 6px;
+  color: var(--fg-text);
+}
+#focus-guide-{{ sid }} .fg-product-desc {
+  font-size: 14px;
+  color: var(--fg-muted);
+  line-height: 1.6;
+  margin: 0 0 12px;
+}
+#focus-guide-{{ sid }} .fg-product-img {
+  border-radius: var(--fg-radius);
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+#focus-guide-{{ sid }} .fg-product-img img {
+  display: block;
+  width: 100%;
+  height: auto;
+  transition: var(--fg-transition);
+}
+#focus-guide-{{ sid }} .fg-product-card:hover .fg-product-img img {
+  transform: scale(1.03);
+}
+#focus-guide-{{ sid }} .fg-product-footer {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+#focus-guide-{{ sid }} .fg-product-ctas {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+#focus-guide-{{ sid }} .fg-product-meta {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--fg-text);
+}
+
+/* ═══════════════════════════════════════════════════════
+   BUNDLE CTA + DOSING TABLE
+   ═══════════════════════════════════════════════════════ */
+#focus-guide-{{ sid }} .fg-bundle-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+@media (min-width: 760px) {
+  #focus-guide-{{ sid }} .fg-bundle-grid { grid-template-columns: 1.2fr 0.8fr; }
+}
+#focus-guide-{{ sid }} .fg-bundle-main {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+#focus-guide-{{ sid }} .fg-bundle-img {
+  border-radius: var(--fg-radius);
+  overflow: hidden;
+  max-width: 360px;
+}
+#focus-guide-{{ sid }} .fg-bundle-img img {
+  display: block;
+  width: 100%;
+  height: auto;
+  transition: var(--fg-transition);
+}
+#focus-guide-{{ sid }} .fg-bundle-img:hover img {
+  transform: scale(1.03);
+}
+#focus-guide-{{ sid }} .fg-bundle-ctas {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+#focus-guide-{{ sid }} .fg-bundle-price {
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--fg-text);
+}
+#focus-guide-{{ sid }} .fg-kpi-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+#focus-guide-{{ sid }} .fg-kpi {
+  background: var(--fg-accent-glass);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  border: none;
+  border-radius: var(--nx-radius-md);
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--fg-text);
+}
+#focus-guide-{{ sid }} .fg-routine-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+#focus-guide-{{ sid }} .fg-routine-note {
+  font-size: 13px;
+  color: var(--fg-muted);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* ── Native responsive dosing table ── */
+#focus-guide-{{ sid }} .fg-table-wrap {
+  border-radius: var(--fg-radius);
+  overflow: hidden;
+  box-shadow: var(--fg-shadow-rest);
+}
+#focus-guide-{{ sid }} .fg-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+#focus-guide-{{ sid }} .fg-table thead {
+  background: var(--fg-bg-alt);
+}
+#focus-guide-{{ sid }} .fg-table th {
+  text-align: left;
+  padding: 10px 14px;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--fg-text);
+  line-height: 1.4;
+}
+#focus-guide-{{ sid }} .fg-table td {
+  padding: 12px 14px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--fg-text);
+  border-top: 1px solid rgba(0, 0, 0, 0.04);
+}
+#focus-guide-{{ sid }} .fg-table tbody tr {
+  transition: var(--fg-transition);
+}
+#focus-guide-{{ sid }} .fg-table tbody tr:hover {
+  background: var(--fg-accent-glass);
+}
+@media (max-width: 640px) {
+  #focus-guide-{{ sid }} .fg-table thead { display: none; }
+  #focus-guide-{{ sid }} .fg-table tbody tr {
+    display: block;
+    padding: 12px;
+    border-top: 1px solid rgba(0, 0, 0, 0.04);
+  }
+  #focus-guide-{{ sid }} .fg-table tbody tr:first-child { border-top: none; }
+  #focus-guide-{{ sid }} .fg-table td {
+    display: block;
+    padding: 3px 0;
+    border-top: none;
+  }
+  #focus-guide-{{ sid }} .fg-table td::before {
+    content: attr(data-label) ": ";
+    font-weight: 700;
+    color: var(--fg-text);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   TESTIMONIALS — Sibling fade, equal-height
+   ═══════════════════════════════════════════════════════ */
+#focus-guide-{{ sid }} .fg-testimonial-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 18px;
+  margin-top: 12px;
+}
+@media (min-width: 900px) {
+  #focus-guide-{{ sid }} .fg-testimonial-grid { grid-template-columns: repeat(3, 1fr); }
+}
+#focus-guide-{{ sid }} .fg-testimonial {
+  display: flex;
+  flex-direction: column;
+}
+#focus-guide-{{ sid }} .fg-testimonial-grid:hover .fg-testimonial {
+  opacity: 0.6;
+}
+#focus-guide-{{ sid }} .fg-testimonial-grid .fg-testimonial:hover {
+  opacity: 1;
+  transform: translateY(-4px);
+  box-shadow: var(--fg-shadow-hover);
+}
+#focus-guide-{{ sid }} .fg-testimonial p {
+  font-size: 15px;
+  line-height: 1.6;
+  margin: 0 0 10px;
+  flex: 1;
+}
+#focus-guide-{{ sid }} .fg-testimonial-author {
+  font-size: 13px;
+  color: var(--fg-muted);
+  margin-top: auto;
+}
+
+/* ═══════════════════════════════════════════════════════
+   TRUST BAR — Glass cards
+   ═══════════════════════════════════════════════════════ */
+#focus-guide-{{ sid }} .fg-trust-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  margin-top: 12px;
+}
+@media (min-width: 760px) {
+  #focus-guide-{{ sid }} .fg-trust-grid { grid-template-columns: repeat(3, 1fr); }
+}
+#focus-guide-{{ sid }} .fg-trust-item {
+  border: none;
+  border-radius: var(--fg-radius);
+  padding: 16px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  background: var(--fg-accent-glass);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  box-shadow: var(--fg-shadow-rest);
+  transition: var(--fg-transition);
+  line-height: 1.5;
+}
+#focus-guide-{{ sid }} .fg-trust-item:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--fg-shadow-hover);
+}
+#focus-guide-{{ sid }} .fg-trust-icon {
+  font-size: 22px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+#focus-guide-{{ sid }} .fg-trust-item strong {
+  color: var(--fg-text);
+}
+#focus-guide-{{ sid }} .fg-trust-detail {
+  display: block;
+  font-size: 14px;
+  color: var(--fg-muted);
+  margin-top: 2px;
+}
+
+/* ═══════════════════════════════════════════════════════
+   FAQ — Animated disclosure, chevron rotation
+   ═══════════════════════════════════════════════════════ */
+#focus-guide-{{ sid }} .fg-faq {
+  border: none;
+  border-radius: var(--nx-radius-md);
+  margin: 8px 0;
+  box-shadow: var(--fg-shadow-rest);
+  overflow: hidden;
+  background: var(--fg-bg);
+  transition: var(--fg-transition);
+}
+#focus-guide-{{ sid }} .fg-faq:hover {
+  box-shadow: var(--fg-shadow-hover);
+}
+#focus-guide-{{ sid }} .fg-faq-q {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 18px;
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--fg-text);
+  cursor: pointer;
+  list-style: none;
+  min-height: var(--touch-min, 44px);
+}
+#focus-guide-{{ sid }} .fg-faq-q::-webkit-details-marker { display: none; }
+#focus-guide-{{ sid }} .fg-faq-q::marker { content: ""; }
+
+#focus-guide-{{ sid }} .fg-faq-chevron {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  position: relative;
+  transition: transform 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+#focus-guide-{{ sid }} .fg-faq-chevron::before,
+#focus-guide-{{ sid }} .fg-faq-chevron::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 10px;
+  height: 2px;
+  background: var(--fg-muted);
+  border-radius: 1px;
+  transition: transform 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+#focus-guide-{{ sid }} .fg-faq-chevron::before {
+  left: 1px;
+  transform: translateY(-50%) rotate(45deg);
+}
+#focus-guide-{{ sid }} .fg-faq-chevron::after {
+  right: 1px;
+  transform: translateY(-50%) rotate(-45deg);
+}
+#focus-guide-{{ sid }} .fg-faq[open] .fg-faq-chevron::before {
+  transform: translateY(-50%) rotate(-45deg);
+}
+#focus-guide-{{ sid }} .fg-faq[open] .fg-faq-chevron::after {
+  transform: translateY(-50%) rotate(45deg);
+}
+#focus-guide-{{ sid }} .fg-faq-answer {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+#focus-guide-{{ sid }} .fg-faq[open] .fg-faq-answer {
+  grid-template-rows: 1fr;
+}
+#focus-guide-{{ sid }} .fg-faq-inner {
+  overflow: hidden;
+}
+#focus-guide-{{ sid }} .fg-faq-inner p {
+  padding: 0 18px 16px;
+  margin: 0;
+  color: var(--fg-muted);
+  line-height: 1.6;
+  font-size: 14px;
+}
+
+/* ═══════════════════════════════════════════════════════
+   FINAL CTA
+   ═══════════════════════════════════════════════════════ */
+#focus-guide-{{ sid }} .fg-final-cta {
+  background: var(--fg-bg-alt);
+  border-radius: var(--fg-radius);
+  padding: 28px 24px;
+  box-shadow: var(--fg-shadow-rest);
+}
+#focus-guide-{{ sid }} .fg-final-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+@media (min-width: 900px) {
+  #focus-guide-{{ sid }} .fg-final-grid { grid-template-columns: 1.2fr 0.8fr; align-items: center; }
+}
+#focus-guide-{{ sid }} .fg-legal {
+  font-size: 12px;
+  color: var(--fg-muted);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* ═══════════════════════════════════════════════════════
+   ACCESSIBILITY — focus-visible + reduced motion
+   ═══════════════════════════════════════════════════════ */
+#focus-guide-{{ sid }} :focus-visible {
+  outline: 2px solid var(--fg-accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #focus-guide-{{ sid }} *,
+  #focus-guide-{{ sid }} *::before,
+  #focus-guide-{{ sid }} *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+{%- endstyle -%}
+
+{% schema %}
+{
+  "name": "Focus & Attention Guide",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Hero"
+    },
+    { "type": "text", "id": "hero_title", "label": "Hero title", "default": "Sharper Focus, Naturally." },
+    { "type": "textarea", "id": "hero_subtitle", "label": "Hero subtitle", "default": "Understand the science behind distraction and build a simple, effective Focus Stack that helps you feel calm, clear, and in control." },
+    { "type": "image_picker", "id": "hero_image", "label": "Hero image (optional)" },
+    {
+      "type": "header",
+      "content": "Bundle / Stack Product"
+    },
+    { "type": "product", "id": "stack_product", "label": "Focus Stack bundle (product picker)" },
+    { "type": "text", "id": "stack_product_handle", "label": "Backup handle (if picker not available)", "default": "enhanced-focus-stack" },
+    { "type": "text", "id": "bundle_title", "label": "Bundle title", "default": "Enhanced Focus Stack" },
+    { "type": "range", "id": "subscribe_discount", "min": 0, "max": 30, "step": 1, "unit": "%", "label": "Subscribe & Save %", "default": 15 },
+    {
+      "type": "header",
+      "content": "Component Products"
+    },
+    { "type": "product", "id": "theanine_product", "label": "Caffeine + L-Theanine (product picker)" },
+    { "type": "text", "id": "theanine_handle", "label": "Backup handle", "default": "caffeine-l-theanine-capsules" },
+    { "type": "product", "id": "choline_product", "label": "Alpha-GPC (product picker)" },
+    { "type": "text", "id": "choline_handle", "label": "Backup handle", "default": "alpha-gpc" },
+    { "type": "product", "id": "lion_product", "label": "Lion's Mane (product picker)" },
+    { "type": "text", "id": "lion_handle", "label": "Backup handle", "default": "lion-mane-mushroom-capsules" },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "max_width",
+      "label": "Max width (px)",
+      "min": 800,
+      "max": 1400,
+      "step": 20,
+      "default": 1100
+    },
+    {
+      "type": "range",
+      "id": "padding_y",
+      "label": "Vertical padding (px)",
+      "min": 32,
+      "max": 120,
+      "step": 4,
+      "default": 56
+    },
+    {
+      "type": "header",
+      "content": "SEO"
+    },
+    {
+      "type": "text",
+      "id": "date_published",
+      "label": "Date published (YYYY-MM-DD)",
+      "default": "2025-06-01",
+      "info": "Used in Article JSON-LD structured data."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "faq",
+      "name": "FAQ",
+      "settings": [
+        { "type": "text", "id": "q", "label": "Question", "default": "Will this make me jittery?" },
+        { "type": "textarea", "id": "a", "label": "Answer", "default": "The L-Theanine + Caffeine combo is chosen specifically to smooth out stimulation. Start low and see how you feel." }
+      ]
+    }
+  ],
+  "max_blocks": 10,
+  "presets": [
+    { "name": "Focus & Attention Guide", "category": "Nootropix Guides" }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,137 @@
+<section id="ntx-faq-global" class="ntx-global">
+  <div class="ntx-global__wrap">
+    <h2 class="sr-only">Search FAQs</h2>
+    <input id="ntxGlobalSearch" type="search" class="ntx-input" placeholder="{{ section.settings.placeholder }}" aria-label="Search all FAQs">
+
+    <div class="ntx-global__chips">
+      <button class="ntx-chip ntx-chip--active" data-chip="*">All</button>
+      <button class="ntx-chip" data-chip="Dubai Delivery">Dubai Delivery</button>
+      <button class="ntx-chip" data-chip="UAE-wide Delivery">UAE Delivery</button>
+      <button class="ntx-chip" data-chip="DHL Delivery">International Delivery</button>
+      <button class="ntx-chip" data-chip="tag:4-hour">Dubai 4-Hour</button>
+      <button class="ntx-chip" data-chip="tag:next day">Dubai Next-Day</button>
+    </div>
+  </div>
+</section>
+
+<style>
+  .ntx-global {
+    max-width: var(--container-width-narrow); margin: 0 auto 16px; padding: 8px var(--page-gutter);
+    font-family: var(--font-body-family, sans-serif);
+  }
+
+  .ntx-global .ntx-input {
+    width: 100%; padding: 12px 16px; min-height: 44px; box-sizing: border-box;
+    border: 1.5px solid var(--nx-pill-border, #e5e7eb); border-radius: var(--nx-radius-md);
+    font-family: var(--font-body-family, sans-serif);
+    font-size: clamp(0.85rem, 1.3vw, 0.9375rem);
+    background: #fff; color: var(--nx-text, #0B0B0B);
+    transition: var(--transition-premium);
+    box-shadow: var(--shadow-xs);
+  }
+  .ntx-global .ntx-input:focus {
+    outline: none;
+    border-color: var(--nx-accent, #FBBF24);
+    box-shadow: var(--shadow-gold-focus);
+  }
+  .ntx-global .ntx-input:focus-visible {
+    outline: 2px solid var(--nx-accent, #FBBF24); outline-offset: 2px;
+  }
+  .ntx-global .ntx-input::placeholder { opacity: 0.5; }
+
+  .ntx-global__chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .ntx-global .ntx-chip {
+    border: 1.5px solid var(--nx-pill-border, #e5e7eb); border-radius: var(--nx-radius-pill);
+    padding: 8px 14px; min-height: 44px; box-sizing: border-box;
+    background: #fff; cursor: pointer;
+    font-size: clamp(0.8rem, 1.2vw, 0.875rem);
+    font-family: var(--font-body-family, sans-serif);
+    display: inline-flex; align-items: center;
+    color: var(--nx-text, #0B0B0B);
+    box-shadow: var(--shadow-xs);
+    transition: var(--transition-premium);
+  }
+  .ntx-global .ntx-chip:hover {
+    border-color: var(--nx-accent, #FBBF24);
+    box-shadow: var(--shadow-sm-hover);
+    transform: translateY(-1px);
+  }
+  .ntx-global .ntx-chip:active { transform: translateY(1px); }
+  .ntx-global .ntx-chip:focus-visible { outline: 2px solid var(--nx-accent, #FBBF24); outline-offset: 2px; }
+  .ntx-global .ntx-chip--active {
+    border-color: var(--nx-accent, #FBBF24); font-weight: 600;
+    background: rgba(251,191,36,0.08);
+    box-shadow: 0 0 0 1.5px var(--nx-accent, #FBBF24), 0 2px 12px rgba(251,191,36,0.18);
+  }
+  .ntx-global .ntx-chip--active:hover { filter: brightness(0.96); }
+
+  .sr-only { position: absolute; left: -9999px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ntx-global .ntx-input, .ntx-global .ntx-chip { transition: none; }
+    .ntx-global .ntx-chip:hover { transform: none; }
+  }
+</style>
+
+<script>
+(function(){
+  var search = document.getElementById('ntxGlobalSearch');
+  var chips = document.querySelectorAll('#ntx-faq-global .ntx-chip');
+  var items = document.querySelectorAll('.ntx-faq__item');
+
+  function activeChipKey(){
+    var a = document.querySelector('#ntx-faq-global .ntx-chip--active');
+    return a ? a.getAttribute('data-chip') : '*';
+  }
+
+  function matchesChip(el, key){
+    if (key === '*') return true;
+    if (!key.startsWith('tag:')) {
+      var cat = (el.getAttribute('data-category') || '').toLowerCase();
+      return cat.indexOf(key.toLowerCase()) !== -1;
+    }
+    var tag = key.replace('tag:','').toLowerCase();
+    var tags = (el.getAttribute('data-tags') || '').toLowerCase();
+    return tags.indexOf(tag) !== -1;
+  }
+
+  function matchesTerm(el, term){
+    if (!term) return true;
+    term = term.toLowerCase();
+    var q = (el.querySelector('.ntx-faq__question')?.textContent || '').toLowerCase();
+    var a = (el.querySelector('.ntx-faq__a')?.textContent || '').toLowerCase();
+    var t = (el.getAttribute('data-tags') || '').toLowerCase();
+    return q.indexOf(term) !== -1 || a.indexOf(term) !== -1 || t.indexOf(term) !== -1;
+  }
+
+  function applyFilters(){
+    var term = search ? search.value.trim() : '';
+    var key = activeChipKey();
+    items.forEach(function(el){
+      var ok = matchesChip(el, key) && matchesTerm(el, term);
+      el.style.display = ok ? '' : 'none';
+    });
+  }
+
+  if (search) search.addEventListener('input', applyFilters);
+  chips.forEach(function(c){
+    c.addEventListener('click', function(){
+      chips.forEach(function(x){ x.classList.remove('ntx-chip--active'); });
+      c.classList.add('ntx-chip--active');
+      applyFilters();
+    });
+  });
+
+  applyFilters();
+})();
+</script>
+
+{% schema %}
+{
+  "name": "FAQ – Global Controls",
+  "settings": [
+    { "type": "text", "id": "placeholder", "label": "Search placeholder", "default": "Search all FAQs… e.g., 4-hour, next-day, DHL, COD" }
+  ],
+  "presets": [{ "name": "FAQ – Global Controls" }]
+}
+{% endschema %}

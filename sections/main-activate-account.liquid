@@ -1,0 +1,135 @@
+{% assign accpass = 'customer.activate_account.password' | t %}
+{% assign accpasscf = 'customer.activate_account.password_confirm' | t %}
+
+{{ 'section-main-activate-account.css' | asset_url | stylesheet_tag }}
+
+<section {% render 'section-attr' %}>
+  <div class='main-activate-account'>
+    <xo-container class='main-activate-account__container'>
+      <xo-grid class='main-activate-account__grid'>
+        <div class='main-activate-account__content' style='--xs: 12; --md: 12; --lg: 4; --start-lg: 5'>
+          {%- form 'activate_customer_password' -%}
+            <xo-animate xo-cascade>
+              <div class='main-activate-account__item'>
+                <div class='main-activate-account__input'>
+                  {% render 'field-input', type: 'password', name: 'customer[password]', label: accpass, id: 'passwordField' %}
+                </div>
+                <div class='main-activate-account__icon'>
+                  <div class='main-activate-account__icon-hide'>
+                    {% render 'icon', name: 'eye-hide', size: '2.4rem' %}
+                  </div>
+                  <div class='main-activate-account__icon-open'>
+                    {% render 'icon', name: 'eye', size: '2.4rem' %}
+                  </div>
+                </div>
+              </div>
+            </xo-animate>
+            {% render 'space', spacing_dt: 8, spacing_mb: 8 %}
+            <xo-animate xo-cascade>
+              <div class='main-activate-account__item'>
+                <div class='main-activate-account__input'>
+                  {% render 'field-input', type: 'password', name: 'customer[password_confirmation]', label: accpasscf, id: 'passwordField' %}
+                </div>
+                <div class='main-activate-account__icon'>
+                  <div class='main-activate-account__icon-hide'>
+                    {% render 'icon', name: 'eye-hide', size: '2.4rem' %}
+                  </div>
+                  <div class='main-activate-account__icon-open'>
+                    {% render 'icon', name: 'eye', size: '2.4rem' %}
+                  </div>
+                </div>
+              </div>
+            </xo-animate>
+            {% render 'space', spacing_dt: 24, spacing_mb: 24 %}
+            <div class='main-activate-account__footer'>
+              <xo-animate xo-cascade>
+                <div class='main-activate-account__button main-activate-account__button--acvivate'>
+                  {% assign btn_submit = 'customer.activate_account.submit' | t %}
+                  {% render 'button', type: 'submit', text: btn_submit, size: 'md', block: true, style: 'primary' %}
+                </div>
+              </xo-animate>
+              {% render 'space', spacing_dt: 24, spacing_mb: 14 %}
+              <xo-animate xo-cascade>
+                <div class='main-activate-account__button main-activate-account__button--decline'>
+                  {% assign decline_invitation = 'customer.activate_account.cancel' | t %}
+                  {% render 'button', text: decline_invitation, link: routes.account_login_url, style: 'link' %}
+                </div>
+              </xo-animate>
+            </div>
+          {%- endform -%}
+        </div>
+      </xo-grid>
+    </xo-container>
+  </div>
+</section>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    console.log('DOM is loaded');
+    const togglePasswords = document.querySelectorAll('.main-activate-account__icon');
+    togglePasswords.forEach((togglePassword) => {
+      const passwordField = togglePassword.previousElementSibling.querySelector('input[type="password"]');
+      const eyeOpenPassword = togglePassword.querySelector('.main-activate-account__icon-open');
+      const eyeHidePassword = togglePassword.querySelector('.main-activate-account__icon-hide');
+
+      togglePassword.addEventListener('click', function () {
+        if (passwordField.type === 'password') {
+          passwordField.type = 'text';
+          eyeOpenPassword.classList.add('active');
+          eyeHidePassword.classList.add('active');
+        } else {
+          passwordField.type = 'password';
+          eyeHidePassword.classList.remove('active');
+          eyeOpenPassword.classList.remove('active');
+        }
+      });
+    });
+  });
+</script>
+
+{% schema %}
+{
+  "name": "t:sections.main_activate_account.name",
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Section color scheme"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color"
+    },
+    {
+      "type": "color_background",
+      "id": "background_gradient",
+      "label": "Background gradient"
+    },
+    {
+      "type": "number",
+      "id": "padding_top_desktop",
+      "label": "Padding top desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_desktop",
+      "label": "Padding bottom desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_top_mobile",
+      "label": "Padding top mobile",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_mobile",
+      "label": "Padding bottom mobile",
+      "default": 50
+    }
+  ]
+}
+{% endschema %}

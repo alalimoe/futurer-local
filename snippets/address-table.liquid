@@ -1,0 +1,98 @@
+{{ 'address-form.css' | asset_url | stylesheet_tag }}
+
+{% liquid
+  assign td_wrap_class = 'xo-address-table__td-wrap'
+  assign value_symbol_empty = '—'
+%}
+
+<div class="xo-address-table" data-customer-addresses>
+  <xo-animate xo-cascade>
+    <div class="xo-address-table__title">{{ 'customer.addresses.list_of_addresses' | t }}</div>
+  </xo-animate>
+  {% paginate customer.addresses by 10 %}
+    {%- if customer.addresses.size > 0 -%}
+      <xo-animate xo-cascade>
+        <table class="xo-address-table__table">
+          <thead>
+            <tr class="xo-address-table__head-row">
+              <th>{{ 'customer.addresses.name' | t }}</th>
+              <th>{{ 'customer.addresses.phone' | t }}</th>
+              <th>{{ 'customer.addresses.address' | t }}</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {%- for address in customer.addresses -%}
+              <tr class="xo-address-table__body-row">
+                <td>
+                  <div class="{{ td_wrap_class }}" data-th="{{ 'customer.addresses.name' | t }}">
+                    {% if address.first_name != blank or address.last_name != blank %}
+                      {{ address.first_name | capitalize }}
+                      {{ address.last_name | capitalize }}
+                    {% else %}
+                      {{ value_symbol_empty }}
+                    {% endif %}
+                  </div>
+                </td>
+                <td>
+                  <div class="{{ td_wrap_class }}" data-th="{{ 'customer.addresses.phone' | t }}">
+                    {% if address.phone != blank %}
+                      {{ address.phone }}
+                    {% else %}
+                      {{ value_symbol_empty }}
+                    {% endif %}
+                  </div>
+                </td>
+                <td>
+                  <div class="{{ td_wrap_class }}" data-th="{{ 'customer.addresses.address' | t }}">
+                    {% if address.company != blank or address.company != blank or address.company != blank %}
+                      {{ address.company }}
+                      {{ address.street }}
+                      {{ address.city | capitalize }}
+                    {% else %}
+                      {{ value_symbol_empty }}
+                    {% endif %}
+                  </div>
+                </td>
+                <td>
+                  <div class="{{ td_wrap_class | append: ' xo-address-table__td-wrap--action' }}" data-address data-th="{{ 'customer.addresses.action' | t }}">
+                    <div class="xo-address-table__action-wrap">
+                      {% comment %} delete address {% endcomment %}
+                      {% render 'delete-address', address: address %}
+                      {% comment %} edit address {% endcomment %}
+                      {% render 'edit-address', address: address %}
+                      {% comment %} set default address {% endcomment %}
+                      {% render 'set-default-address', address: address %}
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            {%- endfor -%}
+          </tbody>
+        </table>
+      </xo-animate>
+      <div class="xo-address-table__footer">
+        {% render 'add-new-address', customer: customer, button_style: 'link' %}
+        <div class="xo-address-table__paginate">
+          {% render 'pagination', paginate: paginate %}
+        </div>
+      </div>
+    {%- else -%}
+      <xo-animate xo-cascade>
+        {% render 'address-empty', customer: customer %}
+      </xo-animate>
+    {%- endif -%}
+  {% endpaginate %}
+</div>
+
+<script>
+  window.onload = () => {
+    typeof CustomerAddresses !== 'undefined' && new CustomerAddresses();
+  };
+  const buttonSetDefault = (e) => {
+    const formId = e.target.name;
+    const form = document.getElementById(`address_form_${formId}`);
+    form.querySelector(`#address_default_address_${formId}`).checked = true;
+    form.submit();
+  };
+</script>

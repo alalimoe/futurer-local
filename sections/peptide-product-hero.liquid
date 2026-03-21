@@ -1,0 +1,812 @@
+{% comment %}
+───────────────────────────────────────────────
+SECTION: Peptide Product Hero / Overview (Customizable)
+───────────────────────────────────────────────
+{% endcomment %}
+
+{%- liquid
+  assign subtitle_mf         = product.metafields.npx.subtitle
+  assign benefits_mf         = product.metafields.npx.benefits
+
+  # PDP — benefits
+  assign benefit1            = product.metafields.pdp.benefit_1
+  assign benefit2            = product.metafields.pdp.benefit_2
+  assign benefit3            = product.metafields.pdp.benefit_3
+
+  # PDP — new headline + intro (override legacy)
+  assign pdp_headline_mf     = product.metafields.pdp.headline
+  assign pdp_intro_mf        = product.metafields.pdp.first_paragraph
+
+  # PDP — logistics + reassurance
+  assign microcopy_price_mf  = product.metafields.pdp.microcopy_price
+  assign ship_promise_mf     = product.metafields.pdp.shipping_promise
+  assign return_promise_mf   = product.metafields.pdp.return_promise
+  assign delivery_promise_mf = product.metafields.pdp.delivery_promise
+  if ship_promise_mf == blank and delivery_promise_mf
+    assign ship_promise_mf = delivery_promise_mf
+  endif
+
+  # PDP — verification + disclaimer
+  assign pdp_assay_mf        = product.metafields.pdp.assay_percent
+  assign pdp_impurity_mf     = product.metafields.pdp.impurity_max
+  assign pdp_lab_mf          = product.metafields.pdp.lab_name
+  assign pdp_disclaimer_mf   = product.metafields.pdp.disclaimer
+
+  # Legacy highlight + batch copy
+  assign highlight_mf        = product.metafields.pep.pdp_highlight
+  assign batch_microcopy_mf  = product.metafields.pep.batch_microcopy
+
+  assign shipping_note_mf    = product.metafields.peptide.shipping_note
+
+  # COA (prefer pdp.coa_url, then metaobject files)
+  assign pdp_coa_override    = product.metafields.pdp.coa_url
+  assign coa_pdf_mf          = product.metafields.pep.coa_pdf
+  assign coa_files_mf        = product.metafields.peptide.coa_file
+
+
+  assign selected_variant    = product.selected_or_first_available_variant
+
+  # Resolve COA URL (priority: pdp.coa_url → pep.coa_pdf → peptide.coa_file[0])
+  assign coa_url = nil
+  if pdp_coa_override and pdp_coa_override != blank
+    assign coa_url = pdp_coa_override
+  elsif coa_pdf_mf and coa_pdf_mf.value and coa_pdf_mf.value.url
+    assign coa_url = coa_pdf_mf.value.url
+  elsif coa_files_mf and coa_files_mf.value and coa_files_mf.value.size > 0
+    assign first_file = coa_files_mf.value.first
+    if first_file and first_file.url
+      assign coa_url = first_file.url
+    endif
+  endif
+
+  # Resolve HPLC/MS images (optional)
+  assign pep_ref = product.metafields.pep.reference
+  assign pep = nil
+  if pep_ref and pep_ref.value
+    assign pep = pep_ref.value
+  endif
+  assign hplc_mf = product.metafields.pep.hplc_image
+  assign ms_mf   = product.metafields.pep.ms_image
+
+  assign hplc_img = nil
+  if hplc_mf and hplc_mf.value
+    assign hplc_img = hplc_mf.value
+  elsif pep and pep.hplc_image
+    assign hplc_img = pep.hplc_image
+  endif
+
+  assign ms_img = nil
+  if ms_mf and ms_mf.value
+    assign ms_img = ms_mf.value
+  elsif pep and pep.ms_image
+    assign ms_img = pep.ms_image
+  endif
+
+  # Robust Formula / MW fallbacks (match snippet logic)
+  assign formula_display = nil
+  if product.metafields.peptide.molecular_formula
+    assign formula_display = product.metafields.peptide.molecular_formula
+  elsif pep and pep.molecular_formula
+    assign formula_display = pep.molecular_formula
+  elsif product.metafields.pep.formula
+    assign formula_display = product.metafields.pep.formula
+  endif
+
+  assign mw_display = nil
+  if product.metafields.peptide.molecular_weight
+    assign mw_display = product.metafields.peptide.molecular_weight
+  elsif pep and pep.molecular_weight__g_mol
+    assign mw_display = pep.molecular_weight__g_mol
+  elsif pep and pep.molecular_weight_g_mol
+    assign mw_display = pep.molecular_weight_g_mol
+  elsif product.metafields.pep.mw
+    assign mw_display = product.metafields.pep.mw
+  endif
+
+  # Grid ratio mapping
+  assign left = '1.15fr'
+  assign right = '0.85fr'
+  case section.settings.columns_ratio
+    when '50_50'  then assign left = '1fr'    assign right = '1fr'
+    when '55_45'  then assign left = '1.1fr'  assign right = '.9fr'
+    when '60_40'  then assign left = '1.2fr'  assign right = '.8fr'
+    when '65_35'  then assign left = '1.3fr'  assign right = '.7fr'
+  endcase
+-%}
+
+<section id="peptide-hero" class="pp-wrap">
+  <style>
+    /* Hide price coming from the snippet to avoid double price */
+    .pp-info-card .pep-spec-card__price { display:none !important; }
+    /* Force Formula & M.W. to be stacked vertically */
+    .pp-meta-kv{ display:grid; grid-template-columns: 1fr !important; gap: 6px; }
+
+    /* ================= Variables ================= */
+    #peptide-hero{
+      --pp-maxw: {{ section.settings.max_width | default: 1280 }}px;
+      --pp-pad-top: {{ section.settings.padding_top | default: 24 }}px;
+      --pp-pad-bot: {{ section.settings.padding_bottom | default: 24 }}px;
+      --pp-gap: {{ section.settings.grid_gap | default: 48 }}px;
+      --pp-accent: {{ section.settings.accent_color | default: '#FBBF24' }};
+      --pp-text: {{ section.settings.text_color | default: '#111111' }};
+      --pp-muted: {{ section.settings.muted_color | default: '#6B7280' }};
+      --pp-border: {{ section.settings.border_color | default: '#E7E9ED' }};
+      --pp-frame-bg: {{ section.settings.frame_bg | default: '#FFFFFF' }};
+      --pp-frame-radius: {{ section.settings.frame_radius | default: 16 }}px;
+      --pp-frame-pad: {{ section.settings.frame_padding | default: 12 }}px;
+      --pp-thumb-m: {{ section.settings.thumb_size_mobile | default: 72 }}px;
+      --pp-thumb-d: {{ section.settings.thumb_size_desktop | default: 82 }}px;
+      --pp-thumb-radius: {{ section.settings.thumb_radius | default: 10 }}px;
+      --pp-title-size: {{ section.settings.title_size | default: 32 }}px;
+      --pp-atc-radius: {{ section.settings.atc_radius | default: 10 }}px;
+      --pp-atc-bg: {{ section.settings.atc_bg | default: '#FBBF24' }};
+      --pp-atc-text: {{ section.settings.atc_text | default: '#000000' }};
+    }
+
+    /* ================= Layout ================= */
+    .pp-container{max-width:var(--pp-maxw);margin:0 auto;padding:var(--pp-pad-top) var(--page-gutter) var(--pp-pad-bot);font-family:var(--font-body-family,sans-serif)}
+    .pp-grid{display:grid;grid-template-columns: {{ left }} {{ right }}; gap: var(--pp-gap); align-items:start}
+    @media(max-width:1024px){.pp-grid{grid-template-columns:1fr !important;gap:32px}}
+
+    /* ================= Breadcrumbs ================= */
+    .pp-breadcrumbs{font-size:clamp(0.8rem,1.2vw,0.875rem);color:var(--pp-muted);margin-bottom:14px;font-family:var(--font-body-family,sans-serif)}
+    .pp-breadcrumbs a{color:var(--pp-muted);text-decoration:none;transition:color .2s ease}
+    .pp-breadcrumbs a:hover{color:var(--pp-text)}
+    .pp-breadcrumbs a:focus-visible{outline:2px solid var(--pp-accent);outline-offset:2px;border-radius:4px}
+
+    /* ================= Gallery ================= */
+    .pp-gallery{display:flex;flex-direction:column;gap:12px;min-width:0}
+    .pp-main-frame{background:var(--pp-frame-bg);border:none;border-radius:var(--pp-frame-radius);padding:var(--pp-frame-pad);box-shadow:var(--shadow-sm)}
+    .pp-main-img{display:block;width:100%;height:auto;object-fit:contain}
+    .pp-frame{display:none}
+    .pp-frame.is-active{display:block}
+    .pp-thumbs{display:flex;flex-wrap:wrap;gap:10px}
+    .pp-thumb{flex:0 0 auto;width:var(--pp-thumb-m);height:var(--pp-thumb-m);border:1.5px solid var(--pp-border);border-radius:var(--pp-thumb-radius);overflow:hidden;cursor:pointer;background:var(--color-surface-primary);transition:var(--transition-premium);box-shadow:var(--shadow-xs)}
+    .pp-thumb:focus-visible{outline:2px solid var(--pp-accent);outline-offset:2px}
+    @media(min-width:1024px){ .pp-thumb{width:var(--pp-thumb-d);height:var(--pp-thumb-d)} }
+    .pp-thumb-img{width:100%;height:100%;object-fit:cover;display:block}
+    .pp-thumb:hover{border-color:var(--pp-accent);box-shadow:0 0 0 2px color-mix(in srgb, var(--pp-accent) 24%, transparent) inset}
+    .pp-thumb.is-selected{border-color:var(--pp-accent);box-shadow:0 0 0 3px color-mix(in srgb, var(--pp-accent) 32%, transparent) inset}
+
+    /* ================= Right column card ================= */
+    .pp-info{display:flex;flex-direction:column;gap:14px;min-width:0}
+    .pp-info-card{
+      border:none;
+      border-radius:var(--nx-radius);
+      background:var(--color-surface-primary);
+      box-shadow:var(--shadow-sm);
+      padding:16px;
+    }
+    .pp-info-card + *{ margin-top:12px; }
+    .pp-info-card * { font-size:14px; line-height:1.55; }
+    .pp-info-card { --pp-strong:600; }
+
+    /* Blend peptide meta header + shrink REF/SKU */
+    .pp-info-card .pep-spec-card{ border:none !important; background:transparent !important; box-shadow:none !important; padding:0 !important; }
+    .pp-info-card .pep-spec-card__name{ font-weight:var(--pp-strong); }
+    .pp-info-card .pep-spec-card__brand,
+    .pp-info-card .pep-spec-card__subtitle{ color:var(--pp-muted); }
+
+    /* ====== SKU/REF line — 12px regular ====== */
+    .pp-info-card .pep-spec-card__ref{
+      font-size:12px !important;
+      font-weight:400 !important;
+      letter-spacing:.02em;
+      color:var(--pp-muted);
+      display:inline-flex;
+      gap:8px;
+      align-items:center;
+    }
+
+    /* ===== Hide the snippet's original meta so we can re-render it at the bottom ===== */
+    .pp-info-card .pep-spec-card__kv,
+    .pp-info-card .pep-spec-card__badges,
+    .pp-info-card .pep-spec-card__note{
+      display:none !important;
+    }
+
+    /* Title/Highlight/Chips */
+    .pp-title{line-height:1.2;margin:0 0 6px;font-size:clamp(1.25rem,2.5vw,var(--pp-title-size));color:var(--pp-text);font-family:var(--font-heading-family,sans-serif);font-weight:800;letter-spacing:-0.025em}
+    .pp-sub{color:var(--pp-muted);margin:0 0 8px;font-size:clamp(0.85rem,1.3vw,0.9375rem)}
+    .pp-hl{display:flex;gap:10px;align-items:flex-start;margin:6px 0 8px;background:var(--color-warning-bg);border-radius:var(--nx-radius-md);padding:10px 12px;border:1px solid var(--pp-border)}
+    .pp-hl .dot{width:8px;height:8px;border-radius:50%;margin-top:6px;background:var(--pp-accent)}
+    .pp-chips{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 10px;padding:0;list-style:none}
+    .pp-chips li{border:1.5px solid var(--pp-border);border-radius:var(--nx-radius-pill);padding:8px 14px;background:var(--color-surface-primary);color:var(--pp-text);font-size:clamp(0.8rem,1.2vw,0.875rem);box-shadow:var(--shadow-xs);transition:var(--transition-premium)}
+    .pp-chips li:hover{border-color:var(--pp-accent);box-shadow:var(--shadow-sm-hover);transform:translateY(-1px)}
+
+    /* ----- Match older pill style for bottom chips ----- */
+    .pp-meta-chips{ gap:10px; }
+    .pp-meta-chips .pp-chip{ border:1px solid var(--pp-border); background:var(--color-surface-primary); border-radius:var(--nx-radius-md); padding:6px 12px; font-weight:500; line-height:1.4; }
+    .pp-meta-chips .pp-chip:nth-child(1){ padding:2px 8px; border:2px solid var(--pp-accent); background:var(--color-warning-bg); border-radius:var(--nx-radius-sm); font-weight:500; }
+    .pp-meta-chips .pp-chip:nth-child(2){ border:2px solid var(--pp-accent); background:var(--color-surface-primary); }
+    .pp-meta-chips .pp-chip:nth-child(3){ background:var(--color-surface-secondary); border-color:var(--pp-border); }
+    .pp-meta-chips .pp-chip:hover{ background:var(--color-warning-bg); }
+
+    /* Price & buy */
+    .pp-price-row{display:flex;align-items:center;gap:10px;margin:10px 0 6px}
+    .pp-price{font-weight:var(--pp-strong);color:var(--pp-text);font-size:clamp(1rem,1.5vw,1.125rem);font-family:var(--font-heading-family,sans-serif)}
+    .pp-compare{color:var(--color-text-tertiary);text-decoration:line-through}
+
+    .pp-payments{margin:6px 0 8px;opacity:.95}
+
+    .pp-buy{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:6px}
+    .pp-qty{display:flex;align-items:center;border:1.5px solid var(--pp-border);border-radius:var(--nx-radius-md);overflow:hidden;background:var(--color-surface-primary);box-shadow:var(--shadow-xs)}
+    .pp-qty-btn{width:42px;min-height:44px;border:0;background:transparent;cursor:pointer;font-size:16px;color:var(--pp-text);transition:background .2s ease}
+    .pp-qty-btn:hover{background:rgba(0,0,0,0.03)}
+    .pp-qty-btn:focus-visible{outline:2px solid var(--pp-accent);outline-offset:-2px}
+    .pp-qty-input{width:58px;min-height:44px;border:0;text-align:center;font-weight:var(--pp-strong);color:var(--pp-text);font-family:var(--font-body-family,sans-serif)}
+    .pp-qty-input:focus-visible{outline:2px solid var(--pp-accent);outline-offset:-2px}
+    .pp-atc{flex:1;min-height:48px;border:0;border-radius:var(--pp-atc-radius);background:var(--pp-atc-bg);color:var(--pp-atc-text);font-weight:var(--pp-strong);cursor:pointer;font-family:var(--font-body-family,sans-serif);font-size:clamp(0.85rem,1.2vw,0.9375rem);box-shadow:var(--shadow-sm);transition:var(--transition-premium)}
+    .pp-atc:hover:not([disabled]){transform:translateY(-1px);box-shadow:var(--shadow-md-hover)}
+    .pp-atc:active:not([disabled]){transform:scale(0.97)}
+    .pp-atc:focus-visible{outline:2px solid var(--pp-accent);outline-offset:2px}
+    .pp-atc[disabled]{background:var(--color-border-default);color:var(--color-text-tertiary);cursor:not-allowed;box-shadow:none}
+
+    .pp-microcopy{margin-top:6px;list-style:none;padding:0;color:var(--pp-muted);font-size:clamp(0.8rem,1.1vw,0.85rem)}
+
+    /* QC assets inside card */
+    .pp-qc{margin-top:10px}
+    .pp-qc .pp-qc-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:8px}
+    .pp-qc a.pp-coa-btn{display:inline-flex;align-items:center;min-height:44px;margin-top:2px;text-decoration:none;border:1.5px dashed var(--pp-border);padding:6px 12px;border-radius:var(--nx-radius-md);color:var(--pp-text);font-weight:600;transition:var(--transition-premium);box-shadow:var(--shadow-xs)}
+    .pp-qc a.pp-coa-btn:hover{border-color:var(--pp-accent);box-shadow:var(--shadow-sm-hover);transform:translateY(-1px)}
+    .pp-qc a.pp-coa-btn:focus-visible{outline:2px solid var(--pp-accent);outline-offset:2px}
+    .pp-qc-img{width:100%;height:auto;border:none;border-radius:var(--nx-radius-md);background:var(--color-surface-primary);box-shadow:var(--shadow-sm)}
+
+    /* ====== Bottom meta stack — ALL 12px to match SKU ====== */
+    .pp-meta-bottom{margin-top:12px}
+    .pp-meta-bottom *{font-size:12px !important}
+    .pp-meta-kv{display:grid;grid-template-columns:1fr;gap:6px}
+    @media(min-width:900px){ .pp-meta-kv{grid-template-columns:1fr 1fr} }
+    .pp-meta-row{display:flex;gap:6px;align-items:baseline;color:var(--pp-text)}
+    .pp-meta-row .label{font-weight:500;color:var(--pp-text)}
+    .pp-meta-row .value{font-weight:400;color:var(--pp-text)}
+
+    .pp-meta-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+    .pp-chip{padding:5px 10px;border-radius:var(--nx-radius-pill);border:1.5px solid var(--pp-border);background:var(--color-surface-primary);font-weight:400;color:var(--pp-text);text-decoration:none;transition:var(--transition-premium);box-shadow:var(--shadow-xs)}
+    .pp-chip:hover{background:var(--color-warning-bg);border-color:var(--pp-accent);transform:translateY(-1px);box-shadow:var(--shadow-sm-hover)}
+    .pp-chip:focus-visible{outline:2px solid var(--pp-accent);outline-offset:2px}
+    .pp-meta-disclaimer{margin-top:8px;color:var(--pp-muted)}
+
+    /* Verified COA link styling + center-out underline */
+    .pp-meta-coa{ margin-top:6px; display:flex; align-items:center; gap:8px; }
+    .pp-meta-coa a{ text-decoration:none; font-weight:600; color:var(--pp-text); position:relative; }
+    .pp-meta-coa a:focus-visible{outline:2px solid var(--pp-accent);outline-offset:2px;border-radius:4px}
+    .pp-meta-coa a::after{
+      content:""; position:absolute; left:50%; right:50%; bottom:-2px; height:1px; background: currentColor; transition:left .18s ease,right .18s ease;
+    }
+    .pp-meta-coa a:hover::after{ left:0; right:0; }
+
+    /* RUO footer removed */
+    .pp-card-footer{display:none !important}
+
+    /* ---------- Hard stop: prevent any horizontal overflow on mobile ---------- */
+    @media (max-width: 540px){
+      *, *::before, *::after { box-sizing: border-box; }
+      .pp-container { padding-left: var(--page-gutter); padding-right: var(--page-gutter); max-width: 100vw; overflow-x: hidden; }
+      .pp-wrap, .pp-grid, .pp-info-card { width: 100%; max-width: 100%; box-sizing: border-box; overflow-x: hidden; }
+      .pp-grid { gap: 24px !important; }
+      .pp-info-card { padding: 12px; }
+      .pp-info-card img, .pp-info-card video, .pp-info-card canvas, .pp-info-card iframe, .pp-info-card svg, .pp-info-card .pp-qc-img { max-width: 100% !important; width: 100% !important; height: auto; box-sizing: border-box; }
+      .pp-payments, .pp-info-card .shopify-payment-button, .pp-info-card .shopify-payment-button__button, .pp-info-card .shopify-payment-button__more-options { max-width: 100% !important; width: 100% !important; box-sizing: border-box; overflow: hidden; }
+      .pp-info-card .shopify-payment-button__button--unbranded { width: 100% !important; }
+      .pp-thumbs { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-left: -16px; margin-right: -16px; padding-left: 16px; padding-right: 16px; }
+      .pp-thumbs .pp-thumb { flex: 0 0 auto; }
+      .pp-buy { gap: 8px; flex-wrap: nowrap; }
+      .pp-qty { flex-shrink: 0; }
+      .pp-qty-btn, .pp-qty-input { height: 40px; }
+      .pp-atc { min-width: 0; }
+    }
+
+    /* ============== Subtle kinetic cues (respect reduced motion) ============== */
+    @media (prefers-reduced-motion: no-preference) {
+      /* COA verify badge pulse */
+      .pp-verify-badge { transform: scale(1); opacity: 1; }
+      .pp-verify-badge.is-in { animation: ppPulse 520ms cubic-bezier(0.22,1,0.36,1) 1; }
+      @keyframes ppPulse { 0%{transform:scale(.96);opacity:.85} 60%{transform:scale(1.02)} 100%{transform:scale(1);opacity:1} }
+
+      /* Formula character stagger */
+      .pp-mw span { opacity: 0; display:inline-block; transform: translateY(2px); }
+      .pp-mw.is-in span { animation: ppFadeStagger 320ms ease-out forwards; }
+      @keyframes ppFadeStagger { to { opacity: 1; transform:none } }
+
+      /* Purity sheen sweep (first viewport entry) */
+      .pp-chip--purity { position:relative; overflow:hidden; }
+      .pp-chip--purity::after{
+        content:""; position:absolute; inset:0 -40%;
+        transform:translateX(-120%); background:linear-gradient(90deg, transparent, rgba(255,255,255,.35), transparent);
+      }
+      .pp-chip--purity.is-in::after{ animation: ppSheen 700ms cubic-bezier(0.22,1,0.36,1) 1; }
+      @keyframes ppSheen { to { transform:translateX(120%); } }
+
+      /* Microcopy rise */
+      .pp-micro { opacity:0; transform:translateY(14px); }
+      .pp-micro.is-in { animation: ppRise 260ms cubic-bezier(0.22,1,0.36,1) forwards; }
+      @keyframes ppRise { to { opacity:1; transform:none; } }
+    }
+
+    /* Small icon chip for verify */
+    .pp-verify-badge{
+      display:inline-flex; align-items:center; gap:6px;
+      padding:2px 8px; border:1px solid var(--pp-border); border-radius:var(--nx-radius-pill); background:var(--color-warning-bg);
+      font-size:11px; font-weight:600; color:var(--color-success-text);
+    }
+    .pp-verify-badge svg{ width:12px; height:12px; display:block; }
+
+    @media (prefers-reduced-motion: reduce){
+      .pp-thumb,.pp-chips li,.pp-chip,.pp-atc,.pp-qc a.pp-coa-btn{transition:none}
+      .pp-chips li:hover,.pp-chip:hover,.pp-qc a.pp-coa-btn:hover,.pp-atc:hover:not([disabled]){transform:none}
+    }
+  </style>
+
+  <div class="pp-container">
+    {% if section.settings.show_breadcrumbs %}
+      <nav class="pp-breadcrumbs" aria-label="Breadcrumb">
+        <a href="{{ routes.root_url }}">Home</a><span class="sep">/</span>
+        {% assign bc_collection = product.collections | first %}
+        {% if bc_collection %}<a href="{{ bc_collection.url }}">{{ bc_collection.title }}</a>{% else %}<a href="{{ routes.all_products_collection_url }}">Shop</a>{% endif %}
+        <span class="sep">/</span><span aria-current="page">{{ product.title }}</span>
+      </nav>
+    {% endif %}
+
+    <div class="pp-grid">
+      <!-- LEFT: Gallery -->
+      <div class="pp-gallery">
+        {% if product.media.size > 0 %}
+          <div class="pp-main-frame" aria-label="Product media">
+            {% for m in product.media %}
+              <div class="pp-frame {% if forloop.first %}is-active{% endif %}" data-media-id="{{ m.id }}">
+                {%- assign alt_text = m.alt | default: m.preview_image.alt | default: product.title -%}
+                {% case m.media_type %}
+                  {% when 'image' %}
+                    {{ m.preview_image | image_url: width: 1500 | image_tag: class: 'pp-main-img', loading: 'eager', alt: alt_text }}
+                  {% else %}
+                    {{ m | media_tag: image_size: '1500x', class: 'pp-main-img', loading: 'eager' }}
+                {% endcase %}
+              </div>
+            {% endfor %}
+          </div>
+          {% if section.settings.show_thumbs %}
+            <div class="pp-thumbs" role="list">
+              {% for m in product.media %}
+                <button type="button"
+                        class="pp-thumb {% if forloop.first %}is-selected{% endif %}"
+                        data-target-media="{{ m.id }}"
+                        aria-label="Thumbnail {{ forloop.index }}"
+                        aria-current="{% if forloop.first %}true{% else %}false{% endif %}">
+                  {%- assign thumb_alt = m.alt | default: m.preview_image.alt | default: product.title -%}
+                  {% case m.media_type %}
+                    {% when 'image' %}
+                      {{ m.preview_image | image_url: width: 240 | image_tag: class: 'pp-thumb-img', loading: 'lazy', alt: thumb_alt }}
+                    {% else %}
+                      {{ m | media_tag: image_size: '240x', class: 'pp-thumb-img', loading: 'lazy' }}
+                  {% endcase %}
+                </button>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% else %}
+          <div class="pp-empty" style="border:1px dashed var(--pp-border);border-radius:var(--pp-frame-radius);padding:12px">No media available.</div>
+        {% endif %}
+      </div>
+
+      <!-- RIGHT: Info (entire column as a card) -->
+      <div class="pp-info">
+        <div class="pp-info-card">
+
+          {% render 'peptide-meta-card' %}
+
+          {% if pdp_headline_mf %}
+  <p class="pp-sub">{{ pdp_headline_mf }}</p>
+{% elsif subtitle_mf %}
+  <p class="pp-sub">{{ subtitle_mf | metafield_tag }}</p>
+{% endif %}
+
+
+          {% if pdp_intro_mf %}
+  <div class="pp-hl">
+    <span class="dot" aria-hidden="true"></span>
+    <span class="pp-hl-text">{{ pdp_intro_mf | newline_to_br }}</span>
+  </div>
+{% elsif highlight_mf %}
+  <div class="pp-hl">
+    <span class="dot" aria-hidden="true"></span>
+    <span class="pp-hl-text">{{ highlight_mf | metafield_tag }}</span>
+  </div>
+{% endif %}
+
+
+          {% if section.settings.show_chips %}
+            <ul class="pp-chips">
+              {% assign chips_out = false %}
+              {% if benefits_mf and benefits_mf.value and benefits_mf.value.size > 0 %}
+                {% for b in benefits_mf.value %}
+                  {% assign t = b | strip %}{% if t != blank %}{% assign chips_out = true %}<li>{{ t }}</li>{% endif %}
+                {% endfor %}
+              {% endif %}
+              {% if chips_out == false %}
+                {% if benefit1 %}<li>{{ benefit1 }}</li>{% endif %}
+                {% if benefit2 %}<li>{{ benefit2 }}</li>{% endif %}
+                {% if benefit3 %}<li>{{ benefit3 }}</li>{% endif %}
+              {% endif %}
+            </ul>
+          {% endif %}
+
+          {%- form 'product', product, id: 'peptide-form', class: 'pp-form' -%}
+            {% unless product.has_only_default_variant %}
+              <div class="pp-options">
+                {% for opt in product.options_with_values %}
+                  <div class="pp-opt-block" data-opt-index="{{ forloop.index0 }}">
+                    <div class="pp-opt-label">{{ opt.name }}</div>
+                    <div class="pp-pills" role="radiogroup" aria-label="{{ opt.name }}">
+                      {% for value in opt.values %}
+                        {% assign is_sel = false %}
+                        {% if opt.selected_value == value %}{% assign is_sel = true %}{% endif %}
+                        <button type="button"
+                                class="pp-pill {% if is_sel %}is-active{% endif %}"
+                                data-option="{{ opt.name | escape }}"
+                                data-value="{{ value | escape }}"
+                                aria-pressed="{% if is_sel %}true{% else %}false{% endif %}">
+                          {{ value }}
+                        </button>
+                      {% endfor %}
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+              <div class="pp-hidden-selects">
+                {% for option in product.options_with_values %}
+                  <select name="options[{{ option.name }}]" aria-label="{{ option.name }}">
+                    {% for value in option.values %}
+                      <option {% if option.selected_value == value %}selected{% endif %} value="{{ value | escape }}">{{ value }}</option>
+                    {% endfor %}
+                  </select>
+                {% endfor %}
+              </div>
+            {% endunless %}
+
+            <input type="hidden" name="id" value="{{ selected_variant.id }}">
+
+            <!-- Price -->
+            <div class="pp-price-row">
+              <div class="pp-price" data-price>{{ selected_variant.price | money }}</div>
+              {% if selected_variant.compare_at_price > selected_variant.price %}
+                <s class="pp-compare" data-compare>{{ selected_variant.compare_at_price | money }}</s>
+              {% endif %}
+            </div>
+
+            <!-- Tabby/Tamara under price -->
+            <div class="pp-payments" style="margin:4px 0 0">
+              {% render 'tabby-installments' %}
+            </div>
+
+            {% if section.settings.show_price_per_mg %}
+              <div class="pp-per-unit" data-per-unit style="display:none;"></div>
+            {% endif %}
+
+            <!-- ATC -->
+            <div class="pp-buy">
+              <div class="pp-qty">
+                <button type="button" class="pp-qty-btn" data-qty="dec" aria-label="Decrease">−</button>
+                <input class="pp-qty-input" type="number" name="quantity" value="1" min="1" step="1" inputmode="numeric" pattern="[0-9]*" aria-label="Quantity">
+                <button type="button" class="pp-qty-btn" data-qty="inc" aria-label="Increase">+</button>
+              </div>
+              <button type="submit" class="pp-atc" {% unless selected_variant.available %}disabled{% endunless %}>
+                {% if selected_variant.available %}{{ section.settings.atc_label | default: 'Add to Cart' }}{% else %}Sold Out{% endif %}
+              </button>
+            </div>
+
+            {% if section.settings.show_buy_now %}
+              <div class="pp-buy-now">{{ form | payment_button }}</div>
+            {% endif %}
+
+            <!-- Tamara AFTER ATC -->
+            <div class="pp-payments" style="margin-top:8px">
+              {% render 'tamara' %}
+            </div>
+
+            {% if section.settings.enable_microcopy %}
+              <ul class="pp-microcopy pp-micro">
+                {% if batch_microcopy_mf %}<li>{{ batch_microcopy_mf | metafield_tag }}</li>{% endif %}
+                {% if microcopy_price_mf %}<li>{{ microcopy_price_mf }}</li>{% endif %}
+                {% if ship_promise_mf %}<li>{{ ship_promise_mf }}</li>{% endif %}
+                {% if return_promise_mf %}<li>{{ return_promise_mf }}</li>{% endif %}
+                {% if shipping_note_mf %}<li>{{ shipping_note_mf | metafield_tag }}</li>{% endif %}
+                {% if section.settings.microcopy_fallback != blank %}
+                  {% assign lines = section.settings.microcopy_fallback | split: '\n' %}
+                  {% for line in lines %}{% assign t = line | strip %}{% if t != blank %}<li>{{ t }}</li>{% endif %}{% endfor %}
+                {% endif %}
+              </ul>
+            {% endif %}
+
+            <!-- ===== Meta block at the very bottom ===== -->
+            <div class="pp-meta-bottom">
+              <!-- Formula & M.W. at 12px regular; labels semi-bold -->
+              <div class="pp-meta-kv" aria-label="specifications">
+                <div class="pp-meta-row">
+                  <span class="label">Formula:</span>
+                  <span class="value pp-mw">
+                    {%- if formula_display -%}
+                      {%- assign chars = formula_display | split: '' -%}
+                      {%- for ch in chars -%}
+                        <span>{{ ch }}</span>
+                      {%- endfor -%}
+                    {%- endif -%}
+                  </span>
+                </div>
+                <div class="pp-meta-row">
+                  <span class="label">M.W.:</span>
+                  <span class="value pp-mw-total">{{ mw_display }}{% unless mw_display contains 'g/mol' %} g/mol{% endunless %}</span>
+                </div>
+              </div>
+
+              {% if coa_url %}
+                <div class="pp-meta-coa">
+                  <span class="pp-verify-badge" title="Batch verified">
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9.5 12.5l2 2 4-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    Verified
+                  </span>
+                  <a href="{{ coa_url }}" target="_blank" rel="noopener">View Verified COA</a>
+                </div>
+              {% endif %}
+
+              {% if pdp_assay_mf or pdp_impurity_mf or pdp_lab_mf %}
+                <div class="pp-meta-row">
+                  <span class="label">Verification:</span>
+                  <span class="value">
+                    {% if pdp_assay_mf %}Assay {{ pdp_assay_mf }}%{% endif %}
+                    {% if pdp_impurity_mf %}{% if pdp_assay_mf %} · {% endif %}Impurities ≤ {{ pdp_impurity_mf }}%{% endif %}
+                    {% if pdp_lab_mf %}{% if pdp_assay_mf or pdp_impurity_mf %} · {% endif %}Lab: {{ pdp_lab_mf }}{% endif %}
+                  </span>
+                </div>
+              {% endif %}
+
+              <!-- Chips: PURITY (links to #coa), HPLC, RUO – all 12px -->
+              <div class="pp-meta-chips">
+                <a href="#coa" class="pp-chip pp-chip--purity">PURITY</a>
+                <span class="pp-chip">HPLC tested</span>
+                <span class="pp-chip">RUO</span>
+              </div>
+
+              <!-- RUO disclaimer (12px) -->
+              <div class="pp-meta-disclaimer">
+                {{ pdp_disclaimer_mf | default: 'For laboratory research use only (RUO). Not for human or veterinary use.' }}
+              </div>
+            </div>
+            <!-- ===== /Meta bottom ===== -->
+
+            <!-- QC: COA link + thumbnails (two-up if present) -->
+            <div class="pp-qc" id="coa">
+              {% if coa_url %}
+                <a class="pp-coa-btn" href="{{ coa_url }}" target="_blank" rel="noopener">{{ section.settings.coa_label | default: 'View COA' }}</a>
+              {% endif %}
+              {% if hplc_img or ms_img %}
+                <div class="pp-qc-grid">
+                  {% if hplc_img %}<img class="pp-qc-img" src="{{ hplc_img | image_url: width: 800 }}" alt="HPLC chromatogram" width="800" height="{{ 800 | divided_by: hplc_img.aspect_ratio | round }}" loading="lazy">{% endif %}
+                  {% if ms_img %}<img class="pp-qc-img" src="{{ ms_img | image_url: width: 800 }}" alt="Mass spectrometry spectrum" width="800" height="{{ 800 | divided_by: ms_img.aspect_ratio | round }}" loading="lazy">{% endif %}
+                </div>
+              {% endif %}
+            </div>
+
+            <!-- RUO footer intentionally removed -->
+            <div class="pp-card-footer" aria-hidden="true"></div>
+
+          {%- endform -%}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{%- capture variants_meta_json -%}
+{
+{% for v in product.variants %}
+  "{{ v.id }}": {
+    "price": {{ v.price | json }},
+    "compare_at_price": {{ v.compare_at_price | json }},
+    "available": {{ v.available | json }},
+    "strength_mg": {% if v.metafields.pdp.strength_mg %}{{ v.metafields.pdp.strength_mg.value | json }}{% else %}0{% endif %},
+    "unit_count": {% if v.metafields.pdp.unit_count %}{{ v.metafields.pdp.unit_count.value | json }}{% else %}1{% endif %}
+  }{% unless forloop.last %},{% endunless %}
+{% endfor %}
+}
+{%- endcapture -%}
+
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  var wrap = document.getElementById('peptide-hero');
+  if(!wrap) return;
+
+  // Gallery thumbs
+  var frames = wrap.querySelectorAll('.pp-frame');
+  var thumbs = wrap.querySelectorAll('.pp-thumb');
+  function showGallery(i){
+    if(frames.length===0) return;
+    frames.forEach(function(f,idx){ f.classList.toggle('is-active', idx===i); });
+    thumbs.forEach(function(t,idx){ t.classList.toggle('is-selected', idx===i); t.setAttribute('aria-current', idx===i ? 'true':'false'); });
+  }
+  thumbs.forEach(function(btn, i){ btn.addEventListener('click', function(){ showGallery(i); }); });
+
+  // Form/Variants
+  var form = document.getElementById('peptide-form');
+  if(!form) return;
+  var selects = form.querySelectorAll('.pp-hidden-selects select');
+  var pills   = form.querySelectorAll('.pp-pill');
+  var priceEl = form.querySelector('[data-price]');
+  var cmpEl   = form.querySelector('[data-compare]');
+  var perEl   = form.querySelector('[data-per-unit]');
+  var atcBtn  = form.querySelector('.pp-atc');
+
+  var moneyFormat = {{ shop.money_format | json }};
+  var VARIANTS_META = {{ variants_meta_json | strip }};
+  var variants = {{ product.variants | json }};
+
+  function findVariant(){
+    var optVals = Array.prototype.map.call(selects, function(s){ return s.value; });
+    for (var i=0;i<variants.length;i++){
+      var v = variants[i], ok = true;
+      for (var j=0;j<optVals.length;j++){ if(v['option'+(j+1)] !== optVals[j]) { ok = false; break; } }
+      if(ok) return v;
+    }
+    return null;
+  }
+  function fmtMoney(cents){ try { return Shopify.formatMoney(cents, moneyFormat); } catch(e){ return (cents/100).toFixed(2); } }
+
+  function updatePrice(v){
+    if(!v) return;
+    if(priceEl){ priceEl.textContent = fmtMoney(v.price); }
+    if(cmpEl){
+      if(v.compare_at_price && v.compare_at_price > v.price){ cmpEl.style.display = ''; cmpEl.textContent = fmtMoney(v.compare_at_price); }
+      else { cmpEl.style.display = 'none'; }
+    }
+    if(perEl){
+      var meta = VARIANTS_META[String(v.id)] || {};
+      var mg   = parseFloat(meta.strength_mg || 0);
+      var units= parseFloat(meta.unit_count || 1);
+      var denom = mg * units;
+      if(denom > 0 && {{ section.settings.show_price_per_mg | json }}){
+        var perCents = v.price / denom;
+        perEl.style.display = '';
+        perEl.textContent = "≈ " + fmtMoney(perCents) + " / mg";
+      } else { perEl.style.display = 'none'; }
+    }
+    // Also sync any .pep-price / .pep-compare inside the peptide-meta-card (if present)
+    document.querySelectorAll('.pep-price').forEach(function(el){ el.textContent = fmtMoney(v.price); });
+    document.querySelectorAll('.pep-compare').forEach(function(el){
+      if (v.compare_at_price && v.compare_at_price > v.price) {
+        el.style.display = ''; el.textContent = fmtMoney(v.compare_at_price);
+      } else { el.style.display = 'none'; }
+    });
+  }
+  function setVariant(v){
+    if(!v) return;
+    var idInput = form.querySelector('input[name="id"]'); if(idInput) idInput.value = v.id;
+    if(atcBtn){ atcBtn.disabled = !v.available; atcBtn.textContent = v.available ? {{ section.settings.atc_label | default: 'Add to Cart' | json }} : "Sold Out"; }
+    var url = new URL(window.location.href); url.searchParams.set('variant', v.id); window.history.replaceState({}, '', url.toString());
+    if(v.featured_media && v.featured_media.id){
+      var targetId = String(v.featured_media.id), idx = -1;
+      frames.forEach(function(f,i){ if(f.dataset.mediaId === targetId){ idx = i; }});
+      if(idx >= 0) showGallery(idx);
+    }
+    updatePrice(v);
+  }
+  pills.forEach(function(p){
+    p.addEventListener('click', function(){
+      var opt = p.dataset.option, val = p.dataset.value;
+      Array.prototype.forEach.call(p.parentElement.querySelectorAll('.pp-pill'), function(x){ x.classList.remove('is-active'); x.setAttribute('aria-pressed','false'); });
+      p.classList.add('is-active'); p.setAttribute('aria-pressed','true');
+      Array.prototype.forEach.call(selects, function(s){ if(s.name === 'options['+opt+']'){ s.value = val; s.dispatchEvent(new Event('change', {bubbles:true})); } });
+      var v = findVariant(); if(v) setVariant(v);
+    });
+  });
+  selects.forEach(function(s){
+    s.addEventListener('change', function(){
+      var opt = s.name.replace('options[','').replace(']',''), val = s.value;
+      var rel = form.querySelectorAll('.pp-pill[data-option="'+opt+'"]');
+      Array.prototype.forEach.call(rel, function(x){ var on = (x.dataset.value === val); x.classList.toggle('is-active', on); x.setAttribute('aria-pressed', on ? 'true' : 'false'); });
+      var v = findVariant(); if(v) setVariant(v);
+    });
+  });
+
+  // qty controls
+  var qty = form.querySelector('.pp-qty-input');
+  form.querySelectorAll('.pp-qty-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){ var q = parseInt(qty.value || '1', 10); q = btn.dataset.qty==='inc' ? q+1 : Math.max(1,q-1); qty.value = q; });
+  });
+
+  updatePrice({{ selected_variant | json }});
+
+  // ===== Subtle kinetic cues: run-once intersection observers (respect reduced motion) =====
+  try {
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      var io = new IntersectionObserver(function(entries){
+        entries.forEach(function(e){
+          if(e.isIntersecting){
+            e.target.classList.add('is-in');
+            io.unobserve(e.target);
+            // Special: stagger characters for .pp-mw
+            if (e.target.classList.contains('pp-mw')) {
+              var spans = e.target.querySelectorAll('span');
+              spans.forEach(function(s, idx){
+                s.style.animationDelay = (idx * 18) + 'ms';
+              });
+            }
+          }
+        });
+      }, { threshold: 0.35 });
+
+      // targets
+      wrap.querySelectorAll('.pp-verify-badge, .pp-mw, .pp-chip--purity, .pp-micro').forEach(function(el){ io.observe(el); });
+    }
+  } catch(e) {
+    /* no-op */
+  }
+});
+</script>
+
+{% schema %}
+{
+  "name": "Peptide product hero",
+  "settings": [
+    { "type": "range", "id": "max_width", "min": 900, "max": 1600, "step": 10, "unit": "px", "label": "Container max width", "default": 1280 },
+    { "type": "range", "id": "padding_top", "min": 0, "max": 80, "step": 2, "unit": "px", "label": "Padding top", "default": 24 },
+    { "type": "range", "id": "padding_bottom", "min": 0, "max": 80, "step": 2, "unit": "px", "label": "Padding bottom", "default": 24 },
+    { "type": "select", "id": "columns_ratio", "label": "Desktop column ratio", "default": "60_40",
+      "options": [
+        { "value": "50_50", "label": "50% / 50%" },
+        { "value": "55_45", "label": "55% / 45%" },
+        { "value": "60_40", "label": "60% / 40%" },
+        { "value": "65_35", "label": "65% / 35%" }
+      ]
+    },
+    { "type": "range", "id": "grid_gap", "min": 16, "max": 80, "step": 2, "unit": "px", "label": "Grid gap", "default": 48 },
+
+    { "type": "checkbox", "id": "show_breadcrumbs", "label": "Show breadcrumbs", "default": true },
+    { "type": "checkbox", "id": "show_thumbs", "label": "Show gallery thumbnails", "default": true },
+    { "type": "checkbox", "id": "show_rating", "label": "Show rating row", "default": true },
+    { "type": "text", "id": "rating_text_fallback", "label": "Fallback rating text", "default": "-" },
+    { "type": "checkbox", "id": "show_chips", "label": "Show benefit chips", "default": true },
+
+    { "type": "checkbox", "id": "show_title", "label": "Show big title above card", "default": false },
+
+    { "type": "checkbox", "id": "show_price_per_mg", "label": "Show price per mg", "default": true },
+    { "type": "checkbox", "id": "show_buy_now", "label": "Show dynamic Buy Now button", "default": false },
+    { "type": "checkbox", "id": "enable_microcopy", "label": "Show microcopy under price", "default": true },
+    { "type": "textarea", "id": "microcopy_fallback", "label": "Microcopy fallback (one per line)", "default": "Independent COA available for this batch.\nZero-substitution policy: if a batch doesn’t pass spec, we don’t sell it." },
+    { "type": "checkbox", "id": "show_coa_link", "label": "Show COA link (pep.coa_pdf or peptide.coa_file[0])", "default": true },
+    { "type": "text", "id": "coa_label", "label": "COA link label", "default": "View COA" },
+    { "type": "checkbox", "id": "show_meta_description", "label": "Show product description", "default": true },
+
+    { "type": "color", "id": "accent_color", "label": "Accent color", "default": "#FBBF24" },
+    { "type": "color", "id": "text_color", "label": "Primary text color", "default": "#111111" },
+    { "type": "color", "id": "muted_color", "label": "Muted text color", "default": "#6B7280" },
+    { "type": "color", "id": "border_color", "label": "Border color", "default": "#E7E9ED" },
+    { "type": "color", "id": "frame_bg", "label": "Gallery frame background", "default": "#FFFFFF" },
+
+    { "type": "range", "id": "frame_radius", "min": 0, "max": 30, "step": 1, "unit": "px", "label": "Gallery frame radius", "default": 16 },
+    { "type": "range", "id": "frame_padding", "min": 0, "max": 32, "step": 1, "unit": "px", "label": "Gallery frame padding", "default": 12 },
+
+    { "type": "range", "id": "thumb_size_mobile", "min": 48, "max": 120, "step": 2, "unit": "px", "label": "Thumbnail size — mobile", "default": 72 },
+    { "type": "range", "id": "thumb_size_desktop", "min": 56, "max": 120, "step": 2, "unit": "px", "label": "Thumbnail size — desktop", "default": 82 },
+    { "type": "range", "id": "thumb_radius", "min": 0, "max": 16, "step": 1, "unit": "px", "label": "Thumbnail radius", "default": 10 },
+
+    { "type": "range", "id": "title_size", "min": 22, "max": 44, "step": 1, "unit": "px", "label": "Title size", "default": 32 },
+    { "type": "range", "id": "price_size", "min": 18, "max": 36, "step": 1, "unit": "px", "label": "Price size", "default": 28 },
+
+    { "type": "text", "id": "atc_label", "label": "Add to cart label", "default": "Add to Cart" },
+    { "type": "color", "id": "atc_bg", "label": "ATC background", "default": "#FBBF24" },
+    { "type": "color", "id": "atc_text", "label": "ATC text color", "default": "#000000" },
+    { "type": "range", "id": "atc_radius", "min": 0, "max": 16, "step": 1, "unit": "px", "label": "ATC radius", "default": 10 },
+
+    { "type": "textarea", "id": "custom_css", "label": "Custom CSS (scoped to this section)", "default": "-" }
+  ],
+  "blocks": [
+    { "type": "@app" }
+  ],
+  "max_blocks": 4,
+  "presets": [ { "name": "Peptide product hero" } ]
+}
+{% endschema %}
+
+{% if section.settings.custom_css != blank %}
+  <style>#peptide-hero { {{ section.settings.custom_css }} }</style>
+{% endif %}

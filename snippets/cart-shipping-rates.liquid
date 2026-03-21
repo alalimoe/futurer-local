@@ -1,0 +1,117 @@
+{% comment %}
+  Renders the shipping rates form.
+
+  Accepts:
+  - type: {String} Type of the component (optional, value: regular, popover, drawer, modal, collapse)
+  - overlay_width: {String} Width of the overlay (optional)
+  - uid: {String} Unique identifier for the component
+
+  Usage:
+  {% render 'cart-shipping-rates', type: 'popover' %}
+{% endcomment %}
+
+{% liquid
+  if type == null
+    assign type = 'regular'
+  endif
+  if type == 'popover'
+    assign tag_type = 'popover'
+  elsif type == 'drawer' or type == 'modal'
+    assign tag_type = 'modal'
+  endif
+  assign title = 'sections.cart.estimate_shipping_rates_title' | t
+  assign submit_label = 'sections.cart.calculate_shipping' | t
+  assign cancel_label = 'sections.cart.cancel' | t
+  assign name = 'cart-shipping-rates-' | append: uid
+%}
+
+{% capture overlay_attrs %}
+  {% if type == 'popover' %}
+    xo-animate='fade-down' xo-placement='top-center'
+  {% elsif type == 'drawer' %}
+    xo-animate='slide-up' xo-placement='bottom-{{ settings.cart_drawer_placement }}' xo-backdrop-color="transparent"
+  {% endif %}
+{% endcapture %}
+
+{% capture content %}
+  <div
+    class='xo-cart-shipping-rates__inner
+      {% unless type == 'regular' or type == 'collapse' %} xo-cart-shipping-rates__inner--padding{% endunless %}
+      {% if type == 'popover' or type == 'drawer' %} xo-cart-shipping-rates__inner--effect{% endif %}'
+    {% if overlay_width != null %}
+      style='width: {{ overlay_width }};'
+    {% endif %}
+  >
+    {% unless type == 'collapse' %}
+      <h6 class='xo-cart-shipping-rates__title h6 mb-30'>{{ title }}</h6>
+      <div class='xo-cart-shipping-rates__regular'>{{ title }}</div>
+
+    {% endunless %}
+    <xo-cart-shipping-rates-field>
+      <label class='xo-cart-shipping-rates__label'>{{ 'localization.country_label' | t }}</label>
+      {% render 'field-select', options: all_country_option_tags, name: 'country', autocomplete: 'country' %}
+    </xo-cart-shipping-rates-field>
+    {% render 'space', spacing_dt: 20, spacing_mb: 16 %}
+    <xo-cart-shipping-rates-field>
+      <label>{{ 'localization.state_label' | t }}</label>
+      {% capture select_attrs %}aria-label="{{ 'localization.select_province' | t }}"{% endcapture %}
+      {% render 'field-select', options: all_country_option_tags, name: 'province', autocomplete: 'address-level1', attrs: select_attrs %}
+    </xo-cart-shipping-rates-field>
+    <xo-cart-shipping-rates-field>
+      {% assign postal_id = 'postal--' | append: section.id %}
+      {% assign label = 'localization.postal_code_label' | t %}
+      {% render 'field-input', name: 'zip', label: label, id: postal_id %}
+    </xo-cart-shipping-rates-field>
+    <div class='{% if template.name == "cart" %}xo-cart-shipping-rates__flex {% else %}xo-cart-shipping-rates__flex-drawer flex-h gap-10{% endif %}'>
+      <xo-cart-shipping-rates-submit class="xo-cart-shipping-rates__caculator-modal" {% if type == 'regular' %} class="full-width"{% endif %}>
+        {% if type == 'regular' %}
+          {% assign button_block = true %}
+          {% assign button_block = false %}
+        {% endif %}
+
+        {% if template.name == "cart" %}
+          <div class='xo-cart-shipping-rates__caculator'>
+            {% render 'button', text: submit_label, size: 'sm', style: 'link', block: button_block, icon: 'estimate-shipping-rates', icon_position: 'left' %}
+          </div>
+          {% else %}
+          {% render 'button', text: submit_label, size: 'sm', style: 'primary', block: button_block %}
+        {% endif %}
+      </xo-cart-shipping-rates-submit>
+      {% if type != 'regular' %}
+        <xo-{{ tag_type }}-trigger>
+          {% if template.name == "cart" %}
+            {% render 'button', text: cancel_label, size: 'sm', style: 'link' %}
+            {% else %}
+            {% render 'button', text: cancel_label, size: 'sm', style: 'secondary' %}
+          {% endif %}
+        </xo-{{ tag_type }}-trigger>
+      {% endif %}
+    </div>
+    <div class="xo-cart-shipping-rates__error-d-block">
+      <xo-cart-shipping-rates-error class='xo-cart-shipping-rates__error xo-error'></xo-cart-shipping-rates-error>
+    </div>
+  </div>
+{% endcapture %}
+
+{% if type == 'regular' %}
+  {{ content }}
+{% elsif type == 'collapse' %}
+  <div class='xo-cart-shipping-rates'>
+    {% render 'collapse', name: name, title: title, content: content %}
+  </div>
+{% else %}
+  <div class='xo-cart-shipping-rates'>
+    <div class='xo-cart-shipping-rates__btn'>
+      <xo-{{ tag_type }}-trigger xo-name='{{ name }}' class='xo-cart-shipping-rates__trigger' tabindex='0' role='button'>
+        <div class='xo-cart-shipping-rates__icon'>
+          {% render 'icon', name: 'estimate-shipping-rates', size: '1.8rem' %}
+        </div>
+        <div class='xo-cart-shipping-rates__text'>{{ title }}</div>
+      </xo-{{ tag_type }}-trigger>
+    </div>
+
+    <xo-{{ tag_type }} {{ overlay_attrs }} xo-portal xo-name='{{ name }}' class='xo-cart-shipping-rates__content'>
+      {{ content }}
+    </xo-{{ tag_type }}>
+  </div>
+{% endif %}

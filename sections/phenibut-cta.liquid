@@ -1,0 +1,126 @@
+{% comment %}
+  Closing CTA — Premium refactored section
+  - Design tokens, focus-visible, reduced-motion, srcset for packshot
+{% endcomment %}
+
+<section id="phb-ct-{{ section.id }}" class="phb-cta" aria-labelledby="phb-cta-title-{{ section.id }}">
+  <div class="phb-cta__container">
+    <h2 id="phb-cta-title-{{ section.id }}" class="phb-cta__title">{{ section.settings.heading | escape }}</h2>
+    {% if section.settings.subhead != blank %}
+      <div class="phb-cta__sub">{{ section.settings.subhead }}</div>
+    {% endif %}
+
+    <div class="phb-cta__buttons">
+      {% if section.settings.primary_label != blank and section.settings.primary_href != blank %}
+        <a class="phb-cta__btn phb-cta__btn--primary" href="{{ section.settings.primary_href | escape }}">{{ section.settings.primary_label | escape }}</a>
+      {% endif %}
+      {% if section.settings.secondary_label != blank and section.settings.secondary_href != blank %}
+        <a class="phb-cta__btn phb-cta__btn--ghost" href="{{ section.settings.secondary_href | escape }}">{{ section.settings.secondary_label | escape }}</a>
+      {% endif %}
+    </div>
+
+    {% if section.settings.packshot_image != blank %}
+      <img
+        class="phb-cta__packshot"
+        src="{{ section.settings.packshot_image | image_url: width: 900 }}"
+        srcset="{{ section.settings.packshot_image | image_url: width: 400 }} 400w, {{ section.settings.packshot_image | image_url: width: 600 }} 600w, {{ section.settings.packshot_image | image_url: width: 900 }} 900w"
+        sizes="(max-width: 989px) 44vw, 26vw"
+        width="{{ section.settings.packshot_image.width | default: 900 }}"
+        height="{{ section.settings.packshot_image.height | default: 900 }}"
+        alt="{% unless section.settings.packshot_decorative %}{{ section.settings.packshot_alt | escape }}{% endunless %}"
+        {% if section.settings.packshot_decorative %}role="presentation" aria-hidden="true"{% endif %}
+        loading="lazy" decoding="async"
+      >
+    {% endif %}
+  </div>
+</section>
+
+{%- style -%}
+#phb-ct-{{ section.id }} {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 520px;
+  --phb-grad-from: {{ section.settings.gradient_from }};
+  --phb-grad-to: {{ section.settings.gradient_to }};
+  --phb-max: {{ section.settings.max_width }}px;
+  --phb-py: {{ section.settings.padding_y }}px;
+  --phb-accent: var(--color-accent-primary, #FBBF24);
+  --phb-text-on-dark: #fff;
+  --phb-heading-dark: var(--color-text-main, #0A2342);
+  --phb-font: var(--font-body-family, sans-serif);
+  --phb-font-heading: var(--font-heading-family, sans-serif);
+  --phb-transition: var(--transition-smooth, all 0.3s cubic-bezier(0.25,0.8,0.25,1));
+  --phb-touch: var(--touch-min, 44px);
+  background: linear-gradient(180deg, var(--phb-grad-from) 0%, var(--phb-grad-to) 100%);
+  color: var(--phb-text-on-dark);
+  position: relative; overflow: clip;
+  font-family: var(--phb-font);
+}
+#phb-ct-{{ section.id }} .phb-cta__container {
+  max-width: var(--phb-max); margin: 0 auto; padding: var(--phb-py) 16px;
+  text-align: center; position: relative;
+}
+#phb-ct-{{ section.id }} .phb-cta__title {
+  font-family: var(--phb-font-heading);
+  font-size: clamp(22px, 4.2vw, 36px); line-height: 1.2; margin: 0 0 8px;
+}
+#phb-ct-{{ section.id }} .phb-cta__sub { font-size: clamp(16px, 2.2vw, 18px); opacity: .95; margin-bottom: 12px; }
+#phb-ct-{{ section.id }} .phb-cta__buttons { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+#phb-ct-{{ section.id }} .phb-cta__btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 12px 18px; min-height: var(--phb-touch);
+  border-radius: 8px; font-weight: 700; text-decoration: none;
+  border: 2px solid var(--phb-text-on-dark); transition: var(--phb-transition);
+}
+#phb-ct-{{ section.id }} .phb-cta__btn:focus-visible { outline: 2px solid var(--phb-accent); outline-offset: 2px; }
+#phb-ct-{{ section.id }} .phb-cta__btn--primary {
+  background: var(--phb-text-on-dark); color: var(--phb-heading-dark);
+  border-color: var(--phb-text-on-dark);
+}
+#phb-ct-{{ section.id }} .phb-cta__btn--ghost { background: transparent; color: var(--phb-text-on-dark); }
+#phb-ct-{{ section.id }} .phb-cta__packshot {
+  position: absolute; right: max(16px, 6%); bottom: 8px;
+  width: clamp(160px, 26vw, 340px); height: auto; pointer-events: none;
+  filter: drop-shadow(0 16px 32px rgba(0,0,0,.25)); opacity: .95;
+}
+@media (max-width: 989px) {
+  #phb-ct-{{ section.id }} .phb-cta__packshot {
+    display: {% if section.settings.packshot_hide_mobile %}none{% else %}block{% endif %};
+    right: 12px; width: clamp(140px, 44vw, 260px); opacity: .9;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  #phb-ct-{{ section.id }} *,
+  #phb-ct-{{ section.id }} *::before,
+  #phb-ct-{{ section.id }} *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+{%- endstyle -%}
+
+{% schema %}
+{
+  "name": "Closing CTA",
+  "tag": "section",
+  "class": "section-phenibut-cta",
+  "settings": [
+    { "type": "text", "id": "anchor_id", "label": "Anchor ID", "default": "closing" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Calm, Rest, Reset — delivered fast." },
+    { "type": "richtext", "id": "subhead", "label": "Subhead", "default": "<p>Lab‑tested quality • 4‑hour delivery in Dubai • Express worldwide • Free express shipping 300 AED+</p>" },
+    { "type": "text", "id": "primary_label", "label": "Primary CTA label", "default": "Shop Phenibut" },
+    { "type": "text", "id": "primary_href", "label": "Primary CTA href", "default": "#shop-phenibut" },
+    { "type": "text", "id": "secondary_label", "label": "Secondary CTA label", "default": "Compare Forms" },
+    { "type": "text", "id": "secondary_href", "label": "Secondary CTA href", "default": "#forms" },
+    { "type": "color", "id": "gradient_from", "label": "Gradient from", "default": "#0A2342" },
+    { "type": "color", "id": "gradient_to", "label": "Gradient to", "default": "#CFE7E7" },
+    { "type": "range", "id": "max_width", "label": "Max width (px)", "min": 720, "max": 1400, "step": 20, "default": 1000 },
+    { "type": "range", "id": "padding_y", "label": "Vertical padding (px)", "min": 40, "max": 160, "step": 4, "default": 72 },
+    { "type": "image_picker", "id": "packshot_image", "label": "Decorative packshot image" },
+    { "type": "text", "id": "packshot_alt", "label": "Packshot alt text", "default": "Phenibut bottles" },
+    { "type": "checkbox", "id": "packshot_decorative", "label": "Mark packshot decorative (hide from screen readers)", "default": true },
+    { "type": "checkbox", "id": "packshot_hide_mobile", "label": "Hide packshot on mobile", "default": true }
+  ],
+  "blocks": [],
+  "presets": [ { "name": "Closing CTA" } ]
+}
+{% endschema %}

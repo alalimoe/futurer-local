@@ -1,0 +1,124 @@
+{% comment %}
+  Renders a category
+
+  @param {Object} block - Block
+  @param {Object} collection_list - Collection list
+  @param {Object} button - Button
+  @param {String} image - Image
+  @param {Object} aspect_ratio - Aspect ratio
+  @param {Object} image_desktop - Image desktop
+  @param {Object} aspect_ratio_desktop - Aspect ratio desktop
+  @param {Object} image_mobile - Image mobile
+  @param {Object} aspect_ratio_mobile - Aspect ratio mobile
+
+  @example
+    {% render 'category-2-block',
+    block: block,
+    collection_list: collection_list,
+    image_desktop: image_desktop,
+    aspect_ratio_desktop: aspect_ratio_desktop,
+    image_mobile: image_mobile,
+    aspect_ratio_mobile: aspect_ratio_mobile,
+    button: button
+  %}
+{% endcomment %}
+
+<xo-animate
+  xo-cascade
+  class="category-2-block{% if settings.enable_border_radius %} category-2-block--radius{% endif %}{% if color_schema_box %} color-{{ color_schema_box }}{% endif %}"
+>
+  <div class="category-2-block__wrapper">
+    <div class="category-2-block__head">
+      {% if heading %}
+        <div class="category-2-block__heading">
+          {% render 'text', context: block %}
+        </div>
+      {% endif %}
+      <div class="category-2-block__button">
+        {% render 'button',
+          text: button.button_text,
+          link: button.button_link,
+          style: button.button_style,
+          size: button.button_size,
+          radius: settings.button_radius,
+          padding: settings.button_padding
+        %}
+      </div>
+      <div class="category-2-block__image category-2-block__image--desktop">
+        <xo-animate xo-cascade xo-type="zoom-out" style="height: 100%">
+          {% render 'image', image: image_desktop, aspect_ratio: aspect_ratio_desktop %}
+        </xo-animate>
+      </div>
+      <div class="category-2-block__image category-2-block__image--mobile">
+        <xo-animate xo-cascade xo-type="zoom-out" style="height: 100%">
+          {% render 'image', image: image_mobile, aspect_ratio: aspect_ratio_mobile %}
+        </xo-animate>
+      </div>
+    </div>
+    <div class="category-2-block__bottom">
+      <xo-carousel
+        class="category-2-block__carousel"
+        xo-per-view="4"
+        xo-gap="54"
+        xo-breakpoints="
+          {
+            400: {
+              perView: 2,
+              perMove: 1,
+              gap: 20
+            },
+            768: {
+              perView: 3,
+              perMove: 1,
+              gap: 20
+            },
+            992: {
+              perView: 3,
+              perMove: 1,
+              gap: 20
+            },
+            1200: {
+              perView: 3,
+              perMove: 1,
+              gap: 30
+            },
+            1400: {
+              perView: 3,
+              perMove: 1,
+              gap: 40
+            },
+          }
+        "
+      >
+        <xo-carousel-inner>
+          <xo-carousel-list>
+            {% if collection_list != blank %}
+              {% for collection in collection_list %}
+                <xo-carousel-slide>
+                  <div class="category-2-block__item">
+                    {% render 'collection-card-v2',
+                      collection: collection,
+                      padding_vertical: 18,
+                      padding_horizontal: 18,
+                      image_size: image_size,
+                      layout: 'vertical',
+                      animated_enable: true
+                    %}
+                  </div>
+                </xo-carousel-slide>
+              {% endfor %}
+            {% else %}
+              {% for item in (1..4) %}
+                <xo-carousel-slide>
+                  <div class="category-2-block__item">
+                    {% render 'collection-card-v2', padding_vertical: 10, padding_horizontal: 10, image_size: image_size, layout: 'vertical', animated_enable: true %}
+                  </div>
+                </xo-carousel-slide>
+              {% endfor %}
+            {% endif %}
+          </xo-carousel-list>
+        </xo-carousel-inner>
+      </xo-carousel>
+    </div>
+  </div>
+</xo-animate>

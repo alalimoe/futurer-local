@@ -1,0 +1,459 @@
+{{ 'section-mega-menu-2.css' | asset_url | stylesheet_tag }}
+{{ 'img-with-text-7.css' | asset_url | stylesheet_tag }}
+
+{% liquid
+  assign mega_menu_index = section.settings.index_nav
+  assign blocks = section.blocks
+  assign button_blocks = section.blocks | where: 'type', 'button'
+%}
+
+<template xo-mega-menu-name="header-mega-menu" xo-mega-menu-index="{{ mega_menu_index }}">
+  <div {% render 'section-attr' %}>
+    <div class="xo-mega-menu-2">
+      <xo-carousel
+        xo-per-view="3"
+        xo-per-move="1"
+        xo-column-width="180"
+        xo-breakpoints="
+          {
+            400: {
+              perView: 1,
+              perMove: 1,
+            },
+            768: {
+              perView: 2,
+              perMove: 2,
+              perMove: 1,
+              },
+            1200: {
+              perView: 3,
+              perMove: 1,
+            },
+          }
+        "
+        class="xo-mega-menu-2__carousel"
+      >
+        <xo-carousel-inner>
+          <xo-carousel-list>
+            {% for block in blocks %}
+              {% case block.type %}
+                {% when 'image-with-text' %}
+                  {% liquid
+                    assign heading = block.settings.heading
+                    assign link = block.settings.link
+                    assign color_scheme_box = block.settings.color_scheme_box
+                    assign desktop_image = block.settings.desktop_image
+                    assign aspect_ratio_desktop = block.settings.aspect_ratio_desktop
+                    if aspect_ratio_desktop == 'custom'
+                      assign aspect_ratio_desktop = block.settings.aspect_ratio_desktop_width | append: '/' | append: block.settings.aspect_ratio_desktop_height
+                    endif
+                    assign mobile_image = block.settings.mobile_image
+                    assign aspect_ratio_mobile = block.settings.aspect_ratio_mobile
+                    if aspect_ratio_mobile == 'custom'
+                      assign aspect_ratio_mobile = block.settings.aspect_ratio_mobile_width | append: '/' | append: block.settings.aspect_ratio_mobile_height
+                    endif
+                  %}
+                  <xo-carousel-slide>
+                    {% render 'img-with-text-7',
+                      heading: heading,
+                      link: link,
+                      desktop_image: desktop_image,
+                      aspect_ratio_desktop: aspect_ratio_desktop,
+                      mobile_image: mobile_image,
+                      aspect_ratio_mobile: aspect_ratio_mobile,
+                      color_scheme_box: color_scheme_box
+                    %}
+                  </xo-carousel-slide>
+              {% endcase %}
+            {% endfor %}
+          </xo-carousel-list>
+        </xo-carousel-inner>
+        <xo-carousel-prev class="xo-mega-menu-2__prev">
+          {% render 'button-slide', icon: 'arrow-left', icon_size: '2.4rem', size: '3.6rem', direction: 'left', style: 'primary' %}
+        </xo-carousel-prev>
+        <xo-carousel-next class="xo-mega-menu-2__next">
+          {% render 'button-slide', icon: 'arrow-right', icon_size: '2.4rem', size: '3.6rem', direction: 'right', style: 'primary' %}
+        </xo-carousel-next>
+        <div class="xo-mega-menu-2__pagination">
+          {% render 'carousel-pagination', align: 'center', style: 'sticks' %}
+        </div>
+      </xo-carousel>
+      {% if button_blocks.size > 0 %}
+        <div class="xo-mega-menu-2__button">
+          {% for block in blocks %}
+            {% case block.type %}
+              {% when 'button' %}
+                {% render 'button', text: block.settings.button_text, link: block.settings.button_link, style: block.settings.button_style, size: block.settings.button_size %}
+            {% endcase %}
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</template>
+
+{% schema %}
+{
+  "name": "t:sections.mega_menu_2.name",
+  "enabled_on": {
+    "groups": [
+      "header"
+    ]
+  },
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "t:sections.mega_menu_2.settings.paragraph.content"
+    },
+    {
+      "type": "select",
+      "id": "index_nav",
+      "label": "t:sections.mega_menu_2.settings.index_nav.label",
+      "options": [
+        {
+          "value": "0",
+          "label": "t:sections.mega_menu_2.settings.index_nav.option_1.label"
+        },
+        {
+          "value": "1",
+          "label": "t:sections.mega_menu_2.settings.index_nav.option_2.label"
+        },
+        {
+          "value": "2",
+          "label": "t:sections.mega_menu_2.settings.index_nav.option_3.label"
+        },
+        {
+          "value": "3",
+          "label": "t:sections.mega_menu_2.settings.index_nav.option_4.label"
+        },
+        {
+          "value": "4",
+          "label": "t:sections.mega_menu_2.settings.index_nav.option_5.label"
+        },
+        {
+          "value": "5",
+          "label": "t:sections.mega_menu_2.settings.index_nav.option_6.label"
+        },
+        {
+          "value": "6",
+          "label": "t:sections.mega_menu_2.settings.index_nav.option_7.label"
+        },
+        {
+          "value": "7",
+          "label": "t:sections.mega_menu_2.settings.index_nav.option_8.label"
+        },
+        {
+          "value": "8",
+          "label": "t:sections.mega_menu_2.settings.index_nav.option_9.label"
+        },
+        {
+          "value": "9",
+          "label": "t:sections.mega_menu_2.settings.index_nav.option_10.label"
+        }
+      ],
+      "default": "0"
+    },
+    {
+      "type": "header",
+      "content": "General settings"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Section color scheme"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color"
+    },
+    {
+      "type": "color_background",
+      "id": "background_gradient",
+      "label": "Background gradient"
+    },
+    {
+      "type": "number",
+      "id": "padding_top_desktop",
+      "label": "Padding top desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_desktop",
+      "label": "Padding bottom desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_top_mobile",
+      "label": "Padding top mobile",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_mobile",
+      "label": "Padding bottom mobile",
+      "default": 50
+    }
+  ],
+  "blocks": [
+    {
+      "name": "t:sections.mega_menu_2.blocks.name_1",
+      "type": "image-with-text",
+      "settings": [
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "t:sections.mega_menu_2.blocks.settings.heading.label",
+          "default": "Heading"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "t:sections.mega_menu_2.blocks.settings.link.label"
+        },
+        {
+          "type": "color_scheme",
+          "id": "color_scheme_box",
+          "label": "t:sections.mega_menu_2.blocks.settings.color_schema.label",
+          "default": "scheme_1"
+        },
+        {
+          "type": "header",
+          "content": "t:sections.mega_menu_2.blocks.settings.header_image.content"
+        },
+        {
+          "type": "image_picker",
+          "id": "desktop_image",
+          "label": "t:sections.mega_menu_2.blocks.settings.desktop_image.label"
+        },
+        {
+          "type": "select",
+          "id": "aspect_ratio_desktop",
+          "label": "t:sections.mega_menu_2.blocks.settings.aspect_ratio_desktop.label",
+          "default": "auto",
+          "options": [
+            {
+              "value": "auto",
+              "label": "Auto"
+            },
+            {
+              "value": "2/3",
+              "label": "2:3"
+            },
+            {
+              "value": "3/4",
+              "label": "3:4"
+            },
+            {
+              "value": "3/2",
+              "label": "3:2"
+            },
+            {
+              "value": "1",
+              "label": "1:1"
+            },
+            {
+              "value": "4/3",
+              "label": "4:3"
+            },
+            {
+              "value": "16/9",
+              "label": "16:9"
+            },
+            {
+              "value": "21/9",
+              "label": "21:9"
+            }
+          ]
+        },
+        {
+          "type": "image_picker",
+          "id": "mobile_image",
+          "label": "t:sections.mega_menu_2.blocks.settings.mobile_image.label"
+        },
+        {
+          "type": "select",
+          "id": "aspect_ratio_mobile",
+          "label": "t:sections.mega_menu_2.blocks.settings.aspect_ratio_mobile.label",
+          "default": "auto",
+          "options": [
+            {
+              "value": "auto",
+              "label": "Auto"
+            },
+            {
+              "value": "2/3",
+              "label": "2:3"
+            },
+            {
+              "value": "3/4",
+              "label": "3:4"
+            },
+            {
+              "value": "3/2",
+              "label": "3:2"
+            },
+            {
+              "value": "1",
+              "label": "1:1"
+            },
+            {
+              "value": "4/3",
+              "label": "4:3"
+            },
+            {
+              "value": "16/9",
+              "label": "16:9"
+            },
+            {
+              "value": "21/9",
+              "label": "21:9"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "t:sections.mega_menu_2.blocks.name_2",
+      "type": "button",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "button_text",
+          "label": "Button text",
+          "default": "Button"
+        },
+        {
+          "type": "url",
+          "id": "button_link",
+          "label": "Button link",
+          "default": "/collections/all"
+        },
+        {
+          "type": "select",
+          "id": "button_style",
+          "label": "Button style",
+          "options": [
+            {
+              "value": "primary",
+              "label": "Primary"
+            },
+            {
+              "value": "secondary",
+              "label": "Secondary"
+            },
+            {
+              "value": "link",
+              "label": "Link"
+            }
+          ],
+          "default": "primary"
+        },
+        {
+          "type": "select",
+          "id": "button_size",
+          "label": "Button size",
+          "options": [
+            {
+              "value": "xs",
+              "label": "Extra small"
+            },
+            {
+              "value": "sm",
+              "label": "Small"
+            },
+            {
+              "value": "md",
+              "label": "Medium"
+            },
+            {
+              "value": "lg",
+              "label": "Large"
+            }
+          ],
+          "default": "md"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.mega_menu_2.presets.name",
+      "blocks": [
+        {
+          "type": "image-with-text",
+          "settings": {
+            "heading": "Heading",
+            "link": "",
+            "color_scheme_box": "background-2",
+            "aspect_ratio_desktop": "4/3",
+            "aspect_ratio_mobile": "4/3"
+          }
+        },
+        {
+          "type": "image-with-text",
+          "settings": {
+            "heading": "Heading",
+            "link": "",
+            "color_scheme_box": "background-2",
+            "aspect_ratio_desktop": "4/3",
+            "aspect_ratio_mobile": "4/3"
+          }
+        },
+        {
+          "type": "image-with-text",
+          "settings": {
+            "heading": "Heading",
+            "link": "",
+            "color_scheme_box": "background-2",
+            "aspect_ratio_desktop": "4/3",
+            "aspect_ratio_mobile": "4/3"
+          }
+        },
+        {
+          "type": "image-with-text",
+          "settings": {
+            "heading": "Heading",
+            "link": "",
+            "color_scheme_box": "background-2",
+            "aspect_ratio_desktop": "4/3",
+            "aspect_ratio_mobile": "4/3"
+          }
+        },
+        {
+          "type": "image-with-text",
+          "settings": {
+            "heading": "Heading",
+            "link": "",
+            "color_scheme_box": "background-2",
+            "aspect_ratio_desktop": "4/3",
+            "aspect_ratio_mobile": "4/3"
+          }
+        },
+        {
+          "type": "button",
+          "settings": {
+            "button_text": "Button",
+            "button_link": "shopify://collections/all",
+            "button_style": "primary",
+            "button_size": "sm"
+          }
+        }
+      ],
+      "settings": {
+        "index_nav": "0",
+        "color_scheme": "",
+        "background_color": "",
+        "background_gradient": "",
+        "padding_top_desktop": 0,
+        "padding_bottom_desktop": 0,
+        "padding_top_mobile": 0,
+        "padding_bottom_mobile": 0
+      }
+    }
+  ]
+}
+{% endschema %}

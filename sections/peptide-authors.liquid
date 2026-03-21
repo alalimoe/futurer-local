@@ -1,0 +1,58 @@
+{% comment %}
+SECTION: Authors / Credits
+Data: pep.reference.author_researcher (+ disclaimers from pep.warnings)
+{% endcomment %}
+
+{%- liquid
+  assign pep_ref = product.metafields.pep.reference
+  assign pep = nil
+  if pep_ref and pep_ref.value
+    assign pep = pep_ref.value
+  endif
+-%}
+
+<section class="pep-authors">
+  <div class="container">
+    <h2 class="h">{{ section.settings.heading }}</h2>
+    <div class="cards">
+      {% if pep and pep.author_researcher %}
+        {% assign authors_raw = pep.author_researcher | replace: ';', '|' %}
+        {% assign authors = authors_raw | split: '|' %}
+        {% for a in authors %}
+          {% assign name = a | strip %}
+          {% if name != blank %}
+            <div class="card">{{ name }}</div>
+          {% endif %}
+        {% endfor %}
+      {% else %}
+        <div class="card">{{ section.settings.fallback_author }}</div>
+      {% endif %}
+    </div>
+
+    {% if product.metafields.pep.warnings %}
+      <p class="disc">{{ product.metafields.pep.warnings }}</p>
+    {% elsif pep and pep.warnings %}
+      <p class="disc">{{ pep.warnings }}</p>
+    {% endif %}
+  </div>
+</section>
+
+<style>
+.pep-authors{padding:24px 16px}
+.container{max-width:var(--container-width-max);margin:0 auto}
+.h{margin:0 0 12px}
+.cards{display:flex;gap:10px;flex-wrap:wrap}
+.card{background:#fff;border:1px solid #E7E9ED;border-radius:10px;padding:10px 12px}
+.disc{margin-top:10px;color:#374151}
+</style>
+
+{% schema %}
+{
+  "name": "Peptide authors",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Research & editorial credits" },
+    { "type": "text", "id": "fallback_author", "label": "Fallback author", "default": "Editorial team" }
+  ],
+  "presets": [{ "name": "Peptide authors" }]
+}
+{% endschema %}

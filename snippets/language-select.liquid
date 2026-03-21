@@ -1,0 +1,35 @@
+{% assign random_number = 'now' | date: '%N' | modulo: 100 %}
+{% assign id = 'localization_form_' | append: random_number %}
+
+<xo-language-select class='xo-language-select'>
+  {%- if localization.available_languages.size > 1 -%}
+    {%- form 'localization', id: id, class: 'xo-language-select__form' -%}
+      <div class='xo-language-select__label'>
+        {{ 'localization.language_label' | t }}
+      </div>
+      <xo-popover-trigger xo-name='{{ id }}' class='xo-language-select__trigger focus-inset' tabindex='0' role='button'>
+        <span>{{ localization.language.endonym_name }}</span>
+        {% render 'icon', name: 'arrow-down', size: '20' %}
+      </xo-popover-trigger>
+
+      <xo-popover xo-name='{{ id }}' xo-placement='{% if selector_position == 'footer' %}top-center{% else %}bottom-center{% endif %}' class='xo-language-select__content'>
+        {%- for language in localization.available_languages -%}
+          {% assign input_id = 'Language--' | append: language.iso_code %}
+          <label class='xo-language-select__item' tabindex='0' role='button' for='{{ input_id }}-{{ section.id }}'>
+            <input
+              class='xo-language-select__input'
+              type='radio'
+              name='locale_code'
+              value='{{ language.iso_code }}'
+              id='{{ input_id }}-{{ section.id }}'
+              {%- if language.iso_code == localization.language.iso_code %}
+                checked
+              {% endif %}
+            >
+            <span class='xo-language-select__name'>{{ language.endonym_name }}</span>
+          </label>
+        {%- endfor -%}
+      </xo-popover>
+    {%- endform -%}
+  {%- endif -%}
+</xo-language-select>

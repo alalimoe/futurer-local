@@ -1,0 +1,204 @@
+{% if columns_desktop == 4 %}
+  {% capture grid_style_1 %}
+    style='--xxl: {{ columns_desktop }}; --xl: {{ columns_desktop }}; --lg: {{ columns_desktop | minus: 1 }}; --md: {{ columns_mobile | plus: 1 }}; --xs: {{ columns_mobile }};'
+  {% endcapture %}
+  {% capture grid_style_2 %}
+    style='--xxl: 7; --xl: 8; --lg: 7; --md: 12; --xs: 12; --start-lg: 6;  --start-xl: 5; --start-xxl: 6;'
+  {% endcapture %}
+{% elsif columns_desktop == 3 %}
+  {% capture grid_style_1 %}
+    style='--xxl: {{ columns_desktop }}; --xl: {{ columns_desktop }}; --lg: {{ columns_desktop | minus: 1 }}; --md: {{ columns_mobile | plus: 1 }}; --xs: {{ columns_mobile }};'
+  {% endcapture %}
+  {% capture grid_style_2 %}
+    style='--xxl: 6; --xl: 7; --lg: 7; --md: 12; --xs: 12; --start-lg: 6;  --start-xl: 5;  --start-xxl: 6;'
+  {% endcapture %}
+{% else %}
+  {% capture grid_style_1 %}
+    style='--xxl: {{ columns_desktop }}; --xl: {{ columns_desktop }}; --lg: {{ columns_desktop }}; --md: {{ columns_mobile | plus: 1 }}; --xs: {{ columns_mobile }};'
+  {% endcapture %}
+  {% capture grid_style_2 %}
+    style='--xxl: 4; --xl: 4; --lg: 4; --md: 12; --xs: 12; --start-lg: 7;  --start-xl: 7;  --start-xxl: 7;'
+  {% endcapture %}
+{% endif %}
+
+{% liquid
+  assign link_list_blocks = blocks | where: 'type', 'link_list'
+  assign information_blocks = blocks | where: 'type', 'information'
+
+  assign logo_class = 'xo-footer-1__grid-logo'
+  assign logo_style = ''
+  if link_list_blocks.size > 0 or information_blocks.size > 0
+    assign logo_style = '--xl: 3; --lg: 4; --md: 12; --xs: 12;'
+  else
+    assign logo_class = 'xo-footer-1__grid-logo--center'
+    assign logo_style = '--xl: 4; --lg: 6; --md: 6; --xs: 12; --start-md: 4; --start-lg: 4; --start-xl: 5;'
+  endif
+%}
+
+<div class="xo-footer-1">
+  <!-- logo, social media, menu footer -->
+  <div class="xo-footer-1__top">
+    <xo-grid class="xo-footer-1__grid">
+      <div class="{{ logo_class }}" style="{{ logo_style }}">
+        <xo-animate xo-cascade>
+          <div class="xo-footer-1__wrapper">
+            <!-- logo -->
+            <a href="{{ routes.root_url }}" class="xo-footer-1__logo">
+              {% if logo != blank %}
+                <div class="xo-footer-1__logo-image" style="--width_dt: {{ width_dt }}px; --width_md: {{ width_mb }}px;">
+                  {% render 'image', image: logo %}
+                </div>
+              {% elsif logo == blank %}
+                <h4 class="xo-footer-1__logo-name h4">{{ shop.name }}</h4>
+              {% endif %}
+            </a>
+            <!-- description -->
+            {% if sub_heading != blank %}
+              <div class="xo-footer-1__sub-heading">{{ sub_heading }}</div>
+            {% endif %}
+            <!-- social media -->
+            {% if show_icon == 'show' %}
+              <div class="xo-footer-1__social">
+                {%- render 'socials' -%}
+              </div>
+            {% endif %}
+          </div>
+        </xo-animate>
+        {%- if shop.features.follow_on_shop? and enable_follow_on_shop == 'show' -%}
+          <xo-animate xo-cascade>
+            <div class="xo-footer-1__follow-on-shop">
+              {{ shop | login_button: action: 'follow' }}
+            </div>
+          </xo-animate>
+        {%- endif -%}
+      </div>
+      {% if link_list_blocks.size > 0 or information_blocks.size > 0 %}
+        <!-- menu -->
+        <div class="xo-footer-1__grid-nav" {{ grid_style_2 }}>
+          <xo-grid class="xo-footer-1__nav" {{ grid_style_1 }}>
+            {% for block in blocks %}
+              {% case block.type %}
+                {% when 'link_list' %}
+                  <xo-animate xo-cascade>
+                    {% render 'footer-nav', footer_menu: block.settings.footer_menu, heading: block.settings.heading %}
+                  </xo-animate>
+                {% when 'information' %}
+                  <xo-animate xo-cascade>
+                    {% render 'information-footer', list_info: block.settings.list_info %}
+                  </xo-animate>
+              {% endcase %}
+            {% endfor %}
+          </xo-grid>
+        </div>
+      {% endif %}
+    </xo-grid>
+  </div>
+  <!-- subcribe -->
+  <xo-animate xo-cascade>
+    <div class="xo-footer-1__center">
+      <div class="xo-footer-1__input {% if settings.enable_border_radius %}xo-footer-1__input--radius{% endif %} {% if show_form == 'hidden' %} xo-footer-1__input--hidden{% endif %}">
+        {%- form 'customer', id: 'xo-footer-form', class: 'xo-footer-1__form' -%}
+          <input type="hidden" name="contact[tags]" value="newsletter">
+          <div class="xo-footer-1__field-input">
+            {% assign email_id = 'email--' | append: section.id %}
+            {% assign label = 'newsletter.label_placeholder_footer' | t %}
+            {% capture attr %}
+                aria-required='true'
+                autocorrect='off'
+              {% if form.errors %}
+                autofocus
+                aria-invalid='true'
+                aria-describedby='ContactFooter-error'
+              {% elsif form.posted_successfully? %}
+                aria-describedby='ContactFooter-success'
+              {% endif %}
+                required
+            {% endcapture %}
+            {% render 'field-input', type: 'email', name: 'contact[email]', value: form.email, label: label, attr: attr, id: email_id %}
+            <button
+              type="submit"
+              class="xo-footer-1__field-button {% if settings.enable_border_radius %}xo-footer-1__field-button--radius{% endif %}"
+              name="commit"
+              id="xo-btn-subscribe"
+              aria-label="{{ 'newsletter.button_label' | t }}"
+            >
+              {% render 'button-slide', icon: 'arrow-right', icon_size: '2.4rem', size: '3.6rem', direction: 'right', style: 'secondary' %}
+            </button>
+          </div>
+          <!-- submit error -->
+          <div class="xo-footer-1__form-message xo-footer-1__form-message--error xo-footer-1__form-error h6" id="xo-footer-form-message" style="display: none;">
+            {% render 'icon', name: 'error' %}
+            <p class="xo-footer-1__message">{{ 'customer.subscribe.error_text' | t }}</p>
+          </div>
+          {%- if form.errors -%}
+            <div class="xo-footer-1__form-message xo-footer-1__form-message--error h6" id="ContactFooter-error">
+              {% render 'form-error', form: form %}
+            </div>
+          {%- endif -%}
+          <!-- submit success -->
+          {%- if form.posted_successfully? -%}
+            <div
+              class="xo-footer-1__form-message xo-footer-1__form-message--success h6"
+              id="ContactFooter-success"
+              tabindex="-1"
+              autofocus
+            >
+              {% render 'icon-success', size: '3rem' -%}
+              {{- 'newsletter.success' | t }}
+            </div>
+          {%- endif -%}
+        {%- endform -%}
+      </div>
+    </div>
+  </xo-animate>
+  <!-- policy, payment, language, curency -->
+  <xo-animate xo-cascade>
+    <div class="xo-footer-1__bottom">
+      <div class="xo-footer-1__bottom-left">
+        <div class="xo-footer-1__copy-right">
+          <p>&copy; {{ 'now' | date: '%Y' }} - {{ shop.name | link_to: routes.root_url }} - {{ powered_by_link }}</p>
+        </div>
+        <div class="xo-footer-1__policy">
+          {%- if show_policy -%}
+            <div class="xo-footer-1__policy-list">
+              {%- for policy in shop.policies -%}
+                {%- if policy != blank -%}
+                  <div class="xo-footer-1__policy-list-item">
+                    <div class="xo-footer-1__policy-dot"></div>
+                    <a href="{{ policy.url }}">
+                      {{ policy.title }}
+                      <span class="xo-footer-1__line-hover"></span>
+                    </a>
+                  </div>
+                {%- endif -%}
+              {%- endfor -%}
+            </div>
+          {%- endif -%}
+        </div>
+      </div>
+      <div class="xo-footer-1__bottom-right">
+        {% if show_payment == 'show' %}
+          <div class="xo-footer-1__payment">
+            <ul class="xo-footer-1__list-payment" role="list">
+              {% for type in shop.enabled_payment_types %}
+                <li class="xo-footer-1__payment-item">
+                  {{ type | payment_type_svg_tag: class: '' }}
+                </li>
+              {%- endfor -%}
+            </ul>
+          </div>
+        {% endif %}
+        {% if show_language_selector == 'show' %}
+          <div class="xo-footer-1__language-select">
+            {% render 'language-select', selector_position: 'footer' %}
+          </div>
+        {% endif %}
+        {% if show_currency_selector == 'show' %}
+          <div class="xo-footer-1__currency-select">
+            {% render 'currency-select', selector_position: 'footer' %}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </xo-animate>
+</div>

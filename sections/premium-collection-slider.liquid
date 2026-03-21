@@ -1,0 +1,374 @@
+{% schema %}
+{
+  "name": "Premium Collection Slider",
+  "tag": "section",
+  "class": "section-premium-collections",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Section Title",
+      "default": "Shop by Category"
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "Subtitle",
+      "default": "Explore our curated collections."
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "card_bg",
+      "label": "Card Background",
+      "default": "#f8f9fa"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#111827"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent Color (Hover)",
+      "default": "#000000"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "collection",
+      "name": "Collection",
+      "settings": [
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Select Collection"
+        },
+        {
+          "type": "text",
+          "id": "custom_title",
+          "label": "Custom Title (Optional)",
+          "info": "Overrides the default collection title."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Premium Collection Slider",
+      "blocks": [
+        { "type": "collection" },
+        { "type": "collection" },
+        { "type": "collection" },
+        { "type": "collection" }
+      ]
+    }
+  ]
+}
+{% endschema %}
+
+<div class="pcs-wrapper" id="pcs-{{ section.id }}" style="--bg-color: {{ section.settings.bg_color }}; --card-bg: {{ section.settings.card_bg }}; --text-color: {{ section.settings.text_color }}; --accent-color: {{ section.settings.accent_color }};">
+  <div class="pcs-container">
+    
+    <div class="pcs-header">
+      <div class="pcs-header-text">
+        {% if section.settings.title != blank %}
+          <h2 class="pcs-title">{{ section.settings.title }}</h2>
+        {% endif %}
+        {% if section.settings.subtitle != blank %}
+          <p class="pcs-subtitle">{{ section.settings.subtitle }}</p>
+        {% endif %}
+      </div>
+      
+      <div class="pcs-controls">
+        <button class="pcs-arrow pcs-prev" aria-label="Previous" disabled>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <button class="pcs-arrow pcs-next" aria-label="Next">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="pcs-slider-track" id="track-{{ section.id }}">
+      {% for block in section.blocks %}
+        {% assign collection = block.settings.collection %}
+        {% assign title = block.settings.custom_title | default: collection.title | default: "Collection Name" %}
+        {% assign link = collection.url | default: "#" %}
+        
+        {% assign svg_icon = collection.metafields.custom.collection_icon.value %}
+
+        <a href="{{ link }}" class="pcs-card" {{ block.shopify_attributes }}>
+          <div class="pcs-card-inner">
+            <div class="pcs-icon-wrapper">
+              {% if svg_icon != blank %}
+                <div class="pcs-inline-svg">
+                  {{ svg_icon }}
+                </div>
+              {% else %}
+                <div class="pcs-fallback-icon"></div>
+              {% endif %}
+            </div>
+            
+            <div class="pcs-content">
+              <h3 class="pcs-card-title">{{ title }}</h3>
+              {% if collection != blank %}
+                <span class="pcs-item-count">{{ collection.products_count }} Items</span>
+              {% endif %}
+            </div>
+            
+            <div class="pcs-hover-arrow">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </div>
+          </div>
+        </a>
+      {% endfor %}
+    </div>
+
+  </div>
+</div>
+
+<style>
+  /* Base Variables & Container */
+  .pcs-wrapper {
+    background-color: var(--bg-color);
+    padding: 80px 20px;
+    font-family: inherit;
+    color: var(--text-color);
+    overflow: hidden;
+  }
+  .pcs-container {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  /* Header & Typography */
+  .pcs-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 40px;
+    gap: 20px;
+  }
+  .pcs-title {
+    font-size: clamp(28px, 4vw, 42px);
+    font-weight: 600;
+    margin: 0 0 8px 0;
+    letter-spacing: -0.02em;
+    color: var(--text-color);
+    line-height: 1.1;
+  }
+  .pcs-subtitle {
+    font-size: 16px;
+    margin: 0;
+    opacity: 0.6;
+    color: var(--text-color);
+  }
+
+  /* Navigation Arrows */
+  .pcs-controls {
+    display: flex;
+    gap: 12px;
+  }
+  .pcs-arrow {
+    background: transparent;
+    border: 1px solid rgba(0,0,0,0.1);
+    color: var(--text-color);
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .pcs-arrow:hover:not(:disabled) {
+    background: var(--text-color);
+    color: var(--bg-color);
+    border-color: var(--text-color);
+  }
+  .pcs-arrow:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+
+  /* Slider Track - Native Scroll Snapping */
+  .pcs-slider-track {
+    display: flex;
+    gap: 24px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    padding-bottom: 24px;
+    margin-bottom: -24px;
+    scrollbar-width: none; 
+    -ms-overflow-style: none;
+  }
+  .pcs-slider-track::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Cards */
+  .pcs-card {
+    flex: 0 0 calc(25% - 18px);
+    min-width: 260px;
+    scroll-snap-align: start;
+    text-decoration: none;
+    color: inherit;
+    outline: none;
+  }
+  
+  .pcs-card-inner {
+    background: var(--card-bg);
+    border-radius: 20px;
+    padding: 32px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    border: 1px solid rgba(0,0,0,0.03);
+  }
+
+  .pcs-card:hover .pcs-card-inner {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px -10px rgba(0,0,0,0.08);
+    background: var(--bg-color);
+    border-color: rgba(0,0,0,0.08);
+  }
+
+  /* SVG Icon Wrapper */
+  .pcs-icon-wrapper {
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+    background: var(--bg-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 32px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+    transition: transform 0.4s ease;
+    color: var(--text-color); /* Sets the default SVG color */
+  }
+  .pcs-card:hover .pcs-icon-wrapper {
+    transform: scale(1.05);
+    color: var(--accent-color); /* Changes the SVG color on hover */
+  }
+  
+  /* Inline SVG Sizing */
+  .pcs-inline-svg {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .pcs-inline-svg svg {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+    /* This ensures your SVG inherits the colors set above */
+    color: inherit; 
+    fill: currentColor;
+  }
+
+  .pcs-fallback-icon {
+    width: 32px;
+    height: 32px;
+    background: rgba(0,0,0,0.1);
+    border-radius: 50%;
+  }
+
+  /* Content */
+  .pcs-content {
+    margin-top: auto;
+  }
+  .pcs-card-title {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0 0 6px 0;
+    line-height: 1.2;
+    transition: color 0.3s ease;
+  }
+  .pcs-item-count {
+    font-size: 13px;
+    opacity: 0.5;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  /* Hover Arrow */
+  .pcs-hover-arrow {
+    position: absolute;
+    bottom: 32px;
+    right: 32px;
+    opacity: 0;
+    transform: translateX(-10px);
+    transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+    color: var(--accent-color);
+  }
+  .pcs-card:hover .pcs-hover-arrow {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  .pcs-card:hover .pcs-card-title {
+    color: var(--accent-color);
+  }
+
+  /* Responsive Adjustments */
+  @media (max-width: 1024px) {
+    .pcs-card { flex: 0 0 calc(33.333% - 16px); }
+  }
+  @media (max-width: 768px) {
+    .pcs-wrapper { padding: 60px 16px; }
+    .pcs-header { flex-direction: column; align-items: flex-start; gap: 16px; }
+    .pcs-card { flex: 0 0 calc(60% - 16px); }
+    .pcs-controls { display: none; }
+    .pcs-slider-track { padding-bottom: 16px; }
+  }
+  @media (max-width: 480px) {
+    .pcs-card { flex: 0 0 calc(85% - 16px); }
+  }
+</style>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const section = document.querySelector('#pcs-{{ section.id }}');
+    if (!section) return;
+
+    const track = section.querySelector('.pcs-slider-track');
+    const prevBtn = section.querySelector('.pcs-prev');
+    const nextBtn = section.querySelector('.pcs-next');
+
+    nextBtn?.addEventListener('click', () => {
+      const scrollAmount = track.offsetWidth * 0.8; 
+      track.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    });
+
+    prevBtn?.addEventListener('click', () => {
+      const scrollAmount = track.offsetWidth * 0.8;
+      track.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+    });
+
+    const updateButtons = () => {
+      if (!prevBtn || !nextBtn) return;
+      const isAtStart = track.scrollLeft <= 0;
+      const isAtEnd = track.scrollLeft + track.offsetWidth >= track.scrollWidth - 1;
+      
+      prevBtn.disabled = isAtStart;
+      nextBtn.disabled = isAtEnd;
+    };
+
+    track.addEventListener('scroll', updateButtons, { passive: true });
+    window.addEventListener('resize', updateButtons);
+    updateButtons(); 
+  });
+</script>

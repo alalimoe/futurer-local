@@ -1,0 +1,199 @@
+{% liquid
+  assign alignment = block.settings.alignment
+  assign padding_top_dt = block.settings.padding_top_dt | divided_by: 10.0
+  assign padding_bottom_dt = block.settings.padding_bottom_dt | divided_by: 10.0
+  assign padding_top_mb = block.settings.padding_top_mb | divided_by: 10.0
+  assign padding_bottom_mb = block.settings.padding_bottom_mb | divided_by: 10.0
+
+  assign container_class = 'xo-heading-block'
+  assign container_style = '--padding-top-dt: ' | append: padding_top_dt | append: 'rem; --padding-bottom-dt: ' | append: padding_bottom_dt | append: 'rem; --padding-top-mb: ' | append: padding_top_mb | append: 'rem; --padding-bottom-mb: ' | append: padding_bottom_mb | append: 'rem;'
+
+  case alignment
+    when 'left'
+      assign container_class = container_class | append: ' xo-heading-block--left'
+    when 'center'
+      assign container_class = container_class | append: ' xo-heading-block--center'
+    when 'right'
+      assign container_class = container_class | append: ' xo-heading-block--right'
+  endcase
+%}
+
+<div class="{{ container_class }}" style="{{ container_style }}" {{ block.shopify_attributes }}>
+  {% render 'text', context: block %}
+</div>
+
+
+{% schema %}
+{
+  "name": "t:blocks.text.name",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Text"
+    },
+    {
+      "type": "select",
+      "id": "text_tag_name",
+      "label": "Tag name",
+      "options": [
+        {
+          "value": "h1",
+          "label": "H1"
+        },
+        {
+          "value": "h2",
+          "label": "H2"
+        },
+        {
+          "value": "h3",
+          "label": "H3"
+        },
+        {
+          "value": "h4",
+          "label": "H4"
+        },
+        {
+          "value": "h5",
+          "label": "H5"
+        },
+        {
+          "value": "h6",
+          "label": "H6"
+        }
+      ],
+      "default": "h2"
+    },
+    {
+      "type": "textarea",
+      "id": "text_heading",
+      "label": "Text",
+      "default": "Heading"
+    },
+    {
+      "type": "select",
+      "id": "font_size_heading",
+      "label": "Font size heading",
+      "default": "h5",
+      "options": [
+        {
+          "value": "h1",
+          "label": "Extra extra large"
+        },
+        {
+          "value": "h2",
+          "label": "Extra large"
+        },
+        {
+          "value": "h3",
+          "label": "Large"
+        },
+        {
+          "value": "h4",
+          "label": "Medium"
+        },
+        {
+          "value": "h5",
+          "label": "Small"
+        },
+        {
+          "value": "h6",
+          "label": "Extra small"
+        }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "text_line_height",
+      "label": "Line height",
+      "min": 0,
+      "max": 3,
+      "step": 0.1,
+      "default": 1.2
+    },
+    {
+      "type": "select",
+      "id": "text_effect",
+      "label": "Effect",
+      "options": [
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "reveal",
+          "label": "Blur"
+        },
+        {
+          "value": "split",
+          "label": "Split"
+        }
+      ],
+      "default": "split"
+    },
+    {
+      "type": "number",
+      "id": "text_duration",
+      "label": "Duration (milliseconds)",
+      "default": 1000
+    },
+    {
+      "type": "range",
+      "id": "text_heading_width_desktop",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "label": "Desktop heading width",
+      "default": 100
+    },
+    {
+      "type": "range",
+      "id": "text_heading_width_mobile",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "label": "Mobile heading width",
+      "default": 100
+    },
+    {
+      "type": "text_alignment",
+      "id": "alignment",
+      "label": "t:blocks.text.settings.alignment.label"
+    },
+    {
+      "type": "header",
+      "content": "t:blocks.text.settings.padding.content"
+    },
+    {
+      "type": "number",
+      "id": "padding_top_dt",
+      "label": "t:blocks.text.settings.top_dt.label",
+      "default": 0
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_dt",
+      "label": "t:blocks.text.settings.bottom_dt.label",
+      "default": 0
+    },
+    {
+      "type": "number",
+      "id": "padding_top_mb",
+      "label": "t:blocks.text.settings.top_mb.label",
+      "default": 0
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_mb",
+      "label": "t:blocks.text.settings.bottom_mb.label",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:blocks.text.name"
+    }
+  ]
+}
+{% endschema %}

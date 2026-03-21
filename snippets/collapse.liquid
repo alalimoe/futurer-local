@@ -1,0 +1,67 @@
+{{ 'collapse.css' | asset_url | stylesheet_tag }}
+
+{% comment %}
+  Renders a collapse component.
+
+  Accepts:
+  - title: {String} Title of the collapse (optional)
+  - content: {String} Content of the collapse (optional)
+  - name: {String} Name of the collapse (optional)
+  - icon: {String} Name of the icon to use. Default: 'chevron-down' (optional)
+
+  Usage:
+  {% render 'collapse',
+    title: title,
+    content: content,
+    name: name,
+    icon: 'chevron-down'
+  %}
+{% endcomment %}
+
+{% assign style = style | default: false %}
+
+<div class='xo-collapse'>
+  <xo-collapse-trigger
+    class='xo-collapse__trigger'
+    {% if name %}
+      xo-name='{{ name }}'
+    {% endif %}
+    {% if style == true %}
+      xo-active
+    {% endif %}
+    tabindex="0" role="button"
+  >
+    <div class='xo-collapse__trigger-title'>
+      {{ title }}
+    </div>
+    {% if show_icon_arrow %}
+      <div class='xo-collapse__trigger-icon'>
+        <div class='xo-collapse__trigger-icon-arrow'>
+          {% render 'icon', name: 'arrow-down', size: '2.4rem' %}
+        </div>
+      </div>
+    {%- else -%}
+      <div class='xo-collapse__trigger-icon'>
+        <div class='xo-collapse__trigger-icon-default'>
+          {% render 'icon', name: 'collapse-default', size: '2.4rem' %}
+        </div>
+        <div class='xo-collapse__trigger-icon-active'>
+          {% render 'icon', name: 'collapse-active', size: '2.4rem' %}
+        </div>
+      </div>
+    {% endif %}
+  </xo-collapse-trigger>
+  <xo-collapse
+    class='xo-collapse__body'
+    {% if name %}
+      xo-name='{{ name }}'
+    {% endif %}
+    {% if style == true %}
+      xo-active
+    {% endif %}
+  >
+    <div class='xo-collapse__content'>
+      {{ content }}
+    </div>
+  </xo-collapse>
+</div>

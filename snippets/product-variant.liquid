@@ -1,0 +1,96 @@
+{% comment %}
+  Renders a product variant
+
+  Accepts:
+  - style: {String} The style of the radio buttons. Accepts 'radio' | 'boxed' | 'select' | 'color'
+  - option: {Object} The product variant option to render.
+  - select_custom_popover_name_suffix: {String} Suffix for popover name (optional)
+  Usage:
+  {% render 'product-variant', option: option %}
+{% endcomment %}
+
+{% assign placement = placement | default: 'bottom-left' %}
+
+<div class="xo-product-variant">
+  {% if style == 'select' %}
+    <div class="xo-product-variant__top">
+      <div class="xo-product-variant__top-name">
+        <span>{{ option.name }}</span>
+        <span class="xo-product-variant__value-selected">{{ option.selected_value }}</span>
+      </div>
+    </div>
+    {% capture options %}
+      <div class="xo-product-variant__inner">
+        {% liquid
+          for value in option.values
+            render 'field-select-custom-option', label: value, option: option, name: option.name, value: value, checked: value.selected, option_value_id: value.id, variant_id: value.variant.id, use_with: 'product-variant'
+          endfor
+        %}
+      </div>
+    {% endcapture %}
+    {% render 'field-select-custom',
+      use_with: 'product-variant',
+      option: option,
+      name: option.name,
+      value: option.selected_value,
+      options: options,
+      placement: placement,
+      popover_name_suffix: select_custom_popover_name_suffix
+    %}
+
+  {% elsif style == 'color' %}
+    <div class="xo-product-variant__inner">
+      <div class="xo-product-variant__inner-name">
+        <span>{{ option.name }}</span>
+        <span class="xo-product-variant__value-selected">{{ option.selected_value }}</span>
+      </div>
+      <div class="xo-product-variant__inner-value">
+        {% for value in option.values %}
+          {% render 'field-color',
+            style: style,
+            option: option,
+            name: option.name,
+            value: value,
+            label: value,
+            image: value.swatch.image,
+            use_image: true,
+            use_with: 'product-variant'
+          %}
+        {% endfor %}
+      </div>
+    </div>
+  {%- elsif style == 'variant_image' -%}
+    <div class="xo-product-variant__inner">
+      <div class="xo-product-variant__inner-name">
+        <span>{{ option.name }}</span>
+        <span class="xo-product-variant__value-selected">{{ option.selected_value }}</span>
+      </div>
+      <div class="xo-product-variant__inner-value">
+        {% for value in option.values %}
+          {% render 'field-color',
+            style: style,
+            option: option,
+            name: option.name,
+            value: value,
+            label: value,
+            image: value.variant.featured_image,
+            use_image: true,
+            use_with: 'product-variant'
+          %}
+        {% endfor %}
+      </div>
+    </div>
+  {% else %}
+    <div class="xo-product-variant__inner">
+      <div class="xo-product-variant__inner-name">
+        <span>{{ option.name }}</span>
+        <span class="xo-product-variant__value-selected">{{ option.selected_value }}</span>
+      </div>
+      <div class="xo-product-variant__inner-value">
+        {% for value in option.values %}
+          {% render 'field-radio', style: style, option: option, name: option.name, value: value, label: value, checked: value.selected, use_with: 'product-variant' %}
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+</div>

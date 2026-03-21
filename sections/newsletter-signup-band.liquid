@@ -1,0 +1,55 @@
+{% comment %} Simple signup band (can be swapped to your form app snippet) {% endcomment %}
+<section class="nl-band">
+  <div class="container">
+    <div class="left">
+      <div class="h">{{ section.settings.heading }}</div>
+      <div class="p">{{ section.settings.subtext }}</div>
+    </div>
+    <div class="right">
+      <form method="post" action="{{ routes.predictive_search_url | default: '/' }}" onsubmit="return false;">
+        <input type="email" placeholder="{{ section.settings.placeholder }}" aria-label="Email" autocomplete="email">
+        <button type="button">{{ section.settings.cta }}</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<style>
+.nl-band{padding:22px var(--page-gutter);border-top:none;font-family:var(--font-body-family,sans-serif)}
+.nl-band .container{max-width:var(--container-width-max);margin:0 auto;display:flex;gap:16px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.nl-band .h{font-family:var(--font-heading-family,sans-serif);font-weight:800;font-size:clamp(1.1rem,2vw,1.35rem);letter-spacing:-0.02em;color:var(--nx-text,#111)}
+.nl-band .p{color:var(--nx-muted,#6B7280);line-height:1.5;font-size:clamp(0.85rem,1.2vw,0.9375rem)}
+.nl-band .right form{display:flex;gap:8px}
+.nl-band .right input{
+  border:none;border-radius:var(--nx-radius-md);padding:10px 14px;min-height:44px;box-sizing:border-box;
+  font-family:var(--font-body-family,sans-serif);font-size:clamp(0.85rem,1.2vw,0.9375rem);
+  background:rgba(255,255,255,0.7);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+  box-shadow:var(--shadow-xs);
+  transition:all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+.nl-band .right input:focus{outline:none;box-shadow:var(--shadow-gold-focus);background:rgba(255,255,255,0.9)}
+.nl-band .right input:focus-visible{outline:2px solid var(--nx-accent,#FBBF24);outline-offset:2px}
+.nl-band .right button{
+  border:2px solid var(--nx-accent,#FBBF24);border-radius:var(--nx-radius-md);background:transparent;color:var(--color-text-primary);font-weight:800;
+  padding:10px 18px;min-height:44px;cursor:pointer;font-size:clamp(0.85rem,1.2vw,0.9375rem);
+  box-shadow:var(--shadow-sm);
+  transition:all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+.nl-band .right button:hover{background:var(--nx-accent,#FBBF24);transform:translateY(-1px);box-shadow:var(--shadow-gold-sm)}
+.nl-band .right button:active{transform:scale(0.97)}
+.nl-band .right button:focus-visible{outline:2px solid var(--nx-accent,#FBBF24);outline-offset:2px}
+@media(prefers-reduced-motion:reduce){.nl-band .right input,.nl-band .right button{transition:none}.nl-band .right button:hover{transform:none}}
+</style>
+
+{% schema %}
+{
+  "name": "Newsletter signup band",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Be the first to know" },
+    { "type": "text", "id": "subtext", "label": "Subtext", "default": "Get research updates, product drops, and COA postings." },
+    { "type": "text", "id": "placeholder", "label": "Placeholder", "default": "you@lab.edu" },
+    { "type": "text", "id": "cta", "label": "CTA", "default": "Subscribe" }
+  ],
+  "presets": [{ "name": "Newsletter signup band" }]
+}
+{% endschema %}

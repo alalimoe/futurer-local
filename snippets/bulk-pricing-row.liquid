@@ -1,0 +1,19 @@
+{%- comment -%}
+  PDP bulk-pricing row (Retail 15/20/25; hide for wholesale-tagged customers)
+{%- endcomment -%}
+
+{%- assign retail_breaks_enabled = true -%}
+{%- assign wholesale_link = '/pages/wholesale' -%}
+
+{%- if customer and customer.tags contains 'wholesale' -%}
+  <div class="BulkRow" aria-live="polite">Wholesale pricing shown.</div>
+{%- elsif retail_breaks_enabled -%}
+  <div class="BulkRow" id="BulkRow" aria-live="polite">
+    <span class="BulkRow__icon" aria-hidden="true">%</span>
+    <span class="BulkRow__text">
+      Buy more &amp; save: <strong>3+ 15%</strong> · <strong>6+ 20%</strong> · <strong>12+ 25%</strong>
+      · <a href="{{ wholesale_link }}">Wholesale →</a>
+      <span id="BulkRowApplied" class="BulkRow__applied" hidden></span>
+    </span>
+  </div>
+{%- endif -%}

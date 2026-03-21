@@ -1,0 +1,93 @@
+{% comment %}
+  Renders a collection list
+
+  @param {Array} collection_list - Collection list (required),
+  @param {Boolean} autoplay - Autoplay (optional),
+  @param {Number} autoplay_speed - Autoplay speed (optional),
+  @param {Number} product_per_view - Number of products per view (optional),
+
+  @example
+  {% render 'collection-list-6', collection_list: collection_list, autoplay: autoplay, autoplay_speed: autoplay_speed, product_per_view: product_per_view %}
+{% endcomment %}
+
+<div class="collection-list-6{% if heading != blank %} collection-list-6__content--modifier{% endif %}">
+  {% if heading != blank %}
+    <div class="collection-list-6__head">
+      {% render 'text', context: section %}
+    </div>
+  {% endif %}
+  <xo-animate xo-cascade class="collection-list-6__body">
+    <xo-carousel
+      class="collection-list-6__carousel"
+      xo-per-view="{{ product_per_view }}"
+      {% if autoplay == 'on' %}
+        xo-autoplay="{{ autoplay_speed }}"
+        xo-loop
+      {% endif %}
+      xo-breakpoints="
+        {
+          400: {
+            perView: 2,
+            perMove: 1,
+            gap: 10,
+            overflow: 'visible'
+          },
+          768: {
+            perView: 3,
+            perMove: 1,
+          },
+          992: {
+            perView: 3,
+            perMove: 1,
+          },
+          1200: {
+            perView: 4,
+            perMove: 1,
+          },
+          1400: {
+            perView: {{ product_per_view | minus: 1 }},
+            perMove: 1,
+          },
+        }
+      "
+    >
+      <xo-carousel-inner>
+        <xo-carousel-list>
+          {% if section.settings.collection_list != blank %}
+            {% for collection in collection_list %}
+              <xo-carousel-slide>
+                <div class="collection-list-6__product">
+                  {% render 'collection-card-v2',
+                    collection: collection,
+                    animated_enable: true,
+                    padding_vertical: 18,
+                    padding_horizontal: 18,
+                    image_size: image_size,
+                    color_schema_card: color_schema_card,
+                    layout: 'vertical'
+                  %}
+                </div>
+              </xo-carousel-slide>
+            {% endfor %}
+          {% else %}
+            {% for item in (1..6) %}
+              <xo-carousel-slide>
+                <div class="collection-list-6__product">
+                  {% render 'collection-card-v2',
+                    collection: empty,
+                    animated_enable: true,
+                    padding_vertical: 18,
+                    padding_horizontal: 18,
+                    image_size: image_size,
+                    color_schema_card: color_schema_card,
+                    layout: 'vertical'
+                  %}
+                </div>
+              </xo-carousel-slide>
+            {% endfor %}
+          {% endif %}
+        </xo-carousel-list>
+      </xo-carousel-inner>
+    </xo-carousel>
+  </xo-animate>
+</div>

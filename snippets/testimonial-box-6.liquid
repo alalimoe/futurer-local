@@ -1,0 +1,131 @@
+{% comment %}
+  Renders a testimonial element with a given value
+
+  Accepts:
+  - autoplay: {String} Autoplay slide (required)
+  - autoplay_time: {String} Set time for autoplay slide (required)
+
+  Usage:
+  {% render 'testimonial-box-6', autoplay: autoplay, autoplay_time: autoplay_time %}
+{% endcomment %}
+
+<div class='testimonial-box-6'>
+  <xo-animate xo-cascade>
+    <div class='testimonial-box-6__head'>
+      {% if sub_heading %}
+        <div class='testimonial-box-6__sub-heading'>
+          <p>{{ sub_heading }}</p>
+        </div>
+      {% endif %}
+    </div>
+  </xo-animate>
+  <div class='testimonial-box-6__body'>
+    <div class='testimonial-box-6__desktop'>
+      <xo-grid class='testimonial-box-6__grid' style='--lg: {{ column_dt }}; --md: 1; --xs: 1'>
+        {% for item in block %}
+          {% liquid
+            assign content_1 = item.settings.content_1
+            assign avatar_1 = item.settings.avatar_1
+            assign name_1 = item.settings.customer_name_1
+            assign content_2 = item.settings.content_2
+            assign avatar_2 = item.settings.avatar_2
+            assign name_2 = item.settings.customer_name_2
+          %}
+          <xo-animate xo-cascade>
+            <div class='testimonial-box-6__item'>
+              <div class='testimonial-box-6__row'>
+                {% render 'testimonial-box',
+                  content: content_1,
+                  avatar: avatar_1,
+                  name: name_1,
+                  enable_navigation: 'false',
+                  enable_show_icon: 'false',
+                  tag_2: 'div',
+                  tag_1: 'xo-animate'
+                %}
+              </div>
+              <div class='testimonial-box-6__row'>
+                {% render 'testimonial-box',
+                  content: content_2,
+                  avatar: avatar_2,
+                  name: name_2,
+                  enable_navigation: 'false',
+                  enable_show_icon: 'false',
+                  tag_2: 'div',
+                  tag_1: 'xo-animate'
+                %}
+              </div>
+            </div>
+          </xo-animate>
+        {% endfor %}
+      </xo-grid>
+    </div>
+    <div class='testimonial-box-6__mobile'>
+      <xo-carousel
+        class='testimonial-box-6__carousel'
+        xo-per-view='1'
+        xo-per-move='1'
+        xo-type='none'
+        {% if autoplay == 'on' %}
+          xo-autoplay='{{ autoplay_time }}'
+          xo-loop
+        {% endif %}
+        xo-breakpoints='
+          {
+            768: {
+              perView: 1,
+              perMove: 1,
+              gap: 10,
+              overflow: "visible"
+            },
+          }
+        '
+        xo-render-bullet="<span class='carousel-bullet'></span>"
+      >
+        <xo-carousel-inner>
+          <xo-carousel-list>
+            {% for item in block %}
+              {% liquid
+                assign content_1 = item.settings.content_1
+                assign avatar_1 = item.settings.avatar_1
+                assign name_1 = item.settings.customer_name_1
+                assign content_2 = item.settings.content_2
+                assign avatar_2 = item.settings.avatar_2
+                assign name_2 = item.settings.customer_name_2
+              %}
+              <xo-carousel-slide>
+                <div xo-cascade class='testimonial-box-6__item'>
+                  <div class='testimonial-box-6__row'>
+                    {% render 'testimonial-box',
+                      content: content_1,
+                      avatar: avatar_1,
+                      name: name_1,
+                      enable_navigation: 'false',
+                      enable_show_icon: 'false',
+                      tag_2: 'div',
+                      tag_1: 'xo-animate'
+                    %}
+                  </div>
+                  <div class='testimonial-box-6__row'>
+                    {% render 'testimonial-box',
+                      content: content_2,
+                      avatar: avatar_2,
+                      name: name_2,
+                      enable_navigation: 'false',
+                      enable_show_icon: 'false',
+                      tag_2: 'div',
+                      tag_1: 'xo-animate'
+                    %}
+                  </div>
+                </div>
+              </xo-carousel-slide>
+            {% endfor %}
+          </xo-carousel-list>
+        </xo-carousel-inner>
+        <div class='testimonial-box-6__paginate'>
+          {% render 'carousel-pagination', align: 'center', style: 'sticks' %}
+        </div>
+      </xo-carousel>
+    </div>
+  </div>
+</div>

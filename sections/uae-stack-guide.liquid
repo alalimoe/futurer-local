@@ -1,0 +1,178 @@
+{% schema %}
+{
+  "name": "UAE Stack Guide",
+  "tag": "section",
+  "class": "section-uae-stack-guide",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Quick Stack Guide" },
+    { "type": "text", "id": "table_1_heading", "label": "Table 1 Heading", "default": "Popular Compounds" },
+    { "type": "text", "id": "table_2_heading", "label": "Table 2 Heading", "default": "Head-to-Head Comparisons" },
+    { "type": "header", "content": "Colors" },
+    { "type": "color", "id": "bg_color", "label": "Background", "default": "#f9fafb" },
+    { "type": "color", "id": "accent_color", "label": "Accent", "default": "#FBBF24" }
+  ],
+  "blocks": [
+    {
+      "type": "compound",
+      "name": "Compound Row",
+      "settings": [
+        { "type": "text", "id": "name", "label": "Compound" },
+        { "type": "text", "id": "use", "label": "Primary Use" },
+        { "type": "text", "id": "onset", "label": "Onset" },
+        { "type": "text", "id": "pairs", "label": "Pairs With" },
+        { "type": "url", "id": "url", "label": "Product Link" }
+      ]
+    },
+    {
+      "type": "compare",
+      "name": "Comparison Row",
+      "settings": [
+        { "type": "text", "id": "vs", "label": "VS" },
+        { "type": "text", "id": "use_case", "label": "Use Case" },
+        { "type": "text", "id": "feels", "label": "Feels Like" },
+        { "type": "text", "id": "notes", "label": "Notes" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "UAE Stack Guide",
+      "blocks": [
+        { "type": "compound", "settings": { "name": "Caffeine + L-Theanine", "use": "Calm focus", "onset": "15-30 m", "pairs": "CDP-Choline" } },
+        { "type": "compound", "settings": { "name": "Alpha-GPC", "use": "Choline source", "onset": "30-60 m", "pairs": "Noopept" } },
+        { "type": "compound", "settings": { "name": "CDP-Choline", "use": "Memory support", "onset": "30-60 m", "pairs": "Phenylpiracetam" } },
+        { "type": "compare", "settings": { "vs": "CDP-Choline vs Alpha-GPC", "use_case": "Memory vs power output", "feels": "Clean vs robust", "notes": "Try one; avoid doubling high doses" } }
+      ]
+    }
+  ]
+}
+{% endschema %}
+
+{%- assign usg_compounds = section.blocks | where: "type", "compound" -%}
+{%- assign usg_compares = section.blocks | where: "type", "compare" -%}
+
+{%- comment -%} ── JSON-LD: ItemList ── {%- endcomment -%}
+{% if usg_compounds.size > 0 %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "name": {{ section.settings.heading | json }},
+  "numberOfItems": {{ usg_compounds.size }},
+  "itemListElement": [
+    {%- for block in usg_compounds -%}
+    {
+      "@type": "ListItem",
+      "position": {{ forloop.index }},
+      "name": {{ block.settings.name | json }},
+      "description": {{ block.settings.use | json }}
+      {%- if block.settings.url != blank -%}
+      ,"url": "{{ block.settings.url }}"
+      {%- endif -%}
+    }{%- unless forloop.last -%},{%- endunless -%}
+    {%- endfor -%}
+  ]
+}
+</script>
+{% endif %}
+
+<div class="usg-wrapper" id="uae-stacks">
+  <div class="usg-inner">
+    {% if section.settings.heading != blank %}
+      <h2 class="usg-heading">{{ section.settings.heading }}</h2>
+    {% endif %}
+
+    {% if usg_compounds.size > 0 %}
+      {% if section.settings.table_1_heading != blank %}
+        <h3 class="usg-sub">{{ section.settings.table_1_heading }}</h3>
+      {% endif %}
+      <div class="usg-scroll">
+        <table class="usg-table">
+          <thead>
+            <tr><th>Compound</th><th>Primary Use</th><th>Onset</th><th>Pairs With</th><th>Shop</th></tr>
+          </thead>
+          <tbody>
+            {%- for block in usg_compounds -%}
+              <tr {{ block.shopify_attributes }}>
+                <td class="usg-name">{{ block.settings.name }}</td>
+                <td>{{ block.settings.use }}</td>
+                <td>{{ block.settings.onset }}</td>
+                <td>{{ block.settings.pairs }}</td>
+                <td>{% if block.settings.url != blank %}<a href="{{ block.settings.url }}" class="usg-link">View</a>{% endif %}</td>
+              </tr>
+            {%- endfor -%}
+          </tbody>
+        </table>
+      </div>
+    {% endif %}
+
+    {% if usg_compares.size > 0 %}
+      {% if section.settings.table_2_heading != blank %}
+        <h3 class="usg-sub">{{ section.settings.table_2_heading }}</h3>
+      {% endif %}
+      <div class="usg-scroll">
+        <table class="usg-table">
+          <thead>
+            <tr><th>VS</th><th>Use Case</th><th>Feels Like</th><th>Notes</th></tr>
+          </thead>
+          <tbody>
+            {%- for block in usg_compares -%}
+              <tr {{ block.shopify_attributes }}>
+                <td class="usg-name">{{ block.settings.vs }}</td>
+                <td>{{ block.settings.use_case }}</td>
+                <td>{{ block.settings.feels }}</td>
+                <td>{{ block.settings.notes }}</td>
+              </tr>
+            {%- endfor -%}
+          </tbody>
+        </table>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<style>
+  .usg-wrapper {
+    --usg-bg: {{ section.settings.bg_color }};
+    --usg-accent: {{ section.settings.accent_color }};
+    --usg-text: var(--color-text-main, #111827);
+    --usg-muted: var(--color-text-muted, #4b5563);
+    --usg-border: var(--nx-pill-border, #E5E7EB);
+    --usg-radius: var(--nx-radius, 14px);
+    --usg-font: var(--font-body-family, sans-serif);
+    --usg-font-heading: var(--font-heading-family, sans-serif);
+    background: var(--usg-bg); padding: 80px var(--page-gutter); font-family: var(--usg-font);
+  }
+  .usg-inner { max-width: 960px; margin: 0 auto; }
+  .usg-heading {
+    font-family: var(--usg-font-heading); font-size: clamp(1.75rem, 3vw, 2.25rem);
+    font-weight: 800; color: var(--usg-text); margin: 0 0 32px; text-align: center; letter-spacing: -0.02em;
+  }
+  .usg-sub {
+    font-family: var(--usg-font-heading); font-size: 1.125rem;
+    font-weight: 700; color: var(--usg-text); margin: 0 0 16px;
+  }
+  .usg-scroll {
+    overflow-x: auto; border: 1px solid var(--usg-border);
+    border-radius: var(--usg-radius); margin-bottom: 32px;
+    background: var(--color-bg-primary, #fff);
+  }
+  .usg-table { width: 100%; border-collapse: collapse; min-width: 560px; }
+  .usg-table thead { background: var(--color-bg-secondary, #f1f5f9); }
+  .usg-table th {
+    padding: 12px 16px; text-align: left; font-size: 0.75rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.5px; color: var(--usg-muted);
+  }
+  .usg-table td { padding: 14px 16px; font-size: 0.9375rem; color: var(--usg-text); border-top: 1px solid var(--usg-border); }
+  .usg-name { font-weight: 700; }
+  .usg-table tbody tr:hover { background: var(--color-bg-secondary, #f9fafb); }
+  .usg-link {
+    font-weight: 700; font-size: 0.875rem; color: var(--usg-accent);
+    text-decoration: none; transition: color 0.2s;
+  }
+  .usg-link:hover { text-decoration: underline; }
+
+  .usg-wrapper :focus-visible { outline: 2px solid var(--usg-accent); outline-offset: 2px; }
+  @media (prefers-reduced-motion: reduce) { .usg-wrapper *, .usg-wrapper *::before, .usg-wrapper *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
+  @media (max-width: 640px) { .usg-wrapper { padding: 56px var(--page-gutter); } }
+</style>

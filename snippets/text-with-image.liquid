@@ -1,0 +1,142 @@
+{% comment %}
+  Render text with image
+
+  @params {object} context - Context (section | block)
+  @params {object} blocks - Blocks
+
+  @examples
+  {% render 'text-with-image', context: context, blocks: blocks %}
+{% endcomment %}
+
+{% liquid
+  assign context = context | default: section
+  assign font_size = context.settings.font_size
+  assign text = context.settings.text
+  assign text_highlight = context.settings.text_highlight
+  assign text_highlight_color = context.settings.text_highlight_color
+
+  assign container_class = 'text-with-image'
+  if font_size != 'd1'
+    assign container_class = container_class | append: ' ' | append: font_size
+  else
+    assign container_class = container_class | append: ' text-with-image--modifier'
+  endif
+%}
+
+{% capture text_highlight_inner %}
+  <span class="text-with-image__highlight" style="--color-highlight: {{ text_highlight_color }}">{{ text_highlight }}</span>
+{% endcapture %}
+
+{% if text contains '[highlight]' and text_highlight != blank %}
+  {% assign text = text | replace: '[highlight]', text_highlight_inner %}
+{% else %}
+  {% assign text = text %}
+{% endif %}
+
+{% liquid
+  assign has_img = false
+  if text contains '[img]'
+    assign has_img = true
+    assign text_parts = text | strip | split: '[img]'
+  endif
+%}
+
+{% if has_img %}
+  {% capture final_text %}
+    <span>
+      {% for part in text_parts %}
+        {% assign has_next_img = false %}
+        {% if forloop.index0 < blocks.size %}
+          {% assign has_next_img = true %}
+        {% endif %}
+        {% if part != blank or has_next_img %}
+          {{ part }}
+        {% endif %}
+        {% if forloop.index0 < blocks.size %}
+            {% liquid
+              assign placeholder = 'detailed-apparel-1'
+              assign lazyload = true
+              assign sizes = '100vw'
+              assign wc = 'xo-lazyload'
+              if lazyload
+                assign loading = 'lazy'
+                assign final_widths = '100'
+                assign width = 100
+              else
+                assign loading = 'eager'
+              endif
+              assign fetch_priority = 'auto'
+              assign is_header_and_template = false
+              if section.location == 'template' or section.location == 'header'
+                assign is_header_and_template = true
+              endif
+              if section.index == 1 and is_header_and_template
+                assign loading = 'eager'
+                assign fetch_priority = 'high'
+              endif
+              if loading == 'eager'
+                assign final_widths = '100'
+                assign width = 100
+              endif
+
+              assign image = blocks[forloop.index0].settings.image
+              assign inherit_desktop_value = blocks[forloop.index0].settings.inherit_desktop_value
+              assign width_desktop = blocks[forloop.index0].settings.width_desktop | divided_by: 10.0
+              assign height_desktop = blocks[forloop.index0].settings.height_desktop | divided_by: 10.0
+              assign width_mobile = blocks[forloop.index0].settings.width_mobile | divided_by: 10.0
+              assign height_mobile = blocks[forloop.index0].settings.height_mobile | divided_by: 10.0
+              if inherit_desktop_value
+                assign width_mobile = width_desktop
+                assign height_mobile = height_desktop
+              endif
+
+              assign image_style = ''
+              if width_desktop
+                assign image_style = image_style | append: '--width-desktop: ' | append: width_desktop | append: 'rem;'
+              endif
+              if height_desktop
+                assign image_style = image_style | append: '--height-desktop: ' | append: height_desktop | append: 'rem;'
+              endif
+              if width_mobile
+                assign image_style = image_style | append: '--width-mobile: ' | append: width_mobile | append: 'rem;'
+              endif
+              if height_mobile
+                assign image_style = image_style | append: '--height-mobile: ' | append: height_mobile | append: 'rem;'
+              endif
+            %}
+            {% if image != blank %}
+              {{
+                image
+                | image_url: width: width
+                | image_tag:
+                  is: wc,
+                  loading: loading,
+                  width: image.width,
+                  height: image.height,
+                  class: 'text-with-image__image',
+                  style: image_style,
+                  sizes: sizes,
+                  widths: final_widths,
+                  alt: 'Image',
+                  fetchpriority: fetch_priority,
+                  xo-intrinsic-width: image.width,
+                  xo-intrinsic-height: image.height
+              }}
+            {% else %}
+              <svg class="text-with-image__image" style="{{ image_style }}">
+                {{ 'detailed-apparel-1' | placeholder_svg_tag: 'placeholder-svg' }}
+              </svg>
+            {% endif %}
+          {% endif %}
+      {% endfor %}
+    </span>
+  {% endcapture %}
+{% else %}
+  {% capture final_text %}
+    <span>{{ text }}</span>
+  {% endcapture %}
+{% endif %}
+
+<div class="{{ container_class }}">
+  {{ final_text }}
+</div>

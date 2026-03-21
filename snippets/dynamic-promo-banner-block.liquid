@@ -1,0 +1,74 @@
+{% comment %}
+  Renders a dynamic promo banner block
+
+    Accepts:
+  - image_desktop: {Image} Desktop image for the promo banner (optional)
+  - aspect_ratio_desktop: {String} Aspect ratio for the desktop image (optional)
+  - image_mobile: {Image} Mobile image for the promo banner (optional)
+  - aspect_ratio_mobile: {String} Aspect ratio for the mobile image (optional)
+  - promo_title: {Text} Title of the promo banner (optional)
+  - promo_subtext: {Text} Subtext of the promo banner (optional)
+  - discount_value: {Text} Discount value or promotional detail (optional)
+  - button: {Object} Button settings including text, link, style, size, radius, and padding (optional)
+  - color_schema_box: {String} Color schema for the promo box (optional)
+
+  Usage:
+  {% render 'dynamic-promo-banner-block',
+    image_desktop: image_desktop,
+    aspect_ratio_desktop: aspect_ratio_desktop,
+    image_mobile: image_mobile,
+    aspect_ratio_mobile: aspect_ratio_mobile,
+    promo_title: promo_title,
+    promo_subtext: promo_subtext,
+    discount_value: discount_value,
+    button: button,
+    color_schema_box: color_schema_box
+  %}
+{% endcomment %}
+
+<div class='dynamic-promo-banner-block'>
+  <div class='dynamic-promo-banner-block__bg{% if settings.enable_border_radius %} dynamic-promo-banner-block__bg--radius{% endif %}'>
+    <div class='dynamic-promo-banner-block__image dynamic-promo-banner-block__image--desktop'>
+      {% render 'image', image: image_desktop, aspect_ratio: aspect_ratio_desktop %}
+    </div>
+    <div class='dynamic-promo-banner-block__image dynamic-promo-banner-block__image--mobile'>
+      {% render 'image', image: image_mobile, aspect_ratio: aspect_ratio_mobile %}
+    </div>
+  </div>
+  <div class='dynamic-promo-banner-block__content'>
+    <div class='dynamic-promo-banner-block__wrap{% if settings.enable_border_radius %} dynamic-promo-banner-block__wrap--radius{% endif %}'>
+      {% if promo_title != blank %}
+        <xo-animate xo-cascade>
+          <div class='dynamic-promo-banner-block__promo-title'>{{ promo_title }}</div>
+        </xo-animate>
+      {% endif %}
+      <div class='dynamic-promo-banner-block__box'>
+        {% if discount_value != blank %}
+          <xo-animate xo-cascade>
+            <h3 class='dynamic-promo-banner-block__discount-value h1'>
+              <xo-countto xo-from='0' xo-to='{{ discount_value }}' xo-duration='3000'>0</xo-countto>
+              <span>%</span>
+            </h3>
+          </xo-animate>
+        {% endif %}
+        {% if promo_subtext != blank %}
+          <xo-animate xo-cascade>
+            <div class='dynamic-promo-banner-block__promo-subtext'>{{ promo_subtext }}</div>
+          </xo-animate>
+        {% endif %}
+      </div>
+      <xo-animate xo-cascade>
+        <div class='dynamic-promo-banner-block__button'>
+          {% render 'button',
+            text: button.button_text,
+            link: button.button_link,
+            style: button.button_style,
+            size: button.button_size,
+            radius: settings.button_radius,
+            padding: settings.button_padding
+          %}
+        </div>
+      </xo-animate>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,228 @@
+{% comment %}
+  Renders a product special element with a given value
+
+  Accepts:
+  - sub_heading: {String} Subheading (required)
+  - block: {Object} Block (required)
+
+  Usage:
+  {% render 'product-specification-2', sub_heading: sub_heading, block: block %}
+{% endcomment %}
+
+{% if layout == '' %}
+  {% capture style_1 %}
+    style='--lg: 4; --md: 12; --xs: 12'
+  {% endcapture %}
+  {% capture style_2 %}
+    style='--xl: 3; --lg: 4; --md: 12; --xs: 12; --start-xl: 6'
+  {% endcapture %}
+  {% capture style_3 %}
+    style='--lg: 4; --md: 12; --xs: 12'
+  {% endcapture %}
+{%- else -%}
+  {% capture style_1 %}
+    style='--lg: 5; --md: 12; --xs: 12'
+  {% endcapture %}
+  {% capture style_2 %}
+    style='--lg: 3; --md: 12; --xs: 12'
+  {% endcapture %}
+  {% capture style_3 %}
+    style='--lg: 4; --md: 12; --xs: 12'
+  {% endcapture %}
+{% endif %}
+
+<div class="product-specification-2 {% if layout == "" %}product-specification-2--default{% endif %}">
+  <xo-container class="product-specification-2__container">
+    <div class="product-specification-2__content">
+      {% if layout == 'background-image' %}
+        <xo-animate xo-cascade>
+          <div class="product-specification-2__head">
+            {% if heading %}
+              <h3 class="product-specification-2__heading {{ class }}">{{ heading }}</h3>
+            {% endif %}
+          </div>
+        </xo-animate>
+      {% endif %}
+      {% if layout == 'background-image' %}
+        <div class="product-specification-2__bottom">
+          <div class="product-specification-2__desktop">
+      {% endif %}
+      <xo-grid class="product-specification-2__grid">
+        <xo-animate xo-cascade {{ style_1 }}>
+          <div class="product-specification-2__left">
+            {% for item in block %}
+              {% case item.type %}
+                {% when 'detail-infomation-1' %}
+                  {% if layout == 'background-image' %}
+                    {% render 'product-special',
+                      caption: item.settings.caption,
+                      class: item.settings.font_size_heading,
+                      sub_heading_1: item.settings.sub_heading_1,
+                      heading_1: item.settings.heading_1,
+                      sub_heading_2: item.settings.sub_heading_2,
+                      heading_2: item.settings.heading_2,
+                      color_schema_box: item.settings.color_schema_box
+                    %}
+                  {%- else -%}
+                    {% render 'product-special',
+                      heading: item.settings.heading,
+                      class: item.settings.font_size_heading,
+                      sub_heading_1: item.settings.sub_heading_1,
+                      heading_1: item.settings.heading_1,
+                      sub_heading_2: item.settings.sub_heading_2,
+                      heading_2: item.settings.heading_2,
+                      color_schema_box: item.settings.color_schema_box
+                    %}
+                  {% endif %}
+              {% endcase %}
+            {% endfor %}
+          </div>
+        </xo-animate>
+        <xo-animate xo-cascade {{ style_2 }}>
+          <div class="product-specification-2__center">
+            {% for item in block %}
+              {% case item.type %}
+                {% when 'product' %}
+                  {%- assign placeholder_image = 'collection-1' -%}
+                  {% render 'product-card',
+                    product: item.settings.product,
+                    show_image: settings.product_card_show_image,
+                    show_secondary_image: settings.product_card_show_secondary_image,
+                    show_vendor: settings.product_card_show_vendor,
+                    show_description: settings.product_card_show_description,
+                    show_quick_add: settings.product_card_show_quick_add,
+                    show_quick_view: settings.product_card_show_quick_view,
+                    show_favorite: settings.product_card_show_favorite,
+                    show_price: settings.product_card_show_price,
+                    show_badge: settings.product_card_show_badge,
+                    media_aspect_ratio: item.settings.product_card_aspect_ratio,
+                    color_scheme: item.settings.card_color_scheme,
+                    placeholder_image: placeholder_image
+                  -%}
+              {% endcase %}
+            {% endfor %}
+          </div>
+        </xo-animate>
+        <xo-animate xo-cascade {{ style_3 }}>
+          <div class="product-specification-2__right">
+            {% for item in block %}
+              {% case item.type %}
+                {% when 'detail-infomation-2' %}
+                  {% liquid
+                    assign caption = item.settings.caption
+                    assign color_schema_box = item.settings.color_schema_box
+                    assign title_list = item.settings.title_list
+                    assign content_list = item.settings.content_list
+                  %}
+                  {% render 'product-information', caption: caption, color_schema_box: color_schema_box, title_list: title_list, content_list: content_list %}
+              {% endcase %}
+            {% endfor %}
+          </div>
+        </xo-animate>
+      </xo-grid>
+      {% if layout == 'background-image' %}
+        </div>
+      {% endif %}
+      {% if layout == 'background-image' %}
+        <div class="product-specification-2__mobile">
+          <xo-carousel
+            xo-per-view="1"
+            xo-per-move="1"
+            {% if autoplay == 'on' %}
+              xo-autoplay="{{ autoplay_time }}"
+              xo-loop
+            {% endif %}
+            xo-breakpoints='
+              {
+                767: {
+                  perView: 1,
+                  perMove: 1,
+                  gap: 10,
+                  overflow: "visible"
+                },
+                768: {
+                  perView: 2,
+                  perMove: 1,
+                  gap: 10,
+                  overflow: "visible"
+                },
+                992: {
+                  perView: 2,
+                  perMove: 1,
+                  gap: 10,
+                  overflow: "visible"
+                },
+              }
+            '
+            class="product-specification-2__carousel"
+          >
+            <xo-carousel-inner>
+              <xo-carousel-list>
+                <xo-carousel-slide>
+                  <div class="product-specification-2__left">
+                    {% for item in block %}
+                      {% case item.type %}
+                        {% when 'detail-infomation-1' %}
+                          {% render 'product-special',
+                            caption: item.settings.caption,
+                            class: item.settings.font_size_heading,
+                            sub_heading_1: item.settings.sub_heading_1,
+                            heading_1: item.settings.heading_1,
+                            sub_heading_2: item.settings.sub_heading_2,
+                            heading_2: item.settings.heading_2,
+                            color_schema_box: item.settings.color_schema_box
+                          %}
+                      {% endcase %}
+                    {% endfor %}
+                  </div>
+                </xo-carousel-slide>
+                <xo-carousel-slide>
+                  <div class="product-specification-2__center">
+                    {% for item in block %}
+                      {% case item.type %}
+                        {% when 'product' %}
+                          {%- assign placeholder_image = 'collection-1' -%}
+                          {% render 'product-card',
+                            product: item.settings.product,
+                            show_image: settings.product_card_show_image,
+                            show_secondary_image: settings.product_card_show_secondary_image,
+                            show_vendor: settings.product_card_show_vendor,
+                            show_description: settings.product_card_show_description,
+                            show_quick_add: settings.product_card_show_quick_add,
+                            show_quick_view: settings.product_card_show_quick_view,
+                            show_favorite: settings.product_card_show_favorite,
+                            show_price: settings.product_card_show_price,
+                            show_badge: settings.product_card_show_badge,
+                            media_aspect_ratio: item.settings.product_card_aspect_ratio,
+                            color_scheme: item.settings.card_color_scheme,
+                            placeholder_image: placeholder_image
+                          -%}
+                      {% endcase %}
+                    {% endfor %}
+                  </div>
+                </xo-carousel-slide>
+                <xo-carousel-slide>
+                  <div class="product-specification-2__right">
+                    {% for item in block %}
+                      {% case item.type %}
+                        {% when 'detail-infomation-2' %}
+                          {% liquid
+                            assign caption = item.settings.caption
+                            assign color_schema_box = item.settings.color_schema_box
+                            assign title_list = item.settings.title_list
+                            assign content_list = item.settings.content_list
+                          %}
+                          {% render 'product-information', caption: caption, color_schema_box: color_schema_box, title_list: title_list, content_list: content_list %}
+                      {% endcase %}
+                    {% endfor %}
+                  </div>
+                </xo-carousel-slide>
+              </xo-carousel-list>
+            </xo-carousel-inner>
+          </xo-carousel>
+        </div>
+        </div>
+      {% endif %}
+    </div>
+  </xo-container>
+</div>

@@ -1,0 +1,59 @@
+{% comment %}
+  Renders the cart table.
+  Usage:
+  {% render 'cart-table' %}
+{% endcomment %}
+
+<div class="xo-cart-table">
+  <form action="{{ routes.cart_url }}" method="post" id="cart">
+    <table class="xo-cart-table__table">
+      <thead>
+        <tr class="xo-cart-table__head-row">
+          <th class="xo-cart-table__head-product">{{ 'sections.cart.headings.product' | t }}</th>
+          <th class="xo-cart-table__head-quantity">{{ 'sections.cart.headings.quantity' | t }}</th>
+          <th class="xo-cart-table__head-total">{{ 'sections.cart.headings.total' | t }}</th>
+        </tr>
+      </thead>
+      <tbody class="xo-cart-table__body">
+        {%- for item in cart.items -%}
+          <tr class="xo-cart-table__body-row">
+            <td class="xo-cart-table__row-product" data-th="{{ 'sections.cart.headings.product' | t }}">
+              <xo-product xo-section-id="{{ section.id }}" xo-product-id="{{ item.product_id }}" xo-line="{{ forloop.index }}">
+                {% render 'cart-item', item: item %}
+                <xo-cart-remove class="xo-cart-table__remove-text">
+                  {% assign button_text = 'sections.cart.delete' | t %}
+                  {% render 'button', text: button_text, style: 'link' %}
+                </xo-cart-remove>
+                <xo-cart-change-fallback class="xo-cart-table__loading">{% render 'loader-2' %}</xo-cart-change-fallback>
+              </xo-product>
+            </td>
+            <td class="xo-cart-table__row-quantity" data-th="{{ 'sections.cart.headings.quantity' | t }}">
+              <xo-product xo-section-id="{{ section.id }}" xo-product-id="{{ item.product_id }}" xo-line="{{ forloop.index }}">
+                <div class="xo-cart-table__quantity-item">
+                  {% render 'quantity', value: item.quantity, variant: item.variant, product: item.product, is_cart: true %}
+                </div>
+              </xo-product>
+            </td>
+            <td class="xo-cart-table__row-total" data-th="{{ 'sections.cart.headings.total' | t }}">
+              <div class="xo-cart-table__price">
+                {%- if item.original_line_price != item.final_line_price -%}
+                  <span class="xo-cart-table__old-price xo-cart-table__old-price--del">
+                    {{ item.original_line_price | money }}
+                  </span>
+                  <span class="xo-cart-table__new-price">
+                    {{ item.final_line_price | money }}
+                  </span>
+                {%- else -%}
+                  <span class="xo-cart-table__old-price">
+                    {{ item.original_line_price | money }}
+                  </span>
+                {%- endif -%}
+                {% render 'unit-price', product: item.product %}
+              </div>
+            </td>
+          </tr>
+        {%- endfor -%}
+      </tbody>
+    </table>
+  </form>
+</div>

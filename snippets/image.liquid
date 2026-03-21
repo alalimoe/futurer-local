@@ -1,0 +1,113 @@
+{% comment %}
+  Renders an image
+
+  Accepts:
+  - image: {Image} Image source (required)
+  - lazyload: {Boolean} Lazyload image. Default: true (optional)
+  - container_class: {String} Class of the image (required)
+  - class: {String} Class of the image (required)
+  - placeholder: {String} Placeholder SVG. Default: "detailed-apparel-1" (optional)
+  - attrs: {String} Additional attributes of the image. Default: "" (optional)
+  - aspect_ratio: {Number} Aspect ratio of the image (optional)
+  - width_range: {Number} Fallback width of the image (optional)
+
+  Usage:
+  {% render 'image',
+    image: section.settings.image,
+  %}
+{% endcomment %}
+
+{% liquid
+  assign global_lazyload = settings.image_lazyload
+  if lazyload == null
+    assign lazyload = global_lazyload
+  endif
+  if aspect_ratio == blank
+    assign aspect_ratio = image.aspect_ratio
+  endif
+  assign sizes = '100vw'
+  assign wc = 'xo-lazyload'
+  if lazyload
+    assign loading = 'lazy'
+    assign final_widths = '100'
+    assign width = 100
+  else
+    assign loading = 'eager'
+  endif
+  assign fetch_priority = 'auto'
+  assign is_header_and_template = false
+  if section.location == 'template' or section.location == 'header'
+    assign is_header_and_template = true
+  endif
+  if section.index == 1 and is_header_and_template
+    assign loading = 'eager'
+    assign fetch_priority = 'high'
+  endif
+  if loading == 'eager'
+    assign final_widths = '100'
+    assign width = 100
+  endif
+
+  assign alt = alt | default: 'Image'
+  if disable_alt
+    assign alt = ''
+  endif
+
+  if show_placeholder_product == null
+    assign show_placeholder_product = false
+  endif
+
+  assign container_class = 'xo-image'
+  assign container_style = '--xo-ratio-percent: ' | append: aspect_ratio | append: '; --x-pos: ' | append: image.presentation.focal_point.x | append: '%; --y-pos: ' | append: image.presentation.focal_point.y | append: '%'
+  if class
+    assign container_class = container_class | append: ' ' | append: class
+  endif
+%}
+
+<div class="{{ container_class }}" style="{{ container_style }}">
+  {%- if image != blank -%}
+    {{
+      image
+      | image_url: width: width
+      | image_tag:
+        is: wc,
+        loading: loading,
+        width: image.width,
+        height: image.height,
+        class: class,
+        sizes: sizes,
+        widths: final_widths,
+        fetchpriority: fetch_priority,
+        xo-intrinsic-width: image.width,
+        xo-intrinsic-height: image.height,
+        xo-width-range: width_range,
+        alt: alt
+    }}
+    {%- if lazyload -%}
+      <div class="xo-image__overlay xo-lazyload-overlay">
+        <div class="xo-image__loading">
+          {% liquid
+            case settings.image_lazyload_loading
+              when 'loader-1'
+                render 'loader-1', color: 'rgb(var(--color-foreground))'
+              when 'loader-2'
+                render 'loader-2', color: 'rgb(var(--color-foreground))'
+              when 'loader-3'
+                render 'loader-3', color: 'rgb(var(--color-foreground))'
+              else
+                render 'loader-3', color: 'rgb(var(--color-foreground))'
+            endcase
+          %}
+        </div>
+      </div>
+    {%- endif -%}
+  {%- else -%}
+    <div class="xo-image__placeholder" style="--xo-ratio-percent: {{ aspect_ratio }}">
+      {% if show_placeholder_product %}
+        {{ placeholder | default: 'collection-1' | placeholder_svg_tag: 'placeholder-svg' }}
+      {% else %}
+        {{ placeholder | default: 'detailed-apparel-1' | placeholder_svg_tag: 'placeholder-svg' }}
+      {% endif %}
+    </div>
+  {%- endif -%}
+</div>

@@ -1,0 +1,178 @@
+{% schema %}
+{
+  "name": "Peptide TL;DR",
+  "tag": "section",
+  "class": "section-peptide-tldr",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Key Takeaways (TL;DR)"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background",
+      "default": "#fafafb"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent (Left Border)",
+      "default": "#FBBF24"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "takeaway",
+      "name": "Takeaway",
+      "settings": [
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Takeaway text"
+        }
+      ]
+    }
+  ],
+  "max_blocks": 8,
+  "presets": [
+    {
+      "name": "Peptide TL;DR",
+      "blocks": [
+        { "type": "takeaway", "settings": { "text": "<p>Enter your vial details into our <strong>free calculator</strong> for instant, exact dosing.</p>" } },
+        { "type": "takeaway", "settings": { "text": "<p>Always use <strong>bacteriostatic water</strong> — never tap or distilled.</p>" } },
+        { "type": "takeaway", "settings": { "text": "<p>Reconstituted peptides must be <strong>refrigerated (2–8 °C)</strong> and used within 30 days.</p>" } }
+      ]
+    }
+  ]
+}
+{% endschema %}
+
+{%- assign s = section.settings -%}
+{%- assign sid = section.id -%}
+
+<div class="ptldr-wrapper" id="ptldr-{{ sid }}">
+  <div class="ptldr-container">
+    <div class="ptldr-card">
+      <h2 class="ptldr-heading">{{ s.heading }}</h2>
+      {% if section.blocks.size > 0 %}
+        <ul class="ptldr-list" role="list">
+          {% for block in section.blocks %}
+            <li class="ptldr-item" {{ block.shopify_attributes }}>{{ block.settings.text }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+{%- style -%}
+  #ptldr-{{ sid }} {
+    --ptldr-bg: {{ s.bg_color }};
+    --ptldr-accent: {{ s.accent_color }};
+    --ptldr-font: var(--font-body-family, sans-serif);
+    --ptldr-text: var(--color-text-main, #111827);
+    --ptldr-muted: var(--color-text-muted, #4b5563);
+    --ptldr-radius: var(--nx-radius, 14px);
+    --ptldr-shadow-sm: var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.04));
+    --ptldr-shadow-md: var(--shadow-md, 0 12px 30px rgba(0,0,0,0.06));
+    --ptldr-transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    content-visibility: auto;
+  }
+
+  .ptldr-wrapper {
+    background: var(--ptldr-bg);
+    padding: 0 20px 48px;
+    font-family: var(--ptldr-font);
+  }
+
+  .ptldr-container {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .ptldr-card {
+    background: var(--color-bg-primary, #fff);
+    border-radius: var(--ptldr-radius);
+    padding: 32px 32px 28px;
+    box-shadow: var(--ptldr-shadow-sm);
+    position: relative;
+    padding-left: 36px;
+    transition: var(--ptldr-transition);
+  }
+  .ptldr-card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--ptldr-accent);
+    border-radius: var(--ptldr-radius) 0 0 var(--ptldr-radius);
+    box-shadow: 0 0 12px var(--ptldr-accent);
+  }
+  .ptldr-card:hover {
+    box-shadow: var(--ptldr-shadow-md);
+    transform: translateY(-2px);
+  }
+
+  .ptldr-heading {
+    font-family: var(--font-heading-family, sans-serif);
+    font-size: clamp(20px, 2.5vw, 24px);
+    font-weight: 800;
+    color: var(--ptldr-text);
+    margin: 0 0 20px;
+    letter-spacing: -0.3px;
+  }
+
+  .ptldr-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .ptldr-item {
+    position: relative;
+    padding: 10px 0 10px 24px;
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--ptldr-muted);
+  }
+  .ptldr-item + .ptldr-item {
+    box-shadow: inset 0 1px 0 rgba(15,23,42,0.06);
+  }
+
+  .ptldr-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 8px;
+    height: 8px;
+    background: var(--ptldr-accent);
+    border-radius: 50%;
+    box-shadow: 0 0 6px var(--ptldr-accent);
+  }
+
+  .ptldr-item strong { color: var(--ptldr-text); font-weight: 700; }
+  .ptldr-item p { margin: 0; }
+
+  .ptldr-wrapper :focus-visible {
+    outline: 2px solid var(--color-accent-primary, #FBBF24);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ptldr-wrapper *, .ptldr-wrapper *::before, .ptldr-wrapper *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .ptldr-card { padding: 24px 20px 20px 28px; }
+  }
+{%- endstyle -%}

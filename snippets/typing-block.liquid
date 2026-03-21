@@ -1,0 +1,41 @@
+{% comment %}
+  Renders a typing block
+
+  Accepts:
+  - class: {String} Class (optional)
+  - tag_name: {String} Tag name (required)
+  - content_before: {String} Content before (optional)
+  - content_after: {String} Content after (optional)
+  - array_content: {String} Array content (required)
+  - effect: {String} Effect (required) ('typing', 'slide', 'goo')
+  - delay: {Number} Delay (ms) (optional)
+  - duration: {Number} Duration (ms) (optional)
+
+  Usage:
+  {% render 'typing-block',
+    tag_name: 'h1',
+    content_typing: 'Hello',
+    array_content: '["Hello", "World"]',
+    effect: 'fade',
+    delay: 1000,
+    duration: 1000
+  %}
+{% endcomment %}
+
+<div class="xo-typing-block{% if class %} {{ class }}{% endif %}">
+  <{{ tag_name }} class="xo-typing-block__content">
+    {{ content_before }}
+    <xo-typing
+      class="xo-typing-block__typing"
+      xo-effect="{{ effect }}"
+      {% if delay != 0 %}
+        xo-delay="{{ delay }}"
+      {% endif %}
+      {% if duration != 0 %}
+        xo-duration="{{ duration }}"
+      {% endif %}
+      xo-content="{{ array_content }}"
+    ></xo-typing>
+    {{ content_after }}
+  </{{ tag_name }}>
+</div>

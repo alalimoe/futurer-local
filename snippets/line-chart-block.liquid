@@ -1,0 +1,59 @@
+{% comment %}
+  Renders a line chart block
+
+  Accepts:
+  - x_axis_labels: {Array} X axis labels (required)
+  - y_axis_labels: {Array} Y axis labels (required)
+  - max_value: {Number} Max value (required)
+  - first_line_data: {Array} First line data (required)
+  - first_line_color: {String} First line color (required)
+  - second_line_data: {Array} Second line data (required)
+  - second_line_color: {String} Second line color (required)
+  - grid_color: {String} Grid color (required)
+  - grid_type: {String} Grid type (required)
+  - margin: {Number} Margin (required)
+  - smoothness: {Number} Smoothness (required)
+  - chart_aspect_ratio: {Number} Chart aspect ratio (required)
+
+  Usage:
+  {% render 'line-chart-block',
+    x_axis_labels: ['0', '1h', '2h', '3h', '4h', '5h', '6h'],
+    y_axis_labels: ['0', '20', '40', '60'],
+    max_value: 60,
+    first_line_data: [0, 20, 10, 35, 50, 40],
+    first_line_color: '#1ec5d4',
+    second_line_data: [0, 10, 30, 20],
+    second_line_color: '#f00',
+    grid_color: '#ddd',
+    grid_type: 'dashed',
+    margin: 40,
+    smoothness: 1,
+    chart_aspect_ratio: 4/3
+  %}
+{% endcomment %}
+
+<div class="xo-line-chart-block" style="border: 0.1rem solid rgba(var(--color-border)); aspect-ratio: {{ chart_aspect_ratio }};">
+  <xo-animate xo-cascade xo-type="fade" xo-duration="1500" style="height: 100%">
+    <xo-line-chart
+      xo-x-labels="{{ x_axis_labels }}"
+      xo-y-labels="{{ y_axis_labels }}"
+      xo-max="{{ max_value }}"
+      xo-datasets="
+        [
+          {
+            data: {{ first_line_data }},
+            lineColor: '{{ first_line_color }}'
+          },
+          {
+            data: {{ second_line_data }},
+            lineColor: '{{ second_line_color }}'
+          }
+        ]
+      "
+      xo-grid-color="{{ grid_color }}"
+      xo-grid-type="{{ grid_type }}"
+      xo-margin="{{ margin }}"
+      xo-smoothness="{{ smoothness }}"
+    ></xo-line-chart>
+  </xo-animate>
+</div>

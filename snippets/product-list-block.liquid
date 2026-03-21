@@ -1,0 +1,135 @@
+{% comment %}
+  Renders a product list element with a given value
+
+  Accepts:
+  - product_list: {Object} Select product (required)
+  - autoplay: {String} Autoplay (optional)
+  - autoplay_time: {Number} Autoplay speed (seconds) (required)
+  - product_per_view: {Number} Product per view (required)
+  - product_pre_move: {Number} Product per move (required)
+
+  Usage:
+  {% render 'product-list-block',
+    product_list: product_list,
+    autoplay: autoplay,
+    autoplay_time: autoplay_time,
+    product_per_view: product_per_view,
+    product_per_move: product_per_move,
+  %}
+{% endcomment %}
+
+<div class="product-list-block">
+  <div class="product-list-block__content">
+    {% if product_list != blank %}
+      <xo-carousel
+        xo-per-view="{{ product_per_view }}"
+        xo-per-move="{{ product_per_move }}"
+        {% if autoplay == 'on' %}
+          xo-autoplay="{{ autoplay_time }}"
+          xo-loop
+        {% endif %}
+        {% if overflow == 'visible' %}
+          xo-overflow="visible"
+        {% endif %}
+        xo-breakpoints='
+          {
+            600: {
+              perView: 2,
+              perMove: 1,
+              gap: 10,
+              overflow: "visible"
+            },
+            768: {
+              perView: 2,
+              perMove: 1,
+              gap: 10,
+              overflow: "visible"
+            },
+          }
+        '
+        xo-render-bullet="<span class='carousel-bullet'></span>"
+        class="product-list-block__carousel"
+      >
+        <xo-carousel-inner>
+          <xo-carousel-list>
+            {% for product in product_list %}
+              <xo-carousel-slide>
+                {% render 'product-card',
+                  product: product,
+                  show_image: settings.product_card_show_image,
+                  show_secondary_image: settings.product_card_show_secondary_image,
+                  show_vendor: settings.product_card_show_vendor,
+                  show_description: settings.product_card_show_description,
+                  show_quick_add: settings.product_card_show_quick_add,
+                  show_quick_view: settings.product_card_show_quick_view,
+                  show_favorite: settings.product_card_show_favorite,
+                  show_price: settings.product_card_show_price,
+                  show_badge: settings.product_card_show_badge,
+                  position_badge: settings.position_badge,
+                  media_aspect_ratio: block.settings.product_card_aspect_ratio,
+                  color_scheme: block.settings.card_color_scheme,
+                  placeholder_image: placeholder_image,
+                  animate_enabled: true
+                %}
+              </xo-carousel-slide>
+            {% endfor %}
+          </xo-carousel-list>
+        </xo-carousel-inner>
+        <div class="product-list-block__paginate">
+          {% render 'carousel-pagination', align: 'center', style: 'sticks' %}
+        </div>
+      </xo-carousel>
+    {% else %}
+      <xo-carousel
+        xo-per-view="{{ product_per_view }}"
+        xo-per-move="{{ product_per_move }}"
+        {% if autoplay == 'on' %}
+          xo-autoplay="{{ autoplay_time }}"
+          xo-loop
+        {% endif %}
+        xo-breakpoints='
+          {
+            768: {
+              perView: 1,
+              perMove: 1,
+              gap: 10,
+              overflow: "visible"
+            },
+          }
+        '
+        xo-render-bullet="<span class='carousel-bullet'></span>"
+        class="product-list-block__carousel"
+      >
+        <xo-carousel-inner>
+          <xo-carousel-list>
+            {% for i in (1..4) %}
+              <xo-carousel-slide>
+                {% render 'product-card',
+                  product: item,
+                  show_image: settings.product_card_show_image,
+                  show_secondary_image: settings.product_card_show_secondary_image,
+                  show_vendor: settings.product_card_show_vendor,
+                  show_description: settings.product_card_show_description,
+                  show_quick_add: settings.product_card_show_quick_add,
+                  show_quick_view: settings.product_card_show_quick_view,
+                  show_favorite: settings.product_card_show_favorite,
+                  show_price: settings.product_card_show_price,
+                  show_badge: settings.product_card_show_badge,
+                  position_badge: settings.position_badge,
+                  media_aspect_ratio: block.settings.product_card_aspect_ratio,
+                  color_scheme: block.settings.card_color_scheme,
+                  placeholder_image: placeholder_image,
+                  animate_enabled: true,
+                  animate_focus: true
+                %}
+              </xo-carousel-slide>
+            {% endfor %}
+          </xo-carousel-list>
+        </xo-carousel-inner>
+        <div class="product-list-block__paginate">
+          {% render 'carousel-pagination', align: 'center', style: 'sticks' %}
+        </div>
+      </xo-carousel>
+    {% endif %}
+  </div>
+</div>

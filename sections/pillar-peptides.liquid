@@ -1,0 +1,546 @@
+{% comment %}
+Pillar Page — Peptides (CX/AIO/SEO/CRO)
+- 9 sections in one configurable section
+- Headings black; accent #FBBF24
+- Two product grids; intro; discount; wholesale; COA explainer + carousel; blog 2‑up; newsletter
+- Quick‑Add optional
+{% endcomment %}
+
+<section id="peptides-pillar" class="pep-wrap" data-accent="{{ section.settings.accent_color }}">
+  <div class="pep-container">
+    {% if section.settings.show_breadcrumbs %}
+      <nav class="pep-breadcrumbs" aria-label="Breadcrumb">
+        <a href="{{ routes.root_url }}">Home</a> <span class="sep">/</span>
+        <span aria-current="page">{{ section.settings.hero_title | default: 'Peptides' }}</span>
+      </nav>
+    {% endif %}
+
+    {%- comment -%} 1) HERO {%- endcomment -%}
+    <header class="pep-hero" {% if section.settings.hero_bg != blank %} style="--hero-bg:url({{ section.settings.hero_bg | image_url: width: 2400 }});" {% endif %}>
+      <div class="pep-hero-inner">
+        <h1 class="pep-h1">{{ section.settings.hero_title | escape }}</h1>
+        {% if section.settings.hero_sub %}<p class="pep-hero-sub">{{ section.settings.hero_sub }}</p>{% endif %}
+        {% if section.settings.hero_chips != blank %}
+          <ul class="pep-chips">
+            {%- assign chips = section.settings.hero_chips -%}
+            {%- if chips contains '|' -%}{% assign chips = chips | split: '|' %}{% else %}{% assign chips = chips | split: ',' %}{% endif -%}
+            {% for c in chips %}
+              {% assign chip = c | strip %}
+              {% if chip != blank %}<li class="pep-chip">{{ chip }}</li>{% endif %}
+            {% endfor %}
+          </ul>
+        {% endif %}
+        <div class="pep-cta-row">
+          {% if section.settings.hero_cta_label and section.settings.hero_cta_link %}
+            <a class="pep-btn pep-btn-primary" href="{{ section.settings.hero_cta_link }}">{{ section.settings.hero_cta_label }}</a>
+          {% endif %}
+          {% if section.settings.hero_secondary_label and section.settings.hero_secondary_link %}
+            <a class="pep-btn pep-btn-ghost" href="{{ section.settings.hero_secondary_link }}">{{ section.settings.hero_secondary_label }}</a>
+          {% endif %}
+        </div>
+        {% if section.settings.hero_note %}
+          <div class="pep-legal">{{ section.settings.hero_note }}</div>
+        {% endif %}
+      </div>
+    </header>
+
+    {%- comment -%} 2) GRID #1 — single vials {%- endcomment -%}
+    <section id="pep-grid-1" class="pep-grid-section">
+      <div class="pep-grid-header">
+        <h2 class="pep-h2">{{ section.settings.grid1_title | default: 'Shop Peptides' }}</h2>
+        {% if section.settings.grid1_sub %}<p class="pep-lead">{{ section.settings.grid1_sub }}</p>{% endif %}
+      </div>
+
+      {% assign pgrid1 = '' %}
+      {% if section.settings.grid1_source == 'collection' and section.settings.grid1_collection != blank %}
+        {% assign c1 = collections[section.settings.grid1_collection] %}
+        {% assign pgrid1 = c1.products %}
+      {% endif %}
+
+      <div class="pep-grid">
+        {% if pgrid1 != '' %}
+          {% for product in pgrid1 limit: 4 %}
+            {% render 'product-card',
+              product: product,
+              show_image: settings.product_card_show_image,
+              show_secondary_image: settings.product_card_show_secondary_image,
+              show_vendor: settings.product_card_show_vendor,
+              show_price: settings.product_card_show_price,
+              show_badge: settings.product_card_show_badge,
+              show_quick_add: section.settings.enable_quick_add,
+              show_quick_view: settings.product_card_show_quick_view,
+              media_aspect_ratio: section.settings.product_card_aspect_ratio,
+              animate_enabled: true,
+              lazyload: true
+            %}
+          {% endfor %}
+        {% else %}
+          {% assign picks1 = section.blocks | where: 'type', 'grid1_product' %}
+          {% for b in picks1 limit: 4 %}
+            {% assign p = all_products[b.settings.product] %}
+            {% render 'product-card',
+              product: p,
+              show_image: settings.product_card_show_image,
+              show_secondary_image: settings.product_card_show_secondary_image,
+              show_vendor: settings.product_card_show_vendor,
+              show_price: settings.product_card_show_price,
+              show_badge: settings.product_card_show_badge,
+              show_quick_add: section.settings.enable_quick_add,
+              show_quick_view: settings.product_card_show_quick_view,
+              media_aspect_ratio: section.settings.product_card_aspect_ratio,
+              animate_enabled: true,
+              lazyload: true
+            %}
+          {% endfor %}
+        {% endif %}
+      </div>
+
+      {% if section.settings.grid1_cta_label and section.settings.grid1_cta_link %}
+        <div class="pep-more">
+          <a class="pep-btn pep-btn-ghost" href="{{ section.settings.grid1_cta_link }}">{{ section.settings.grid1_cta_label }}</a>
+        </div>
+      {% endif %}
+    </section>
+
+    {%- comment -%} 3) INTRO {%- endcomment -%}
+    <section id="pep-intro" class="pep-intro">
+      <div class="pep-intro-grid">
+        <div><h2 class="pep-h2">{{ section.settings.intro_title | default: 'About our peptides' }}</h2></div>
+        <div class="pep-intro-body">
+          {{ section.settings.intro_richtext }}
+        </div>
+      </div>
+    </section>
+
+    {%- comment -%} 4) 10% BANNER {%- endcomment -%}
+    {% if section.settings.show_discount %}
+    <aside class="pep-discount">
+      <div class="pep-discount-inner">
+        <div class="pep-discount-copy">
+          <strong>{{ section.settings.discount_heading | default: 'Get 10% off your first order' }}</strong>
+          <span>{{ section.settings.discount_sub | default: 'Use code at checkout' }}</span>
+          {% if section.settings.discount_code %}<code class="pep-code">{{ section.settings.discount_code }}</code>{% endif %}
+        </div>
+        {% if section.settings.discount_cta_label and section.settings.discount_cta_link %}
+          <a class="pep-btn pep-btn-primary" href="{{ section.settings.discount_cta_link }}">{{ section.settings.discount_cta_label }}</a>
+        {% endif %}
+      </div>
+    </aside>
+    {% endif %}
+
+    {%- comment -%} 5) GRID #2 — sets of 10 {%- endcomment -%}
+    <section id="pep-grid-2" class="pep-grid-section">
+      <div class="pep-grid-header">
+        <h2 class="pep-h2">{{ section.settings.grid2_title | default: '10‑Vial Sets' }}</h2>
+        {% if section.settings.grid2_sub %}<p class="pep-lead">{{ section.settings.grid2_sub }}</p>{% endif %}
+      </div>
+
+      {% assign pgrid2 = '' %}
+      {% if section.settings.grid2_source == 'collection' and section.settings.grid2_collection != blank %}
+        {% assign c2 = collections[section.settings.grid2_collection] %}
+        {% assign pgrid2 = c2.products %}
+      {% endif %}
+
+      <div class="pep-grid">
+        {% if pgrid2 != '' %}
+          {% for product in pgrid2 limit: 4 %}
+            {% render 'product-card',
+              product: product,
+              show_image: settings.product_card_show_image,
+              show_secondary_image: settings.product_card_show_secondary_image,
+              show_vendor: settings.product_card_show_vendor,
+              show_price: settings.product_card_show_price,
+              show_badge: settings.product_card_show_badge,
+              show_quick_add: section.settings.enable_quick_add,
+              show_quick_view: settings.product_card_show_quick_view,
+              media_aspect_ratio: section.settings.product_card_aspect_ratio,
+              animate_enabled: true,
+              lazyload: true
+            %}
+          {% endfor %}
+        {% else %}
+          {% assign picks2 = section.blocks | where: 'type', 'grid2_product' %}
+          {% for b in picks2 limit: 4 %}
+            {% assign p = all_products[b.settings.product] %}
+            {% render 'product-card',
+              product: p,
+              show_image: settings.product_card_show_image,
+              show_secondary_image: settings.product_card_show_secondary_image,
+              show_vendor: settings.product_card_show_vendor,
+              show_price: settings.product_card_show_price,
+              show_badge: settings.product_card_show_badge,
+              show_quick_add: section.settings.enable_quick_add,
+              show_quick_view: settings.product_card_show_quick_view,
+              media_aspect_ratio: section.settings.product_card_aspect_ratio,
+              animate_enabled: true,
+              lazyload: true
+            %}
+          {% endfor %}
+        {% endif %}
+      </div>
+
+      {% if section.settings.grid2_cta_label and section.settings.grid2_cta_link %}
+        <div class="pep-more">
+          <a class="pep-btn pep-btn-ghost" href="{{ section.settings.grid2_cta_link }}">{{ section.settings.grid2_cta_label }}</a>
+        </div>
+      {% endif %}
+    </section>
+
+    {%- comment -%} 6) WHOLESALE {%- endcomment -%}
+    {% if section.settings.show_wholesale %}
+      <section id="pep-wholesale" class="pep-wholesale">
+        <div class="pep-wh-box">
+          <div>
+            <h2 class="pep-h2">{{ section.settings.wh_title | default: 'Wholesale & Labs' }}</h2>
+            <p class="pep-lead">{{ section.settings.wh_sub | default: 'Volume pricing, standing orders, and batch documentation.' }}</p>
+          </div>
+          <div class="pep-wh-cta">
+            {% if section.settings.wh_cta_label and section.settings.wh_cta_link %}
+              <a class="pep-btn pep-btn-primary" href="{{ section.settings.wh_cta_link }}">{{ section.settings.wh_cta_label }}</a>
+            {% endif %}
+            {% if section.settings.wh_secondary_label and section.settings.wh_secondary_link %}
+              <a class="pep-btn pep-btn-ghost" href="{{ section.settings.wh_secondary_link }}">{{ section.settings.wh_secondary_label }}</a>
+            {% endif %}
+          </div>
+        </div>
+      </section>
+    {% endif %}
+
+    {%- comment -%} 7) COA EXPLAINER + CAROUSEL {%- endcomment -%}
+    <section id="pep-coa" class="pep-coa">
+      <div class="pep-coa-grid">
+        <article class="pep-coa-card">
+          <h2 class="pep-h2">{{ section.settings.coa_title | default: 'What is a COA?' }}</h2>
+          <div class="pep-coa-body">{{ section.settings.coa_richtext }}</div>
+          {% if section.settings.coa_cta_label and section.settings.coa_cta_link %}
+            <a class="pep-btn pep-btn-ghost" href="{{ section.settings.coa_cta_link }}">{{ section.settings.coa_cta_label }}</a>
+          {% endif %}
+        </article>
+
+        <aside class="pep-carousel" data-auto="{{ section.settings.coa_auto }}">
+          <div class="pep-carousel-track">
+            {% assign coa_imgs = section.blocks | where: 'type', 'coa_image' %}
+            {% for b in coa_imgs %}
+              {% if b.settings.image != blank %}
+                <figure class="pep-slide">
+                  {{ b.settings.image | image_url: width: 1200 | image_tag: loading: 'lazy', class: 'pep-slide-img', alt: b.settings.alt }}
+                  {% if b.settings.caption %}<figcaption class="pep-slide-cap">{{ b.settings.caption }}</figcaption>{% endif %}
+                </figure>
+              {% endif %}
+            {% endfor %}
+          </div>
+          <div class="pep-carousel-nav">
+            <button class="pep-nav prev" aria-label="Previous">‹</button>
+            <button class="pep-nav next" aria-label="Next">›</button>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    {%- comment -%} 8) BLOG POSTS (tag filter) {%- endcomment -%}
+    {% if section.settings.blog != blank %}
+      {% assign blog_obj = blogs[section.settings.blog] %}
+      {% if blog_obj != blank %}
+        {% assign tag = section.settings.blog_tag | strip %}
+        {% assign limit = section.settings.blog_limit | default: 6 %}
+        <section id="pep-posts" class="pep-posts">
+          <div class="pep-grid-header">
+            <h2 class="pep-h2">{{ section.settings.blog_title | default: 'Peptide insights' }}</h2>
+            {% if section.settings.blog_sub %}<p class="pep-lead">{{ section.settings.blog_sub }}</p>{% endif %}
+          </div>
+          <div class="pep-post-grid">
+            {%- assign count = 0 -%}
+            {% for art in blog_obj.articles %}
+              {% if tag == blank or art.tags contains tag %}
+                <article class="pep-post">
+                  <a href="{{ art.url }}" class="pep-post-media">
+                    {% if art.image %}
+                      {{ art.image | image_url: width: 900 | image_tag: loading: 'lazy', class: 'pep-post-img', alt: art.title }}
+                    {% else %}
+                      <div class="pep-post-placeholder">Article</div>
+                    {% endif %}
+                  </a>
+                  <div class="pep-post-body">
+                    <h3 class="pep-post-title"><a href="{{ art.url }}">{{ art.title }}</a></h3>
+                    <p class="pep-post-excerpt">{{ art.excerpt_or_content | strip_html | truncate: 140 }}</p>
+                    <a class="pep-post-link" href="{{ art.url }}">Read more</a>
+                  </div>
+                </article>
+                {%- assign count = count | plus: 1 -%}
+                {% if count >= limit %}{% break %}{% endif %}
+              {% endif %}
+            {% endfor %}
+          </div>
+        </section>
+      {% endif %}
+    {% endif %}
+
+    {%- comment -%} 9) NEWSLETTER {%- endcomment -%}
+    <section id="pep-news" class="pep-news">
+      <div class="pep-news-box">
+        <div>
+          <h2 class="pep-h2">{{ section.settings.news_title | default: 'Get peptide updates & drops' }}</h2>
+          {% if section.settings.news_sub %}<p class="pep-lead">{{ section.settings.news_sub }}</p>{% endif %}
+        </div>
+        <div class="pep-news-form">
+          {% form 'customer', id: 'pep-newsletter' %}
+            <input type="hidden" name="contact[tags]" value="newsletter, peptides">
+            <div class="pep-inputs">
+              <input class="pep-input" type="email" name="contact[email]" placeholder="you@example.com" required aria-label="Email" autocomplete="email">
+              <button class="pep-btn pep-btn-primary" type="submit">Subscribe</button>
+            </div>
+            {% if form.posted_successfully? %}
+              <p class="pep-success">Thanks — you’re on the list.</p>
+            {% elsif form.errors %}
+              <p class="pep-error">{{ form.errors | default_errors }}</p>
+            {% endif %}
+          {% endform %}
+        </div>
+      </div>
+    </section>
+  </div>
+
+  {%- comment -%} SEO ItemList for the two product grids (only outputs if a collection is selected) {%- endcomment -%}
+  {%- if section.settings.grid1_source == 'collection' or section.settings.grid2_source == 'collection' -%}
+    {%- capture ld_json -%}
+    {
+      "@context":"https://schema.org",
+      "@type":"ItemList",
+      "name": {{ section.settings.hero_title | default: 'Peptides' | json }},
+      "itemListElement":[
+        {%- assign pos = 0 -%}
+        {%- if section.settings.grid1_source == 'collection' and section.settings.grid1_collection != blank -%}
+          {%- assign c1 = collections[section.settings.grid1_collection] -%}
+          {%- for p in c1.products limit: 4 -%}
+            { "@type":"ListItem","position": {{ pos | plus: 1 }},"url": {{ p.url | json }} }{% assign pos = pos | plus: 1 %}{% unless forloop.last and section.settings.grid2_source != 'collection' %},{% endunless %}
+          {%- endfor -%}
+        {%- endif -%}
+        {%- if section.settings.grid2_source == 'collection' and section.settings.grid2_collection != blank -%}
+          {%- assign c2 = collections[section.settings.grid2_collection] -%}
+          {%- for p in c2.products limit: 4 -%}
+            { "@type":"ListItem","position": {{ pos | plus: 1 }},"url": {{ p.url | json }} }{% assign pos = pos | plus: 1 %}{% unless forloop.last %},{% endunless %}
+          {%- endfor -%}
+        {%- endif -%}
+      ]
+    }
+    {%- endcapture -%}
+    <script type="application/ld+json">{{ ld_json | strip }}</script>
+  {%- endif -%}
+</section>
+
+<style>
+  :root{--pep-accent: {{ section.settings.accent_color }};--pep-black:var(--color-text-primary);--pep-body:var(--color-text-primary);--pep-muted:var(--color-text-secondary);--pep-border:var(--color-border-default);--pep-bg:var(--color-surface-secondary);--pep-card:var(--color-surface-primary);--pep-radius:14px}
+  .pep-container{max-width:var(--container-width-max);margin:0 auto;padding:24px var(--page-gutter)}
+  .pep-breadcrumbs{font-size:.95rem;color:var(--color-text-secondary);margin-bottom:8px}
+  .pep-breadcrumbs a{color:var(--color-text-secondary);text-decoration:none}.pep-breadcrumbs a:hover{color:var(--color-text-primary)}.pep-breadcrumbs .sep{margin:0 6px}
+
+  .pep-hero{position:relative;border:1px solid var(--pep-border);border-radius:var(--nx-radius);background:radial-gradient(1200px 400px at 20% -20%, rgba(251,191,36,.12), transparent 60%),var(--color-surface-primary);overflow:hidden;margin-bottom:22px}
+  .pep-hero::before{content:"";position:absolute;inset:0;background-image:var(--hero-bg, none);background-size:cover;background-position:center;opacity:.08}
+  .pep-hero-inner{position:relative;padding:36px}
+  .pep-h1{margin:0 0 8px;color:var(--pep-black);font-size:clamp(1.8rem,3.2vw,2.4rem);font-weight:900}
+  .pep-hero-sub{color:var(--color-ui-charcoal-hover);max-width:820px;margin:6px 0 14px}
+  .pep-chips{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0 16px;padding:0;list-style:none}
+  .pep-chip{background:var(--color-surface-primary);border:1px solid var(--pep-border);border-radius:var(--nx-radius-pill);padding:6px 12px;font-size:.9rem;color:var(--color-text-primary)}
+  .pep-cta-row{display:flex;gap:10px;flex-wrap:wrap}
+  .pep-btn{display:inline-flex;align-items:center;justify-content:center;border-radius:var(--nx-radius-md);height:46px;padding:0 16px;font-weight:800;text-decoration:none}
+  .pep-btn-primary{background:var(--pep-accent);color:var(--color-text-primary);border:0}
+  .pep-btn-ghost{border:1px solid var(--pep-border);background:var(--color-surface-primary);color:var(--color-text-primary)}
+  .pep-legal{margin-top:8px;color:var(--color-text-secondary);font-size:.92rem}
+
+  .pep-grid-section{margin-top:24px}
+  .pep-grid-header{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:8px}
+  .pep-h2{margin:0;color:var(--color-text-primary);font-size:1.35rem;font-weight:900}
+  .pep-lead{color:var(--color-ui-charcoal-hover)}
+  .pep-grid{display:grid;gap:14px;grid-template-columns:repeat(4,1fr)}
+  @media(max-width:1024px){.pep-grid{grid-template-columns:repeat(3,1fr)}}
+  @media(max-width:780px){.pep-grid{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:520px){.pep-grid{grid-template-columns:1fr}}
+
+  .pep-intro{margin-top:28px}
+  .pep-intro-grid{display:grid;grid-template-columns:320px 1fr;gap:18px}
+  .pep-intro-body{background:var(--color-surface-primary);border:1px solid var(--pep-border);border-radius:var(--nx-radius);padding:16px}
+  @media(max-width:900px){.pep-intro-grid{grid-template-columns:1fr}}
+
+  .pep-discount{margin-top:22px}
+  .pep-discount-inner{display:flex;justify-content:space-between;align-items:center;gap:12px;border:1px solid var(--pep-border);border-radius:var(--nx-radius);background:rgba(251,191,36,.12);padding:12px 14px}
+  .pep-code{background:var(--color-surface-primary);border:1px dashed var(--color-border-default);border-radius:var(--nx-radius-sm);padding:2px 6px;margin-left:6px}
+
+  .pep-wholesale{margin-top:28px}
+  .pep-wh-box{display:flex;justify-content:space-between;align-items:center;gap:18px;border:1px solid var(--pep-border);border-radius:var(--nx-radius);background:var(--color-surface-primary);padding:16px}
+  .pep-wh-cta{display:flex;gap:10px;flex-wrap:wrap}
+
+  .pep-coa{margin-top:28px}
+  .pep-coa-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .pep-coa-card{border:1px solid var(--pep-border);border-radius:var(--nx-radius);background:var(--color-surface-primary);padding:16px}
+  .pep-carousel{position:relative;border:1px solid var(--pep-border);border-radius:var(--nx-radius);background:var(--color-surface-primary);overflow:hidden}
+  .pep-carousel-track{display:flex;transition:transform .35s ease}
+  .pep-slide{min-width:100%}
+  .pep-slide-img{width:100%;height:420px;object-fit:contain;background:var(--color-surface-primary)}
+  .pep-slide-cap{text-align:center;color:var(--color-text-secondary);font-size:.92rem;padding:6px 10px}
+  .pep-carousel-nav{position:absolute;inset:0;display:flex;justify-content:space-between;align-items:center;pointer-events:none}
+  .pep-nav{pointer-events:auto;width:36px;height:36px;border-radius:50%;border:0;background:var(--color-surface-primary);box-shadow:0 1px 3px rgba(0,0,0,.12);cursor:pointer}
+  @media(max-width:900px){.pep-coa-grid{grid-template-columns:1fr}}
+
+  .pep-posts{margin-top:28px}
+  .pep-post-grid{display:grid;gap:14px;grid-template-columns:1fr 1fr}
+  @media(max-width:780px){.pep-post-grid{grid-template-columns:1fr}}
+  .pep-post{border:1px solid var(--pep-border);border-radius:var(--nx-radius);background:var(--color-surface-primary);overflow:hidden;display:flex;flex-direction:column}
+  .pep-post-media{display:block;background:var(--color-surface-primary)}
+  .pep-post-img{width:100%;height:220px;object-fit:cover}
+  .pep-post-placeholder{height:220px;display:flex;align-items:center;justify-content:center;color:var(--color-text-tertiary);background:var(--color-surface-secondary)}
+  .pep-post-body{padding:12px}
+  .pep-post-title{margin:0 0 6px;font-size:1.05rem}
+  .pep-post-excerpt{color:var(--color-text-secondary)}
+  .pep-post-link{display:inline-block;margin-top:8px;border-bottom:1px solid var(--color-border-default);color:var(--color-text-primary)}
+
+  .pep-news{margin-top:28px}
+  .pep-news-box{border:1px solid var(--pep-border);border-radius:var(--nx-radius);background:var(--color-surface-primary);padding:16px;display:flex;justify-content:space-between;gap:18px;align-items:center;flex-wrap:wrap}
+  .pep-inputs{display:flex;gap:10px}
+  .pep-input{height:46px;border:1px solid var(--pep-border);border-radius:var(--nx-radius-md);padding:0 12px;min-width:260px}
+  .pep-success{color:var(--color-success)}.pep-error{color:var(--color-error)}
+</style>
+
+<script>
+  (function(){
+    var wrap = document.getElementById('peptides-pillar');
+    if(!wrap) return;
+
+    // Carousel
+    var car = wrap.querySelector('.pep-carousel');
+    if(car){
+      var track = car.querySelector('.pep-carousel-track');
+      var slides = car.querySelectorAll('.pep-slide');
+      var prev = car.querySelector('.pep-nav.prev');
+      var next = car.querySelector('.pep-nav.next');
+      var idx = 0;
+      function show(i){ idx = (i + slides.length) % slides.length; track.style.transform = 'translateX(' + (-idx*100) + '%)'; }
+      if(prev) prev.addEventListener('click', function(){ show(idx-1); });
+      if(next) next.addEventListener('click', function(){ show(idx+1); });
+      var auto = car.getAttribute('data-auto') === 'true';
+      if(auto && slides.length > 1){ setInterval(function(){ show(idx+1); }, 4500); }
+    }
+
+    // Quick add (optional)
+    {% if section.settings.enable_quick_add %}
+    function addToCart(variantId, qty){
+      return fetch('/cart/add.js', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({id: variantId, quantity: qty || 1})
+      }).then(function(r){ return r.json(); });
+    }
+    document.addEventListener('click', function(e){
+      var btn = e.target.closest('[data-quick-add]');
+      if(!btn) return;
+      e.preventDefault();
+      var handle = btn.getAttribute('data-handle');
+      var qty = parseInt(btn.getAttribute('data-qty')||'1',10);
+      fetch('/products/'+handle+'.js')
+        .then(function(r){ return r.json(); })
+        .then(function(p){
+          var v = p.variants.find(function(v){ return v.available; }) || p.variants[0];
+          return addToCart(v.id, qty);
+        })
+        .then(function(){
+          btn.textContent = 'Added ✓';
+          setTimeout(function(){ btn.textContent = 'Add to Cart'; }, 1200);
+          document.dispatchEvent(new CustomEvent('cart:refresh'));
+        })
+        .catch(function(){ window.location.href = '/products/'+handle; });
+    });
+    {% endif %}
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Pillar — Peptides",
+  "class": "pillar-peptides",
+  "settings": [
+    { "type": "checkbox", "id": "show_breadcrumbs", "label": "Show breadcrumbs", "default": false },
+    { "type": "color", "id": "accent_color", "label": "Accent color", "default": "#FBBF24" },
+
+    { "type": "text", "id": "hero_title", "label": "Hero title", "default": "Peptides, verified and fast" },
+    { "type": "textarea", "id": "hero_sub", "label": "Hero subtext", "default": "Research-grade peptides with third‑party COAs. Same‑day Dubai delivery, worldwide express on $120+." },
+    { "type": "image_picker", "id": "hero_bg", "label": "Hero background image" },
+    { "type": "text", "id": "hero_chips", "label": "Hero chips (comma or | separated)", "default": "COA on page | Same‑day Dubai delivery | Free intl. shipping $120+ | Research use only" },
+    { "type": "text", "id": "hero_cta_label", "label": "Hero primary CTA label", "default": "Shop peptides" },
+    { "type": "url",  "id": "hero_cta_link",  "label": "Hero primary CTA link", "default": "/" },
+    { "type": "text", "id": "hero_secondary_label", "label": "Hero secondary CTA label", "default": "What is a COA?" },
+    { "type": "url",  "id": "hero_secondary_link",  "label": "Hero secondary CTA link", "default": "/" },
+    { "type": "text", "id": "hero_note", "label": "Hero compliance note", "default": "For laboratory research use only. Not for human consumption." },
+
+    { "type": "header", "content": "Grid #1 — single vials" },
+    { "type": "select", "id": "grid1_source", "label": "Source", "default": "collection", "options": [
+      { "value": "collection", "label": "Collection" }, { "value": "manual", "label": "Manual picks (blocks)" }
+    ]},
+    { "type": "collection", "id": "grid1_collection", "label": "Collection for grid #1" },
+    { "type": "text", "id": "grid1_title", "label": "Title", "default": "Shop Peptides" },
+    { "type": "textarea", "id": "grid1_sub", "label": "Subtext" },
+    { "type": "text", "id": "grid1_cta_label", "label": "Section CTA label" },
+    { "type": "url",  "id": "grid1_cta_link",  "label": "Section CTA link", "default": "/" },
+
+    { "type": "header", "content": "Intro copy" },
+    { "type": "text", "id": "intro_title", "label": "Intro heading", "default": "About our peptides" },
+    { "type": "richtext", "id": "intro_richtext", "label": "Intro rich text", "default": "<p>Every batch is independently tested for identity, purity and potency. We publish downloadable COAs and offer fast, reliable shipping. Research use only.</p>" },
+
+    { "type": "header", "content": "First‑order banner" },
+    { "type": "checkbox", "id": "show_discount", "label": "Show 10% banner", "default": true },
+    { "type": "text", "id": "discount_heading", "label": "Heading", "default": "Get 10% off your first order" },
+    { "type": "text", "id": "discount_sub", "label": "Subtext", "default": "Use code at checkout" },
+    { "type": "text", "id": "discount_code", "label": "Discount code", "default": "PEPTIDE10" },
+    { "type": "text", "id": "discount_cta_label", "label": "CTA label", "default": "Apply at checkout" },
+    { "type": "url",  "id": "discount_cta_link",  "label": "CTA link", "default": "/" },
+
+    { "type": "header", "content": "Grid #2 — sets of 10" },
+    { "type": "select", "id": "grid2_source", "label": "Source", "default": "collection", "options": [
+      { "value": "collection", "label": "Collection" }, { "value": "manual", "label": "Manual picks (blocks)" }
+    ]},
+    { "type": "text", "id": "grid2_title", "label": "Title", "default": "10‑Vial Sets" },
+    { "type": "textarea", "id": "grid2_sub", "label": "Subtext", "default": "Best value for labs and clinics." },
+    { "type": "text", "id": "grid2_cta_label", "label": "Section CTA label" },
+    { "type": "url",  "id": "grid2_cta_link",  "label": "Section CTA link", "default": "/" },
+
+    { "type": "header", "content": "Wholesale CTA" },
+    { "type": "checkbox", "id": "show_wholesale", "label": "Show wholesale card", "default": true },
+    { "type": "text", "id": "wh_title", "label": "Heading", "default": "Wholesale & Labs" },
+    { "type": "textarea", "id": "wh_sub", "label": "Subtext", "default": "Volume pricing, standing orders, and batch documentation." },
+    { "type": "text", "id": "wh_cta_label", "label": "Primary button label", "default": "Request access" },
+    { "type": "url",  "id": "wh_cta_link",  "label": "Primary button link", "default": "/" },
+    { "type": "text", "id": "wh_secondary_label", "label": "Secondary button label", "default": "Learn more" },
+    { "type": "url",  "id": "wh_secondary_link",  "label": "Secondary button link", "default": "/" },
+
+    { "type": "header", "content": "COA explainer & carousel" },
+    { "type": "text", "id": "coa_title", "label": "Heading", "default": "What is a COA?" },
+    { "type": "richtext", "id": "coa_richtext", "label": "Explainer rich text", "default": "<p>A certificate of analysis (COA) documents third‑party testing for identity (FTIR), purity and potency (HPLC), and storage/packaging details. We publish COAs on every peptide page.</p>" },
+    { "type": "text", "id": "coa_cta_label", "label": "Link label", "default": "See sample COA" },
+    { "type": "url",  "id": "coa_cta_link",  "label": "Link URL", "default": "/" },
+    { "type": "checkbox", "id": "coa_auto", "label": "Auto-rotate slides", "default": true },
+
+    { "type": "header", "content": "Blog posts" },
+    { "type": "blog", "id": "blog", "label": "Blog" },
+    { "type": "text", "id": "blog_tag", "label": "Filter by tag (optional)", "default": "peptides" },
+    { "type": "text", "id": "blog_title", "label": "Section title", "default": "Peptide insights" },
+    { "type": "textarea", "id": "blog_sub", "label": "Section subtext" },
+    { "type": "range", "id": "blog_limit", "label": "Max articles", "min": 2, "max": 8, "step": 1, "default": 6 },
+
+    { "type": "header", "content": "Newsletter" },
+    { "type": "text", "id": "news_title", "label": "Heading", "default": "Get peptide updates & drops" },
+    { "type": "textarea", "id": "news_sub", "label": "Subtext", "default": "New batches, COAs, and promotions. Unsubscribe anytime." },
+
+    { "type": "header", "content": "Card behavior" },
+    { "type": "checkbox", "id": "enable_quick_add", "label": "Enable quick add to cart (fallback to PDP)", "default": true }
+  ],
+  "blocks": [
+    { "type": "grid1_product", "name": "Grid #1 — product", "settings": [ { "type": "product", "id": "product", "label": "Product" } ] },
+    { "type": "grid2_product", "name": "Grid #2 — product", "settings": [ { "type": "product", "id": "product", "label": "Product" } ] },
+    { "type": "coa_image", "name": "COA slide", "settings": [
+      { "type": "image_picker", "id": "image", "label": "Image" },
+      { "type": "text", "id": "alt", "label": "Alt text" },
+      { "type": "text", "id": "caption", "label": "Caption" }
+    ] },
+    { "type": "@app" }
+  ],
+  "presets": [ { "name": "Pillar — Peptides" } ]
+}
+{% endschema %}

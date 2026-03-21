@@ -1,0 +1,35 @@
+{% liquid
+  assign notification_header = 'general.cart.item_added' | t
+  capture notification_content
+    if cart == empty
+      render 'cart-empty'
+    else
+      for item in cart.items
+        render 'cart-mini-item', item: item, animate_enabled: true, for_notification: true
+      endfor
+    endif
+  endcapture
+%}
+
+{% capture notification_footer %}
+ {% if cart != empty %}
+  <div class='cart-notification'>
+    {% assign label = 'general.cart.view' | t: count: cart.item_count %}
+    {% render 'button', text: label, style: 'link', link: routes.cart_url, block: true %}
+
+    {% render 'space', spacing_dt: 24, spacing_mb: 24 %}
+
+    <form style="--lg: 12" action='/checkout' method='post' id='xo-cart-popup-form'>
+      {% capture checkout_label %}{{ 'sections.cart.checkout' | t }}{% endcapture %}
+      {% render 'button', text: checkout_label, style: 'primary', size: 'md' type: 'submit', block: true %}
+    </form>
+
+    <xo-modal-trigger style="--lg: 12">
+      {% capture continue_label %}{{ 'general.continue_shopping' | t }}{% endcapture %}
+      {% render 'button', text: continue_label, style: 'link', block: true %}
+    </xo-modal-trigger>
+  </div>
+ {% endif %}
+{% endcapture %}
+
+{% render 'modal-content', content: notification_content, title: notification_header, title_class: 'h6', footer: notification_footer %}

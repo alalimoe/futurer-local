@@ -1,0 +1,48 @@
+{% comment %}
+  Renders a stack block
+
+  Accepts:
+  - content: {String} Content (required)
+  - direction: {String} Direction (required)
+  - wrap: {Boolean} Wrap (required)
+  - reverse: {Boolean} Reverse (required)
+  - desktop_col_gap: {Number} Desktop column gap (required)
+  - desktop_row_gap: {Number} Desktop row gap (required)
+  - mobile_col_gap: {Number} Mobile column gap (required)
+  - mobile_row_gap: {Number} Mobile row gap (required)
+  - align_items: {String} Align items (required)
+  - justify_content: {String} Justify content (required)
+
+  Usage:
+  {% render 'stack-block',
+    content: content,
+    direction: 'row',
+    wrap: true,
+    reverse: false,
+    desktop_col_gap: 0,
+    desktop_row_gap: 0,
+    mobile_col_gap: 0,
+    mobile_row_gap: 0,
+    align_items: 'flex-start',
+    justify_content: 'flex-start'
+  %}
+{% endcomment %}
+
+{% liquid
+  assign reverse = ''
+  if flex_reverse
+    assign reverse = '-reverse'
+  endif
+  assign css_vars = '--dir:' | append: direction | append: reverse | append: ';'
+  assign css_vars = css_vars | append: '--wrap:' | append: wrap | append: ';'
+  assign css_vars = css_vars | append: '--col-gap:' | append: desktop_col_gap | append: ';'
+  assign css_vars = css_vars | append: '--row-gap:' | append: desktop_row_gap | append: ';'
+  assign css_vars = css_vars | append: '--col-gap-mobile:' | append: mobile_col_gap | append: ';'
+  assign css_vars = css_vars | append: '--row-gap-mobile:' | append: mobile_row_gap | append: ';'
+  assign css_vars = css_vars | append: '--ai:' | append: align_items | append: ';'
+  assign css_vars = css_vars | append: '--jc:' | append: justify_content | append: ';'
+%}
+
+<div class="xo-stack" style="{{ css_vars }}">
+  {{- content -}}
+</div>

@@ -1,0 +1,41 @@
+{% comment %}
+  Renders a message about free shipping in the cart.
+
+  Usage:
+  {% render 'cart-free-shipping' %}
+{% endcomment %}
+
+{{ 'cart-free-shipping.css' | asset_url | stylesheet_tag }}
+
+{% liquid
+  assign total_amount = cart.total_price | divided_by: 100.0
+%}
+
+{% if settings.show_cart_free_shipping %}
+  <xo-cart-free-shipping-custom
+    xo-free-shipping-notice="{{ 'general.cart.free_shipping_notice_2' | t }}"
+    xo-free-shipping-progress="{{ 'general.cart.free_shipping_progress' | t }}"
+  >
+    <div class="xo-cart-free-shipping">
+      <xo-cart-will-change
+        class="xo-cart-free-shipping-checking-inner xo-visually-hidden"
+        xo-unique-id="xo-cart-free-shipping-checking-inner"
+        xo-total-price="{{ cart.total_price }}"
+      >
+        {{- cart.total_price -}}
+      </xo-cart-will-change>
+      <xo-cart-will-change xo-unique-id="xo-cart-free-shipping-checking" class="xo-cart-free-shipping__checking">
+        {%- if cart != empty -%}{{- total_amount -}}{%- endif -%}
+      </xo-cart-will-change>
+      <xo-cart-will-change xo-unique-id="xo-cart-free-shipping-text" class="xo-cart-free-shipping__text">
+        {{ 'general.cart.free_shipping_notice' | t }}
+      </xo-cart-will-change>
+      <div class="xo-cart-free-shipping__progress{% if settings.enable_border_radius %} xo-cart-free-shipping__progress--radius{% endif %}">
+        {{ total_amount }}
+      </div>
+      <div class="xo-cart-mini-footer__separator-pd pb-0">
+        <div class="xo-cart-mini-footer__separator"></div>
+      </div>
+    </div>
+  </xo-cart-free-shipping-custom>
+{% endif %}

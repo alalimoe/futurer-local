@@ -1,0 +1,642 @@
+{% doc %}
+  @prompt
+    create a modern, clean, premium hero section with the following: H1: Quality & COA Library
+    Subhead:
+    We don’t ask you to “trust us.” We show you the batch/lot and the COA—so quality claims are verifiable, not just marketing.
+    
+    Quick bullets (3):
+    
+    Batch/lot traceability (match your label to the report)
+    
+    Third‑party analytical documentation (methods + results)
+    
+    UAE‑aware handling (shipping heat + storage guidance)
+    
+    Buttons (3):
+    
+    Browse COAs (anchor link to COA section)
+    
+    How to Read a COA (link target above)
+    
+    Request a COA (anchor to request section)
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-hero-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    background-color: {{ block.settings.background_color }};
+    padding: {{ block.settings.padding_top }}px var(--page-gutter) {{ block.settings.padding_bottom }}px;
+  }
+
+  .ai-hero-container-{{ ai_gen_id }} {
+    max-width: {{ block.settings.max_width }}px;
+    margin: 0 auto;
+    text-align: {{ block.settings.text_alignment }};
+  }
+
+  .ai-hero-heading-{{ ai_gen_id }} {
+    color: {{ block.settings.heading_color }};
+    margin: 0 0 {{ block.settings.heading_spacing }}px;
+    font-weight: 600;
+    line-height: 1.2;
+  }
+
+  .ai-hero-subhead-{{ ai_gen_id }} {
+    font-size: {{ block.settings.subhead_size }}px;
+    color: {{ block.settings.subhead_color }};
+    margin: 0 0 {{ block.settings.subhead_spacing }}px;
+    line-height: 1.6;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .ai-hero-bullets-{{ ai_gen_id }} {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 {{ block.settings.bullets_spacing }}px;
+    display: flex;
+    flex-direction: column;
+    gap: {{ block.settings.bullet_gap }}px;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .ai-hero-bullet-{{ ai_gen_id }} {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: {{ block.settings.bullet_size }}px;
+    color: {{ block.settings.bullet_color }};
+    line-height: 1.5;
+  }
+
+  .ai-hero-bullet-icon-{{ ai_gen_id }} {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    margin-top: 2px;
+  }
+
+  .ai-hero-bullet-icon-{{ ai_gen_id }} svg {
+    width: 100%;
+    height: 100%;
+    fill: {{ block.settings.icon_color }};
+  }
+
+  .ai-hero-buttons-{{ ai_gen_id }} {
+    display: flex;
+    flex-wrap: wrap;
+    gap: {{ block.settings.button_gap }}px;
+    justify-content: {{ block.settings.text_alignment }};
+    margin-top: {{ block.settings.buttons_spacing }}px;
+  }
+
+  .ai-hero-button-{{ ai_gen_id }} {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: {{ block.settings.button_padding_vertical }}px {{ block.settings.button_padding_horizontal }}px;
+    font-size: {{ block.settings.button_font_size }}px;
+    font-weight: 500;
+    text-decoration: none;
+    border-radius: {{ block.settings.button_border_radius }}px;
+    transition: var(--transition-smooth);
+    border: 2px solid transparent;
+  }
+
+  .ai-hero-button-primary-{{ ai_gen_id }} {
+    background-color: {{ block.settings.button_primary_bg }};
+    color: {{ block.settings.button_primary_text }};
+    border-color: {{ block.settings.button_primary_bg }};
+  }
+
+  .ai-hero-button-primary-{{ ai_gen_id }}:hover {
+    background-color: {{ block.settings.button_primary_hover_bg }};
+    border-color: {{ block.settings.button_primary_hover_bg }};
+    color: {{ block.settings.button_primary_text }};
+  }
+
+  .ai-hero-button-secondary-{{ ai_gen_id }} {
+    background-color: {{ block.settings.button_secondary_bg }};
+    color: {{ block.settings.button_secondary_text }};
+    border-color: {{ block.settings.button_secondary_border }};
+  }
+
+  .ai-hero-button-secondary-{{ ai_gen_id }}:hover {
+    background-color: {{ block.settings.button_secondary_hover_bg }};
+    border-color: {{ block.settings.button_secondary_hover_border }};
+    color: {{ block.settings.button_secondary_text }};
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-hero-{{ ai_gen_id }} {
+      padding: {{ block.settings.padding_top | times: 0.6 }}px var(--page-gutter) {{ block.settings.padding_bottom | times: 0.6 }}px;
+    }
+
+    .ai-hero-subhead-{{ ai_gen_id }} {
+      font-size: {{ block.settings.subhead_size | times: 0.9 }}px;
+    }
+
+    .ai-hero-bullet-{{ ai_gen_id }} {
+      font-size: {{ block.settings.bullet_size | times: 0.9 }}px;
+    }
+
+    .ai-hero-buttons-{{ ai_gen_id }} {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .ai-hero-button-{{ ai_gen_id }} {
+      width: 100%;
+    }
+  }
+{% endstyle %}
+
+<ai-hero-{{ ai_gen_id }} class="ai-hero-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="ai-hero-container-{{ ai_gen_id }}">
+    <h1 class="ai-hero-heading-{{ ai_gen_id }} {{ block.settings.heading_size }}">{{ block.settings.heading }}</h1>
+    
+    {% if block.settings.subhead != blank %}
+      <div class="ai-hero-subhead-{{ ai_gen_id }}">{{ block.settings.subhead }}</div>
+    {% endif %}
+
+    <ul class="ai-hero-bullets-{{ ai_gen_id }}">
+      {% if block.settings.bullet_1 != blank %}
+        <li class="ai-hero-bullet-{{ ai_gen_id }}">
+          <span class="ai-hero-bullet-icon-{{ ai_gen_id }}">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+              <path d="M10 0C4.486 0 0 4.486 0 10s4.486 10 10 10 10-4.486 10-10S15.514 0 10 0zm5.707 7.707l-6 6a.999.999 0 01-1.414 0l-3-3a.999.999 0 111.414-1.414L9 11.586l5.293-5.293a.999.999 0 111.414 1.414z"/>
+            </svg>
+          </span>
+          <span>{{ block.settings.bullet_1 }}</span>
+        </li>
+      {% endif %}
+      
+      {% if block.settings.bullet_2 != blank %}
+        <li class="ai-hero-bullet-{{ ai_gen_id }}">
+          <span class="ai-hero-bullet-icon-{{ ai_gen_id }}">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+              <path d="M10 0C4.486 0 0 4.486 0 10s4.486 10 10 10 10-4.486 10-10S15.514 0 10 0zm5.707 7.707l-6 6a.999.999 0 01-1.414 0l-3-3a.999.999 0 111.414-1.414L9 11.586l5.293-5.293a.999.999 0 111.414 1.414z"/>
+            </svg>
+          </span>
+          <span>{{ block.settings.bullet_2 }}</span>
+        </li>
+      {% endif %}
+      
+      {% if block.settings.bullet_3 != blank %}
+        <li class="ai-hero-bullet-{{ ai_gen_id }}">
+          <span class="ai-hero-bullet-icon-{{ ai_gen_id }}">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+              <path d="M10 0C4.486 0 0 4.486 0 10s4.486 10 10 10 10-4.486 10-10S15.514 0 10 0zm5.707 7.707l-6 6a.999.999 0 01-1.414 0l-3-3a.999.999 0 111.414-1.414L9 11.586l5.293-5.293a.999.999 0 111.414 1.414z"/>
+            </svg>
+          </span>
+          <span>{{ block.settings.bullet_3 }}</span>
+        </li>
+      {% endif %}
+    </ul>
+
+    <div class="ai-hero-buttons-{{ ai_gen_id }}">
+      {% if block.settings.button_1_text != blank %}
+        <a 
+          href="{{ block.settings.button_1_link }}" 
+          class="ai-hero-button-{{ ai_gen_id }} ai-hero-button-primary-{{ ai_gen_id }}"
+        >
+          {{ block.settings.button_1_text }}
+        </a>
+      {% endif %}
+      
+      {% if block.settings.button_2_text != blank %}
+        <a 
+          href="{{ block.settings.button_2_link }}" 
+          class="ai-hero-button-{{ ai_gen_id }} ai-hero-button-secondary-{{ ai_gen_id }}"
+        >
+          {{ block.settings.button_2_text }}
+        </a>
+      {% endif %}
+      
+      {% if block.settings.button_3_text != blank %}
+        <a 
+          href="{{ block.settings.button_3_link }}" 
+          class="ai-hero-button-{{ ai_gen_id }} ai-hero-button-secondary-{{ ai_gen_id }}"
+        >
+          {{ block.settings.button_3_text }}
+        </a>
+      {% endif %}
+    </div>
+  </div>
+</ai-hero-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class AiHero{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+      }
+
+      connectedCallback() {
+        this.setupSmoothScroll();
+      }
+
+      setupSmoothScroll() {
+        const links = this.querySelectorAll('a[href^="#"]');
+        links.forEach(link => {
+          link.addEventListener('click', (e) => {
+            const href = link.getAttribute('href');
+            if (href && href.startsWith('#')) {
+              const targetId = href.substring(1);
+              const targetElement = document.getElementById(targetId);
+              if (targetElement) {
+                e.preventDefault();
+                targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }
+            }
+          });
+        });
+      }
+    }
+
+    customElements.define('ai-hero-{{ ai_gen_id }}', AiHero{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Quality & COA hero",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Quality & COA Library"
+    },
+    {
+      "type": "textarea",
+      "id": "subhead",
+      "label": "Subheading",
+      "default": "We don't ask you to \"trust us.\" We show you the batch/lot and the COA—so quality claims are verifiable, not just marketing."
+    },
+    {
+      "type": "text",
+      "id": "bullet_1",
+      "label": "Bullet 1",
+      "default": "Batch/lot traceability (match your label to the report)"
+    },
+    {
+      "type": "text",
+      "id": "bullet_2",
+      "label": "Bullet 2",
+      "default": "Third‑party analytical documentation (methods + results)"
+    },
+    {
+      "type": "text",
+      "id": "bullet_3",
+      "label": "Bullet 3",
+      "default": "UAE‑aware handling (shipping heat + storage guidance)"
+    },
+    {
+      "type": "header",
+      "content": "Button 1"
+    },
+    {
+      "type": "text",
+      "id": "button_1_text",
+      "label": "Text",
+      "default": "Browse COAs"
+    },
+    {
+      "type": "url",
+      "id": "button_1_link",
+      "label": "Link"
+    },
+    {
+      "type": "header",
+      "content": "Button 2"
+    },
+    {
+      "type": "text",
+      "id": "button_2_text",
+      "label": "Text",
+      "default": "How to Read a COA"
+    },
+    {
+      "type": "url",
+      "id": "button_2_link",
+      "label": "Link"
+    },
+    {
+      "type": "header",
+      "content": "Button 3"
+    },
+    {
+      "type": "text",
+      "id": "button_3_text",
+      "label": "Text",
+      "default": "Request a COA"
+    },
+    {
+      "type": "url",
+      "id": "button_3_link",
+      "label": "Link"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "max_width",
+      "label": "Maximum width",
+      "min": 600,
+      "max": 1400,
+      "step": 50,
+      "unit": "px",
+      "default": 1000
+    },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "Text alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Top padding",
+      "min": 20,
+      "max": 120,
+      "step": 10,
+      "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom padding",
+      "min": 20,
+      "max": 120,
+      "step": 10,
+      "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Heading size",
+      "options": [
+        {"value": "h1", "label": "Display"},
+        {"value": "h2", "label": "XL"},
+        {"value": "h3", "label": "L"},
+        {"value": "h4", "label": "M"},
+        {"value": "h5", "label": "S"},
+        {"value": "h6", "label": "XS"}
+      ],
+      "default": "h1"
+    },
+    {
+      "type": "range",
+      "id": "subhead_size",
+      "label": "Subheading size",
+      "min": 14,
+      "max": 28,
+      "step": 1,
+      "unit": "px",
+      "default": 18
+    },
+    {
+      "type": "range",
+      "id": "bullet_size",
+      "label": "Bullet size",
+      "min": 14,
+      "max": 22,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "button_font_size",
+      "label": "Button font size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 15
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "heading_spacing",
+      "label": "Heading bottom spacing",
+      "min": 10,
+      "max": 50,
+      "step": 5,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "subhead_spacing",
+      "label": "Subheading bottom spacing",
+      "min": 20,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "bullets_spacing",
+      "label": "Bullets bottom spacing",
+      "min": 20,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "bullet_gap",
+      "label": "Gap between bullets",
+      "min": 8,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "buttons_spacing",
+      "label": "Buttons top spacing",
+      "min": 0,
+      "max": 40,
+      "step": 5,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "button_gap",
+      "label": "Gap between buttons",
+      "min": 8,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "subhead_color",
+      "label": "Subheading",
+      "default": "#4a4a4a"
+    },
+    {
+      "type": "color",
+      "id": "bullet_color",
+      "label": "Bullet text",
+      "default": "#333333"
+    },
+    {
+      "type": "color",
+      "id": "icon_color",
+      "label": "Bullet icon",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Primary button"
+    },
+    {
+      "type": "color",
+      "id": "button_primary_bg",
+      "label": "Background",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "button_primary_text",
+      "label": "Text",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "button_primary_hover_bg",
+      "label": "Hover background",
+      "default": "#333333"
+    },
+    {
+      "type": "header",
+      "content": "Secondary buttons"
+    },
+    {
+      "type": "color",
+      "id": "button_secondary_bg",
+      "label": "Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "button_secondary_text",
+      "label": "Text",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "button_secondary_border",
+      "label": "Border",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "button_secondary_hover_bg",
+      "label": "Hover background",
+      "default": "#f5f5f5"
+    },
+    {
+      "type": "color",
+      "id": "button_secondary_hover_border",
+      "label": "Hover border",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Button style"
+    },
+    {
+      "type": "range",
+      "id": "button_padding_vertical",
+      "label": "Vertical padding",
+      "min": 8,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "button_padding_horizontal",
+      "label": "Horizontal padding",
+      "min": 16,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "button_border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 4
+    }
+  ],
+  "presets": [
+    {
+      "name": "Quality & COA hero"
+    }
+  ]
+}
+{% endschema %}

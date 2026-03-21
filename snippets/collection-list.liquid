@@ -1,0 +1,62 @@
+{% comment %}
+  Renders a collection list
+
+  @param {String} collection_image - Image of the collection (required),
+  @param {String} collection_name - Title of the collection (required),
+  @param {String} collection_link - URL of the collection (required),
+  @param {String} color_scheme_collection - The color scheme to use (optional),
+
+  @example
+  {% render 'collection-list',
+    collection_image: collection_image,
+    collection_name: collection_name,
+    collection_link: collection_link,
+    color_scheme_collection: color_scheme_collection,
+  %}
+{% endcomment %}
+
+{% liquid
+  assign aspect_ratio_dt = aspect_ratio_dt | default: '3/2'
+  assign aspect_ratio_mb = aspect_ratio_mb | default: '3/4'
+%}
+
+<xo-animate xo-cascade>
+  <div class="collection-list{% if settings.enable_border_radius %} collection-list--radius{% endif %}{% if color_scheme_collection %} color-{{ color_scheme_collection }} {% endif %}">
+    <a
+      {% if collection_link == blank %}
+        role="link"
+        aria-disabled="true"
+      {% else %}
+        href="{{ collection_link }}"
+      {% endif %}
+      class="collection-list__link"
+      title="Collection link"
+    >
+      <div class="collection-list__content" style="--opacity: {{ background_overlay }}">
+        {% if collection_image == blank %}
+          <div class="collection-list__image collection-list__image--desktop">
+            {% render 'image', image: image, placeholder: placeholder, aspect_ratio: aspect_ratio_dt, disable_alt: true %}
+          </div>
+          <div class="collection-list__image collection-list__image--mobile">
+            {% render 'image', image: image, placeholder: placeholder, aspect_ratio: aspect_ratio_mb, disable_alt: true %}
+          </div>
+        {%- else -%}
+          <div class="collection-list__image collection-list__image--desktop">
+            {% render 'image', image: collection_image, aspect_ratio: aspect_ratio_dt, disable_alt: true %}
+          </div>
+          <div class="collection-list__image collection-list__image--mobile">
+            {% render 'image', image: collection_image, aspect_ratio: aspect_ratio_mb, disable_alt: true %}
+          </div>
+        {% endif %}
+        <div class="collection-list__text">
+          <div class="collection-list__heading">
+            {% render 'text', class: class, text: collection_name, tag_name: tag_name, effect: 'split', duration: 1000 %}
+          </div>
+          <div class="collection-list__button">
+            {% render 'button', text: 'Shop all', style: 'primary', size: 'sm' %}
+          </div>
+        </div>
+      </div>
+    </a>
+  </div>
+</xo-animate>

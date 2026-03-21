@@ -1,0 +1,237 @@
+{% schema %}
+{
+  "name": "Peptide Calc (Premium)",
+  "tag": "section",
+  "class": "section-peptide-calc",
+  "settings": [
+    { "type": "color", "id": "bg_color", "label": "Background", "default": "#fafafb" },
+    { "type": "color", "id": "accent_color", "label": "Brand Accent", "default": "#FBBF24" },
+    { "type": "text", "id": "title", "label": "Heading", "default": "Peptide Reconstitution Calculator" },
+    { "type": "textarea", "id": "subtitle", "label": "Subheading", "default": "Fill in your vial's details below to instantly visualize your exact dose. No guessing required." },
+    {
+      "type": "range",
+      "id": "max_width",
+      "label": "Max Width (px)",
+      "min": 800,
+      "max": 1200,
+      "step": 10,
+      "default": 950
+    },
+    {
+      "type": "range",
+      "id": "padding_y",
+      "label": "Vertical Padding (px)",
+      "min": 40,
+      "max": 160,
+      "step": 4,
+      "default": 80
+    }
+  ],
+  "presets": [{"name": "Peptide Calc (Premium)"}]
+}
+{% endschema %}
+
+{%- assign s = section.settings -%}
+{%- assign sid = section.id -%}
+
+<div id="pc-calculator-section" class="pca-wrapper" data-section-id="{{ sid }}">
+  <div class="pca-container" id="pca-{{ sid }}">
+    <div class="pca-card">
+      <div class="pca-grid">
+
+        <div class="pca-inputs">
+          <div class="pca-badge"><span class="pca-dot"></span> Interactive Tool</div>
+          <h2 class="pca-title">{{ s.title }}</h2>
+          <p class="pca-subtitle">{{ s.subtitle }}</p>
+
+          <div class="pca-form">
+            <div class="pca-input-group">
+              <label for="pca-mg-{{ sid }}">Total Peptide in Vial <span title="Check your powder vial label" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+              </span></label>
+              <div class="pca-input-wrap">
+                <input type="number" id="pca-mg-{{ sid }}" inputmode="decimal" placeholder="e.g. 5" step="0.1" min="0" aria-describedby="pca-result-{{ sid }}">
+                <span class="pca-suffix" aria-hidden="true">mg</span>
+              </div>
+            </div>
+
+            <div class="pca-input-group">
+              <label for="pca-ml-{{ sid }}">BAC Water Added <span title="How much liquid did you add?" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+              </span></label>
+              <div class="pca-input-wrap">
+                <input type="number" id="pca-ml-{{ sid }}" inputmode="decimal" placeholder="e.g. 2" step="0.1" min="0" aria-describedby="pca-result-{{ sid }}">
+                <span class="pca-suffix" aria-hidden="true">mL</span>
+              </div>
+            </div>
+
+            <div class="pca-input-group">
+              <label for="pca-mcg-{{ sid }}">Target Dose <span title="Your protocol's required dose" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+              </span></label>
+              <div class="pca-input-wrap">
+                <input type="number" id="pca-mcg-{{ sid }}" inputmode="decimal" placeholder="e.g. 250" step="10" min="0" aria-describedby="pca-result-{{ sid }}">
+                <span class="pca-suffix" aria-hidden="true">mcg</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="pca-result-box" id="pca-result-{{ sid }}" aria-live="polite" aria-atomic="true">
+            <div class="pca-res-bg"></div>
+            <div class="pca-res-content">
+              <div class="pca-res-label">DRAW TO THE</div>
+              <div class="pca-res-val"><span id="pca-units-{{ sid }}">0</span> <small>UNITS</small></div>
+              <p class="pca-res-note">On a standard 100-unit / 1mL syringe</p>
+              <div id="pca-warning-{{ sid }}" class="pca-warning" role="alert" hidden>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                Exceeds 1mL capacity.
+              </div>
+            </div>
+          </div>
+
+          <a href="#pc-video-section" class="pca-protip">
+            <div class="pca-protip-icon" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            </div>
+            <div class="pca-protip-text">
+              <strong>Pro-Tip:</strong> Not sure how much water to add? <span>Watch the video tutorial below.</span>
+            </div>
+          </a>
+
+        </div>
+
+        <div class="pca-visual">
+          <div class="pca-visual-label">Visual Guide</div>
+          <div class="pca-syringe-scale">
+            <div class="pca-plunger"></div>
+            <div class="pca-barrel">
+              <div class="pca-flange"></div>
+              <div class="pca-graduations"></div>
+              <div id="pca-fill-{{ sid }}" class="pca-fill"></div>
+              <div class="pca-glass-glare"></div>
+            </div>
+            <div class="pca-needle-base"></div>
+            <div class="pca-needle"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+{%- style -%}
+  #pca-{{ sid }} {
+    --pca-bg: {{ s.bg_color }};
+    --pca-accent: {{ s.accent_color }};
+    --pca-max: {{ s.max_width | default: 950 }}px;
+    --pca-py: {{ s.padding_y | default: 80 }}px;
+    --pca-text: var(--color-text-main, #111827);
+    --pca-muted: var(--color-text-muted, #4b5563);
+    --pca-font: var(--font-body-family, sans-serif);
+    --pca-radius: var(--nx-radius, 14px);
+    --pca-shadow-sm: var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.04));
+    --pca-shadow-md: var(--shadow-md, 0 12px 30px rgba(0,0,0,0.06));
+    --pca-transition: var(--transition-premium);
+    --pca-danger: #ef4444;
+    content-visibility: auto;
+  }
+
+  .pca-wrapper { padding: var(--pca-py) var(--page-gutter); background: var(--pca-bg); font-family: var(--pca-font); }
+  .pca-container { max-width: var(--pca-max); margin: 0 auto; }
+  .pca-card { background: rgba(255,255,255,0.85); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border-radius: 24px; box-shadow: var(--pca-shadow-md), inset 0 1px 0 rgba(255,255,255,1); overflow: hidden; }
+  .pca-grid { display: grid; grid-template-columns: 1.2fr 1fr; }
+
+  .pca-inputs { padding: 48px; }
+  .pca-badge { display: inline-flex; align-items: center; gap: 6px; background: #fffbeb; color: var(--color-accent-dark, #92400e); font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; padding: 6px 12px; border-radius: 99px; margin-bottom: 16px; box-shadow: var(--pca-shadow-sm); }
+  .pca-dot { width: 6px; height: 6px; background: var(--pca-accent); border-radius: 50%; box-shadow: 0 0 6px var(--pca-accent); }
+  .pca-title { font-size: 32px; font-weight: 800; letter-spacing: -0.5px; margin: 0 0 12px; color: var(--pca-text); font-family: var(--font-heading-family, sans-serif); }
+  .pca-subtitle { color: var(--pca-muted); font-size: 16px; margin-bottom: 32px; line-height: 1.6; }
+
+  .pca-form { display: flex; flex-direction: column; gap: 20px; }
+  .pca-input-group label { display: flex; align-items: center; gap: 6px; font-weight: 700; margin-bottom: 8px; color: var(--pca-text); font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .pca-input-group label span svg { width: 14px; height: 14px; color: #94a3b8; cursor: help; }
+  .pca-input-wrap { position: relative; }
+  .pca-input-wrap input { width: 100%; background: var(--color-bg-secondary, #f9fafb); padding: 16px 48px 16px 16px; border-radius: 12px; font-size: 16px; color: var(--pca-text); font-weight: 600; transition: var(--pca-transition); box-sizing: border-box; outline: none; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); border: none; }
+  .pca-input-wrap input:focus { background: var(--color-bg-primary, #fff); box-shadow: var(--shadow-gold-focus), inset 0 2px 4px rgba(0,0,0,0.02); }
+  .pca-suffix { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 14px; font-weight: 700; pointer-events: none; }
+
+  .pca-result-box { margin-top: 32px; background: var(--color-surface-tertiary); border-radius: 16px; padding: 32px 24px; text-align: center; color: #ffffff; position: relative; overflow: hidden; box-shadow: var(--pca-shadow-md); }
+  .pca-res-bg { position: absolute; inset: 0; background: radial-gradient(circle at top, rgba(251,191,36,0.15), transparent 70%); pointer-events: none; }
+  .pca-res-content { position: relative; z-index: 1; }
+  .pca-res-label { font-size: 12px; font-weight: 800; letter-spacing: 1px; color: #94a3b8; margin-bottom: 8px; }
+  .pca-res-val { font-size: 56px; font-weight: 900; line-height: 1; color: #ffffff; margin-bottom: 8px; text-shadow: 0 0 20px rgba(255,255,255,0.2); letter-spacing: -1px; }
+  .pca-res-val small { font-size: 18px; color: var(--pca-accent); margin-left: 4px; vertical-align: super; }
+  .pca-res-note { margin: 0; color: var(--pca-muted); font-size: 13px; font-weight: 500; }
+  .pca-warning { display: inline-flex; align-items: center; justify-content: center; gap: 8px; color: var(--pca-danger); font-size: 13px; font-weight: 700; margin-top: 16px; background: rgba(239,68,68,0.1); padding: 8px 16px; border-radius: 8px; }
+
+  .pca-protip { margin-top: 24px; display: flex; align-items: flex-start; gap: 12px; background: #fffbeb; padding: 16px 20px; border-radius: 12px; cursor: pointer; transition: var(--pca-transition); text-decoration: none; box-shadow: var(--pca-shadow-sm); }
+  .pca-protip:hover { background: #fef3c7; transform: translateY(-2px); box-shadow: var(--pca-shadow-md); }
+  .pca-protip:active { transform: scale(0.98); }
+  .pca-protip-icon { color: #d97706; flex-shrink: 0; margin-top: 2px; }
+  .pca-protip-text { font-size: 14px; color: var(--color-accent-dark, #92400e); line-height: 1.5; margin: 0; }
+  .pca-protip-text span { font-weight: 700; text-decoration: underline; text-underline-offset: 4px; }
+
+  .pca-visual { background: rgba(241, 245, 249, 0.5); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 48px; }
+  .pca-visual-label { font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 40px; }
+  .pca-syringe-scale { display: flex; flex-direction: column; align-items: center; width: 100px; filter: drop-shadow(0 15px 20px rgba(0,0,0,0.06)); }
+  .pca-plunger { width: 44px; height: 12px; background: #64748b; border-radius: 6px 6px 0 0; position: relative; }
+  .pca-plunger::after { content:''; position:absolute; bottom:0; left:14px; right:14px; height:40px; background: linear-gradient(90deg, #e2e8f0, #f8fafc, #e2e8f0); }
+  .pca-barrel { width: 64px; height: 320px; border-radius: 0 0 8px 8px; position: relative; background: linear-gradient(90deg, rgba(255,255,255,0.5), rgba(255,255,255,0.9) 20%, rgba(255,255,255,0.9) 80%, rgba(255,255,255,0.5)); box-shadow: inset -6px 0 12px rgba(0,0,0,0.04), inset 0 0 0 2px #334155; overflow: hidden; margin-top: 40px; }
+  .pca-flange { position: absolute; top: -2px; left: -12px; right: -12px; height: 6px; background: #334155; border-radius: 3px; }
+  .pca-graduations { position: absolute; top: 0; left: 0; bottom: 0; width: 40%; background-image: repeating-linear-gradient(to bottom, transparent, transparent calc(10% - 2px), #94a3b8 calc(10% - 2px), #94a3b8 10%); z-index: 2; }
+  .pca-fill { position: absolute; bottom: 0; left: 0; right: 0; height: 0%; background: var(--pca-accent); opacity: 0.9; transition: height 0.6s cubic-bezier(0.16,1,0.3,1), background-color 0.3s; z-index: 1; border-radius: 0 0 4px 4px; }
+  .pca-fill::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: var(--color-surface-elevated); }
+  .pca-glass-glare { position: absolute; top: 0; right: 10%; width: 15%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent); z-index: 3; pointer-events: none; }
+  .pca-needle-base { width: 18px; height: 12px; background: linear-gradient(90deg, #94a3b8, #cbd5e1, #94a3b8); border-radius: 0 0 4px 4px; }
+  .pca-needle { width: 3px; height: 40px; background: linear-gradient(90deg, #94a3b8, #f8fafc, #94a3b8); }
+
+  .pca-wrapper :focus-visible { outline: 2px solid var(--color-accent-primary, #FBBF24); outline-offset: 2px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pca-wrapper *, .pca-wrapper *::before, .pca-wrapper *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  }
+
+  @media (max-width: 800px) {
+    .pca-grid { grid-template-columns: 1fr; }
+    .pca-inputs { padding: 40px 24px; }
+    .pca-visual { padding: 40px 20px; }
+  }
+{%- endstyle -%}
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    var sid = '{{ sid }}';
+    var inputs = ['pca-mg-' + sid, 'pca-ml-' + sid, 'pca-mcg-' + sid].map(function(id) { return document.getElementById(id); });
+    var output = document.getElementById('pca-units-' + sid);
+    var fillBar = document.getElementById('pca-fill-' + sid);
+    var warning = document.getElementById('pca-warning-' + sid);
+    var wrapper = document.getElementById('pca-' + sid);
+
+    function updateCalc() {
+      var vals = inputs.map(function(el) { return parseFloat(el.value); });
+      if (vals.every(function(v) { return v > 0; })) {
+        var units = (vals[2] * vals[1]) / (vals[0] * 10);
+        output.innerText = (Math.round(units * 10) / 10).toString();
+
+        if (units > 100) {
+          fillBar.style.height = '100%';
+          fillBar.style.backgroundColor = getComputedStyle(wrapper).getPropertyValue('--pca-danger').trim() || '#ef4444';
+          output.style.color = getComputedStyle(wrapper).getPropertyValue('--pca-danger').trim() || '#ef4444';
+          warning.removeAttribute('hidden');
+        } else {
+          fillBar.style.height = units + '%';
+          fillBar.style.backgroundColor = getComputedStyle(wrapper).getPropertyValue('--pca-accent').trim() || '#FBBF24';
+          output.style.color = '#ffffff';
+          warning.setAttribute('hidden', '');
+        }
+      } else {
+        output.innerText = '0';
+        fillBar.style.height = '0%';
+        output.style.color = '#ffffff';
+        warning.setAttribute('hidden', '');
+      }
+    }
+    inputs.forEach(function(el) { if (el) el.addEventListener('input', updateCalc); });
+  });
+</script>

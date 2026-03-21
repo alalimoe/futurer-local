@@ -1,0 +1,26 @@
+{% case filter.type %}
+  {% when 'boolean', 'list' %}
+    {%- for value in filter.values -%}
+      {% assign count_id = value.param_name | append: '-' | append: value.value %}
+      {% if value.param_name contains 'color-' or value.param_name contains '-color' %}
+        <xo-filters-field>
+          {% render 'field-color-1', name: value.param_name, value: value.value, swatch: value.swatch, label: value.label %}
+        </xo-filters-field>
+      {% else %}
+        <xo-filters-field>
+          {% render 'field-checkbox-1',
+            name: value.param_name,
+            value: value.value,
+            label: value.label,
+            count_id: count_id,
+            count_value: value.count,
+            facets_horizontal: facets_horizontal
+          %}
+        </xo-filters-field>
+      {% endif %}
+    {%- endfor -%}
+  {% when 'price_range' %}
+    {% render 'field-price', filter: filter %}
+  {% else %}
+
+{% endcase %}

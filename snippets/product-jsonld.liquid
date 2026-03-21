@@ -1,0 +1,166 @@
+{%- comment -%}
+  Unified Product + BreadcrumbList JSON-LD @graph for the default product template.
+  Pulls AggregateRating from Shopify's reviews.rating / reviews.rating_count
+  metafields (populated by Judge.me).
+  Includes speakable (B4) and additionalProperty (B6) for AIO discoverability.
+{%- endcomment -%}
+
+{%- liquid
+  assign p = product
+  assign desc = p.description | strip_html | strip | truncate: 5000
+  if desc == blank
+    assign desc = p.title
+  endif
+
+  assign rating_mf = p.metafields.reviews.rating
+  assign rating_val = rating_mf.value | default: rating_mf | plus: 0
+  assign rating_cnt = p.metafields.reviews.rating_count | plus: 0
+
+  assign return_url = shop.secure_url | append: '/pages/shipping-and-returns'
+  assign return_id = return_url | append: '#return-policy'
+
+  assign bc_collection = collection
+  if bc_collection == blank and p.collections.size > 0
+    assign bc_collection = p.collections.first
+  endif
+-%}
+
+{%- comment -%} Build additionalProperty JSON fragments from available metafields {%- endcomment -%}
+{%- capture additional_props -%}
+{%- assign prop_printed = false -%}
+{%- if p.type != blank -%}
+  {%- if prop_printed -%},{%- endif -%}
+  {"@type":"PropertyValue","name":"Product Form","value":{{ p.type | json }}}
+  {%- assign prop_printed = true -%}
+{%- endif -%}
+{%- if p.metafields.npx.what_it_is != blank -%}
+  {%- assign wi_raw = p.metafields.npx.what_it_is.value | default: p.metafields.npx.what_it_is -%}
+  {%- if prop_printed -%},{%- endif -%}
+  {"@type":"PropertyValue","name":"Category","value":{{ wi_raw | strip_html | strip | truncate: 200 | json }}}
+  {%- assign prop_printed = true -%}
+{%- endif -%}
+{%- if p.metafields.peptide.molecular_weight != blank -%}
+  {%- if prop_printed -%},{%- endif -%}
+  {"@type":"PropertyValue","name":"Molecular Weight","value":{{ p.metafields.peptide.molecular_weight | json }},"unitText":"g/mol"}
+  {%- assign prop_printed = true -%}
+{%- endif -%}
+{%- if p.metafields.peptide.molecular_formula != blank -%}
+  {%- if prop_printed -%},{%- endif -%}
+  {"@type":"PropertyValue","name":"Molecular Formula","value":{{ p.metafields.peptide.molecular_formula | json }}}
+  {%- assign prop_printed = true -%}
+{%- endif -%}
+{%- if p.metafields.peptide.purity != blank -%}
+  {%- if prop_printed -%},{%- endif -%}
+  {"@type":"PropertyValue","name":"Purity","value":{{ p.metafields.peptide.purity | json }},"unitText":"%"}
+  {%- assign prop_printed = true -%}
+{%- endif -%}
+{%- if p.metafields.peptide.sequence != blank -%}
+  {%- if prop_printed -%},{%- endif -%}
+  {"@type":"PropertyValue","name":"Amino Acid Sequence","value":{{ p.metafields.peptide.sequence | json }}}
+  {%- assign prop_printed = true -%}
+{%- endif -%}
+{%- endcapture -%}
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Product",
+      "name": {{ p.title | json }},
+      "brand": { "@type": "Brand", "name": {{ p.vendor | json }} },
+      "description": {{ desc | json }},
+      "url": {{ canonical_url | json }},
+      "sku": {{ p.selected_or_first_available_variant.sku | json }},
+      {%- if p.selected_or_first_available_variant.barcode != blank -%}
+        "mpn": {{ p.selected_or_first_available_variant.barcode | json }},
+      {%- endif -%}
+      "image": [
+        {%- for img in p.images -%}
+          {{ img | image_url: width: 1200 | prepend: 'https:' | json }}{%- unless forloop.last -%},{%- endunless -%}
+        {%- endfor -%}
+      ],
+      "itemCondition": "https://schema.org/NewCondition",
+      "offers": {
+        "@type": "AggregateOffer",
+        "priceCurrency": {{ cart.currency.iso_code | json }},
+        "lowPrice": {{ p.price_min | money_without_currency | remove: ',' | json }},
+        "highPrice": {{ p.price_max | money_without_currency | remove: ',' | json }},
+        "offerCount": {{ p.variants.size }},
+        "availability": "https://schema.org/{% if p.available %}InStock{% else %}OutOfStock{% endif %}",
+        "url": {{ canonical_url | json }},
+        "priceValidUntil": {{ 'now' | date: '%s' | plus: 2592000 | date: '%Y-%m-%d' | json }},
+        "shippingDetails": {
+          "@type": "OfferShippingDetails",
+          "shippingDestination": {
+            "@type": "DefinedRegion",
+            "addressCountry": "AE"
+          }
+        },
+        "hasMerchantReturnPolicy": {
+          "@type": "MerchantReturnPolicy",
+          "@id": {{ return_id | json }},
+          "merchantReturnLink": {{ return_url | json }},
+          "applicableCountry": "AE"
+        },
+        "seller": {
+          "@type": "Organization",
+          "name": {{ shop.name | json }}
+        }
+      }
+      {%- if rating_cnt > 0 and rating_val > 0 -%}
+        ,"aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": {{ rating_val }},
+          "bestRating": 5,
+          "worstRating": 1,
+          "ratingCount": {{ rating_cnt }}
+        }
+      {%- endif -%}
+      ,"speakable": {
+        "@type": "SpeakableSpecification",
+        "cssSelector": [
+          ".xo-product-info-content__title",
+          ".xo-product-info-content__description"
+        ]
+      }
+      {%- assign props_stripped = additional_props | strip -%}
+      {%- if props_stripped != blank -%}
+        ,"additionalProperty": [{{ props_stripped }}]
+      {%- endif -%}
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": {{ shop.secure_url | json }}
+        }
+        {%- if bc_collection -%}
+          ,{
+            "@type": "ListItem",
+            "position": 2,
+            "name": {{ bc_collection.title | json }},
+            "item": {{ shop.secure_url | append: bc_collection.url | json }}
+          }
+          ,{
+            "@type": "ListItem",
+            "position": 3,
+            "name": {{ p.title | json }},
+            "item": {{ canonical_url | json }}
+          }
+        {%- else -%}
+          ,{
+            "@type": "ListItem",
+            "position": 2,
+            "name": {{ p.title | json }},
+            "item": {{ canonical_url | json }}
+          }
+        {%- endif -%}
+      ]
+    }
+  ]
+}
+</script>

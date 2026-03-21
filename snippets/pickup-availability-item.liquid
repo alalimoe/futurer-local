@@ -1,0 +1,35 @@
+{% assign closest_location = pick_up_availabilities.first %}
+
+<xo-product-pickup-availability class='xo-pickup-availability-item'>
+  <div class='xo-pickup-availability-item__icon'>
+    {% if closest_location.available %}
+      {% render 'icon', name: 'check', size: '2.4rem' %}
+    {% endif %}
+  </div>
+  <div class='xo-pickup-availability-item__content'>
+    {%- if closest_location.available -%}
+      <p class='xo-pickup-availability-item__name'>
+        {{ 'products.product.pickup_availability.pick_up_available_at_html' | t: location_name: closest_location.location.name }}
+      </p>
+      <p class='xo-pickup-availability-item__time'>{{ closest_location.pick_up_time }}</p>
+      <xo-modal-trigger xo-name='pickup-availability'>
+        {%- if pick_up_availabilities.size == 1 -%}
+          {% assign label = 'products.product.pickup_availability.view_store_info' | t %}
+        {%- else -%}
+          {% assign label = 'products.product.pickup_availability.check_other_stores' | t %}
+        {%- endif -%}
+        <div class='xo-pickup-availability-item__button'>
+          {% render 'button', text: label, style: 'link' %}
+        </div>
+      </xo-modal-trigger>
+    {%- else -%}
+      {%- if pick_up_availabilities.size > 1 -%}
+        <p class='xo-pickup-availability-item__name'>{{ 'products.product.pickup_availability.pick_up_unavailable_at_html' | t: location_name: closest_location.location.name }}</p>
+        <xo-modal-trigger xo-name='pickup-availability'>
+          {% assign label = 'products.product.pickup_availability.check_other_stores' | t %}
+          {% render 'button', text: label, style: 'link' %}
+        </xo-modal-trigger>
+      {%- endif -%}
+    {%- endif -%}
+  </div>
+</xo-product-pickup-availability>

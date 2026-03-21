@@ -1,0 +1,41 @@
+<nav class="toc" aria-label="{{ section.settings.title | escape }}">
+  {% if section.settings.title != blank %}
+    <h2 class="toc__title">{{ section.settings.title }}</h2>
+  {% endif %}
+  <ul class="toc__list">
+    {% for block in section.blocks %}
+      <li {{ block.shopify_attributes }}>
+        <a href="{{ block.settings.href }}">{{ block.settings.label }}</a>
+      </li>
+    {% endfor %}
+  </ul>
+</nav>
+
+<style>
+  .toc {margin: 0 0 1.25rem; padding: .75rem 1rem; border: 1px solid rgba(0,0,0,.08); border-radius: 8px;}
+  .toc__title {margin: 0 0 .5rem; font-size: 1.5rem; align: center;}
+  .toc__list {display:flex; flex-wrap:wrap; gap:.5rem 1rem; margin:0; padding-left:1.25rem; list-style:disc;}
+  html {scroll-behavior: smooth;}
+  .anchor {scroll-margin-top: 96px;}
+</style>
+
+{% schema %}
+{
+  "name": "Table of contents",
+  "settings": [
+    { "type": "text", "id": "title", "label": "Heading", "default": "What’s on this page" }
+  ],
+  "blocks": [
+    {
+      "type": "link",
+      "name": "Link",
+      "settings": [
+        { "type": "text", "id": "label", "label": "Label", "default": "Delivery speed" },
+        { "type": "text", "id": "href",  "label": "Anchor (e.g. #delivery-speed)", "default": "#delivery-speed" }
+      ]
+    }
+  ],
+  "max_blocks": 12,
+  "presets": [{ "name": "Table of contents" }]
+}
+{% endschema %}

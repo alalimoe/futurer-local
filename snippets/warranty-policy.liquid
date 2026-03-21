@@ -1,0 +1,66 @@
+{% comment %}
+  Render a warranty policy
+
+  Accepts:
+  - font_size_heading: {String} The font size class for the heading (e.g., 'h1', 'h2', 'h3')
+  - heading: {String} The main heading for the warranty policy
+  - sub_heading: {String} The sub-heading or description for the warranty policy
+  - button: {Object} An object containing:
+    - button_text: {String} The text for the button
+    - button_link: {String} The URL the button should link to
+    - button_style: {String} The style of the button (e.g., primary, secondary)
+    - button_size: {String} The size of the button (e.g., small, medium, large)
+  - alignment: {String} The alignment of the content (left, center, right)
+
+  Usage:
+  {% render 'warranty-policy', font_size_heading: font_size_heading, heading: 'Heading', sub_heading: 'Sub heading', button: 'Button text', alignment: 'left' %}
+{% endcomment %}
+
+{% liquid
+  assign content_class = 'warranty-policy__content'
+  assign content_style = '--xl: 6; --lg: 6; --md: 8; --xs: 12;'
+  case alignment
+    when 'left'
+      assign content_class = content_class | append: ' warranty-policy__content--left'
+    when 'center'
+      assign content_class = content_class | append: ' warranty-policy__content--center'
+      assign content_style = content_style | append: ' --start-md: 3; --start-lg: 4;'
+    when 'right'
+      assign content_class = content_class | append: ' warranty-policy__content--right'
+      assign content_style = content_style | append: ' --start-md: 5; --start-lg: 7;'
+  endcase
+%}
+
+<div class="warranty-policy">
+  <xo-grid class="warranty-policy__grid">
+    <div class="{{ content_class }}" style="{{ content_style }}">
+      {% if heading != blank or sub_heading != blank or button.button_text != blank %}
+        <xo-animate xo-cascade>
+          <div class="warranty-policy__icon">
+            {% render 'icon', name: 'warranty', size: '3.3rem', color: 'rgba(var(--color-accent))' %}
+          </div>
+        </xo-animate>
+      {% endif %}
+      <h3 class="warranty-policy__heading {{ font_size_heading }}">
+        {{ heading }}
+      </h3>
+      <xo-animate xo-cascade>
+        <div class="warranty-policy__sub-heading">
+          {{ sub_heading }}
+        </div>
+      </xo-animate>
+      <xo-animate xo-cascade>
+        <div class="warranty-policy__button">
+          {% render 'button',
+            text: button.button_text,
+            link: button.button_link,
+            style: button.button_style,
+            size: button.button_size,
+            radius: settings.button_radius,
+            padding: settings.button_padding
+          %}
+        </div>
+      </xo-animate>
+    </div>
+  </xo-grid>
+</div>

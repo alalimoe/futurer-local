@@ -1,0 +1,347 @@
+{{ 'img-with-text-8.css' | asset_url | stylesheet_tag }}
+
+{% liquid
+  assign sub_heading = section.settings.sub_heading
+  assign reveal_text_effect = section.settings.reveal_text_effect
+  assign reveal_text_opacity = section.settings.reveal_text_opacity
+  assign content = section.settings.content
+  assign desktop_image = section.settings.desktop_image
+  assign aspect_ratio_desktop = section.settings.aspect_ratio_desktop
+  if aspect_ratio_desktop == 'custom'
+    assign aspect_ratio_desktop = section.settings.aspect_ratio_desktop_width | append: '/' | append: section.settings.aspect_ratio_desktop_height
+  endif
+  assign mobile_image = section.settings.mobile_image
+  assign aspect_ratio_mobile = section.settings.aspect_ratio_mobile
+  if aspect_ratio_mobile == 'custom'
+    assign aspect_ratio_mobile = section.settings.aspect_ratio_mobile_width | append: '/' | append: section.settings.aspect_ratio_mobile_height
+  endif
+  assign bottom_content_type = section.settings.bottom_content_type
+  assign stats_speed_value = section.settings.stats_speed_value
+  assign stats_speed_unit = section.settings.stats_speed_unit
+  assign stats_description = section.settings.stats_description
+  assign button = section.settings
+%}
+
+<section {% render 'section-attr' %}>
+  <div class="xo-image-with-text-style-8">
+    <xo-container class="xo-image-with-text-style-8__container">
+      <div class="xo-image-with-text-style-8__content">
+        {% render 'img-with-text-8',
+          sub_heading: sub_heading,
+          reveal_text_effect: reveal_text_effect,
+          reveal_text_opacity: reveal_text_opacity,
+          content: content,
+          desktop_image: desktop_image,
+          aspect_ratio_desktop: aspect_ratio_desktop,
+          mobile_image: mobile_image,
+          aspect_ratio_mobile: aspect_ratio_mobile,
+          bottom_content_type: bottom_content_type,
+          button: button,
+          stats_speed_value: stats_speed_value,
+          stats_speed_unit: stats_speed_unit,
+          stats_description: stats_description
+        %}
+      </div>
+    </xo-container>
+  </div>
+</section>
+
+{% schema %}
+{
+  "tag": "section",
+  "name": "t:sections.image_with_text_style_8.name",
+  "settings": [
+    {
+      "type": "text",
+      "id": "sub_heading",
+      "label": "Subheading",
+      "default": "Subheading"
+    },
+    {
+      "type": "textarea",
+      "id": "content",
+      "label": "Content",
+      "default": "Use this text to share information about your brand with your customers. Describe a product, share announcements, or welcome customers to your store."
+    },
+    {
+      "type": "checkbox",
+      "id": "reveal_text_effect",
+      "label": "Reveal text effect",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "reveal_text_opacity",
+      "label": "Reveal text opacity",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 50,
+      "visible_if": "{{ section.settings.reveal_text_effect == true }}"
+    },
+    {
+      "type": "header",
+      "content": "Image"
+    },
+    {
+      "type": "image_picker",
+      "id": "desktop_image",
+      "label": "Desktop image"
+    },
+    {
+      "type": "select",
+      "id": "aspect_ratio_desktop",
+      "label": "Aspect ratio desktop",
+      "default": "auto",
+      "options": [
+        {
+          "value": "auto",
+          "label": "Auto"
+        },
+        {
+          "value": "2/3",
+          "label": "2:3"
+        },
+        {
+          "value": "3/4",
+          "label": "3:4"
+        },
+        {
+          "value": "3/2",
+          "label": "3:2"
+        },
+        {
+          "value": "1",
+          "label": "1:1"
+        },
+        {
+          "value": "4/3",
+          "label": "4:3"
+        },
+        {
+          "value": "16/9",
+          "label": "16:9"
+        },
+        {
+          "value": "21/9",
+          "label": "21:9"
+        }
+      ]
+    },
+    {
+      "type": "image_picker",
+      "id": "mobile_image",
+      "label": "Mobile image"
+    },
+    {
+      "type": "select",
+      "id": "aspect_ratio_mobile",
+      "label": "Aspect ratio mobile",
+      "default": "auto",
+      "options": [
+        {
+          "value": "auto",
+          "label": "Auto"
+        },
+        {
+          "value": "2/3",
+          "label": "2:3"
+        },
+        {
+          "value": "3/4",
+          "label": "3:4"
+        },
+        {
+          "value": "3/2",
+          "label": "3:2"
+        },
+        {
+          "value": "1",
+          "label": "1:1"
+        },
+        {
+          "value": "4/3",
+          "label": "4:3"
+        },
+        {
+          "value": "16/9",
+          "label": "16:9"
+        },
+        {
+          "value": "21/9",
+          "label": "21:9"
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Bottom content"
+    },
+    {
+      "type": "select",
+      "id": "bottom_content_type",
+      "label": "Bottom type",
+      "default": "stats-display",
+      "options": [
+        {
+          "value": "stats-display",
+          "label": "Statistics display"
+        },
+        {
+          "value": "cta-button",
+          "label": "Call to action button"
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "t:sections.image_with_text_style_8.settings.header_button.content",
+      "visible_if": "{{ section.settings.bottom_content_type == 'cta-button' }}"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button text",
+      "default": "Button",
+      "visible_if": "{{ section.settings.bottom_content_type == 'cta-button' }}"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link",
+      "default": "/collections/all",
+      "visible_if": "{{ section.settings.bottom_content_type == 'cta-button' }}"
+    },
+    {
+      "type": "select",
+      "id": "button_style",
+      "label": "Button style",
+      "options": [
+        {
+          "value": "primary",
+          "label": "Primary"
+        },
+        {
+          "value": "secondary",
+          "label": "Secondary"
+        },
+        {
+          "value": "link",
+          "label": "Link"
+        }
+      ],
+      "default": "primary",
+      "visible_if": "{{ section.settings.bottom_content_type == 'cta-button' }}"
+    },
+    {
+      "type": "select",
+      "id": "button_size",
+      "label": "Button size",
+      "options": [
+        {
+          "value": "xs",
+          "label": "Extra small"
+        },
+        {
+          "value": "sm",
+          "label": "Small"
+        },
+        {
+          "value": "md",
+          "label": "Medium"
+        },
+        {
+          "value": "lg",
+          "label": "Large"
+        }
+      ],
+      "default": "md",
+      "visible_if": "{{ section.settings.bottom_content_type == 'cta-button' }}"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.image_with_text_style_8.settings.header_stats.content",
+      "visible_if": "{{ section.settings.bottom_content_type == \"stats-display\" }}"
+    },
+    {
+      "type": "number",
+      "id": "stats_speed_value",
+      "label": "Speed value",
+      "default": 50,
+      "visible_if": "{{ section.settings.bottom_content_type == 'stats-display' }}"
+    },
+    {
+      "type": "text",
+      "id": "stats_speed_unit",
+      "label": "Speed unit",
+      "default": "km/h",
+      "visible_if": "{{ section.settings.bottom_content_type == 'stats-display' }}"
+    },
+    {
+      "type": "richtext",
+      "id": "stats_description",
+      "label": "Description",
+      "default": "<p>Use this text to share information about your brand with your customers.</p>",
+      "visible_if": "{{ section.settings.bottom_content_type == 'stats-display' }}"
+    },
+    {
+      "type": "header",
+      "content": "General settings"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Section color scheme"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color"
+    },
+    {
+      "type": "color_background",
+      "id": "background_gradient",
+      "label": "Background gradient"
+    },
+    {
+      "type": "number",
+      "id": "padding_top_desktop",
+      "label": "Padding top desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_desktop",
+      "label": "Padding bottom desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_top_mobile",
+      "label": "Padding top mobile",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_mobile",
+      "label": "Padding bottom mobile",
+      "default": 50
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.image_with_text_style_8.name"
+    }
+  ],
+  "disabled_on": {
+    "groups": [
+      "header",
+      "footer",
+      "custom.overlay",
+      "custom.popups",
+      "custom.features"
+    ]
+  }
+}
+{% endschema %}

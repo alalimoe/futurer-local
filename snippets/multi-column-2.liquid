@@ -1,0 +1,90 @@
+{% comment %}
+  Renders a list multi column
+
+  Accepts:
+  - image: {Object} Image (required)
+  - title: {String} Title (required)
+  - number: {Number} Number (required)
+
+  Usage:
+  {% render 'multi-column-2', title: title, block: block %}
+{% endcomment %}
+
+<div class="multi-column-2">
+  <div class="multi-column-2__header">
+    {% render 'heading-multi-column', class: class, heading: heading, layout: layout, column: 12 %}
+  </div>
+  <div class="multi-column-2__body">
+    <div class="multi-column-2__desktop">
+      <xo-grid class="multi-column-2__grid" style="--lg: {{ column }}; --md: 2; --xs: 2">
+        {% for item in block %}
+          {% liquid
+            assign image = item.settings.image
+            assign aspect_ratio = item.settings.aspect_ratio
+            if aspect_ratio == 'custom'
+              assign aspect_ratio = item.settings.aspect_ratio_width | append: '/' | append: item.settings.aspect_ratio_height
+            endif
+            assign title = item.settings.title
+            assign number = forloop.index0 | plus: 1 | prepend: '00' | slice: -2, 2
+          %}
+          <xo-animate
+            xo-cascade
+            xo-order="{{ forloop.index }}"
+            class="multi-column-2__item{% if settings.enable_border_radius %} multi-column-2__item--radius{% endif %}"
+          >
+            <div class="multi-column-2__image" data-index="{{ forloop.index }}">
+              {% render 'image', image: image, aspect_ratio: aspect_ratio %}
+            </div>
+            <div class="multi-column-2__content">
+              <div class="multi-column-2__number">{{ number }}</div>
+              <div class="multi-column-2__title" data-index="{{ forloop.index }}">{{ title }}</div>
+            </div>
+          </xo-animate>
+        {% endfor %}
+      </xo-grid>
+    </div>
+    <div class="multi-column-2__mobile">
+      <xo-carousel
+        xo-per-view="1"
+        xo-per-move="1"
+        xo-breakpoints='
+          {
+            768: {
+              perView: 1,
+              perMove: 1,
+              gap: 10,
+              overflow: "visible"
+            },
+          }
+        '
+      >
+        <xo-carousel-inner>
+          <xo-carousel-list>
+            {% for item in block %}
+              {% liquid
+                assign image = item.settings.image
+                assign aspect_ratio = item.settings.aspect_ratio
+                if aspect_ratio == 'custom'
+                  assign aspect_ratio = item.settings.aspect_ratio_width | append: '/' | append: item.settings.aspect_ratio_height
+                endif
+                assign title = item.settings.title
+                assign number = forloop.index0 | plus: 1 | prepend: '00' | slice: -2, 2
+              %}
+              <xo-carousel-slide>
+                <div class="multi-column-2__item {% if settings.enable_border_radius %}multi-column-2__item--radius{% endif %}">
+                  <div class="multi-column-2__image" data-index="{{ forloop.index }}">
+                    {% render 'image', image: image, aspect_ratio: aspect_ratio %}
+                  </div>
+                  <div class="multi-column-2__content">
+                    <div class="multi-column-2__number">{{ number }}</div>
+                    <div class="multi-column-2__title" data-index="{{ forloop.index }}">{{ title }}</div>
+                  </div>
+                </div>
+              </xo-carousel-slide>
+            {% endfor %}
+          </xo-carousel-list>
+        </xo-carousel-inner>
+      </xo-carousel>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,412 @@
+{{ 'warranty-policy.css' | asset_url | stylesheet_tag }}
+
+{% liquid
+  assign highlight_text_class = ''
+  assign highlight_class = ''
+  assign effect = 'none'
+  assign order_type = ''
+  assign duration = 0
+
+  assign font_size_heading = section.settings.font_size_heading
+  assign heading = section.settings.heading
+  assign sub_heading = section.settings.sub_heading
+  assign button = section.settings
+  assign alignment = section.settings.alignment
+  assign stroke_width = section.settings.highlight_stroke_width | default: 4
+
+  if section.settings.color_enabled and section.settings.highlight_svg_color != blank
+    assign highlight_style = '--highlight-color: ' | append: section.settings.highlight_svg_color | append: ';'
+  endif
+  if section.settings.color_enabled and section.settings.highlight_text_color != blank
+    assign highlight_text_style = '--highlight-text-color: ' | append: section.settings.highlight_text_color | append: ';'
+  endif
+  if section.settings.animate_enabled
+    assign effect = section.settings.effect
+    assign order_type = section.settings.order_type
+    assign duration = section.settings.duration
+    if section.settings.order_type == '' and section.settings.effect != 'none'
+      assign effect = 'default'
+    endif
+  endif
+
+  if section.settings.highlight_italic
+    assign highlight_text_class = highlight_text_class | append: ' xo-animate-st__highlight--italic'
+  endif
+  if section.settings.highlight != blank and section.settings.highlight != 'none'
+    capture highlight
+      render 'animate-highlight', class: highlight_class, style: highlight_style, stroke_width: stroke_width
+    endcapture
+  endif
+
+  capture heading_content
+    render 'animate-scroll-text', text: heading, effect: effect, order_type: order_type, duration: duration, highlight: highlight, highlight_class: highlight_text_class, highlight_style: highlight_text_style
+  endcapture
+%}
+
+<section {% render 'section-attr' %}>
+  <div class="xo-warranty-policy">
+    <xo-container class="xo-warranty-policy__container">
+      {%- render 'warranty-policy', font_size_heading: font_size_heading, heading: heading_content, sub_heading: sub_heading, button: button, alignment: alignment -%}
+    </xo-container>
+  </div>
+</section>
+
+{% schema %}
+{
+  "tag": "section",
+  "name": "t:sections.warranty_policy.name",
+  "settings": [
+    {
+      "type": "select",
+      "id": "font_size_heading",
+      "label": "Font size heading",
+      "default": "h3",
+      "options": [
+        {
+          "value": "h1",
+          "label": "Extra extra large"
+        },
+        {
+          "value": "h2",
+          "label": "Extra large"
+        },
+        {
+          "value": "h3",
+          "label": "Large"
+        },
+        {
+          "value": "h4",
+          "label": "Medium"
+        },
+        {
+          "value": "h5",
+          "label": "Small"
+        },
+        {
+          "value": "h6",
+          "label": "Extra small"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Warranty [policy]"
+    },
+    {
+      "type": "richtext",
+      "id": "sub_heading",
+      "label": "Subheading",
+      "default": "<p>Use this text to share information about your brand with your customers</p>"
+    },
+    {
+      "type": "header",
+      "content": "Highlight"
+    },
+    {
+      "type": "select",
+      "id": "highlight",
+      "label": "Decoration",
+      "options": [
+        {
+          "label": "None",
+          "value": "none"
+        },
+        {
+          "value": "type-1",
+          "label": "Type 1"
+        },
+        {
+          "value": "type-2",
+          "label": "Type 2"
+        },
+        {
+          "value": "type-3",
+          "label": "Type 3"
+        },
+        {
+          "value": "type-4",
+          "label": "Type 4"
+        },
+        {
+          "value": "type-5",
+          "label": "Type 5"
+        },
+        {
+          "value": "type-6",
+          "label": "Type 6"
+        }
+      ],
+      "default": "type-1"
+    },
+    {
+      "type": "range",
+      "id": "highlight_stroke_width",
+      "label": "Stroke width",
+      "min": 1,
+      "max": 14,
+      "step": 1,
+      "unit": "px",
+      "default": 4,
+      "visible_if": "{{ section.settings.highlight == 'type-1' or section.settings.highlight == 'type-2' or section.settings.highlight == 'type-3' or section.settings.highlight == 'type-4' }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "color_enabled",
+      "label": "Color",
+      "default": true
+    },
+    {
+      "type": "color",
+      "id": "highlight_svg_color",
+      "label": "Decoration color",
+      "alpha": true,
+      "default": "#FE5000",
+      "visible_if": "{{ section.settings.color_enabled == true }}"
+    },
+    {
+      "type": "color",
+      "id": "highlight_text_color",
+      "label": "Text color",
+      "alpha": true,
+      "default": "#FE5000",
+      "visible_if": "{{ section.settings.color_enabled == true }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "highlight_italic",
+      "label": "Text italic",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Animation"
+    },
+    {
+      "type": "checkbox",
+      "id": "animate_enabled",
+      "label": "Enable",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "effect",
+      "label": "Effect",
+      "options": [
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "fade-up",
+          "label": "Slide up"
+        },
+        {
+          "value": "fade-right",
+          "label": "Slide right"
+        },
+        {
+          "value": "fade-down",
+          "label": "Slide down"
+        },
+        {
+          "value": "fade-left",
+          "label": "Slide left"
+        },
+        {
+          "value": "rotate-left-up",
+          "label": "Rotate left up"
+        },
+        {
+          "value": "rotate-right-up",
+          "label": "Rotate right up"
+        },
+        {
+          "value": "zoom-in",
+          "label": "Zoom"
+        }
+      ],
+      "default": "fade-up",
+      "visible_if": "{{ section.settings.animate_enabled == true }}"
+    },
+    {
+      "type": "select",
+      "id": "order_type",
+      "label": "Order",
+      "options": [
+        {
+          "value": "",
+          "label": "None"
+        },
+        {
+          "value": "ltr",
+          "label": "Left to right"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "random",
+          "label": "Random"
+        }
+      ],
+      "default": "ltr",
+      "visible_if": "{{ section.settings.animate_enabled == true }}"
+    },
+    {
+      "type": "range",
+      "id": "duration",
+      "label": "Duration",
+      "min": 100,
+      "max": 4000,
+      "step": 100,
+      "unit": "ms",
+      "default": 1000,
+      "visible_if": "{{ section.settings.animate_enabled == true }}"
+    },
+    {
+      "type": "header",
+      "content": "Button"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button text",
+      "default": "Button"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link",
+      "default": "/collections/all"
+    },
+    {
+      "type": "select",
+      "id": "button_style",
+      "label": "Button style",
+      "options": [
+        {
+          "value": "primary",
+          "label": "Primary"
+        },
+        {
+          "value": "secondary",
+          "label": "Secondary"
+        },
+        {
+          "value": "link",
+          "label": "Link"
+        }
+      ],
+      "default": "primary"
+    },
+    {
+      "type": "select",
+      "id": "button_size",
+      "label": "Button size",
+      "options": [
+        {
+          "value": "xs",
+          "label": "Extra small"
+        },
+        {
+          "value": "sm",
+          "label": "Small"
+        },
+        {
+          "value": "md",
+          "label": "Medium"
+        },
+        {
+          "value": "lg",
+          "label": "Large"
+        }
+      ],
+      "default": "md"
+    },
+    {
+      "type": "header",
+      "content": "Advanced"
+    },
+    {
+      "type": "select",
+      "id": "alignment",
+      "label": "Alignment",
+      "default": "left",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "General settings"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Section color scheme"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color"
+    },
+    {
+      "type": "color_background",
+      "id": "background_gradient",
+      "label": "Background gradient"
+    },
+    {
+      "type": "number",
+      "id": "padding_top_desktop",
+      "label": "Padding top desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_desktop",
+      "label": "Padding bottom desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_top_mobile",
+      "label": "Padding top mobile",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_mobile",
+      "label": "Padding bottom mobile",
+      "default": 50
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.warranty_policy.name"
+    }
+  ],
+  "disabled_on": {
+    "groups": [
+      "header",
+      "footer",
+      "custom.overlay",
+      "custom.popups",
+      "custom.features"
+    ]
+  }
+}
+{% endschema %}

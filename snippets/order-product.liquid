@@ -1,0 +1,62 @@
+<div class="order-product">
+  {%- if item.url != blank -%}
+    <a href="{{ item.url }}" class="order-product__title">{{ item.title }}</a>
+  {%- else -%}
+    <p class="order-product__title">{{ item.title }}</p>
+  {%- endif -%}
+  {%- assign property_size = item.properties | size -%}
+  {%- unless item.selling_plan_allocation == null and property_size == 0 -%}
+    <div class="order-product__properties">
+      {%- unless item.product.has_only_default_variant -%}
+        <span>{{ item.variant.title }}</span>
+      {%- endunless -%}
+      {%- unless item.selling_plan_allocation == null -%}
+        <span>{{ item.selling_plan_allocation.selling_plan.name }}</span>
+      {%- endunless -%}
+      {%- if property_size != 0 -%}
+        {%- for property in item.properties -%}
+          {% assign property_first_char = property.first | slice: 0 %}
+          {%- if property.last != blank and property_first_char != '_' -%}
+            <span>{{ property.first }}:</span>
+            <span>
+              {%- if property.last contains '/uploads/' -%}
+                <a href="{{ property.last }}">{{ property.last | split: '/' | last }}</a>
+              {%- else -%}
+                {{ property.last }}
+              {%- endif -%}
+            </span>
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endif -%}
+    </div>
+  {%- endunless -%}
+
+  {%- if item.line_level_discount_allocations != blank -%}
+    <ul class="order-product__discount list-unstyled" role="list" aria-label="{{ 'customer.order.discount' | t }}">
+      {%- for discount_allocation in item.line_level_discount_allocations -%}
+        <li class="order-product__discount-item">
+          {% render 'badge-discount', label: discount_allocation.discount_application.title, discount_allocation: discount_allocation %}
+        </li>
+      {%- endfor -%}
+    </ul>
+  {%- endif -%}
+
+  {%- if item.fulfillment -%}
+    <div class="order-product__fulfillment">
+      {%- assign created_at = item.fulfillment.created_at | time_tag: format: 'date' -%}
+      <span>{{ 'customer.order.fulfilled_at_html' | t: date: created_at }}</span>
+
+      {%- if item.fulfillment.tracking_url -%}
+        <a href="{{ item.fulfillment.tracking_url }}">
+          {{ 'customer.order.track_shipment' | t }}
+        </a>
+      {%- endif -%}
+      <span>
+        {{ item.fulfillment.tracking_company }}
+        {%- if item.fulfillment.tracking_number -%}
+          #{{ item.fulfillment.tracking_number }}
+        {%- endif -%}
+      </span>
+    </div>
+  {%- endif -%}
+</div>

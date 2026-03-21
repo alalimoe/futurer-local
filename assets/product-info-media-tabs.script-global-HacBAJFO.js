@@ -1,0 +1,1 @@
+import{i,p as l}from"./index-B3F33_mG.js";const e=document.querySelector(".product-info-media-tabs__trigger"),t=e==null?void 0:e.querySelector(".product-info-media-tabs__trigger-list");let o=0;if(t&&!i.any){const r=l({element:t,onStart:()=>{o=t.scrollLeft},onMove:({dx:s})=>{t.scrollTo({left:o-s})},onEnd:()=>{r.setValue({dx:0})}})}

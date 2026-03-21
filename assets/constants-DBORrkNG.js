@@ -1,0 +1,1 @@
+const t="xo-testimonial",o="xo-testimonial-content",n="xo-testimonial-content-slide",T="xo-testimonial-item",i="xo-testimonial-next",I="xo-testimonial-prev";export{t as TESTIMONIAL,o as TESTIMONIAL_CONTENT,T as TESTIMONIAL_ITEM,i as TESTIMONIAL_NEXT,I as TESTIMONIAL_PREV,n as TESTIMONIAL_SLIDE};

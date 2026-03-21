@@ -1,0 +1,72 @@
+{% comment %}
+  Renders a image with text
+
+  Accepts:
+  - block: {Object} Block (required)
+  - image_dt: {String} Image desktop (required)
+  - aspect_ratio_dt: {String} Aspect ratio desktop (required)
+  - image_mb: {String} Image mobile (required)
+  - aspect_ratio_mb: {String} Aspect ratio mobile (required)
+  - color_schema: {String} Color schema (required)
+  - heading: {String} Heading (required)
+  - class: {String} Class (required)
+  - button: {Object} Button (required)
+
+  Usage:
+  {% render 'banner-box',
+    image_dt: image_dt,
+    aspect_ratio_dt: aspect_ratio_dt,
+    image_mb: image_mb,
+    aspect_ratio_mb: aspect_ratio_mb,
+    color_schema: color_schema,
+    heading: heading,
+    class: class,
+    button: button
+  %}
+{% endcomment %}
+
+<div class='banner-box{% if settings.enable_border_radius %} banner-box--radius{% endif %}' tabindex='0'>
+  <div class='banner-box__content{% if color_scheme %} color-{{ color_scheme }}{% endif %}' style='--opacity: {{ background_overlay }};'>
+    {% if video_enable %}
+      <div class='banner-box__video' style='--aspect-ratio: {{ aspect_ratio_dt }}; --aspect-ratio-mb: {{ aspect_ratio_mb }};'>
+        {% render 'video-button', video: video, video_url: video_url, cover_image: cover_image, button: button, enable_video_looping: enable_video_looping, button_enable: false %}
+      </div>
+    {% else %}
+      <a href='{{ button.button_link }}' class='banner-box__link' title='Image button'>
+        <div class='banner-box__image banner-box__image--desktop'>
+          {% render 'animate-image', image: image_dt, border_radius: 0, aspect_ratio: aspect_ratio_dt, disable_alt: true, max_width: 100 %}
+        </div>
+        <div class='banner-box__image banner-box__image--mobile'>
+          {% render 'animate-image', image: image_mb, border_radius: 0, aspect_ratio: aspect_ratio_mb, disable_alt: true, max_width: 100 %}
+        </div>
+      </a>
+    {% endif %}
+    <div
+      class='banner-box__wrapper{% if placement %} banner-box__wrapper--{{ placement }}{% endif %}{% if alignment %} banner-box__wrapper--{{ alignment }}{% endif %}{% if space_between %} banner-box__wrapper--modifier{% endif %}'
+      style='--spacing: {{ padding }}px;'
+    >
+      <div class='banner-box__text'>
+        {% if sub_heading != blank %}
+          <xo-animate xo-cascade>
+            <div class='banner-box__sub-heading'>{{ sub_heading }}</div>
+          </xo-animate>
+        {% endif %}
+        {% if heading != blank %}
+          <xo-animate xo-cascade>
+            <h3 class='banner-box__heading h6'>{{ heading }}</h3>
+          </xo-animate>
+        {% endif %}
+      </div>
+      <div class='banner-box__button'>
+        {% render 'button',
+          text: button.button_text,
+          link: button.button_link,
+          style: button.button_style,
+          size: button.button_size,
+          radius: settings.button_radius,
+          padding: settings.button_padding
+        %}
+      </div>
+    </div>
+  </div>
+</div>

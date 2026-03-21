@@ -1,0 +1,115 @@
+{% schema %}
+{
+  "name": "FAQ (Premium)",
+  "tag": "section",
+  "class": "section-peptide-faq",
+  "settings": [
+    { "type": "color", "id": "bg_color", "label": "Background", "default": "#ffffff" },
+    { "type": "color", "id": "accent_color", "label": "Brand Accent", "default": "#FBBF24" },
+    { "type": "text", "id": "title", "label": "Heading", "default": "First-Timer Questions, Answered." },
+    {
+      "type": "range",
+      "id": "padding_y",
+      "label": "Vertical Padding (px)",
+      "min": 40,
+      "max": 160,
+      "step": 4,
+      "default": 80
+    }
+  ],
+  "blocks": [
+    {
+      "type": "faq",
+      "name": "FAQ",
+      "settings": [
+        { "type": "text", "id": "question", "label": "Question", "default": "Why did the water get sucked into the peptide vial automatically?" },
+        { "type": "textarea", "id": "answer", "label": "Answer", "default": "That's a vacuum effect! It's completely normal..." }
+      ]
+    }
+  ],
+  "presets": [{"name": "FAQ (Premium)"}]
+}
+{% endschema %}
+
+{%- assign s = section.settings -%}
+{%- assign sid = section.id -%}
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {%- for block in section.blocks -%}
+    {
+      "@type": "Question",
+      "name": {{ block.settings.question | json }},
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": {{ block.settings.answer | strip_html | json }}
+      }
+    }{%- unless forloop.last -%},{%- endunless -%}
+    {%- endfor -%}
+  ]
+}
+</script>
+
+<div class="pf-wrapper" id="pf-{{ sid }}">
+  <div class="pf-container">
+    <h2 class="pf-title">{{ s.title }}</h2>
+    <div class="pf-list">
+      {% for block in section.blocks %}
+        <details class="pf-item" {{ block.shopify_attributes }}>
+          <summary class="pf-q">
+            {{ block.settings.question }}
+            <span class="pf-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg></span>
+          </summary>
+          <div class="pf-a">
+            <div class="pf-a-inner">{{ block.settings.answer }}</div>
+          </div>
+        </details>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+{%- style -%}
+  #pf-{{ sid }} {
+    --pf-bg: {{ s.bg_color }};
+    --pf-accent: {{ s.accent_color }};
+    --pf-py: {{ s.padding_y | default: 80 }}px;
+    --pf-text: var(--color-text-main, #111827);
+    --pf-muted: var(--color-text-muted, #4b5563);
+    --pf-font: var(--font-body-family, sans-serif);
+    --pf-heading: var(--font-heading-family, sans-serif);
+    --pf-shadow-sm: var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.04));
+    --pf-transition: var(--transition-premium);
+    content-visibility: auto;
+  }
+
+  .pf-wrapper { padding: var(--pf-py) var(--page-gutter); background: var(--pf-bg); font-family: var(--pf-font); }
+  .pf-container { max-width: 750px; margin: 0 auto; }
+  .pf-title { text-align: center; font-size: 32px; font-weight: 800; color: var(--pf-text); margin: 0 0 48px; letter-spacing: -0.5px; font-family: var(--pf-heading); }
+
+  .pf-list { display: flex; flex-direction: column; }
+  .pf-item { transition: var(--pf-transition); }
+  .pf-item + .pf-item { box-shadow: inset 0 1px 0 rgba(15,23,42,0.06); }
+
+  .pf-q { padding: 24px 0; font-weight: 700; font-size: 17px; color: var(--pf-text); display: flex; justify-content: space-between; align-items: center; cursor: pointer; list-style: none; transition: color 0.2s; }
+  .pf-q::-webkit-details-marker { display: none; }
+  .pf-q:hover { color: var(--pf-accent); }
+
+  .pf-icon { width: 24px; height: 24px; color: #94a3b8; transition: transform 0.3s ease; flex-shrink: 0; }
+  .pf-item[open] .pf-icon { transform: rotate(180deg); color: var(--pf-accent); }
+
+  .pf-a { padding: 0 0 32px 0; color: var(--pf-muted); font-size: 16px; line-height: 1.7; animation: pfSlideDown 0.3s ease-out; }
+  .pf-a-inner { padding-left: 20px; position: relative; }
+  .pf-a-inner::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: var(--pf-accent); border-radius: 1px; }
+
+  @keyframes pfSlideDown { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+
+  .pf-wrapper :focus-visible { outline: 2px solid var(--color-accent-primary, #FBBF24); outline-offset: 2px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pf-wrapper *, .pf-wrapper *::before, .pf-wrapper *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  }
+{%- endstyle -%}

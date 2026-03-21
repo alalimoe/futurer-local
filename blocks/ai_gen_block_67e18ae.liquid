@@ -1,0 +1,295 @@
+{% doc %}
+  @prompt
+    generate a section to add 2 sentences of rich text such as 1.: To protect yourself from unverified vendors and ensure you are getting pure, lab-tested material, review our comprehensive [UAE Quality & Trust Guide] before finalizing your purchase. 2. "Because delicate amino acid chains can degrade quickly in extreme temperatures, our logistics team utilizes strict protocols for [shipping peptides safely in UAE heat] to guarantee product stability upon arrival."
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-trust-info-{{ ai_gen_id }} {
+    display: block;
+    width: {{ block.settings.desktop_width_percent }}%;
+    max-width: 100%;
+    padding: {{ block.settings.padding_vertical }}px {{ block.settings.padding_horizontal }}px;
+    background-color: {{ block.settings.background_color }};
+    border-radius: {{ block.settings.border_radius }}px;
+    font-family: var(--font-body-family, sans-serif);
+    box-shadow: var(--shadow-sm);
+    {% if block.settings.show_border %}
+      border: {{ block.settings.border_thickness }}px solid {{ block.settings.border_color }};
+    {% endif %}
+  }
+
+  .ai-trust-info-content-{{ ai_gen_id }} {
+    display: flex;
+    flex-direction: column;
+    gap: {{ block.settings.spacing_between_items }}px;
+  }
+
+  .ai-trust-info-item-{{ ai_gen_id }} {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .ai-trust-info-icon-{{ ai_gen_id }} {
+    flex-shrink: 0;
+    width: {{ block.settings.icon_size }}px;
+    height: {{ block.settings.icon_size }}px;
+    margin-top: 2px;
+  }
+
+  .ai-trust-info-icon-{{ ai_gen_id }} svg {
+    width: 100%;
+    height: 100%;
+    fill: {{ block.settings.icon_color }};
+  }
+
+  .ai-trust-info-text-{{ ai_gen_id }} {
+    flex: 1;
+    color: {{ block.settings.text_color }};
+    font-size: clamp(0.85rem, 1.2vw, {{ block.settings.text_size }}px);
+    line-height: 1.6;
+    font-family: var(--font-body-family, sans-serif);
+  }
+
+  .ai-trust-info-text-{{ ai_gen_id }} a {
+    color: {{ block.settings.link_color }};
+    text-decoration: none;
+    position: relative;
+    font-weight: 600;
+  }
+
+  .ai-trust-info-text-{{ ai_gen_id }} a::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: {{ block.settings.link_color }};
+    transform: scaleX(0.3);
+    transform-origin: left;
+    transition: transform 0.35s var(--ease-premium);
+  }
+
+  .ai-trust-info-text-{{ ai_gen_id }} a:hover {
+    color: {{ block.settings.link_hover_color }};
+  }
+
+  .ai-trust-info-text-{{ ai_gen_id }} a:hover::after {
+    transform: scaleX(1);
+  }
+
+  .ai-trust-info-text-{{ ai_gen_id }} a:focus-visible {
+    outline: 2px solid var(--color-accent-primary, #FBBF24);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-trust-info-{{ ai_gen_id }} {
+      width: 100%;
+    }
+  }
+{% endstyle %}
+
+<div class="ai-trust-info-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="ai-trust-info-content-{{ ai_gen_id }}">
+    {% if block.settings.text_1 != blank %}
+      <div class="ai-trust-info-item-{{ ai_gen_id }}">
+        <div class="ai-trust-info-icon-{{ ai_gen_id }}">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/>
+          </svg>
+        </div>
+        <div class="ai-trust-info-text-{{ ai_gen_id }}">
+          {{ block.settings.text_1 }}
+        </div>
+      </div>
+    {% endif %}
+
+    {% if block.settings.text_2 != blank %}
+      <div class="ai-trust-info-item-{{ ai_gen_id }}">
+        <div class="ai-trust-info-icon-{{ ai_gen_id }}">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/>
+          </svg>
+        </div>
+        <div class="ai-trust-info-text-{{ ai_gen_id }}">
+          {{ block.settings.text_2 }}
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Trust information",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "richtext",
+      "id": "text_1",
+      "label": "First message",
+      "default": "<p>To protect yourself from unverified vendors and ensure you are getting pure, lab-tested material, review our comprehensive <a href=\"#\">UAE Quality & Trust Guide</a> before finalizing your purchase.</p>"
+    },
+    {
+      "type": "richtext",
+      "id": "text_2",
+      "label": "Second message",
+      "default": "<p>Because delicate amino acid chains can degrade quickly in extreme temperatures, our logistics team utilizes strict protocols for <a href=\"#\">shipping peptides safely in UAE heat</a> to guarantee product stability upon arrival.</p>"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "desktop_width_percent",
+      "label": "Desktop width",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "range",
+      "id": "spacing_between_items",
+      "label": "Spacing between items",
+      "min": 8,
+      "max": 40,
+      "step": 4,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "padding_vertical",
+      "label": "Vertical padding",
+      "min": 0,
+      "max": 60,
+      "step": 4,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "padding_horizontal",
+      "label": "Horizontal padding",
+      "min": 0,
+      "max": 60,
+      "step": 4,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "header",
+      "content": "Icon"
+    },
+    {
+      "type": "range",
+      "id": "icon_size",
+      "label": "Icon size",
+      "min": 16,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "color",
+      "id": "icon_color",
+      "label": "Icon color",
+      "default": "#5a9d6f"
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background",
+      "default": "#f9f9f9"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text",
+      "default": "#2a2a2a"
+    },
+    {
+      "type": "color",
+      "id": "link_color",
+      "label": "Link",
+      "default": "#5a9d6f"
+    },
+    {
+      "type": "color",
+      "id": "link_hover_color",
+      "label": "Link hover",
+      "default": "#7ab88f"
+    },
+    {
+      "type": "header",
+      "content": "Border"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_border",
+      "label": "Show border",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "border_thickness",
+      "label": "Border thickness",
+      "min": 1,
+      "max": 4,
+      "step": 1,
+      "unit": "px",
+      "default": 1
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Border color",
+      "default": "#e8e8e8"
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "range",
+      "id": "text_size",
+      "label": "Text size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    }
+  ],
+  "presets": [
+    {
+      "name": "Trust information"
+    }
+  ]
+}
+{% endschema %}

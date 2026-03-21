@@ -1,0 +1,459 @@
+{% comment %}
+───────────────────────────────────────────────
+SECTION: Nootropix · Guided Stack Creator (Phase 2)
+Reads Shop metafields:
+- shop.metafields.stack.ingredients (JSON Array)
+- shop.metafields.stack.rules (JSON Object)
+- shop.metafields.stack.copy_guidelines (JSON Object)
+- shop.metafields.stack.product_map (JSON Object)  ← variant/handle resolver
+───────────────────────────────────────────────
+{% endcomment %}
+
+{% liquid
+  assign ingredients_mf = shop.metafields.stack.ingredients
+  assign rules_mf       = shop.metafields.stack.rules
+  assign copy_mf        = shop.metafields.stack.copy_guidelines
+  assign product_map_mf = shop.metafields.stack.product_map
+
+  # Fallbacks to keep the section rendering even if metafields empty
+  assign ingredients_json = ingredients_mf | default: '[]'
+  assign rules_json       = rules_mf | default: '{}' 
+  assign copy_json        = copy_mf | default: '{}'
+  assign product_map_json = product_map_mf | default: '{}'
+%}
+
+<section class="npx-stack">
+  <div class="npx-stack__wrap">
+    <header class="npx-stack__hero">
+      <div>
+        <h2 class="npx-h">{{ section.settings.heading }}</h2>
+        <p class="npx-sub">{{ section.settings.subheading }}</p>
+        <div class="npx-badges">
+          <span class="npx-badge">Same/next-day UAE</span>
+          <span class="npx-badge">Express intl.</span>
+          <span class="npx-badge">Evidence-informed</span>
+        </div>
+      </div>
+      <div class="npx-cta">
+        <a class="npx-btn npx-btn--ghost" href="{{ section.settings.learn_href }}">Learn more</a>
+      </div>
+    </header>
+
+    <div class="npx-stack__grid">
+      <!-- Controls -->
+      <div class="npx-card npx-controls" id="npx-controls">
+        <div class="npx-field">
+          <label>Focus intensity</label>
+          <input type="range" min="0" max="10" step="1" value="6" id="npx-focus">
+          <div class="npx-range-hints"><span>Light</span><span>Deep</span></div>
+        </div>
+
+        <div class="npx-field">
+          <label>Calm ↔ Energy</label>
+          <input type="range" min="0" max="10" step="1" value="5" id="npx-calmEnergy">
+          <div class="npx-range-hints"><span>Calm</span><span>Energy</span></div>
+        </div>
+
+        <div class="npx-field">
+          <label>Duration</label>
+          <input type="range" min="0" max="10" step="1" value="6" id="npx-duration">
+          <div class="npx-range-hints"><span>Short</span><span>Sustained</span></div>
+        </div>
+
+        <div class="npx-toggles">
+          <label class="npx-toggle">
+            <input type="checkbox" id="npx-includeCaff" checked>
+            <span>Include caffeine</span>
+          </label>
+          <label class="npx-toggle">
+            <input type="checkbox" id="npx-stimFree">
+            <span>Stimulant-free</span>
+          </label>
+        </div>
+
+        {% if section.settings.show_goals %}
+        <div class="npx-goals">
+          <div class="npx-goal" data-goal="Focus">Focus</div>
+          <div class="npx-goal" data-goal="Memory">Memory</div>
+          <div class="npx-goal" data-goal="Calm">Calm</div>
+          <div class="npx-goal" data-goal="Flow">Flow</div>
+          <div class="npx-goal" data-goal="Study">Study</div>
+          <div class="npx-goal" data-goal="Social">Social</div>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Output Panel -->
+      <div class="npx-card npx-output">
+        <h3 class="npx-block-title">Your Stack</h3>
+        <div class="npx-stack-lines" id="npx-stackLines">
+          <!-- JS populates Base / Boosters / Modulators -->
+        </div>
+
+        <div class="npx-metrics" id="npx-metrics">
+          <!-- JS populates metric chips -->
+        </div>
+
+        <div class="npx-plan" id="npx-plan">
+          <!-- JS populates timing plan -->
+        </div>
+
+        <div class="npx-actions">
+          <button class="npx-btn" id="npx-addCart">Add items to cart</button>
+          <button class="npx-btn npx-btn--ghost" id="npx-savePlan">Save plan</button>
+          <a class="npx-btn npx-btn--ghost" id="npx-emailPlan" href="#">Email me this plan</a>
+        </div>
+
+        <p class="npx-disclaimer" id="npx-disclaimer"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Data payloads -->
+  <script type="application/json" id="npx-ingredients">{{ ingredients_json | json }}</script>
+  <script type="application/json" id="npx-rules">{{ rules_json | json }}</script>
+  <script type="application/json" id="npx-copy">{{ copy_json | json }}</script>
+  <script type="application/json" id="npx-productMap">{{ product_map_json | json }}</script>
+
+  <style>
+    .npx-stack{--card:#fff;--muted:#666;--text:#111;--chip:#f5f5f5;--edge:rgba(251,191,36,0.1)}
+    .npx-stack__wrap{max-width:var(--container-width-large);margin:0 auto;padding:28px var(--page-gutter)}
+    .npx-h{font-size:28px;line-height:1.2;margin:0 0 6px}
+    .npx-sub{color:var(--muted);margin:0}
+    .npx-badges{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+    .npx-badge{background:var(--chip);padding:6px 10px;border-radius:var(--nx-radius-pill);font-size:12px}
+    .npx-cta{display:flex;align-items:center;gap:10px}
+    .npx-btn{display:inline-block;border:1px solid #111;padding:8px 14px;border-radius:var(--nx-radius-pill);font-weight:600}
+    .npx-btn--ghost{background:transparent}
+    .npx-stack__hero{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;gap:16px}
+    .npx-stack__grid{display:grid;grid-template-columns:1fr;gap:16px}
+    @media(min-width:980px){.npx-stack__grid{grid-template-columns:1fr 1fr}}
+    .npx-card{background:var(--card);border:1px solid #eee;border-radius:var(--nx-radius);padding:16px}
+    .npx-field{margin-bottom:12px}
+    .npx-field label{display:block;font-weight:600;margin-bottom:6px}
+    .npx-range-hints{display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}
+    .npx-toggles{display:flex;gap:12px;margin:8px 0}
+    .npx-toggle{display:flex;align-items:center;gap:8px}
+    .npx-goals{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+    .npx-goal{padding:6px 10px;border-radius:var(--nx-radius-pill);border:1px solid #ddd;cursor:pointer}
+    .npx-goal.is-active{border-color:#111;font-weight:600}
+    .npx-output .npx-block-title{margin:0 0 8px;font-size:18px}
+    .npx-stack-lines{display:grid;gap:8px}
+    .npx-line{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .npx-label{min-width:92px;font-weight:700}
+    .npx-chip{background:var(--chip);padding:6px 10px;border-radius:var(--nx-radius-pill);font-size:13px}
+    .npx-chip--edge{background:var(--edge)}
+    .npx-metrics{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+    .npx-metric{padding:6px 10px;border-radius:var(--nx-radius-pill);border:1px solid #eee}
+    .npx-plan{margin-top:10px;font-size:14px;color:#222}
+    .npx-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+    .npx-disclaimer{margin-top:10px;font-size:12px;color:var(--muted)}
+  </style>
+
+  <script>
+  (function(){
+    // --- Read metafields ---
+    const INGREDIENTS = JSON.parse(document.getElementById('npx-ingredients').textContent || '[]');
+    const RULES = JSON.parse(document.getElementById('npx-rules').textContent || '{}');
+    const COPY = JSON.parse(document.getElementById('npx-copy').textContent || '{}');
+    const PRODUCT_MAP = JSON.parse(document.getElementById('npx-productMap').textContent || '{}');
+
+    // DOM
+    const elLines = document.getElementById('npx-stackLines');
+    const elMetrics = document.getElementById('npx-metrics');
+    const elPlan = document.getElementById('npx-plan');
+    const elDisc = document.getElementById('npx-disclaimer');
+    const elAdd = document.getElementById('npx-addCart');
+    const elSave = document.getElementById('npx-savePlan');
+    const elEmail = document.getElementById('npx-emailPlan');
+
+    const $ = (id) => document.getElementById(id);
+    const sliders = { focus: $('npx-focus'), calmEnergy: $('npx-calmEnergy'), duration: $('npx-duration') };
+    const toggles = { includeCaff: $('npx-includeCaff'), stimFree: $('npx-stimFree') };
+
+    // Goal chips
+    const goalEls = Array.from(document.querySelectorAll('.npx-goal'));
+    let activeGoal = null;
+    goalEls.forEach(g => g.addEventListener('click', () => {
+      goalEls.forEach(x => x.classList.remove('is-active'));
+      g.classList.add('is-active');
+      activeGoal = g.dataset.goal;
+      recompute();
+    }));
+
+    // Helpers
+    const inRuleList = (name, list=[]) => (list || []).some(x => (x||'').toString().toLowerCase() === (name||'').toString().toLowerCase());
+    const stimulantFilter = (arr) => {
+      const block = (RULES.stimulant_free_filter || []);
+      return arr.filter(i => !inRuleList(i.name, block));
+    };
+    const isType = (t) => (i) => (i.type||'').toLowerCase() === t;
+
+    // Simple scoring model (placeholder; tune later)
+    function scoreIngredient(ing, state){
+      let s = { focus:0, calm:0, energy:0, onset:0, duration: ing.half_life_hr || 0, jitter:0, sleep:0 };
+
+      const tags = (ing.tags||[]).map(x=>x.toLowerCase());
+      const has = (t)=> tags.includes(t);
+
+      if (has('cholinergic')) s.focus += 3;
+      if (has('stimulant')) { s.focus += 2; s.energy += 4; s.jitter += 3; }
+      if (has('neurotrophic')) s.focus += 1;
+      if (has('adaptogen')) { s.energy += 2; s.calm += 2; }
+      if (has('anxiolytic') || has('calm')) { s.calm += 3; s.jitter -= 1; }
+      if (ing.name?.toLowerCase().includes('theanine')) { s.calm += 4; s.jitter -= 3; }
+      if (/phenylpiracetam/i.test(ing.name)) { s.energy += 4; s.focus += 2; s.jitter += 1; }
+      if (/fladrafinil/i.test(ing.name)) { s.energy += 5; s.focus += 3; s.jitter += 2; }
+      if (/melatonin/i.test(ing.name)) { s.sleep -= 2; }
+
+      // Slider influences
+      s.focus *= (0.6 + state.focus/20);
+      s.calm  *= (0.6 + (10-state.calmEnergy)/20);
+      s.energy*= (0.6 + state.calmEnergy/20);
+      s.duration = (ing.half_life_hr || 0);
+
+      return s;
+    }
+
+    // Resolve a chosen ingredient name to a variant id using product_map
+    async function resolveVariantId(ingredientName){
+      if (!ingredientName) return null;
+
+      // Try exact match, then normalized variants without parentheses or units
+      const normalize = (s) => (s||'')
+        .replace(/\s*\(.*?\)\s*/g,'')
+        .replace(/capsules?/ig,'')
+        .replace(/\s+\d+mg/ig,'')
+        .trim();
+
+      const exact = PRODUCT_MAP[ingredientName] || PRODUCT_MAP[normalize(ingredientName)];
+      if (!exact) return null;
+
+      if (exact.variant_id && Number(exact.variant_id) > 0) return Number(exact.variant_id);
+
+      // Fallback: fetch product JSON by handle and take first available variant
+      try{
+        const res = await fetch(`/products/${exact.handle}.js`);
+        if (!res.ok) return null;
+        const p = await res.json();
+        const v = (p.variants || []).find(v=>v.available) || (p.variants||[])[0];
+        return v ? Number(v.id) : null;
+      }catch(e){
+        return null;
+      }
+    }
+
+    function recompute(){
+      const state = {
+        focus: parseInt(sliders.focus.value,10),
+        calmEnergy: parseInt(sliders.calmEnergy.value,10),
+        duration: parseInt(sliders.duration.value,10),
+        includeCaff: toggles.includeCaff.checked,
+        stimFree: toggles.stimFree.checked,
+        goal: activeGoal
+      };
+
+      let pool = [...INGREDIENTS];
+
+      // Filters
+      if (!state.includeCaff) {
+        pool = pool.filter(i => !/caffeine/i.test(i.name));
+      }
+      if (state.stimFree) {
+        pool = stimulantFilter(pool);
+      }
+
+      // Group by type
+      const bases = pool.filter(isType('base'));
+      const boosters = pool.filter(isType('booster'));
+      const modulators = pool.filter(isType('modulator'));
+      const edges = pool.filter(isType('edge'));
+
+      // Pick base
+      let baseChoice;
+      if (state.stimFree || (!state.includeCaff && state.calmEnergy < 6)) {
+        baseChoice = (bases.find(i => /lion's mane|citicoline|alpha-gpc/i.test(i.name)) || bases[0]);
+      } else {
+        baseChoice = (bases.find(i => /caffeine/i.test(i.name)) || bases[0]);
+      }
+
+      // Score boosters/modulators
+      const scoredBoosters = boosters.map(i => ({i, s: scoreIngredient(i,state)}))
+                                     .sort((a,b)=> (b.s.focus+b.s.energy) - (a.s.focus+a.s.energy));
+      const scoredMods     = modulators.map(i => ({i, s: scoreIngredient(i,state)}))
+                                       .sort((a,b)=> (b.s.calm - a.s.calm));
+
+      // Select top N with simple safety rails
+      const pickBoosters = (RULES.default_stack_sizes && RULES.default_stack_sizes.boosters ? RULES.default_stack_sizes.boosters[1] : 2) || 2;
+      const pickMods     = (RULES.default_stack_sizes && RULES.default_stack_sizes.modulators ? RULES.default_stack_sizes.modulators[1] : 2) || 2;
+
+      const chosenBoosters = [];
+      for (const c of scoredBoosters) {
+        if (chosenBoosters.length >= pickBoosters) break;
+        const incompatible = (RULES.incompatible_pairs||[]).some(pair => pair.includes(c.i.name) && pair.includes(baseChoice?.name));
+        if (!incompatible) chosenBoosters.push(c.i);
+      }
+
+      const chosenMods = [];
+      for (const c of scoredMods) {
+        if (chosenMods.length >= pickMods) break;
+        const incompatible = (RULES.incompatible_pairs||[]).some(pair => pair.includes(c.i.name) && pair.includes(baseChoice?.name));
+        if (!incompatible) chosenMods.push(c.i);
+      }
+
+      // Optional edge if energy very high & not stim-free
+      let chosenEdge = null;
+      if (!state.stimFree && state.calmEnergy >= 7) {
+        chosenEdge = edges.find(i => /fladrafinil/i.test(i.name)) || null;
+      }
+
+      // Render stack lines
+      elLines.innerHTML = '';
+      const line = (label, arr, isEdge=false) => {
+        const row = document.createElement('div');
+        row.className = 'npx-line';
+        const l = document.createElement('div');
+        l.className = 'npx-label';
+        l.textContent = label;
+        row.appendChild(l);
+        (Array.isArray(arr) ? arr : [arr]).filter(Boolean).forEach(x => {
+          const chip = document.createElement('span');
+          chip.className = 'npx-chip' + (isEdge ? ' npx-chip--edge' : '');
+          chip.textContent = x.name;
+          row.appendChild(chip);
+        });
+        elLines.appendChild(row);
+      };
+      line('Base', baseChoice);
+      line('Boosters', chosenBoosters);
+      line('Modulators', chosenMods);
+      if (chosenEdge) line('Edge', chosenEdge, true);
+
+      // Simple metrics
+      const allChosen = [baseChoice, ...chosenBoosters, ...chosenMods].filter(Boolean);
+      const metrics = computeMetrics(allChosen, state);
+      renderMetrics(metrics);
+
+      // Timing plan
+      elPlan.textContent = buildTimingPlan(baseChoice, chosenBoosters, chosenMods, chosenEdge);
+
+      // Disclaimer
+      elDisc.textContent = COPY.disclaimer || 'Educational tool. Not medical advice.';
+      
+      // Wire CTAs
+      const payload = {
+        goal: state.goal, sliders: state, stack: {
+          base: baseChoice?.name, boosters: chosenBoosters.map(x=>x.name), modulators: chosenMods.map(x=>x.name), edge: chosenEdge?.name || null
+        }, plan: elPlan.textContent
+      };
+      elSave.onclick = () => {
+        const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = 'Nootropix_StackPlan.json'; a.click();
+        URL.revokeObjectURL(url);
+      };
+      elEmail.href = 'mailto:?subject=' + encodeURIComponent('My Nootropix Stack Plan') +
+                     '&body=' + encodeURIComponent(JSON.stringify(payload, null, 2));
+
+      // Real Add-to-Cart with product_map
+      elAdd.onclick = async () => {
+        const names = [baseChoice?.name, ...chosenBoosters.map(x=>x.name), ...chosenMods.map(x=>x.name), chosenEdge?.name].filter(Boolean);
+        if (!names.length) return;
+
+        const variantIds = (await Promise.all(names.map(n => resolveVariantId(n)))).filter(Boolean);
+
+        if (!variantIds.length){
+          alert('Could not resolve product variants for: ' + names.join(', '));
+          return;
+        }
+
+        const items = variantIds.map(id => ({ id, quantity: 1 }));
+
+        try{
+          const r = await fetch('/cart/add.js', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            body: JSON.stringify({ items })
+          });
+          if (!r.ok){ throw new Error('Add to cart failed'); }
+
+          // Optional: trigger theme cart drawer if supported
+          try { window.Shopify && window.Shopify.theme && window.dispatchEvent(new CustomEvent('cart:refresh')); } catch(e){}
+          alert('Added to cart ✔️');
+        }catch(e){
+          alert('Sorry—couldn’t add items to cart. Please try again.');
+        }
+      };
+    }
+
+    function computeMetrics(list, state){
+      let m = { Focus:0, Calm:0, Energy:0, Onset:'Fast', Duration:'—', 'Jitter Risk':0, 'Sleep Impact':0 };
+      let halfLives = [];
+      list.forEach(ing=>{
+        const s = scoreIngredient(ing, state);
+        m.Focus += (s.focus||0);
+        m.Calm += (s.calm||0);
+        m.Energy += (s.energy||0);
+        m['Jitter Risk'] += Math.max(0, s.jitter||0);
+        m['Sleep Impact'] += Math.max(0, s.sleep||0);
+        if (ing.half_life_hr) halfLives.push(ing.half_life_hr);
+      });
+      const avgHL = halfLives.length ? (halfLives.reduce((a,b)=>a+b,0)/halfLives.length) : 0;
+      m.Duration = avgHL ? (avgHL.toFixed(1) + 'h avg') : '—';
+      return m;
+    }
+
+    function renderMetrics(m){
+      elMetrics.innerHTML = '';
+      Object.keys(m).forEach(k=>{
+        const chip = document.createElement('div');
+        chip.className = 'npx-metric';
+        chip.textContent = k + ': ' + (typeof m[k]==='number' ? Math.round(m[k]) : m[k]);
+        elMetrics.appendChild(chip);
+      });
+    }
+
+    function buildTimingPlan(base, boosters, mods, edge){
+      const amOnly = new Set((RULES.timing?.AM_only)||[]);
+      const pmOK   = new Set((RULES.timing?.PM_ok)||[]);
+      const am = [];
+      const pm = [];
+      const all = [base, ...boosters, ...mods, edge].filter(Boolean);
+      all.forEach(x=>{
+        if (amOnly.has(x.name)) am.push(x.name);
+        else if (pmOK.has(x.name)) pm.push(x.name);
+        else {
+          if (/caffeine|phenylpiracetam|fladrafinil|n-acetyl l-tyrosine|rhodiola/i.test(x.name)) am.push(x.name);
+          else if (/magnesium|gaba|melatonin|ashwagandha/i.test(x.name)) pm.push(x.name);
+          else am.push(x.name);
+        }
+      });
+      const tip = COPY.timing_tip || 'Start low, increase gradually.';
+      return `AM: ${am.join(', ') || '—'} · PM: ${pm.join(', ') || '—'} · ${tip}`;
+    }
+
+    // Bind
+    ['input','change'].forEach(evt=>{
+      Object.values(sliders).forEach(s=> s.addEventListener(evt, recompute));
+      Object.values(toggles).forEach(t=> t.addEventListener(evt, recompute));
+    });
+    // Initial compute
+    recompute();
+  })();
+  </script>
+
+  {% schema %}
+  {
+    "name": "Guided Stack Creator",
+    "settings": [
+      { "type": "text", "id": "heading", "label": "Heading", "default": "Build Your Ideal Stack" },
+      { "type": "text", "id": "subheading", "label": "Subheading", "default": "Adjust your goals; we suggest a smart, safe stack." },
+      { "type": "url", "id": "learn_href", "label": "Learn more link", "default": "/" },
+      { "type": "checkbox", "id": "show_goals", "label": "Show goal chips", "default": true }
+    ],
+    "blocks": [],
+    "presets": [{ "name": "Guided Stack Creator" }]
+  }
+  {% endschema %}
+</section>

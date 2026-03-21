@@ -1,0 +1,1 @@
+import{D as o}from"./index-B3F33_mG.js";function r(){const e=document.querySelector(".xo-bundle-modal__size");if(e){const t=()=>{const i=e.getAttribute("xo-size");e.innerText=i||"0"};t(),new MutationObserver(()=>{t()}).observe(e,{attributes:!0,attributeFilter:["xo-size"]})}}o(()=>{r()});

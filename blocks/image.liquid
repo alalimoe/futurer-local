@@ -1,0 +1,67 @@
+{% liquid
+  assign aspect_ratio = block.settings.aspect_ratio
+  if aspect_ratio == 'custom'
+    assign aspect_ratio = block.settings.aspect_ratio_width | append: '/' | append: block.settings.aspect_ratio_height
+  endif
+%}
+{% render 'image', image: block.settings.image, aspect_ratio: aspect_ratio, image_width: block.settings.image_width %}
+
+
+{% schema %}
+{
+  "name": "t:blocks.image.name",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "t:blocks.image.settings.image.label"
+    },
+    {
+      "type": "select",
+      "id": "aspect_ratio",
+      "label": "t:blocks.image.settings.aspect_ratio.label",
+      "default": "3/4",
+      "options": [
+        {
+          "value": "auto",
+          "label": "t:blocks.image.settings.aspect_ratio.options_1.label"
+        },
+        {
+          "value": "2/3",
+          "label": "t:blocks.image.settings.aspect_ratio.options_2.label"
+        },
+        {
+          "value": "3/4",
+          "label": "t:blocks.image.settings.aspect_ratio.options_3.label"
+        },
+        {
+          "value": "1",
+          "label": "t:blocks.image.settings.aspect_ratio.options_4.label"
+        },
+        {
+          "value": "4/3",
+          "label": "t:blocks.image.settings.aspect_ratio.options_5.label"
+        },
+        {
+          "value": "16/9",
+          "label": "t:blocks.image.settings.aspect_ratio.options_6.label"
+        },
+        {
+          "value": "21/9",
+          "label": "t:blocks.image.settings.aspect_ratio.options_7.label"
+        }
+      ]
+    },
+    {
+      "type": "number",
+      "id": "image_width",
+      "label": "t:blocks.image.settings.image_width.label"
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:blocks.image.presets.name"
+    }
+  ]
+}
+{% endschema %}

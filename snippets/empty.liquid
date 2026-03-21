@@ -1,0 +1,53 @@
+{% comment %}
+  Renders an empty.
+
+  Accepts:
+  - title: {String} The title of the empty
+  - content: {String} The content of the empty (optional)
+  - icon_name: {String} The icon to display. Default: 'empty' (optional)
+  - icon_size: {String} The size of the icon. Default: '5rem' (optional)
+  - align: {String} The alignment of the empty. Default: 'center' (optional)
+
+  Usage:
+  {% render 'empty',
+    title: 'No results',
+    content: 'There are no results to display'
+  %}
+{% endcomment %}
+
+{% liquid
+  if icon_name == blank
+    assign icon_name = 'cart-empty-1'
+  endif
+  if icon_size == null
+    assign icon_size = '5rem'
+  endif
+  if align == null
+    assign align = 'center'
+  endif
+
+  if button_enable == null
+    assign button_enable = false
+  endif
+%}
+
+<div class='xo-empty' style='--align: {{ align }}'>
+  <div class='xo-empty__header'>
+    <div class='xo-empty__icon'>
+      {% render 'icon', name: icon_name, size: icon_size %}
+    </div>
+    <h6 class='xo-empty__title h6'>
+      {{ title }}
+    </h6>
+  </div>
+  {% if content %}
+    <div class='xo-empty__content'>
+      {{ content }}
+    </div>
+  {% endif %}
+  {% if button_enable %}
+    <div class='xo-empty__button'>
+      {% render 'button', text: button_text, link: button_link, size: 'md', style: 'primary', block: true %}
+    </div>
+  {% endif %}
+</div>

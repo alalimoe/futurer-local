@@ -1,0 +1,89 @@
+{% comment %}
+  Renders the cart discount component.
+
+  Accepts:
+  - type: {String} Type of the component (optional, value: regular, popover, drawer, modal, collapse)
+  - overlay_width: {String} Width of the overlay (optional)
+  - uid: {String} Unique identifier for the component
+
+  Usage:
+  {% render 'cart-discount', type: 'popover' %}
+{% endcomment %}
+
+{% liquid
+  if type == null
+    assign type = 'regular'
+  endif
+  if type == 'popover'
+    assign tag_type = 'popover'
+  elsif type == 'drawer' or type == 'modal'
+    assign tag_type = 'modal'
+  endif
+  assign title = 'sections.cart.discount_title' | t
+  assign label = 'sections.cart.discount_label' | t
+  assign submit_label = 'sections.cart.save' | t
+  assign cancel_label = 'sections.cart.cancel' | t
+  assign name = 'cart-discount-' | append: uid
+%}
+
+{% capture overlay_attrs %}
+  {% if type == 'popover' %}
+    xo-animate='fade-down' xo-placement='top-center'
+  {% elsif type == 'drawer' %}
+    xo-animate='slide-up' xo-placement='bottom-{{ settings.cart_drawer_placement }}' xo-backdrop-color="transparent"
+  {% endif %}
+{% endcapture %}
+
+{% if type == 'regular' %}
+  <xo-cart-discount>
+    <div class='xo-cart-discount__regular'>{{ title }}</div>
+    {% render 'field-input', name: 'discount', label: label %}
+  </xo-cart-discount>
+{% elsif type == 'collapse' %}
+  {% capture collapse_content %}
+    <xo-cart-discount>
+      {% assign discount_id = 'discount--' | append: section.id %}
+      {% render 'field-input', name: 'discount', label: label, id: discount_id %}
+    </xo-cart-discount>
+  {% endcapture %}
+  <div class='xo-cart-discount'>
+    {% render 'collapse', name: name, title: title, content: collapse_content %}
+  </div>
+{% else %}
+  <div class='xo-cart-discount'>
+    <div class='xo-cart-discount__btn'>
+      <xo-{{ tag_type }}-trigger xo-name='{{ name }}' class='xo-cart-discount__trigger' tabindex="0" role="button">
+        <div class='xo-cart-discount__icon'>
+          {% render 'icon', name: 'discount', size: '2.4rem' %}
+        </div>
+        <div class='xo-cart-discount__text'>{{ title }}</div>
+      </xo-{{ tag_type }}-trigger>
+    </div>
+    <xo-{{ tag_type }} {{ overlay_attrs }} xo-portal xo-autofocus xo-name='{{ name }}' class='xo-cart-discount__content'>
+      <div
+        class='
+          xo-cart-discount__inner
+          {% unless type == 'regular' or type == 'collapse' %} xo-cart-discount__inner--padding{% endunless %}
+          {% if type == 'popover' or type == 'drawer' %} xo-cart-discount__inner--effect{% endif %}
+        '
+        {% if overlay_width != null %}
+          style='width: {{ overlay_width }};'
+        {% endif %}
+      >
+        <h6 class='xo-cart-discount__title h6 mb-30'>{{ title }}</h6>
+        <xo-cart-discount>
+          {% assign discount_id = 'discount--' | append: section.id %}
+          {% render 'field-input', name: 'discount', label: label, id: discount_id %}
+          <div class='{% if template.name == "cart" %}xo-cart-discount__flex {% else %}xo-cart-discount__flex-drawer flex-h gap-10{% endif %}'>
+            <xo-cart-discount-submit>
+              {% render 'button', text: submit_label, size: 'sm', style: 'primary' %}
+            </xo-cart-discount-submit>
+            <xo-{{ tag_type }}-trigger tabindex="0" role="button">
+              {% render 'button', text: cancel_label, size: 'sm', style: 'secondary' %}
+            </xo-{{ tag_type }}-trigger>
+          </div>
+        </xo-cart-discount>
+      </div>
+    </xo-{{ tag_type }}>
+  </div>
+{% endif %}

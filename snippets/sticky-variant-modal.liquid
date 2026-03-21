@@ -1,0 +1,71 @@
+{% comment %}
+  Renders a sticky variants modal
+
+  Accepts:
+  - product: {Object} product object
+
+  Usage:
+  {% render 'sticky-variant-modal', product: product %}
+{% endcomment %}
+
+<div class="xo-sticky-variant-modal">
+  <div class="xo-sticky-variant-modal__container{% if settings.enable_border_radius %} xo-sticky-variant-modal__container--radius{% endif %}">
+    <div class="xo-sticky-variant-modal__content">
+      <div class="xo-sticky-variant-modal__wrapper">
+        <xo-animate xo-cascade>
+          <h3 class="xo-sticky-variant-modal__title h6">
+            {{ product.title }}
+          </h3>
+        </xo-animate>
+
+        <xo-modal-trigger class="xo-sticky-variant-modal__close" xo-name="variant-options-{{ product.id }}">
+          {% render 'icon', name: 'close', size: '2.4rem' %}
+        </xo-modal-trigger>
+      </div>
+
+      {%- unless product.has_only_default_variant -%}
+        <xo-product-variants>
+          <div class="xo-sticky-variant-modal__variant-list">
+            {%- for option in product.options_with_values -%}
+              <div class="xo-sticky-variant-modal__variant-item">
+                {% if option.name == settings.product_card_color_option_name %}
+                  {% render 'product-variant', option: option, style: variant_color_style, select_custom_popover_name_suffix: 'sticky' %}
+                {% else %}
+                  {% render 'product-variant', option: option, style: variant_style, select_custom_popover_name_suffix: 'sticky' %}
+                {% endif %}
+              </div>
+            {%- endfor -%}
+          </div>
+        </xo-product-variants>
+      {%- endunless -%}
+
+      <xo-animate xo-cascade class="xo-sticky-variant-modal__quantity">
+        {%- render 'quantity', size: 'md', variant: product.selected_or_first_available_variant, product: product, is_cart: false %}
+      </xo-animate>
+
+      <xo-animate xo-cascade>
+        <xo-product-will-change xo-unique-id="sticky-product-add-cart-modal-{{ section.id }}">
+          <xo-cart-add
+            class="xo-sticky-variant-modal__button-add"
+            {% if product.selected_or_first_available_variant.available == false %}
+              xo-disabled
+            {% endif %}
+            {% if settings.cart_type == 'page' %}
+              xo-cart-redirection
+            {% endif %}
+          >
+            {% if product.selected_or_first_available_variant.available %}
+              {% assign button_text = 'products.product.add_to_cart' | t %}
+              {% assign button_text_unavailable = 'products.product.unavailable' | t %}
+              {% render 'button', style: 'primary', text: button_text, size: 'md', block: true, text_unavailable: button_text_unavailable %}
+            {%- else -%}
+              {% assign button_text = 'products.product.sold_out' | t %}
+              {% assign button_text_unavailable = 'products.product.unavailable' | t %}
+              {% render 'button', style: 'primary', text: button_text, size: 'md', block: true, text_unavailable: button_text_unavailable %}
+            {% endif %}
+          </xo-cart-add>
+        </xo-product-will-change>
+      </xo-animate>
+    </div>
+  </div>
+</div>

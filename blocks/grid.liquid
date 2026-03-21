@@ -1,0 +1,182 @@
+{% liquid
+  capture content
+    content_for 'blocks'
+  endcapture
+%}
+
+{% render 'grid-block',
+  content: content,
+  desktop_col: block.settings.desktop_col,
+  tablet_col: block.settings.tablet_col,
+  mobile_col: block.settings.mobile_col,
+  auto_row: block.settings.auto_row,
+  fixed_row: block.settings.fixed_row,
+  gap: block.settings.gap,
+  col_gap_custom_desktop: block.settings.col_gap_custom_desktop,
+  col_gap_custom_mobile: block.settings.col_gap_custom_mobile,
+  row_gap_custom_desktop: block.settings.row_gap_custom_desktop,
+  row_gap_custom_mobile: block.settings.row_gap_custom_mobile
+%}
+
+
+{% schema %}
+{
+  "tag": null,
+  "name": "t:blocks.grid.name",
+  "settings": [
+    {
+      "type": "select",
+      "id": "device",
+      "label": "Device",
+      "options": [
+        {
+          "value": "desktop",
+          "label": "Desktop"
+        },
+        {
+          "value": "tablet",
+          "label": "Tablet"
+        },
+        {
+          "value": "mobile",
+          "label": "Mobile"
+        }
+      ],
+      "default": "desktop"
+    },
+    {
+      "type": "range",
+      "id": "desktop_col",
+      "label": "t:blocks.grid.settings.column.label",
+      "default": 4,
+      "min": 1,
+      "max": 12,
+      "step": 1,
+      "visible_if": "{{ block.settings.device == 'desktop' }}"
+    },
+    {
+      "type": "range",
+      "id": "tablet_col",
+      "label": "t:blocks.grid.settings.column.label",
+      "default": 2,
+      "min": 1,
+      "max": 12,
+      "step": 1,
+      "visible_if": "{{ block.settings.device == 'tablet' }}"
+    },
+    {
+      "type": "range",
+      "id": "mobile_col",
+      "label": "t:blocks.grid.settings.column.label",
+      "default": 1,
+      "min": 1,
+      "max": 12,
+      "step": 1,
+      "visible_if": "{{ block.settings.device == 'mobile' }}"
+    },
+    {
+      "type": "select",
+      "id": "gap",
+      "label": "t:blocks.grid.settings.gap.label",
+      "options": [
+        {
+          "value": "global",
+          "label": "t:blocks.grid.settings.gap.option_1.label"
+        },
+        {
+          "value": "custom",
+          "label": "t:blocks.grid.settings.gap.option_2.label"
+        }
+      ],
+      "default": "global"
+    },
+    {
+      "type": "range",
+      "id": "col_gap_custom_desktop",
+      "label": "t:blocks.grid.settings.col_gap_custom.label",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "default": 20,
+      "visible_if": "{{ block.settings.gap == 'custom' and block.settings.device != 'mobile' }}"
+    },
+    {
+      "type": "range",
+      "id": "col_gap_custom_mobile",
+      "label": "t:blocks.grid.settings.col_gap_custom.label",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "default": 14,
+      "visible_if": "{{ block.settings.gap == 'custom' and block.settings.device == 'mobile' }}"
+    },
+    {
+      "type": "range",
+      "id": "row_gap_custom_desktop",
+      "label": "t:blocks.grid.settings.row_gap_custom.label",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "default": 20,
+      "visible_if": "{{ block.settings.gap == 'custom' and block.settings.device != 'mobile' }}"
+    },
+    {
+      "type": "range",
+      "id": "row_gap_custom_mobile",
+      "label": "t:blocks.grid.settings.row_gap_custom.label",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "default": 14,
+      "visible_if": "{{ block.settings.gap == 'custom' and block.settings.device == 'mobile' }}"
+    },
+    {
+      "type": "header",
+      "content": "t:blocks.grid.settings.header_advanced.content"
+    },
+    {
+      "type": "checkbox",
+      "id": "fixed_row",
+      "label": "t:blocks.grid.settings.fixed_row.label",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "auto_row",
+      "label": "t:blocks.grid.settings.auto_row.label",
+      "default": 20,
+      "min": 1,
+      "max": 90,
+      "step": 1,
+      "visible_if": "{{ block.settings.fixed_row == true }}"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "@theme"
+    },
+    {
+      "type": "@app"
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:blocks.grid.presets.name",
+      "settings": {
+        "desktop_col": 3
+      },
+      "blocks": [
+        {
+          "type": "column"
+        },
+        {
+          "type": "column"
+        },
+        {
+          "type": "column"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

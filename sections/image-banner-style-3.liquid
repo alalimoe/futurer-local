@@ -1,0 +1,368 @@
+{{ 'img-banner-4.css' | asset_url | stylesheet_tag }}
+
+{% liquid
+  assign heading = section.settings.heading
+  assign image_desktop = section.settings.image_desktop | image_url
+  assign image_mobile = section.settings.image_mobile | image_url
+  assign background_image_desktop = section.settings.background_image_desktop | image_url
+  assign background_image_mobile = section.settings.background_image_mobile | image_url
+  assign blocks = section.blocks
+%}
+
+<section {% render 'section-attr' %}>
+  <div class="image-banner-style-4">
+    {% render 'img-banner-4',
+      heading: heading,
+      image_desktop: image_desktop,
+      image_mobile: image_mobile,
+      background_image_desktop: background_image_desktop,
+      background_image_mobile: background_image_mobile,
+      blocks: blocks
+    %}
+  </div>
+</section>
+
+{% schema %}
+{
+  "tag": "section",
+  "name": "t:sections.image_banner_style_3.name",
+  "class": "section-hero",
+  "settings": [
+    {
+      "type": "select",
+      "id": "font_size",
+      "label": "Font size",
+      "options": [
+        {
+          "value": "d1",
+          "label": "Display"
+        },
+        {
+          "value": "h1",
+          "label": "Extra extra large"
+        },
+        {
+          "value": "h2",
+          "label": "Extra large"
+        },
+        {
+          "value": "h3",
+          "label": "Large"
+        },
+        {
+          "value": "h4",
+          "label": "Medium"
+        },
+        {
+          "value": "h5",
+          "label": "Small"
+        },
+        {
+          "value": "h6",
+          "label": "Extra small"
+        }
+      ],
+      "default": "h1"
+    },
+    {
+      "type": "textarea",
+      "id": "text",
+      "label": "Text",
+      "default": "Text",
+      "info": "Add [img] to insert Text image, and add [highlight] to insert Highlight text."
+    },
+    {
+      "type": "text",
+      "id": "text_highlight",
+      "label": "Text highlight",
+      "default": "Text highlight",
+      "info": "Insert texts to replace the [highlight] part in Text box"
+    },
+    {
+      "type": "color",
+      "id": "text_highlight_color",
+      "label": "Text highlight color",
+      "default": "#D8C6F1",
+      "visible_if": "{{ section.settings.text_highlight != blank }}"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.image_banner_style_3.settings.header_image.content"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_desktop",
+      "label": "t:sections.image_banner_style_3.settings.image_desktop.label"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_mobile",
+      "label": "t:sections.image_banner_style_3.settings.image_mobile.label"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.image_banner_style_3.settings.header_bg_image.content"
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image_desktop",
+      "label": "t:sections.image_banner_style_3.settings.image_desktop.label"
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image_mobile",
+      "label": "t:sections.image_banner_style_3.settings.image_mobile.label"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.image_banner_style_3.settings.header_general.content"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Section color scheme"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color"
+    },
+    {
+      "type": "color_background",
+      "id": "background_gradient",
+      "label": "Background gradient"
+    },
+    {
+      "type": "number",
+      "id": "padding_top_desktop",
+      "label": "Padding top desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_desktop",
+      "label": "Padding bottom desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_top_mobile",
+      "label": "Padding top mobile",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_mobile",
+      "label": "Padding bottom mobile",
+      "default": 50
+    }
+  ],
+  "blocks": [
+    {
+      "name": "t:sections.image_banner_style_3.blocks.name_1",
+      "type": "image-parallax",
+      "limit": 2,
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "t:sections.image_banner_style_3.blocks.settings.image.label"
+        },
+        {
+          "type": "header",
+          "content": "t:sections.image_banner_style_3.blocks.settings.header_size.content"
+        },
+        {
+          "type": "select",
+          "id": "device",
+          "label": "t:sections.image_banner_style_3.blocks.settings.device.label",
+          "options": [
+            {
+              "value": "desktop",
+              "label": "t:sections.image_banner_style_3.blocks.settings.device.option_1.label"
+            },
+            {
+              "value": "mobile",
+              "label": "t:sections.image_banner_style_3.blocks.settings.device.option_2.label"
+            }
+          ]
+        },
+        {
+          "type": "checkbox",
+          "id": "inherit_desktop_value",
+          "label": "t:sections.image_banner_style_3.blocks.settings.inherit_desktop_value.label",
+          "default": true,
+          "visible_if": "{{ block.settings.device == 'mobile' }}"
+        },
+        {
+          "type": "number",
+          "id": "width_desktop",
+          "label": "t:sections.image_banner_style_3.blocks.settings.width.label",
+          "default": 100,
+          "visible_if": "{{ block.settings.device == 'desktop' }}"
+        },
+        {
+          "type": "number",
+          "id": "height_desktop",
+          "label": "t:sections.image_banner_style_3.blocks.settings.height.label",
+          "default": 100,
+          "visible_if": "{{ block.settings.device == 'desktop' }}"
+        },
+        {
+          "type": "number",
+          "id": "width_mobile",
+          "label": "t:sections.image_banner_style_3.blocks.settings.width.label",
+          "default": 100,
+          "visible_if": "{{ block.settings.device == 'mobile' and block.settings.inherit_desktop_value == false }}"
+        },
+        {
+          "type": "number",
+          "id": "height_mobile",
+          "label": "t:sections.image_banner_style_3.blocks.settings.height.label",
+          "default": 100,
+          "visible_if": "{{ block.settings.device == 'mobile' and block.settings.inherit_desktop_value == false }}"
+        }
+      ]
+    },
+    {
+      "name": "t:sections.image_banner_style_3.blocks.name_2",
+      "type": "image-text",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "t:sections.image_banner_style_3.blocks.settings.image.label"
+        },
+        {
+          "type": "header",
+          "content": "t:sections.image_banner_style_3.blocks.settings.header_size.content"
+        },
+        {
+          "type": "select",
+          "id": "device",
+          "label": "t:sections.image_banner_style_3.blocks.settings.device.label",
+          "options": [
+            {
+              "value": "desktop",
+              "label": "t:sections.image_banner_style_3.blocks.settings.device.option_1.label"
+            },
+            {
+              "value": "mobile",
+              "label": "t:sections.image_banner_style_3.blocks.settings.device.option_2.label"
+            }
+          ]
+        },
+        {
+          "type": "checkbox",
+          "id": "inherit_desktop_value",
+          "label": "t:sections.image_banner_style_3.blocks.settings.inherit_desktop_value.label",
+          "default": true,
+          "visible_if": "{{ block.settings.device == 'mobile' }}"
+        },
+        {
+          "type": "number",
+          "id": "width_desktop",
+          "label": "t:sections.image_banner_style_3.blocks.settings.width.label",
+          "default": 100,
+          "visible_if": "{{ block.settings.device == 'desktop' }}"
+        },
+        {
+          "type": "number",
+          "id": "height_desktop",
+          "label": "t:sections.image_banner_style_3.blocks.settings.height.label",
+          "default": 100,
+          "visible_if": "{{ block.settings.device == 'desktop' }}"
+        },
+        {
+          "type": "number",
+          "id": "width_mobile",
+          "label": "t:sections.image_banner_style_3.blocks.settings.width.label",
+          "default": 100,
+          "visible_if": "{{ block.settings.device == 'mobile' and block.settings.inherit_desktop_value == false }}"
+        },
+        {
+          "type": "number",
+          "id": "height_mobile",
+          "label": "t:sections.image_banner_style_3.blocks.settings.height.label",
+          "default": 100,
+          "visible_if": "{{ block.settings.device == 'mobile' and block.settings.inherit_desktop_value == false }}"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.image_banner_style_3.name",
+      "blocks": {
+        "image_text_4PUGgM": {
+          "type": "image-text",
+          "settings": {
+            "image": "shopify://shop_images/Group.png",
+            "device": "desktop",
+            "inherit_desktop_value": false,
+            "width_desktop": 100,
+            "height_desktop": 100,
+            "width_mobile": 60,
+            "height_mobile": 50
+          }
+        },
+        "image_parallax_nrVet3": {
+          "type": "image-parallax",
+          "settings": {
+            "image": "shopify://shop_images/Group_2.png",
+            "device": "desktop",
+            "inherit_desktop_value": false,
+            "width_desktop": 224,
+            "height_desktop": 220,
+            "width_mobile": 100,
+            "height_mobile": 100
+          }
+        },
+        "image_parallax_9Yafgr": {
+          "type": "image-parallax",
+          "settings": {
+            "image": "shopify://shop_images/Group_1.png",
+            "device": "desktop",
+            "inherit_desktop_value": false,
+            "width_desktop": 351,
+            "height_desktop": 314,
+            "width_mobile": 120,
+            "height_mobile": 120
+          }
+        }
+      },
+      "block_order": [
+        "image_text_4PUGgM",
+        "image_parallax_nrVet3",
+        "image_parallax_9Yafgr"
+      ],
+      "settings": {
+        "font_size": "d1",
+        "text": "Pamper [img] Your Pets with Love and [highlight]",
+        "text_highlight": "Style",
+        "text_highlight_color": "#d8c6f1",
+        "image_desktop": "shopify://shop_images/image2.png",
+        "image_mobile": "shopify://shop_images/image2.png",
+        "background_image_desktop": "shopify://shop_images/Mask_group.png",
+        "background_image_mobile": "shopify://shop_images/iPhone_13_mini_-_50.png",
+        "color_scheme": "background-2",
+        "background_color": "#ffffff",
+        "background_gradient": "",
+        "padding_top_desktop": 0,
+        "padding_bottom_desktop": 0,
+        "padding_top_mobile": 0,
+        "padding_bottom_mobile": 0
+      }
+    }
+  ],
+  "disabled_on": {
+    "groups": [
+      "header",
+      "footer",
+      "custom.overlay",
+      "custom.popups",
+      "custom.features"
+    ]
+  }
+}
+{% endschema %}

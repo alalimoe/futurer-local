@@ -1,0 +1,82 @@
+{% comment %} COA explainer + carousel {% endcomment %}
+{%- assign sid = section.id | replace:'_','' | downcase -%}
+<style>
+#coa-{{ sid }}{ --b:#E7E9ED; }
+#coa-{{ sid }} .c-wrap{ padding:24px var(--page-gutter); border-top:1px solid var(--b); background:#FAFAFB; }
+#coa-{{ sid }} .c-container{ max-width:{{ section.settings.maxw | default:1200 }}px; margin:0 auto; }
+#coa-{{ sid }} .c-grid{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+@media(max-width:900px){ #coa-{{ sid }} .c-grid{ grid-template-columns:1fr; } }
+#coa-{{ sid }} .c-card{ border:1px solid var(--b); border-radius:14px; background:#fff; padding:14px; }
+#coa-{{ sid }} .c-title{ margin:0 0 6px; font-weight:800; }
+#coa-{{ sid }} .c-btn{ display:inline-flex; align-items:center; justify-content:center; height:44px; padding:0 14px; border-radius:12px; border:1px solid var(--b); font-weight:700; text-decoration:none; }
+#coa-{{ sid }} .c-btn:hover{ background:rgba(251,191,36,0.12); border-color:var(--color-accent-primary); }
+
+#coa-{{ sid }} .carousel{ position:relative; border:1px solid var(--b); border-radius:14px; overflow:hidden; background:#fff; }
+#coa-{{ sid }} .track{ display:flex; transition:transform .35s ease; }
+#coa-{{ sid }} .slide{ min-width:100%; }
+#coa-{{ sid }} .slide img{ width:100%; height:420px; object-fit:contain; background:#fff; }
+#coa-{{ sid }} .nav{ position:absolute; inset:0; display:flex; justify-content:space-between; align-items:center; pointer-events:none; }
+#coa-{{ sid }} .nav button{ pointer-events:auto; width:36px; height:36px; border-radius:50%; border:0; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.12); cursor:pointer; }
+</style>
+
+<section id="what-is-coa" class="pdp-section" aria-label="What is a COA?">
+  <div class="c-wrap">
+    <div class="c-container">
+      <div class="c-grid">
+        <article class="c-card">
+          <h2 class="c-title">{{ section.settings.title | default: 'What is a COA?' }}</h2>
+          <div class="c-body">{{ section.settings.rich | default: "<p>A certificate of analysis (COA) documents third-party testing for identity (FTIR), purity and potency (HPLC), and storage/packaging details. We publish COAs on every peptide page.</p>" }}</div>
+          {% if section.settings.cta_label and section.settings.cta_link %}<a class="c-btn" href="{{ section.settings.cta_link }}">{{ section.settings.cta_label }}</a>{% endif %}
+        </article>
+
+        <aside class="carousel" data-auto="{{ section.settings.auto }}">
+          <div class="track">
+            {% for b in section.blocks %}
+              {% if b.type == 'img' and b.settings.image != blank %}
+                <figure class="slide">
+                  {{ b.settings.image | image_url: width: 1600 | image_tag: loading: 'lazy', alt: b.settings.alt, class:'img' }}
+                </figure>
+              {% endif %}
+            {% endfor %}
+          </div>
+          <div class="nav">
+            <button class="prev" aria-label="Previous">‹</button>
+            <button class="next" aria-label="Next">›</button>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  var root = document.querySelector('#coa-{{ sid }} .carousel'); if(!root) return;
+  var track = root.querySelector('.track');
+  var slides = root.querySelectorAll('.slide');
+  var prev = root.querySelector('.prev'); var next = root.querySelector('.next');
+  var idx = 0; function show(i){ idx=(i+slides.length)%slides.length; track.style.transform = 'translateX('+(-idx*100)+'%)'; }
+  prev && prev.addEventListener('click', function(){ show(idx-1); });
+  next && next.addEventListener('click', function(){ show(idx+1); });
+  var auto = root.getAttribute('data-auto') === 'true';
+  if(auto && slides.length>1){ setInterval(function(){ show(idx+1); }, 4500); }
+});
+</script>
+
+{% schema %}
+{
+  "name":"COA explainer & carousel",
+  "settings":[
+    { "type":"range","id":"maxw","min":800,"max":1600,"step":10,"unit":"px","label":"Max width","default":1200 },
+    { "type":"text","id":"title","label":"Heading","default":"What is a COA?" },
+    { "type":"richtext","id":"rich","label":"Body" },
+    { "type":"text","id":"cta_label","label":"Link label","default":"See sample COA" },
+    { "type":"url","id":"cta_link","label":"Link URL","default":"/" },
+    { "type":"checkbox","id":"auto","label":"Auto-rotate slides","default":true }
+  ],
+  "blocks":[
+    { "type":"img","name":"Image","settings":[ { "type":"image_picker","id":"image","label":"Image" }, { "type":"text","id":"alt","label":"Alt" } ] }
+  ],
+  "presets":[{ "name":"COA explainer & carousel" }]
+}
+{% endschema %}

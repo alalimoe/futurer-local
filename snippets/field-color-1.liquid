@@ -1,0 +1,76 @@
+{% comment %}
+  Renders a color button
+
+  Accepts:
+  - name: {string} Name of the color button
+  - value: {string} Value of the color button
+  - label: {string} Label of the color button (optional)
+  - size: {string} Size of the color button. Default: 16px (optional)
+  - count_id: {string} Unique ID for the count element (optional, support filters)
+  - count_value: {string} Value of the count element (optional, support filters)
+  - checked: {Boolean} If the radio button is checked (optional)
+  - image: {Image} Image of the color button (optional)
+  - use_image: {Boolean} If the image should be used (optional)
+  - signal: {String} Signal to be used for color button(optional)
+  - signal: {String} Signal to be used for color button(optional)
+
+  Usage:
+  {% render 'field-color-1',
+  name: '{{ signal }}color',
+  value: 'color',
+  label: 'Color',
+  size: '2.2rem'
+  %}
+{% endcomment %}
+
+{% liquid
+  assign swatch_value = null
+  if swatch.image
+    assign image_url = swatch.image | image_url: width: 50
+    assign swatch_value = 'url(' | append: image_url | append: ')'
+  elsif swatch.color
+    assign swatch_value = 'rgb(' | append: swatch.color.rgb | append: ')'
+  endif
+
+  assign size = size | default: '2rem'
+  assign container_class = 'xo-field-color-1 xo-field-color-1--swatch'
+  assign container_style = '--size: ' | append: size | append: '; --color: ' | append: swatch_value | append: ';'
+  if settings.enable_border_radius
+    assign container_class = container_class | append: ' xo-field-color-1--radius'
+  endif
+  if use_image and swatch.image != blank
+    assign container_class = container_class | append: ' xo-field-color--modifier'
+  endif
+%}
+
+<label
+  class="{{ container_class }}"
+  style="{{ container_style }}"
+  data-button="true"
+  tabindex="0"
+  aria-label="{{ value | escape }}"
+>
+  <input
+    class="xo-field-color-1__input"
+    type="checkbox"
+    name="{{ name }}"
+    value="{{ value }}"
+    xo-label="{{ label }}"
+    {% if checked %}
+      checked
+    {% endif %}
+    aria-label="{{ value | escape }}"
+  >
+  <span class="xo-field-color-1__item" style="--size: {{ size | default: '2rem' }}; --color: {{ swatch_value }};">
+    <span class="xo-field-color-1__fill" style="--size: {{ size | default: '2rem' }}; --color: {{ swatch_value }};">
+      <span class="xo-field-color-1__icon">
+        {%- render 'icon', name: 'check', size: '1.4rem', color: '#FCF7F2' -%}
+      </span>
+      {% if swatch.image != blank %}
+        <span class="xo-field-color-1__image">
+          {% render 'image', image: swatch.image, aspect_ratio: 1 %}
+        </span>
+      {% endif %}
+    </span>
+  </span>
+</label>

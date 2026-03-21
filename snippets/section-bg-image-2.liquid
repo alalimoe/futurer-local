@@ -1,0 +1,39 @@
+{% comment %}
+  Renders a bg image
+
+  Usage:
+  {% render 'section-bg-image-2' %}
+{% endcomment %}
+
+{% if img_desktop or img_mobile %}
+  <div
+    class="xo-section-bg-image-2"
+    style="{% if img_desktop != blank %}--img-desktop: url('{{ img_desktop | image_url }}');{% endif %}{% if img_mobile != blank %}--img-mobile: url('{{ img_mobile | image_url }}');{% endif %}"
+  >
+    {% if use_parallax %}
+      <xo-parallax xo-lerp-ease="0.4" class="xo-section-bg-image-2__item">
+        <xo-parallax-scroll
+          xo-reset-position
+          xo-keyframes="
+            {
+              '0%': { backgroundPositionY: '200px' },
+              '100%': { backgroundPositionY: '-200px' },
+            }
+          "
+          class="xo-section-bg-image-2__url"
+        >
+        </xo-parallax-scroll>
+      </xo-parallax>
+    {% else %}
+      <div class="xo-section-bg-image-2__item"><div class="xo-section-bg-image-2__url"></div></div>
+    {% endif %}
+  </div>
+{%- else -%}
+  <div class="xo-section-bg-image-2">
+    <div class="xo-section-bg-image-2__item">
+      <div class="xo-section-bg-image-2__url">
+        {{ placeholder | default: 'hero-apparel-1' | placeholder_svg_tag }}
+      </div>
+    </div>
+  </div>
+{% endif %}

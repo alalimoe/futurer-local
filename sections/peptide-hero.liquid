@@ -1,0 +1,409 @@
+{% schema %}
+{
+  "name": "Peptide Hero (Premium)",
+  "tag": "section",
+  "class": "section-peptide-hero",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Theme Colors"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Section Background",
+      "default": "#fafafb"
+    },
+    {
+      "type": "color",
+      "id": "card_bg",
+      "label": "Card Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Brand Accent (Gold)",
+      "default": "#FBBF24"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Main Text",
+      "default": "#0f172a"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "max_width",
+      "label": "Max Width (px)",
+      "min": 900,
+      "max": 1400,
+      "step": 10,
+      "default": 1100
+    },
+    {
+      "type": "range",
+      "id": "padding_y",
+      "label": "Vertical Padding (px)",
+      "min": 40,
+      "max": 160,
+      "step": 4,
+      "default": 100
+    },
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "badge",
+      "label": "Badge Text",
+      "default": "Evidence-Based Guide"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "The Ultimate Peptide Reconstitution Calculator & Step-by-Step Guide"
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Welcome! This page has everything you need to calculate, mix, and store your peptides safely. Jump straight to the tool below, or read on to master the prep process."
+    },
+    {
+      "type": "image_picker",
+      "id": "hero_image",
+      "label": "Hero Image (Overrides Graphic)"
+    },
+    {
+      "type": "header",
+      "content": "Trust & Meta"
+    },
+    {
+      "type": "text",
+      "id": "read_time",
+      "label": "Estimated Read Time",
+      "default": "8 min read"
+    },
+    {
+      "type": "text",
+      "id": "trust_1",
+      "label": "Trust Signal 1",
+      "default": "Used by 8,400+ Researchers"
+    },
+    {
+      "type": "text",
+      "id": "trust_2",
+      "label": "Trust Signal 2",
+      "default": "Free BAC Water Calculator"
+    },
+    {
+      "type": "text",
+      "id": "trust_3",
+      "label": "Trust Signal 3",
+      "default": "Evidence-Based Protocol"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Peptide Hero (Premium)"
+    }
+  ]
+}
+{% endschema %}
+
+{%- assign s = section.settings -%}
+{%- assign sid = section.id -%}
+
+<div class="ph-progress-bar" id="ph-progress-{{ sid }}" aria-hidden="true"></div>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Home", "item": {{ shop.url | json }} },
+        { "@type": "ListItem", "position": 2, "name": "Guides", "item": {{ shop.url | append: '/pages/guides' | json }} },
+        { "@type": "ListItem", "position": 3, "name": {{ s.heading | json }}, "item": {{ canonical_url | json }} }
+      ]
+    },
+    {
+      "@type": "Article",
+      "headline": {{ s.heading | json }},
+      "description": {{ s.subheading | json }},
+      "mainEntityOfPage": {{ canonical_url | json }},
+      "author": { "@type": "Organization", "name": "Nootropix" },
+      "publisher": { "@type": "Organization", "name": "Nootropix", "url": {{ shop.url | json }} },
+      "datePublished": "2024-06-01",
+      "dateModified": "{{ 'now' | date: '%Y-%m-%d' }}"
+    }
+  ]
+}
+</script>
+
+<div class="ph-wrapper" id="ph-{{ sid }}">
+  <div class="ph-ambient-glow"></div>
+
+  <div class="ph-container">
+    <div class="ph-main-grid">
+
+      <div class="ph-content-col ph-animate-up">
+        <div class="ph-brand-badge">
+          <span class="ph-badge-dot"></span>
+          {{ s.badge }}
+        </div>
+
+        <h1 class="ph-title">{{ s.heading }}</h1>
+        <p class="ph-subtitle">{{ s.subheading }}</p>
+
+        {% if s.read_time != blank or s.trust_1 != blank %}
+          <div class="ph-trust-strip">
+            {% if s.read_time != blank %}
+              <span class="ph-trust-pill ph-trust-pill--meta">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                {{ s.read_time }}
+              </span>
+            {% endif %}
+            {% if s.trust_1 != blank %}
+              <span class="ph-trust-pill">{{ s.trust_1 }}</span>
+            {% endif %}
+            {% if s.trust_2 != blank %}
+              <span class="ph-trust-pill">{{ s.trust_2 }}</span>
+            {% endif %}
+            {% if s.trust_3 != blank %}
+              <span class="ph-trust-pill">{{ s.trust_3 }}</span>
+            {% endif %}
+          </div>
+        {% endif %}
+
+        <div class="ph-toc-wrapper">
+          <div class="ph-toc-label">Table of Contents</div>
+          <div class="ph-toc-grid">
+            <a href="#pc-calculator-section" class="ph-toc-link ph-toc-primary">
+              <span class="ph-toc-icon">&#8595;</span> Jump to Calculator
+            </a>
+            <a href="#pc-video-section" class="ph-toc-link">
+              <span class="ph-toc-icon">&#8595;</span> Watch Video Tutorial
+            </a>
+            <a href="#pc-guide-section" class="ph-toc-link">
+              <span class="ph-toc-icon">&#8595;</span> Read Step-by-Step Guide
+            </a>
+            <a href="#pc-faq-section" class="ph-toc-link">
+              <span class="ph-toc-icon">&#8595;</span> Frequently Asked Questions
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="ph-visual-col ph-animate-fade">
+        {% if s.hero_image != blank %}
+          <div class="ph-image-wrapper">
+            <img
+              src="{{ s.hero_image | image_url: width: 800 }}"
+              srcset="{{ s.hero_image | image_url: width: 400 }} 400w,
+                      {{ s.hero_image | image_url: width: 600 }} 600w,
+                      {{ s.hero_image | image_url: width: 800 }} 800w,
+                      {{ s.hero_image | image_url: width: 1200 }} 1200w"
+              sizes="(max-width: 900px) 100vw, 440px"
+              width="{{ s.hero_image.width }}"
+              height="{{ s.hero_image.height }}"
+              loading="eager"
+              fetchpriority="high"
+              decoding="async"
+              alt="{{ s.hero_image.alt | default: s.heading | escape }}"
+              class="ph-hero-img">
+          </div>
+        {% else %}
+          <div class="ph-glass-card">
+            <div class="ph-ambient-orb"></div>
+            <div class="ph-glass-grid"></div>
+
+            <div class="ph-floating-pill ph-float-1">
+              <div class="ph-icon-circle">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M10 2v3"/><path d="M14 2v3"/><path d="M8 5h8v3H8z"/><path d="M7 8v12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V8"/>
+                  <line x1="10" y1="14" x2="14" y2="14"/><line x1="10" y1="18" x2="14" y2="18"/>
+                </svg>
+              </div>
+              <div class="ph-pill-text">
+                <span class="ph-pill-title">Peptide Compound</span>
+                <span class="ph-pill-sub">Lyophilized Base</span>
+              </div>
+            </div>
+
+            <div class="ph-floating-pill ph-float-2">
+              <div class="ph-icon-circle">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+                </svg>
+              </div>
+              <div class="ph-pill-text">
+                <span class="ph-pill-title">Bacteriostatic Water</span>
+                <span class="ph-pill-sub">Sterile Diluent</span>
+              </div>
+            </div>
+
+            <div class="ph-floating-pill ph-float-3">
+              <div class="ph-icon-circle ph-icon-rotate">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="10" width="14" height="4" rx="1"/><path d="M17 10v4"/><path d="M20 11v2"/><path d="M1 12h2"/><path d="M6 10v4"/><path d="M10 10v4"/><path d="M14 10v4"/>
+                </svg>
+              </div>
+              <div class="ph-pill-text">
+                <span class="ph-pill-title">Precision Syringe</span>
+                <span class="ph-pill-sub">Dosing Instrument</span>
+              </div>
+            </div>
+
+          </div>
+        {% endif %}
+      </div>
+
+    </div>
+  </div>
+</div>
+
+{%- style -%}
+  #ph-{{ sid }} {
+    --ph-bg: {{ s.bg_color }};
+    --ph-card: {{ s.card_bg }};
+    --ph-accent: {{ s.accent_color }};
+    --ph-text: {{ s.text_color }};
+    --ph-max: {{ s.max_width | default: 1100 }}px;
+    --ph-py: {{ s.padding_y | default: 100 }}px;
+    --ph-muted: var(--color-text-muted, #4b5563);
+    --ph-font: var(--font-body-family, sans-serif);
+    --ph-shadow-sm: var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.04));
+    --ph-shadow-md: var(--shadow-md, 0 12px 30px rgba(0,0,0,0.06));
+    --ph-shadow-float: var(--shadow-lg, 0 20px 46px rgba(0,0,0,0.10));
+    --ph-radius: var(--nx-radius, 14px);
+    --ph-transition: var(--transition-premium);
+    content-visibility: auto;
+  }
+
+  .ph-wrapper { background-color: var(--ph-bg); color: var(--ph-text); padding: var(--ph-py) var(--page-gutter); font-family: var(--ph-font); line-height: 1.5; position: relative; overflow: hidden; }
+  .ph-ambient-glow { position: absolute; top: 50%; right: 10%; width: 600px; height: 600px; background: radial-gradient(circle, var(--ph-accent) 0%, transparent 60%); opacity: 0.08; transform: translateY(-50%); filter: blur(80px); pointer-events: none; z-index: 0; }
+  .ph-container { max-width: var(--ph-max); margin: 0 auto; position: relative; z-index: 1; }
+  .ph-main-grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 80px; align-items: center; }
+
+  @media(max-width: 900px) { .ph-main-grid { grid-template-columns: 1fr; gap: 60px; } }
+
+  .ph-content-col { display: flex; flex-direction: column; align-items: flex-start; }
+  .ph-brand-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); color: var(--ph-text); padding: 6px 16px; border-radius: var(--nx-radius-pill); font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 28px; box-shadow: var(--ph-shadow-sm); }
+  .ph-badge-dot { width: 6px; height: 6px; background-color: var(--ph-accent); border-radius: 50%; box-shadow: 0 0 8px var(--ph-accent); animation: phPulse 2s infinite; }
+
+  @keyframes phPulse { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.5); opacity: 0.5; } 100% { transform: scale(1); opacity: 1; } }
+
+  .ph-title { font-size: clamp(36px, 4.5vw, 52px); font-weight: 800; color: var(--ph-text); margin: 0 0 20px; letter-spacing: -1.5px; line-height: 1.1; }
+  .ph-subtitle { color: var(--ph-muted); font-size: 19px; margin: 0 0 32px; line-height: 1.6; font-weight: 400; max-width: 90%; }
+
+  .ph-trust-strip { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 28px; }
+  .ph-trust-pill { display: inline-flex; align-items: center; gap: 6px; background: var(--color-bg-secondary, #f9fafb); padding: 6px 14px; border-radius: var(--nx-radius-pill); font-size: 12px; font-weight: 600; color: var(--ph-muted); letter-spacing: 0.2px; white-space: nowrap; box-shadow: var(--ph-shadow-sm); }
+  .ph-trust-pill--meta { background: rgba(255,255,255,0.7); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); font-weight: 700; color: var(--ph-text); }
+  .ph-trust-pill svg { flex-shrink: 0; }
+
+  .ph-toc-wrapper { width: 100%; max-width: 480px; }
+  .ph-toc-label { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; color: var(--ph-muted); margin-bottom: 16px; }
+  .ph-toc-grid { display: flex; flex-direction: column; gap: 10px; }
+
+  .ph-toc-link { display: flex; align-items: center; gap: 12px; padding: 14px 20px; background: transparent; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-radius: var(--nx-radius-md); text-decoration: none; color: var(--ph-text); font-weight: 600; font-size: 15px; transition: var(--ph-transition); box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.08); }
+  .ph-toc-link:hover { transform: translateY(-2px); background: var(--ph-accent); color: var(--color-text-primary); box-shadow: var(--ph-shadow-md); }
+  .ph-toc-link:active { transform: scale(0.98); }
+
+  .ph-toc-primary { background: var(--ph-text); color: #ffffff; box-shadow: var(--ph-shadow-md); }
+  .ph-toc-primary:hover { background: #000000; color: #ffffff; }
+
+  .ph-toc-icon { display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; background: rgba(15,23,42,0.05); border-radius: 50%; font-size: 12px; font-weight: 800; color: var(--ph-text); }
+  .ph-toc-primary .ph-toc-icon { background: rgba(255,255,255,0.15); color: var(--ph-accent); }
+
+  .ph-visual-col { position: relative; width: 100%; display: flex; justify-content: center; perspective: 1000px; }
+  .ph-image-wrapper { position: relative; padding: 8px; background: #ffffff; border-radius: var(--ph-radius); box-shadow: var(--ph-shadow-md); overflow: hidden; }
+  .ph-hero-img { width: 100%; max-width: 440px; border-radius: calc(var(--ph-radius) - 8px); display: block; transition: var(--ph-transition); }
+  .ph-image-wrapper:hover .ph-hero-img { transform: scale(1.03); }
+
+  .ph-glass-card { width: 100%; max-width: 440px; aspect-ratio: 1/1; background: linear-gradient(145deg, rgba(255,255,255,0.9), rgba(255,255,255,0.5)); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border-radius: var(--ph-radius); position: relative; overflow: hidden; box-shadow: var(--ph-shadow-float), inset 0 1px 0 rgba(255, 255, 255, 1); }
+  .ph-ambient-orb { position: absolute; width: 250px; height: 250px; background: radial-gradient(circle, rgba(251,191,36,0.12) 0%, transparent 60%); top: 50%; left: 50%; transform: translate(-50%, -50%); animation: phPulseOrb 8s ease-in-out infinite; }
+
+  @keyframes phPulseOrb { 0%, 100% { opacity: 0.6; transform: translate(-50%, -50%) scale(1); } 50% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); } }
+
+  .ph-glass-grid { position: absolute; inset: 0; background-image: radial-gradient(rgba(15,23,42,0.06) 1px, transparent 1px); background-size: 28px 28px; mask-image: radial-gradient(circle at center, black 30%, transparent 80%); -webkit-mask-image: radial-gradient(circle at center, black 30%, transparent 80%); }
+
+  .ph-floating-pill { position: absolute; background: rgba(255, 255, 255, 0.85); padding: 10px 24px 10px 10px; border-radius: var(--nx-radius-pill); box-shadow: var(--ph-shadow-float), inset 0 1px 0 rgba(255,255,255,1); display: flex; align-items: center; gap: 14px; z-index: 2; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); transition: var(--ph-transition); }
+  .ph-floating-pill:hover { transform: scale(1.03) !important; z-index: 10; }
+  .ph-icon-circle { width: 44px; height: 44px; border-radius: 50%; background: #ffffff; color: var(--ph-text); display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: var(--shadow-sm); }
+  .ph-icon-rotate { transform: rotate(-45deg); }
+  .ph-pill-text { display: flex; flex-direction: column; justify-content: center; }
+  .ph-pill-title { font-size: 13px; font-weight: 700; color: var(--ph-text); line-height: 1.2; }
+  .ph-pill-sub { font-size: 11px; font-weight: 500; color: var(--ph-muted); margin-top: 2px; }
+
+  .ph-float-1 { top: 12%; left: -5%; animation: phFloatSmooth 7s ease-in-out infinite; }
+  .ph-float-2 { top: 45%; right: -10%; animation: phFloatSmooth 8s ease-in-out infinite reverse; }
+  .ph-float-3 { bottom: 15%; left: 15%; animation: phFloatSmooth 9s ease-in-out infinite 1s; }
+
+  @keyframes phFloatSmooth { 0% { transform: translateY(0px); } 50% { transform: translateY(-14px); } 100% { transform: translateY(0px); } }
+
+  .ph-animate-up { animation: phSlideUpFade 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+  .ph-animate-fade { animation: phSimpleFade 1s ease-out forwards; animation-delay: 0.2s; opacity: 0; }
+
+  @keyframes phSlideUpFade { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes phSimpleFade { from { opacity: 0; } to { opacity: 1; } }
+
+  .ph-wrapper :focus-visible { outline: 2px solid var(--color-accent-primary, #FBBF24); outline-offset: 2px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ph-wrapper *, .ph-wrapper *::before, .ph-wrapper *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  }
+
+  @media(max-width: 600px) {
+    .ph-wrapper { padding: 60px var(--page-gutter); }
+    .ph-title { font-size: 34px; letter-spacing: -1px; }
+    .ph-subtitle { font-size: 16px; max-width: 100%; }
+    .ph-floating-pill { padding: 8px 16px 8px 8px; }
+    .ph-icon-circle { width: 38px; height: 38px; }
+    .ph-icon-circle svg { width: 18px; height: 18px; }
+    .ph-float-1 { left: 5%; top: 5%; }
+    .ph-float-2 { right: 5%; top: 40%; }
+    .ph-float-3 { left: 15%; bottom: 10%; }
+  }
+
+  .ph-progress-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    z-index: 9999;
+    pointer-events: none;
+    background: var(--color-accent-primary, #FBBF24);
+    transform-origin: left;
+    transform: scaleX(0);
+    transition: transform 0.15s linear;
+  }
+{%- endstyle -%}
+
+<script>
+  (function(){
+    var bar = document.getElementById('ph-progress-{{ sid }}');
+    if (!bar) return;
+    var ticking = false;
+    function onScroll() {
+      if (!ticking) {
+        requestAnimationFrame(function() {
+          var docH = document.documentElement.scrollHeight - window.innerHeight;
+          bar.style.transform = 'scaleX(' + (docH > 0 ? Math.min(window.scrollY / docH, 1) : 0) + ')';
+          ticking = false;
+        });
+        ticking = true;
+      }
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+  })();
+</script>

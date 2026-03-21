@@ -1,0 +1,43 @@
+<section class="np-surface">
+  <div class="np-wrap np-social">
+    <div class="np-social__stat">
+      <strong>{{ section.settings.orders }}</strong>
+      <span class="np-meta">orders shipped</span>
+    </div>
+    <div class="np-social__stat">
+      <strong>{{ section.settings.customers }}</strong>
+      <span class="np-meta">happy customers</span>
+    </div>
+    <div class="np-social__stat">
+      <strong>{{ section.settings.countries }}</strong>
+      <span class="np-meta">countries served</span>
+    </div>
+    {% if section.blocks.size > 0 %}
+      <span class="np-meta" style="margin-left:1rem;">Trusted by</span>
+      {% for block in section.blocks %}
+        {% if block.settings.logo != blank %}
+          <img {{ block.shopify_attributes }} src="{{ block.settings.logo | image_url: width: 120 }}" alt="{{ block.settings.alt | escape }}" loading="lazy" style="height:28px;">
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name":"Social Row",
+  "settings":[
+    { "type":"text", "id":"orders", "label":"Orders shipped", "default":"5,700+" },
+    { "type":"text", "id":"customers", "label":"Customers", "default":"1,700+" },
+    { "type":"text", "id":"countries", "label":"Countries", "default":"17" }
+  ],
+  "blocks":[
+    { "type":"logo", "name":"Logo", "settings":[
+      { "type":"image_picker", "id":"logo", "label":"Logo image" },
+      { "type":"text", "id":"alt", "label":"Alt text", "default":"Brand logo" }
+    ]}
+  ],
+  "max_blocks": 6,
+  "presets":[{ "name":"NP • Social Row" }]
+}
+{% endschema %}

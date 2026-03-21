@@ -1,0 +1,206 @@
+<section id="ntx-faq-tracker" class="ntx-tracker">
+  <div class="ntx-tracker__wrap">
+    <h2 class="ntx-tracker__title">{{ section.settings.heading }}</h2>
+
+    <div class="ntx-tracker__tabs" role="tablist" aria-label="Tracking type">
+      <button class="ntx-tab ntx-tab--active" data-tab="local" role="tab" aria-selected="true">Dubai / UAE (Quiqup)</button>
+      <button class="ntx-tab" data-tab="intl" role="tab" aria-selected="false">International (DHL)</button>
+    </div>
+
+    <!-- Local / Quiqup -->
+    <div class="ntx-panel ntx-panel--active" data-panel="local" role="tabpanel" aria-labelledby="local">
+      <label for="ntxLocalRef" class="ntx-label">Enter your Quiqup reference or order number</label>
+      <div class="ntx-row">
+        <input id="ntxLocalRef" type="text" class="ntx-input" placeholder="{{ section.settings.local_placeholder }}">
+        <button class="ntx-btn" id="ntxLocalBtn">Track with Quiqup</button>
+      </div>
+      <p class="ntx-hint">We’ll open Quiqup’s tracking page in a new tab. If asked, paste your reference number to see live status.</p>
+    </div>
+
+    <!-- International / DHL -->
+    <div class="ntx-panel" data-panel="intl" role="tabpanel" aria-labelledby="intl" hidden>
+      <label for="ntxIntlRef" class="ntx-label">Enter your DHL waybill / tracking number</label>
+      <div class="ntx-row">
+        <input id="ntxIntlRef" type="text" class="ntx-input" placeholder="{{ section.settings.intl_placeholder }}">
+        <button class="ntx-btn" id="ntxIntlBtn">Track with DHL</button>
+      </div>
+      <p class="ntx-hint">You’ll be taken to DHL’s tracking page with your number applied.</p>
+    </div>
+  </div>
+</section>
+
+<style>
+  :root {
+    --ntx-accent: var(--nx-accent, #FBBF24);
+    --ntx-accent-ink: var(--nx-text, #0B0B0B);
+    --ntx-accent-bg: rgba(251,191,36,0.08);
+  }
+
+  .ntx-tracker {
+    background: #fff; border: none; border-radius: var(--nx-radius);
+    padding: 20px; margin: 0 auto 16px; max-width: var(--container-width-narrow);
+    font-family: var(--font-body-family, sans-serif);
+    box-shadow: var(--shadow-sm);
+  }
+  .ntx-tracker__title {
+    margin: 0 0 10px;
+    font-family: var(--font-heading-family, sans-serif);
+    font-size: clamp(1.1rem, 2vw, 1.35rem);
+    font-weight: 800; letter-spacing: -0.02em;
+    color: var(--ntx-accent-ink);
+  }
+
+  .ntx-tracker__tabs { display: inline-flex; gap: 8px; margin-bottom: 14px; }
+  .ntx-tab {
+    border: 1.5px solid var(--nx-pill-border, #e5e7eb); background: #fff;
+    border-radius: var(--nx-radius-pill); padding: 8px 14px; min-height: 44px; box-sizing: border-box;
+    cursor: pointer; font-size: clamp(0.8rem, 1.2vw, 0.875rem);
+    font-family: var(--font-body-family, sans-serif);
+    display: inline-flex; align-items: center;
+    box-shadow: var(--shadow-xs);
+    transition: var(--transition-premium);
+    color: var(--ntx-accent-ink);
+  }
+  .ntx-tab:hover {
+    border-color: var(--ntx-accent);
+    box-shadow: var(--shadow-sm-hover);
+    transform: translateY(-1px);
+  }
+  .ntx-tab:active { transform: translateY(1px); }
+  .ntx-tab:focus-visible { outline: 2px solid var(--ntx-accent); outline-offset: 2px; }
+  .ntx-tab--active {
+    border-color: var(--ntx-accent); font-weight: 600;
+    background: var(--ntx-accent-bg);
+    box-shadow: 0 0 0 1.5px var(--ntx-accent), 0 2px 12px rgba(251,191,36,0.18);
+  }
+
+  .ntx-panel { }
+  .ntx-panel[hidden] { display: none; }
+  .ntx-label {
+    display: block; margin-bottom: 6px;
+    font-size: clamp(0.8rem, 1.2vw, 0.875rem);
+    color: var(--nx-muted, #6B7280);
+  }
+  .ntx-row { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; }
+
+  .ntx-input {
+    border: 1.5px solid var(--nx-pill-border, #e5e7eb); border-radius: var(--nx-radius-md);
+    padding: 10px 14px; width: 100%; min-height: 44px; box-sizing: border-box;
+    font-family: var(--font-body-family, sans-serif);
+    font-size: clamp(0.85rem, 1.3vw, 0.9375rem);
+    background: #fff; color: var(--ntx-accent-ink);
+    transition: var(--transition-premium);
+    box-shadow: var(--shadow-xs);
+  }
+  .ntx-input:focus {
+    outline: none;
+    border-color: var(--ntx-accent);
+    box-shadow: var(--shadow-gold-focus);
+  }
+  .ntx-input:focus-visible { outline: 2px solid var(--ntx-accent); outline-offset: 2px; }
+  .ntx-input::placeholder { opacity: 0.5; }
+
+  .ntx-btn {
+    border: none; border-radius: var(--nx-radius-md); padding: 10px 16px; min-height: 44px;
+    background: var(--ntx-accent-ink); color: #fff;
+    font-family: var(--font-body-family, sans-serif);
+    font-size: clamp(0.8rem, 1.2vw, 0.875rem); font-weight: 600;
+    cursor: pointer; white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: var(--transition-premium);
+  }
+  .ntx-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.14);
+  }
+  .ntx-btn:active { transform: scale(0.97); }
+  .ntx-btn:focus-visible { outline: 2px solid var(--ntx-accent); outline-offset: 2px; }
+
+  .ntx-hint {
+    font-size: clamp(0.65rem, 1vw, 0.75rem);
+    color: var(--nx-muted, #6B7280); margin-top: 8px;
+  }
+
+  .ntx-chip {
+    border: 1.5px solid var(--nx-pill-border, #e5e7eb); border-radius: var(--nx-radius-pill);
+    padding: 8px 14px; min-height: 44px; box-sizing: border-box;
+    background: #fff; cursor: pointer;
+    font-size: clamp(0.8rem, 1.2vw, 0.875rem);
+    font-family: var(--font-body-family, sans-serif);
+    display: inline-flex; align-items: center;
+    color: var(--ntx-accent-ink);
+    box-shadow: var(--shadow-xs);
+    transition: var(--transition-premium);
+  }
+  .ntx-chip:hover {
+    border-color: var(--ntx-accent);
+    box-shadow: var(--shadow-sm-hover);
+    transform: translateY(-1px);
+  }
+  .ntx-chip:active { transform: translateY(1px); }
+  .ntx-chip:focus-visible { outline: 2px solid var(--ntx-accent); outline-offset: 2px; }
+  .ntx-chip--active {
+    border-color: var(--ntx-accent); font-weight: 600;
+    background: var(--ntx-accent-bg);
+    box-shadow: 0 0 0 1.5px var(--ntx-accent), 0 2px 12px rgba(251,191,36,0.18);
+  }
+  .ntx-chip--active:hover { filter: brightness(0.96); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ntx-tab, .ntx-input, .ntx-btn, .ntx-chip { transition: none; }
+    .ntx-tab:hover, .ntx-btn:hover, .ntx-chip:hover { transform: none; }
+  }
+</style>
+
+<script>
+  (function(){
+    var tabs = document.querySelectorAll('.ntx-tab');
+    var panels = document.querySelectorAll('.ntx-panel');
+
+    function showTab(key){
+      tabs.forEach(function(t){ t.classList.toggle('ntx-tab--active', t.getAttribute('data-tab')===key); });
+      panels.forEach(function(p){
+        var active = p.getAttribute('data-panel')===key;
+        p.toggleAttribute('hidden', !active);
+        p.classList.toggle('ntx-panel--active', active);
+      });
+    }
+
+    tabs.forEach(function(t){
+      t.addEventListener('click', function(){ showTab(t.getAttribute('data-tab')); });
+    });
+
+    // Quiqup tracking: open official tracking portal
+    var localBtn = document.getElementById('ntxLocalBtn');
+    if (localBtn) {
+      localBtn.addEventListener('click', function(){
+        var ref = document.getElementById('ntxLocalRef').value.trim();
+        if (ref) { navigator.clipboard?.writeText(ref).catch(function(){}); }
+        window.open('https://track-parcel.quiqup.com/', '_blank', 'noopener');
+      });
+    }
+
+    // DHL tracking: pass tracking id to DHL
+    var intlBtn = document.getElementById('ntxIntlBtn');
+    if (intlBtn) {
+      intlBtn.addEventListener('click', function(){
+        var id = document.getElementById('ntxIntlRef').value.trim();
+        if (!id) return;
+        var url = 'https://www.dhl.com/global-en/home/tracking/tracking-express.html?submit=1&tracking-id=' + encodeURIComponent(id);
+        window.open(url, '_blank', 'noopener');
+      });
+    }
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "FAQ Tracking Widget",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Track your delivery" },
+    { "type": "text", "id": "local_placeholder", "label": "Local placeholder", "default": "e.g., QUIQUP‑REF‑1234" },
+    { "type": "text", "id": "intl_placeholder", "label": "International placeholder", "default": "e.g., DHL 10‑digit waybill" }
+  ],
+  "presets": [{ "name": "FAQ Tracking Widget" }]
+}
+{% endschema %}

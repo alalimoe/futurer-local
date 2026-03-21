@@ -1,0 +1,103 @@
+{% comment %}
+  Render img-with-text-1
+
+  @param {String} heading - Heading
+  @param {String} description - Description
+  @param {String} small_image - Small image
+  @param {String} large_image - Large image
+  @param {Object} blocks - Blocks
+
+  @example
+  {% render 'img-with-text-1', heading: heading, description: description, small_image: small_image, large_image: large_image, blocks: blocks %}
+{% endcomment %}
+
+{% liquid
+  assign container_class = 'img-with-text-1'
+  if layout
+    assign container_class = container_class | append: ' img-with-text-1--' | append: layout
+  endif
+  if settings.enable_border_radius
+    assign container_class = container_class | append: ' img-with-text-1--radius'
+  endif
+
+  assign final_aspect_ratio_small = aspect_ratio_small
+  assign final_aspect_ratio_large = aspect_ratio_large
+  if aspect_ratio_small == 'custom'
+    assign final_aspect_ratio_small = aspect_ratio_small_width | append: '/' | append: aspect_ratio_small_height
+  endif
+  if aspect_ratio_large == 'custom'
+    assign final_aspect_ratio_large = aspect_ratio_large_width | append: '/' | append: aspect_ratio_large_height
+  endif
+
+  assign wrap_style = '--lg: 6; --md: 6; --xs: 12;'
+  if layout == 'reverse'
+    assign wrap_style = '--lg: 6; --md: 6; --xs: 12; --start-md: 7;'
+  endif
+%}
+
+{% capture additional_images %}
+  <div class="img-with-text-1__additional">
+    {% for block in blocks %}
+      {% liquid
+        assign image = block.settings.image
+
+        # Size
+        assign inherit_desktop_value_size = block.settings.inherit_desktop_value_size
+        assign width_dt = block.settings.width_dt | divided_by: 10.0
+        assign height_dt = block.settings.height_dt | divided_by: 10.0
+        assign width_mb = block.settings.width_mb | divided_by: 10.0
+        assign height_mb = block.settings.height_mb | divided_by: 10.0
+        if inherit_desktop_value_size
+          assign width_mb = width_dt
+          assign height_mb = height_dt
+        endif
+
+        assign item_class = 'img-with-text-1__item-parallax' | append: ' img-with-text-1__item-parallax--' | append: forloop.index
+        assign item_style = '--width-dt: ' | append: width_dt | append: 'rem; --height-dt: ' | append: height_dt | append: 'rem; --width-mb: ' | append: width_mb | append: 'rem; --height-mb: ' | append: height_mb | append: 'rem'
+      %}
+      <div class="{{ item_class }}" style="{{ item_style }}">
+        <xo-animate xo-cascade xo-type="zoom-in" xo-duration="700">
+          <div class="img-with-text-1__image img-with-text-1__image--parallax">
+            {% render 'image', image: image, aspect_ratio: 'auto' %}
+          </div>
+        </xo-animate>
+      </div>
+    {% endfor %}
+  </div>
+{% endcapture %}
+
+<div class="{{ container_class }}">
+  <div xo-parallax class="img-with-text-1__inner">
+    <xo-container>
+      <xo-grid class="img-with-text-1__grid">
+        <div class="img-with-text-1__wrap" style="{{ wrap_style }}">
+          <div class="img-with-text-1__group">
+            {% if heading != blank %}
+              <div class="img-with-text-1__heading">
+                {% render 'text', context: section %}
+              </div>
+            {% endif %}
+            {% if description != blank %}
+              <xo-animate xo-cascade>
+                <div class="img-with-text-1__description">
+                  {{ description }}
+                </div>
+              </xo-animate>
+            {% endif %}
+          </div>
+          <div class="img-with-text-1__image-group">
+            <div class="img-with-text-1__image img-with-text-1__image--small">
+              {% render 'animate-image', image: small_image, aspect_ratio: final_aspect_ratio_small, border_radius: 0, max_width: 100 %}
+            </div>
+            {{ additional_images }}
+          </div>
+        </div>
+      </xo-grid>
+    </xo-container>
+  </div>
+  <div class="img-with-text-1__image-wrap">
+    <div class="img-with-text-1__image img-with-text-1__image--large">
+      {% render 'animate-image', image: large_image, aspect_ratio: final_aspect_ratio_large, border_radius: 0, max_width: 100 %}
+    </div>
+  </div>
+</div>

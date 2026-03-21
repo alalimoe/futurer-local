@@ -1,0 +1,391 @@
+{{ 'section-footer.css' | asset_url | stylesheet_tag }}
+{{ 'information-footer.css' | asset_url | stylesheet_tag }}
+{{ 'footer-nav.css' | asset_url | stylesheet_tag }}
+{{ 'footer-1.css' | asset_url | stylesheet_tag }}
+{{ 'footer-2.css' | asset_url | stylesheet_tag }}
+
+{% style %}
+  /* Newsletter input focus glow */
+  @keyframes ntx-focus-pulse {
+    0% { box-shadow: 0 0 0 0 rgba(251,191,36,0.3); }
+    50% { box-shadow: 0 0 0 4px rgba(251,191,36,0.15); }
+    100% { box-shadow: 0 0 0 3px rgba(251,191,36,0.2); }
+  }
+  #FooterNewsletter-email:focus {
+    outline: none;
+    border-color: var(--color-accent-primary, #FBBF24);
+    box-shadow: 0 0 0 3px rgba(251,191,36,0.2);
+    animation: ntx-focus-pulse 0.6s ease-out;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    #FooterNewsletter-email:focus { animation: none; }
+  }
+{% endstyle %}
+
+{% liquid
+  assign columns_desktop = section.settings.grid_col_desktop
+  assign columns_mobile  = section.settings.grid_col_mobile
+%}
+
+<footer {% render 'section-attr' %} class="section-footer {{ section.settings.color_scheme }}">
+  <div class="footer{% if section.settings.footer_fixed == 'fixed' %} footer--fixed{% endif %}"
+       style="
+         {% if section.settings.background_color != blank %}background-color: {{ section.settings.background_color }};{% endif %}
+         {% if section.settings.background_gradient != blank %}background: {{ section.settings.background_gradient }};{% endif %}
+         padding-top: clamp({{ section.settings.padding_top_mobile }}px, 5vw, {{ section.settings.padding_top_desktop }}px);
+         padding-bottom: clamp({{ section.settings.padding_bottom_mobile }}px, 5vw, {{ section.settings.padding_bottom_desktop }}px);
+       ">
+    <div class="footer__container">
+
+      {%- comment -%} USP bar {%- endcomment -%}
+      <div class="footer__usp">
+        <ul class="footer__usp-list" role="list">
+          {% if section.settings.usp_1 != blank %}<li class="footer__usp-item">{{ section.settings.usp_1 }}</li>{% endif %}
+          {% if section.settings.usp_2 != blank %}<li class="footer__usp-item">{{ section.settings.usp_2 }}</li>{% endif %}
+          {% if section.settings.usp_3 != blank %}<li class="footer__usp-item">{{ section.settings.usp_3 }}</li>{% endif %}
+        </ul>
+      </div>
+
+      <div class="footer__top" style="display:grid;gap:24px;grid-template-columns:repeat({{ columns_desktop }},minmax(0,1fr));">
+        {%- comment -%} Col 1 — Logo + Newsletter {%- endcomment -%}
+        <div class="footer__col footer__brand">
+          {% if section.settings.image %}
+            <div class="footer__logo">
+              <img src="{{ section.settings.image | image_url: width: 400 }}"
+                   alt="{{ shop.name }}"
+                   width="{{ section.settings.logo_width_desktop }}"
+                   height="{{ section.settings.logo_width_desktop | divided_by: section.settings.image.aspect_ratio }}"
+                   loading="lazy"
+                   decoding="async"
+                   style="max-width:100%;height:auto">
+            </div>
+          {% endif %}
+
+          {% if section.settings.newsletter_show == 'show' %}
+            <div class="footer__newsletter">
+              <h2 class="footer__title">{{ section.settings.news_title }}</h2>
+              {% if section.settings.sub_heading != blank %}<div class="footer__subtext rte">{{ section.settings.sub_heading }}</div>{% endif %}
+
+              {% form 'customer', id: 'FooterNewsletter' %}
+                {% if form.posted_successfully? %}
+                  <p class="footer__success">{{ section.settings.news_success_text }}</p>
+                {% else %}
+                  <div class="footer__newsletter-fields">
+                    <label class="visually-hidden" for="FooterNewsletter-email">Email</label>
+                    <input id="FooterNewsletter-email"
+                           type="email"
+                           name="contact[email]"
+                           value="{{ form.email }}"
+                           placeholder="{{ section.settings.news_placeholder }}"
+                           required>
+                    <input type="hidden" name="contact[tags]" value="newsletter,footer">
+                    <button type="submit" class="footer__btn">{{ section.settings.news_cta }}</button>
+                  </div>
+                  {% if form.errors %}<div class="footer__errors">{{ form.errors | default_errors }}</div>{% endif %}
+                {% endif %}
+              {% endform %}
+              {% if section.settings.news_privacy != blank %}<p class="footer__micro">{{ section.settings.news_privacy }}</p>{% endif %}
+            </div>
+          {% endif %}
+        </div>
+
+        {%- comment -%} Col 2 — Shop (menu) {%- endcomment -%}
+        <nav class="footer__col" aria-label="Shop">
+          <h2 class="footer__title">{{ section.settings.col1_title }}</h2>
+          {% if section.settings.menu_shop != blank %}
+            <ul class="footer__links" role="list">
+              {% for link in section.settings.menu_shop.links %}
+                <li><a class="footer__link" href="{{ link.url }}">{{ link.title }}</a></li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p class="footer__muted">Assign “Footer — Shop” menu.</p>
+          {% endif %}
+        </nav>
+
+        {%- comment -%} Col 3 — Shop by Goal (tags → collection filters) {%- endcomment -%}
+        <nav class="footer__col" aria-label="Shop by Goal">
+          <h2 class="footer__title">{{ section.settings.col2_title }}</h2>
+          <ul class="footer__links" role="list">
+            {% assign goals = section.settings.goal_tags | split: ',' %}
+            {% for raw in goals %}
+              {% assign t = raw | strip %}
+              {% if t != blank %}
+                <li><a class="footer__link" href="{{ routes.all_products_collection_url }}/{{ t | handleize }}">{{ t }}</a></li>
+              {% endif %}
+            {% endfor %}
+          </ul>
+        </nav>
+
+        {%- comment -%} Col 4 — Help (menu) {%- endcomment -%}
+        <nav class="footer__col" aria-label="Help & Support">
+          <h2 class="footer__title">{{ section.settings.col3_title }}</h2>
+          {% if section.settings.menu_help != blank %}
+            <ul class="footer__links" role="list">
+              {% for link in section.settings.menu_help.links %}
+                <li><a class="footer__link" href="{{ link.url }}">{{ link.title }}</a></li>
+              {% endfor %}
+              <li><a class="footer__link" href="/sitemap.xml">Sitemap</a></li>
+            </ul>
+          {% else %}
+            <p class="footer__muted">Assign “Footer — Help” menu.</p>
+          {% endif %}
+        </nav>
+      </div>
+
+      {%- comment -%} Contact + Social + Selectors + Payments {%- endcomment -%}
+      <div class="footer__middle" style="display:grid;gap:18px;margin-top:20px;grid-template-columns:repeat({{ columns_mobile }},minmax(0,1fr));">
+        <div class="footer__contact" itemscope itemtype="https://schema.org/Organization">
+          <h2 class="footer__title">{{ section.settings.col4_title }}</h2>
+          <p class="footer__text" itemprop="name">{{ shop.name }}</p>
+          <p class="footer__text" itemprop="address" itemscope itemtype="https://schema.org/PostalAddress">
+            <span itemprop="addressLocality">{{ section.settings.city }}</span>, <span itemprop="addressCountry">{{ section.settings.country }}</span>
+          </p>
+          {% if section.settings.phone != blank %}
+            {% assign phone_plain = section.settings.phone | remove: ' ' | remove: '-' | remove: '(' | remove: ')' | remove: '+' %}
+            <p class="footer__text"><a href="tel:+{{ phone_plain }}" itemprop="telephone">{{ section.settings.phone }}</a></p>
+          {% endif %}
+          {% if section.settings.email != blank %}
+            <p class="footer__text"><a href="mailto:{{ section.settings.email }}" itemprop="email">{{ section.settings.email }}</a></p>
+          {% endif %}
+          {% if section.settings.whatsapp_number != blank %}
+            {% assign wa_msg = section.settings.whatsapp_msg | default: 'Hi Nootropix! I have a quick question.' | url_encode %}
+            <p class="footer__text"><a rel="noopener" target="_blank" href="https://wa.me/{{ section.settings.whatsapp_number | remove: ' ' | remove: '+' }}?text={{ wa_msg }}">WhatsApp</a></p>
+          {% endif %}
+
+          {% if section.settings.show_social == 'show' %}
+            <div class="footer__social">
+              {% if section.settings.instagram != blank %}<a href="{{ section.settings.instagram }}" target="_blank" rel="noopener">Instagram</a>{% endif %}
+              {% if section.settings.twitter != blank %}<a href="{{ section.settings.twitter }}" target="_blank" rel="noopener">X</a>{% endif %}
+              {% if section.settings.youtube != blank %}<a href="{{ section.settings.youtube }}" target="_blank" rel="noopener">YouTube</a>{% endif %}
+              {% if section.settings.facebook != blank %}<a href="{{ section.settings.facebook }}" target="_blank" rel="noopener">Facebook</a>{% endif %}
+            </div>
+          {% endif %}
+        </div>
+
+        <div class="footer__selectors">
+          {% if section.settings.show_language_selector == 'show' or section.settings.show_currency_selector == 'show' %}
+            {%- form 'localization', id: 'FooterLocalization', class: 'localization-form' -%}
+              <div class="localization-form__fields">
+                {% if section.settings.show_language_selector == 'show' %}
+                  <div class="localization-form__item">
+                    <label class="visually-hidden" for="FooterLanguage">Language</label>
+                    <select id="FooterLanguage" name="locale_code" class="localization-selector" onchange="this.form.submit()">
+                      {% for locale in localization.available_languages %}
+                        <option value="{{ locale.iso_code }}" {% if locale.iso_code == localization.language.iso_code %}selected{% endif %}>{{ locale.endonym_name }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                {% endif %}
+                {% if section.settings.show_currency_selector == 'show' %}
+                  <div class="localization-form__item">
+                    <label class="visually-hidden" for="FooterCurrency">Currency</label>
+                    <select id="FooterCurrency" name="country_code" class="localization-selector" onchange="this.form.submit()">
+                      {% for country in localization.available_countries %}
+                        <option value="{{ country.iso_code }}" {% if country.iso_code == localization.country.iso_code %}selected{% endif %}>
+                          {{ country.name }} ({{ country.currency.iso_code }})
+                        </option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                {% endif %}
+              </div>
+            {%- endform -%}
+          {% endif %}
+
+          {% if section.settings.show_payment == 'show' %}
+            <div class="footer__payments" aria-label="Accepted payment methods">
+              <ul class="footer__payments-list" role="list">
+                {% for type in shop.enabled_payment_types %}
+                  <li>{{ type | payment_type_svg_tag }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      {%- comment -%} Trust badges — YMYL critical {%- endcomment -%}
+      {% if section.settings.show_trust_badges == 'show' %}
+        <div class="footer__trust" role="list" aria-label="Trust & safety certifications">
+          <div class="footer__trust-badge" role="listitem">
+            <svg class="footer__trust-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6l1 4h3a1 1 0 0 1 1 1v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a1 1 0 0 1 1-1h3l1-4z"/><path d="M10 14c0 1.1.9 2 2 2s2-.9 2-2-.9-2-2-2"/><line x1="10" y1="10" x2="10" y2="14"/><line x1="14" y1="12" x2="14" y2="14"/></svg>
+            <span class="footer__trust-label">{{ section.settings.trust_badge_1 }}</span>
+          </div>
+          <div class="footer__trust-badge" role="listitem">
+            <svg class="footer__trust-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2l7 4v5c0 5.25-3.5 9.74-7 11-3.5-1.26-7-5.75-7-11V6l7-4z"/><polyline points="9 12 11 14 15 10"/></svg>
+            <span class="footer__trust-label">{{ section.settings.trust_badge_2 }}</span>
+          </div>
+          <div class="footer__trust-badge" role="listitem">
+            <svg class="footer__trust-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><circle cx="12" cy="16" r="1"/></svg>
+            <span class="footer__trust-label">{{ section.settings.trust_badge_3 }}</span>
+          </div>
+          {% if section.settings.show_payment == 'show' %}
+            <div class="footer__trust-payments" aria-label="Accepted payment methods">
+              <ul class="footer__trust-payments-list" role="list">
+                {% for type in shop.enabled_payment_types %}
+                  <li>{{ type | payment_type_svg_tag }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+          {% endif %}
+        </div>
+      {% endif %}
+
+      {%- comment -%} Bottom row: disclaimer + legal menu {%- endcomment -%}
+      <div class="footer__bottom">
+        {% if section.settings.disclaimer_text != blank %}
+          <small class="footer__disclaimer">{{ section.settings.disclaimer_text }}</small>
+        {% endif %}
+        <div class="footer__legal">
+          <span>&copy; {{ 'now' | date: "%Y" }} {{ shop.name }}.</span>
+          {% if section.settings.menu_legal != blank %}
+            <ul class="footer__legal-links" role="list">
+              {% for link in section.settings.menu_legal.links %}
+                <li><a class="footer__link" href="{{ link.url }}">{{ link.title }}</a></li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        </div>
+      </div>
+
+      {%- comment -%} Organization JSON-LD {%- endcomment -%}
+      <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": {{ shop.name | json }},
+        "url": {{ shop.url | json }},
+        "logo": {{ section.settings.image | image_url: width: 400 | prepend: 'https:' | json }},
+        "email": {{ section.settings.email | json }},
+        "telephone": {{ section.settings.phone | json }},
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": {{ section.settings.city | json }},
+          "addressCountry": {{ section.settings.country | json }}
+        },
+        "sameAs": [{% capture list %}{% assign s = '' %}{% if section.settings.instagram != blank %}{{ section.settings.instagram }}{% assign s = '1' %}{% endif %}{% if section.settings.twitter != blank %}{% if s != '' %}, {% endif %}{{ section.settings.twitter }}{% assign s = '1' %}{% endif %}{% if section.settings.youtube != blank %}{% if s != '' %}, {% endif %}{{ section.settings.youtube }}{% assign s = '1' %}{% endif %}{% if section.settings.facebook != blank %}{% if s != '' %}, {% endif %}{{ section.settings.facebook }}{% endif %}{% endcapture %}{{ list | json }}]
+      }
+      </script>
+    </div>
+  </div>
+
+  <style>
+    /* light-touch, theme-friendly */
+    .footer__usp { border-bottom: 1px solid rgba(255,255,255,.08); padding-bottom: 12px; margin-bottom: 16px; }
+    .footer__usp-list { display:flex; flex-wrap:wrap; gap:10px 16px; font-weight:600; }
+    .footer__title { margin: 0 0 8px 0; font-size: 1rem; }
+    .footer__links { display:grid; gap:6px; margin:0; padding:0; list-style:none; }
+    .footer__link { text-decoration:none; opacity:.92; }
+    .footer__link:hover { text-decoration:underline; opacity:1; }
+    .footer__newsletter .footer__newsletter-fields { display:flex; gap:8px; margin:8px 0; }
+    .footer__newsletter input[type=email] { flex:1; min-width:0; }
+    .footer__btn { cursor:pointer; }
+    .footer__micro { opacity:.75; font-size:.85rem; }
+    .footer__social a { margin-right:10px; }
+    .footer__payments { margin-top:10px; }
+    .footer__payments-list { display:flex; flex-wrap:wrap; gap:10px; list-style:none; margin:0; padding:0; }
+    /* Trust badges */
+    .footer__trust { display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:20px 32px; margin-top:20px; padding:20px 0; border-top:1px solid rgba(255,255,255,.06); border-bottom:1px solid rgba(255,255,255,.06); }
+    .footer__trust-badge { display:flex; align-items:center; gap:8px; }
+    .footer__trust-icon { width:22px; height:22px; flex-shrink:0; color:var(--color-accent-primary,#FBBF24); transition:transform .3s cubic-bezier(.34,1.56,.64,1); }
+    .footer__trust-badge:hover .footer__trust-icon { transform:scale(1.12); }
+    .footer__trust-label { font-family:var(--font-body-family,sans-serif); font-size:clamp(0.72rem,1vw,0.82rem); font-weight:600; letter-spacing:.04em; text-transform:uppercase; opacity:.88; }
+    .footer__trust-payments { display:flex; align-items:center; }
+    .footer__trust-payments-list { display:flex; flex-wrap:wrap; gap:8px; list-style:none; margin:0; padding:0; }
+    .footer__trust-payments-list li { display:flex; align-items:center; }
+    .footer__trust-payments-list svg { height:22px; width:auto; opacity:.7; transition:opacity .2s ease; }
+    .footer__trust-payments-list li:hover svg { opacity:1; }
+    @media(prefers-reduced-motion:reduce){ .footer__trust-icon { transition:none; } .footer__trust-payments-list svg { transition:none; } }
+    @media(max-width:640px){ .footer__trust { gap:14px 20px; padding:16px 0; } .footer__trust-icon { width:18px; height:18px; } .footer__trust-label { font-size:0.7rem; } }
+    .footer__bottom { border-top:1px solid rgba(255,255,255,.08); margin-top:16px; padding-top:16px; display:flex; flex-direction:column; gap:8px; }
+    .footer__legal { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:10px; }
+    .footer__legal-links { display:flex; gap:12px; list-style:none; margin:0; padding:0; }
+    .footer__muted { opacity:.6; }
+    .visually-hidden { position:absolute !important; clip:rect(1px,1px,1px,1px); height:1px; width:1px; overflow:hidden; }
+    @media (max-width: 980px){ .footer__top { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+    @media (max-width: 640px){ .footer__top { grid-template-columns:1fr; } }
+  </style>
+</footer>
+
+{% schema %}
+{
+  "name": "Nootropix Footer (inline)",
+  "class": "section-footer",
+  "settings": [
+    { "type": "select", "id": "footer_fixed", "label": "Footer position", "options":[{ "value": "", "label": "Normal" },{ "value":"fixed","label":"Fixed" }], "default":"fixed" },
+
+    { "type": "header", "content": "Grid" },
+    { "type": "range", "id": "grid_col_desktop", "min": 2, "max": 4, "step": 1, "default": 4, "label": "Columns (desktop)" },
+    { "type": "select", "id": "grid_col_mobile", "label": "Columns (mobile)", "options":[{ "value":"1","label":"1" },{ "value":"2","label":"2" }], "default":"2" },
+
+    { "type": "header", "content": "Brand" },
+    { "type": "image_picker", "id": "image", "label": "Logo" },
+    { "type": "range", "id": "logo_width_desktop", "min": 50, "max": 500, "step": 10, "default": 220, "unit": "px", "label": "Logo width (desktop)" },
+
+    { "type": "header", "content": "Newsletter" },
+    { "type": "select", "id": "newsletter_show", "label": "Newsletter", "options":[{ "value":"hidden","label":"Hidden" },{ "value":"show","label":"Show" }], "default":"show" },
+    { "type": "text", "id": "news_title", "label": "Newsletter title", "default": "Get 10% Off Your First Order" },
+    { "type": "richtext", "id": "sub_heading", "label": "Newsletter subtext", "default": "<p>Join 1,700+ customers in Dubai & beyond. New products, research-backed guides, exclusive offers.</p>" },
+    { "type": "text", "id": "news_placeholder", "label": "Email placeholder", "default": "Enter your email" },
+    { "type": "text", "id": "news_cta", "label": "Button label", "default": "Unlock 10% Off" },
+    { "type": "text", "id": "news_success_text", "label": "Success message", "default": "You're in — check your inbox for your 10% code" },
+    { "type": "text", "id": "news_privacy", "label": "Privacy note", "default": "No spam. Unsubscribe anytime." },
+
+    { "type": "header", "content": "Columns" },
+    { "type": "text", "id": "col1_title", "label": "Col 2 title", "default": "Shop" },
+    { "type": "link_list", "id": "menu_shop", "label": "Menu — Shop" },
+
+    { "type": "text", "id": "col2_title", "label": "Col 3 title", "default": "Shop by Goal" },
+    { "type": "textarea", "id": "goal_tags", "label": "Goal tags (comma-separated)", "default": "Focus & Attention, Memory Support, Energy, Mood, Anxiety & Stress, ADHD, Longevity, Performance, Neuroprotection" },
+
+    { "type": "text", "id": "col3_title", "label": "Col 4 title", "default": "Help & Support" },
+    { "type": "link_list", "id": "menu_help", "label": "Menu — Help" },
+
+    { "type": "header", "content": "Contact & Social" },
+    { "type": "text", "id": "col4_title", "label": "Contact column title", "default": "Contact" },
+    { "type": "text", "id": "phone", "label": "Phone (displayed)", "default": "+971 00 000 0000" },
+    { "type": "text", "id": "whatsapp_number", "label": "WhatsApp number (digits only)", "default": "971000000000" },
+    { "type": "text", "id": "whatsapp_msg", "label": "WhatsApp default message", "default": "Hi Nootropix! I have a quick question." },
+    { "type": "text", "id": "email", "label": "Support email", "default": "support@nootropix.shop" },
+    { "type": "text", "id": "city", "label": "City", "default": "Dubai" },
+    { "type": "text", "id": "country", "label": "Country", "default": "United Arab Emirates" },
+    { "type": "select", "id": "show_social", "label": "Show social links", "options":[{ "value":"hidden","label":"Hidden" },{ "value":"show","label":"Show" }], "default":"show" },
+    { "type": "url", "id": "instagram", "label": "Instagram URL" },
+    { "type": "url", "id": "twitter", "label": "X/Twitter URL" },
+    { "type": "url", "id": "youtube", "label": "YouTube URL" },
+    { "type": "url", "id": "facebook", "label": "Facebook URL" },
+
+    { "type": "header", "content": "Selectors & Payments" },
+    { "type": "select", "id": "show_language_selector", "label": "Language selector", "options":[{ "value":"hidden","label":"Hidden" },{ "value":"show","label":"Show" }], "default":"show" },
+    { "type": "select", "id": "show_currency_selector", "label": "Currency selector", "options":[{ "value":"hidden","label":"Hidden" },{ "value":"show","label":"Show" }], "default":"show" },
+    { "type": "select", "id": "show_payment", "label": "Payment icons", "options":[{ "value":"hidden","label":"Hidden" },{ "value":"show","label":"Show" }], "default":"show" },
+
+    { "type": "header", "content": "Trust Badges" },
+    { "type": "select", "id": "show_trust_badges", "label": "Trust badges row", "options":[{ "value":"hidden","label":"Hidden" },{ "value":"show","label":"Show" }], "default":"show" },
+    { "type": "text", "id": "trust_badge_1", "label": "Badge 1 label", "default": "3rd-Party Lab Tested" },
+    { "type": "text", "id": "trust_badge_2", "label": "Badge 2 label", "default": "GMP Certified Facility" },
+    { "type": "text", "id": "trust_badge_3", "label": "Badge 3 label", "default": "Secure 256-bit Checkout" },
+
+    { "type": "header", "content": "Legal" },
+    { "type": "link_list", "id": "menu_legal", "label": "Menu — Legal (privacy/refund/shipping/terms/contact)" },
+    { "type": "textarea", "id": "disclaimer_text", "label": "Medical/legal disclaimer", "default": "These products are not intended to diagnose, treat, cure, or prevent any disease. Consult a healthcare professional before use." },
+
+    { "type": "header", "content": "USPs" },
+    { "type": "text", "id": "usp_1", "label": "USP #1", "default": "Daily dispatch in Dubai" },
+    { "type": "text", "id": "usp_2", "label": "USP #2", "default": "Free express shipping over AED 300" },
+    { "type": "text", "id": "usp_3", "label": "USP #3", "default": "Easy returns within 30 days" },
+
+    { "type": "header", "content": "Appearance" },
+    { "type": "color_scheme", "id": "color_scheme", "label": "Section color scheme" },
+    { "type": "color", "id": "background_color", "label": "Background color" },
+    { "type": "color_background", "id": "background_gradient", "label": "Background gradient" },
+    { "type": "number", "id": "padding_top_desktop", "label": "Padding top desktop", "default": 50 },
+    { "type": "number", "id": "padding_bottom_desktop", "label": "Padding bottom desktop", "default": 50 },
+    { "type": "number", "id": "padding_top_mobile", "label": "Padding top mobile", "default": 36 },
+    { "type": "number", "id": "padding_bottom_mobile", "label": "Padding bottom mobile", "default": 36 }
+  ],
+  "blocks": [],
+  "presets": [{ "name": "Nootropix Footer (inline)" }]
+}
+{% endschema %}

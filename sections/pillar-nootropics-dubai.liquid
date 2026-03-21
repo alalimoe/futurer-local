@@ -1,0 +1,909 @@
+{% comment %}
+  =============================================
+  Section: Pillar — Buy Nootropics in Dubai
+  File: sections/pillar-nootropics-dubai.liquid
+  Purpose: Commercial landing page — competitive comparison, 4 product showcase, CRO / SEO / A11y
+  Theme: Futurer 2.x (OS 2.0) — cascades from global tokens
+  =============================================
+{% endcomment %}
+
+{%- assign s = section.settings -%}
+{%- assign sid = section.id -%}
+
+{%- comment -%} ── Product resolution (picker → handle → known fallback) ── {%- endcomment -%}
+{%- assign p1 = s.product_1 -%}
+{%- if p1 == blank and s.product_1_handle != blank -%}
+  {%- assign p1 = all_products[s.product_1_handle] -%}
+{%- endif -%}
+{%- if p1 == blank -%}{%- assign p1 = all_products['phenibut'] -%}{%- endif -%}
+
+{%- assign p2 = s.product_2 -%}
+{%- if p2 == blank and s.product_2_handle != blank -%}
+  {%- assign p2 = all_products[s.product_2_handle] -%}
+{%- endif -%}
+{%- if p2 == blank -%}{%- assign p2 = all_products['aniracetam'] -%}{%- endif -%}
+
+{%- assign p3 = s.product_3 -%}
+{%- if p3 == blank and s.product_3_handle != blank -%}
+  {%- assign p3 = all_products[s.product_3_handle] -%}
+{%- endif -%}
+{%- if p3 == blank -%}{%- assign p3 = all_products['noopept'] -%}{%- endif -%}
+
+{%- assign p4 = s.product_4 -%}
+{%- if p4 == blank and s.product_4_handle != blank -%}
+  {%- assign p4 = all_products[s.product_4_handle] -%}
+{%- endif -%}
+{%- if p4 == blank -%}{%- assign p4 = all_products['caffeine-l-theanine'] -%}{%- endif -%}
+
+{%- assign faq_blocks = section.blocks | where: 'type', 'faq' -%}
+
+{%- comment -%} ── JSON-LD: Article ── {%- endcomment -%}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": {{ s.hero_title | default: "Buy Nootropics in Dubai, UAE — Same-Day Delivery" | json }},
+  "description": {{ s.hero_subtitle | default: "Premium, lab-tested nootropics delivered to your Dubai door in as little as 4 hours." | strip_html | truncate: 160 | json }},
+  "author": { "@type": "Organization", "name": "Nootropix" },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Nootropix",
+    "url": {{ shop.url | json }},
+    "logo": {
+      "@type": "ImageObject",
+      "url": {{ shop.url | append: '/cdn/shop/files/nootropix-logo.png' | json }}
+    }
+  },
+  "datePublished": {{ s.date_published | default: "2025-01-15" | json }},
+  "dateModified": {{ page.updated_at | date: "%Y-%m-%d" | default: "2025-01-15" | json }},
+  "mainEntityOfPage": {{ canonical_url | json }}
+}
+</script>
+
+{%- comment -%} ── JSON-LD: ItemList ── {%- endcomment -%}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "name": "Top Selling Nootropics in Dubai",
+  "numberOfItems": 4,
+  "itemListElement": [
+    {%- if p1 != blank -%}{ "@type": "ListItem", "position": 1, "name": {{ p1.title | json }}, "url": {{ shop.url | append: p1.url | json }} }{%- endif -%}
+    {%- if p2 != blank -%},{ "@type": "ListItem", "position": 2, "name": {{ p2.title | json }}, "url": {{ shop.url | append: p2.url | json }} }{%- endif -%}
+    {%- if p3 != blank -%},{ "@type": "ListItem", "position": 3, "name": {{ p3.title | json }}, "url": {{ shop.url | append: p3.url | json }} }{%- endif -%}
+    {%- if p4 != blank -%},{ "@type": "ListItem", "position": 4, "name": {{ p4.title | json }}, "url": {{ shop.url | append: p4.url | json }} }{%- endif -%}
+  ]
+}
+</script>
+
+{%- comment -%} ── JSON-LD: FAQPage (dynamic from blocks) ── {%- endcomment -%}
+{% if faq_blocks.size > 0 %}
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {%- for block in faq_blocks -%}
+        {
+          "@type": "Question",
+          "name": {{ block.settings.q | json }},
+          "acceptedAnswer": { "@type": "Answer", "text": {{ block.settings.a | json }} }
+        }{%- unless forloop.last -%},{%- endunless -%}
+      {%- endfor -%}
+    ]
+  }
+  </script>
+{% endif %}
+
+{%- comment -%} ── JSON-LD: LocalBusiness ── {%- endcomment -%}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "name": "Nootropix",
+  "url": {{ shop.url | json }},
+  "address": {
+    "@type": "PostalAddress",
+    "addressLocality": "Dubai",
+    "addressCountry": "AE"
+  },
+  "areaServed": ["Dubai", "Abu Dhabi", "Sharjah", "Ajman", "UAE"],
+  "description": "Premium nootropics store with same-day delivery in Dubai and next-day across the UAE."
+}
+</script>
+
+{%- comment -%} ── JSON-LD: BreadcrumbList ── {%- endcomment -%}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": {{ shop.url | json }} },
+    { "@type": "ListItem", "position": 2, "name": "Buy Nootropics Dubai", "item": {{ canonical_url | json }} }
+  ]
+}
+</script>
+
+<section id="pillar-dubai-{{ sid }}" class="pd-section" aria-labelledby="pd-title-{{ sid }}">
+  <div class="pd-inner">
+
+    {%- comment -%} ── HERO ── {%- endcomment -%}
+    <header class="pd-hero"{% if s.hero_image != blank %} style="background-image:url({{ s.hero_image | image_url: width: 1600 }});"{% endif %}>
+      <div class="pd-hero-overlay">
+        <h1 id="pd-title-{{ sid }}" class="pd-hero-title">{{ s.hero_title | default: "Buy Nootropics in Dubai, UAE — Same-Day Delivery" }}</h1>
+        <p class="pd-hero-sub">{{ s.hero_subtitle | default: "Premium, lab-tested nootropics delivered to your Dubai door in as little as 4 hours. Rest of UAE: 24 hours. International express dispatch same day." }}</p>
+        <div class="pd-hero-actions">
+          <a href="{{ s.hero_cta_link | default: routes.all_products_collection_url }}" class="btn btn--primary">{{ s.hero_cta_text | default: "Browse All" }}</a>
+          <a href="#pd-compare" class="btn btn--ghost">See Why Nootropix</a>
+        </div>
+      </div>
+    </header>
+
+    {%- comment -%} ── INTRO ── {%- endcomment -%}
+    <div class="pd-intro" aria-label="Introduction">
+      <div class="pd-intro-text">{{ s.intro_text | default: "<p>Tired of waiting weeks for nootropics supplements to clear customs? <strong>Nootropix</strong> delivers premium, lab-tested nootropics to your Dubai door in as little as <strong>4 hours</strong>. Rest of UAE: 24 hours. International express dispatch same day.</p>" }}</div>
+    </div>
+
+    {%- comment -%} ── COMPETITIVE COMPARISON TABLE ── {%- endcomment -%}
+    <section id="pd-compare" aria-label="Nootropix vs Others comparison">
+      <span class="pd-kicker">Head-to-Head</span>
+      <h2 class="pd-heading">Why Nootropix vs Others?</h2>
+      <div class="pd-table-wrap">
+        <table class="pd-table" aria-label="Nootropix vs Others comparison">
+          <thead>
+            <tr>
+              <th scope="col">Feature</th>
+              <th scope="col" class="pd-table-highlight">Nootropix</th>
+              <th scope="col">Others</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td data-label="Feature"><strong>Delivery Time</strong></td>
+              <td data-label="Nootropix" class="pd-table-highlight">{{ s.compare_nx_delivery | default: "4 h within Dubai" }}</td>
+              <td data-label="Others">{{ s.compare_other_delivery | default: "5–10 days Intl. post" }}</td>
+            </tr>
+            <tr>
+              <td data-label="Feature"><strong>Customs Risk</strong></td>
+              <td data-label="Nootropix" class="pd-table-highlight">{{ s.compare_nx_customs | default: "0 % — local fulfillment" }}</td>
+              <td data-label="Others">{{ s.compare_other_customs | default: "20 % parcels held" }}</td>
+            </tr>
+            <tr>
+              <td data-label="Feature"><strong>Shipping Fees</strong></td>
+              <td data-label="Nootropix" class="pd-table-highlight">{{ s.compare_nx_shipping | default: "FREE" }}</td>
+              <td data-label="Others">{{ s.compare_other_shipping | default: "25–55 AED extra" }}</td>
+            </tr>
+            <tr>
+              <td data-label="Feature"><strong>Money-Back</strong></td>
+              <td data-label="Nootropix" class="pd-table-highlight">{{ s.compare_nx_refund | default: "Quick refunds" }}</td>
+              <td data-label="Others">{{ s.compare_other_refund | default: "30-day through ticket" }}</td>
+            </tr>
+            <tr>
+              <td data-label="Feature"><strong>Lab Testing</strong></td>
+              <td data-label="Nootropix" class="pd-table-highlight">{{ s.compare_nx_testing | default: "COA on every batch" }}</td>
+              <td data-label="Others">{{ s.compare_other_testing | default: "Varies by brand" }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    {%- comment -%} ── TRUST ICONS ── {%- endcomment -%}
+    <section aria-label="Delivery promise">
+      <span class="pd-kicker">Delivery</span>
+      <h2 class="pd-heading">Everything You Need, Nothing You Don't</h2>
+      <div class="pd-trust-grid">
+        <div class="pd-trust-card">
+          {% if s.icon_1_image != blank %}
+            <div class="pd-trust-icon"><img src="{{ s.icon_1_image | image_url: width: 200 }}" alt="{{ s.icon_1_title | default: 'Dubai 4-Hour Delivery' }}" loading="lazy" width="100" height="100"></div>
+          {% else %}
+            <span class="pd-trust-emoji" aria-hidden="true">&#128666;</span>
+          {% endif %}
+          <span class="pd-trust-label">{{ s.icon_1_title | default: "Dubai — 4 Hours" }}</span>
+        </div>
+        <div class="pd-trust-card">
+          {% if s.icon_2_image != blank %}
+            <div class="pd-trust-icon"><img src="{{ s.icon_2_image | image_url: width: 200 }}" alt="{{ s.icon_2_title | default: 'UAE Next Day' }}" loading="lazy" width="100" height="100"></div>
+          {% else %}
+            <span class="pd-trust-emoji" aria-hidden="true">&#128230;</span>
+          {% endif %}
+          <span class="pd-trust-label">{{ s.icon_2_title | default: "UAE — Next Day" }}</span>
+        </div>
+        <div class="pd-trust-card">
+          {% if s.icon_3_image != blank %}
+            <div class="pd-trust-icon"><img src="{{ s.icon_3_image | image_url: width: 200 }}" alt="{{ s.icon_3_title | default: 'International DHL Express' }}" loading="lazy" width="100" height="100"></div>
+          {% else %}
+            <span class="pd-trust-emoji" aria-hidden="true">&#9992;&#65039;</span>
+          {% endif %}
+          <span class="pd-trust-label">{{ s.icon_3_title | default: "International — DHL Express" }}</span>
+        </div>
+      </div>
+    </section>
+
+    {%- comment -%} ── 4-PRODUCT SHOWCASE GRID ── {%- endcomment -%}
+    <section aria-label="Top selling nootropics">
+      <span class="pd-kicker">Best Sellers</span>
+      <h2 class="pd-heading">Top Selling Nootropics</h2>
+      <div class="pd-product-grid">
+
+        <article class="pd-product-card">
+          {% if p1 != blank and p1.featured_image %}
+            <div class="pd-product-img">
+              <img src="{{ p1.featured_image | image_url: width: 600 }}" alt="{{ p1.title }}" loading="lazy" width="600" height="600">
+            </div>
+          {% endif %}
+          <h3 class="pd-product-title">{{ p1.title | default: "Phenibut" }}</h3>
+          <p class="pd-product-desc">{{ s.product_1_desc | default: "GABA-B agonist for calm focus and social confidence." }}</p>
+          <div class="pd-product-footer">
+            {% if p1 != blank %}
+              <div class="pd-product-ctas">
+                <a class="btn btn--ghost" href="{{ p1.url }}">View Product</a>
+                <form method="post" action="{{ routes.cart_add_url }}">
+                  <input type="hidden" name="id" value="{{ p1.selected_or_first_available_variant.id }}">
+                  <button type="submit" class="btn btn--primary">Add to Cart</button>
+                </form>
+              </div>
+              <div class="pd-product-meta">From {{ p1.price | money }}</div>
+            {% endif %}
+          </div>
+        </article>
+
+        <article class="pd-product-card">
+          {% if p2 != blank and p2.featured_image %}
+            <div class="pd-product-img">
+              <img src="{{ p2.featured_image | image_url: width: 600 }}" alt="{{ p2.title }}" loading="lazy" width="600" height="600">
+            </div>
+          {% endif %}
+          <h3 class="pd-product-title">{{ p2.title | default: "Aniracetam" }}</h3>
+          <p class="pd-product-desc">{{ s.product_2_desc | default: "Anxiolytic racetam for creative flow and verbal fluency." }}</p>
+          <div class="pd-product-footer">
+            {% if p2 != blank %}
+              <div class="pd-product-ctas">
+                <a class="btn btn--ghost" href="{{ p2.url }}">View Product</a>
+                <form method="post" action="{{ routes.cart_add_url }}">
+                  <input type="hidden" name="id" value="{{ p2.selected_or_first_available_variant.id }}">
+                  <button type="submit" class="btn btn--primary">Add to Cart</button>
+                </form>
+              </div>
+              <div class="pd-product-meta">From {{ p2.price | money }}</div>
+            {% endif %}
+          </div>
+        </article>
+
+        <article class="pd-product-card">
+          {% if p3 != blank and p3.featured_image %}
+            <div class="pd-product-img">
+              <img src="{{ p3.featured_image | image_url: width: 600 }}" alt="{{ p3.title }}" loading="lazy" width="600" height="600">
+            </div>
+          {% endif %}
+          <h3 class="pd-product-title">{{ p3.title | default: "Noopept" }}</h3>
+          <p class="pd-product-desc">{{ s.product_3_desc | default: "Ultra-potent neuropeptide for memory and learning." }}</p>
+          <div class="pd-product-footer">
+            {% if p3 != blank %}
+              <div class="pd-product-ctas">
+                <a class="btn btn--ghost" href="{{ p3.url }}">View Product</a>
+                <form method="post" action="{{ routes.cart_add_url }}">
+                  <input type="hidden" name="id" value="{{ p3.selected_or_first_available_variant.id }}">
+                  <button type="submit" class="btn btn--primary">Add to Cart</button>
+                </form>
+              </div>
+              <div class="pd-product-meta">From {{ p3.price | money }}</div>
+            {% endif %}
+          </div>
+        </article>
+
+        <article class="pd-product-card">
+          {% if p4 != blank and p4.featured_image %}
+            <div class="pd-product-img">
+              <img src="{{ p4.featured_image | image_url: width: 600 }}" alt="{{ p4.title }}" loading="lazy" width="600" height="600">
+            </div>
+          {% endif %}
+          <h3 class="pd-product-title">{{ p4.title | default: "Caffeine + L-Theanine" }}</h3>
+          <p class="pd-product-desc">{{ s.product_4_desc | default: "Smooth, clean energy — focused alertness without jitters." }}</p>
+          <div class="pd-product-footer">
+            {% if p4 != blank %}
+              <div class="pd-product-ctas">
+                <a class="btn btn--ghost" href="{{ p4.url }}">View Product</a>
+                <form method="post" action="{{ routes.cart_add_url }}">
+                  <input type="hidden" name="id" value="{{ p4.selected_or_first_available_variant.id }}">
+                  <button type="submit" class="btn btn--primary">Add to Cart</button>
+                </form>
+              </div>
+              <div class="pd-product-meta">From {{ p4.price | money }}</div>
+            {% endif %}
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+    {%- comment -%} ── FAQ (animated disclosure) ── {%- endcomment -%}
+    <section aria-label="Frequently asked questions">
+      <span class="pd-kicker">Questions</span>
+      <h2 class="pd-heading">Dubai Nootropics FAQ</h2>
+
+      {% if faq_blocks.size > 0 %}
+        {% for block in faq_blocks %}
+          <details class="pd-faq" {{ block.shopify_attributes }}>
+            <summary class="pd-faq-q">{{ block.settings.q }}<span class="pd-faq-chevron" aria-hidden="true"></span></summary>
+            <div class="pd-faq-answer"><div class="pd-faq-inner"><p>{{ block.settings.a }}</p></div></div>
+          </details>
+        {% endfor %}
+      {% else %}
+        <details class="pd-faq">
+          <summary class="pd-faq-q">How fast is delivery in Dubai?<span class="pd-faq-chevron" aria-hidden="true"></span></summary>
+          <div class="pd-faq-answer"><div class="pd-faq-inner"><p>Orders placed before 5 pm are delivered within 4 hours to Dubai city limits and same or next day to other UAE emirates via Quiqup.</p></div></div>
+        </details>
+        <details class="pd-faq">
+          <summary class="pd-faq-q">Are nootropics legal in the UAE?<span class="pd-faq-chevron" aria-hidden="true"></span></summary>
+          <div class="pd-faq-answer"><div class="pd-faq-inner"><p>Yes. Every product we sell is compliant with UAE supplement regulations. Because we ship locally, your order never passes through customs.</p></div></div>
+        </details>
+      {% endif %}
+    </section>
+
+    {%- comment -%} ── FINAL CTA ── {%- endcomment -%}
+    <section class="pd-final-cta" aria-label="Get started">
+      <h2 class="pd-heading">Ready to upgrade your cognition?</h2>
+      <p class="pd-body-muted">Order now — same-day delivery in Dubai, next-day across the UAE.</p>
+      <a class="btn btn--primary" href="{{ s.cta_link | default: routes.all_products_collection_url }}">{{ s.cta_text | default: "Shop All Nootropics" }}</a>
+    </section>
+
+  </div>
+</section>
+
+{%- style -%}
+/* ═══════════════════════════════════════════════════════
+   PILLAR — BUY NOOTROPICS DUBAI — Premium Design Tokens
+   ═══════════════════════════════════════════════════════ */
+
+#pillar-dubai-{{ sid }} {
+  --section-max-width: {{ s.max_width | default: 1100 }}px;
+  --pd-py: {{ s.padding_y | default: 56 }}px;
+  --pd-accent: var(--color-accent-primary, #FBBF24);
+  --pd-accent-hover: var(--color-accent-hover, #D97706);
+  --pd-accent-dark: var(--color-accent-dark, #92400e);
+  --pd-accent-glass: rgba(251, 191, 36, 0.08);
+  --pd-accent-glass-strong: rgba(251, 191, 36, 0.14);
+  --pd-text: var(--color-text-main, #111827);
+  --pd-muted: var(--color-text-muted, #4b5563);
+  --pd-bg: {{ s.background_color | default: '#ffffff' }};
+  --pd-bg-alt: var(--color-bg-secondary, #f9fafb);
+  --pd-radius: var(--radius-premium, 14px);
+  --pd-transition: var(--transition-premium, all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1));
+  --pd-shadow-rest: var(--shadow-sm, 0 2px 8px rgba(0, 0, 0, 0.04));
+  --pd-shadow-hover: var(--shadow-md, 0 12px 30px rgba(0, 0, 0, 0.06));
+  --pd-gold-glow: var(--shadow-gold-glow, 0 4px 14px rgba(251, 191, 36, 0.25));
+  --pd-gold-glow-hover: var(--shadow-gold-glow-hover, 0 8px 24px rgba(251, 191, 36, 0.35));
+  --pd-font: var(--font-body-family, sans-serif);
+  --pd-font-heading: var(--font-heading-family, sans-serif);
+
+  background: var(--pd-bg);
+  color: var(--pd-text);
+  font-family: var(--pd-font);
+  line-height: 1.6;
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 5000px;
+}
+
+#pillar-dubai-{{ sid }} .pd-inner {
+  max-width: var(--section-max-width);
+  margin: 0 auto;
+  padding: var(--pd-py) var(--page-gutter);
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+@media (min-width: 990px) {
+  #pillar-dubai-{{ sid }} .pd-inner { gap: 56px; }
+}
+
+/* ── Shared typography ── */
+#pillar-dubai-{{ sid }} .pd-kicker {
+  display: block;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 700;
+  font-size: 12px;
+  color: var(--pd-accent-dark);
+  margin-bottom: 6px;
+}
+#pillar-dubai-{{ sid }} .pd-heading {
+  font-family: var(--pd-font-heading);
+  font-size: clamp(22px, 3vw, 34px);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--pd-text);
+  margin: 0 0 10px;
+}
+#pillar-dubai-{{ sid }} .pd-body-muted {
+  color: var(--pd-muted);
+  line-height: 1.6;
+  margin: 0 0 16px;
+}
+
+/* ═══════════════════════════════════════════════════════
+   HERO
+   ═══════════════════════════════════════════════════════ */
+#pillar-dubai-{{ sid }} .pd-hero {
+  background: linear-gradient(135deg, rgba(251,191,36,0.08) 0%, rgba(251,191,36,0.18) 50%, rgba(251,191,36,0.08) 100%);
+  background-size: cover;
+  background-position: center;
+  border-radius: 20px;
+  overflow: hidden;
+  min-height: 320px;
+  display: flex;
+  align-items: flex-end;
+}
+#pillar-dubai-{{ sid }} .pd-hero-overlay {
+  width: 100%;
+  padding: 36px 24px;
+  background: rgba(0, 0, 0, 0.25);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+}
+@media (min-width: 990px) {
+  #pillar-dubai-{{ sid }} .pd-hero { min-height: 400px; }
+  #pillar-dubai-{{ sid }} .pd-hero-overlay { padding: 48px 36px; }
+}
+#pillar-dubai-{{ sid }} .pd-hero-title {
+  font-family: var(--pd-font-heading);
+  font-size: clamp(28px, 5vw, 50px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  color: #fff;
+  margin: 0 0 10px;
+}
+#pillar-dubai-{{ sid }} .pd-hero-sub {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: clamp(15px, 2vw, 18px);
+  line-height: 1.6;
+  margin: 0 0 20px;
+  max-width: 640px;
+}
+#pillar-dubai-{{ sid }} .pd-hero-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+/* ═══════════════════════════════════════════════════════
+   INTRO
+   ═══════════════════════════════════════════════════════ */
+#pillar-dubai-{{ sid }} .pd-intro-text {
+  font-size: clamp(16px, 2vw, 18px);
+  line-height: 1.7;
+  color: var(--pd-muted);
+  max-width: 800px;
+}
+#pillar-dubai-{{ sid }} .pd-intro-text p { margin: 0 0 12px; }
+#pillar-dubai-{{ sid }} .pd-intro-text p:last-child { margin-bottom: 0; }
+
+/* ═══════════════════════════════════════════════════════
+   COMPETITIVE COMPARISON TABLE
+   ═══════════════════════════════════════════════════════ */
+#pillar-dubai-{{ sid }} .pd-table-wrap {
+  border-radius: var(--pd-radius);
+  overflow: hidden;
+  box-shadow: var(--pd-shadow-rest);
+  margin-top: 12px;
+}
+#pillar-dubai-{{ sid }} .pd-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+#pillar-dubai-{{ sid }} .pd-table thead {
+  background: var(--pd-bg-alt);
+}
+#pillar-dubai-{{ sid }} .pd-table th {
+  text-align: left;
+  padding: 12px 16px;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--pd-text);
+  line-height: 1.4;
+}
+#pillar-dubai-{{ sid }} .pd-table td {
+  padding: 14px 16px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--pd-text);
+  border-top: 1px solid rgba(0, 0, 0, 0.04);
+}
+#pillar-dubai-{{ sid }} .pd-table tbody tr {
+  transition: var(--pd-transition);
+}
+#pillar-dubai-{{ sid }} .pd-table tbody tr:hover {
+  background: var(--pd-accent-glass);
+}
+#pillar-dubai-{{ sid }} .pd-table-highlight {
+  background: var(--pd-accent-glass);
+  font-weight: 600;
+}
+@media (max-width: 640px) {
+  #pillar-dubai-{{ sid }} .pd-table thead { display: none; }
+  #pillar-dubai-{{ sid }} .pd-table tbody tr {
+    display: block;
+    padding: 14px;
+    border-top: 1px solid rgba(0, 0, 0, 0.04);
+  }
+  #pillar-dubai-{{ sid }} .pd-table tbody tr:first-child { border-top: none; }
+  #pillar-dubai-{{ sid }} .pd-table td {
+    display: block;
+    padding: 3px 0;
+    border-top: none;
+  }
+  #pillar-dubai-{{ sid }} .pd-table td::before {
+    content: attr(data-label) ": ";
+    font-weight: 700;
+    color: var(--pd-text);
+  }
+  #pillar-dubai-{{ sid }} .pd-table-highlight {
+    background: transparent;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   TRUST ICONS — Glass grid
+   ═══════════════════════════════════════════════════════ */
+#pillar-dubai-{{ sid }} .pd-trust-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  margin-top: 14px;
+}
+@media (min-width: 760px) {
+  #pillar-dubai-{{ sid }} .pd-trust-grid { grid-template-columns: repeat(3, 1fr); }
+}
+#pillar-dubai-{{ sid }} .pd-trust-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 24px 16px;
+  border: none;
+  border-radius: var(--pd-radius);
+  background: var(--pd-accent-glass);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  box-shadow: var(--pd-shadow-rest);
+  transition: var(--pd-transition);
+  text-align: center;
+}
+#pillar-dubai-{{ sid }} .pd-trust-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--pd-shadow-hover);
+}
+#pillar-dubai-{{ sid }} .pd-trust-icon {
+  width: 80px;
+  height: 80px;
+  flex-shrink: 0;
+}
+#pillar-dubai-{{ sid }} .pd-trust-icon img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+#pillar-dubai-{{ sid }} .pd-trust-emoji {
+  font-size: 36px;
+  line-height: 1;
+}
+#pillar-dubai-{{ sid }} .pd-trust-label {
+  display: inline-block;
+  padding: 5px 12px;
+  border-radius: 8px;
+  background: var(--pd-accent);
+  color: var(--color-text-primary);
+  font-weight: 600;
+  font-size: 13px;
+}
+
+/* ═══════════════════════════════════════════════════════
+   4-PRODUCT GRID — Sibling fade, image scale
+   ═══════════════════════════════════════════════════════ */
+#pillar-dubai-{{ sid }} .pd-product-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  margin-top: 16px;
+}
+@media (min-width: 900px) {
+  #pillar-dubai-{{ sid }} .pd-product-grid { grid-template-columns: repeat(4, 1fr); }
+}
+#pillar-dubai-{{ sid }} .pd-product-card {
+  background: var(--pd-bg);
+  border: none;
+  border-radius: var(--pd-radius);
+  padding: 18px;
+  box-shadow: var(--pd-shadow-rest);
+  display: flex;
+  flex-direction: column;
+  transition: var(--pd-transition);
+}
+#pillar-dubai-{{ sid }} .pd-product-grid:hover .pd-product-card {
+  opacity: 0.6;
+}
+#pillar-dubai-{{ sid }} .pd-product-grid .pd-product-card:hover {
+  opacity: 1;
+  transform: translateY(-4px);
+  box-shadow: var(--pd-shadow-hover);
+}
+#pillar-dubai-{{ sid }} .pd-product-img {
+  border-radius: var(--pd-radius);
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+#pillar-dubai-{{ sid }} .pd-product-img img {
+  display: block;
+  width: 100%;
+  height: auto;
+  transition: var(--pd-transition);
+}
+#pillar-dubai-{{ sid }} .pd-product-card:hover .pd-product-img img {
+  transform: scale(1.03);
+}
+#pillar-dubai-{{ sid }} .pd-product-title {
+  font-family: var(--pd-font-heading);
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.3;
+  margin: 0 0 6px;
+  color: var(--pd-text);
+}
+#pillar-dubai-{{ sid }} .pd-product-desc {
+  font-size: 13px;
+  color: var(--pd-muted);
+  line-height: 1.6;
+  margin: 0 0 12px;
+}
+#pillar-dubai-{{ sid }} .pd-product-footer {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+#pillar-dubai-{{ sid }} .pd-product-ctas {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+#pillar-dubai-{{ sid }} .pd-product-meta {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--pd-text);
+}
+
+/* ═══════════════════════════════════════════════════════
+   FAQ — Animated disclosure, chevron rotation
+   ═══════════════════════════════════════════════════════ */
+#pillar-dubai-{{ sid }} .pd-faq {
+  border: none;
+  border-radius: 10px;
+  margin: 8px 0;
+  box-shadow: var(--pd-shadow-rest);
+  overflow: hidden;
+  background: var(--pd-bg);
+  transition: var(--pd-transition);
+}
+#pillar-dubai-{{ sid }} .pd-faq:hover {
+  box-shadow: var(--pd-shadow-hover);
+}
+#pillar-dubai-{{ sid }} .pd-faq-q {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 18px;
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--pd-text);
+  cursor: pointer;
+  list-style: none;
+  min-height: var(--touch-min, 44px);
+}
+#pillar-dubai-{{ sid }} .pd-faq-q::-webkit-details-marker { display: none; }
+#pillar-dubai-{{ sid }} .pd-faq-q::marker { content: ""; }
+
+#pillar-dubai-{{ sid }} .pd-faq-chevron {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  position: relative;
+  transition: transform 0.35s var(--ease-premium);
+}
+#pillar-dubai-{{ sid }} .pd-faq-chevron::before,
+#pillar-dubai-{{ sid }} .pd-faq-chevron::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 10px;
+  height: 2px;
+  background: var(--pd-muted);
+  border-radius: 1px;
+  transition: transform 0.35s var(--ease-premium);
+}
+#pillar-dubai-{{ sid }} .pd-faq-chevron::before {
+  left: 1px;
+  transform: translateY(-50%) rotate(45deg);
+}
+#pillar-dubai-{{ sid }} .pd-faq-chevron::after {
+  right: 1px;
+  transform: translateY(-50%) rotate(-45deg);
+}
+#pillar-dubai-{{ sid }} .pd-faq[open] .pd-faq-chevron::before {
+  transform: translateY(-50%) rotate(-45deg);
+}
+#pillar-dubai-{{ sid }} .pd-faq[open] .pd-faq-chevron::after {
+  transform: translateY(-50%) rotate(45deg);
+}
+#pillar-dubai-{{ sid }} .pd-faq-answer {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.35s var(--ease-premium);
+}
+#pillar-dubai-{{ sid }} .pd-faq[open] .pd-faq-answer {
+  grid-template-rows: 1fr;
+}
+#pillar-dubai-{{ sid }} .pd-faq-inner {
+  overflow: hidden;
+}
+#pillar-dubai-{{ sid }} .pd-faq-inner p {
+  padding: 0 18px 16px;
+  margin: 0;
+  color: var(--pd-muted);
+  line-height: 1.6;
+  font-size: 14px;
+}
+
+/* ═══════════════════════════════════════════════════════
+   FINAL CTA
+   ═══════════════════════════════════════════════════════ */
+#pillar-dubai-{{ sid }} .pd-final-cta {
+  background: var(--pd-bg-alt);
+  border-radius: var(--pd-radius);
+  padding: 28px 24px;
+  box-shadow: var(--pd-shadow-rest);
+  text-align: center;
+}
+
+/* ═══════════════════════════════════════════════════════
+   ACCESSIBILITY — focus-visible + reduced motion
+   ═══════════════════════════════════════════════════════ */
+#pillar-dubai-{{ sid }} :focus-visible {
+  outline: 2px solid var(--pd-accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #pillar-dubai-{{ sid }} *,
+  #pillar-dubai-{{ sid }} *::before,
+  #pillar-dubai-{{ sid }} *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+{%- endstyle -%}
+
+{% schema %}
+{
+  "name": "Pillar — Nootropics Dubai",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Hero"
+    },
+    { "type": "text", "id": "hero_title", "label": "Hero title", "default": "Buy Nootropics in Dubai, UAE — Same-Day Delivery" },
+    { "type": "textarea", "id": "hero_subtitle", "label": "Hero subtitle", "default": "Premium, lab-tested nootropics delivered to your Dubai door in as little as 4 hours. Rest of UAE: 24 hours. International express dispatch same day." },
+    { "type": "image_picker", "id": "hero_image", "label": "Hero background image (optional)" },
+    { "type": "text", "id": "hero_cta_text", "label": "Hero CTA text", "default": "Browse All" },
+    { "type": "url", "id": "hero_cta_link", "label": "Hero CTA link" },
+    {
+      "type": "header",
+      "content": "Intro"
+    },
+    { "type": "richtext", "id": "intro_text", "label": "Intro paragraph", "default": "<p>Tired of waiting weeks for nootropics supplements to clear customs? <strong>Nootropix</strong> delivers premium, lab-tested nootropics to your Dubai door in as little as <strong>4 hours</strong>. Rest of UAE: 24 hours. International express dispatch same day.</p>" },
+    {
+      "type": "header",
+      "content": "Comparison Table"
+    },
+    { "type": "text", "id": "compare_nx_delivery", "label": "Nootropix — Delivery", "default": "4 h within Dubai" },
+    { "type": "text", "id": "compare_other_delivery", "label": "Others — Delivery", "default": "5–10 days Intl. post" },
+    { "type": "text", "id": "compare_nx_customs", "label": "Nootropix — Customs", "default": "0 % — local fulfillment" },
+    { "type": "text", "id": "compare_other_customs", "label": "Others — Customs", "default": "20 % parcels held" },
+    { "type": "text", "id": "compare_nx_shipping", "label": "Nootropix — Shipping Fees", "default": "FREE" },
+    { "type": "text", "id": "compare_other_shipping", "label": "Others — Shipping Fees", "default": "25–55 AED extra" },
+    { "type": "text", "id": "compare_nx_refund", "label": "Nootropix — Money-Back", "default": "Quick refunds" },
+    { "type": "text", "id": "compare_other_refund", "label": "Others — Money-Back", "default": "30-day through ticket" },
+    { "type": "text", "id": "compare_nx_testing", "label": "Nootropix — Lab Testing", "default": "COA on every batch" },
+    { "type": "text", "id": "compare_other_testing", "label": "Others — Lab Testing", "default": "Varies by brand" },
+    {
+      "type": "header",
+      "content": "Trust Icons"
+    },
+    { "type": "image_picker", "id": "icon_1_image", "label": "Icon 1 image" },
+    { "type": "text", "id": "icon_1_title", "label": "Icon 1 title", "default": "Dubai — 4 Hours" },
+    { "type": "image_picker", "id": "icon_2_image", "label": "Icon 2 image" },
+    { "type": "text", "id": "icon_2_title", "label": "Icon 2 title", "default": "UAE — Next Day" },
+    { "type": "image_picker", "id": "icon_3_image", "label": "Icon 3 image" },
+    { "type": "text", "id": "icon_3_title", "label": "Icon 3 title", "default": "International — DHL Express" },
+    {
+      "type": "header",
+      "content": "Products"
+    },
+    { "type": "product", "id": "product_1", "label": "Product 1 (picker)" },
+    { "type": "text", "id": "product_1_handle", "label": "Product 1 backup handle", "default": "phenibut" },
+    { "type": "text", "id": "product_1_desc", "label": "Product 1 description", "default": "GABA-B agonist for calm focus and social confidence." },
+    { "type": "product", "id": "product_2", "label": "Product 2 (picker)" },
+    { "type": "text", "id": "product_2_handle", "label": "Product 2 backup handle", "default": "aniracetam" },
+    { "type": "text", "id": "product_2_desc", "label": "Product 2 description", "default": "Anxiolytic racetam for creative flow and verbal fluency." },
+    { "type": "product", "id": "product_3", "label": "Product 3 (picker)" },
+    { "type": "text", "id": "product_3_handle", "label": "Product 3 backup handle", "default": "noopept" },
+    { "type": "text", "id": "product_3_desc", "label": "Product 3 description", "default": "Ultra-potent neuropeptide for memory and learning." },
+    { "type": "product", "id": "product_4", "label": "Product 4 (picker)" },
+    { "type": "text", "id": "product_4_handle", "label": "Product 4 backup handle", "default": "caffeine-l-theanine" },
+    { "type": "text", "id": "product_4_desc", "label": "Product 4 description", "default": "Smooth, clean energy — focused alertness without jitters." },
+    {
+      "type": "header",
+      "content": "Final CTA"
+    },
+    { "type": "text", "id": "cta_text", "label": "CTA button text", "default": "Shop All Nootropics" },
+    { "type": "url", "id": "cta_link", "label": "CTA button link" },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "max_width",
+      "label": "Max width (px)",
+      "min": 800,
+      "max": 1400,
+      "step": 20,
+      "default": 1100
+    },
+    {
+      "type": "range",
+      "id": "padding_y",
+      "label": "Vertical padding (px)",
+      "min": 32,
+      "max": 120,
+      "step": 4,
+      "default": 56
+    },
+    {
+      "type": "header",
+      "content": "SEO"
+    },
+    {
+      "type": "text",
+      "id": "date_published",
+      "label": "Date published (YYYY-MM-DD)",
+      "default": "2025-01-15",
+      "info": "Used in Article JSON-LD structured data."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "faq",
+      "name": "FAQ",
+      "settings": [
+        { "type": "text", "id": "q", "label": "Question", "default": "How fast is delivery in Dubai?" },
+        { "type": "textarea", "id": "a", "label": "Answer", "default": "Orders placed before 5 pm are delivered within 4 hours to Dubai city limits." }
+      ]
+    }
+  ],
+  "max_blocks": 12,
+  "presets": [
+    { "name": "Pillar — Nootropics Dubai", "category": "Nootropix" }
+  ]
+}
+{% endschema %}

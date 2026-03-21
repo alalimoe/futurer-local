@@ -1,0 +1,44 @@
+{% comment %}
+  Accepts:
+  - sub_heading: {String} Subheading (required)
+  - block: {Object} Blocks (required)
+  Usage:
+  {% render 'img-with-text-3', sub_heading: sub_heading, image_dt: image_dt, aspect_ratio_dt: aspect_ratio_dt, image_mb: image_mb , aspect_ratio_mb: aspect_ratio_mb , block: block %}
+{% endcomment %}
+
+<div class='img-with-text-3'>
+  {% if sub_heading %}
+    <xo-animate xo-cascade>
+      <div class='img-with-text-3__sub-heading'>
+        {{ sub_heading }}
+      </div>
+    </xo-animate>
+  {% endif %}
+  <xo-animate xo-cascade>
+    <div class='img-with-text-3__head'>
+      <div class='img-with-text-3__content' style='--lg: 12; --md: 12; --xs: 12'>
+        {% for item in block %}
+          {% liquid
+            assign class = item.settings.font_size_heading
+            assign heading = item.settings.heading
+            assign link = item.settings.link
+          %}
+          <a href='{{ link }}' class='img-with-text-3__heading {{ class }}' data-text='{{ heading }}'>
+            <span class='img-with-text-3__bullet'></span>
+            <p>
+              <span class='img-with-text-3__text'>{{ heading }}</span>
+            </p>
+          </a>
+        {% endfor %}
+      </div>
+    </div>
+  </xo-animate>
+  <div class='img-with-text-3__bottom'>
+    <div class='img-with-text-3__image img-with-text-3__image--desktop{% if settings.enable_border_radius %} img-with-text-3__image--radius{% endif %}'>
+      {% render 'image', image: image_dt, aspect_ratio: aspect_ratio_dt %}
+    </div>
+    <div class='img-with-text-3__image img-with-text-3__image--mobile{% if settings.enable_border_radius %} img-with-text-3__image--radius{% endif %}'>
+      {% render 'image', image: image_mb, aspect_ratio: aspect_ratio_mb %}
+    </div>
+  </div>
+</div>

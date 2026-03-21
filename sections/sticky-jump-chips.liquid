@@ -1,0 +1,177 @@
+{% comment %}
+SECTION: Sticky Jump Chips
+Place this directly under the hero.
+Targets these IDs if present (graceful when absent):
+- #peptide-research   (Overview tab block)
+- #pep-coa-band       (COA band)
+- #pep-refs           (References)
+- #pep-storage        (Storage)
+- #peptide-compare    (Compare table)
+Options:
+- Custom labels
+- Sticky top offset (e.g., header height)
+- Max width / accent color
+{% endcomment %}
+
+<section id="sticky-jump-chips" class="sjc-wrap" data-sjc>
+  <style>
+    #sticky-jump-chips{
+      --sjc-maxw: {{ section.settings.max_width | default: 1200 }}px;
+      --sjc-top: {{ section.settings.sticky_top | default: 64 }}px;
+      --sjc-accent: {{ section.settings.accent_color | default: '#FBBF24' }};
+      --sjc-border:#E7E9ED;
+      --sjc-bg:#FFFFFF;
+      --sjc-muted:#6B7280;
+      --sjc-text:#111111;
+      --sjc-radius: 14px;
+      --sjc-shadow: 0 1px 6px rgba(16,24,40,.06);
+    }
+    .sjc-wrap{
+      padding:8px var(--page-gutter);
+      position: sticky; top: var(--sjc-top); z-index: 20;
+      background: rgba(255,255,255,0.75);
+      -webkit-backdrop-filter: blur(16px) saturate(180%);
+      backdrop-filter: blur(16px) saturate(180%);
+    }
+    .sjc-inner{
+      max-width: var(--sjc-maxw); margin: 0 auto;
+      border:none; border-radius: var(--sjc-radius);
+      background: rgba(255,255,255,0.72);
+      -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+      box-shadow: var(--shadow-sm);
+      padding:8px; overflow:auto; -webkit-overflow-scrolling: touch;
+    }
+
+    .sjc-row{ display:flex; gap:8px; align-items:center; flex-wrap:nowrap; }
+    .sjc-chip{
+      flex:0 0 auto;
+      border:none; border-radius:var(--nx-radius-pill);
+      background:rgba(255,255,255,0.7); color:var(--sjc-text);
+      padding:8px 14px; min-height:44px; box-sizing:border-box;
+      font-family:var(--font-body-family,sans-serif);
+      font-weight:700; font-size:clamp(0.8rem,1.2vw,0.875rem); line-height:1.1;
+      text-decoration:none; cursor:pointer; user-select:none;
+      display:inline-flex; align-items:center;
+      box-shadow:var(--shadow-xs);
+      transition: var(--transition-premium);
+    }
+    .sjc-chip:focus-visible{outline:2px solid var(--sjc-accent);outline-offset:2px}
+    .sjc-chip:hover{ background:rgba(251,191,36,0.12); transform:translateY(-2px); box-shadow:var(--shadow-sm-hover); }
+    .sjc-chip.is-active{
+      background:rgba(251,191,36,0.08);
+      box-shadow:0 0 0 2px var(--sjc-accent), var(--shadow-gold-sm);
+    }
+
+    /* tiny icon dot */
+    .sjc-chip .dot{width:6px;height:6px;border-radius:50%;background:var(--sjc-accent);display:inline-block;margin-right:8px}
+
+    .sjc-wrap.is-stuck .sjc-inner{ box-shadow: var(--shadow-md-hover); }
+
+    /* reduce motion respect */
+    @media (prefers-reduced-motion: reduce){
+      html:root { scroll-behavior: auto; }
+      .sjc-chip{transition:none}
+      .sjc-chip:hover{transform:none}
+    }
+
+    /* small screens */
+    @media (max-width: 540px){
+      .sjc-chip{ padding:7px 10px; font-weight:600; min-height:40px; }
+    }
+  </style>
+
+  <div class="sjc-inner">
+    <nav class="sjc-row" role="navigation" aria-label="On-page">
+      <button class="sjc-chip" data-target="#peptide-research"><span class="dot" aria-hidden="true"></span>{{ section.settings.label_overview | default: 'Overview' }}</button>
+      <button class="sjc-chip" data-target="#pep-coa-band"><span class="dot" aria-hidden="true"></span>{{ section.settings.label_coa | default: 'COA' }}</button>
+      <button class="sjc-chip" data-target="#pep-refs"><span class="dot" aria-hidden="true"></span>{{ section.settings.label_refs | default: 'References' }}</button>
+      <button class="sjc-chip" data-target="#pep-storage"><span class="dot" aria-hidden="true"></span>{{ section.settings.label_storage | default: 'Storage' }}</button>
+      <button class="sjc-chip" data-target="#peptide-compare"><span class="dot" aria-hidden="true"></span>{{ section.settings.label_compare | default: 'Compare' }}</button>
+    </nav>
+  </div>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  var wrap = document.querySelector('#sticky-jump-chips'); if(!wrap) return;
+  var chips = wrap.querySelectorAll('.sjc-chip');
+
+  // Smooth scroll with configurable offset
+  function scrollToTarget(sel){
+    var el = document.querySelector(sel);
+    if(!el) return;
+    var topOffset = parseInt(getComputedStyle(document.querySelector('#sticky-jump-chips')).getPropertyValue('--sjc-top')) || 64;
+    var y = el.getBoundingClientRect().top + window.pageYOffset - (topOffset + 12); // extra spacing
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      window.scrollTo(0, y);
+    } else {
+      window.scrollTo({ top: y, behavior: 'smooth' });
+    }
+  }
+
+  chips.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var sel = btn.getAttribute('data-target'); scrollToTarget(sel);
+    });
+    // keyboard accessibility
+    btn.addEventListener('keydown', function(e){
+      if(e.key === 'Enter' || e.key === ' ') { e.preventDefault(); btn.click(); }
+      if(e.key === 'ArrowRight' || e.key === 'ArrowLeft'){
+        var all = Array.from(chips);
+        var i = all.indexOf(btn);
+        var next = e.key === 'ArrowRight' ? (i+1)%all.length : (i-1+all.length)%all.length;
+        all[next].focus();
+      }
+    });
+  });
+
+  // Stickiness shadow toggle
+  var startY = wrap.offsetTop;
+  function onScroll(){
+    if(window.scrollY > startY - 4) wrap.classList.add('is-stuck'); else wrap.classList.remove('is-stuck');
+  }
+  window.addEventListener('scroll', onScroll, { passive:true }); onScroll();
+
+  // Scrollspy — highlight active chip
+  var targets = [
+    ['#peptide-research', chips[0]],
+    ['#pep-coa-band',    chips[1]],
+    ['#pep-refs',        chips[2]],
+    ['#pep-storage',     chips[3]],
+    ['#peptide-compare', chips[4]]
+  ].filter(function(t){
+    return document.querySelector(t[0]);
+  });
+
+  try{
+    var io = new IntersectionObserver(function(entries){
+      // pick the topmost visible section
+      var vis = entries.filter(e=>e.isIntersecting).sort((a,b)=>a.boundingClientRect.top - b.boundingClientRect.top);
+      if(vis.length){
+        var id = '#'+(vis[0].target.id || '');
+        targets.forEach(function(t){ t[1].classList.toggle('is-active', t[0]===id); });
+      }
+    }, { rootMargin: '-{{ section.settings.sticky_top | default: 64 }}px 0px 0px 0px', threshold: 0.25 });
+
+    targets.forEach(function(t){ var el = document.querySelector(t[0]); if(el) io.observe(el); });
+  }catch(e){}
+});
+</script>
+
+{% schema %}
+{
+  "name": "Sticky jump chips",
+  "settings": [
+    { "type":"range", "id":"max_width", "min":800, "max":1600, "step":10, "unit":"px", "label":"Container max width", "default":1200 },
+    { "type":"range", "id":"sticky_top", "min":0, "max":160, "step":2, "unit":"px", "label":"Sticky top offset (header height)", "default":64 },
+    { "type":"color", "id":"accent_color", "label":"Accent color", "default":"#FBBF24" },
+
+    { "type":"text", "id":"label_overview", "label":"Overview label", "default":"Overview" },
+    { "type":"text", "id":"label_coa", "label":"COA label", "default":"COA" },
+    { "type":"text", "id":"label_refs", "label":"References label", "default":"References" },
+    { "type":"text", "id":"label_storage", "label":"Storage label", "default":"Storage" },
+    { "type":"text", "id":"label_compare", "label":"Compare label", "default":"Compare" }
+  ],
+  "presets": [{ "name": "Sticky jump chips" }]
+}
+{% endschema %}

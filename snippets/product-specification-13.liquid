@@ -1,0 +1,106 @@
+{% comment %}
+  Renders a product special element with a given value
+
+  Accepts:
+  - image_dt: {String} Desktop image (required)
+  - image_mb: {String} Mobile image (required)
+  - block: {Object} Block (required)
+
+  Usage:
+  {% render 'product-specification-13', image_dt: image_dt, image_mb: image_mb, block: block %}
+{% endcomment %}
+
+<div class="product-specification-13">
+  <xo-grid class="product-specification-13__grid">
+    <div style="--xl: 5; --lg: 4; --md: 12; --xs: 12">
+      <div class="product-specification-13__image{% if settings.enable_border_radius %} product-specification-13__image--radius{% endif %}">
+        <div class="product-specification-13__image-desktop">
+          {% render 'animate-image', image: image_desktop, border_radius: 0, aspect_ratio: '674/534' %}
+        </div>
+        <div class="product-specification-13__image-mobile">
+          {% render 'animate-image', image: image_mobile, border_radius: 0, aspect_ratio: '330/273' %}
+        </div>
+      </div>
+    </div>
+    <xo-animate xo-cascade style="--xl: 7; --lg: 8; --md: 12; --xs: 12">
+      <div class="product-specification-13__chart">
+        {% for item in block %}
+          {% case item.type %}
+            {% when 'chart' %}
+              {% liquid
+                assign title = item.settings.title
+                assign value_max = item.settings.value_max
+
+                assign dataset_input = item.settings.dataset
+                assign dataset_arr = dataset_input | newline_to_br | split: '<br />'
+
+                assign x_label_input = item.settings.x_label
+                assign x_label_items = x_label_input | split: ' '
+                assign x_label_arr = x_label_items | join: "', '"
+                assign x_label_output = "['" | append: x_label_arr | append: "']"
+
+                assign y_label_input = item.settings.y_label
+                assign y_label_items = y_label_input | split: ' '
+                assign y_label_arr = y_label_items | join: "', '"
+                assign y_label_output = "['" | append: y_label_arr | append: "']"
+
+                assign list_information = item.settings.list_information
+              %}
+              {% render 'chart-1',
+                title: title,
+                value_max: value_max,
+                dataset_arr: dataset_arr,
+                x_label_output: x_label_output,
+                y_label_output: y_label_output,
+                list_information: list_information,
+                margin: 30
+              %}
+          {% endcase %}
+        {% endfor %}
+      </div>
+    </xo-animate>
+    <div style="--lg: 12; --md: 12; --xs: 12">
+      <div class="product-specification-13__collection">
+        {% for item in block %}
+          {% case item.type %}
+            {% when 'collection' %}
+              {% liquid
+                assign collection = item.settings.collection
+                assign image_desktop = item.settings.image_dt
+                assign aspect_ratio_dt = item.settings.aspect_ratio_dt
+                if aspect_ratio_dt == 'custom'
+                  assign aspect_ratio_dt = item.settings.aspect_ratio_dt_width | append: '/' | append: item.settings.aspect_ratio_dt_height
+                endif
+                assign image_mobile = item.settings.image_mb
+                assign aspect_ratio_mb = item.settings.aspect_ratio_mb
+                if aspect_ratio_mb == 'custom'
+                  assign aspect_ratio_mb = item.settings.aspect_ratio_mb_width | append: '/' | append: item.settings.aspect_ratio_mb_height
+                endif
+                assign button_text = item.settings.button_text
+                assign button_link = item.settings.button_link
+                assign button_style = item.settings.button_style
+                assign button_size = item.settings.button_size
+              %}
+              <div class="product-specification-13__item" style="--aspect-ratio-desktop: {{ aspect_ratio_dt }}; --aspect-ratio-mobile: {{ aspect_ratio_mb }}">
+                {% render 'collection-image-1',
+                  collection: collection,
+                  image_desktop: image_desktop,
+                  media_aspect_ratio_desktop: aspect_ratio_dt,
+                  image_mobile: image_mobile,
+                  media_aspect_ratio_mobile: aspect_ratio_mb,
+                  show_heading: false,
+                  color_schema_collection: color_schema_collection,
+                  show_button: true,
+                  button_text: button_text,
+                  button_link: button_link,
+                  button_style: button_style,
+                  button_size: button_size,
+                  animate_enabled: false
+                %}
+              </div>
+          {% endcase %}
+        {% endfor %}
+      </div>
+    </div>
+  </xo-grid>
+</div>

@@ -1,0 +1,1 @@
+var o=0;const e=document.querySelector(".side-actions");window.addEventListener("scroll",function(){var s=window.pageYOffset||document.documentElement.scrollTop;s>o?e==null||e.classList.add("side-actions--hidden"):e==null||e.classList.remove("side-actions--hidden"),o=s},!1);

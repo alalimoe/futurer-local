@@ -1,0 +1,135 @@
+{% comment %}
+  Renders an article card for a given blog with settings to either show the image or not.
+
+  Accepts:
+  - item: {Object} The cart item to render
+  - for_notification: {Boolean} Whether the item is being rendered for a notification or not. Default: false (optional)
+  - animate_enabled: {Boolean} Whether to animate the item or not. Default: false (optional)
+
+  Usage:
+  {% render 'cart-mini-item', item: item %}
+{% endcomment %}
+
+{% capture content %}
+  {% if item.image != blank %}
+    <a href="{{ item.url }}" class="xo-cart-mini-item__image{% if settings.enable_border_radius %} xo-cart-mini-item__image--radius{% endif %}" tabindex="-1" aria-hidden="true">
+      {% render 'image', image: item.image, width: '140', lazyload: false, disable_alt: true %}
+    </a>
+  {% endif %}
+  <div class="xo-cart-mini-item__content">
+    <div class="xo-cart-mini-item__header">
+      <!-- vendor -->
+      {%- if settings.show_vendor -%}
+        <span class="xo-cart-mini-item__vendor">{{ item.product.vendor }}</span>
+      {%- endif -%}
+      <!-- image -->
+      <a href="{{ item.url }}" class="xo-cart-mini-item__title">
+        {{ item.product.title | escape }}
+      </a>
+      <!-- price -->
+      <div class="xo-cart-mini-item__price">
+        {%- if item.original_price != item.final_price -%}
+          <div class="xo-cart-mini-item__discounted-prices">
+            <span class="xo-visually-hidden">
+              {{ 'products.product.price.regular_price' | t }}
+            </span>
+            <s class="xo-cart-mini-item__old-price">
+              {{- item.original_price | money -}}
+            </s>
+            <span class="xo-visually-hidden">
+              {{ 'products.product.price.sale_price' | t }}
+            </span>
+            <strong class="xo-cart-mini-item__final-price">
+              {{ item.final_price | money }}
+            </strong>
+          </div>
+        {%- else -%}
+          <div class="xo-cart-mini-item__final-price">
+            {{ item.original_price | money }}
+          </div>
+        {%- endif -%}
+      </div>
+      {% render 'cart-unit-price', item: item %}
+      <!-- variants, properties, selling plan -->
+      {%- if item.product.has_only_default_variant == false or item.properties.size != 0 or item.selling_plan_allocation != null -%}
+        <div class="xo-cart-mini-item__options{% if item.product.has_only_default_variant == false %} xo-cart-mini-item__options--pd{% endif %}">
+          <!-- variants -->
+          {%- if item.product.has_only_default_variant == false -%}
+            {%- for option in item.options_with_values -%}
+              <div class="xo-cart-mini-item__option">
+                <span>{{ option.name }}: </span>
+                <span>{{ option.value -}}</span>
+              </div>
+            {%- endfor -%}
+          {%- endif -%}
+          <!-- properties -->
+          {% if item.properties.size != 0 %}
+            {%- for property in item.properties -%}
+              {%- assign property_first_char = property.first | slice: 0 -%}
+              {%- if property.last != blank and property_first_char != '_' -%}
+                <div class="xo-cart-mini-item__option">
+                  <span>{{ property.first }}: </span>
+                  <span>
+                    {%- if property.last contains '/uploads/' -%}
+                      {% assign text = property.last | split: '/' | last %}
+                      {% capture attrs %}target='_blank' aria-describedby='a11y-new-window-message'{% endcapture %}
+                      {% render 'button', text: text, link: property.last, style: 'link', attrs: attrs %}
+                    {%- else -%}
+                      {{ property.last }}
+                    {%- endif -%}
+                  </span>
+                </div>
+              {%- endif -%}
+            {%- endfor -%}
+          {% endif %}
+        </div>
+        <!-- selling plan -->
+        {% if item.selling_plan_allocation.selling_plan.name != blank %}
+          <p class="xo-cart-mini-item__selling-plan">{{ item.selling_plan_allocation.selling_plan.name }}</p>
+        {% endif %}
+      {%- endif -%}
+      <!-- discount -->
+      <ul class="xo-cart-mini-item__discounts list-unstyled" role="list">
+        {%- for discount in item.line_level_discount_allocations -%}
+          <li class="xo-cart-mini-item__discount">
+            {% render 'badge-discount', label: discount.discount_application.title %}
+          </li>
+        {%- endfor -%}
+      </ul>
+    </div>
+    {%- unless for_notification -%}
+      <div class="xo-cart-mini-item__quantity">
+        {% render 'quantity', size: 'md', value: item.quantity, variant: item.variant, product: item.product, is_cart: true %}
+      </div>
+      <div class="xo-cart-mini-item__remove">
+        <xo-cart-change-fallback class="xo-cart-mini-item__loading">
+          {% render 'loader-2' %}
+        </xo-cart-change-fallback>
+        <xo-cart-remove class="xo-cart-mini-item__remove-action" tabindex="0" role="button" aria-label="Remove button">
+          <div class="xo-cart-mini-item__remove-icon">
+            {% render 'action-remove', icon_size: '2rem' %}
+          </div>
+        </xo-cart-remove>
+      </div>
+    {%- endunless -%}
+  </div>
+{% endcapture %}
+
+<xo-product
+  class="xo-cart-mini-item"
+  xo-section-id="mini-cart"
+  xo-product-id="{{ item.product_id }}"
+  xo-line="{{ index }}"
+>
+  {% if animate_enabled %}
+    <xo-animate xo-cascade>
+      <div class="xo-cart-mini-item__inner">
+        {{ content }}
+      </div>
+    </xo-animate>
+  {% else %}
+    <div class="xo-cart-mini-item__inner">
+      {{ content }}
+    </div>
+  {% endif %}
+</xo-product>

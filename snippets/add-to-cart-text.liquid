@@ -1,0 +1,37 @@
+{% comment %}
+  Renders add to cart text
+
+  @param {object} product - product object.
+
+  @example
+    {% liquid
+      capture add_cart_text
+        render 'add-to-cart-text', product: product
+      endcapture
+    %}
+
+    {% render 'button', text: add_cart_text %}
+{% endcomment %}
+
+{% liquid
+  assign is_bundle = is_bundle | default: false
+  assign is_select_options = is_select_options | default: true, allow_false: true
+%}
+
+{% if product.variants.size > 1 and is_select_options %}
+  {% if is_bundle %}
+    {{ 'products.product.button_bundle_text' | t }}
+  {% else %}
+    {{ 'products.product.add_to_cart' | t }}
+  {% endif %}
+{% else %}
+  {% if product.selected_or_first_available_variant.available %}
+    {% if is_bundle %}
+      {{ 'products.product.button_bundle_text' | t }}
+    {% else %}
+      {{ 'products.product.add_to_cart' | t }}
+    {% endif %}
+  {% else %}
+    {{ 'products.product.sold_out' | t }}
+  {% endif %}
+{% endif %}

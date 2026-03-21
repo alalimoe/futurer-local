@@ -1,0 +1,201 @@
+{{ 'section-main-article.css' | asset_url | stylesheet_tag }}
+{{ 'share.css' | asset_url | stylesheet_tag }}
+
+<section {% render 'section-attr' %}>
+  <article class='xo-main-article'>
+    <xo-container class='xo-main-article__container'>
+      {%- for block in section.blocks -%}
+        {%- case block.type -%}
+          {%- when '@app' -%}
+            <xo-animate xo-cascade>
+              <div class='xo-main-article__app'>
+                {% render block %}
+              </div>
+            </xo-animate>
+
+          {%- when 'featured_image' -%}
+            {%- if article.image -%}
+              <xo-animate xo-cascade>
+                <div class='xo-main-article__image {% if settings.enable_border_radius %}xo-main-article__image--radius{% endif %}'>
+                  {% render 'image', image: article.image %}
+                </div>
+              </xo-animate>
+            {%- endif -%}
+
+          {%- when 'tag' -%}
+            {% if article.tags[0] != blank %}
+              <xo-animate xo-cascade>
+                <div class='xo-main-article__tag'>
+                  {{ article.tags[0] }}
+                </div>
+              </xo-animate>
+            {% endif %}
+
+          {%- when 'title' -%}
+            <xo-animate xo-cascade>
+              <div class='xo-main-article__header'>
+                <h3 class='xo-main-article__title h3' itemprop='headline'>{{ article.title }}</h3>
+              </div>
+            </xo-animate>
+
+          {%- when 'published' -%}
+            <xo-animate xo-cascade>
+              <div class='xo-main-article__published'>
+                <span class='xo-main-article__date'>{{ article.published_at | time_tag: format: 'date' }}</span>
+              </div>
+            </xo-animate>
+
+          {%- when 'content' -%}
+            <xo-animate xo-cascade>
+              <div class='xo-main-article__box'>
+                <div class='xo-main-article__content xo-content'>{{ article.content }}</div>
+              </div>
+            </xo-animate>
+            {% render 'space', spacing_dt: 63, spacing_mb: 21 %}
+
+          {%- when 'share' -%}
+            <xo-animate xo-cascade>
+              <div class='xo-main-article__share' style='--align_dt: {{ block.settings.align_dt }}; --align_mb: {{ block.settings.align_mb }}'>
+                {% assign url_link = request.origin | append: article.url %}
+                {% render 'share', copy_title: article.title, url: url_link, list: 'facebook, linked ,twitter' %}
+              </div>
+            </xo-animate>
+            {% render 'space', spacing_dt: 32, spacing_mb: 21 %}
+        {%- endcase -%}
+      {%- endfor -%}
+      <xo-animate xo-cascade>
+        <div class='xo-main-article__button'>
+          {% assign text = 'blogs.article.back_to_blog' | t %}
+          {% render 'button', link: blog.url, style: 'link', type: 'button', size: 'md', text: text, icon: 'chevron-left', icon_position: 'left' %}
+        </div>
+      </xo-animate>
+    </xo-container>
+  </article>
+</section>
+{% render 'main-article-ld-json' %}
+
+{% schema %}
+{
+  "name": "t:sections.main_article.name",
+  "tag": "section",
+  "class": "section",
+  "blocks": [
+    {
+      "type": "@app"
+    },
+    {
+      "type": "tag",
+      "name": "t:sections.main_article.blocks.tag.name",
+      "limit": 1
+    },
+    {
+      "type": "title",
+      "name": "t:sections.main_article.blocks.title.name",
+      "limit": 1
+    },
+    {
+      "type": "published",
+      "name": "t:sections.main_article.blocks.published.name",
+      "limit": 1
+    },
+    {
+      "type": "featured_image",
+      "name": "t:sections.main_article.blocks.featured_image.name",
+      "limit": 1
+    },
+    {
+      "type": "content",
+      "name": "t:sections.main_article.blocks.content.name",
+      "limit": 1
+    },
+    {
+      "type": "share",
+      "name": "t:sections.main_article.blocks.share.name",
+      "limit": 2,
+      "settings": [
+        {
+          "type": "select",
+          "id": "align_dt",
+          "label": "t:sections.main_article.blocks.share.align_dt",
+          "options": [
+            {
+              "value": "flex-start",
+              "label": "t:sections.main_article.blocks.share.left"
+            },
+            {
+              "value": "center",
+              "label": "t:sections.main_article.blocks.share.center"
+            },
+            {
+              "value": "flex-end",
+              "label": "t:sections.main_article.blocks.share.right"
+            }
+          ],
+          "default": "center"
+        },
+        {
+          "type": "select",
+          "id": "align_mb",
+          "label": "t:sections.main_article.blocks.share.align_dt",
+          "options": [
+            {
+              "value": "flex-start",
+              "label": "t:sections.main_article.blocks.share.left"
+            },
+            {
+              "value": "center",
+              "label": "t:sections.main_article.blocks.share.center"
+            },
+            {
+              "value": "flex-end",
+              "label": "t:sections.main_article.blocks.share.right"
+            }
+          ],
+          "default": "center"
+        }
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Section color scheme"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color"
+    },
+    {
+      "type": "color_background",
+      "id": "background_gradient",
+      "label": "Background gradient"
+    },
+    {
+      "type": "number",
+      "id": "padding_top_desktop",
+      "label": "Padding top desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_desktop",
+      "label": "Padding bottom desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_top_mobile",
+      "label": "Padding top mobile",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_mobile",
+      "label": "Padding bottom mobile",
+      "default": 50
+    }
+  ]
+}
+{% endschema %}

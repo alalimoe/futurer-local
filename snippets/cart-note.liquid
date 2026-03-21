@@ -1,0 +1,89 @@
+{% comment %}
+  Renders a cart note overlay component.
+
+  Accepts:
+  - type: {String} Type of the component (optional, value: regular, popover, drawer, modal, collapse)
+  - overlay_width: {String} Width of the overlay (optional)
+  - uid: {String} Unique identifier for the component
+
+  Usage:
+  {% render 'cart-note', type: 'popover' %}
+{% endcomment %}
+
+{% liquid
+  if type == null
+    assign type = 'regular'
+  endif
+  if type == 'popover'
+    assign tag_type = 'popover'
+  elsif type == 'drawer' or type == 'modal'
+    assign tag_type = 'modal'
+  endif
+  assign title = 'sections.cart.note_title' | t
+  assign title_order = 'sections.cart.note_order' | t
+  assign label = 'sections.cart.note_order' | t
+  assign submit_label = 'sections.cart.note_submit' | t
+  assign cancel_label = 'sections.cart.cancel' | t
+  assign name = 'cart-note-' | append: uid
+%}
+
+{% capture overlay_attrs %}
+  {% if type == 'popover' %}
+    xo-animate='fade-down' xo-placement='top-center'
+  {% elsif type == 'drawer' %}
+    xo-animate='slide-up' xo-placement='bottom-{{ settings.cart_drawer_placement }}' xo-backdrop-color="transparent"
+  {% endif %}
+{% endcapture %}
+
+{% if type == 'regular' %}
+  <xo-cart-note>
+    <div class='xo-cart-note__regular{% if type == 'regular' %} xo-cart-note__regular--modifier{% endif %}'>{{ title }}</div>
+    <div class='xo-cart-note__change{% if type == 'regular' %} xo-cart-note__change--modifier{% endif %}'>{{ title_order }}</div>
+    {% render 'field-textarea', name: 'note', value: cart.note, label: label, placeholder: label %}
+  </xo-cart-note>
+{% elsif type == 'collapse' %}
+  {% capture collapse_content %}
+    <xo-cart-note>
+      {% render 'field-textarea', name: 'note', value: cart.note, label: label, placeholder: label %}
+    </xo-cart-note>
+  {% endcapture %}
+  <div class='xo-cart-note'>
+    {% render 'collapse', name: name, title: title_order, content: collapse_content %}
+  </div>
+{% else %}
+  <div class='xo-cart-note'>
+    <div class='xo-cart-note__btn'>
+      <xo-{{ tag_type }}-trigger xo-name='{{ name }}' class='xo-cart-note__trigger' tabindex='0' role='button'>
+        <div class='xo-cart-note__icon'>
+          {% render 'icon', name: 'note', size: '2.4rem' %}
+        </div>
+        <div class='xo-cart-note__text'>{{ title }}</div>
+      </xo-{{ tag_type }}-trigger>
+    </div>
+    <xo-{{ tag_type }} {{ overlay_attrs }} xo-portal xo-autofocus xo-name='{{ name }}' class='xo-cart-note__content'>
+      <div
+        class='
+          xo-cart-note__inner
+          {% unless type == 'regular' or type == 'collapse' %} xo-cart-note__inner--padding{% endunless %}
+          {% if type == 'popover' or type == 'drawer' %} xo-cart-note__inner--effect{% endif %}
+        '
+        {% if overlay_width != null %}
+          style='width: {{ overlay_width }};'
+        {% endif %}
+      >
+        <h6 class='xo-cart-note__title h6 mb-20'>{{ title }}</h6>
+        <xo-cart-note>
+          {% render 'field-textarea', name: 'note', value: cart.note, label: label, placeholder: label %}
+          <div class='{% if template.name == "cart" %}xo-cart-note__flex {% else %}xo-cart-note__flex-drawer flex-h gap-10{% endif %}'>
+            <xo-cart-note-submit>
+              {% render 'button', text: submit_label, size: 'sm', style: 'primary' %}
+            </xo-cart-note-submit>
+            <xo-{{ tag_type }}-trigger tabindex='0' role='button'>
+              {% render 'button', text: cancel_label, size: 'sm', style: 'secondary' %}
+            </xo-{{ tag_type }}-trigger>
+          </div>
+        </xo-cart-note>
+      </div>
+    </xo-{{ tag_type }}>
+  </div>
+{% endif %}

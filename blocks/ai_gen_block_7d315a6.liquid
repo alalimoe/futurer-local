@@ -1,0 +1,250 @@
+{% doc %}
+  @prompt
+    Promo banner with click-to-copy discount code and hint text.
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-promo-section-{{ ai_gen_id }} {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: {{ block.settings.section_padding }}px var(--page-gutter);
+    background-color: {{ block.settings.section_background }};
+    gap: 10px;
+  }
+
+  .ai-promo-row-{{ ai_gen_id }} {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .ai-promo-label-{{ ai_gen_id }} {
+    font-size: {{ block.settings.font_size }}px;
+    font-weight: 600;
+    color: {{ block.settings.button_text_color }};
+    letter-spacing: -0.01em;
+  }
+
+  .ai-promo-chip-{{ ai_gen_id }} {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: {{ block.settings.code_background }};
+    color: {{ block.settings.code_text_color }};
+    border: 1.5px dashed rgba(251, 191, 36, 0.4);
+    border-radius: var(--nx-radius-sm);
+    font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    font-weight: 700;
+    font-size: {{ block.settings.font_size }}px;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    position: relative;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  .ai-promo-chip-{{ ai_gen_id }}:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-gold-sm);
+    border-color: rgba(251, 191, 36, 0.7);
+  }
+
+  .ai-promo-chip-{{ ai_gen_id }}:active {
+    transform: scale(0.97);
+  }
+
+  .ai-promo-chip__icon-{{ ai_gen_id }} {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    opacity: 0.6;
+    transition: opacity 0.2s ease;
+  }
+
+  .ai-promo-chip-{{ ai_gen_id }}:hover .ai-promo-chip__icon-{{ ai_gen_id }} {
+    opacity: 1;
+  }
+
+  .ai-promo-chip-{{ ai_gen_id }}[data-copied="true"] {
+    border-color: #22c55e;
+    background: rgba(34, 197, 94, 0.08);
+  }
+
+  .ai-promo-chip-{{ ai_gen_id }}[data-copied="true"] .ai-promo-chip__icon-{{ ai_gen_id }} {
+    opacity: 1;
+    color: #22c55e;
+  }
+
+  .ai-promo-hint-{{ ai_gen_id }} {
+    font-size: {{ block.settings.font_size | minus: 3 }}px;
+    color: {{ block.settings.button_text_color }};
+    opacity: 0.5;
+    text-align: center;
+    transition: all 0.3s ease;
+    min-height: 1.4em;
+  }
+
+  .ai-promo-hint-{{ ai_gen_id }}[data-state="copied"] {
+    opacity: 0.8;
+    color: #22c55e;
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-promo-label-{{ ai_gen_id }} {
+      font-size: {{ block.settings.font_size | times: 0.88 }}px;
+    }
+    .ai-promo-chip-{{ ai_gen_id }} {
+      font-size: {{ block.settings.font_size | times: 0.88 }}px;
+      padding: 7px 14px;
+    }
+    .ai-promo-hint-{{ ai_gen_id }} {
+      font-size: {{ block.settings.font_size | minus: 4 }}px;
+    }
+  }
+{% endstyle %}
+
+<div class="ai-promo-section-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="ai-promo-row-{{ ai_gen_id }}">
+    <span class="ai-promo-label-{{ ai_gen_id }}">{{ block.settings.button_text }}</span>
+    <button
+      type="button"
+      class="ai-promo-chip-{{ ai_gen_id }}"
+      data-promo-copy="{{ ai_gen_id }}"
+      data-code="{{ block.settings.promo_code }}"
+      aria-label="Copy discount code {{ block.settings.promo_code }}"
+    >
+      <span class="ai-promo-chip__code" data-promo-code="{{ ai_gen_id }}">{{ block.settings.promo_code }}</span>
+      <svg class="ai-promo-chip__icon-{{ ai_gen_id }}" data-promo-icon="{{ ai_gen_id }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+      </svg>
+    </button>
+  </div>
+  <span class="ai-promo-hint-{{ ai_gen_id }}" data-promo-hint="{{ ai_gen_id }}">{{ block.settings.hint_text }}</span>
+</div>
+
+<script>
+  (function(){
+    var btn = document.querySelector('[data-promo-copy="{{ ai_gen_id }}"]');
+    if (!btn) return;
+    btn.addEventListener('click', function(){
+      var code = btn.getAttribute('data-code');
+      var hint = document.querySelector('[data-promo-hint="{{ ai_gen_id }}"]');
+      var icon = document.querySelector('[data-promo-icon="{{ ai_gen_id }}"]');
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(code).then(function(){ showCopied(); });
+      } else {
+        var t = document.createElement('textarea');
+        t.value = code; t.style.position = 'fixed'; t.style.opacity = '0';
+        document.body.appendChild(t); t.select();
+        try { document.execCommand('copy'); showCopied(); } catch(e){}
+        document.body.removeChild(t);
+      }
+      function showCopied(){
+        btn.setAttribute('data-copied','true');
+        icon.innerHTML = '<polyline points="20 6 9 17 4 12"/>';
+        if (hint) { hint.textContent = 'Copied!'; hint.setAttribute('data-state','copied'); }
+        setTimeout(function(){
+          btn.removeAttribute('data-copied');
+          icon.innerHTML = '<rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>';
+          if (hint) { hint.textContent = '{{ block.settings.hint_text | escape }}'; hint.removeAttribute('data-state'); }
+        }, 2000);
+      }
+    });
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Promo button",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Label text",
+      "default": "First order 10% OFF —"
+    },
+    {
+      "type": "text",
+      "id": "promo_code",
+      "label": "Promo code",
+      "default": "WLCM10"
+    },
+    {
+      "type": "text",
+      "id": "hint_text",
+      "label": "Hint text (below code)",
+      "default": "Tap to copy code"
+    },
+    {
+      "type": "header",
+      "content": "Style"
+    },
+    {
+      "type": "range",
+      "id": "font_size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Font size",
+      "default": 15
+    },
+    {
+      "type": "range",
+      "id": "section_padding",
+      "min": 8,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Section padding",
+      "default": 24
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "section_background",
+      "label": "Section background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Label text color",
+      "default": "#111827"
+    },
+    {
+      "type": "color",
+      "id": "code_background",
+      "label": "Code chip background",
+      "default": "#fefce8"
+    },
+    {
+      "type": "color",
+      "id": "code_text_color",
+      "label": "Code chip text color",
+      "default": "#111827"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Promo button"
+    }
+  ],
+  "tag": null
+}
+{% endschema %}

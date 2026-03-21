@@ -1,0 +1,309 @@
+{{ 'hero-showcase.css' | asset_url | stylesheet_tag }}
+
+{% liquid
+  assign heading = section.settings.heading
+  assign image_desktop = section.settings.image_desktop | image_url
+  assign image_mobile = section.settings.image_mobile | image_url
+  assign blocks = section.blocks
+  assign button = section.settings
+%}
+
+<section {% render 'section-attr' %}>
+  <div class="xo-hero-showcase">
+    <xo-container class="xo-hero-showcase__container">
+      {% render 'hero-showcase', heading: heading, button: button, image_desktop: image_desktop, image_mobile: image_mobile, blocks: blocks %}
+    </xo-container>
+  </div>
+</section>
+
+{% schema %}
+{
+  "tag": "section",
+  "name": "t:sections.hero_showcase.name",
+  "settings": [
+    {
+      "type": "select",
+      "id": "font_size",
+      "label": "Font size",
+      "options": [
+        {
+          "value": "d1",
+          "label": "Display"
+        },
+        {
+          "value": "h1",
+          "label": "Extra extra large"
+        },
+        {
+          "value": "h2",
+          "label": "Extra large"
+        },
+        {
+          "value": "h3",
+          "label": "Large"
+        },
+        {
+          "value": "h4",
+          "label": "Medium"
+        },
+        {
+          "value": "h5",
+          "label": "Small"
+        },
+        {
+          "value": "h6",
+          "label": "Extra small"
+        }
+      ],
+      "default": "h1"
+    },
+    {
+      "type": "textarea",
+      "id": "text",
+      "label": "Text",
+      "default": "Text",
+      "info": "Add [img] to insert Text image, and add [highlight] to insert Highlight text."
+    },
+    {
+      "type": "text",
+      "id": "text_highlight",
+      "label": "Text highlight",
+      "default": "Text highlight",
+      "info": "Insert texts to replace the [highlight] part in Text box"
+    },
+    {
+      "type": "color",
+      "id": "text_highlight_color",
+      "label": "Text highlight color",
+      "default": "#D8C6F1",
+      "visible_if": "{{ section.settings.text_highlight != blank }}"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.hero_showcase.settings.header_button.content"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button text",
+      "default": "Button"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link",
+      "default": "/collections/all"
+    },
+    {
+      "type": "select",
+      "id": "button_style",
+      "label": "Button style",
+      "options": [
+        {
+          "value": "primary",
+          "label": "Primary"
+        },
+        {
+          "value": "secondary",
+          "label": "Secondary"
+        },
+        {
+          "value": "link",
+          "label": "Link"
+        }
+      ],
+      "default": "primary"
+    },
+    {
+      "type": "select",
+      "id": "button_size",
+      "label": "Button size",
+      "options": [
+        {
+          "value": "xs",
+          "label": "Extra small"
+        },
+        {
+          "value": "sm",
+          "label": "Small"
+        },
+        {
+          "value": "md",
+          "label": "Medium"
+        },
+        {
+          "value": "lg",
+          "label": "Large"
+        }
+      ],
+      "default": "md"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.hero_showcase.settings.header_image.content"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_desktop",
+      "label": "t:sections.hero_showcase.settings.image_desktop.label"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_mobile",
+      "label": "t:sections.hero_showcase.settings.image_mobile.label"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.hero_showcase.settings.header_general.content"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Section color scheme"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color"
+    },
+    {
+      "type": "color_background",
+      "id": "background_gradient",
+      "label": "Background gradient"
+    },
+    {
+      "type": "number",
+      "id": "padding_top_desktop",
+      "label": "Padding top desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_desktop",
+      "label": "Padding bottom desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_top_mobile",
+      "label": "Padding top mobile",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_mobile",
+      "label": "Padding bottom mobile",
+      "default": 50
+    }
+  ],
+  "blocks": [
+    {
+      "name": "t:sections.hero_showcase.blocks.name_1",
+      "type": "image-parallax",
+      "limit": 4,
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "t:sections.hero_showcase.blocks.settings.image.label"
+        },
+        {
+          "type": "header",
+          "content": "t:sections.hero_showcase.blocks.settings.header_size.content"
+        },
+        {
+          "type": "number",
+          "id": "width",
+          "label": "t:sections.hero_showcase.blocks.settings.width.label",
+          "default": 200
+        },
+        {
+          "type": "number",
+          "id": "height",
+          "label": "t:sections.hero_showcase.blocks.settings.height.label",
+          "default": 200
+        }
+      ]
+    },
+    {
+      "name": "t:sections.hero_showcase.blocks.name_2",
+      "type": "image-text",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "t:sections.hero_showcase.blocks.settings.image.label"
+        },
+        {
+          "type": "header",
+          "content": "t:sections.hero_showcase.blocks.settings.header_size.content"
+        },
+        {
+          "type": "select",
+          "id": "device",
+          "label": "t:sections.hero_showcase.blocks.settings.device.label",
+          "options": [
+            {
+              "value": "desktop",
+              "label": "t:sections.hero_showcase.blocks.settings.device.option_1.label"
+            },
+            {
+              "value": "mobile",
+              "label": "t:sections.hero_showcase.blocks.settings.device.option_2.label"
+            }
+          ]
+        },
+        {
+          "type": "checkbox",
+          "id": "inherit_desktop_value",
+          "label": "t:sections.hero_showcase.blocks.settings.inherit_desktop_value.label",
+          "default": true,
+          "visible_if": "{{ block.settings.device == 'mobile' }}"
+        },
+        {
+          "type": "number",
+          "id": "width_desktop",
+          "label": "t:sections.hero_showcase.blocks.settings.width.label",
+          "default": 100,
+          "visible_if": "{{ block.settings.device == 'desktop' }}"
+        },
+        {
+          "type": "number",
+          "id": "height_desktop",
+          "label": "t:sections.hero_showcase.blocks.settings.height.label",
+          "default": 100,
+          "visible_if": "{{ block.settings.device == 'desktop' }}"
+        },
+        {
+          "type": "number",
+          "id": "width_mobile",
+          "label": "t:sections.hero_showcase.blocks.settings.width.label",
+          "default": 100,
+          "visible_if": "{{ block.settings.device == 'mobile' and block.settings.inherit_desktop_value == false }}"
+        },
+        {
+          "type": "number",
+          "id": "height_mobile",
+          "label": "t:sections.hero_showcase.blocks.settings.height.label",
+          "default": 100,
+          "visible_if": "{{ block.settings.device == 'mobile' and block.settings.inherit_desktop_value == false }}"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.hero_showcase.name"
+    }
+  ],
+  "disabled_on": {
+    "groups": [
+      "header",
+      "footer",
+      "custom.overlay",
+      "custom.popups",
+      "custom.features"
+    ]
+  }
+}
+{% endschema %}

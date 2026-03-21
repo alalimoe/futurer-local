@@ -1,0 +1,91 @@
+{% comment %}
+  Renders a product recommendations section.
+
+  Accepts:
+  - intent: {'related' | 'complementary'} Recommendation intent (optional)
+  Usage:
+  {% render 'product-recommendations', intent: 'related' %}
+{% endcomment %}
+
+<xo-product-recommendations
+  class="xo-product-recommendations"
+  xo-url="{{ routes.product_recommendations_url }}?section_id={{ section.id }}&product_id={{ product.id }}&intent={{ intent }}"
+>
+  <xo-grid class="xo-product-recommendations__head">
+    {% if heading %}
+      <xo-animate xo-cascade style="--lg: 9; --md: 9; --xs: 8">
+        <div class="xo-product-recommendations__heading">
+          {% render 'text', text: heading, class: class %}
+        </div>
+      </xo-animate>
+    {% endif %}
+    <xo-animate xo-cascade style="--lg: 3; --md: 3; --xs: 4">
+      <div class="xo-product-recommendations__button">
+        {% render 'button',
+          text: button.button_text,
+          link: button.button_link,
+          style: button.button_style,
+          size: button.button_size,
+          radius: settings.button_radius,
+          padding: settings.button_padding
+        %}
+      </div>
+    </xo-animate>
+  </xo-grid>
+  {% if recommendations.performed? and recommendations.products_count > 0 %}
+    <div class="xo-product-recommendations__content">
+      <xo-carousel
+        xo-per-view="{{ product_per_view }}"
+        xo-per-move="{{  product_per_move }}"
+        {% if autoplay == 'on' %}
+          xo-autoplay="{{ autoplay_time }}"
+          xo-loop
+        {% endif %}
+        xo-breakpoints='
+          {
+            768: {
+              perView: 2,
+              perMove: 1,
+              gap: 10,
+              overflow: "visible"
+            },
+          }
+        '
+        xo-render-bullet="<span class='carousel-bullet'></span>"
+        class="xo-product-recommendations__carousel"
+      >
+        <xo-carousel-inner>
+          <xo-carousel-list>
+            {% for recommendation in recommendations.products %}
+              {%- assign placeholder_image = 'collection-1' -%}
+              <xo-carousel-slide>
+                {% render 'product-card',
+                  product: recommendation,
+                  show_image: settings.product_card_show_image,
+                  show_secondary_image: settings.product_card_show_secondary_image,
+                  show_vendor: settings.product_card_show_vendor,
+                  show_description: settings.product_card_show_description,
+                  show_quick_add: settings.product_card_show_quick_add,
+                  show_quick_view: settings.product_card_show_quick_view,
+                  show_favorite: settings.product_card_show_favorite,
+                  show_price: settings.product_card_show_price,
+                  show_badge: settings.product_card_show_badge,
+                  media_aspect_ratio: media_aspect_ratio,
+                  color_scheme: card_color_scheme,
+                  placeholder_image: placeholder_image,
+                  animate_enabled: true
+                %}
+              </xo-carousel-slide>
+            {% endfor %}
+          </xo-carousel-list>
+        </xo-carousel-inner>
+        <div class="xo-product-recommendations__paginate">
+          {% render 'carousel-pagination', align: 'center', style: 'sticks' %}
+        </div>
+      </xo-carousel>
+    </div>
+  {%- else -%}
+    {%- assign title = 'sections.product_recommendation.empty' | t -%}
+    {% render 'collection-empty', title: title %}
+  {% endif %}
+</xo-product-recommendations>

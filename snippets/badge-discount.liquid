@@ -1,0 +1,30 @@
+{% comment %}
+  Renders a discount badge
+
+  Accepts:
+  - label: {String} Label to display
+  - discount: {Discount} Discount object (optional)
+  - discount_allocation: {Discount} Discount object (optional)
+
+  Usage:
+  {% render 'badge-discount', label: discount_application.title %}
+{% endcomment %}
+
+{% if label != blank %}
+  <span class="xo-badge-discount">
+    <span class="xo-badge-discount__icon">
+      {%- render 'icon', name: 'discount', size: '2.4rem' -%}
+    </span>
+    <span class="xo-badge-discount__label">
+      {{- label -}}
+      {% if discount.total_allocated_amount %}
+        (-{{ discount.total_allocated_amount | money }})
+      {% endif %}
+      {% if discount_allocation.amount %}
+        (-
+        {{- discount_allocation.amount | money -}}
+        )
+      {% endif %}
+    </span>
+  </span>
+{% endif %}

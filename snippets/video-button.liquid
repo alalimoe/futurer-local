@@ -1,0 +1,59 @@
+{% comment %}
+  Renders a video button
+
+  Accepts:
+  - video: {Object} video object (optional)
+  - video_url: {String} Url of video, only accept youtube, vimeo (optional)
+  - enable_video_looping: {Boolean} Set looping for video. Default: false (optional)
+  - cover_image: {String} Image cover for video (optional)
+
+  Usage:
+
+  {% render 'video-button',
+    video: video,
+    video_url: 'https://www.youtube.com/watch?v=_9VUPq3SxOc',
+    enable_video_looping: true
+  %}
+{% endcomment %}
+
+{% liquid
+  assign button_enable = button_enable | default: true, allow_false: true
+%}
+
+<div class='video-button{% if settings.enable_border_radius %} video-button--radius{% endif %}'>
+  <div class='video-button__content'>
+    {% if video != blank or video_url != blank %}
+      {% if video == null and video_url != null %}
+        {% comment %} Video url {% endcomment %}
+        {% if video_url.type == 'youtube' %}
+          {% render 'media', media: video_url, type: 'youtube', loop: true, enable_video_looping: enable_video_looping, autoplay: true, controls: false, muted: true %}
+        {% else %}
+          {% render 'media', media: video_url, type: 'vimeo', loop: true, enable_video_looping: enable_video_looping, autoplay: true, controls: false, muted: true %}
+        {% endif %}
+      {% else %}
+        {% comment %} Video upload {% endcomment %}
+        {% render 'media', media: video, type: 'video', autoplay: true, loop: enable_video_looping, enable_video_looping: enable_video_looping, controls: false, muted: true %}
+      {% endif %}
+    {% else %}
+      {{ 'hero-apparel-1' | placeholder_svg_tag: 'placeholder-svg placeholder' }}
+    {% endif -%}
+  </div>
+  {% if button_enable %}
+    <xo-magnetic
+      xo-duration='500'
+      xo-radius='150'
+      class='video-button__button'
+    >
+      <xo-magnetic-content>
+        {% render 'button',
+          text: button.button_text,
+          link: button.button_link,
+          style: button.button_style,
+          size: button.button_size,
+          radius: settings.button_radius,
+          padding: settings.button_padding
+        %}
+      </xo-magnetic-content>
+    </xo-magnetic>
+  {% endif %}
+</div>

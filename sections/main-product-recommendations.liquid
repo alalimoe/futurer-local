@@ -1,0 +1,284 @@
+{{ 'product-recommendations.css' | asset_url | stylesheet_tag }}
+{{ 'collection-empty.css' | asset_url | stylesheet_tag }}
+
+{% liquid
+  assign class = section.settings.font_size_heading
+  assign heading = section.settings.heading
+  assign autoplay = section.settings.autoplay
+  assign autoplay_time = section.settings.autoplay_time
+  assign product_per_view = section.settings.product_per_view
+  assign product_per_move = section.settings.product_per_move
+  assign media_aspect_ratio = section.settings.product_card_aspect_ratio
+  assign card_color_scheme = section.settings.card_color_scheme
+  assign button = section.settings
+%}
+
+<section {% render 'section-attr' %}>
+  <div class='main-product-recommendations'>
+    <xo-container class='main-product-recommendations__container'>
+      <div class='main-product-recommendations__content'>
+        {% render 'product-recommendations',
+          intent: 'related',
+          class: class,
+          heading: heading,
+          autoplay: autoplay,
+          autoplay_time: autoplay_time,
+          product_per_view: product_per_view,
+          product_per_move: product_per_move,
+          button: button,
+          media_aspect_ratio: media_aspect_ratio,
+          card_color_scheme: card_color_scheme
+        %}
+      </div>
+    </xo-container>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "t:sections.main_product_recommendations.name",
+  "settings": [
+    {
+      "type": "select",
+      "id": "font_size_heading",
+      "label": "Font size heading",
+      "default": "h5",
+      "options": [
+        {
+          "value": "h1",
+          "label": "Extra extra large"
+        },
+        {
+          "value": "h2",
+          "label": "Extra large"
+        },
+        {
+          "value": "h3",
+          "label": "Large"
+        },
+        {
+          "value": "h4",
+          "label": "Medium"
+        },
+        {
+          "value": "h5",
+          "label": "Small"
+        },
+        {
+          "value": "h6",
+          "label": "Extra small"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "t:sections.main_product_recommendations.settings.heading.label",
+      "default": "May you also like"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.main_product_recommendations.settings.header_button.content"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button text",
+      "default": "Button"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link",
+      "default": "/collections/all"
+    },
+    {
+      "type": "select",
+      "id": "button_style",
+      "label": "Button style",
+      "options": [
+        {
+          "value": "primary",
+          "label": "Primary"
+        },
+        {
+          "value": "secondary",
+          "label": "Secondary"
+        },
+        {
+          "value": "link",
+          "label": "Link"
+        }
+      ],
+      "default": "primary"
+    },
+    {
+      "type": "select",
+      "id": "button_size",
+      "label": "Button size",
+      "options": [
+        {
+          "value": "xs",
+          "label": "Extra small"
+        },
+        {
+          "value": "sm",
+          "label": "Small"
+        },
+        {
+          "value": "md",
+          "label": "Medium"
+        },
+        {
+          "value": "lg",
+          "label": "Large"
+        }
+      ],
+      "default": "md"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.main_product_recommendations.settings.header_carousel.content"
+    },
+    {
+      "type": "range",
+      "id": "product_per_view",
+      "min": 2,
+      "max": 5,
+      "step": 1,
+      "unit": "col",
+      "label": "t:sections.main_product_recommendations.settings.product_per_view.label",
+      "default": 4
+    },
+    {
+      "type": "select",
+      "id": "autoplay",
+      "label": "t:sections.main_product_recommendations.settings.autoplay.label",
+      "options": [
+        {
+          "value": "off",
+          "label": "t:sections.main_product_recommendations.settings.autoplay.option__1.label"
+        },
+        {
+          "value": "on",
+          "label": "t:sections.main_product_recommendations.settings.autoplay.option__2.label"
+        }
+      ],
+      "default": "off"
+    },
+    {
+      "type": "range",
+      "id": "product_per_move",
+      "min": 1,
+      "max": 4,
+      "step": 1,
+      "unit": "col",
+      "label": "t:sections.main_product_recommendations.settings.product_per_move.label",
+      "default": 1
+    },
+    {
+      "type": "range",
+      "id": "autoplay_time",
+      "min": 1000,
+      "max": 5000,
+      "step": 1000,
+      "unit": "s",
+      "label": "t:sections.main_product_recommendations.settings.autoplay_time.label",
+      "default": 3000
+    },
+    {
+      "type": "header",
+      "content": "Product card"
+    },
+    {
+      "type": "select",
+      "id": "product_card_aspect_ratio",
+      "label": "Aspect ratio",
+      "options": [
+        {
+          "value": "auto",
+          "label": "Adapt to image"
+        },
+        {
+          "value": "2/3",
+          "label": "2:3"
+        },
+        {
+          "value": "3/4",
+          "label": "3:4"
+        },
+        {
+          "value": "3/2",
+          "label": "3:2"
+        },
+        {
+          "value": "1",
+          "label": "1:1"
+        },
+        {
+          "value": "4/3",
+          "label": "4:3"
+        },
+        {
+          "value": "16/9",
+          "label": "16:9"
+        },
+        {
+          "value": "21/9",
+          "label": "21:9"
+        }
+      ],
+      "default": "1"
+    },
+    {
+      "type": "color_scheme",
+      "id": "card_color_scheme",
+      "label": "Color scheme"
+    },
+    {
+      "type": "header",
+      "content": "General settings"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Section color scheme"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color"
+    },
+    {
+      "type": "color_background",
+      "id": "background_gradient",
+      "label": "Background gradient"
+    },
+    {
+      "type": "number",
+      "id": "padding_top_desktop",
+      "label": "Padding top desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_desktop",
+      "label": "Padding bottom desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_top_mobile",
+      "label": "Padding top mobile",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_mobile",
+      "label": "Padding bottom mobile",
+      "default": 50
+    }
+  ],
+  "blocks": []
+}
+{% endschema %}

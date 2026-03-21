@@ -1,0 +1,491 @@
+{% doc %}
+  @prompt
+    create clean checklist: Verify a COA in 60 seconds
+    Heading: How to verify a COA (quick checklist)
+    
+    Exact product name (not “close enough”)
+    
+    Batch/lot matches your label
+    
+    Lab name + contact details present
+    
+    Test date is plausible for that batch
+    
+    Methods are stated (HPLC / LC‑MS / FTIR, etc.)
+    
+    Results include numbers (not only “PASS”)
+    
+    Button: How to Read a COA (links to the COA guide page)
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-coa-checklist-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    padding: {{ block.settings.padding_vertical }}px {{ block.settings.padding_horizontal }}px;
+    background-color: {{ block.settings.background_color }};
+    border-radius: {{ block.settings.border_radius }}px;
+  }
+
+  .ai-coa-checklist__container-{{ ai_gen_id }} {
+    max-width: {{ block.settings.max_width }}px;
+    margin: 0 auto;
+  }
+
+  .ai-coa-checklist__heading-{{ ai_gen_id }} {
+    margin: 0 0 {{ block.settings.heading_spacing }}px;
+    color: {{ block.settings.heading_color }};
+    font-weight: 600;
+    line-height: 1.2;
+  }
+
+  .ai-coa-checklist__list-{{ ai_gen_id }} {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 {{ block.settings.button_spacing }}px;
+  }
+
+  .ai-coa-checklist__item-{{ ai_gen_id }} {
+    display: flex;
+    align-items: flex-start;
+    gap: {{ block.settings.item_gap }}px;
+    padding: {{ block.settings.item_padding }}px 0;
+    border-bottom: 1px solid {{ block.settings.divider_color }};
+  }
+
+  .ai-coa-checklist__item-{{ ai_gen_id }}:last-child {
+    border-bottom: none;
+  }
+
+  .ai-coa-checklist__icon-{{ ai_gen_id }} {
+    flex-shrink: 0;
+    width: {{ block.settings.icon_size }}px;
+    height: {{ block.settings.icon_size }}px;
+    margin-top: 2px;
+  }
+
+  .ai-coa-checklist__icon-{{ ai_gen_id }} svg {
+    width: 100%;
+    height: 100%;
+    stroke: {{ block.settings.icon_color }};
+  }
+
+  .ai-coa-checklist__text-{{ ai_gen_id }} {
+    flex: 1;
+    color: {{ block.settings.text_color }};
+    font-size: {{ block.settings.text_size }}px;
+    line-height: 1.5;
+  }
+
+  .ai-coa-checklist__button-{{ ai_gen_id }} {
+    display: inline-block;
+    padding: {{ block.settings.button_padding_vertical }}px {{ block.settings.button_padding_horizontal }}px;
+    background-color: {{ block.settings.button_background }};
+    color: {{ block.settings.button_text_color }};
+    text-decoration: none;
+    border-radius: {{ block.settings.button_border_radius }}px;
+    font-size: {{ block.settings.button_text_size }}px;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+  }
+
+  .ai-coa-checklist__button-{{ ai_gen_id }}:hover {
+    background-color: {{ block.settings.button_background_hover }};
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-coa-checklist-{{ ai_gen_id }} {
+      padding: {{ block.settings.padding_vertical | times: 0.7 }}px {{ block.settings.padding_horizontal | times: 0.7 }}px;
+    }
+
+    .ai-coa-checklist__text-{{ ai_gen_id }} {
+      font-size: {{ block.settings.text_size | times: 0.9 }}px;
+    }
+  }
+{% endstyle %}
+
+<div class="ai-coa-checklist-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="ai-coa-checklist__container-{{ ai_gen_id }}">
+    {% if block.settings.heading != blank %}
+      <h2 class="ai-coa-checklist__heading-{{ ai_gen_id }} {{ block.settings.heading_size }}">{{ block.settings.heading }}</h2>
+    {% endif %}
+
+    <ul class="ai-coa-checklist__list-{{ ai_gen_id }}">
+      {% if block.settings.item_1 != blank %}
+        <li class="ai-coa-checklist__item-{{ ai_gen_id }}">
+          <div class="ai-coa-checklist__icon-{{ ai_gen_id }}">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </div>
+          <div class="ai-coa-checklist__text-{{ ai_gen_id }}">{{ block.settings.item_1 }}</div>
+        </li>
+      {% endif %}
+
+      {% if block.settings.item_2 != blank %}
+        <li class="ai-coa-checklist__item-{{ ai_gen_id }}">
+          <div class="ai-coa-checklist__icon-{{ ai_gen_id }}">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </div>
+          <div class="ai-coa-checklist__text-{{ ai_gen_id }}">{{ block.settings.item_2 }}</div>
+        </li>
+      {% endif %}
+
+      {% if block.settings.item_3 != blank %}
+        <li class="ai-coa-checklist__item-{{ ai_gen_id }}">
+          <div class="ai-coa-checklist__icon-{{ ai_gen_id }}">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </div>
+          <div class="ai-coa-checklist__text-{{ ai_gen_id }}">{{ block.settings.item_3 }}</div>
+        </li>
+      {% endif %}
+
+      {% if block.settings.item_4 != blank %}
+        <li class="ai-coa-checklist__item-{{ ai_gen_id }}">
+          <div class="ai-coa-checklist__icon-{{ ai_gen_id }}">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </div>
+          <div class="ai-coa-checklist__text-{{ ai_gen_id }}">{{ block.settings.item_4 }}</div>
+        </li>
+      {% endif %}
+
+      {% if block.settings.item_5 != blank %}
+        <li class="ai-coa-checklist__item-{{ ai_gen_id }}">
+          <div class="ai-coa-checklist__icon-{{ ai_gen_id }}">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </div>
+          <div class="ai-coa-checklist__text-{{ ai_gen_id }}">{{ block.settings.item_5 }}</div>
+        </li>
+      {% endif %}
+
+      {% if block.settings.item_6 != blank %}
+        <li class="ai-coa-checklist__item-{{ ai_gen_id }}">
+          <div class="ai-coa-checklist__icon-{{ ai_gen_id }}">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </div>
+          <div class="ai-coa-checklist__text-{{ ai_gen_id }}">{{ block.settings.item_6 }}</div>
+        </li>
+      {% endif %}
+    </ul>
+
+    {% if block.settings.button_text != blank and block.settings.button_link != blank %}
+      <a href="{{ block.settings.button_link }}" class="ai-coa-checklist__button-{{ ai_gen_id }}">
+        {{ block.settings.button_text }}
+      </a>
+    {% endif %}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "COA checklist",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "How to verify a COA (quick checklist)"
+    },
+    {
+      "type": "text",
+      "id": "item_1",
+      "label": "Checklist item 1",
+      "default": "Exact product name (not \"close enough\")"
+    },
+    {
+      "type": "text",
+      "id": "item_2",
+      "label": "Checklist item 2",
+      "default": "Batch/lot matches your label"
+    },
+    {
+      "type": "text",
+      "id": "item_3",
+      "label": "Checklist item 3",
+      "default": "Lab name + contact details present"
+    },
+    {
+      "type": "text",
+      "id": "item_4",
+      "label": "Checklist item 4",
+      "default": "Test date is plausible for that batch"
+    },
+    {
+      "type": "text",
+      "id": "item_5",
+      "label": "Checklist item 5",
+      "default": "Methods are stated (HPLC / LC‑MS / FTIR, etc.)"
+    },
+    {
+      "type": "text",
+      "id": "item_6",
+      "label": "Checklist item 6",
+      "default": "Results include numbers (not only \"PASS\")"
+    },
+    {
+      "type": "header",
+      "content": "Button"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button text",
+      "default": "How to Read a COA"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link"
+    },
+    {
+      "type": "header",
+      "content": "Style"
+    },
+    {
+      "type": "range",
+      "id": "max_width",
+      "min": 400,
+      "max": 1200,
+      "step": 50,
+      "unit": "px",
+      "label": "Maximum width",
+      "default": 700
+    },
+    {
+      "type": "range",
+      "id": "padding_vertical",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Vertical padding",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_horizontal",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Horizontal padding",
+      "default": 30
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Border radius",
+      "default": 8
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background",
+      "default": "#f9f9f9"
+    },
+    {
+      "type": "header",
+      "content": "Heading"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Heading size",
+      "options": [
+        {"value": "h1", "label": "Display"},
+        {"value": "h2", "label": "XL"},
+        {"value": "h3", "label": "L"},
+        {"value": "h4", "label": "M"},
+        {"value": "h5", "label": "S"},
+        {"value": "h6", "label": "XS"}
+      ],
+      "default": "h5"
+    },
+    {
+      "type": "range",
+      "id": "heading_spacing",
+      "min": 10,
+      "max": 50,
+      "step": 5,
+      "unit": "px",
+      "label": "Bottom spacing",
+      "default": 25
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Color",
+      "default": "#2a2a2a"
+    },
+    {
+      "type": "header",
+      "content": "Checklist items"
+    },
+    {
+      "type": "range",
+      "id": "text_size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Text size",
+      "default": 16
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#2a2a2a"
+    },
+    {
+      "type": "range",
+      "id": "icon_size",
+      "min": 16,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "label": "Icon size",
+      "default": 20
+    },
+    {
+      "type": "color",
+      "id": "icon_color",
+      "label": "Icon color",
+      "default": "#5a9d6f"
+    },
+    {
+      "type": "range",
+      "id": "item_gap",
+      "min": 8,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "label": "Icon gap",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "item_padding",
+      "min": 8,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "label": "Item padding",
+      "default": 12
+    },
+    {
+      "type": "color",
+      "id": "divider_color",
+      "label": "Divider color",
+      "default": "#e8e8e8"
+    },
+    {
+      "type": "header",
+      "content": "Button style"
+    },
+    {
+      "type": "range",
+      "id": "button_spacing",
+      "min": 10,
+      "max": 50,
+      "step": 5,
+      "unit": "px",
+      "label": "Top spacing",
+      "default": 25
+    },
+    {
+      "type": "range",
+      "id": "button_text_size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Text size",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "button_padding_vertical",
+      "min": 8,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "label": "Vertical padding",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "button_padding_horizontal",
+      "min": 16,
+      "max": 48,
+      "step": 4,
+      "unit": "px",
+      "label": "Horizontal padding",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "button_border_radius",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Border radius",
+      "default": 4
+    },
+    {
+      "type": "color",
+      "id": "button_background",
+      "label": "Background",
+      "default": "#5a9d6f"
+    },
+    {
+      "type": "color",
+      "id": "button_background_hover",
+      "label": "Hover background",
+      "default": "#4a8d5f"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Text color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "desktop_width_percent",
+      "label": "Desktop width",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    }
+  ],
+  "presets": [
+    {
+      "name": "COA checklist"
+    }
+  ]
+}
+{% endschema %}

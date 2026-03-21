@@ -1,0 +1,36 @@
+{% comment %}
+  List information
+
+  Accepts:
+  - label: {String} The label of the information (required)
+  - value: {String} The value of the information (required)
+  - animate_delay_enabled: {Boolean} Whether
+  - animate_delay_from: {Number} The delay
+  - list_item_class: {String} The class of the list item
+
+  Usage:
+  {% render 'list-information', list_information: list_information %}
+{% endcomment %}
+
+{%- assign list_arr = list_information | newline_to_br | split: '<br />' -%}
+
+<div class='list-information {% if animate_delay_enabled %}list-information--animate{% endif %}'>
+  {% for list_item in list_arr %}
+    {%- assign label = list_item | split: ':' | first | strip %}
+    {%- assign value = list_item | split: ':' | last | strip %}
+    {%- assign animate_delay_var = '--delay-from: ' | append: animate_delay_from -%}
+    {%- if animate_delay_enabled -%}
+      {%- assign delay = forloop.index0 | times: 75 -%}
+      {%- assign animate_delay_var = animate_delay_var | append: '; --delay: ' | append: delay -%}
+    {%- endif -%}
+
+    <div class='list-information__item xo-stack {{ list_item_class }}' style='--dir: col; --jc: space-between; --ai: center;{{ animate_delay_var }}'>
+      {% if list_item contains ':' %}
+        <div class='list-information__label'>{{ label }}</div>
+        <div class='list-information__value'>{{ value }}</div>
+      {%- else -%}
+        <div class='list-information__label'>{{ label }}</div>
+      {% endif %}
+    </div>
+  {% endfor %}
+</div>

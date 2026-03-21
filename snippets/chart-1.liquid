@@ -1,0 +1,89 @@
+{% comment %}
+  Renders chart-1 element
+
+  Accepts:
+  - title: {String} Title (required)
+  - image: {String} Image (required)
+  - percent: {Number} Percent (required)
+  - description: {String} Description (required)
+
+  Usage:
+  {% render 'chart-1',
+    title: title,
+    image: image,
+    percent_1: percent_1,
+    description_1: description_1,
+    percent_2: percent_2,
+    description_2: description_2
+  %}
+{% endcomment %}
+
+{% capture xo_datasets %}
+  [
+    {% for item in dataset_arr %}
+      {%- assign cleaned_item = item | strip | replace: ' ', '' -%}
+      {%- assign dataset_output = "[" | append: '"' | append: cleaned_item | replace: ',', '","' | append: '"]' -%}
+      {%- assign contrast_initial = 1.0 -%}
+      {%- assign contrast = contrast_initial | divided_by: forloop.index | round: 2 -%}
+      {
+        "data": {{ dataset_output }},
+        "lineColor": "rgba(var(--color-button), {{ contrast }})"
+      }{% if forloop.last == false %},{% endif %}
+    {% endfor %}
+  ]
+{% endcapture %}
+
+{%- assign list_arr = list_information | newline_to_br | split: '<br />' -%}
+{%- assign margin = margin | default: 25 -%}
+
+<div class='chart-1'>
+  <div class='chart-1__box {% if settings.enable_border_radius %}chart-1__box--radius{% endif %}'>
+
+    {% if title %}
+      <div class='chart-1__title'>
+        {{ title }}
+      </div>
+    {% endif %}
+
+    <div class='chart-1__content'>
+      <div class='chart-1__thumbnail'>
+        <div class='chart-1__image'>
+          <xo-animate xo-cascade xo-type="fade" xo-duration="1000" style="height: 100%" xo-scroll-forced>
+            <xo-line-chart
+              xo-x-labels="{{ x_label_output }}"
+              xo-y-labels="{{ y_label_output }}"
+              xo-max="{{ value_max }}"
+              xo-margin="{{ margin }}"
+              xo-grid-color="rgba(var(--color-border))"
+              xo-datasets='{{ xo_datasets | strip }}'
+            ></xo-line-chart>
+          </xo-animate>
+        </div>
+      </div>
+
+      <div class='chart-1__perfomance'>
+        {% for list_item in list_arr %}
+          {% liquid
+            assign label = list_item | split: ' - ' | first | strip
+            assign value = list_item | split: ' - ' | last | strip
+          %}
+          <div class='chart-1__perfomance-item'>
+            {% if list_item contains ' - ' %}
+              <div class='chart-1__description'>
+                {{ label }}
+              </div>
+              <div class='chart-1__percent h3'>
+                <xo-countto class='chart-1__percent-value' xo-from='0' xo-to='{{ value }}' xo-duration='1000'>0</xo-countto>
+                <span>%</span>
+              </div>
+            {%- else -%}
+              <div class='chart-1__description'>
+                {{ label }}
+              </div>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>

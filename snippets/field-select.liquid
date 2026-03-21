@@ -1,0 +1,45 @@
+{% comment %}
+  Renders a select box.
+
+  Accepts:
+  - name: {string} Name of the select box
+  - value: {string} Value of the select box
+  - options: {string} Options for the select box
+  - autocomplete: {string} Autocomplete for the select box (optional)
+  - attrs: {string} Additional attributes for the select box (optional)
+  - classes: {string} Additional classes for the select box (optional)
+
+  Usage:
+  {% render 'field-select',
+    name: 'radio',
+    value: 'radio',
+  %}
+{% endcomment %}
+
+<div class='xo-field-select{% if classes %} {{ classes }}{% endif %}'>
+  <select
+    class='xo-field-select__select {% if settings.enable_border_radius %}xo-field-select__select--radius{% endif %}'
+    {% if name %}
+      name='{{ name -}}'
+    {% endif %}
+    {% if value %}
+      value='{{ value -}}'
+    {% endif %}
+    {% if autocomplete %}
+      autocomplete='{{ autocomplete -}}'
+    {% endif %}
+    {% if attrs %}
+      {{ attrs -}}
+    {% endif %}
+    aria-label='{{ label | escape }}'
+  >
+    {% if options contains 'class=' %}
+      {{ options | replace: 'class="', 'class="xo-field-select__option ' | replace: "class='", "class='xo-field-select__option" }}
+    {% else %}
+      {{ options | replace: '<option', '<option class="xo-field-select__option"' }}
+    {% endif %}
+  </select>
+  <span class='xo-field-select__icon'>
+    {% render 'icon', name: 'arrow-down', size: '2.4rem' %}
+  </span>
+</div>

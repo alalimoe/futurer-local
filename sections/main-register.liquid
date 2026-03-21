@@ -1,0 +1,233 @@
+{{ 'section-main-register.css' | asset_url | stylesheet_tag }}
+
+{% liquid
+  assign class = section.settings.font_size_heading
+  assign heading = section.settings.heading
+  assign subheading = section.settings.sub_heading
+%}
+
+<section {% render 'section-attr' %}>
+  <div class='xo-register'>
+    <xo-container class='xo-register__container'>
+      <xo-grid class='xo-register__grid'>
+        <xo-animate xo-cascade style='--lg: 12; --md: 12; --xs: 12'>
+          <div class='xo-register__header'>
+            {% if heading %}
+              <h3 class='xo-register__heading {{ class }}'>{{ heading }}</h3>
+            {% endif %}
+            {% if subheading %}
+              <div class='xo-register__sub-heading'>
+                <p>{{ subheading }}</p>
+              </div>
+            {% endif %}
+          </div>
+        </xo-animate>
+        <div class='xo-register__content' style='--lg: 12; --md: 12; --xs: 12'>
+          {%- form 'create_customer', novalidate: 'novalidate', class: 'xo-sign-up__content' -%}
+            {% render 'form-error', form: form %}
+            <xo-grid class='xo-register__name'>
+              <xo-animate xo-cascade style='--lg: 6; --md: 12; --sm:12; --xs: 12'>
+                <div class='xo-register__input-item'>
+                  {% assign first_name_id = 'first-name--' | append: section.id %}
+                  {% assign first_name = 'customer.register.first_name' | t %}
+                  {% render 'field-input', type: 'text', name: 'customer[first_name]', label: first_name, value: form.first_name, id: first_name_id %}
+                </div>
+              </xo-animate>
+              <xo-animate xo-cascade style='--lg: 6; --md: 12; --sm:12; --xs: 12'>
+                <div class='xo-register__input-item'>
+                  {% assign last_name_id = 'last-name--' | append: section.id %}
+                  {% assign last_name = 'customer.register.last_name' | t %}
+                  {% render 'field-input', type: 'text', name: 'customer[last_name]', label: last_name, value: form.last_name, id: last_name_id %}
+                </div>
+              </xo-animate>
+            </xo-grid>
+            {% render 'space', spacing_dt: 8, spacing_mb: 6 %}
+            <xo-animate xo-cascade style='--lg: 12; --md: 12; --sm:12; --xs: 12'>
+              <div class='xo-register__input-item'>
+                <div class='xo-register__item-input'>
+                  {% assign email_input_id = 'email-input--' | append: section.id %}
+                  {% assign email = 'customer.register.email' | t %}
+                  {% render 'field-input', type: 'email', name: 'customer[email]', label: email, value: form.email, id: email_input_id %}
+                </div>
+                <div class='xo-register__item-icon'>
+                  {% render 'icon', name: 'mail', size: '1.8rem' %}
+                </div>
+              </div>
+            </xo-animate>
+            {% render 'space', spacing_dt: 8, spacing_mb: 6 %}
+            <xo-animate xo-cascade style='--lg: 12; --md: 12; --sm:12; --xs: 12'>
+              <div class='xo-register__input-item'>
+                <div class='xo-register__item-input'>
+                  {% assign password_input_id = 'passwordField' %}
+                  {% assign password = 'customer.register.password' | t %}
+                  {% render 'field-input', type: 'password', name: 'customer[password]', label: password, id: password_input_id %}
+                </div>
+                <div class='xo-register__item-icon' id='togglePassword'>
+                  <div class='xo-register__icon-hide'>
+                    {% render 'icon', name: 'eye-hide', size: '2.4rem' %}
+                  </div>
+                  <div class='xo-register__icon-open'>
+                    {% render 'icon', name: 'eye', size: '2.4rem' %}
+                  </div>
+                </div>
+              </div>
+            </xo-animate>
+            {% render 'space', spacing_dt: 8, spacing_mb: 6 %}
+            <xo-animate xo-cascade style='--lg: 12; --md: 12; --sm:12; --xs: 12'>
+              <div class='xo-register__input-item'>
+                <div class='xo-register__item-input'>
+                  {% assign confirm_password_input_id = 'confirmPasswordField' %}
+                  {% assign password_confirm = 'customer.register.password_confirm' | t %}
+                  {% render 'field-input', type: 'password', name: 'customer[password_confirmation]', label: password_confirm, id: confirm_password_input_id %}
+                </div>
+                <div class='xo-register__item-icon' id='togglePassword'>
+                  <div class='xo-register__icon-hide'>
+                    {% render 'icon', name: 'eye-hide', size: '2.4rem' %}
+                  </div>
+                  <div class='xo-register__icon-open'>
+                    {% render 'icon', name: 'eye', size: '2.4rem' %}
+                  </div>
+                </div>
+              </div>
+            </xo-animate>
+            <xo-animate xo-cascade>
+              <div class='xo-register__submit'>
+                {% assign button_text = 'customer.register.submit' | t %}
+                {% render 'button', text: button_text, size: 'md', block: true, style: 'primary' %}
+              </div>
+            </xo-animate>
+            {% render 'space', spacing_dt: 23, spacing_mb: 17 %}
+            <xo-animate xo-cascade>
+              <div class='xo-register__footer'>
+                <div class='xo-register__footer-title'>{{ 'customer.register.already' | t }}</div>
+                <div class='xo-register__sign-in'>
+                  {% assign button_text = 'customer.register.signin' | t %}
+                  {% render 'button', text: button_text, link: routes.account_login_url, style: 'link', size: 'sm' %}
+                </div>
+              </div>
+            </xo-animate>
+          {%- endform -%}
+        </div>
+      </xo-grid>
+    </xo-container>
+  </div>
+</section>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const togglePasswords = document.querySelectorAll('.xo-register__input-item #togglePassword');
+
+    togglePasswords.forEach((togglePassword) => {
+      const passwordField = togglePassword.previousElementSibling.querySelector('input[type="password"]');
+      const eyeOpenPassword = togglePassword.querySelector('.xo-register__icon-open');
+      const eyeHidePassword = togglePassword.querySelector('.xo-register__icon-hide');
+
+      togglePassword.addEventListener('click', () => {
+        if (passwordField.type === 'password') {
+          passwordField.type = 'text';
+          eyeOpenPassword.classList.add('active');
+          eyeHidePassword.classList.add('active');
+        } else {
+          passwordField.type = 'password';
+          eyeHidePassword.classList.remove('active');
+          eyeOpenPassword.classList.remove('active');
+        }
+      });
+    });
+  });
+</script>
+
+{% schema %}
+{
+  "name": "t:sections.main_register.name",
+  "settings": [
+    {
+      "type": "select",
+      "id": "font_size_heading",
+      "label": "Font size heading",
+      "default": "h4",
+      "options": [
+        {
+          "value": "h1",
+          "label": "Extra extra large"
+        },
+        {
+          "value": "h2",
+          "label": "Extra large"
+        },
+        {
+          "value": "h3",
+          "label": "Large"
+        },
+        {
+          "value": "h4",
+          "label": "Medium"
+        },
+        {
+          "value": "h5",
+          "label": "Small"
+        },
+        {
+          "value": "h6",
+          "label": "Extra small"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "t:sections.main_register.settings.heading.label",
+      "default": "Create an ccount"
+    },
+    {
+      "type": "richtext",
+      "id": "sub_heading",
+      "label": "t:sections.main_register.settings.sub_heading.label",
+      "default": "<p>Enter your information below to proceed. If you already have an account, please log in instead.</p>"
+    },
+    {
+      "type": "header",
+      "content": "General settings"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Section color scheme"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color"
+    },
+    {
+      "type": "color_background",
+      "id": "background_gradient",
+      "label": "Background gradient"
+    },
+    {
+      "type": "number",
+      "id": "padding_top_desktop",
+      "label": "Padding top desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_desktop",
+      "label": "Padding bottom desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_top_mobile",
+      "label": "Padding top mobile",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_mobile",
+      "label": "Padding bottom mobile",
+      "default": 50
+    }
+  ]
+}
+{% endschema %}

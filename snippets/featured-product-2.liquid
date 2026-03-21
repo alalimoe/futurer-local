@@ -1,0 +1,139 @@
+{% comment %}
+  Rennder a feature product
+
+  @param {String} heading - The main heading text (required)
+  @param {String} sub_content - Additional content to display below the heading (optional)
+  @param {String} content - Main content text (optional)
+  @param {String} product - Product object to display (required)
+  @param {String} color_schema - Color schema for the box (optional)
+
+  @example
+  {% render 'featured-product-2',
+    heading: heading,
+    sub_content: sub_content,
+    content: content,
+    product: product,
+    color_schema: color_schema
+  %}
+{% endcomment %}
+
+<div class="featured-product-2">
+  <div class="featured-product-2__inner">
+    <div class="featured-product-2__top">
+      {% if heading != blank %}
+        <div class="featured-product-2__heading">
+          {% render 'text', context: section %}
+        </div>
+      {% endif %}
+      {% if sub_content != blank %}
+        <xo-animate xo-cascade>
+          <div class="featured-product-2__sub-content">{{ sub_content }}</div>
+        </xo-animate>
+      {% endif %}
+      {% if content != blank %}
+        <xo-animate xo-cascade>
+          <div class="featured-product-2__content">{{ content }}</div>
+        </xo-animate>
+      {% endif %}
+    </div>
+    <xo-grid class="featured-product-2__grid">
+      <div class="featured-product-2__bottom" style="--xl: 4; --lg: 6; --md: 6; --xs: 12; --start-md: 4; --start-xl: 5;">
+        <xo-animate xo-cascade>
+          {% if product and product != empty %}
+            <xo-product
+              xo-selected-or-first-available-variant-id="{{ product.selected_or_first_available_variant.id }}"
+              xo-featured-product
+              xo-product-id="{{ product.id }}"
+              xo-product-url="{{ shop.url }}{{ product.url }}"
+              xo-section-id="{{ section.id }}"
+              class="featured-product-2__product"
+            >
+              <div class="featured-product-2__product-wrap{% if settings.enable_border_radius %} featured-product-2__product-wrap--radius{% endif %}{% if color_schema %} color-{{ color_schema }}{% endif %}">
+                <xo-animate xo-cascade>
+                  <span class="featured-product-2__product-title">{{ product.title }}</span>
+                </xo-animate>
+                <xo-animate xo-cascade>
+                  <span class="featured-product-2__product-description xo-line-3">{{ product.description }}</span>
+                </xo-animate>
+                {% if product and product != empty %}
+                  {% unless product.has_only_default_variant %}
+                    <xo-animate xo-cascade>
+                      <xo-product-variants>
+                        <div class="featured-product-2__product-variant">
+                          {% for option in product.options_with_values %}
+                            <div class="featured-product-2__variant-option">
+                              {% if option.name == settings.product_card_color_option_name %}
+                                {% render 'product-variant', option: option, style: 'color', product: product %}
+                              {% else %}
+                                {% render 'product-variant', option: option, style: 'select', product: product %}
+                              {% endif %}
+                            </div>
+                          {% endfor %}
+                        </div>
+                      </xo-product-variants>
+                    </xo-animate>
+                  {% endunless %}
+                {% endif %}
+                <xo-animate xo-cascade>
+                  <div class="featured-product-2__product-price">
+                    <xo-product-will-change xo-unique-id="xo-product-price-{{ section.id }}" xo-morph-selector="[xo-price]">
+                      {% render 'price', product: product, use_variant: true %}
+                    </xo-product-will-change>
+                  </div>
+                </xo-animate>
+                <xo-animate xo-cascade style="width: 100%;">
+                  <xo-product-will-change xo-unique-id="xo-product-add-button-{{ section.id }}" class="featured-product-2__button">
+                    <xo-cart-add
+                      class="featured-product-2__button-add"
+                      {% if product.selected_or_first_available_variant.available == false %}
+                        xo-disabled
+                      {% endif %}
+                    >
+                      {% if product and product != empty %}
+                        {% if product.selected_or_first_available_variant.available %}
+                          {% assign button_text = 'products.product.add_to_cart' | t %}
+                          {% render 'button', style: 'primary', text: button_text, size: 'md', block: true %}
+                        {% else %}
+                          {% assign button_text = 'products.product.sold_out' | t %}
+                          {% render 'button', style: 'primary', text: button_text, size: 'md', block: true %}
+                        {% endif %}
+                      {% else %}
+                        {% assign button_text = 'products.product.add_to_cart' | t %}
+                        {% render 'button', style: 'primary', text: button_text, size: 'md', block: true %}
+                      {% endif %}
+                    </xo-cart-add>
+                  </xo-product-will-change>
+                </xo-animate>
+              </div>
+              {% render 'product-data', product: product %}
+            </xo-product>
+          {% else %}
+            <div class="featured-product-2__product">
+              <div class="featured-product-2__product-wrap{% if settings.enable_border_radius %} featured-product-2__product-wrap--radius{% endif %}{% if color_schema %} color-{{ color_schema }}{% endif %}">
+                <xo-animate xo-cascade>
+                  <span class="featured-product-2__product-title">{{ 'onboarding.product_title' | t }}</span>
+                </xo-animate>
+                <xo-animate xo-cascade>
+                  <span class="featured-product-2__product-description">{{ 'onboarding.product_description' | t }}</span>
+                </xo-animate>
+                <xo-animate xo-cascade>
+                  <div class="featured-product-2__product-price">
+                    {% render 'price', product: empty, use_variant: true %}
+                  </div>
+                </xo-animate>
+                <xo-animate xo-cascade style="width: 100%;">
+                  <div class="featured-product-2__button">
+                    <div class="featured-product-2__button-add">
+                      {% assign button_text = 'products.product.add_to_cart' | t %}
+                      {% render 'button', style: 'primary', text: button_text, size: 'md', block: true %}
+                    </div>
+                  </div>
+                </xo-animate>
+              </div>
+            </div>
+          {% endif %}
+        </xo-animate>
+      </div>
+    </xo-grid>
+  </div>
+</div>

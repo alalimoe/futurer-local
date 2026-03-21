@@ -1,0 +1,118 @@
+{% comment %}
+  Renders a feature collection
+
+  @param {Object} block - Block (required)
+
+  @example
+  {% render 'featured-collection-1', block: block %}
+{% endcomment %}
+
+<div class="featured-collection-1">
+  <xo-grid class="featured-collection-1__grid">
+    <xo-animate
+      xo-cascade
+      class="featured-collection-1__left{% if settings.enable_border_radius %} featured-collection-1__left--radius{% endif %}"
+      style="--lg: 6; --md: 6; --xs: 12"
+    >
+      {% for item in block %}
+        {% case item.type %}
+          {% when 'image-with-text' %}
+            {% liquid
+              assign caption = item.settings.caption
+              assign sub_heading = item.settings.sub_heading
+              assign class = item.settings.font_size_heading
+              assign heading = item.settings.heading
+              assign image_dt = item.settings.image_dt
+              assign image_mb = item.settings.image_mb
+            %}
+            <div class="featured-collection-1__item">
+              <div class="featured-collection-1__image featured-collection-1__image--desktop">
+                {% render 'animate-image', image: image_dt, border_radius: 0, aspect_ratio: media_aspect_ratio_mobile %}
+              </div>
+              <div class="featured-collection-1__image featured-collection-1__image--mobile">
+                {% render 'animate-image', image: image_mb, border_radius: 0, aspect_ratio: '330/360' %}
+              </div>
+              {% if caption %}
+                <div class="featured-collection-1__caption">
+                  {{ caption }}
+                </div>
+              {% endif %}
+              <div class="featured-collection-1__text">
+                {% if sub_heading %}
+                  <div class="featured-collection-1__sub-heading">
+                    {{ sub_heading }}
+                  </div>
+                {% endif %}
+                {% if heading %}
+                  <div class="featured-collection-1__heading">
+                    {% render 'text', class: class, text: heading, tag_name: tag_name, effect: 'split', duration: 500 %}
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+        {% endcase %}
+      {% endfor %}
+    </xo-animate>
+    <div class="featured-collection-1__right" style="--lg: 6; --md: 6; --xs: 12">
+      {% for item in block %}
+        {% case item.type %}
+          {% when 'featured-product' %}
+            {% liquid
+              assign heading = item.settings.heading
+              assign color_config_enable = item.settings.color_config_enable
+              assign image_1 = item.settings.image_1
+              assign title_1 = item.settings.title_1
+              assign image_2 = item.settings.image_2
+              assign title_2 = item.settings.title_2
+              assign image_3 = item.settings.image_3
+              assign title_3 = item.settings.title_3
+            %}
+            <div class="featured-collection-1__item">
+              {% render 'product-featured',
+                class: 'h6',
+                heading: heading,
+                color_config_enable: color_config_enable,
+                image_1: image_1,
+                title_1: title_1,
+                image_2: image_2,
+                title_2: title_2,
+                image_3: image_3,
+                title_3: title_3
+              %}
+            </div>
+        {% endcase %}
+      {% endfor %}
+      {% for item in block %}
+        {% case item.type %}
+          {% when 'collection' %}
+            {% liquid
+              assign button = item.settings
+              assign collection = item.settings.collection
+              assign image_desktop = item.settings.image_collection_desktop
+              assign media_aspect_ratio_desktop = item.settings.aspect_ratio_collection_desktop
+              if media_aspect_ratio_desktop == 'custom'
+                assign media_aspect_ratio_desktop = item.settings.aspect_ratio_collection_desktop_width | append: '/' | append: item.settings.aspect_ratio_collection_desktop_height
+              endif
+              assign image_mobile = item.settings.image_collection_mobile
+              assign media_aspect_ratio_mobile = item.settings.aspect_ratio_collection_mobile
+              if media_aspect_ratio_mobile == 'custom'
+                assign media_aspect_ratio_mobile = item.settings.aspect_ratio_collection_mobile_width | append: '/' | append: item.settings.aspect_ratio_collection_mobile_height
+              endif
+            %}
+            <div class="featured-collection-1__item">
+              {% render 'collection-image',
+                collection: collection,
+                show_button: true,
+                animate_enabled: false,
+                button: button,
+                image_desktop: image_desktop,
+                media_aspect_ratio_desktop: media_aspect_ratio_desktop,
+                image_mobile: image_mobile,
+                media_aspect_ratio_mobile: media_aspect_ratio_mobile
+              %}
+            </div>
+        {% endcase %}
+      {% endfor %}
+    </div>
+  </xo-grid>
+</div>

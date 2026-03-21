@@ -1,0 +1,855 @@
+{% schema %}
+{
+  "name": "Nootropix Calc (Light)",
+  "tag": "section",
+  "class": "section-nootropix-calc",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Theme Colors"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Section Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "card_bg",
+      "label": "Card Background",
+      "default": "#f9f9f9"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Brand Accent (Gold)",
+      "default": "#fbbf24"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Main Text",
+      "default": "#111827"
+    },
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Beginner Volume Calculator"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Nootropix Calc (Light)"
+    }
+  ]
+}
+{% endschema %}
+
+<div class="nc-wrapper">
+  <div class="nc-container">
+    
+    <header class="nc-header">
+      <div class="nc-brand-badge">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        Evidence-Based Tool
+      </div>
+      <h1 class="nc-title">{{ section.settings.heading }}</h1>
+      <p class="nc-subtitle">
+        Simplifying research solution preparation. <br>
+        <span style="opacity:0.6; font-weight:400;">Select your parameters below to visualize the correct volume.</span>
+      </p>
+    </header>
+
+    <div class="nc-main-grid">
+      
+      <div class="nc-inputs-col">
+        
+        <div class="nc-step-card">
+          <div class="nc-step-label">
+            <span class="nc-step-num">1</span>
+            <span class="nc-step-text">Syringe Capacity</span>
+          </div>
+          <p class="nc-explainer">Match the icon to the syringe you are holding.</p>
+          
+          <div class="nc-options-grid" role="group" aria-label="Syringe capacity">
+            <button class="nc-option-btn active" aria-pressed="true" aria-label="0.3 mL syringe, 30 units" onclick="setParam('syringe', 0.3, this)">
+              <div class="nc-icon-wrap">
+                <svg class="nc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="5" y="10" width="14" height="4" rx="1"/><path d="M19 10v4"/><path d="M22 11v2"/><path d="M2 12h3"/><path d="M9 10v4"/><path d="M13 10v4"/></svg>
+              </div>
+              <span>0.3 mL</span>
+              <small>30 Units</small>
+            </button>
+            <button class="nc-option-btn" aria-pressed="false" aria-label="0.5 mL syringe, 50 units" onclick="setParam('syringe', 0.5, this)">
+              <div class="nc-icon-wrap">
+                <svg class="nc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="4" y="9" width="16" height="6" rx="1"/><path d="M20 9v6"/><path d="M23 11v2"/><path d="M1 12h3"/><path d="M9 9v6"/><path d="M14 9v6"/></svg>
+              </div>
+              <span>0.5 mL</span>
+              <small>50 Units</small>
+            </button>
+            <button class="nc-option-btn" aria-pressed="false" aria-label="1.0 mL syringe, 100 units" onclick="setParam('syringe', 1.0, this)">
+               <div class="nc-icon-wrap">
+                 <svg class="nc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="8" width="18" height="8" rx="1"/><path d="M21 8v8"/><path d="M24 11v2"/><path d="M0 12h3"/><path d="M9 8v8"/><path d="M15 8v8"/></svg>
+               </div>
+              <span>1.0 mL</span>
+              <small>100 Units</small>
+            </button>
+          </div>
+        </div>
+
+        <div class="nc-step-card">
+          <div class="nc-step-label">
+             <span class="nc-step-num">2</span>
+             <span class="nc-step-text">Vial Quantity (mg)</span>
+          </div>
+          <p class="nc-explainer">Total powder weight listed on your vial label.</p>
+          
+          <div class="nc-options-row" role="group" aria-label="Vial quantity in milligrams">
+            <button class="nc-pill-btn" aria-pressed="false" onclick="setParam('peptide', 2, this)">2 mg</button>
+            <button class="nc-pill-btn active" aria-pressed="true" onclick="setParam('peptide', 5, this)">5 mg</button>
+            <button class="nc-pill-btn" aria-pressed="false" onclick="setParam('peptide', 10, this)">10 mg</button>
+            <button class="nc-pill-btn" aria-pressed="false" onclick="setParam('peptide', 15, this)">15 mg</button>
+            <button class="nc-pill-btn" aria-pressed="false" onclick="setParam('peptide', 'other', this)">Other</button>
+          </div>
+          <div id="input-peptide-box" class="nc-input-reveal hidden">
+            <label for="input-peptide" class="visually-hidden">Custom vial quantity in mg</label>
+            <input type="number" id="input-peptide" inputmode="decimal" aria-label="Custom vial quantity in milligrams" placeholder="Enter custom mg..." oninput="updateCustom('peptide')">
+          </div>
+        </div>
+
+        <div class="nc-step-card">
+          <div class="nc-step-label">
+             <span class="nc-step-num">3</span>
+             <span class="nc-step-text">Water Added (mL)</span>
+          </div>
+          <p class="nc-explainer">Amount of bacteriostatic water mixed into the vial.</p>
+          
+          <div class="nc-options-row" role="group" aria-label="Water added in milliliters">
+            <button class="nc-pill-btn" aria-pressed="false" onclick="setParam('water', 1, this)">1 mL</button>
+            <button class="nc-pill-btn active" aria-pressed="true" onclick="setParam('water', 2, this)">2 mL</button>
+            <button class="nc-pill-btn" aria-pressed="false" onclick="setParam('water', 3, this)">3 mL</button>
+            <button class="nc-pill-btn" aria-pressed="false" onclick="setParam('water', 'other', this)">Other</button>
+          </div>
+          <div id="input-water-box" class="nc-input-reveal hidden">
+            <label for="input-water" class="visually-hidden">Custom water amount in mL</label>
+            <input type="number" id="input-water" inputmode="decimal" aria-label="Custom water amount in milliliters" placeholder="Enter custom mL..." oninput="updateCustom('water')">
+          </div>
+        </div>
+
+        <div class="nc-step-card">
+          <div class="nc-step-label">
+             <span class="nc-step-num">4</span>
+             <span class="nc-step-text">Desired Dose (mcg)</span>
+          </div>
+          <p class="nc-explainer">The specific amount you want to research per use.</p>
+          
+          <div class="nc-options-row" role="group" aria-label="Desired dose in micrograms">
+            <button class="nc-pill-btn" aria-pressed="false" onclick="setParam('dose', 100, this)">100</button>
+            <button class="nc-pill-btn active" aria-pressed="true" onclick="setParam('dose', 250, this)">250</button>
+            <button class="nc-pill-btn" aria-pressed="false" onclick="setParam('dose', 500, this)">500</button>
+            <button class="nc-pill-btn" aria-pressed="false" onclick="setParam('dose', 'other', this)">Other</button>
+          </div>
+          <div id="input-dose-box" class="nc-input-reveal hidden">
+            <label for="input-dose" class="visually-hidden">Custom dose in mcg</label>
+            <input type="number" id="input-dose" inputmode="decimal" aria-label="Custom dose in micrograms" placeholder="Enter custom mcg..." oninput="updateCustom('dose')">
+          </div>
+        </div>
+
+      </div>
+
+      <div class="nc-results-col">
+        <div class="nc-result-card">
+          
+          <div class="nc-result-header">
+            <span class="nc-result-label">Visual Guide</span>
+          </div>
+          
+          <div class="nc-result-hero" role="status" aria-live="polite" aria-atomic="true">
+            <div class="nc-hero-text">Draw to:</div>
+            <div class="nc-hero-val"><span id="res-units">10</span> <small>UNITS</small></div>
+            <div class="nc-hero-sub">To get <strong id="res-dose">250 mcg</strong></div>
+          </div>
+
+          <div class="nc-syringe-visual">
+            <div class="nc-syringe-barrel">
+              <div class="nc-liquid" id="liquid-fill"></div>
+              <div class="nc-graduations"></div>
+              <div class="nc-plunger-stopper" id="plunger-stopper"></div>
+            </div>
+            <div class="nc-needle-tip"></div>
+            <div class="nc-syringe-flange"></div>
+            <div class="nc-plunger-rod"></div>
+          </div>
+          
+          <div class="nc-ruler-scale">
+            <span>0</span>
+            <span id="scale-mid">15</span>
+            <span id="scale-max">30</span>
+          </div>
+
+          <div class="nc-summary-action" id="summary-action">
+            <div class="nc-summary-text" id="summary-text">
+              To have a dose of <strong>250 mcg</strong>, pull the syringe to <strong>10 units</strong>.
+            </div>
+            <button class="nc-copy-btn" id="copy-btn" aria-label="Copy calculation result" onclick="copyResult()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              <span>Copy Result</span>
+            </button>
+          </div>
+
+          <div id="error-box" class="nc-error hidden" role="alert">
+            <div class="nc-error-icon" aria-hidden="true">!</div>
+            <div><strong>Capacity Exceeded:</strong> This dose requires more volume than the selected syringe can hold.</div>
+          </div>
+
+          <div class="nc-stats-row">
+            <div class="nc-stat">
+              <label>Volume</label>
+              <span id="res-vol">0.1 mL</span>
+            </div>
+            <div class="nc-stat">
+              <label>Concentration</label>
+              <span id="res-conc">2.5 mg/mL</span>
+            </div>
+          </div>
+
+        </div>
+        
+        <p class="nc-disclaimer">
+          <strong>Note:</strong> 100 Units = 1 mL. Always verify calculations manually. This tool is for educational laboratory use only.
+        </p>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<style>
+  :root {
+    --nc-bg: {{ section.settings.bg_color }};
+    --nc-card: {{ section.settings.card_bg }};
+    --nc-accent: {{ section.settings.accent_color }};
+    --nc-text: {{ section.settings.text_color }};
+    --nc-border: var(--nx-pill-border, var(--color-border-default));
+    --nc-border-hover: var(--color-border-default);
+    --nc-muted: var(--nx-muted, var(--color-text-secondary));
+    --nc-font: var(--font-body-family, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif);
+    --nc-font-heading: var(--font-heading-family, var(--nc-font));
+    --nc-shadow: var(--shadow-sm);
+    --nc-shadow-hover: var(--shadow-md-hover);
+    --nc-radius: 12px;
+    --nc-transition: all 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+    --nc-accent-bg: rgba(251, 191, 36, 0.08);
+    --nc-error: var(--color-error);
+    --nc-success: var(--color-success);
+  }
+
+  .nc-wrapper {
+    background-color: var(--nc-bg);
+    color: var(--nc-text);
+    padding: clamp(32px, 6vw, 60px) var(--page-gutter);
+    font-family: var(--nc-font);
+    line-height: 1.5;
+  }
+  
+  .nc-container {
+    max-width: var(--container-width-medium);
+    margin: 0 auto;
+  }
+
+  /* HEADER */
+  .nc-header {
+    text-align: center;
+    max-width: 600px;
+    margin: 0 auto 50px;
+  }
+  .nc-brand-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--nc-accent-bg);
+    color: var(--nc-accent);
+    padding: 4px 12px;
+    border-radius: var(--nx-radius-pill);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 16px;
+    filter: saturate(1.2);
+  }
+  .nc-title {
+    font-family: var(--nc-font-heading);
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    font-weight: 800;
+    color: var(--nc-text);
+    margin: 0 0 12px;
+    letter-spacing: -0.025em;
+    line-height: 1.2;
+  }
+  .nc-subtitle {
+    color: var(--nc-muted);
+    font-size: clamp(0.875rem, 1.5vw, 1rem);
+  }
+
+  /* LAYOUT GRID */
+  .nc-main-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 40px;
+    align-items: start;
+  }
+  @media(max-width: 800px) {
+    .nc-main-grid { grid-template-columns: 1fr; }
+  }
+
+  /* INPUT CARDS */
+  .nc-inputs-col {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+  
+  .nc-step-card {
+    background: var(--color-surface-primary);
+    border: none;
+    border-radius: var(--nc-radius);
+    padding: 24px;
+    box-shadow: var(--nc-shadow);
+    transition: var(--nc-transition);
+  }
+  .nc-step-card:hover {
+    box-shadow: var(--nc-shadow-hover);
+    transform: translateY(-2px);
+  }
+
+  .nc-step-label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 4px;
+  }
+  .nc-step-num {
+    background: var(--nc-accent);
+    color: var(--color-text-primary);
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 12px;
+  }
+  .nc-step-text {
+    font-family: var(--nc-font-heading);
+    font-weight: 700;
+    font-size: clamp(0.875rem, 1.5vw, 1rem);
+    color: var(--nc-text);
+    letter-spacing: -0.01em;
+  }
+  .nc-explainer {
+    margin: 0 0 16px 36px;
+    font-size: clamp(0.8rem, 1.2vw, 0.875rem);
+    color: var(--nc-muted);
+    line-height: 1.5;
+  }
+
+  /* BUTTONS: SYRINGE (Big Cards) */
+  .nc-options-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+  .nc-option-btn {
+    background: var(--color-surface-primary);
+    border: 1.5px solid var(--nc-border);
+    border-radius: var(--nx-radius-md);
+    padding: 16px 8px;
+    min-height: 44px;
+    cursor: pointer;
+    text-align: center;
+    transition: var(--nc-transition);
+    color: var(--nc-text);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: var(--shadow-xs);
+  }
+  .nc-option-btn:hover { border-color: var(--nc-border-hover); box-shadow: var(--shadow-sm-hover); transform: translateY(-1px); }
+  .nc-option-btn.active {
+    border-color: var(--nc-accent);
+    background-color: var(--nc-accent-bg);
+    box-shadow: 0 0 0 1.5px var(--nc-accent), 0 2px 12px rgba(251,191,36,0.18);
+    animation: ntx-calc-pulse 0.4s ease-out;
+  }
+  .nc-option-btn:focus-visible { outline: 2px solid var(--nc-accent); outline-offset: 2px; }
+  .nc-icon-wrap {
+    color: var(--nc-muted);
+    margin-bottom: 8px;
+    transition: color 0.3s ease;
+  }
+  .nc-option-btn.active .nc-icon-wrap { color: var(--nc-accent); filter: saturate(1.4); }
+  .nc-icon { width: 24px; height: 24px; }
+  .nc-option-btn span { font-weight: 700; font-size: clamp(0.8rem, 1.2vw, 0.875rem); display: block; }
+  .nc-option-btn small { font-size: 10px; color: var(--nc-muted); text-transform: uppercase; font-weight: 600; margin-top: 2px; }
+
+  /* BUTTONS: PILLS (Smaller Options) */
+  .nc-options-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .nc-pill-btn {
+    flex: 1;
+    min-width: 60px;
+    min-height: 44px;
+    background: var(--color-surface-primary);
+    border: 1.5px solid var(--nc-border);
+    padding: 10px 16px;
+    border-radius: var(--nx-radius-sm);
+    font-size: clamp(0.8rem, 1.2vw, 0.875rem);
+    font-weight: 500;
+    color: var(--nc-text);
+    cursor: pointer;
+    transition: var(--nc-transition);
+    box-shadow: var(--shadow-xs);
+  }
+  .nc-pill-btn:hover { border-color: var(--nc-border-hover); box-shadow: var(--shadow-sm-hover); }
+  .nc-pill-btn:active { transform: scale(0.96); }
+  .nc-pill-btn:focus-visible { outline: 2px solid var(--nc-accent); outline-offset: 2px; }
+  .nc-pill-btn.active {
+    background: var(--nc-accent);
+    border-color: var(--nc-accent);
+    color: var(--color-text-primary);
+    font-weight: 700;
+    box-shadow: 0 0 0 1.5px var(--nc-accent), 0 2px 12px rgba(251,191,36,0.18);
+    animation: ntx-calc-pulse 0.4s ease-out;
+  }
+
+  /* INPUT FIELDS */
+  .nc-input-reveal {
+    margin-top: 12px;
+  }
+  .nc-input-reveal.hidden { display: none; }
+  .nc-input-reveal input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1.5px solid var(--nc-border);
+    border-radius: var(--nx-radius-sm);
+    font-size: clamp(0.8rem, 1.2vw, 0.875rem);
+    font-family: var(--nc-font);
+    outline: none;
+    background: var(--color-surface-secondary);
+    color: var(--nc-text);
+    min-height: 44px;
+    transition: var(--nc-transition);
+  }
+  .nc-input-reveal input:focus {
+    border-color: var(--nc-accent);
+    background: var(--color-surface-primary);
+    box-shadow: var(--shadow-gold-focus);
+  }
+
+  /* RESULTS COLUMN */
+  .nc-results-col {
+    position: sticky;
+    top: 40px;
+  }
+  .nc-result-card {
+    background: var(--color-surface-primary);
+    border: none;
+    border-radius: var(--nc-radius);
+    padding: 32px;
+    box-shadow: var(--shadow-sm);
+    text-align: center;
+  }
+  .nc-result-label {
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--nc-muted);
+    display: block;
+    margin-bottom: 20px;
+  }
+  
+  .nc-hero-text { font-size: 14px; color: var(--nc-muted); margin-bottom: 4px; }
+  .nc-hero-val { 
+    font-family: var(--nc-font-heading);
+    font-size: clamp(2.5rem, 5vw, 3rem);
+    font-weight: 900; 
+    color: var(--nc-text); 
+    line-height: 1; 
+    margin-bottom: 8px;
+    letter-spacing: -0.03em;
+    transition: color 0.3s ease;
+  }
+  .nc-hero-val small { font-size: 14px; color: var(--nc-accent); vertical-align: middle; margin-left: 4px; }
+  .nc-hero-sub { font-size: 14px; color: var(--nc-text); }
+
+  /* SYRINGE VISUAL - LIGHT MODE */
+  .nc-syringe-visual {
+    margin: 40px auto 10px;
+    width: 100%;
+    max-width: 320px;
+    height: 40px;
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .nc-needle-tip {
+    width: 20px; height: 1px; background: var(--color-text-tertiary);
+    position: absolute; left: -20px;
+  }
+  .nc-syringe-barrel {
+    flex-grow: 1;
+    height: 100%;
+    border: 2px solid var(--color-ui-charcoal-hover);
+    border-radius: 4px;
+    position: relative;
+    background: var(--color-surface-primary);
+    overflow: hidden;
+    z-index: 2;
+  }
+  /* Liquid */
+  .nc-liquid {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    background: var(--nc-accent);
+    width: 33%;
+    opacity: 0.8;
+    transition: width 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+  }
+  /* Graduations */
+  .nc-graduations {
+    position: absolute;
+    inset: 0;
+    background-image: repeating-linear-gradient(90deg, 
+      transparent, transparent calc(10% - 1px), 
+      var(--color-border-default) calc(10% - 1px), var(--color-border-default) 10%);
+  }
+  .nc-plunger-stopper {
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 4px;
+    background: var(--color-text-primary);
+    left: 33%; /* Matches liquid width */
+    transform: translateX(-50%);
+    transition: left 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    z-index: 3;
+  }
+  /* Plunger Rod sticking out back */
+  .nc-plunger-rod {
+    position: absolute;
+    height: 8px;
+    background: var(--color-border-default);
+    top: 50%;
+    transform: translateY(-50%);
+    left: 100%;
+    width: 40px;
+    z-index: 1;
+  }
+
+  .nc-ruler-scale {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    font-family: monospace;
+    color: var(--nc-muted);
+    max-width: 320px;
+    margin: 0 auto 30px;
+  }
+
+  /* SUMMARY & COPY SECTION */
+  .nc-summary-action {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    background: var(--color-surface-secondary);
+    border: none;
+    border-radius: var(--nx-radius-md);
+    padding: 16px;
+    margin-bottom: 24px;
+    box-shadow: inset 0 1px 4px rgba(0,0,0,0.04);
+  }
+  .nc-summary-action.hidden {
+    display: none;
+  }
+  .nc-summary-text {
+    font-size: 14px;
+    color: var(--nc-text);
+    line-height: 1.4;
+    text-align: center;
+  }
+  .nc-copy-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--color-surface-primary);
+    border: 1.5px solid var(--nc-border);
+    color: var(--nc-text);
+    font-size: 13px;
+    font-family: var(--nc-font);
+    font-weight: 600;
+    padding: 8px 16px;
+    min-height: 44px;
+    border-radius: var(--nx-radius-sm);
+    cursor: pointer;
+    transition: var(--nc-transition);
+    box-shadow: var(--shadow-xs);
+  }
+  .nc-copy-btn svg {
+    flex-shrink: 0;
+    transition: transform 0.3s ease;
+  }
+  .nc-copy-btn:hover {
+    background: var(--color-surface-secondary);
+    border-color: var(--nc-border-hover);
+    box-shadow: var(--shadow-sm-hover);
+  }
+  .nc-copy-btn:focus-visible { outline: 2px solid var(--nc-accent); outline-offset: 2px; }
+  .nc-copy-btn.copied {
+    background: var(--color-success-bg);
+    border-color: var(--nc-success);
+    color: var(--color-success-text);
+  }
+  .nc-copy-btn.copied svg {
+    transform: scale(1.2);
+  }
+
+  /* ERROR & STATS */
+  .nc-error {
+    background: var(--color-error-bg);
+    border: none;
+    color: var(--color-error-text);
+    font-size: 13px;
+    padding: 12px;
+    border-radius: var(--nx-radius-md);
+    text-align: left;
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    box-shadow: inset 0 0 0 1px rgba(239, 68, 68, 0.2);
+  }
+  .nc-error.hidden { display: none; }
+  .nc-error-icon {
+    background: var(--nc-error); color: var(--color-text-inverse); width: 18px; height: 18px;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-weight: bold; flex-shrink: 0;
+  }
+
+  .nc-stats-row {
+    display: flex;
+    justify-content: space-between;
+    box-shadow: inset 0 1px 0 rgba(0,0,0,0.06);
+    padding-top: 20px;
+  }
+  .nc-stat label { display: block; font-size: 10px; text-transform: uppercase; color: var(--nc-muted); font-weight: 700; letter-spacing: 0.05em; }
+  .nc-stat span { font-size: 14px; font-weight: 600; color: var(--nc-text); font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+
+  .nc-disclaimer {
+    margin-top: 20px;
+    font-size: 11px;
+    color: var(--nc-muted);
+    line-height: 1.5;
+    text-align: center;
+  }
+
+  /* Gold pulse animation for active pills */
+  @keyframes ntx-calc-pulse {
+    0% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.4); }
+    70% { box-shadow: 0 0 0 8px rgba(251, 191, 36, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0); }
+  }
+
+  /* Result flash on calculation change */
+  @keyframes ntx-result-flash {
+    0% { background-color: rgba(251, 191, 36, 0.12); }
+    100% { background-color: transparent; }
+  }
+  .nc-hero-val.flash {
+    animation: ntx-result-flash 0.4s ease-out;
+  }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .nc-step-card,
+    .nc-option-btn,
+    .nc-pill-btn,
+    .nc-copy-btn,
+    .nc-input-reveal input,
+    .nc-liquid,
+    .nc-plunger-stopper { transition: none; }
+    .nc-step-card:hover { transform: none; }
+    .nc-option-btn:hover { transform: none; }
+    .nc-option-btn.active,
+    .nc-pill-btn.active { animation: none; }
+    .nc-hero-val.flash { animation: none; }
+  }
+</style>
+
+<script>
+  let state = {
+    syringe: 0.3,
+    peptide: 5,
+    water: 2,
+    dose: 250
+  };
+
+  function setParam(type, value, btn) {
+    let container;
+    if(type === 'syringe') container = btn.closest('.nc-options-grid');
+    else container = btn.closest('.nc-options-row');
+    
+    const siblings = container.querySelectorAll(type === 'syringe' ? '.nc-option-btn' : '.nc-pill-btn');
+    siblings.forEach(function(b) { b.classList.remove('active'); b.setAttribute('aria-pressed', 'false'); });
+    btn.classList.add('active');
+    btn.setAttribute('aria-pressed', 'true');
+
+    // 2. Input Logic
+    const inputContainer = document.getElementById(`input-${type}-box`);
+    
+    if(inputContainer) {
+      if(value === 'other') {
+        inputContainer.classList.remove('hidden');
+        const customVal = parseFloat(document.getElementById(`input-${type}`).value);
+        state[type] = isNaN(customVal) ? 0 : customVal;
+      } else {
+        inputContainer.classList.add('hidden');
+        state[type] = value;
+      }
+    } else {
+      state[type] = value;
+    }
+
+    calculate();
+  }
+
+  function updateCustom(type) {
+    const val = parseFloat(document.getElementById(`input-${type}`).value);
+    state[type] = isNaN(val) ? 0 : val;
+    calculate();
+  }
+
+  function calculate() {
+    const { syringe, peptide, water, dose } = state;
+    const maxUnits = Math.round(syringe * 100);
+
+    // Scale Label Update
+    document.getElementById('scale-max').innerText = maxUnits;
+    document.getElementById('scale-mid').innerText = Math.round(maxUnits / 2);
+
+    const summaryAction = document.getElementById('summary-action');
+    const errorBox = document.getElementById('error-box');
+
+    // Validations
+    if(peptide <= 0 || water <= 0 || dose <= 0) {
+      updateVisuals(0, maxUnits);
+      document.getElementById('res-units').innerText = '--';
+      if(summaryAction) summaryAction.classList.add('hidden');
+      return;
+    }
+
+    // Math
+    const concentration = (peptide * 1000) / water; // mcg/mL
+    const vol = dose / concentration; // mL
+    let units = vol * 100;
+
+    // Rounding
+    units = Math.round(units * 10) / 10;
+    const volDisplay = vol.toFixed(3);
+    const concDisplay = (peptide / water).toFixed(1); // mg/mL
+
+    var heroEl = document.querySelector('.nc-hero-val');
+    if(heroEl) { heroEl.classList.remove('flash'); void heroEl.offsetWidth; heroEl.classList.add('flash'); }
+    document.getElementById('res-units').innerText = units;
+    document.getElementById('res-dose').innerText = dose + " mcg";
+    document.getElementById('res-vol').innerText = volDisplay + " mL";
+    document.getElementById('res-conc').innerText = concDisplay + " mg/mL";
+
+    // Dynamic Text Summary Update
+    document.getElementById('summary-text').innerHTML = `To have a dose of <strong>${dose} mcg</strong>, pull the syringe to <strong>${units} units</strong>.`;
+
+    // Error & Visuals
+    if(units > maxUnits) {
+      errorBox.classList.remove('hidden');
+      if(summaryAction) summaryAction.classList.add('hidden');
+      updateVisuals(maxUnits + 10, maxUnits, true); // Overfill visual
+    } else {
+      errorBox.classList.add('hidden');
+      if(summaryAction) summaryAction.classList.remove('hidden');
+      updateVisuals(units, maxUnits, false);
+    }
+  }
+
+  function updateVisuals(units, max, isError) {
+    const liquid = document.getElementById('liquid-fill');
+    const stopper = document.getElementById('plunger-stopper');
+    
+    let pct = (units / max) * 100;
+    if(pct > 100) pct = 100;
+    if(pct < 0) pct = 0;
+
+    liquid.style.width = pct + '%';
+    stopper.style.left = pct + '%';
+    
+    if(isError) {
+      liquid.style.backgroundColor = '#fecaca'; // Light red
+      stopper.style.backgroundColor = '#991b1b'; // Dark red
+    } else {
+      liquid.style.backgroundColor = 'var(--nc-accent)';
+      stopper.style.backgroundColor = '#111827';
+    }
+  }
+
+  function copyResult() {
+    const text = document.getElementById('summary-text').innerText;
+    
+    // Check if secure context for Modern Clipboard API
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text).then(() => {
+        showCopiedState();
+      }).catch(err => console.error('Failed to copy text: ', err));
+    } else {
+      // Fallback logic for older browsers
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      textArea.style.position = "fixed";
+      textArea.style.left = "-999999px";
+      textArea.style.top = "-999999px";
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      try {
+        document.execCommand('copy');
+        showCopiedState();
+      } catch (err) {
+        console.error('Fallback copy failed', err);
+      }
+      textArea.remove();
+    }
+  }
+
+  function showCopiedState() {
+    const btn = document.getElementById('copy-btn');
+    const originalHtml = btn.innerHTML;
+    
+    btn.classList.add('copied');
+    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> <span>Copied!</span>`;
+    
+    setTimeout(() => {
+      btn.classList.remove('copied');
+      btn.innerHTML = originalHtml;
+    }, 2000);
+  }
+
+  // Init
+  document.addEventListener('DOMContentLoaded', calculate);
+</script>

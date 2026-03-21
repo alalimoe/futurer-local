@@ -1,0 +1,48 @@
+{% comment %}
+  Renders a testimonial element with a given value
+
+  Accepts:
+  - autoplay: {String} Autoplay slide (required)
+  - autoplay_time: {String} Set time for autoplay slide (required)
+
+  Usage:
+  {% render 'testimonial-box-5', autoplay: autoplay, autoplay_time: autoplay_time %}
+{% endcomment %}
+
+<div class='testimonial-box-5'>
+  <xo-grid class='testimonial-box-5__grid'>
+    <div class='testimonial-box-5__left' style='--xl: 5; --lg: 4; --md: 12; --xs: 12'>
+      <xo-animate xo-cascade>
+        {% if heading %}
+          <h3 class='testimonial-box-5__heading {{ class }}'>{{ heading }}</h3>
+        {% endif %}
+      </xo-animate>
+    </div>
+    <div class='testimonial-box-5__right' style='--xl: 7; --lg: 8; --md: 12; --xs: 12'>
+      <xo-masonry
+        xo-column='2'
+        xo-breakpoints='
+          {
+            768: {
+              column: 1
+            },
+            992: {
+              column: 2
+            }
+          }
+        '
+        class='testimonial-box-5__content'
+      >
+        {% for item in block %}
+          {% liquid
+            assign content = item.settings.content
+            assign name = item.settings.customer_name
+          %}
+          <xo-masonry-item class='testimonial-box-5__item'>
+            {% render 'testimonial-box', content: content, name: name, enable_navigation: 'false', enable_show_icon: 'false', tag_2: 'div', tag_1: 'xo-animate' %}
+          </xo-masonry-item>
+        {% endfor %}
+      </xo-masonry>
+    </div>
+  </xo-grid>
+</div>

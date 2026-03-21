@@ -1,0 +1,41 @@
+{% comment %}
+  Renders a collapse content.
+
+  Accepts:
+  - class: {String} Font size heading of the collapse (required)
+  - heading: {String} Heading of the collapse (required)
+  - content: {String} Content of the collapse (required)
+  - name: {String} Name of the collapse (required)
+
+  Usage:
+  {% render 'collapse-content-box-1',
+    class: class,
+    heading: heading,
+    content: content,
+    name: name,
+  %}
+{% endcomment %}
+
+<div class="collapse-content-box-1">
+  {% if heading %}
+    <xo-animate xo-cascade>
+      <h3 class="collapse-content-box-1__heading {{ class }}">{{ heading }}</h3>
+    </xo-animate>
+  {% endif %}
+  <xo-collapse-provider>
+    <div class="collapse-content-box-1__content">
+      {% for item in block %}
+        {% liquid
+          assign title = item.settings.title
+          assign content = item.settings.content
+          assign name = 'heading-' | append: forloop.index
+        %}
+        <xo-animate xo-cascade>
+          <div class="collapse-content-box-1__item {% if settings.enable_border_radius %}collapse-content-box-1__item--radius{% endif %}">
+            {% render 'collapse', title: title, content: content, name: name, show_icon_arrow: false %}
+          </div>
+        </xo-animate>
+      {% endfor %}
+    </div>
+  </xo-collapse-provider>
+</div>

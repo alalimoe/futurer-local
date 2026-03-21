@@ -1,0 +1,151 @@
+{% comment %}
+  Renders a collection image
+
+  Accepts:
+  - collection: {Object} Collection object (required)
+  - class: {String} Font size heading of the collection (required)
+  - heading: {String} Title of the collection (required)
+  - image: {Image} Image Liquid object (optional)
+  - media_aspect_ratio: {String} Size of the image (optional)
+  - link: {String} Link to the collection (optional)
+  - button: {Object} Button (optional)
+  - show_button: {Boolean} Show button to use (optional)
+  - color_scheme_collection: {String} The color scheme to use (optional)
+  - animate_enabled: {Boolean} Enable animation. Default: true (optional)
+
+  Usage:
+  {% render 'collection-image-1',
+    collection: collection,
+    class: class,
+    heading: heading,
+    image: image_desktop,
+    media_aspect_ratio: media_aspect_ratio_desktop,
+    image: image_mobile,
+    media_aspect_ratio: media_aspect_ratio_mobile,
+    link: link,
+    button: button,
+    show_button: show_button,
+    color_schema_collection: color_schema_collection,
+    animate_enable: true
+  %}
+{% endcomment %}
+
+{%- liquid
+  if collection and collection != empty
+    assign image_collection = collection.featured_image
+    assign collection_name = collection.title
+    assign link = collection.url
+  endif
+
+  if animate_enabled == null
+    assign animate_enabled = true
+  endif
+  assign tag_name = 'div'
+  if animate_enabled
+    assign tag_name = 'xo-animate'
+  endif
+-%}
+
+{% if image_collection == blank %}
+  {% capture style_desktop %}
+    style="--url-desktop: url('{{ image_desktop | image_url }}'); --aspect-ratio-desktop: {{ media_aspect_ratio_desktop }}"
+  {% endcapture %}
+{% else %}
+  {% if image_desktop != blank %}
+    {% capture style_desktop %}
+      style="--url-desktop: url('{{ image_desktop | image_url }}'); --aspect-ratio-desktop: {{ media_aspect_ratio_desktop }}"
+    {% endcapture %}
+  {%- else -%}
+    {% capture style_desktop %}
+      style="--url-desktop: url('{{ image_collection | image_url }}'); --aspect-ratio-desktop: {{ media_aspect_ratio_desktop }}"
+    {% endcapture %}
+  {% endif %}
+{% endif %}
+
+{% if image_collection == blank %}
+  {% capture style_mobile %}
+    style="--url-mobile: url('{{ image_mobile | image_url }}'); --aspect-ratio-mobile: {{ media_aspect_ratio_mobile }}"
+  {% endcapture %}
+{% else %}
+  {% if image_mobile != blank %}
+    {% capture style_mobile %}
+      style="--url-mobile: url('{{ image_mobile | image_url }}'); --aspect-ratio-mobile: {{ media_aspect_ratio_mobile }}"
+    {% endcapture %}
+  {%- else -%}
+    {% capture style_mobile %}
+    style="--url-mobile: url('{{ image_collection | image_url }}'); --aspect-ratio-mobile: {{ media_aspect_ratio_mobile }}"
+  {% endcapture %}
+  {% endif %}
+{% endif %}
+
+<{{ tag_name }} xo-cascade class='collection-image-1{% if color_schema_collection %} color-{{ color_schema_collection }}{% endif %}'>
+  <div class='collection-image-1__bg'>
+    {% if collection == blank and image_desktop == blank %}
+      <div class='collection-image-1__item'>
+        <div class='collection-image-1__image collection-image-1__image--desktop{% if settings.enable_border_radius %} collection-image-1__image--radius{% endif %}'>
+          {{ 'hero-apparel-1' | placeholder_svg_tag: 'placeholder-svg' }}
+        </div>
+      </div>
+    {%- else -%}
+      <xo-parallax class='collection-image-1__item' {{ style_desktop }}>
+        <xo-parallax-scroll
+          class='collection-image-1__image xo-background-lazyload collection-image-1__image--desktop{% if settings.enable_border_radius %} collection-image-1__image--radius{% endif %}'
+          xo-keyframes="
+            {
+              '0%': { backgroundPositionY: '200px' },
+              '100%': { backgroundPositionY: '-200px' },
+            }
+          "
+        >
+        </xo-parallax-scroll>
+      </xo-parallax>
+    {% endif %}
+    {% if collection == blank and image_mobile == blank %}
+      <div class='collection-image-1__item'>
+        <div class='collection-image-1__image collection-image-1__image--mobile{% if settings.enable_border_radius %} collection-image-1__image--radius{% endif %}'>
+          {{ 'hero-apparel-1' | placeholder_svg_tag: 'placeholder-svg' }}
+        </div>
+      </div>
+    {%- else -%}
+      <xo-parallax class='collection-image-1__item' {{ style_mobile }}>
+        <xo-parallax-scroll
+          class='collection-image-1__image xo-background-lazyload collection-image-1__image--mobile{% if settings.enable_border_radius %} collection-image-1__image--radius{% endif %}'
+          xo-keyframes="
+            {
+            '0%': { backgroundPositionY: '100px' },
+            '100%': { backgroundPositionY: '-100px' },
+            }
+          "
+          xo-breakpoints="
+            {
+              768: {
+                '33.3%': { backgroundPositionY: '20px' },
+                '100%': { backgroundPositionY: '-20px' },
+              }
+            }
+          "
+        >
+        </xo-parallax-scroll>
+      </xo-parallax>
+    {% endif %}
+  </div>
+  {% if show_heading %}
+    <div class='collection-image-1__text'>
+      <h5 class='collection-image-1__heading {{ class }}'>{{ heading | default: collection_name }}</h5>
+    </div>
+  {% endif %}
+  {% if show_button %}
+    {% liquid
+      assign button_text_default = 'general.shop_all' | t
+      assign button_text = button_text | default: button_text_default
+      assign button_link = button_link | default: link
+      assign button_style = button_style | default: 'primary'
+      assign button_size = button_size | default: 'sm'
+    %}
+    <xo-magnetic xo-duration='500' xo-radius='150' class='collection-image-1__button'>
+      <xo-magnetic-content>
+        {% render 'button', text: button_text, link: button_link, style: button_style, size: button_size %}
+      </xo-magnetic-content>
+    </xo-magnetic>
+  {% endif %}
+</{{ tag_name }}>

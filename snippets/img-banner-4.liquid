@@ -1,0 +1,154 @@
+{% comment %}
+  Render img banner 4
+
+  @params {string} heading - The heading of banner
+  @params {string} image_desktop - The image of banner
+  @params {string} image_mobile - The image of banner
+  @params {object} blocks - The blocks of banner
+
+  @example
+  {% render 'img-banner-4',
+    heading: heading,
+    image_desktop: image_desktop,
+    image_mobile: image_mobile,
+    background_image_desktop: background_image_desktop,
+    background_image_mobile: background_image_mobile,
+    blocks: blocks
+  %}
+{% endcomment %}
+
+{% liquid
+  assign image_parallax_blocks = blocks | where: 'type', 'image-parallax'
+  assign image_text_blocks = blocks | where: 'type', 'image-text'
+%}
+
+<div xo-parallax class="img-banner-4">
+  <div class="img-banner-4__inner">
+    <xo-parallax-scroll
+      class="img-banner-4__pr"
+      xo-backface-visibility="visible"
+      xo-keyframes="
+        {
+          '50%': { scale: 1, {% if settings.enable_border_radius %}borderRadius: 0{% endif %} },
+          '60%': { scale: 0.95, {% if settings.enable_border_radius %}borderRadius: 30{% endif %} },
+          '100%': { scale: 0.93, {% if settings.enable_border_radius %}borderRadius: 50{% endif %} },
+        }
+      "
+    >
+      <xo-parallax-scroll
+        class="img-banner-4__pr-2"
+        xo-backface-visibility="visible"
+        xo-keyframes="
+          {
+            '40%': { scale: 1, brightness: '100%' },
+            '100%': { scale: 2, brightness: '40%' },
+          }
+        "
+      >
+        <xo-animate
+          xo-cascade
+          xo-type="zoom-out"
+          xo-duration="2000"
+          class="img-banner-4__bg"
+          style="--img-desktop: url('{{ background_image_desktop }}'); --img-mobile: url('{{ background_image_mobile }}')"
+        >
+          {% if background_image_desktop == blank %}
+            {{ 'hero-apparel-1' | placeholder_svg_tag: 'placeholder-svg' }}
+          {% endif %}
+        </xo-animate>
+      </xo-parallax-scroll>
+    </xo-parallax-scroll>
+    <xo-container class="img-banner-4__container">
+      <div class="img-banner-4__body">
+        <div class="img-banner-4__content">
+          <xo-animate xo-cascade>
+            {% render 'text-with-image', context: section, blocks: image_text_blocks %}
+          </xo-animate>
+          <div class="img-banner-4__image-wrap">
+            <xo-parallax-scroll
+              style="width: 100%; height: 100%;"
+              xo-keyframes="
+                {
+                  '0%': { scale: 0.6, y: 200 },
+                  '50%': { scale: 1, y: 0 },
+                  '80%': { scale: 0.9, y: 0 }
+                }
+              "
+            >
+              <div class="img-banner-4__image-content img-banner-4__image--desktop">
+                {% render 'animate-image', image: image_desktop, border_radius: 0, aspect_ratio: 'auto', disable_alt: true, max_width: 100 %}
+              </div>
+              <div class="img-banner-4__image-content img-banner-4__image--mobile">
+                {% render 'animate-image', image: image_mobile, border_radius: 0, aspect_ratio: 'auto', disable_alt: true, max_width: 100 %}
+              </div>
+            </xo-parallax-scroll>
+          </div>
+        </div>
+        <div class="img-banner-4__parallax">
+          {% for block in image_parallax_blocks %}
+            {% liquid
+              assign image = block.settings.image
+              assign inherit_desktop_value = block.settings.inherit_desktop_value
+              assign width_desktop = block.settings.width_desktop | divided_by: 10.0
+              assign height_desktop = block.settings.height_desktop | divided_by: 10.0
+              assign width_mobile = block.settings.width_mobile | divided_by: 10.0
+              assign height_mobile = block.settings.height_mobile | divided_by: 10.0
+              if inherit_desktop_value
+                assign width_mobile = width_desktop
+                assign height_mobile = height_desktop
+              endif
+
+              assign image_style = ''
+              if width_desktop
+                assign image_style = image_style | append: '--width-desktop: ' | append: width_desktop | append: 'rem;'
+              endif
+              if height_desktop
+                assign image_style = image_style | append: '--height-desktop: ' | append: height_desktop | append: 'rem;'
+              endif
+              if width_mobile
+                assign image_style = image_style | append: '--width-mobile: ' | append: width_mobile | append: 'rem;'
+              endif
+              if height_mobile
+                assign image_style = image_style | append: '--height-mobile: ' | append: height_mobile | append: 'rem;'
+              endif
+
+              assign item_class = 'img-banner-4__parallax-item' | append: ' img-banner-4__parallax-item--' | append: forloop.index
+            %}
+
+            {% if forloop.first %}
+              {% capture attr %}
+                xo-keyframes="
+                  {
+                    '0%': { scale: 0.6, opacity: 1, y: 200 },
+                    '50%': { scale: 1, opacity: 1, y: 0 },
+                    '80%': { scale: 0.6, opacity: 0, y: -200 }
+                  }
+                "
+              {% endcapture %}
+            {% else %}
+              {% capture attr %}
+                xo-keyframes="
+                  {
+                    '0%': { scale: 0.6, opacity: 1, y: -200 },
+                    '50%': { scale: 1, opacity: 1, y: 0 },
+                    '80%': { scale: 0.6, opacity: 0, y: 200 }
+                  }
+                "
+              {% endcapture %}
+            {% endif %}
+
+            <div class="{{ item_class }}">
+              <xo-parallax-scroll {{ attr }}>
+                <xo-parallax-hover xo-strength="100">
+                  <div class="img-banner-4__parallax-image" style="{{ image_style }}">
+                    {% render 'image', image: image, aspect_ratio: 'auto', lazyload: true %}
+                  </div>
+                </xo-parallax-hover>
+              </xo-parallax-scroll>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </xo-container>
+  </div>
+</div>

@@ -1,0 +1,84 @@
+{% comment %} TODO: Thiếu phần properties cho order  {% endcomment %}
+{{ 'section-main-order.css' | asset_url | stylesheet_tag }}
+{{ 'order-table.css' | asset_url | stylesheet_tag }}
+{{ 'order-bill.css' | asset_url | stylesheet_tag }}
+{{ 'order-product.css' | asset_url | stylesheet_tag }}
+
+<section {% render 'section-attr' %}>
+  <div class='main-order'>
+    <xo-container class='main-order__container'>
+      <xo-animate xo-cascade>
+        <div class='main-order__head'>
+          <h4 class='main-order__heading h4'>
+            {{ 'customer.account.title' | t }}
+          </h4>
+          <div class='main-order__button'>
+            {% assign button_text = 'customer.account.return' | t %}
+            {% assign button_link = routes.account_url %}
+            {% render 'button', text: button_text, link: button_link, style: 'link', size: 'sm', icon: 'chevron-left', icon_position: 'left' %}
+          </div>
+        </div>
+      </xo-animate>
+      {% render 'space', spacing_dt: 40, spacing_mb: 50 %}
+      <xo-grid class='main-order__grid'>
+        <xo-animate xo-cascade style='--xs: 12; --md: 12; --lg: 9'>
+          <div class='main-order__table'>
+            {% render 'order-table' %}
+          </div>
+        </xo-animate>
+        <xo-animate xo-cascade style='--xs: 12; --md: 12; --lg: 3'>
+          <div class='main-order__info'>
+            {% render 'order-bill' %}
+          </div>
+        </xo-animate>
+      </xo-grid>
+    </xo-container>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "t:sections.main_order.name",
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Section color scheme"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color"
+    },
+    {
+      "type": "color_background",
+      "id": "background_gradient",
+      "label": "Background gradient"
+    },
+    {
+      "type": "number",
+      "id": "padding_top_desktop",
+      "label": "Padding top desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_desktop",
+      "label": "Padding bottom desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_top_mobile",
+      "label": "Padding top mobile",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_mobile",
+      "label": "Padding bottom mobile",
+      "default": 50
+    }
+  ]
+}
+{% endschema %}

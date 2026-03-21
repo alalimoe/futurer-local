@@ -1,0 +1,112 @@
+{% comment %}
+──────────────────────────────────────────────
+SECTION: Evidence Snapshot (Nootropics)
+Displays: Lab Verified ✓, COA Available ✓
+Hides HPLC/MS for nootropics.
+Auto-hides section if no COA metafield exists.
+──────────────────────────────────────────────
+{% endcomment %}
+
+{%- liquid
+  assign coa_url = product.metafields.pdp.coa_url
+  assign coa_pdf = product.metafields.pep.coa_pdf
+
+  # nootropics flag — may expand later if you add peptide logic
+  assign is_nootropic = true
+-%}
+
+{%- if coa_url != blank or coa_pdf != blank -%}
+<section class="evidence-snapshot reveal-up-premium">
+  <div class="ev-wrapper page-width">
+
+    <div class="ev-chips">
+
+      <!-- Lab Verified -->
+      <div class="ev-chip">
+        <span class="ev-icon">✓</span>
+        <span>Lab Verified</span>
+      </div>
+
+      <!-- COA Available -->
+      {%- if coa_url != blank -%}
+        <a href="{{ coa_url }}" target="_blank" class="ev-chip ev-chip-link">
+          <span class="ev-icon">📄</span>
+          <span>COA Available</span>
+        </a>
+      {%- elsif coa_pdf != blank -%}
+        <a href="{{ coa_pdf | file_url }}" target="_blank" class="ev-chip ev-chip-link">
+          <span class="ev-icon">📄</span>
+          <span>COA Available</span>
+        </a>
+      {%- endif -%}
+
+      <!-- Hidden: HPLC/MS -->
+      {%- if is_nootropic == false -%}
+        <!-- Optional peptide-only chips go here -->
+      {%- endif -%}
+
+    </div>
+
+  </div>
+
+  <style>
+    .evidence-snapshot {
+      margin-top: 28px;
+      margin-bottom: 0;
+    }
+
+    .evidence-snapshot .ev-wrapper {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .evidence-snapshot .ev-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .evidence-snapshot .ev-chip {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #f6f6f6;
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--color-text-primary);
+      transition: background 0.18s ease;
+    }
+
+    .evidence-snapshot .ev-chip-link {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .evidence-snapshot .ev-chip:hover {
+      background: #ececec;
+    }
+
+    .evidence-snapshot .ev-icon {
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 1;
+    }
+  </style>
+</section>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Evidence Snapshot",
+  "tag": "section",
+  "settings": [],
+  "presets": [
+    {
+      "name": "Evidence Snapshot"
+    }
+  ]
+}
+{% endschema %}

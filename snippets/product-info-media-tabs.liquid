@@ -1,0 +1,255 @@
+{% comment %}
+  Renders a product media tabs with thumbnails.
+
+  Accepts:
+  - zoom_enabled: {Boolean} Whether to enable zoom on the main image (optional)
+
+  Usage:
+  {% render 'product-info-media-tabs' %}
+{% endcomment %}
+
+{% assign featured_media = product.selected_or_first_available_variant.featured_media %}
+
+<xo-animate xo-cascade>
+  <div class='product-info-media-tabs'>
+    <xo-product-will-change xo-unique-id='product-info-media-tabs-{{ section.id }}'>
+      <xo-tabs>
+        <div class='product-info-media-tabs__content'>
+          <xo-gallery xo-sync='false'>
+            <xo-tabs-content>
+              {% if product.media != blank and product.featured_media != blank %}
+                {% if featured_media != null %}
+                  {% case featured_media.media_type %}
+                    {%- when 'image' -%}
+                      <xo-gallery-item xo-src='{{ featured_media.src | image_url: width: 1200 }}'>
+                        <xo-tabs-pane xo-name='image-default' class='product-info-media-tabs__tab-pane'>
+                          <xo-animate
+                            xo-cascade
+                            xo-type='zoom-out'
+                            class='product-info-media-tabs__image {% if settings.enable_border_radius %}product-info-media-tabs__image--radius{% endif %}'
+                          >
+                            {% render 'media', type: featured_media.media_type, media: featured_media, image_lazyload: false, image_widths: '375, 550, 750, 900' %}
+                          </xo-animate>
+                        </xo-tabs-pane>
+                      </xo-gallery-item>
+                    {% when 'model' %}
+                      <xo-tabs-pane
+                        data-media-id='{{ media.id }}'
+                        xo-name='image-{{ forloop.index }}'
+                        {% if forloop.index == 1 %}
+                          xo-active
+                        {% endif %}
+                        class='product-info-media-tabs__tab-pane'
+                      >
+                        <xo-animate
+                          xo-cascade
+                          xo-type='zoom-out'
+                          class='product-info-media-tabs__image {% if settings.enable_border_radius %}product-info-media-tabs__image--radius{% endif %}'
+                        >
+                          <div style='height: 100%; position: relative'>
+                            <xo-product-model style='height: 100%'>
+                              <button class='xo-product-model__poster' type='button' aria-label='Button 3D' role='button' tabindex='0'>
+                                <span class='xo-product-model__poster-button'>
+                                  {% render 'icon', name: '3d-model', icon_size: '20' %}
+                                </span>
+                                <div class='xo-product-model__poster-image'>
+                                  <img
+                                    is='xo-lazyload'
+                                    width='810'
+                                    height='590'
+                                    src='{{ media | image_url: width: 550, height: 550 }}'
+                                    alt='{{ media.preview_image.alt | escape }}'
+                                  >
+                                  <div class='xo-lazyload-overlay'></div>
+                                </div>
+                              </button>
+                              <template>{% render 'media', type: 'model', media: media %}</template>
+                            </xo-product-model>
+                            <button
+                              class='xb-product-model__btn-view'
+                              type='button'
+                              aria-label='{{ 'products.product.xr_button_label' | t }}'
+                              data-shopify-xr
+                              data-shopify-model3d-id='{{ media.id }}'
+                              data-shopify-title='title'
+                              data-shopify-xr-hidden
+                            >
+                              <span>
+                                {% render 'icon', name: '3d-model', icon_size: '10' %}
+                              </span>
+                              {{ 'products.product.xr_button' | t }}
+                            </button>
+                          </div>
+                        </xo-animate>
+                      </xo-tabs-pane>
+                    {% else %}
+                      <xo-tabs-pane xo-name='image-default' class='product-info-media-tabs__tab-pane'>
+                        <xo-animate
+                          xo-cascade
+                          xo-type='zoom-out'
+                          class='product-info-media-tabs__image {% if settings.enable_border_radius %}product-info-media-tabs__image--radius{% endif %}'
+                        >
+                          {% render 'media', type: featured_media.media_type, media: featured_media, loop: true, controls: true, muted: true, autoplay: true %}
+                        </xo-animate>
+                      </xo-tabs-pane>
+                  {% endcase %}
+                {% endif %}
+                {% for media in product.media %}
+                  {% case media.media_type %}
+                    {%- when 'image' -%}
+                      <xo-gallery-item xo-src='{{ media.src | image_url: width: 1200 }}'>
+                        <xo-tabs-pane
+                          xo-name='image-{{ forloop.index }}'
+                          {% if forloop.index == 1 %}
+                            xo-active
+                          {% endif %}
+                          class='product-info-media-tabs__tab-pane'
+                        >
+                          <xo-animate
+                            xo-cascade
+                            xo-type='zoom-out'
+                            class='product-info-media-tabs__image {% if settings.enable_border_radius %}product-info-media-tabs__image--radius{% endif %}'
+                          >
+                            {% render 'media', type: media.media_type, media: media, image_lazyload: false, image_widths: '375, 550, 750, 900' %}
+                          </xo-animate>
+                        </xo-tabs-pane>
+                      </xo-gallery-item>
+                    {% when 'model' %}
+                      <xo-tabs-pane
+                        data-media-id='{{ media.id }}'
+                        xo-name='image-{{ forloop.index }}'
+                        {% if forloop.index == 1 %}
+                          xo-active
+                        {% endif %}
+                        class='product-info-media-tabs__tab-pane'
+                      >
+                        <div
+                          xo-cascade
+                          xo-type='zoom-out'
+                          class='product-info-media-tabs__image {% if settings.enable_border_radius %}product-info-media-tabs__image--radius{% endif %}'
+                        >
+                          <div style='height: 100%; position: relative'>
+                            <xo-product-model style='height: 100%'>
+                              <button class='xo-product-model__poster' type='button' aria-label='Button 3D' role='button' tabindex='0'>
+                                <span class='xo-product-model__poster-button'>
+                                  {% render 'icon', name: '3d-model', icon_size: '20' %}
+                                </span>
+                                <div class='xo-product-model__poster-image'>
+                                  <img
+                                    is='xo-lazyload'
+                                    width='810'
+                                    height='590'
+                                    src='{{ media | image_url: width: 550, height: 550 }}'
+                                    alt='{{ media.preview_image.alt | escape }}'
+                                  >
+                                  <div class='xo-lazyload-overlay'></div>
+                                </div>
+                              </button>
+                              <template>{% render 'media', type: 'model', media: media %}</template>
+                            </xo-product-model>
+                            <button
+                              class='xb-product-model__btn-view'
+                              type='button'
+                              aria-label='{{ 'products.product.xr_button_label' | t }}'
+                              data-shopify-xr
+                              data-shopify-model3d-id='{{ media.id }}'
+                              data-shopify-title='title'
+                              data-shopify-xr-hidden
+                            >
+                              <span>
+                                {% render 'icon', name: '3d-model', icon_size: '10' %}
+                              </span>
+                              {{ 'products.product.xr_button' | t }}
+                            </button>
+                          </div>
+                        </div>
+                      </xo-tabs-pane>
+                    {%- else -%}
+                      <xo-tabs-pane
+                        xo-name='image-{{ forloop.index }}'
+                        {% if forloop.index == 1 %}
+                          xo-active
+                        {% endif %}
+                        class='product-info-media-tabs__tab-pane'
+                      >
+                        <xo-animate
+                          xo-cascade
+                          xo-type='zoom-out'
+                          class='product-info-media-tabs__image {% if settings.enable_border_radius %}product-info-media-tabs__image--radius{% endif %}'
+                        >
+                          {% render 'media', type: media.media_type, media: media, loop: true, controls: true, muted: true, autoplay: true %}
+                        </xo-animate>
+                      </xo-tabs-pane>
+                  {% endcase %}
+                {% endfor %}
+              {%- else -%}
+                <div class='product-info-media-tabs__image-placeholder'>
+                  {% render 'image', placeholder: 'detailed-apparel-1' %}
+                </div>
+              {% endif %}
+            </xo-tabs-content>
+          </xo-gallery>
+        </div>
+        <div class='product-info-media-tabs__trigger'>
+          <div class='product-info-media-tabs__trigger-list'>
+            {%- if featured_media != null -%}
+              {% case featured_media.media_type %}
+                {%- when 'image' -%}
+                  <xo-tabs-trigger
+                    xo-name='image-default'
+                    class='product-info-media-tabs__tab-trigger {% if settings.enable_border_radius %}product-info-media-tabs__tab-trigger--radius{% endif %}'
+                  >
+                    {% render 'media', type: featured_media.media_type, media: featured_media %}
+                  </xo-tabs-trigger>
+              {% endcase %}
+            {%- endif -%}
+            {% for media in product.media %}
+              <xo-tabs-trigger
+                xo-name='image-{{ forloop.index }}'
+                {% if forloop.index == 1 %}
+                  xo-active
+                {% endif %}
+                class='product-info-media-tabs__tab-trigger {% if settings.enable_border_radius %}product-info-media-tabs__tab-trigger--radius{% endif %}'
+              >
+                {% render 'media', type: 'image', media: media.preview_image %}
+              </xo-tabs-trigger>
+            {% endfor %}
+          </div>
+        </div>
+      </xo-tabs>
+    </xo-product-will-change>
+  </div>
+</xo-animate>
+
+{% comment %}
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const slider = document.querySelector('.product-info-media-tabs__trigger-list');
+      let isDown = false;
+      let startX;
+      let scrollLeft;
+
+      slider.addEventListener('mousedown', (e) => {
+        isDown = true;
+        slider.classList.add('active');
+        startX = e.pageX - slider.offsetLeft;
+        scrollLeft = slider.scrollLeft;
+      });
+      slider.addEventListener('mouseleave', () => {
+        isDown = false;
+        slider.classList.remove('active');
+      });
+      slider.addEventListener('mouseup', () => {
+        isDown = false;
+        slider.classList.remove('active');
+      });
+      slider.addEventListener('mousemove', (e) => {
+        if (!isDown) return;
+        e.preventDefault();
+        const x = e.pageX - slider.offsetLeft;
+        const walk = (x - startX) * 3;
+        slider.scrollLeft = scrollLeft - walk;
+      });
+    });
+  </script>
+{% endcomment %}

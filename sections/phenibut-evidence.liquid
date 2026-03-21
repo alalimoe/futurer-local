@@ -1,0 +1,112 @@
+{% comment %}
+  Evidence Snapshot — Premium refactored section
+  - Simple/Scientific toggle, reference chips, design tokens
+{% endcomment %}
+
+<section id="phb-ev-{{ section.id }}" class="phb-evidence" aria-labelledby="phb-evidence-title-{{ section.id }}">
+  <div class="phb-evidence__container">
+    <h2 id="phb-evidence-title-{{ section.id }}" class="phb-evidence__title">{{ section.settings.heading | escape }}</h2>
+
+    <div class="phb-evidence__tldr">
+      {% if section.settings.phrasing_mode == 'simple' %}
+        {{ section.settings.simple_copy }}
+      {% else %}
+        {{ section.settings.scientific_copy }}
+      {% endif %}
+    </div>
+
+    {% if section.blocks.size > 0 %}
+      <ul class="phb-evidence__chips" role="list">
+        {% for block in section.blocks %}
+          {% if block.type == 'ref' %}
+            <li {{ block.shopify_attributes }}>
+              <a class="phb-evidence__chip" href="{{ block.settings.href | escape }}" target="_blank" rel="noopener noreferrer">
+                {{ block.settings.label | escape }}
+              </a>
+            </li>
+          {% endif %}
+        {% endfor %}
+      </ul>
+    {% endif %}
+
+    {% if section.settings.note != blank %}
+      <p class="phb-evidence__note">{{ section.settings.note }}</p>
+    {% endif %}
+  </div>
+</section>
+
+{%- style -%}
+#phb-ev-{{ section.id }} {
+  --phb-bg: {{ section.settings.background_color }};
+  --phb-max: {{ section.settings.max_width }}px;
+  --phb-py: {{ section.settings.padding_y }}px;
+  --phb-accent: var(--color-accent-primary, #FBBF24);
+  --phb-heading: var(--color-text-main, #0A2342);
+  --phb-text: var(--color-text-main, #0e1726);
+  --phb-muted: var(--color-text-muted, #4b5563);
+  --phb-chip-bg: var(--color-bg-secondary, #f2f6f9);
+  --phb-chip-text: var(--color-text-main, #0b172a);
+  --phb-font: var(--font-body-family, sans-serif);
+  --phb-font-heading: var(--font-heading-family, sans-serif);
+  --phb-transition: var(--transition-smooth, all 0.3s cubic-bezier(0.25,0.8,0.25,1));
+  background: var(--phb-bg);
+  font-family: var(--phb-font);
+}
+#phb-ev-{{ section.id }} .phb-evidence__container { max-width: var(--phb-max); margin: 0 auto; padding: var(--phb-py) 16px; display: grid; gap: 14px; }
+#phb-ev-{{ section.id }} .phb-evidence__title {
+  font-family: var(--phb-font-heading);
+  font-size: clamp(22px, 4.2vw, 36px); line-height: 1.2; margin: 0; color: var(--phb-heading);
+}
+#phb-ev-{{ section.id }} .phb-evidence__tldr { color: var(--phb-text); line-height: 1.7; }
+#phb-ev-{{ section.id }} .phb-evidence__chips {
+  display: flex; flex-wrap: wrap; gap: 10px; margin: 4px 0 0;
+  list-style: none; padding: 0;
+}
+#phb-ev-{{ section.id }} .phb-evidence__chip {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 8px 10px; border-radius: 999px;
+  background: var(--phb-chip-bg); color: var(--phb-chip-text);
+  text-decoration: none; font-weight: 600; font-size: 14px;
+  transition: var(--phb-transition);
+}
+#phb-ev-{{ section.id }} .phb-evidence__chip:hover { filter: brightness(0.95); }
+#phb-ev-{{ section.id }} .phb-evidence__chip:focus-visible {
+  outline: 2px solid var(--phb-accent); outline-offset: 2px;
+}
+#phb-ev-{{ section.id }} .phb-evidence__note { font-size: 13px; color: var(--phb-muted); margin-top: 4px; }
+@media (prefers-reduced-motion: reduce) {
+  #phb-ev-{{ section.id }} *,
+  #phb-ev-{{ section.id }} *::before,
+  #phb-ev-{{ section.id }} *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+{%- endstyle -%}
+
+{% schema %}
+{
+  "name": "Evidence",
+  "tag": "section",
+  "class": "section-phenibut-evidence",
+  "settings": [
+    { "type": "text", "id": "anchor_id", "label": "Anchor ID", "default": "evidence" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Evidence Snapshot" },
+    { "type": "radio", "id": "phrasing_mode", "label": "Phrasing", "default": "simple", "options": [ { "value": "simple", "label": "Simple" }, { "value": "scientific", "label": "Scientific" } ] },
+    { "type": "richtext", "id": "simple_copy", "label": "Simple copy", "default": "<p>Small human studies and user reports suggest calming effects and improved sleep when used occasionally and responsibly.</p>" },
+    { "type": "richtext", "id": "scientific_copy", "label": "Scientific copy", "default": "<p>Phenibut (β‑phenyl‑GABA) is reported to act as a GABA‑B agonist; limited clinical literature suggests anxiolytic and sleep‑modulating properties. Evidence quality varies; careful dosing is essential.</p>" },
+    { "type": "color", "id": "background_color", "label": "Background", "default": "#FFFFFF" },
+    { "type": "range", "id": "max_width", "label": "Max width (px)", "min": 720, "max": 1400, "step": 20, "default": 1200 },
+    { "type": "range", "id": "padding_y", "label": "Vertical padding (px)", "min": 40, "max": 160, "step": 4, "default": 64 },
+    { "type": "text", "id": "note", "label": "Footnote", "default": "Educational only; not medical advice." }
+  ],
+  "blocks": [
+    { "type": "ref", "name": "Reference chip", "settings": [
+      { "type": "text", "id": "label", "label": "Label", "default": "PubMed" },
+      { "type": "text", "id": "href", "label": "URL", "default": "https://pubmed.ncbi.nlm.nih.gov/" }
+    ] }
+  ],
+  "max_blocks": 12,
+  "presets": [ { "name": "Evidence" } ]
+}
+{% endschema %}

@@ -1,0 +1,74 @@
+{% comment %}
+  Renders a parallax block
+
+  Accepts:
+  - content: {String} Content (required)
+  - class: {String} Class (optional)
+  - desktop_top_from: {Number} Desktop top from (required)
+  - desktop_top_to: {Number} Desktop top to (required)
+  - desktop_left_from: {Number} Desktop left from (required)
+  - desktop_left_to: {Number} Desktop left to (required)
+  - desktop_scale_from: {Number} Desktop scale from (required)
+  - desktop_scale_to: {Number} Desktop scale to (required)
+  - mobile_top_from: {Number} Mobile top from (required)
+  - mobile_top_to: {Number} Mobile top to (required)
+  - mobile_left_from: {Number} Mobile left from (required)
+  - mobile_left_to: {Number} Mobile left to (required)
+  - mobile_scale_from: {Number} Mobile scale from (required)
+  - mobile_scale_to: {Number} Mobile scale to (required)
+
+  Usage:
+  {% render 'parallax-block',
+    content: content,
+    desktop_top_from: 0,
+    desktop_top_to: 300,
+    desktop_left_from: 20,
+    desktop_left_to: 100,
+    desktop_scale_from: 0.5,
+    desktop_scale_to: 1,
+    mobile_top_from: 0,
+    mobile_top_to: 300,
+    mobile_left_from: 20,
+    mobile_left_to: 100,
+    mobile_scale_from: 0.5,
+    mobile_scale_to: 1
+  %}
+{% endcomment %}
+
+{% liquid
+  assign desktop_x_from = desktop_top_from | default: 100
+  assign desktop_x_to = desktop_top_to | default: 150
+  assign desktop_y_from = desktop_left_from | default: 50
+  assign desktop_y_to = desktop_left_to | default: 100
+  assign desktop_scale_from = desktop_scale_from | default: 1
+  assign desktop_scale_to = desktop_scale_to | default: 1
+  assign mobile_x_from = mobile_top_from | default: 100
+  assign mobile_x_to = mobile_top_to | default: 150
+  assign mobile_y_from = mobile_left_from | default: 50
+  assign mobile_y_to = mobile_left_to | default: 100
+  assign mobile_scale_from = mobile_scale_from | default: 1
+  assign mobile_scale_to = mobile_scale_to | default: 1
+%}
+
+<div class="xo-parallax-block{% if class %} {{ class }}{% endif %}" style="--top: {{ top | default: 0 }}%; --left: {{ left | default: 0 }}%; --width: {{ width | default: 100 }}px">
+  <xo-parallax>
+    <xo-parallax-scroll
+      xo-keyframes="
+        {
+          '33.33%': { x: {{ desktop_x_from }}, y: {{ desktop_y_from }}, scale: {{ desktop_scale_from }} },
+          '100%': { x: {{ desktop_x_to }}, y: {{ desktop_y_to }}, scale: {{ desktop_scale_to }} }
+        }
+      "
+      xo-breakpoints="
+        {
+          1000: {
+            '33.33%': { x: {{ mobile_x_from }}, y: {{ mobile_y_from }}, scale: {{ mobile_scale_from }} },
+            '100%': { x: {{ mobile_x_to }}, y: {{ mobile_y_to }}, scale: {{ mobile_scale_to }} }
+          }
+        }
+      "
+    >
+      {{- content -}}
+    </xo-parallax-scroll>
+  </xo-parallax>
+</div>

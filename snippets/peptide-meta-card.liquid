@@ -1,0 +1,128 @@
+{%- liquid
+  assign pep_ref = product.metafields.pep.reference
+  assign pep = nil
+  if pep_ref and pep_ref.value
+    assign pep = pep_ref.value
+  endif
+
+  assign title_common = product.title
+  if pep and pep.title__common
+    assign title_common = pep.title__common
+  endif
+
+  assign ref_code = product.selected_or_first_available_variant.sku | default: product.sku | default: product.id
+
+  assign cas = nil
+  if product.metafields.pep.cas
+    assign cas = product.metafields.pep.cas
+  elsif pep and pep.cas
+    assign cas = pep.cas
+  elsif pep and pep.cas_number
+    assign cas = pep.cas_number
+  endif
+
+  assign formula = nil
+  if product.metafields.peptide.molecular_formula
+    assign formula = product.metafields.peptide.molecular_formula
+  elsif pep and pep.molecular_formula
+    assign formula = pep.molecular_formula
+  endif
+
+  assign mw = nil
+  if product.metafields.peptide.molecular_weight
+    assign mw = product.metafields.peptide.molecular_weight
+  elsif pep and pep.molecular_weight__g_mol
+    assign mw = pep.molecular_weight__g_mol
+  elsif pep and pep.molecular_weight_g_mol
+    assign mw = pep.molecular_weight_g_mol
+  endif
+
+  assign purity_pct = nil
+  if product.metafields.pep.purity_pct
+    assign purity_pct = product.metafields.pep.purity_pct
+  elsif pep and pep.purity_pct
+    assign purity_pct = pep.purity_pct
+  endif
+
+  assign ruo_note = product.metafields.pep.ruo_note | default: 'Research use only. Not for human or veterinary use.'
+  assign v = product.selected_or_first_available_variant
+-%}
+
+<div class="pep-spec-card pep-spec-card--light">
+  <div class="pep-spec-card__brand">
+    <span class="pep-spec-card__chip">REF</span>
+    <span class="pep-spec-card__ref">{{ ref_code }}</span>
+  </div>
+
+  <!-- Title + price INSIDE card -->
+  <div class="pep-spec-card__title">
+    <div class="pep-spec-card__name">{{ title_common }}</div>
+  </div>
+
+  <div class="pep-spec-card__price">
+    <span class="pep-price" data-pep-price>{{ v.price | money }}</span>
+    {% if v.compare_at_price > v.price %}
+      <s class="pep-compare" data-pep-compare>{{ v.compare_at_price | money }}</s>
+    {% endif %}
+  </div>
+
+  <div class="pep-spec-card__kv">
+    {% if cas %}
+      <div class="pep-spec-card__row"><span>CAS #:</span><strong>{{ cas }}</strong></div>
+    {% endif %}
+    {% if formula %}
+      <div class="pep-spec-card__row"><span>Formula:</span><strong>{{ formula }}</strong></div>
+    {% endif %}
+    {% if mw %}
+      <div class="pep-spec-card__row"><span>M.W.:</span><strong>{{ mw }} g/mol</strong></div>
+    {% endif %}
+  </div>
+
+  <div class="pep-spec-card__badges">
+    <div class="pep-spec-card__badge">
+      <span class="pep-spec-card__chip">PURITY</span>
+      <strong>{% if purity_pct %}{{ purity_pct }}% HPLC{% else %}HPLC tested{% endif %}</strong>
+    </div>
+    <div class="pep-spec-card__badge pep-spec-card__badge--muted">
+      <span class="pep-spec-card__chip">RUO</span>
+      <strong>Research use only</strong>
+    </div>
+  </div>
+
+  <div class="pep-spec-card__note">{{ ruo_note }}</div>
+</div>
+
+<style>
+/* ===== Peptide spec card — light trust variant (16px unified type) ===== */
+.pep-spec-card--light {
+  background:#F8F9FB;
+  color:#111111;
+  border:1px solid var(--color-accent-primary);
+  border-radius:16px;
+  padding:16px 20px;
+  box-shadow:0 2px 4px rgba(0,0,0,0.05);
+}
+.pep-spec-card--light * { font-size:16px; line-height:1.55; font-weight:400; color:inherit; }
+.pep-spec-card--light strong { font-weight:700; }
+
+.pep-spec-card__brand { display:flex; align-items:center; gap:8px; margin-bottom:10px; }
+.pep-spec-card__chip { border:2px solid var(--color-accent-primary); color:#111; background:#FFFDF1; border-radius:6px; padding:2px 8px; font-weight:700; font-size:14px; letter-spacing:.03em; }
+.pep-spec-card__ref { font-weight:700; color:#111; }
+
+.pep-spec-card__title { margin:2px 0 6px; }
+.pep-spec-card__name { font-weight:700; }
+
+.pep-spec-card__price { display:flex; align-items:center; gap:10px; margin:6px 0 4px; }
+.pep-price { font-weight:800; }
+.pep-compare { color:#9CA3AF; text-decoration:line-through; }
+
+.pep-spec-card__kv { display:grid; gap:6px; margin:8px 0 12px; }
+.pep-spec-card__row { display:flex; justify-content:space-between; gap:12px; }
+.pep-spec-card__row span { color:#6B7280; }
+
+.pep-spec-card__badges { display:flex; gap:10px; flex-wrap:wrap; margin:8px 0 10px; }
+.pep-spec-card__badge { display:flex; align-items:center; gap:6px; background:#FFFFFF; border:1px solid var(--color-accent-primary); border-radius:10px; padding:6px 10px; }
+.pep-spec-card__badge--muted { background:#F0F1F4; border-color:#E7E9ED; }
+
+.pep-spec-card__note { font-size:14px; color:#555; margin-top:8px; }
+</style>

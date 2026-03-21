@@ -1,0 +1,90 @@
+{%- liquid
+  assign sectionId = section.id
+  assign lang = localization.language.iso_code
+-%}
+<div id="TabbyPromo"></div>
+<script>
+  (function() {
+    const script = document.createElement('script');
+    script.src = 'https://checkout.tabby.ai/tabby-promo.js';
+    script.async = true;
+    script.onload = () => {
+      const SUPPORTED_CURRENCIES = {
+        AED: 'AED',
+        KWD: 'KWD',
+        SAR: 'SAR',
+      };
+
+      // here you can describe currency aliases
+      const CURRENCY_NAME_TO_CODE_MAP = {
+        AED: SUPPORTED_CURRENCIES.AED,
+        KWD: SUPPORTED_CURRENCIES.KWD,
+        SAR: SUPPORTED_CURRENCIES.SAR,
+        KD: SUPPORTED_CURRENCIES.KWD,
+        SR: SUPPORTED_CURRENCIES.SAR,
+        Dh: SUPPORTED_CURRENCIES.AED,
+        Dhs: SUPPORTED_CURRENCIES.AED,
+      };
+
+      // here you can describe count of currency decimals in your store
+      const CURRENCY_DIGITS_COUNT = {
+        [SUPPORTED_CURRENCIES.AED]: 2,
+        [SUPPORTED_CURRENCIES.SAR]: 2,
+        [SUPPORTED_CURRENCIES.KWD]: 3,
+      };
+      
+      const priceRegExp = /\b[0-9\.,']+\b/;
+      const currencyRegExp = new RegExp(`\\b(${Object.keys(CURRENCY_NAME_TO_CODE_MAP).join('|')})\\b`);
+      const installmentsCount = 4;
+      const tabbyElementId = '#TabbyPromo';
+      const lang = '{{ lang }}';
+      const sectionId = '{{ sectionId }}';
+      // this works for the default theme, for custom themes sometimes you have to search for a price element manually
+      const priceElement = document.querySelector('.xo-price__item');
+
+      const initializeTabbyPromo = ({ element }) => {
+        const [layoutPrice] = element.textContent?.match(priceRegExp) || [];
+        const [layoutCurrency] = element.textContent?.match(currencyRegExp) || [];
+        const price = layoutPrice.replace(/\D/g, '');
+        const currency = CURRENCY_NAME_TO_CODE_MAP[layoutCurrency];
+      
+        if (price && currency) {
+          document.querySelector('#TabbyPromo').style.display = 'block';
+      
+         new TabbyPromo({
+            selector: tabbyElementId,
+            currency,
+            price: price / Number(1 + '0'.repeat(CURRENCY_DIGITS_COUNT[currency])),
+            lang,
+            installmentsCount,
+            publicKey: 'pk_01937761-07a9-ac54-2be9-6c00a33c1668', // specify your apiKey it should be a string
+            merchantCode: 'default', // enter the code of your Store base currency,
+            //'ksa' for SAR, 'KW' for KWD, 'default' for AED and others
+          });
+        } else {
+          console.warn('can not recognize currency|price promo will be closed');
+      
+          document.querySelector(tabbyElementId).style.display = 'none';
+        }
+      };
+      
+      initializeTabbyPromo({ element: priceElement });
+      
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach(mutation => {
+          if (mutation.type === 'childList') {
+            initializeTabbyPromo({ element: mutation.target });
+          }
+        });
+      });
+      
+      observer.observe(priceElement, { subtree: true, childList: true });
+    };
+    document.body.appendChild(script);
+  })();
+</script>
+<style>
+  #TabbyPromo div:empty, #TabbyDialogContainer div:empty {
+    display: block;
+  }
+</style>

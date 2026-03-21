@@ -1,0 +1,26 @@
+{% comment %}
+  Render edit address
+
+  @param {object} address - address object
+
+  @example
+  {% render 'edit-address', address: address %}
+{% endcomment %}
+
+<div class="xo-address-table__edit">
+  <xo-modal-trigger xo-name="edit-address-{{ address.id }}" class="xo-address-table__edit-trigger">
+    {{ form.first_name }}
+    <div class="xo-address-table__icon">
+      {% render 'button', type: 'button', style: 'link', icon: 'edit' %}
+    </div>
+  </xo-modal-trigger>
+  <xo-modal class="xo-address-table__edit-modal" xo-name="edit-address-{{ address.id }}" xo-portal>
+    {% liquid
+      assign title = 'customer.addresses.edit_address' | t
+      capture edit_form
+        render 'address-form', address: address, type: 'update'
+      endcapture
+      render 'modal-content', title: title, content: edit_form
+    %}
+  </xo-modal>
+</div>

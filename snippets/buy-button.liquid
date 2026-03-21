@@ -1,0 +1,47 @@
+{% assign form_id = 'product_form_id-' | append: section.id %}
+
+{%- form 'product', product, id: form_id, novalidate: 'novalidate', data-type: 'add-to-cart-form' -%}
+  <input type='hidden' name='id' value='{{ product.selected_or_first_available_variant.id }}'>
+  <xo-cart-quantity>
+    <input type='hidden' name='quantity' value='1'>
+  </xo-cart-quantity>
+
+  {% comment %} button này dùng để query của app subscription, không xoá {% endcomment %}
+  <button type='submit' class='xo-visually-hidden' aria-label='Button subcription'></button>
+
+  {% liquid
+    assign gift_card_recipient_feature_active = false
+    if show_gift_card_recipient and product.gift_card?
+      assign gift_card_recipient_feature_active = true
+    endif
+  %}
+  {% if gift_card_recipient_feature_active == true %}
+    {%- render 'recipient-form', product: product, form: form, section: section -%}
+  {% endif %}
+
+  <div class='shopify-payment-button__group {% if settings.enable_border_radius %}shopify-payment-button__group--radius{% endif %}'>
+    {% if show_dynamic_checkout and gift_card_recipient_feature_active == false %}
+      <xo-product-will-change
+        class='shopify-payment-button__buy'
+        xo-unique-id='product-buy-now-button-{{ section.id }}'
+        {% if product.selected_or_first_available_variant.available == false %}
+          xo-disabled
+        {% endif %}
+      >
+        {{ form | payment_button }}
+        {{ form | payment_terms }}
+      </xo-product-will-change>
+    {% endif %}
+    <div class='shopify-payment-button__buy-desciption'>
+      {% liquid
+        assign title = 'general.pay.title' | t
+        assign link = 'general.pay.link' | t
+      %}
+      <p>{{ title }}</p>
+      <div class='shopify-payment-button__buy-desciption-icon'>
+        {% render 'icon', name: 'pay-1', color: '#5A31F4' %}
+      </div>
+      {% render 'button', text: link, style: 'link', size: 'md' %}
+    </div>
+  </div>
+{%- endform -%}

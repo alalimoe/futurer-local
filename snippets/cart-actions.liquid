@@ -1,0 +1,35 @@
+{% comment %}
+  Renders the cart actions (update and checkout buttons) on the cart page.
+
+  Usage:
+  {% render 'cart-actions' %}
+{% endcomment %}
+
+<div class='cart-actions'>
+  <xo-cart-will-change xo-unique-id='xo-actions-{{ section.id }}' class='xo-actions'>
+    {% if cart != empty %}
+      <noscript>
+        {% liquid
+          assign update_label = 'sections.cart.update' | t
+          render 'button', text: update_label, type: 'submit', style: 'secondary', size: 'md', form_id: 'cart', block: true
+        %}
+      </noscript>
+      {% comment %} <form action='/checkout' method='post'> {% endcomment %}
+      {% liquid
+        assign checkout_label = 'sections.cart.checkout' | t
+        if cart == empty
+          assign disabled = true
+        else
+          assign disabled = false
+        endif
+        render 'button', text: checkout_label, type: 'submit', style: 'primary', size: 'md', form_id: 'cart', block: true, disabled: disabled, name: 'checkout'
+      %}
+      {%- if additional_checkout_buttons -%}
+        <div class='cart-actions__dynamic-checkout-buttons'>
+          {{ content_for_additional_checkout_buttons }}
+        </div>
+      {%- endif -%}
+      {% comment %} </form> {% endcomment %}
+    {% endif %}
+  </xo-cart-will-change>
+</div>

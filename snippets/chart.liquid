@@ -1,0 +1,47 @@
+{% comment %}
+  Renders chart element
+
+  Accepts:
+  - sub_heading: {String} Subheading (required)
+  - image: {String} Image (required)
+
+  Usage:
+  {% render 'chart', sub_heading: sub_heading, image: image %}
+{% endcomment %}
+
+{% capture xo_datasets %}
+  [
+    {% for item in dataset_arr %}
+      {%- assign cleaned_item = item | strip | replace: ' ', '' -%}
+      {%- assign dataset_output = "[" | append: '"' | append: cleaned_item | replace: ',', '","' | append: '"]' -%}
+      {%- assign contrast_initial = 1.0 -%}
+      {%- assign contrast = contrast_initial | divided_by: forloop.index | round: 2 -%}
+      {
+        "data": {{ dataset_output }},
+        "lineColor": "rgba(var(--color-button), {{ contrast }})"
+      }{% if forloop.last == false %},{% endif %}
+    {% endfor %}
+  ]
+{% endcapture %}
+
+<div class='chart'>
+  <div class='chart__box {% if settings.enable_border_radius %}chart__box--radius{% endif %}'>
+    {% if sub_heading %}
+      <div class='chart__sub-heading'>
+        {{ sub_heading }}
+      </div>
+    {% endif %}
+    <div class='chart__image chart__image--desktop'>
+      <xo-animate xo-cascade xo-type="fade" xo-duration="1000" style="height: 100%" xo-scroll-forced>
+        <xo-line-chart
+          xo-x-labels="{{ x_label_output }}"
+          xo-y-labels="{{ y_label_output }}"
+          xo-max="{{ value_max }}"
+          xo-margin="25"
+          xo-grid-color="rgba(var(--color-border))"
+          xo-datasets='{{ xo_datasets | strip }}'
+        ></xo-line-chart>
+      </xo-animate>
+    </div>
+  </div>
+</div>

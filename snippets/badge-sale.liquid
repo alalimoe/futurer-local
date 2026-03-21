@@ -1,0 +1,48 @@
+{% comment %}
+  Renders a list of product's badge (regular, sale)
+
+  Accepts:
+  - product: {Object} Product Liquid object (optional)
+  - use_variant: {Boolean} Renders selected or first variant price instead of overall product pricing (optional)
+  - class: {String} Adds a price class to the price element (optional)
+
+  Usage:
+  {% render 'badge-sale',
+    product: product,
+    use_variant: true,
+    class: 'price and more'
+  %}
+{% endcomment %}
+
+{%- liquid
+  if use_variant
+    assign target = product.selected_or_first_available_variant
+  else
+    assign target = product
+  endif
+
+  assign compare_at_price = target.compare_at_price
+  assign price = target.price | default: 1999
+
+  if compare_at_price > price
+    assign discount_percentage = 100 | times: price | divided_by: compare_at_price
+    assign discount_percentage = 100 | minus: discount_percentage
+
+    assign discount_saving = compare_at_price | minus: price
+  endif
+-%}
+
+{% if compare_at_price > price %}
+  <div class='xo-badge-sale{% if class %} {{ class }}{% endif %}{% if settings.enable_border_radius %} xo-badge-sale--radius{% endif %}'>
+    <div class='xo-badge-sale__wrapper xo-stack' style='--ai: center; --jc: center; --gap: 2; --gap-mobile: 2'>
+      <span>
+        {{ 'products.product.on_sale' | t }}
+        {% if settings.product_card_show_discount_as == 'saving' %}
+          {{ discount_saving | money_with_currency }}
+        {% else %}
+          {{ discount_percentage | round }}%
+        {% endif %}
+      </span>
+    </div>
+  </div>
+{% endif %}

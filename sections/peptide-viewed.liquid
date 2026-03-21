@@ -1,0 +1,141 @@
+{% comment %}
+SECTION: Recently Viewed with collection fallback when no history yet.
+- Uses localStorage key `np_recent`.
+- If first visit (no history), falls back to primary collection (same logic as above).
+{% endcomment %}
+
+{%- liquid
+  assign primary_collection = collection
+  if primary_collection == nil
+    assign pc_handle = product.metafields.pdp.primary_collection
+    if pc_handle and collections[pc_handle]
+      assign primary_collection = collections[pc_handle]
+    endif
+  endif
+  if primary_collection == nil and product.collections.size > 0
+    assign primary_collection = product.collections.first
+  endif
+
+  assign fallback = '' 
+  if primary_collection
+    assign count = 0
+    for p in primary_collection.products
+      if p.id != product.id
+        assign img = ''
+        if p.featured_image
+          assign img = p.featured_image | image_url: width: 600
+        endif
+        assign item = '{"title":' | append: p.title | json | append: ',"url":' | append: p.url | json | append: ',"price":' | append: p.price | json | append: ',"image":' | append: img | json | append: ',"handle":' | append: p.handle | json | append: '}' 
+        if fallback != '' 
+          assign fallback = fallback | append: ','
+        endif
+        assign fallback = fallback | append: item
+        assign count = count | plus: 1
+        if count >= section.settings.max_items
+          break
+        endif
+      endif
+    endfor
+  endif
+-%}
+
+<section id="recently-{{ section.id }}" class="rv-wrap">
+  <style>
+    #recently-{{ section.id }}{ --b:#E7E9ED; --r:14px; --sh:0 1px 6px rgba(16,24,40,.06); }
+    #recently-{{ section.id }} .rv-wrap{padding:24px var(--page-gutter);border-top:1px solid var(--b)}
+    #recently-{{ section.id }} .rv-container{max-width:{{ section.settings.max_width | default: 1200 }}px;margin:0 auto}
+    #recently-{{ section.id }} .rv-title{font-weight:800;margin:0 0 12px}
+    #recently-{{ section.id }} .rv-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+    @media(max-width:900px){#recently-{{ section.id }} .rv-grid{grid-template-columns:repeat(2,1fr)}}
+    #recently-{{ section.id }} .rv-card{border:1px solid var(--b);border-radius:var(--r);background:#fff;padding:10px;box-shadow:var(--sh)}
+    #recently-{{ section.id }} .rv-card img{width:100%;height:auto;border-radius:var(--nx-radius-md);border:1px solid #ECEEF2}
+    #recently-{{ section.id }} .rv-name{font-weight:700}
+    #recently-{{ section.id }} .rv-price{font-weight:700}
+    #recently-{{ section.id }} .rv-empty{color:var(--color-text-secondary)}
+  </style>
+
+  <div class="rv-container">
+    <h2 class="rv-title">{{ section.settings.heading | default: 'Recently viewed' }}</h2>
+    <div class="rv-grid" data-rv-grid></div>
+    <script type="application/json" id="rv-fallback-{{ section.id }}">[{{ fallback }}]</script>
+  </div>
+</section>
+
+<script>
+(function(){
+  const root = document.getElementById('recently-{{ section.id }}'); if(!root) return;
+  const grid = root.querySelector('[data-rv-grid]');
+  const key = 'np_recent';
+  const thisHandle = {{ product.handle | json }};
+  const max = {{ section.settings.max_items | default: 8 }};
+  const moneyFormat = {{ shop.money_format | json }};
+  const fmt = c => (window.Shopify && Shopify.formatMoney) ? Shopify.formatMoney(c, moneyFormat) : (c/100).toFixed(2);
+
+  // update history
+  try {
+    const arr = Array.from(new Set([thisHandle].concat(JSON.parse(localStorage.getItem(key)||'[]')))).slice(0, max+3);
+    localStorage.setItem(key, JSON.stringify(arr));
+  } catch(e){}
+
+  async function renderFromHistory(){
+    try{
+      const arr = (JSON.parse(localStorage.getItem(key)||'[]')||[]).filter(h => h !== thisHandle).slice(0, max);
+      if(!arr.length) return false;
+      for(const h of arr){
+        const res = await fetch(`/products/${h}.js`, { credentials:'same-origin' });
+        if(!res.ok) continue;
+        const p = await res.json();
+        const img = (p.images && p.images[0]) ? p.images[0] : null;
+        const card = document.createElement('div');
+        card.className = 'rv-card';
+        card.innerHTML = `
+          ${img ? `<img loading="lazy" src="${img}" alt="${p.title}">` : ''}
+          <div class="rv-name">${p.title}</div>
+          <div class="rv-price">${fmt(parseInt(p.price,10)||0)}</div>
+          <a class="btn btn--secondary" href="${p.url}">View</a>
+        `;
+        grid.appendChild(card);
+      }
+      return arr.length > 0;
+    }catch(e){ return false; }
+  }
+
+  async function renderFallback(){
+    try{
+      const json = JSON.parse(document.getElementById('rv-fallback-{{ section.id }}').textContent || '[]');
+      if(!json.length){ grid.innerHTML = `<div class="rv-empty">Browse more products to see them here.</div>`; return; }
+      json.slice(0, max).forEach(p=>{
+        const card = document.createElement('div');
+        card.className = 'rv-card';
+        const img = p.image;
+        card.innerHTML = `
+          ${img ? `<img loading="lazy" src="${img}" alt="${p.title}">` : ''}
+          <div class="rv-name">${p.title}</div>
+          <div class="rv-price">${fmt(parseInt(p.price,10)||0)}</div>
+          <a class="btn btn--secondary" href="${p.url}">View</a>
+        `;
+        grid.appendChild(card);
+      });
+    }catch(e){
+      grid.innerHTML = `<div class="rv-empty">Browse more products to see them here.</div>`;
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', async function(){
+    const ok = await renderFromHistory();
+    if(!ok) await renderFallback();
+  });
+})();
+</script>
+
+{% schema %}
+{
+  "name":"Recently viewed",
+  "settings":[
+    { "type":"range","id":"max_width","min":800,"max":1600,"step":10,"unit":"px","label":"Container max width","default":1200 },
+    { "type":"text","id":"heading","label":"Heading","default":"Recently viewed" },
+    { "type":"range","id":"max_items","min":2,"max":12,"step":1,"label":"Max items","default":8 }
+  ],
+  "presets":[{"name":"Recently viewed"}]
+}
+{% endschema %}

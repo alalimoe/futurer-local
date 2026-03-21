@@ -1,0 +1,206 @@
+{% comment %}
+  Evidence Snapshot — ultra-simple (chip after notes)
+  - Assumes each claim has ONE source with label + pubmed_url.
+  - Renders: Headline, then notes + [label] linked to pubmed_url.
+{% endcomment %}
+
+{%- assign snapshot_ref = product.metafields.evidence.snapshot -%}
+{%- assign snapshot = snapshot_ref.value | default: snapshot_ref -%}
+{%- assign claims = snapshot.claims_list.value | default: snapshot.claims_list -%}
+
+{%- if snapshot and claims -%}
+<div id="evidence-snapshot" class="es reveal-up-premium" aria-label="Clinical evidence snapshot">
+  <header class="es__header">
+    <div class="es__eyebrow">EVIDENCE SNAPSHOT</div>
+    <h3 class="es__title">
+      {{ snapshot.title.value | default: snapshot.title | default: 'Evidence Snapshot' }}
+    </h3>
+    <div class="es__hint">
+      Hover or tap the numbered chips to see the study details.
+    </div>
+  </header>
+
+  <ul class="es__grid" role="list">
+    {%- for claim in claims -%}
+      {%- assign headline = claim.headline.value | default: claim.headline -%}
+      {%- assign source   = claim.sources.value  | default: claim.sources  -%}
+      {%- assign lbl      = source.label.value   | default: source.label   -%}
+      {%- assign url      = source.pubmed_url.value | default: source.pubmed_url -%}
+
+      <li class="es-claim">
+        <div class="es-claim__icon" aria-hidden="true">⚡</div>
+        <div class="es-claim__body">
+          <div class="es-claim__headline">{{ headline }}</div>
+
+          {%- comment -%}
+            Put the chip *inside* the notes block so it sits inline with the last line.
+          {%- endcomment -%}
+          <div class="es-claim__notes">
+            {%- assign notes_html = claim.notes | metafield_tag -%}
+            {{ notes_html }}
+            {%- if url != blank and lbl != blank -%}
+              {%- unless notes_html contains lbl -%}
+                <a class="es-ref" href="{{ url }}" target="_blank" rel="nofollow noopener">[{{ lbl }}]</a>
+              {%- endunless -%}
+            {%- endif -%}
+          </div>
+        </div>
+      </li>
+    {%- endfor -%}
+  </ul>
+</div>
+{%- endif -%}
+
+<style>
+  .es {
+    --es-radius: var(--radius-premium, 12px);
+    --es-gap: 18px;
+    --es-border: #e5e7eb;
+    --es-bg: var(--color-bg-primary, #ffffff);
+    --es-muted: var(--color-text-muted, #6b7280);
+    --es-title: var(--color-text-main, #111111);
+    --es-shadow: var(--shadow-md, 0 6px 24px rgba(17, 24, 39, 0.06));
+    --es-transition: var(--transition-premium, all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1));
+  }
+
+  .es {
+    margin-top: 0;
+    padding: 18px;
+    border: none;
+    border-radius: var(--es-radius);
+    background: var(--es-bg);
+    box-shadow: var(--shadow-sm);
+    color: var(--es-title);
+  }
+
+  @media (min-width: 900px) {
+    .es { padding: 24px 28px; }
+  }
+
+  .es__eyebrow {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-accent-dark, #92400e);
+    font-weight: 700;
+  }
+
+  .es__title {
+    margin: 4px 0;
+    font-size: 18px;
+    line-height: 1.3;
+    color: var(--es-title);
+  }
+
+  .es__hint {
+    font-size: 13px;
+    color: var(--es-muted);
+  }
+
+  .es__grid {
+    list-style: none;
+    margin: 14px 0 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--es-gap);
+  }
+
+  @media (min-width: 900px) {
+    .es__grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  .es-claim {
+    display: grid;
+    grid-template-columns: 32px 1fr;
+    gap: 12px;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    box-shadow: var(--shadow-sm);
+    transition: var(--es-transition);
+  }
+
+  .es-claim:hover {
+    box-shadow: var(--shadow-md-hover);
+    transform: translateY(-2px);
+  }
+
+  .es-claim__icon {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    background: rgba(250, 204, 21, 0.15);
+    box-shadow: var(--shadow-gold-focus);
+    font-size: 16px;
+    transition: var(--es-transition);
+  }
+
+  .es-claim:hover .es-claim__icon {
+    background: rgba(250, 204, 21, 0.25);
+    transform: scale(1.08);
+  }
+
+  .es-claim__headline {
+    font-weight: 700;
+    margin: 0 0 6px;
+    color: var(--es-title);
+  }
+
+  .es-claim__notes {
+    font-size: 14px;
+    color: var(--es-title);
+    line-height: 1.5;
+  }
+
+  .es-claim__notes p:last-child { display: inline; }
+  .es-claim__notes .es-ref { margin-left: 6px; }
+
+  .es-ref {
+    display: inline-flex;
+    align-items: center;
+    font-weight: 700;
+    font-size: 12px;
+    line-height: 1;
+    padding: 2px 6px;
+    border-radius: 6px;
+    background: var(--color-bg-secondary, #f9fafb);
+    border: none;
+    box-shadow: var(--shadow-xs);
+    color: var(--color-accent-dark, #92400e);
+    text-decoration: none;
+    transition: var(--es-transition);
+  }
+
+  .es-ref:hover {
+    background: var(--color-accent-primary, #FBBF24);
+    color: var(--color-accent-on-gold, #1e1e1e);
+    box-shadow: 0 0 0 1px var(--color-accent-primary, #FBBF24), var(--shadow-gold-sm);
+    transform: translateY(-1px);
+  }
+
+  /* Mobile: stack tighter */
+  @media (max-width: 749px) {
+    .es { padding: 14px; margin-top: 0; }
+    .es__grid { gap: 12px; }
+    .es-claim { padding: 10px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .es-claim, .es-claim__icon, .es-ref { transition: none; transform: none; }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Evidence snapshot",
+  "tag": "aside",
+  "class": "evidence-snapshot-section",
+  "presets": [
+    { "name": "Evidence snapshot" }
+  ]
+}
+{% endschema %}

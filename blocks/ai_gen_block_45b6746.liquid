@@ -1,0 +1,419 @@
+{% doc %}
+  @prompt
+    generate a clean premium section that will render an existing page (https://nootropix.shop/pages/peptides-calculator-reconstitution-complete-guide), including its metafields
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-page-embed-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    max-width: {{ block.settings.max_width }}px;
+    margin: 0 auto;
+    padding: {{ block.settings.padding_vertical }}px {{ block.settings.padding_horizontal }}px;
+    background-color: {{ block.settings.background_color }};
+  }
+
+  .ai-page-embed-container-{{ ai_gen_id }} {
+    width: 100%;
+    background-color: {{ block.settings.content_background }};
+    border-radius: {{ block.settings.border_radius }}px;
+    overflow: hidden;
+    box-shadow: {{ block.settings.shadow_horizontal }}px {{ block.settings.shadow_vertical }}px {{ block.settings.shadow_blur }}px {{ block.settings.shadow_color }};
+  }
+
+  .ai-page-embed-content-{{ ai_gen_id }} {
+    padding: {{ block.settings.content_padding }}px;
+    color: {{ block.settings.text_color }};
+    line-height: 1.6;
+  }
+
+  .ai-page-embed-content-{{ ai_gen_id }} h1,
+  .ai-page-embed-content-{{ ai_gen_id }} h2,
+  .ai-page-embed-content-{{ ai_gen_id }} h3,
+  .ai-page-embed-content-{{ ai_gen_id }} h4,
+  .ai-page-embed-content-{{ ai_gen_id }} h5,
+  .ai-page-embed-content-{{ ai_gen_id }} h6 {
+    color: {{ block.settings.heading_color }};
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+  }
+
+  .ai-page-embed-content-{{ ai_gen_id }} h1:first-child,
+  .ai-page-embed-content-{{ ai_gen_id }} h2:first-child,
+  .ai-page-embed-content-{{ ai_gen_id }} h3:first-child {
+    margin-top: 0;
+  }
+
+  .ai-page-embed-content-{{ ai_gen_id }} p {
+    margin-bottom: 1em;
+  }
+
+  .ai-page-embed-content-{{ ai_gen_id }} a {
+    color: {{ block.settings.link_color }};
+    text-decoration: none;
+    transition: opacity 0.2s ease;
+  }
+
+  .ai-page-embed-content-{{ ai_gen_id }} a:hover {
+    opacity: 0.7;
+  }
+
+  .ai-page-embed-content-{{ ai_gen_id }} ul,
+  .ai-page-embed-content-{{ ai_gen_id }} ol {
+    margin-bottom: 1em;
+    padding-left: 1.5em;
+  }
+
+  .ai-page-embed-content-{{ ai_gen_id }} li {
+    margin-bottom: 0.5em;
+  }
+
+  .ai-page-embed-content-{{ ai_gen_id }} img {
+    max-width: 100%;
+    height: auto;
+    border-radius: {{ block.settings.image_border_radius }}px;
+  }
+
+  .ai-page-embed-content-{{ ai_gen_id }} table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1em;
+  }
+
+  .ai-page-embed-content-{{ ai_gen_id }} th,
+  .ai-page-embed-content-{{ ai_gen_id }} td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid {{ block.settings.border_color }};
+  }
+
+  .ai-page-embed-content-{{ ai_gen_id }} th {
+    font-weight: 600;
+    color: {{ block.settings.heading_color }};
+  }
+
+  .ai-page-embed-metafields-{{ ai_gen_id }} {
+    margin-top: 40px;
+    padding-top: 40px;
+    border-top: 1px solid {{ block.settings.border_color }};
+  }
+
+  .ai-page-embed-metafield-{{ ai_gen_id }} {
+    margin-bottom: 24px;
+  }
+
+  .ai-page-embed-metafield-label-{{ ai_gen_id }} {
+    font-weight: 600;
+    color: {{ block.settings.heading_color }};
+    margin-bottom: 8px;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .ai-page-embed-metafield-value-{{ ai_gen_id }} {
+    color: {{ block.settings.text_color }};
+  }
+
+  .ai-page-embed-empty-{{ ai_gen_id }} {
+    padding: 60px 20px;
+    text-align: center;
+    color: #999;
+    font-size: 14px;
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-page-embed-{{ ai_gen_id }} {
+      padding: {{ block.settings.padding_vertical | times: 0.6 }}px {{ block.settings.padding_horizontal | times: 0.6 }}px;
+    }
+
+    .ai-page-embed-content-{{ ai_gen_id }} {
+      padding: {{ block.settings.content_padding | times: 0.7 }}px;
+    }
+
+    .ai-page-embed-metafields-{{ ai_gen_id }} {
+      margin-top: 30px;
+      padding-top: 30px;
+    }
+  }
+{% endstyle %}
+
+<page-embed-{{ ai_gen_id }}
+  class="ai-page-embed-{{ ai_gen_id }}"
+  {{ block.shopify_attributes }}
+>
+  <div class="ai-page-embed-container-{{ ai_gen_id }}">
+    {% if block.settings.page != blank %}
+      <div class="ai-page-embed-content-{{ ai_gen_id }}">
+        {{ block.settings.page.content }}
+
+        {% if block.settings.show_metafields %}
+          {% assign has_metafields = false %}
+          {% for metafield in block.settings.page.metafields %}
+            {% if metafield.value != blank %}
+              {% assign has_metafields = true %}
+              {% break %}
+            {% endif %}
+          {% endfor %}
+
+          {% if has_metafields %}
+            <div class="ai-page-embed-metafields-{{ ai_gen_id }}">
+              {% for metafield in block.settings.page.metafields %}
+                {% if metafield.value != blank %}
+                  <div class="ai-page-embed-metafield-{{ ai_gen_id }}">
+                    <div class="ai-page-embed-metafield-label-{{ ai_gen_id }}">
+                      {{ metafield.key | replace: '_', ' ' | capitalize }}
+                    </div>
+                    <div class="ai-page-embed-metafield-value-{{ ai_gen_id }}">
+                      {% if metafield.type == 'single_line_text_field' or metafield.type == 'multi_line_text_field' %}
+                        {{ metafield.value }}
+                      {% elsif metafield.type == 'rich_text_field' %}
+                        {{ metafield.value }}
+                      {% elsif metafield.type == 'url' %}
+                        <a href="{{ metafield.value }}" target="_blank" rel="noopener noreferrer">{{ metafield.value }}</a>
+                      {% elsif metafield.type == 'file_reference' %}
+                        {% if metafield.value.media_type == 'image' %}
+                          <img src="{{ metafield.value | image_url: width: 800 }}" alt="{{ metafield.value.alt }}" loading="lazy">
+                        {% else %}
+                          <a href="{{ metafield.value.url }}" target="_blank" rel="noopener noreferrer">{{ metafield.value.url }}</a>
+                        {% endif %}
+                      {% elsif metafield.type == 'list.file_reference' %}
+                        {% for file in metafield.value %}
+                          {% if file.media_type == 'image' %}
+                            <img src="{{ file | image_url: width: 800 }}" alt="{{ file.alt }}" loading="lazy" style="margin-bottom: 10px;">
+                          {% else %}
+                            <a href="{{ file.url }}" target="_blank" rel="noopener noreferrer">{{ file.url }}</a>
+                          {% endif %}
+                        {% endfor %}
+                      {% elsif metafield.type == 'number_integer' or metafield.type == 'number_decimal' %}
+                        {{ metafield.value }}
+                      {% elsif metafield.type == 'date' %}
+                        {{ metafield.value | date: '%B %d, %Y' }}
+                      {% elsif metafield.type == 'date_time' %}
+                        {{ metafield.value | date: '%B %d, %Y at %I:%M %p' }}
+                      {% elsif metafield.type == 'boolean' %}
+                        {% if metafield.value %}
+                          Yes
+                        {% else %}
+                          No
+                        {% endif %}
+                      {% elsif metafield.type == 'json' %}
+                        <pre style="background: #f5f5f5; padding: 12px; border-radius: 4px; overflow-x: auto;">{{ metafield.value | json }}</pre>
+                      {% else %}
+                        {{ metafield.value }}
+                      {% endif %}
+                    </div>
+                  </div>
+                {% endif %}
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endif %}
+      </div>
+    {% else %}
+      <div class="ai-page-embed-empty-{{ ai_gen_id }}">
+        Select a page to display its content
+      </div>
+    {% endif %}
+  </div>
+</page-embed-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class PageEmbed{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+      }
+
+      connectedCallback() {
+        this.initializeLinks();
+      }
+
+      initializeLinks() {
+        const links = this.querySelectorAll('.ai-page-embed-content-{{ ai_gen_id }} a');
+        links.forEach(link => {
+          if (link.hostname !== window.location.hostname) {
+            link.setAttribute('target', '_blank');
+            link.setAttribute('rel', 'noopener noreferrer');
+          }
+        });
+      }
+    }
+
+    customElements.define('page-embed-{{ ai_gen_id }}', PageEmbed{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Page embed",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Page"
+    },
+    {
+      "type": "page",
+      "id": "page",
+      "label": "Page to display"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_metafields",
+      "label": "Show page metafields",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "max_width",
+      "label": "Maximum width",
+      "min": 600,
+      "max": 1600,
+      "step": 100,
+      "unit": "px",
+      "default": 1200
+    },
+    {
+      "type": "range",
+      "id": "padding_vertical",
+      "label": "Vertical padding",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "padding_horizontal",
+      "label": "Horizontal padding",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "content_padding",
+      "label": "Content padding",
+      "min": 20,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "header",
+      "content": "Style"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "content_background",
+      "label": "Content background",
+      "default": "#f9f9f9"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text",
+      "default": "#2a2a2a"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Headings",
+      "default": "#2a2a2a"
+    },
+    {
+      "type": "color",
+      "id": "link_color",
+      "label": "Links",
+      "default": "#5a9d6f"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Borders",
+      "default": "#e8e8e8"
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "image_border_radius",
+      "label": "Image border radius",
+      "min": 0,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "default": 4
+    },
+    {
+      "type": "header",
+      "content": "Shadow"
+    },
+    {
+      "type": "range",
+      "id": "shadow_horizontal",
+      "label": "Horizontal offset",
+      "min": -20,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "shadow_vertical",
+      "label": "Vertical offset",
+      "min": -20,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 2
+    },
+    {
+      "type": "range",
+      "id": "shadow_blur",
+      "label": "Blur",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "color",
+      "id": "shadow_color",
+      "label": "Shadow color",
+      "default": "rgba(0,0,0,0.08)"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Page embed"
+    }
+  ]
+}
+{% endschema %}

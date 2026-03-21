@@ -1,0 +1,58 @@
+{% comment %}
+  Render a img with text given various parameters.
+
+  Accepts:
+  - heading: {String} Heading text (required)
+  - link: {String} Link for the heading (optional)
+  - desktop_image: {Image} Desktop image (required)
+  - aspect_ratio_desktop: {String} Aspect ratio for the desktop image (optional)
+  - mobile_image: {Image} Mobile image (required)
+  - aspect_ratio_mobile: {String} Aspect ratio for the mobile image (optional)
+  - color_scheme_box: {String} Color scheme for the box (optional)
+
+  Usage:
+  {% render 'img-with-text-7',
+    heading: heading,
+    link: link,
+    desktop_image: desktop_image,
+    aspect_ratio_desktop: aspect_ratio_desktop,
+    mobile_image: mobile_image,
+    aspect_ratio_mobile: aspect_ratio_mobile,
+    color_scheme_box: color_scheme_box
+  %}
+{% endcomment %}
+
+{% liquid
+  assign container_class = 'img-with-text-7'
+  if color_scheme_box
+    assign container_class = container_class | append: ' color-' | append: color_scheme_box
+  endif
+
+  assign tag_name = 'div'
+  assign class_name = 'img-with-text-7__wrap'
+  if link != blank
+    assign tag_name = 'a'
+    assign class_name = 'img-with-text-7__link'
+  endif
+%}
+
+<div class="{{ container_class }}" xo-animate-text-normal-hover>
+  <{{ tag_name }}
+    {% if link != blank %}
+      href="{{ link }}"
+    {% endif %}
+    class="{{ class_name }}"
+  >
+    <div class="img-with-text-7__image img-with-text-7__image--desktop{% if settings.enable_border_radius %} img-with-text-7__image--radius{% endif %}">
+      {% render 'animate-image', image: desktop_image, aspect_ratio: aspect_ratio_desktop, border_radius: 0 %}
+    </div>
+    <div class="img-with-text-7__image img-with-text-7__image--mobile{% if settings.enable_border_radius %} img-with-text-7__image--radius{% endif %}">
+      {% render 'animate-image', image: mobile_image, aspect_ratio: aspect_ratio_mobile, border_radius: 0 %}
+    </div>
+    {% if heading != blank %}
+      <h3 class="img-with-text-7__heading h5">
+        {% render 'animate-text-normal', effect: 'underline-in', text: heading %}
+      </h3>
+    {% endif %}
+  </{{ tag_name }}>
+</div>

@@ -1,0 +1,588 @@
+{% comment %}
+  Goal-based Stack Builder (Nootropix)
+  - OS 2.0 section: tabs for Calm/Focus/Sleep/Learning
+  - 2–3 products per goal with include checkboxes, variant selector, qty
+  - Synergy “why” blurb per goal
+  - Live bundle total (pre-discount)
+  - One-click add to cart -> redirect through discount code
+  - No external libraries. Accessible tabs. Vanilla JS.
+{% endcomment %}
+
+<section id="goal-stack-{{ section.id }}" class="goal-stack" data-default-goal="{{ section.settings.default_goal }}">
+  <div class="goal-stack__head page-width">
+    {% if section.settings.heading != blank %}
+      <h2 class="goal-stack__heading">{{ section.settings.heading }}</h2>
+    {% endif %}
+    {% if section.settings.subheading != blank %}
+      <div class="goal-stack__subheading">{{ section.settings.subheading }}</div>
+    {% endif %}
+  </div>
+
+  <div class="goal-stack__tabs page-width" role="tablist" aria-label="Stack goals">
+    {% assign default_goal = section.settings.default_goal | default: 'focus' %}
+    {% for block in section.blocks %}
+      {% assign goal_key = block.settings.goal_key %}
+      {% assign goal_title = block.settings.goal_title | default: goal_key | capitalize %}
+      <button
+        class="goal-tab{% if goal_key == default_goal %} is-active{% endif %}"
+        role="tab"
+        id="tab-{{ goal_key }}-{{ section.id }}"
+        aria-selected="{% if goal_key == default_goal %}true{% else %}false{% endif %}"
+        aria-controls="panel-{{ goal_key }}-{{ section.id }}"
+        data-goal="{{ goal_key }}"
+        {{ block.shopify_attributes }}
+      >
+        {% case goal_key %}
+          {% when 'calm' %}🧘&nbsp;
+          {% when 'focus' %}🎯&nbsp;
+          {% when 'sleep' %}🌙&nbsp;
+          {% when 'learning' %}🧠&nbsp;
+        {% endcase %}
+        {{ goal_title }}
+      </button>
+    {% endfor %}
+  </div>
+
+  {% for block in section.blocks %}
+    {% assign goal_key = block.settings.goal_key %}
+    {% assign goal_title = block.settings.goal_title | default: goal_key | capitalize %}
+
+    <div
+      class="goal-panel page-width"
+      role="tabpanel"
+      id="panel-{{ goal_key }}-{{ section.id }}"
+      aria-labelledby="tab-{{ goal_key }}-{{ section.id }}"
+      {% unless goal_key == default_goal %}hidden{% endunless %}
+      data-goal-panel="{{ goal_key }}"
+    >
+      {% if block.settings.why_blurb != blank %}
+        <div class="goal-panel__why">
+          <h3 class="goal-panel__why-title">Synergy Benefits</h3>
+          <div class="goal-panel__why-copy">{{ block.settings.why_blurb }}</div>
+        </div>
+      {% endif %}
+
+      <div class="goal-panel__products">
+        {%- assign p = block.settings.product_1 -%}
+        {% if p %}
+          {% assign v = p.selected_or_first_available_variant %}
+          <div class="stack-product" data-goal="{{ goal_key }}" data-product-id="{{ p.id }}">
+            <label class="stack-product__check">
+              <input class="js-include" type="checkbox" {% if p.available %}checked{% else %}disabled{% endif %}>
+              Include in stack
+            </label>
+            <a href="{{ p.url }}" class="stack-product__media">
+              {{ p.featured_media | image_url: width: 400 | image_tag: loading: 'lazy', alt: p.title }}
+            </a>
+            <div class="stack-product__body">
+              <div class="stack-product__title">{{ p.title }}</div>
+              <div class="stack-product__price">
+                <span class="js-price" data-price="{{ v.price }}">{{ v.price | money }}</span>
+                {% if v.compare_at_price > v.price %}
+                  <s class="stack-product__compare">{{ v.compare_at_price | money }}</s>
+                {% endif %}
+              </div>
+
+              {% if p.has_only_default_variant %}
+                <input class="js-variant" type="hidden" value="{{ v.id }}" data-price="{{ v.price }}">
+              {% else %}
+                <label class="stack-product__label">Variant
+                  <select class="js-variant">
+                    {% for var in p.variants %}
+                      <option
+                        value="{{ var.id }}"
+                        data-price="{{ var.price }}"
+                        data-compare="{{ var.compare_at_price }}"
+                        {% if var.id == v.id %}selected{% endif %}
+                        {% unless var.available %}disabled{% endunless %}
+                      >{{ var.title }}{% unless var.available %} — Sold out{% endunless %}</option>
+                    {% endfor %}
+                  </select>
+                </label>
+              {% endif %}
+
+              <label class="stack-product__label">Qty
+                <input class="js-qty" type="number" min="1" value="1" inputmode="numeric" pattern="[0-9]*" {% unless p.available %}disabled{% endunless %}>
+              </label>
+
+              {% unless p.available %}
+                <div class="stack-product__soldout">Sold out</div>
+              {% endunless %}
+            </div>
+          </div>
+        {% endif %}
+
+        {%- assign p = block.settings.product_2 -%}
+        {% if p %}
+          {% assign v = p.selected_or_first_available_variant %}
+          <div class="stack-product" data-goal="{{ goal_key }}" data-product-id="{{ p.id }}">
+            <label class="stack-product__check">
+              <input class="js-include" type="checkbox" {% if p.available %}checked{% else %}disabled{% endif %}>
+              Include in stack
+            </label>
+            <a href="{{ p.url }}" class="stack-product__media">
+              {{ p.featured_media | image_url: width: 400 | image_tag: loading: 'lazy', alt: p.title }}
+            </a>
+            <div class="stack-product__body">
+              <div class="stack-product__title">{{ p.title }}</div>
+              <div class="stack-product__price">
+                <span class="js-price" data-price="{{ v.price }}">{{ v.price | money }}</span>
+                {% if v.compare_at_price > v.price %}
+                  <s class="stack-product__compare">{{ v.compare_at_price | money }}</s>
+                {% endif %}
+              </div>
+
+              {% if p.has_only_default_variant %}
+                <input class="js-variant" type="hidden" value="{{ v.id }}" data-price="{{ v.price }}">
+              {% else %}
+                <label class="stack-product__label">Variant
+                  <select class="js-variant">
+                    {% for var in p.variants %}
+                      <option
+                        value="{{ var.id }}"
+                        data-price="{{ var.price }}"
+                        data-compare="{{ var.compare_at_price }}"
+                        {% if var.id == v.id %}selected{% endif %}
+                        {% unless var.available %}disabled{% endunless %}
+                      >{{ var.title }}{% unless var.available %} — Sold out{% endunless %}</option>
+                    {% endfor %}
+                  </select>
+                </label>
+              {% endif %}
+
+              <label class="stack-product__label">Qty
+                <input class="js-qty" type="number" min="1" value="1" inputmode="numeric" pattern="[0-9]*" {% unless p.available %}disabled{% endunless %}>
+              </label>
+
+              {% unless p.available %}
+                <div class="stack-product__soldout">Sold out</div>
+              {% endunless %}
+            </div>
+          </div>
+        {% endif %}
+
+        {%- assign p = block.settings.product_3 -%}
+        {% if p %}
+          {% assign v = p.selected_or_first_available_variant %}
+          <div class="stack-product" data-goal="{{ goal_key }}" data-product-id="{{ p.id }}">
+            <label class="stack-product__check">
+              <input class="js-include" type="checkbox" {% if p.available and block.settings.include_product_3 %}checked{% endif %} {% unless p.available %}disabled{% endunless %}>
+              Include in stack
+            </label>
+            <a href="{{ p.url }}" class="stack-product__media">
+              {{ p.featured_media | image_url: width: 400 | image_tag: loading: 'lazy', alt: p.title }}
+            </a>
+            <div class="stack-product__body">
+              <div class="stack-product__title">{{ p.title }}</div>
+              <div class="stack-product__price">
+                <span class="js-price" data-price="{{ v.price }}">{{ v.price | money }}</span>
+                {% if v.compare_at_price > v.price %}
+                  <s class="stack-product__compare">{{ v.compare_at_price | money }}</s>
+                {% endif %}
+              </div>
+
+              {% if p.has_only_default_variant %}
+                <input class="js-variant" type="hidden" value="{{ v.id }}" data-price="{{ v.price }}">
+              {% else %}
+                <label class="stack-product__label">Variant
+                  <select class="js-variant">
+                    {% for var in p.variants %}
+                      <option
+                        value="{{ var.id }}"
+                        data-price="{{ var.price }}"
+                        data-compare="{{ var.compare_at_price }}"
+                        {% if var.id == v.id %}selected{% endif %}
+                        {% unless var.available %}disabled{% endunless %}
+                      >{{ var.title }}{% unless var.available %} — Sold out{% endunless %}</option>
+                    {% endfor %}
+                  </select>
+                </label>
+              {% endif %}
+
+              <label class="stack-product__label">Qty
+                <input class="js-qty" type="number" min="1" value="1" inputmode="numeric" pattern="[0-9]*" {% unless p.available %}disabled{% endunless %}>
+              </label>
+
+              {% unless p.available %}
+                <div class="stack-product__soldout">Sold out</div>
+              {% endunless %}
+            </div>
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="goal-panel__totals" aria-live="polite">
+        <div class="goal-panel__total-line">
+          <span class="goal-panel__total-label">Bundle Total:</span>
+          <span class="goal-panel__total js-bundle-total" data-total="0">{{ 0 | money }}</span>
+        </div>
+        <div class="goal-panel__discount-note">
+  Your stack is {{ section.settings.discount_percent }}% smarter with code
+  <strong>{{ section.settings.discount_code }}</strong> (applied at checkout).
+</div>
+
+      </div>
+
+      <div class="goal-panel__cta">
+        <button class="btn btn--primary js-add-stack" data-goal-title="{{ goal_title }}">
+  Build My Stack
+</button>
+
+        <div class="goal-panel__error js-error" hidden></div>
+      </div>
+    </div>
+  {% endfor %}
+
+  {% if section.settings.show_shipping_note and section.settings.shipping_note != blank %}
+    <div class="goal-stack__note page-width">{{ section.settings.shipping_note }}</div>
+  {% endif %}
+  {% if section.settings.show_disclaimer and section.settings.disclaimer_text != blank %}
+    <div class="goal-stack__disclaimer page-width">{{ section.settings.disclaimer_text }}</div>
+  {% endif %}
+</section>
+
+<style>
+  #goal-stack-{{ section.id }} .page-width { max-width: var(--page-width, 1200px); margin: 0 auto; padding: 0 var(--page-gutter); }
+
+  /* Headings */
+  #goal-stack-{{ section.id }} .goal-stack__heading { margin-bottom: .25rem; }
+  #goal-stack-{{ section.id }} .goal-stack__subheading { opacity:.85; margin-bottom: 1rem; }
+
+  /* Tabs */
+  #goal-stack-{{ section.id }} .goal-stack__tabs {
+    display:flex; gap:.5rem; margin:.5rem auto 1rem; flex-wrap: wrap;
+    border-bottom: 1px solid rgba(0,0,0,.08);
+  }
+  #goal-stack-{{ section.id }} .goal-tab {
+    padding:.5rem .75rem; border:0; background:rgba(0,0,0,.04);
+    border-radius: 999px; cursor:pointer; font-weight:600;
+    transition: transform .12s ease, background .12s ease;
+  }
+  #goal-stack-{{ section.id }} .goal-tab:hover { transform: translateY(-1px); }
+  #goal-stack-{{ section.id }} .goal-tab.is-active {
+    background:#fff; box-shadow: 0 1px 0 rgba(0,0,0,.06);
+    outline: 2px solid var(--color-accent-primary); /* Nootropix accent */
+    outline-offset: -2px;
+  }
+
+  /* Product grid */
+  #goal-stack-{{ section.id }} .goal-panel__products { display:grid; gap:1rem; grid-template-columns: 1fr; }
+  @media (min-width: 900px){ #goal-stack-{{ section.id }} .goal-panel__products { grid-template-columns: repeat(3,1fr); } }
+
+  /* Card */
+  #goal-stack-{{ section.id }} .stack-product {
+    display:grid; grid-template-columns: 96px 1fr; gap:.75rem; align-items:start;
+    padding: .9rem; border:1px solid rgba(0,0,0,.08); border-radius:.75rem; background:#fff;
+    box-shadow: var(--shadow-xs);
+  }
+  #goal-stack-{{ section.id }} .stack-product__media img { border-radius:.5rem; }
+  #goal-stack-{{ section.id }} .stack-product__title { font-weight:700; margin:.15rem 0; }
+  #goal-stack-{{ section.id }} .stack-product__price { margin:.25rem 0 .5rem; font-size: .95rem; }
+  #goal-stack-{{ section.id }} .stack-product__compare { opacity:.55; margin-left:.35rem; }
+  #goal-stack-{{ section.id }} .stack-product__check { grid-column: 1 / -1; display:flex; gap:.5rem; align-items:center; margin-bottom:.25rem; }
+  #goal-stack-{{ section.id }} .stack-product__label { display:block; margin:.25rem 0; font-size:.9rem; }
+  #goal-stack-{{ section.id }} .stack-product__soldout { color:#b00020; font-size:.9rem; margin-top:.25rem; }
+
+  /* Totals bar */
+  #goal-stack-{{ section.id }} .goal-panel__totals {
+    margin-top: 1rem; padding: .85rem 1rem; border-radius:.75rem;
+    background: linear-gradient(0deg, rgba(251,191,36,.10), rgba(251,191,36,.10));
+    border:1px solid rgba(0,0,0,.06);
+  }
+  #goal-stack-{{ section.id }} .goal-panel__total-line { display:flex; justify-content:space-between; gap:1rem; font-weight:800; font-size:1.05rem; }
+  #goal-stack-{{ section.id }} .goal-panel__discount-note { margin-top:.25rem; font-size:.9rem; color: rgba(0,0,0,.7); }
+
+  /* CTA button */
+  #goal-stack-{{ section.id }} .button {
+    display:inline-flex; align-items:center; justify-content:center; gap:.5rem;
+    padding:.8rem 1.1rem; border-radius:.65rem; border:1px solid transparent;
+    background:var(--color-accent-primary); color:var(--color-text-primary); font-weight:800; cursor:pointer;
+    box-shadow: 0 2px 0 rgba(0,0,0,.06);
+  }
+  #goal-stack-{{ section.id }} .button:hover { transform: translateY(-1px); }
+  #goal-stack-{{ section.id }} .button[disabled] { opacity:.5; cursor:not-allowed; transform:none; }
+  #goal-stack-{{ section.id }} .goal-panel__cta { margin-top: .9rem; display:flex; gap:.75rem; align-items:center; }
+
+  /* Fine print */
+  #goal-stack-{{ section.id }} .goal-stack__note, .goal-stack__disclaimer { margin-top:1rem; font-size:.9rem; opacity:.85; }
+</style>
+
+<script>
+(function() {
+  const section = document.getElementById('goal-stack-{{ section.id }}');
+  if (!section) return;
+
+  // Use theme money format as a JSON-safe string
+  const MONEY_FORMAT = {{ shop.money_format | json }};
+
+  function formatMoney(cents) {
+    try {
+      // If Shopify.formatMoney supports a second arg (format), pass it
+      return Shopify.formatMoney(cents, MONEY_FORMAT);
+    } catch (e) {
+      const amount = (cents / 100).toFixed(2);
+      // Fallback supports common tokens
+      return (MONEY_FORMAT || '$' + '{' + '{amount}}')
+        .replace('{' + '{amount}}', amount)
+        .replace('{' + '{ amount }}', amount)
+        .replace('{' + '{amount_no_decimals}}', Math.round(cents/100))
+        .replace('{' + '{ amount_no_decimals }}', Math.round(cents/100));
+    }
+  }
+
+  function setFormatted(el, cents) {
+    const html = formatMoney(cents);
+    // If the format contains HTML, use innerHTML; else use textContent
+    if (html.indexOf('<') > -1) el.innerHTML = html; else el.textContent = html;
+  }
+
+    // ----- Tabs
+    const tabs = Array.from(section.querySelectorAll('.goal-tab'));
+    const panels = Array.from(section.querySelectorAll('.goal-panel'));
+    const defaultGoal = section.dataset.defaultGoal || (tabs[0] && tabs[0].dataset.goal);
+const goalState = {}; // { goal: [{id, qty, include, variantId}] }
+
+    function showGoal(goal) {
+      tabs.forEach(t => {
+        const active = t.dataset.goal === goal;
+        t.classList.toggle('is-active', active);
+        t.setAttribute('aria-selected', active ? 'true' : 'false');
+      });
+      panels.forEach(p => {
+        p.hidden = p.getAttribute('data-goal-panel') !== goal;
+      });
+      computeTotal();
+      setAddButtonState();
+    }
+
+    tabs.forEach(t => {
+      t.addEventListener('click', () => showGoal(t.dataset.goal));
+      t.addEventListener('keydown', (ev) => {
+        const i = tabs.indexOf(t);
+        if (ev.key === 'ArrowRight') { ev.preventDefault(); (tabs[i+1] || tabs[0]).focus(); }
+        if (ev.key === 'ArrowLeft')  { ev.preventDefault(); (tabs[i-1] || tabs[tabs.length-1]).focus(); }
+      });
+    });
+
+    // ----- Price & total
+    function activePanel() {
+      return section.querySelector('.goal-panel:not([hidden])');
+    }
+
+    function computeTotal() {
+      const panel = activePanel();
+      if (!panel) return;
+
+      let sum = 0;
+      panel.querySelectorAll('.stack-product').forEach(card => {
+        const include = card.querySelector('.js-include');
+        const variantEl = card.querySelector('.js-variant');
+        const qtyEl = card.querySelector('.js-qty');
+
+        if (!include || !variantEl || !qtyEl) return;
+        if (!include.checked || include.disabled) return;
+
+        const price = parseInt(variantEl.tagName === 'SELECT'
+          ? variantEl.selectedOptions[0].dataset.price
+          : variantEl.dataset.price, 10);
+
+        const qty = Math.max(1, parseInt(qtyEl.value || '1', 10));
+        if (!isNaN(price)) sum += (price * qty);
+      });
+
+      const totalEl = panel.querySelector('.js-bundle-total');
+      if (totalEl) {
+  totalEl.dataset.total = String(sum);
+  setFormatted(totalEl, sum);
+}
+
+    }
+
+    // Reflect variant price changes in each card’s visible price
+    function wireCard(card) {
+      const priceEl = card.querySelector('.js-price');
+      const variantEl = card.querySelector('.js-variant');
+      const qtyEl = card.querySelector('.js-qty');
+      const includeEl = card.querySelector('.js-include');
+
+      function updatePriceFromVariant() {
+        if (!variantEl || !priceEl) return;
+        const cents = parseInt(variantEl.tagName === 'SELECT'
+          ? variantEl.selectedOptions[0].dataset.price
+          : variantEl.dataset.price, 10);
+        if (!isNaN(cents)) setFormatted(priceEl, cents);
+      }
+
+      variantEl && variantEl.addEventListener('change', () => { updatePriceFromVariant(); computeTotal(); });
+      qtyEl && qtyEl.addEventListener('input', computeTotal);
+      includeEl && includeEl.addEventListener('change', () => { setAddButtonState(); computeTotal(); });
+
+      updatePriceFromVariant();
+    }
+
+    panels.forEach(p => p.querySelectorAll('.stack-product').forEach(wireCard));
+
+    // ----- Add stack to cart
+    function setAddButtonState() {
+      // Simple +/- for qty inputs
+section.querySelectorAll('.js-qty').forEach(input => {
+  const wrapper = document.createElement('div');
+  wrapper.style.display = 'inline-flex';
+  wrapper.style.alignItems = 'center';
+  wrapper.style.gap = '.35rem';
+
+  const minus = document.createElement('button'); minus.type = 'button'; minus.textContent = '–';
+  const plus  = document.createElement('button'); plus.type = 'button';  plus.textContent  = '+';
+  [minus, plus].forEach(b => { b.className = 'button'; b.style.padding = '.35rem .55rem'; });
+
+  input.parentNode.insertBefore(wrapper, input);
+  wrapper.appendChild(minus); wrapper.appendChild(input); wrapper.appendChild(plus);
+
+  minus.addEventListener('click', () => { input.value = Math.max(1, (parseInt(input.value||'1',10)-1)); computeTotal(); });
+  plus .addEventListener('click', () => { input.value = Math.max(1, (parseInt(input.value||'1',10)+1)); computeTotal(); });
+});
+const panel = activePanel();
+      if (!panel) return;
+      const btn = panel.querySelector('.js-add-stack');
+      if (!btn) return;
+
+      const selectable = Array.from(panel.querySelectorAll('.stack-product'));
+      const any = selectable.some(card => {
+        const ck = card.querySelector('.js-include');
+        return ck && ck.checked && !ck.disabled;
+      });
+
+      btn.disabled = !any;
+    }
+
+    function addCurrentStack() {
+      const panel = activePanel();
+      if (!panel) return;
+
+      const btn = panel.querySelector('.js-add-stack');
+      const errorEl = panel.querySelector('.js-error');
+      errorEl && (errorEl.hidden = true);
+      if (!btn) return;
+
+      const goalTitle = btn.dataset.goalTitle || 'Stack';
+      const items = [];
+
+      panel.querySelectorAll('.stack-product').forEach(card => {
+        const include = card.querySelector('.js-include');
+        const variantEl = card.querySelector('.js-variant');
+        const qtyEl = card.querySelector('.js-qty');
+        if (!include || !include.checked || include.disabled) return;
+        if (!variantEl) return;
+
+        const id = variantEl.tagName === 'SELECT' ? variantEl.value : variantEl.value;
+        const qty = Math.max(1, parseInt(qtyEl.value || '1', 10));
+        if (id && qty) {
+          items.push({
+            id: Number(id),
+            quantity: qty,
+            properties: { "Stack Goal": goalTitle, "Stack Builder": "true" }
+          });
+        }
+      });
+
+      if (!items.length) return;
+
+      btn.classList.add('is-loading');
+      fetch('/cart/add.js', {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json' },
+        body: JSON.stringify({ items })
+      })
+      .then(r => {
+        if (!r.ok) throw new Error('Add to cart failed');
+        return r.json();
+      })
+      .then(() => {
+        const code = '{{ section.settings.discount_code | url_encode }}';
+        if (code) {
+          window.location.href = `/discount/${code}?redirect=/cart`;
+        } else {
+          window.location.href = '/cart';
+        }
+      })
+      .catch(err => {
+        if (errorEl) {
+          errorEl.textContent = 'Sorry—something went wrong adding your stack. Please try again.';
+          errorEl.hidden = false;
+        }
+      })
+      .finally(() => btn.classList.remove('is-loading'));
+    }
+
+    section.addEventListener('click', (e) => {
+      const t = e.target;
+      if (t && t.classList.contains('js-add-stack')) {
+        e.preventDefault();
+        addCurrentStack();
+      }
+    });
+
+    // init
+    showGoal(defaultGoal);
+    computeTotal();
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Goal-based Stack Builder",
+  "tag": "section",
+  "class": "section goal-based-stack",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Build Your Brain Stack" },
+    { "type": "richtext", "id": "subheading", "label": "Subheading", "default": "<p>Pick a goal. We’ll pre‑fill a smart stack.</p>" },
+    { "type": "text", "id": "discount_code", "label": "Discount code (must exist in Discounts)", "default": "STACKS10" },
+    { "type": "range", "id": "discount_percent", "label": "Discount percentage (display only)", "min": 0, "max": 50, "step": 1, "default": 10 },
+    { "type": "select", "id": "default_goal", "label": "Default goal tab", "options": [
+      { "value": "calm", "label": "Calm" },
+      { "value": "focus", "label": "Focus" },
+      { "value": "sleep", "label": "Sleep" },
+      { "value": "learning", "label": "Learning" }
+    ], "default": "focus" },
+    { "type": "checkbox", "id": "show_shipping_note", "label": "Show shipping note", "default": true },
+    { "type": "text", "id": "shipping_note", "label": "Shipping note", "default": "Same‑day delivery in Dubai. Free express international shipping over $120." },
+    { "type": "checkbox", "id": "show_disclaimer", "label": "Show disclaimer", "default": true },
+    { "type": "richtext", "id": "disclaimer_text", "label": "Disclaimer text", "default": "<p>Not medical advice. Consult your physician if needed.</p>" }
+  ],
+  "blocks": [
+    {
+      "type": "goal_stack",
+      "name": "Goal stack",
+      "limit": 4,
+      "settings": [
+        { "type": "select", "id": "goal_key", "label": "Goal", "options": [
+          { "value": "calm", "label": "Calm" },
+          { "value": "focus", "label": "Focus" },
+          { "value": "sleep", "label": "Sleep" },
+          { "value": "learning", "label": "Learning" }
+        ], "default": "calm" },
+        { "type": "text", "id": "goal_title", "label": "Goal title (tab label)", "default": "Calm" },
+
+        { "type": "product", "id": "product_1", "label": "Product 1 (required)" },
+        { "type": "product", "id": "product_2", "label": "Product 2 (required)" },
+        { "type": "product", "id": "product_3", "label": "Product 3 (optional)" },
+        { "type": "checkbox", "id": "include_product_3", "label": "Include 3rd product by default", "default": true },
+
+        { "type": "richtext", "id": "why_blurb", "label": "Why these work together", "default": "<p>Short synergy explanation for this goal.</p>" }
+      ]
+    }
+  ],
+  "max_blocks": 4,
+  "presets": [
+    { "name": "Goal-based Stack Builder", "blocks": [
+      { "type": "goal_stack" },
+      { "type": "goal_stack" },
+      { "type": "goal_stack" },
+      { "type": "goal_stack" }
+    ] }
+  ]
+}
+{% endschema %}
+
+{% stylesheet %}{% endstylesheet %}
+{% javascript %}{% endjavascript %}

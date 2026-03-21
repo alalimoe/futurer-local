@@ -1,0 +1,110 @@
+{% comment %}
+  Accepts:
+  - content: {String} Main content (required)
+  - left_image_desktop: {String} Left image (desktop) (required)
+  - left_aspect_ratio_desktop: {String} Left image aspect ratio (desktop) (optional)
+  - left_image_mobile: {String} Left image (mobile) (required)
+  - left_aspect_ratio_mobile: {String} Left image aspect ratio (mobile) (optional)
+  - right_image_desktop: {String} Right image (desktop) (required)
+  - right_aspect_ratio_desktop: {String} Right image aspect ratio (desktop) (optional)
+  - right_image_mobile: {String} Right image (mobile) (required)
+  - right_aspect_ratio_mobile: {String} Right image aspect ratio (mobile) (optional)
+  - blocks: {Object} Blocks (required)
+
+  Usage:
+  {% render 'introduction-text',
+    content: content,
+    left_image_desktop: left_image_desktop,
+    left_aspect_ratio_desktop: left_aspect_ratio_desktop,
+    left_image_mobile: left_image_mobile,
+    left_aspect_ratio_mobile: left_aspect_ratio_mobile,
+    right_image_desktop: right_image_desktop,
+    right_aspect_ratio_desktop: right_aspect_ratio_desktop,
+    right_image_mobile: right_image_mobile,
+    right_aspect_ratio_mobile: right_aspect_ratio_mobile,
+    blocks: blocks
+  %}
+{% endcomment %}
+
+<div class="introduction-text">
+  <xo-grid class="introduction-text__grid">
+    <div class="introduction-text__head" style="--xl: 8; --lg: 8; --md: 10; --xs: 12;">
+      {% if content %}
+        <xo-parallax>
+          <xo-parallax-scroll
+            class="introduction-text__parallax"
+            xo-keyframes="
+              {
+                '30%': { backgroundSizeX: 0 },
+                '65%': { backgroundSizeX: 100 }
+              }
+            "
+          >
+            <span class="introduction-text__text-scroll h4">{{ content }}</span>
+          </xo-parallax-scroll>
+        </xo-parallax>
+      {% endif %}
+    </div>
+    <div class="introduction-text__content" style="--xl: 12; --lg: 12; --md: 12; --xs: 12;">
+      <xo-grid class="introduction-text__grid">
+        <div class="introduction-text__left" style="--xl: 7; --lg: 7; --md: 6; --xs: 12;">
+          <div class="introduction-text__figure">
+            {% for block in blocks %}
+              {% liquid
+                assign text = block.settings.text
+                assign from_value = block.settings.from_value
+                assign to_value = block.settings.to_value
+                assign prefix = block.settings.prefix
+                assign suffix = block.settings.suffix
+              %}
+              <div class="introduction-text__item">
+                {% assign number = forloop.index0 | plus: 1 | prepend: '00' | slice: -2, 2 %}
+                <xo-animate xo-cascade>
+                  <div class="introduction-text__number">{{ number }}</div>
+                </xo-animate>
+                <div class="introduction-text__item-wrap">
+                  {% if to_value != 0 %}
+                    <xo-animate xo-cascade>
+                      <h3 class="introduction-text__counter h1">
+                        {% if prefix != blank %}
+                          <span>{{ prefix }}</span>
+                        {% endif %}
+                        <xo-countto xo-from="{{ from_value }}" xo-to="{{ to_value }}">
+                          <span>{{ from_value }}</span>
+                        </xo-countto>
+                        {% if suffix != blank %}
+                          <span>{{ suffix }}</span>
+                        {% endif %}
+                      </h3>
+                    </xo-animate>
+                  {% endif %}
+                  {% if text != blank %}
+                    <xo-animate xo-cascade>
+                      <div class="introduction-text__text">{{ text }}</div>
+                    </xo-animate>
+                  {% endif %}
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+          <div class="introduction-text__image-wrap">
+            <div class="introduction-text__image introduction-text__image--desktop{% if settings.enable_border_radius %} introduction-text__image--radius{% endif %}">
+              {% render 'animate-image', image: left_image_desktop, aspect_ratio: left_aspect_ratio_desktop, border_radius: 0 %}
+            </div>
+            <div class="introduction-text__image introduction-text__image--mobile{% if settings.enable_border_radius %} introduction-text__image--radius{% endif %}">
+              {% render 'animate-image', image: left_image_mobile, aspect_ratio: left_aspect_ratio_mobile, border_radius: 0 %}
+            </div>
+          </div>
+        </div>
+        <div class="introduction-text__right" style="--xl: 5; --lg: 5; --md: 6; --xs: 12;">
+          <div class="introduction-text__image introduction-text__image--desktop{% if settings.enable_border_radius %} introduction-text__image--radius{% endif %}">
+            {% render 'animate-image', image: right_image_desktop, aspect_ratio: right_aspect_ratio_desktop, border_radius: 0 %}
+          </div>
+          <div class="introduction-text__image introduction-text__image--mobile{% if settings.enable_border_radius %} introduction-text__image--radius{% endif %}">
+            {% render 'animate-image', image: right_image_mobile, aspect_ratio: right_aspect_ratio_mobile, border_radius: 0 %}
+          </div>
+        </div>
+      </xo-grid>
+    </div>
+  </xo-grid>
+</div>

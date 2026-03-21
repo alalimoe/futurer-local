@@ -1,0 +1,51 @@
+{% comment %}
+  Renders a information with image
+
+  @param {Object} block - Block
+  @param {String} image_dt - Image desktop
+  @param {String} aspect_ratio_dt - Aspect ratio desktop
+  @param {String} image_mb - Image mobile
+  @param {String} aspect_ratio_mb - Aspect ratio mobile
+  @param {String} tag_text - Tag text
+  @param {String} sub_heading - Sub heading
+  @param {String} heading - Heading
+
+  @example
+    {% render 'information-with-image-block',
+    image_dt: image_dt,
+    aspect_ratio_dt: aspect_ratio_dt,
+    image_mb: image_mb,
+    aspect_ratio_mb: aspect_ratio_mb,
+    tag_text: tag_text,
+    sub_heading: sub_heading,
+    heading: heading,
+  %}
+{% endcomment %}
+
+<div class="information-with-image-block">
+  <div class="information-with-image-block__content{% if settings.enable_border_radius %} information-with-image-block__content--radius{% endif %}">
+    <div class="information-with-image-block__image information-with-image-block__image--desktop">
+      {% render 'animate-image', image: image_desktop, border_radius: 0, aspect_ratio: aspect_ratio_desktop %}
+    </div>
+    <div class="information-with-image-block__image information-with-image-block__image--mobile">
+      {% render 'animate-image', image: image_mobile, border_radius: 0, aspect_ratio: aspect_ratio_mobile %}
+    </div>
+    {% if caption %}
+      <div class="information-with-image-block__caption">
+        {{ caption }}
+      </div>
+    {% endif %}
+    <div class="information-with-image-block__text">
+      {% if sub_heading %}
+        <div class="information-with-image-block__sub-heading">
+          {{ sub_heading }}
+        </div>
+      {% endif %}
+      {% if heading %}
+        <div class="information-with-image-block__heading">
+          {% render 'text', text: heading, tag_name: tag_name, effect: 'split', duration: 500 %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>

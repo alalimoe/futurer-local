@@ -1,0 +1,163 @@
+{% comment %}
+  Render a img with text given various parameters.
+
+  Accepts:
+  - sub_heading: {String} Sub-heading text
+  - reveal_text_effect: {Boolean} Whether to apply a reveal effect to the text
+  - reveal_text_opacity: {Number} Opacity for the reveal effect (0-100)
+  - content: {String} Content text
+  - desktop_image: {Image} Desktop image (required)
+  - aspect_ratio_desktop: {String} Aspect ratio for the desktop image
+  - mobile_image: {Image} Mobile image (required)
+  - aspect_ratio_mobile: {String} Aspect ratio for the mobile image
+  - bottom_content_type: {String} Type of content for the bottom section, can be 'cta-button' or 'stats-display' (required)
+  - button: {Object} Button object with properties:
+  - stats_speed_value: {String} Speed value for stats
+  - stats_speed_unit: {String} Speed unit for stats
+  - stats_description: {String} Description for stats
+
+  Usage:
+  {% render 'img-with-text-8',
+    sub_heading: sub_heading,
+    reveal_text_effect: reveal_text_effect,
+    reveal_text_opacity: reveal_text_opacity,
+    content: content,
+    desktop_image: desktop_image,
+    aspect_ratio_desktop: aspect_ratio_desktop,
+    mobile_image: mobile_image,
+    aspect_ratio_mobile: aspect_ratio_mobile,
+    bottom_content_type: bottom_content_type,
+    button: button,
+    stats_speed_value: stats_speed_value,
+    stats_speed_unit: stats_speed_unit,
+    stats_description: stats_description,
+  %}
+{% endcomment %}
+
+<div class='img-with-text-8{% if bottom_content_type %} img-with-text-8--{{ bottom_content_type }}{% endif %}' xo-parallax>
+  <xo-grid class='img-with-text-8__grid'>
+    <div class='img-with-text-8__inner' style='--lg: 8; --md: 10; --xs: 12; --start-md: 2; --start-lg: 3;'>
+      {% if sub_heading != blank %}
+        <xo-animate xo-cascade>
+          <div class='img-with-text-8__sub-heading'>{{ sub_heading }}</div>
+        </xo-animate>
+      {% endif %}
+      {% if content != blank %}
+        <xo-animate xo-cascade>
+          {% if reveal_text_effect %}
+            <div style='--reveal-opacity: {{ reveal_text_opacity }}%'>
+              <xo-parallax-scroll
+                class='img-with-text-8__content h4'
+                xo-keyframes="
+                  {
+                    '0%': { backgroundSizeX: 0 },
+                    '45%': { backgroundSizeX: 100 }
+                  }
+                "
+              >
+                <span>{{ content }}</span>
+              </xo-parallax-scroll>
+            </div>
+          {% else %}
+            <h3 class='img-with-text-8__content h4'>{{ content }}</h3>
+          {% endif %}
+        </xo-animate>
+      {% endif %}
+      <div class='img-with-text-8__media'>
+        <xo-parallax-scroll
+          class='xo-background-lazyload'
+          style='width: 100%;'
+          xo-keyframes="
+            {
+              '0%': { y: 0, scale: 0.5 },
+              '50%': { y: 0, scale: 1 },
+            }
+          "
+        >
+          <div class='img-with-text-8__image img-with-text-8__image--desktop'>
+            {% render 'animate-image', image: desktop_image, aspect_ratio: aspect_ratio_desktop, border_radius: 0 %}
+          </div>
+          <div class='img-with-text-8__image img-with-text-8__image--mobile'>
+            {% render 'animate-image', image: mobile_image, aspect_ratio: aspect_ratio_mobile, border_radius: 0 %}
+          </div>
+        </xo-parallax-scroll>
+      </div>
+      <div class='img-with-text-8__bottom'>
+        {% case bottom_content_type %}
+          {% when 'cta-button' %}
+            <xo-parallax-scroll
+              style='width: 100%;'
+              xo-keyframes="
+                {
+                  '0%': { y: 0, scale: 0.5 },
+                  '50%': { y: 0, scale: 1 },
+                }
+              "
+            >
+              <xo-animate xo-cascade>
+                <div class='img-with-text-8__button'>
+                  {% render 'button',
+                    text: button.button_text,
+                    link: button.button_link,
+                    style: button.button_style,
+                    size: button.button_size,
+                    radius: settings.button_radius,
+                    padding: settings.button_padding
+                  %}
+                </div>
+              </xo-animate>
+            </xo-parallax-scroll>
+
+          {% when 'stats-display' %}
+            <xo-animate xo-cascade>
+              <div class='img-with-text-8__stats'>
+                {% if stats_speed_value != blank %}
+                  <xo-parallax-scroll
+                    style='width: 100%;'
+                    xo-keyframes="
+                      {
+                        '0%': { y: 0, scale: 0 },
+                        '50%': { y: 0, scale: 1 },
+                      }
+                    "
+                  >
+                    <div class='img-with-text-8__stats-speed xo-stack' style='--ai:end; --jc:center; --gap: 7; --gap-mobile: 7'>
+                      <xo-countto class='img-with-text-8__stats-value h1' xo-from='0' xo-to='{{ stats_speed_value }}' xo-duration='1000'>
+                        {{ stats_speed_value }}
+                      </xo-countto>
+                      <span class='img-with-text-8__stats-unit'>{{ stats_speed_unit }}</span>
+                    </div>
+                  </xo-parallax-scroll>
+                {% endif %}
+                <xo-parallax-scroll
+                  style='width: 100%;'
+                  class='img-with-text-8__parallax-divider parallax-divider'
+                  xo-keyframes="
+                    {
+                      '33.3%': { widthCustom: 0 },
+                      '65%': { widthCustom: 100 },
+                    }
+                  "
+                >
+                  <span class='img-with-text-8__stats-divider'></span>
+                </xo-parallax-scroll>
+                <xo-parallax-scroll
+                  style='width: 100%;'
+                  xo-keyframes="
+                    {
+                      '0%': { y: 0, scale: 0 },
+                      '50%': { y: 0, scale: 1 },
+                    }
+                  "
+                >
+                  {% if stats_description != blank %}
+                    <div class='img-with-text-8__stats-description'>{{ stats_description }}</div>
+                  {% endif %}
+                </xo-parallax-scroll>
+              </div>
+            </xo-animate>
+        {% endcase %}
+      </div>
+    </div>
+  </xo-grid>
+</div>

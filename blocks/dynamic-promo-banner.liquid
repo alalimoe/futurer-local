@@ -1,0 +1,222 @@
+{% liquid
+  assign aspect_ratio_desktop = block.settings.aspect_ratio_desktop
+  if aspect_ratio_desktop == 'custom'
+    assign aspect_ratio_desktop = block.settings.aspect_ratio_desktop_width | append: '/' | append: block.settings.aspect_ratio_desktop_height
+  endif
+  assign aspect_ratio_mobile = block.settings.aspect_ratio_mobile
+  if aspect_ratio_mobile == 'custom'
+    assign aspect_ratio_mobile = block.settings.aspect_ratio_mobile_width | append: '/' | append: block.settings.aspect_ratio_mobile_height
+  endif
+%}
+
+{% render 'dynamic-promo-banner-block',
+  image_desktop: block.settings.image_desktop,
+  aspect_ratio_desktop: aspect_ratio_desktop,
+  image_mobile: block.settings.image_mobile,
+  aspect_ratio_mobile: aspect_ratio_mobile,
+  promo_title: block.settings.promo_title,
+  promo_subtext: block.settings.promo_subtext,
+  discount_value: block.settings.discount_value,
+  button: block.settings,
+  color_schema_box: block.settings.color_schema_box
+%}
+
+
+{% schema %}
+{
+  "name": "t:blocks.dynamic_promo_banner.name",
+  "settings": [
+    {
+      "type": "header",
+      "content": "t:blocks.dynamic_promo_banner.settings.desktop_image.content"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_desktop",
+      "label": "t:blocks.dynamic_promo_banner.settings.image.label"
+    },
+    {
+      "type": "select",
+      "id": "aspect_ratio_desktop",
+      "label": "Aspect ratio",
+      "default": "auto",
+      "options": [
+        {
+          "value": "auto",
+          "label": "Auto"
+        },
+        {
+          "value": "2/3",
+          "label": "2:3"
+        },
+        {
+          "value": "3/4",
+          "label": "3:4"
+        },
+        {
+          "value": "3/2",
+          "label": "3:2"
+        },
+        {
+          "value": "1",
+          "label": "1:1"
+        },
+        {
+          "value": "4/3",
+          "label": "4:3"
+        },
+        {
+          "value": "16/9",
+          "label": "16:9"
+        },
+        {
+          "value": "21/9",
+          "label": "21:9"
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "t:blocks.dynamic_promo_banner.settings.mobile_image.content"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_mobile",
+      "label": "t:blocks.dynamic_promo_banner.settings.image.label"
+    },
+    {
+      "type": "select",
+      "id": "aspect_ratio_mobile",
+      "label": "Aspect ratio",
+      "default": "auto",
+      "options": [
+        {
+          "value": "auto",
+          "label": "Auto"
+        },
+        {
+          "value": "2/3",
+          "label": "2:3"
+        },
+        {
+          "value": "3/4",
+          "label": "3:4"
+        },
+        {
+          "value": "3/2",
+          "label": "3:2"
+        },
+        {
+          "value": "1",
+          "label": "1:1"
+        },
+        {
+          "value": "4/3",
+          "label": "4:3"
+        },
+        {
+          "value": "16/9",
+          "label": "16:9"
+        },
+        {
+          "value": "21/9",
+          "label": "21:9"
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "t:blocks.dynamic_promo_banner.settings.header_text.content"
+    },
+    {
+      "type": "text",
+      "id": "promo_title",
+      "label": "t:blocks.dynamic_promo_banner.settings.promo_title.label",
+      "default": "Promo title"
+    },
+    {
+      "type": "number",
+      "id": "discount_value",
+      "label": "t:blocks.dynamic_promo_banner.settings.discount_value.label",
+      "default": 50
+    },
+    {
+      "type": "text",
+      "id": "promo_subtext",
+      "label": "t:blocks.dynamic_promo_banner.settings.promo_subtext.label",
+      "default": "Promo subtext"
+    },
+    {
+      "type": "header",
+      "content": "t:blocks.dynamic_promo_banner.settings.header_button.content"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button text",
+      "default": "Button"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link",
+      "default": "/collections/all"
+    },
+    {
+      "type": "select",
+      "id": "button_style",
+      "label": "Button style",
+      "options": [
+        {
+          "value": "primary",
+          "label": "Primary"
+        },
+        {
+          "value": "secondary",
+          "label": "Secondary"
+        },
+        {
+          "value": "link",
+          "label": "Link"
+        }
+      ],
+      "default": "primary"
+    },
+    {
+      "type": "select",
+      "id": "button_size",
+      "label": "Button size",
+      "options": [
+        {
+          "value": "xs",
+          "label": "Extra small"
+        },
+        {
+          "value": "sm",
+          "label": "Small"
+        },
+        {
+          "value": "md",
+          "label": "Medium"
+        },
+        {
+          "value": "lg",
+          "label": "Large"
+        }
+      ],
+      "default": "md"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme_box",
+      "label": "t:blocks.settings.color_schema.label",
+      "default": "scheme_1"
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:blocks.dynamic_promo_banner.presets.name"
+    }
+  ]
+}
+{% endschema %}

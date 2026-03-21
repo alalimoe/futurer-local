@@ -1,0 +1,231 @@
+{% comment %}
+  Renders a product info content with thumbnails.
+
+  Accepts:
+  - zoom_enabled: {Boolean} Whether to enable zoom on the main image (optional)
+
+  Usage:
+  {% render 'product-info-content' %}
+{% endcomment %}
+
+{% assign timer_data = product.metafields.theme.countdown.value %}
+
+<div class="xo-product-info-content {% if product_media_style == 'style-2' %}xo-product-info-content--sticky{% endif %}">
+  <xo-collapse-provider>
+    {% for block in section.blocks %}
+      {% case block.type %}
+          <!-- app -->
+        {% when '@app' %}
+          <xo-animate xo-cascade>{% render block %}</xo-animate>
+
+          <!-- custom liquid -->
+        {% when 'custom_liquid' %}
+          <xo-animate xo-cascade>
+            {% if block.settings.custom_liquid contains 'name="properties[' or block.settings.custom_liquid contains "name='properties[" %}
+              <xo-product-property>{{ block.settings.custom_liquid }}</xo-product-property>
+            {% else %}
+              {{ block.settings.custom_liquid }}
+            {% endif %}
+          </xo-animate>
+
+          <!-- vendor -->
+        {% when 'vendor' %}
+          <xo-animate xo-cascade>
+            <div class="xo-product-info-content__vendor" {{ block.shopify_attributes }}>
+              {{ product.vendor }}
+            </div>
+          </xo-animate>
+
+          <!-- title -->
+        {% when 'title' %}
+          <xo-animate xo-cascade>
+            <h1 class="xo-product-info-content__title h4 {{ style_title }}" {{ block.shopify_attributes }}>
+              {{ product.title }}
+            </h1>
+          </xo-animate>
+
+          <!-- description -->
+        {% when 'description' %}
+          <xo-animate xo-cascade>
+            <div class="xo-product-info-content__description xo-table xo-content" {{ block.shopify_attributes }}>
+              {{ product.description }}
+            </div>
+          </xo-animate>
+
+          <!-- price -->
+        {% when 'price' %}
+          <xo-animate xo-cascade>
+            <div class="xo-product-info-content__price {{ style_price }} {{ style_price_pd }}">
+              <xo-product-will-change xo-unique-id="product-price-{{ section.id }}" {{ block.shopify_attributes }} xo-morph-selector="[xo-price]">
+                {% render 'price', product: product, use_variant: true %}
+                {% if cart.taxes_included == true %}
+                  <span>{{ 'products.product.price.include_tax' | t }}</span>
+                {% endif %}
+              </xo-product-will-change>
+            </div>
+          </xo-animate>
+
+          <!-- variants -->
+        {% when 'variants' %}
+          {% unless product.has_only_default_variant %}
+            <xo-animate xo-cascade>
+              <xo-product-variants>
+                <div class="xo-product-info-content__variant {{ style_variant }} {{ hidden_variant }} {% if product.has_only_default_variant == false %}xo-product-info-content__variant--pd{% endif %}">
+                  {%- for option in product.options_with_values -%}
+                    {% if option.name == settings.product_card_color_option_name %}
+                      {% render 'product-variant', option: option, style: block.settings.variant_color_style, product: product %}
+                    {% else %}
+                      {% render 'product-variant', option: option, style: block.settings.variant_style, product: product %}
+                    {% endif %}
+                  {%- endfor -%}
+                </div>
+              </xo-product-variants>
+            </xo-animate>
+          {% endunless %}
+
+          <!-- buy button -->
+        {% when 'buy_button' %}
+          <div {{ block.shopify_attributes }}>
+            <div class="xo-product-info-content__buy-form">
+              <xo-animate xo-cascade>
+                <div class="xo-product-info-content__quantity">
+                  {%- render 'quantity', size: 'md', variant: product.selected_or_first_available_variant, product: product, is_cart: false %}
+                </div>
+              </xo-animate>
+              <div class="xo-product-info-content__group">
+                <xo-animate xo-cascade class="xo-product-info-content__add-cart">
+                  {% form 'product', product, xo-buy-ignore: 'true' %}
+                    <xo-product-will-change class="shopify-payment-button__add" xo-unique-id="product-add-button-{{ section.id }}">
+                      <xo-cart-add
+                        class="xo-product-info-content__add"
+                        {% if product.selected_or_first_available_variant.available == false %}
+                          xo-disabled
+                        {% endif %}
+                        {% if settings.cart_type == 'page' %}
+                          xo-cart-redirection
+                        {% endif %}
+                      >
+                        {% if product.selected_or_first_available_variant.available %}
+                          {% assign button_text = 'products.product.add_to_cart' | t %}
+                          {% assign button_text_unavailable = 'products.product.unavailable' | t %}
+                          {% render 'button', style: 'secondary', text: button_text, size: 'md', block: true, text_unavailable: button_text_unavailable %}
+                        {%- else -%}
+                          {% assign button_text = 'products.product.sold_out' | t %}
+                          {% assign button_text_unavailable = 'products.product.unavailable' | t %}
+                          {% render 'button', style: 'secondary', text: button_text, size: 'md', block: true, text_unavailable: button_text_unavailable %}
+                        {% endif %}
+                      </xo-cart-add>
+                    </xo-product-will-change>
+                  {% endform %}
+                </xo-animate>
+                <xo-animate xo-cascade class="xo-product-info-content__buy-now {{ style_button_buy }}">
+                  {% render 'buy-button', show_gift_card_recipient: block.settings.show_gift_card_recipient, show_dynamic_checkout: block.settings.show_dynamic_checkout %}
+                  {% if block.settings.show_gift_card_recipient == false %}
+                    {% render 'cart-add-error' %}
+                  {% endif %}
+                </xo-animate>
+              </div>
+            </div>
+          </div>
+
+          <!-- line -->
+        {% when 'line' %}
+          <xo-animate xo-cascade>
+            {% render 'line' %}
+          </xo-animate>
+
+          <!-- collapse -->
+        {% when 'collapse' %}
+          {% assign name = block.settings.collapse_text | append: forloop.index %}
+          <xo-animate xo-cascade class="xo-product-info-content__collapse">
+            {% render 'collapse', title: block.settings.collapse_text, content: block.settings.collapse_content, name: name %}
+          </xo-animate>
+
+          <!-- share -->
+        {%- when 'share' -%}
+          <xo-animate xo-cascade class="xo-product-info-content__share">
+            {% render 'share-product', product: product, blocks: section.blocks %}
+          </xo-animate>
+
+          <!-- line item property -->
+        {% when 'line_item_property' %}
+          <xo-animate xo-cascade class="xo-product-info-content__line-item">
+            {% render 'line-item-property', block: block %}
+          </xo-animate>
+
+          <!-- volumn discount -->
+        {% when 'volume_discount' %}
+          <xo-animate xo-cascade class="xo-product-info-content__volume-discount">
+            {% render 'volume-discount', block: block, product: product %}
+          </xo-animate>
+
+          <!-- countdown timer -->
+        {% when 'countdown_timer' %}
+          {% if timer_data != blank %}
+            <xo-animate xo-cascade class="xo-product-info-content__countdown-timer">
+              {% render 'countdown-timer', block: block, timer: timer_data %}
+            </xo-animate>
+          {% endif %}
+
+          <!-- inventory status -->
+        {% when 'inventory_status' %}
+          <xo-animate xo-cascade class="xo-product-info-content__inventory-status">
+            <xo-product-will-change xo-unique-id="inventory-status-{{ section.id }}">
+              {% render 'inventory-status', block: block, product: product %}
+            </xo-product-will-change>
+          </xo-animate>
+
+          <!-- pickup availabilities -->
+        {% when 'pickup' %}
+          {% assign pick_up_availabilities = product.selected_or_first_available_variant.store_availabilities | where: 'pick_up_enabled', true %}
+          <div
+            class="xo-product-info-content__pickup{% if product.selected_or_first_available_variant.available == false %} xo-product-info-content__pickup--hidden{% endif %}"
+            {{ block.shopify_attributes }}
+          >
+            <xo-animate xo-cascade>
+              {% render 'pickup-availability-item', pick_up_availabilities: pick_up_availabilities %}
+            </xo-animate>
+          </div>
+          <xo-modal
+            style="z-index: 9999;"
+            xo-portal
+            xo-name="pickup-availability"
+            xo-animate="slide-left"
+            xo-placement="top-right"
+          >
+            {% capture pickup_availability_list %}
+              {% render 'pickup-availability-list', pick_up_availabilities: pick_up_availabilities %}
+            {% endcapture %}
+            {% render 'modal-content',
+              title: product.title,
+              content: pickup_availability_list,
+              width: '50rem',
+              height: '100dvh',
+              full_height: true,
+              title_size: '2rem',
+              title_class: 'xo-line-2 h5',
+              header_separator: true,
+              animate: true
+            %}
+          </xo-modal>
+
+          <!-- complementary products -->
+        {% when 'complementary' %}
+          <xo-animate xo-cascade class="xo-product-info-content__complementary">
+            {% render 'complementary-product',
+              intent: 'complementary',
+              autoplay: block.settings.autoplay,
+              autoplay_time: block.settings.autoplay_time,
+              heading: block.settings.heading,
+              show_paginate: block.settings.show_paginate,
+              show_image: block.settings.product_card_show_image,
+              show_secondary_image: block.settings.product_card_show_secondary_image,
+              show_price: block.settings.product_card_show_price,
+              card_color_scheme: block.settings.card_color_scheme,
+              media_aspect_ratio: block.settings.product_card_aspect_ratio
+            %}
+          </xo-animate>
+      {% endcase %}
+    {% endfor %}
+  </xo-collapse-provider>
+</div>

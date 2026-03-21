@@ -1,0 +1,15 @@
+{% assign unit_price = 'products.product.price.unit_price' | t %}
+{% assign unit_price_separator = 'accessibility.unit_price_separator' | t %}
+
+{%- if item.variant.available and item.unit_price_measurement -%}
+  <div class='xo-cart-unit-price'>
+    <div class='xo-visually-hidden'>{{ unit_price }}</div>
+    {{ item.variant.unit_price | money }}
+    <span aria-hidden='true'>/</span>
+    <div class='xo-visually-hidden'>{{ unit_price_separator }}</div>
+    {%- if item.variant.unit_price_measurement.reference_value != 1 -%}
+      {{- item.variant.unit_price_measurement.reference_value -}}
+    {%- endif -%}
+    {{ item.variant.unit_price_measurement.reference_unit }}
+  </div>
+{%- endif -%}

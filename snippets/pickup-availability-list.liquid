@@ -1,0 +1,23 @@
+<xo-product-pickup-availability-list class='xo-pickup-availability-list'>
+  {%- for availability in pick_up_availabilities -%}
+    <xo-animate xo-cascade>
+      <div class='xo-pickup-availability-list__item'>
+        <div class='xo-pickup-availability-list__title'>{{ availability.location.name | escape }}</div>
+        <xo-product-pickup-availability-custom-content xo-id='{{ availability.location.id }}'></xo-product-pickup-availability-custom-content>
+        {%- if availability.available -%}
+          <div class='xo-pickup-availability-list__available'>
+            <div class='xo-pickup-availability-list__icon'>{% render 'icon', name: 'check', size: '2.4rem' %}</div>
+            <p>{{ 'products.product.pickup_availability.pick_up_available' | t }}, {{ availability.pick_up_time | downcase }}</p>
+          </div>
+        {%- endif -%}
+        {%- assign address = availability.location.address -%}
+        <address class='xo-pickup-availability-list__address'>
+          {{ address | format_address }}
+          {%- if address.phone.size > 0 -%}
+            <p>{{ address.phone }}</p>
+          {%- endif -%}
+        </address>
+      </div>
+    </xo-animate>
+  {%- endfor -%}
+</xo-product-pickup-availability-list>

@@ -1,0 +1,90 @@
+{% comment %}
+  Renders a set of links for paginated results. Must be used within paginate tags.
+
+  Accepts:
+  - paginate: {Object}
+  - anchor: {String} (optional) This can be added so that on page reload it takes you to wherever you've placed your anchor tag.
+  - is_wishlist: {Boolean} (optional) Using for custom paginate
+
+  Usage:
+  {% paginate results by 2 %}
+    {% render 'pagination', paginate: paginate, anchor: '#yourID',   %}
+  {% endpaginate %}
+{% endcomment %}
+
+{% liquid
+  assign prev = paginate.previous.url | append: anchor
+  assign next = paginate.next.url | append: anchor
+
+  if is_wishlist
+    assign path_name = '/search?'
+    assign next_page = null
+    assign next_params = paginate.next.url | replace: path_name, '' | split: '&'
+
+    for param in next_params
+      if param contains 'page='
+        assign next_page = param | replace: 'page=', ''
+      endif
+    endfor
+
+    assign prev = '/pages/wishlist'
+    assign next = '/pages/wishlist?page=' | append: next_page
+  endif
+%}
+
+{%- if paginate.parts.size > 0 -%}
+  <nav class='xo-pagination'>
+    <ul class='xo-pagination__list'>
+      {%- if paginate.previous -%}
+        <li class='xo-pagination__list-item {% if settings.enable_border_radius %}xo-pagination__list-item--radius{% endif %}'>
+          <a href='{{ prev }}' class='xo-pagination__page xo-pagination__page--prev' title='Prev'>
+            {% render 'icon', name: 'arrow-left', size: '2.4rem' %}
+          </a>
+        </li>
+      {%- else -%}
+        <li class='xo-pagination__list-item xo-pagination__list-item--disable{% if settings.enable_border_radius %} xo-pagination__list-item--radius{% endif %}'>
+          <span class='xo-pagination__page xo-pagination__page--prev'>
+            {% render 'icon', name: 'arrow-left', size: '2.4rem' %}
+          </span>
+        </li>
+      {%- endif -%}
+      {%- for part in paginate.parts -%}
+        {% liquid
+          assign number = part.title
+          assign url = part.url | append: anchor
+          if is_wishlist
+            assign url = '/pages/wishlist?page=' | append: forloop.index
+          endif
+        %}
+        <li class='xo-pagination__list-item {% if settings.enable_border_radius %}xo-pagination__list-item--radius{% endif %} {% if part.title == paginate.current_page %} xo-pagination__list-item--current{% endif %}'>
+          {%- if part.is_link -%}
+            <a href='{{ url }}' class='xo-pagination__page' title='Page number'>
+              {{ number }}
+            </a>
+          {%- else -%}
+            {%- if part.title == paginate.current_page -%}
+              <span class='xo-pagination__page xo-pagination__page--current'>
+                {{ number }}
+              </span>
+            {%- else -%}
+              <span class='xo-pagination__page'>{{ number }}</span>
+            {%- endif -%}
+          {%- endif -%}
+        </li>
+      {%- endfor -%}
+      {%- if paginate.next -%}
+        <li class='xo-pagination__list-item {% if settings.enable_border_radius %}xo-pagination__list-item--radius{% endif %}'>
+          <a href='{{ next }}' class='xo-pagination__page xo-pagination__page--next' title='Next'>
+            {%- render 'icon', name: 'arrow-right', size: '2.4rem' -%}
+          </a>
+        </li>
+      {%- else -%}
+        <li class='xo-pagination__list-item xo-pagination__list-item--disable{% if settings.enable_border_radius %} xo-pagination__list-item--radius{% endif %}'>
+          <span class='xo-pagination__page xo-pagination__page--next'>
+            {% render 'icon', name: 'arrow-right', size: '2.4rem' %}
+          </span>
+        </li>
+      {%- endif -%}
+    </ul>
+  </nav>
+{%- endif -%}

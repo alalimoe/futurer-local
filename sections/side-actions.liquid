@@ -1,0 +1,239 @@
+{{ 'section-side-actions.css' | asset_url | stylesheet_tag }}
+{{ 'scroll-to-top.css' | asset_url | stylesheet_tag }}
+{{ 'dark-mode.css' | asset_url | stylesheet_tag }}
+
+{% liquid
+  assign position = section.settings.position
+  assign blocks = section.blocks
+%}
+
+<div class='side-actions{% if position %} side-actions--{{ position }}{% endif %}'>
+  <xo-animate xo-cascade xo-type='fade-left'>
+    {% if blocks.size >= 1 %}
+      <div class='side-actions__content{% if settings.enable_border_radius %} side-actions__content--radius{% endif %}{% if blocks.size > 1 %} side-actions__content--modifier{% endif %}'>
+        <div class='slide-actions__wrapper xo-stack' style='--ai: center; --jc: center; --dir: column; --gap: 10; --gap-mobile: 10'>
+          {% for block in blocks %}
+            {% case block.type %}
+              {% when 'scroll-to-top' %}
+                <div class='side-actions__scroll-top'>
+                  {% render 'scroll-to-top',
+                    box_style: block.settings.box_style,
+                    box_size: block.settings.box_size,
+                    icon_name: block.settings.icon_name,
+                    icon_size: block.settings.icon_size
+                  %}
+                </div>
+              {% when 'dark-mode' %}
+                <div class='side-actions__dark-mode'>
+                  {% render 'dark-mode', box_style: block.settings.box_style, box_size: block.settings.box_size, icon_size: block.settings.icon_size %}
+                </div>
+              {% when 'social' %}
+                <div class='side-actions__social'>
+                  {% assign icon_size = block.settings.icon_size | append: 'em' %}
+                  {%- render 'socials', tooltip_placement: 'top-center', icon_size: icon_size, list: block.settings.social_select %}
+                </div>
+            {% endcase %}
+          {% endfor %}
+        </div>
+      </div>
+    {% endif %}
+  </xo-animate>
+</div>
+
+{% schema %}
+{
+  "name": "t:sections.side_actions.name",
+  "enabled_on": {
+    "groups": [
+      "custom.features"
+    ]
+  },
+  "settings": [
+    {
+      "type": "select",
+      "id": "position",
+      "label": "t:sections.side_actions.settings.position.label",
+      "default": "bottom-right",
+      "options": [
+        {
+          "value": "middle-left",
+          "label": "t:sections.side_actions.settings.position.option__1.label"
+        },
+        {
+          "value": "middle-right",
+          "label": "t:sections.side_actions.settings.position.option__2.label"
+        },
+        {
+          "value": "bottom-left",
+          "label": "t:sections.side_actions.settings.position.option__3.label"
+        },
+        {
+          "value": "bottom-right",
+          "label": "t:sections.side_actions.settings.position.option__4.label"
+        }
+      ]
+    }
+  ],
+  "blocks": [
+    {
+      "name": "t:sections.side_actions.blocks.name_1",
+      "type": "scroll-to-top",
+      "settings": [
+        {
+          "type": "select",
+          "id": "box_style",
+          "label": "t:sections.side_actions.blocks.settings.box_style.label",
+          "default": "circle",
+          "options": [
+            {
+              "value": "boxed",
+              "label": "t:sections.side_actions.blocks.settings.box_style.option__1.label"
+            },
+            {
+              "value": "circle",
+              "label": "t:sections.side_actions.blocks.settings.box_style.option__2.label"
+            }
+          ]
+        },
+        {
+          "type": "range",
+          "id": "box_size",
+          "min": 0,
+          "max": 3,
+          "step": 0.1,
+          "label": "t:sections.side_actions.blocks.settings.box_size.label",
+          "default": 0.6
+        },
+        {
+          "type": "select",
+          "id": "icon_name",
+          "label": "t:sections.side_actions.blocks.settings.icon_name.label",
+          "default": "chevron-up",
+          "options": [
+            {
+              "value": "arrow-up",
+              "label": "t:sections.side_actions.blocks.settings.icon_name.option__1.label"
+            },
+            {
+              "value": "chevron-up",
+              "label": "t:sections.side_actions.blocks.settings.icon_name.option__2.label"
+            }
+          ]
+        },
+        {
+          "type": "range",
+          "id": "icon_size",
+          "min": 0,
+          "max": 2,
+          "step": 0.1,
+          "label": "t:sections.side_actions.blocks.settings.icon_size.label",
+          "default": 0.3
+        }
+      ]
+    },
+    {
+      "name": "t:sections.side_actions.blocks.name_2",
+      "type": "dark-mode",
+      "settings": [
+        {
+          "type": "select",
+          "id": "box_style",
+          "label": "t:sections.side_actions.blocks.settings.box_style.label",
+          "default": "circle",
+          "options": [
+            {
+              "value": "boxed",
+              "label": "t:sections.side_actions.blocks.settings.box_style.option__1.label"
+            },
+            {
+              "value": "circle",
+              "label": "t:sections.side_actions.blocks.settings.box_style.option__2.label"
+            }
+          ]
+        },
+        {
+          "type": "range",
+          "id": "box_size",
+          "min": 0,
+          "max": 3,
+          "step": 0.1,
+          "label": "t:sections.side_actions.blocks.settings.box_size.label",
+          "default": 0.6
+        },
+        {
+          "type": "range",
+          "id": "icon_size",
+          "min": 0,
+          "max": 2,
+          "step": 0.1,
+          "label": "t:sections.side_actions.blocks.settings.icon_size.label",
+          "default": 0.3
+        }
+      ]
+    },
+    {
+      "name": "t:sections.side_actions.blocks.name_3",
+      "type": "social",
+      "settings": [
+        {
+          "type": "select",
+          "id": "social_select",
+          "label": "t:sections.side_actions.blocks.settings.social_select.label",
+          "default": "twitter",
+          "options": [
+            {
+              "value": "twitter",
+              "label": "t:sections.side_actions.blocks.settings.social_select.option__1.label"
+            },
+            {
+              "value": "facebook",
+              "label": "t:sections.side_actions.blocks.settings.social_select.option__2.label"
+            },
+            {
+              "value": "pinterest",
+              "label": "t:sections.side_actions.blocks.settings.social_select.option__3.label"
+            },
+            {
+              "value": "instagram",
+              "label": "t:sections.side_actions.blocks.settings.social_select.option__4.label"
+            },
+            {
+              "value": "tiktok",
+              "label": "t:sections.side_actions.blocks.settings.social_select.option__5.label"
+            },
+            {
+              "value": "tumblr",
+              "label": "t:sections.side_actions.blocks.settings.social_select.option__6.label"
+            },
+            {
+              "value": "snapchat",
+              "label": "t:sections.side_actions.blocks.settings.social_select.option__7.label"
+            },
+            {
+              "value": "youtube",
+              "label": "t:sections.side_actions.blocks.settings.social_select.option__8.label"
+            },
+            {
+              "value": "vimeo",
+              "label": "t:sections.side_actions.blocks.settings.social_select.option__9.label"
+            },
+            {
+              "value": "linked",
+              "label": "t:sections.side_actions.blocks.settings.social_select.option__10.label"
+            }
+          ]
+        },
+        {
+          "type": "range",
+          "id": "icon_size",
+          "min": 0,
+          "max": 2,
+          "step": 0.1,
+          "label": "t:sections.side_actions.blocks.settings.icon_size.label",
+          "default": 0.3
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

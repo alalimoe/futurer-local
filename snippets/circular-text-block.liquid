@@ -1,0 +1,108 @@
+{% comment %}
+  Renders a circular text block
+
+  Accepts:
+  - size: {Number} Size (required)
+  - font_size: {Number} Font size (required)
+  - letter_spacing: {Number} Letter spacing (optional)
+  - padding: {Number} Padding (optional)
+  - text_color: {String} Text color (optional)
+  - stroke_width: {Number} Stroke width (optional)
+  - stroke_color: {String} Stroke color (optional)
+  - text: {String} Text (required)
+  - speed_rotate: {Number} Speed rotate (optional)
+  - direction: {String} Direction rotate (optional) (clockwise | counterclockwise)
+  - image: {Object} Image (optional)
+
+  Usage:
+  {% render 'circular-text-block',
+    text: 'Circular text',
+    text_color: '#f00',
+    size: 300,
+    font_size: 50,
+    letter_spacing: 2,
+    padding: 20,
+    stroke_color: '#f00',
+    stroke_width: 2,
+    direction: 'clockwise',
+    speed_rotate: 5,
+    image: image
+  %}
+{% endcomment %}
+
+{% liquid
+  assign box_size = size
+  assign font_size = font_size
+  assign stroke_width = stroke_width | default: 2
+  assign stroke_color = stroke_color | default: '#f00'
+  assign letter_spacing = letter_spacing
+  assign padding = padding
+  assign text_color = text_color
+  assign image = image
+
+  assign text = text
+
+  assign font_size_d_6 = font_size | divided_by: 6
+  assign font_size_d_3 = font_size | divided_by: 3
+  assign padding_x_2 = padding | times: 2
+  assign radius_1 = box_size | divided_by: 2 | minus: stroke_width
+  assign radius_2 = radius_1 | minus: font_size
+  assign radius_2 = radius_2 | plus: font_size_d_6
+  assign radius_2 = radius_2 | minus: padding_x_2
+  assign radius_3 = radius_1 | minus: font_size
+  assign radius_3 = radius_3 | plus: font_size_d_3
+  assign radius_3 = radius_3 | minus: padding
+%}
+
+{% capture d_circle %}
+M {{ box_size | divided_by: 2 }}, {{ box_size | divided_by: 2 }}
+m -{{ radius_1 }}, 0
+a {{ radius_1 }},{{ radius_1 }} 0 0,1 {{ radius_1 | times: 2 }},0
+a {{ radius_1 }},{{ radius_1 }} 0 0,1 -{{ radius_1 | times: 2 }},0
+{% endcapture %}
+
+{% capture d_circle_2 %}
+M {{ box_size | divided_by: 2 }}, {{ box_size | divided_by: 2 }}
+m -{{ radius_2 }}, 0
+a {{ radius_2 }},{{ radius_2 }} 0 0,1 {{ radius_2 | times: 2 }},0
+a {{ radius_2 }},{{ radius_2 }} 0 0,1 -{{ radius_2 | times: 2 }},0
+{% endcapture %}
+
+{% capture d_circle_3 %}
+M {{ box_size | divided_by: 2 }}, {{ box_size | divided_by: 2 }}
+m -{{ radius_3 }}, 0
+a {{ radius_3 }},{{ radius_3 }} 0 0,1 {{ radius_3 | times: 2 }},0
+a {{ radius_3 }},{{ radius_3 }} 0 0,1 -{{ radius_3 | times: 2 }},0
+{% endcapture %}
+
+<div class="xo-circular-text-block" style="--size: {{ box_size }}px">
+  <svg
+    version="1.1"
+    xmlns="http://www.w3.org/2000/svg"
+    xmlns:xlink="http://www.w3.org/1999/xlink"
+    x="0px"
+    y="0px"
+    viewBox="0 0 {{ box_size }} {{ box_size }}"
+    xml:space="preserve"
+    style="max-width: {{ box_size }}px; max-height: {{ box_size }}px; --speed-rotate: {{ speed_rotate }}s;"
+    class="xo-circular-text-block__svg xo-circular-text-block__svg--{{ direction }}"
+  >
+    <!-- Outer Circle -->
+    <path d="{{ d_circle }}" fill="none" stroke="{{ stroke_color }}" stroke-width="{{ stroke_width }}" />
+
+    <!-- Middle Circle -->
+    <path d="{{ d_circle_2 }}" fill="none" stroke="{{ stroke_color }}" stroke-width="{{ stroke_width }}" />
+
+    <!-- Inner Text Circle -->
+    <path id="circlePath" d="{{ d_circle_3 }}" fill="none" />
+
+    <text fill="{{ text_color }}" style="letter-spacing: {{ letter_spacing }}px; font-size: {{ font_size }}px;">
+      <textPath xlink:href="#circlePath">{{ text }}</textPath>
+    </text>
+  </svg>
+  {% if image != blank %}
+    <div class="xo-circular-text-block__image">
+      {% render 'image', image: image %}
+    </div>
+  {% endif %}
+</div>

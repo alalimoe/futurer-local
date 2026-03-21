@@ -1,0 +1,83 @@
+{{ 'login-form.css' | asset_url | stylesheet_tag }}
+
+<div class='login-form'>
+  <div class='login-form__content'>
+    {% form 'customer_login' %}
+      {% assign success_message = 'customer.login_page.success_message' | t %}
+      {% render 'form-error', form: form %}
+      {% render 'form-success', form: form, message: success_message %}
+      <xo-animate xo-cascade>
+        <div class='login-form__item'>
+          <div class='login-form__item-input'>
+            {% assign email_input_id = 'Email-input--' | append: section.id %}
+            {% assign email_label = 'customer.login_page.email' | t %}
+            {% render 'field-input', type: 'text', name: 'customer[email]', value: '', label: email_label, id: email_input_id, required: 'required' %}
+          </div>
+          <div class='login-form__item-icon'>
+            {% render 'icon', name: 'mail', size: '1.8rem', type: 'button' %}
+          </div>
+        </div>
+        {% render 'space', spacing_dt: 8, spacing_mb: 6 %}
+        <div class='login-form__item'>
+          <div class='login-form__item-input'>
+            {% assign password_input_id = 'passwordField' %}
+            {% assign password_label = 'customer.login_page.password' | t %}
+            {% render 'field-input', type: 'password', name: 'customer[password]', value: '', label: password_label, id: password_input_id, required: 'required' %}
+          </div>
+          <div class='login-form__item-icon' id='togglePassword'>
+            <div class='login-form__icon-hide'>
+              {% render 'icon', name: 'eye-hide', size: '2.4rem' %}
+            </div>
+            <div class='login-form__icon-open'>
+              {% render 'icon', name: 'eye', size: '2.4rem' %}
+            </div>
+          </div>
+        </div>
+      </xo-animate>
+      <xo-animate xo-cascade>
+        <div class='login-form__sign-in'>
+          {% assign btn_sign_in_text = 'customer.login_page.sign_in' | t %}
+          {% render 'button', text: btn_sign_in_text, size: 'md', block: true, effect: 'slide-up', style: 'primary' %}
+        </div>
+      </xo-animate>
+    {% endform %}
+    {% render 'space', spacing_dt: 20, spacing_mb: 20 %}
+    <xo-animate xo-cascade>
+      <div class='login-form__footer'>
+        <div class='login-form__footer-left'>
+          <span class='login-form__left-title'>{{ 'customer.login_page.dont_have' | t }}</span>
+          {% assign button_text = 'customer.login_page.sign_up' | t %}
+          {% render 'button', text: button_text, link: routes.account_register_url, style: 'link', size: 'sm' %}
+        </div>
+        <div class='login-form__footer-right'>
+          <xo-modal-trigger xo-name='forgot-your-password'>
+            {% assign button_text = 'customer.login_page.forgot_password' | t %}
+            {% render 'button', text: button_text, style: 'link', size: 'sm' %}
+          </xo-modal-trigger>
+        </div>
+      </div>
+    </xo-animate>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    console.log('DOM is loaded');
+    const togglePassword = document.getElementById('togglePassword');
+    const passwordField = document.getElementById('passwordField');
+    const eyeOpenPassword = document.querySelector('.login-form__icon-open');
+    const eyeHidePassword = document.querySelector('.login-form__icon-hide');
+
+    togglePassword.addEventListener('click', function () {
+      if (passwordField.type === 'password') {
+        passwordField.type = 'text';
+        eyeOpenPassword.classList.add('active');
+        eyeHidePassword.classList.add('active');
+      } else {
+        passwordField.type = 'password';
+        eyeHidePassword.classList.remove('active');
+        eyeOpenPassword.classList.remove('active');
+      }
+    });
+  });
+</script>

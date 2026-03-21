@@ -1,0 +1,62 @@
+<section class="np-surface">
+  <div class="np-wrap">
+    {% if section.settings.title != blank %}<h3 style="margin-bottom:.5rem;">{{ section.settings.title }}</h3>{% endif %}
+    <div class="np-pro-list">
+      {% for block in section.blocks %}
+        {% case block.type %}
+          {% when 'product' %}
+            {% assign p = block.settings.product %}
+            {% if p %}
+              <article class="np-pro" {{ block.shopify_attributes }}>
+                <a href="{{ p.url }}"><img src="{{ p.featured_image | image_url: width: 200 }}" alt="{{ p.title | escape }}" width="200" height="{{ 200 | divided_by: p.featured_image.aspect_ratio | round }}" loading="lazy"></a>
+                <div>
+                  <h4 style="margin:.25rem 0;"><a href="{{ p.url }}" style="text-decoration:none; color:inherit;">{{ p.title }}</a></h4>
+                  {% if p.price %}<div class="np-meta">{{ p.price | money_with_currency }}</div>{% endif %}
+                  {% if block.settings.badge != blank %}<div class="np-meta">{{ block.settings.badge }}</div>{% endif %}
+                  <div class="np-card__actions" style="margin-top:.5rem;">
+                    <a class="btn btn--secondary" href="{{ p.url }}">Learn</a>
+                    {% form 'product', p, id: 'np-quick-add-' | append: p.id %}
+                      <input type="hidden" name="id" value="{{ p.selected_or_first_available_variant.id }}">
+                      <button class="btn btn--primary" type="submit">Quick add</button>
+                    {% endform %}
+                  </div>
+                </div>
+              </article>
+            {% endif %}
+          {% when 'collection' %}
+            {% assign c = block.settings.collection %}{% if c %}
+              <article class="np-pro" {{ block.shopify_attributes }}>
+                <div>
+                  <h4 style="margin:.25rem 0;"><a href="{{ c.url }}" style="text-decoration:none; color:inherit;">{{ c.title }}</a></h4>
+                  <p class="np-card__deck">{{ c.description | strip_html | truncate: 140 }}</p>
+                  <div class="np-card__actions" style="margin-top:.5rem;">
+                    <a class="btn btn--secondary" href="{{ c.url }}">Explore</a>
+                  </div>
+                </div>
+              </article>
+            {% endif %}
+        {% endcase %}
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Inline Discovery",
+  "settings": [
+    { "type":"text", "id":"title", "label":"Title", "default":"Editor’s picks" }
+  ],
+  "blocks": [
+    { "type":"product", "name":"Product", "settings":[
+      { "type":"product", "id":"product", "label":"Product" },
+      { "type":"text", "id":"badge", "label":"Badge (e.g., COA verified)" }
+    ]},
+    { "type":"collection", "name":"Collection", "settings":[
+      { "type":"collection", "id":"collection", "label":"Collection" }
+    ]}
+  ],
+  "max_blocks": 6,
+  "presets":[{ "name":"NP • Inline Discovery" }]
+}
+{% endschema %}

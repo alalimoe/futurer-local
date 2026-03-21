@@ -1,0 +1,239 @@
+{% doc %}
+  @prompt
+    Safety banner (new block)
+    
+    A styled callout that is always visible near top:
+    
+    “Read safety + interactions before use.”
+    
+    Button anchor: “Jump to Safety”
+    
+    Controls:
+    
+    Background color / border
+    
+    Text + link label
+    
+    Show/hide
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-safety-banner-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background-color: {{ block.settings.background_color }};
+    border: {{ block.settings.border_thickness }}px solid {{ block.settings.border_color }};
+    padding: 16px var(--page-gutter);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .ai-safety-banner-{{ ai_gen_id }}--hidden {
+    display: none;
+  }
+
+  .ai-safety-banner__container-{{ ai_gen_id }} {
+    max-width: {{ settings.page_width }}px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .ai-safety-banner__text-{{ ai_gen_id }} {
+    color: {{ block.settings.text_color }};
+    font-size: 16px;
+    margin: 0;
+    flex-grow: 1;
+  }
+
+  .ai-safety-banner__button-{{ ai_gen_id }} {
+    background-color: {{ block.settings.button_background }};
+    color: {{ block.settings.button_text_color }};
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background-color 0.3s ease;
+  }
+
+  .ai-safety-banner__button-{{ ai_gen_id }}:hover {
+    background-color: {{ block.settings.button_hover_background }};
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-safety-banner__container-{{ ai_gen_id }} {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .ai-safety-banner__button-{{ ai_gen_id }} {
+      width: 100%;
+      text-align: center;
+    }
+  }
+{% endstyle %}
+
+<safety-banner-{{ ai_gen_id }}
+  class="ai-safety-banner-{{ ai_gen_id }} {% unless block.settings.show_banner %}ai-safety-banner-{{ ai_gen_id }}--hidden{% endunless %}"
+  {{ block.shopify_attributes }}
+>
+  <div class="ai-safety-banner__container-{{ ai_gen_id }}">
+    <p class="ai-safety-banner__text-{{ ai_gen_id }}">
+      {{ block.settings.banner_text }}
+    </p>
+    <a
+      href="{{ block.settings.anchor_link }}"
+      class="ai-safety-banner__button-{{ ai_gen_id }}"
+    >
+      {{ block.settings.button_label }}
+    </a>
+  </div>
+</safety-banner-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class SafetyBanner{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+      }
+
+      connectedCallback() {
+        this.setupSmoothScroll();
+      }
+
+      setupSmoothScroll() {
+        const button = this.querySelector('.ai-safety-banner__button-{{ ai_gen_id }}');
+        if (!button) return;
+
+        button.addEventListener('click', function(event) {
+          const href = this.getAttribute('href');
+          if (!href || !href.startsWith('#')) return;
+
+          event.preventDefault();
+          const targetId = href.substring(1);
+          const targetElement = document.getElementById(targetId);
+
+          if (targetElement) {
+            targetElement.scrollIntoView({
+              behavior: 'smooth',
+              block: 'start'
+            });
+          }
+        });
+      }
+    }
+
+    customElements.define('safety-banner-{{ ai_gen_id }}', SafetyBanner{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Safety banner",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "banner_text",
+      "label": "Banner text",
+      "default": "Read safety + interactions before use."
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label",
+      "default": "Jump to Safety"
+    },
+    {
+      "type": "text",
+      "id": "anchor_link",
+      "label": "Anchor link",
+      "default": "#safety",
+      "info": "Use format #section-id to link to a section on the page"
+    },
+    {
+      "type": "header",
+      "content": "Visibility"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_banner",
+      "label": "Show banner",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Style"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#fff9e6"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#2a2a2a"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Border color",
+      "default": "#FBBF24"
+    },
+    {
+      "type": "range",
+      "id": "border_thickness",
+      "min": 0,
+      "max": 10,
+      "step": 1,
+      "unit": "px",
+      "label": "Border thickness",
+      "default": 2
+    },
+    {
+      "type": "header",
+      "content": "Button"
+    },
+    {
+      "type": "color",
+      "id": "button_background",
+      "label": "Background color",
+      "default": "#5a9d6f"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_background",
+      "label": "Hover background color",
+      "default": "#4a8d5f"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Text color",
+      "default": "#ffffff"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Safety banner"
+    }
+  ]
+}
+{% endschema %}

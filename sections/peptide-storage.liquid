@@ -1,0 +1,100 @@
+{% schema %}
+{
+  "name": "Storage (Premium)",
+  "tag": "section",
+  "class": "section-peptide-storage",
+  "settings": [
+    { "type": "color", "id": "bg_color", "label": "Background", "default": "#fafafb" },
+    { "type": "text", "id": "title", "label": "Heading", "default": "Post-Reconstitution Storage Rules" },
+    {
+      "type": "range",
+      "id": "padding_y",
+      "label": "Vertical Padding (px)",
+      "min": 40,
+      "max": 160,
+      "step": 4,
+      "default": 80
+    }
+  ],
+  "presets": [{"name": "Storage (Premium)"}]
+}
+{% endschema %}
+
+{%- assign s = section.settings -%}
+{%- assign sid = section.id -%}
+
+<div class="pst-wrapper" id="pst-{{ sid }}">
+  <div class="pst-container">
+    <h2 class="pst-title">{{ s.title }}</h2>
+
+    <div class="pst-grid">
+      <div class="pst-card pst-powder">
+        <div class="pst-icon pst-icon--powder">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+        </div>
+        <div class="pst-content">
+          <div class="pst-label pst-label--powder">Before Mixing</div>
+          <h3>Lyophilized Powder</h3>
+          <p>Store your unmixed vials in a cool, dark place. For long-term storage, keeping them in the freezer is best to preserve the freeze-dried powder for months or even years.</p>
+        </div>
+      </div>
+
+      <div class="pst-card pst-liquid">
+        <div class="pst-icon pst-icon--liquid">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 17.58A5 5 0 0 0 18 8h-1.26A8 8 0 1 0 4 16.25"/><line x1="8" y1="16" x2="8.01" y2="16"/><line x1="8" y1="20" x2="8.01" y2="20"/><line x1="12" y1="18" x2="12.01" y2="18"/><line x1="12" y1="22" x2="12.01" y2="22"/><line x1="16" y1="16" x2="16.01" y2="16"/><line x1="16" y1="20" x2="16.01" y2="20"/></svg>
+        </div>
+        <div class="pst-content">
+          <div class="pst-label pst-label--liquid">After Mixing</div>
+          <h3>Active Liquid</h3>
+          <p><strong>Refrigerate immediately.</strong> Once mixed with water, peptides degrade quickly at room temp. Keep them in a dark container away from UV lights. Potent for 3 to 4 weeks.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{%- style -%}
+  #pst-{{ sid }} {
+    --pst-bg: {{ s.bg_color }};
+    --pst-py: {{ s.padding_y | default: 80 }}px;
+    --pst-text: var(--color-text-main, #111827);
+    --pst-muted: var(--color-text-muted, #4b5563);
+    --pst-font: var(--font-body-family, sans-serif);
+    --pst-heading: var(--font-heading-family, sans-serif);
+    --pst-radius: var(--nx-radius, 14px);
+    --pst-shadow-sm: var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.04));
+    --pst-shadow-md: var(--shadow-md, 0 12px 30px rgba(0,0,0,0.06));
+    --pst-transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    content-visibility: auto;
+  }
+
+  .pst-wrapper { padding: var(--pst-py) 20px; font-family: var(--pst-font); background: var(--pst-bg); }
+  .pst-container { max-width: var(--container-width-narrow); margin: 0 auto; }
+  .pst-title { text-align: center; font-size: 32px; font-weight: 800; color: var(--pst-text); margin: 0 0 40px; letter-spacing: -0.5px; font-family: var(--pst-heading); }
+
+  .pst-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 32px; }
+  .pst-grid:hover .pst-card:not(:hover) { opacity: 0.6; }
+
+  .pst-card { background: rgba(255,255,255,0.7); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-radius: var(--pst-radius); padding: 48px 32px; display: flex; flex-direction: column; align-items: center; text-align: center; box-shadow: var(--pst-shadow-md); transition: var(--pst-transition); position: relative; overflow: hidden; }
+  .pst-card:hover { transform: translateY(-4px); opacity: 1 !important; }
+
+  .pst-powder::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: #64748b; border-radius: var(--pst-radius) var(--pst-radius) 0 0; }
+  .pst-liquid { background: linear-gradient(180deg, rgba(240,249,255,0.6) 0%, rgba(255,255,255,0.8) 100%); }
+  .pst-liquid::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: #0ea5e9; border-radius: var(--pst-radius) var(--pst-radius) 0 0; }
+
+  .pst-icon { width: 64px; height: 64px; border-radius: var(--nx-radius); display: flex; align-items: center; justify-content: center; margin-bottom: 24px; box-shadow: inset 0 2px 4px rgba(255,255,255,0.5), var(--pst-shadow-sm); }
+  .pst-icon--powder { background: var(--color-bg-secondary, #f9fafb); color: var(--pst-muted); }
+  .pst-icon--liquid { background: #e0f2fe; color: #0284c7; }
+
+  .pst-label { display: inline-block; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; padding: 4px 12px; border-radius: var(--nx-radius-pill); margin-bottom: 16px; }
+  .pst-label--powder { color: var(--pst-muted); background: var(--color-bg-secondary, #f9fafb); box-shadow: var(--pst-shadow-sm); }
+  .pst-label--liquid { color: #0284c7; background: #e0f2fe; box-shadow: var(--pst-shadow-sm); }
+  .pst-content h3 { font-size: 24px; font-weight: 800; color: var(--pst-text); margin: 0 0 16px; letter-spacing: -0.5px; font-family: var(--pst-heading); }
+  .pst-content p { font-size: 15px; color: var(--pst-muted); line-height: 1.7; margin: 0; }
+
+  .pst-wrapper :focus-visible { outline: 2px solid var(--color-accent-primary, #FBBF24); outline-offset: 2px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pst-wrapper *, .pst-wrapper *::before, .pst-wrapper *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  }
+{%- endstyle -%}

@@ -1,0 +1,885 @@
+{% doc %}
+  @prompt
+    clean, future‑friendly blog post template inspired by Futurer, with a Table of Contents on the upper‑left that stays with the reader as they scroll
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-blog-post-{{ ai_gen_id }} {
+    max-width: {{ block.settings.max_width }}px;
+    margin: 0 auto;
+    padding: {{ block.settings.section_padding }}px var(--page-gutter);
+    font-family: {{ block.settings.body_font.family }}, {{ block.settings.body_font.fallback_families }};
+    font-weight: {{ block.settings.body_font.weight }};
+    line-height: 1.6;
+    color: {{ block.settings.text_color }};
+    background-color: {{ block.settings.background_color }};
+  }
+
+  .ai-blog-post-container-{{ ai_gen_id }} {
+    display: grid;
+    grid-template-columns: {{ block.settings.toc_width }}px 1fr;
+    gap: {{ block.settings.content_gap }}px;
+    align-items: start;
+  }
+
+  .ai-blog-toc-{{ ai_gen_id }} {
+    position: sticky;
+    top: {{ block.settings.sticky_offset }}px;
+    background-color: {{ block.settings.toc_background }};
+    border: 1px solid {{ block.settings.toc_border_color }};
+    border-radius: {{ block.settings.border_radius }}px;
+    padding: {{ block.settings.toc_padding }}px;
+    max-height: calc(100vh - {{ block.settings.sticky_offset | plus: 40 }}px);
+    overflow-y: auto;
+  }
+
+  .ai-blog-toc-title-{{ ai_gen_id }} {
+    font-family: {{ block.settings.heading_font.family }}, {{ block.settings.heading_font.fallback_families }};
+    font-weight: {{ block.settings.heading_font.weight }};
+    font-size: {{ block.settings.toc_title_size }}px;
+    color: {{ block.settings.heading_color }};
+    margin: 0 0 16px 0;
+    padding-bottom: 8px;
+    border-bottom: 1px solid {{ block.settings.toc_border_color }};
+  }
+
+  .ai-blog-toc-list-{{ ai_gen_id }} {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .ai-blog-toc-item-{{ ai_gen_id }} {
+    margin-bottom: 8px;
+  }
+
+  .ai-blog-toc-link-{{ ai_gen_id }} {
+    display: block;
+    color: {{ block.settings.toc_link_color }};
+    text-decoration: none;
+    font-size: {{ block.settings.toc_link_size }}px;
+    padding: 6px 0;
+    border-left: 3px solid transparent;
+    padding-left: 12px;
+    transition: var(--transition-smooth);
+  }
+
+  .ai-blog-toc-link-{{ ai_gen_id }}:hover {
+    color: {{ block.settings.toc_link_hover_color }};
+    border-left-color: {{ block.settings.accent_color }};
+    background-color: {{ block.settings.toc_hover_background }};
+  }
+
+  .ai-blog-toc-link-{{ ai_gen_id }}.active {
+    color: {{ block.settings.accent_color }};
+    border-left-color: {{ block.settings.accent_color }};
+    background-color: {{ block.settings.toc_active_background }};
+    font-weight: 600;
+  }
+
+  .ai-blog-content-{{ ai_gen_id }} {
+    min-width: 0;
+  }
+
+  .ai-blog-header-{{ ai_gen_id }} {
+    margin-bottom: {{ block.settings.header_spacing }}px;
+    text-align: {{ block.settings.text_alignment }};
+  }
+
+  .ai-blog-title-{{ ai_gen_id }} {
+    font-family: {{ block.settings.heading_font.family }}, {{ block.settings.heading_font.fallback_families }};
+    font-weight: {{ block.settings.heading_font.weight }};
+    font-size: {{ block.settings.title_size }}px;
+    color: {{ block.settings.heading_color }};
+    margin: 0 0 16px 0;
+    line-height: 1.2;
+  }
+
+  .ai-blog-meta-{{ ai_gen_id }} {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: {{ block.settings.meta_size }}px;
+    color: {{ block.settings.meta_color }};
+    margin-bottom: 24px;
+    {% if block.settings.text_alignment == 'center' %}
+      justify-content: center;
+    {% elsif block.settings.text_alignment == 'right' %}
+      justify-content: flex-end;
+    {% endif %}
+  }
+
+  .ai-blog-meta-item-{{ ai_gen_id }} {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .ai-blog-excerpt-{{ ai_gen_id }} {
+    font-size: {{ block.settings.excerpt_size }}px;
+    color: {{ block.settings.excerpt_color }};
+    margin-bottom: {{ block.settings.excerpt_spacing }}px;
+    font-style: italic;
+  }
+
+  .ai-blog-body-{{ ai_gen_id }} {
+    font-size: {{ block.settings.body_size }}px;
+    line-height: {{ block.settings.line_height }};
+  }
+
+  .ai-blog-body-{{ ai_gen_id }} h1,
+  .ai-blog-body-{{ ai_gen_id }} h2,
+  .ai-blog-body-{{ ai_gen_id }} h3,
+  .ai-blog-body-{{ ai_gen_id }} h4,
+  .ai-blog-body-{{ ai_gen_id }} h5,
+  .ai-blog-body-{{ ai_gen_id }} h6 {
+    font-family: {{ block.settings.heading_font.family }}, {{ block.settings.heading_font.fallback_families }};
+    font-weight: {{ block.settings.heading_font.weight }};
+    color: {{ block.settings.heading_color }};
+    margin: {{ block.settings.heading_spacing }}px 0 16px 0;
+    line-height: 1.3;
+    scroll-margin-top: {{ block.settings.sticky_offset | plus: 20 }}px;
+  }
+
+  .ai-blog-body-{{ ai_gen_id }} h1 { font-size: {{ block.settings.h1_size }}px; }
+  .ai-blog-body-{{ ai_gen_id }} h2 { font-size: {{ block.settings.h2_size }}px; }
+  .ai-blog-body-{{ ai_gen_id }} h3 { font-size: {{ block.settings.h3_size }}px; }
+  .ai-blog-body-{{ ai_gen_id }} h4 { font-size: {{ block.settings.h4_size }}px; }
+  .ai-blog-body-{{ ai_gen_id }} h5 { font-size: {{ block.settings.h5_size }}px; }
+  .ai-blog-body-{{ ai_gen_id }} h6 { font-size: {{ block.settings.h6_size }}px; }
+
+  .ai-blog-body-{{ ai_gen_id }} p {
+    margin-bottom: {{ block.settings.paragraph_spacing }}px;
+  }
+
+  .ai-blog-body-{{ ai_gen_id }} a {
+    color: {{ block.settings.link_color }};
+    text-decoration: underline;
+    text-decoration-color: {{ block.settings.accent_color }};
+    text-underline-offset: 3px;
+    transition: color 0.3s ease;
+  }
+
+  .ai-blog-body-{{ ai_gen_id }} a:hover {
+    color: {{ block.settings.link_hover_color }};
+  }
+
+  .ai-blog-body-{{ ai_gen_id }} blockquote {
+    border-left: 4px solid {{ block.settings.accent_color }};
+    padding-left: 20px;
+    margin: 24px 0;
+    font-style: italic;
+    color: {{ block.settings.quote_color }};
+    background-color: {{ block.settings.quote_background }};
+    padding: 20px;
+    border-radius: {{ block.settings.border_radius }}px;
+  }
+
+  .ai-blog-body-{{ ai_gen_id }} code {
+    background-color: {{ block.settings.code_background }};
+    color: {{ block.settings.code_color }};
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 0.9em;
+  }
+
+  .ai-blog-body-{{ ai_gen_id }} pre {
+    background-color: {{ block.settings.code_background }};
+    color: {{ block.settings.code_color }};
+    padding: 20px;
+    border-radius: {{ block.settings.border_radius }}px;
+    overflow-x: auto;
+    margin: 24px 0;
+  }
+
+  .ai-blog-body-{{ ai_gen_id }} img {
+    max-width: 100%;
+    height: auto;
+    border-radius: {{ block.settings.border_radius }}px;
+    margin: 24px 0;
+  }
+
+  .ai-blog-body-{{ ai_gen_id }} ul,
+  .ai-blog-body-{{ ai_gen_id }} ol {
+    margin: 16px 0;
+    padding-left: 24px;
+  }
+
+  .ai-blog-body-{{ ai_gen_id }} li {
+    margin-bottom: 8px;
+  }
+
+  @media screen and (max-width: 1024px) {
+    .ai-blog-post-container-{{ ai_gen_id }} {
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+
+    .ai-blog-toc-{{ ai_gen_id }} {
+      position: relative;
+      top: auto;
+      order: -1;
+      max-height: none;
+    }
+
+    .ai-blog-post-{{ ai_gen_id }} {
+      padding: {{ block.settings.section_padding | times: 0.7 }}px var(--page-gutter);
+    }
+  }
+
+  @media screen and (max-width: 768px) {
+    .ai-blog-title-{{ ai_gen_id }} {
+      font-size: {{ block.settings.title_size | times: 0.8 }}px;
+    }
+
+    .ai-blog-meta-{{ ai_gen_id }} {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .ai-blog-body-{{ ai_gen_id }} h1 { font-size: {{ block.settings.h1_size | times: 0.8 }}px; }
+    .ai-blog-body-{{ ai_gen_id }} h2 { font-size: {{ block.settings.h2_size | times: 0.8 }}px; }
+    .ai-blog-body-{{ ai_gen_id }} h3 { font-size: {{ block.settings.h3_size | times: 0.8 }}px; }
+  }
+{% endstyle %}
+
+<blog-post-{{ ai_gen_id }} class="ai-blog-post-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="ai-blog-post-container-{{ ai_gen_id }}">
+    {% if block.settings.show_toc %}
+      <nav class="ai-blog-toc-{{ ai_gen_id }}" aria-label="Table of contents">
+        <h3 class="ai-blog-toc-title-{{ ai_gen_id }}">{{ block.settings.toc_title }}</h3>
+        <ul class="ai-blog-toc-list-{{ ai_gen_id }}" id="ai-toc-list-{{ ai_gen_id }}">
+        </ul>
+      </nav>
+    {% endif %}
+
+    <article class="ai-blog-content-{{ ai_gen_id }}">
+      <header class="ai-blog-header-{{ ai_gen_id }}">
+        {% if block.settings.title != blank %}
+          <h1 class="ai-blog-title-{{ ai_gen_id }}">{{ block.settings.title }}</h1>
+        {% endif %}
+
+        {% if block.settings.show_meta %}
+          <div class="ai-blog-meta-{{ ai_gen_id }}">
+            {% if block.settings.author != blank %}
+              <div class="ai-blog-meta-item-{{ ai_gen_id }}">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+                <span>{{ block.settings.author }}</span>
+              </div>
+            {% endif %}
+
+            {% if block.settings.publish_date != blank %}
+              <div class="ai-blog-meta-item-{{ ai_gen_id }}">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                  <line x1="16" y1="2" x2="16" y2="6"></line>
+                  <line x1="8" y1="2" x2="8" y2="6"></line>
+                  <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+                <time>{{ block.settings.publish_date }}</time>
+              </div>
+            {% endif %}
+
+            {% if block.settings.reading_time != blank %}
+              <div class="ai-blog-meta-item-{{ ai_gen_id }}">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12,6 12,12 16,14"></polyline>
+                </svg>
+                <span>{{ block.settings.reading_time }} min read</span>
+              </div>
+            {% endif %}
+          </div>
+        {% endif %}
+
+        {% if block.settings.excerpt != blank %}
+          <div class="ai-blog-excerpt-{{ ai_gen_id }}">{{ block.settings.excerpt }}</div>
+        {% endif %}
+      </header>
+
+      <div class="ai-blog-body-{{ ai_gen_id }}" id="ai-blog-content-{{ ai_gen_id }}">
+        {{ block.settings.content }}
+      </div>
+    </article>
+  </div>
+</blog-post-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class BlogPost{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+        this.tocList = this.querySelector('#ai-toc-list-{{ ai_gen_id }}');
+        this.content = this.querySelector('#ai-blog-content-{{ ai_gen_id }}');
+        this.headings = [];
+        this.tocLinks = [];
+        this.currentActiveIndex = -1;
+      }
+
+      connectedCallback() {
+        if (this.tocList && this.content) {
+          this.generateTOC();
+          this.setupScrollSpy();
+        }
+      }
+
+      generateTOC() {
+        this.headings = Array.from(this.content.querySelectorAll('h1, h2, h3, h4, h5, h6'));
+        
+        if (this.headings.length === 0) {
+          this.querySelector('.ai-blog-toc-{{ ai_gen_id }}').style.display = 'none';
+          return;
+        }
+
+        this.headings.forEach((heading, index) => {
+          const id = `heading-${index}-{{ ai_gen_id }}`;
+          heading.id = id;
+
+          const li = document.createElement('li');
+          li.className = 'ai-blog-toc-item-{{ ai_gen_id }}';
+
+          const link = document.createElement('a');
+          link.href = `#${id}`;
+          link.className = 'ai-blog-toc-link-{{ ai_gen_id }}';
+          link.textContent = heading.textContent;
+          link.style.paddingLeft = `${(parseInt(heading.tagName.charAt(1)) - 1) * 12 + 12}px`;
+
+          link.addEventListener('click', (e) => {
+            e.preventDefault();
+            heading.scrollIntoView({
+              behavior: 'smooth',
+              block: 'start'
+            });
+          });
+
+          li.appendChild(link);
+          this.tocList.appendChild(li);
+          this.tocLinks.push(link);
+        });
+      }
+
+      setupScrollSpy() {
+        const observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              const index = this.headings.indexOf(entry.target);
+              if (entry.isIntersecting) {
+                this.setActiveLink(index);
+              }
+            });
+          },
+          {
+            rootMargin: '-20% 0px -70% 0px',
+            threshold: 0
+          }
+        );
+
+        this.headings.forEach((heading) => {
+          observer.observe(heading);
+        });
+      }
+
+      setActiveLink(index) {
+        if (this.currentActiveIndex !== -1 && this.tocLinks[this.currentActiveIndex]) {
+          this.tocLinks[this.currentActiveIndex].classList.remove('active');
+        }
+
+        if (index !== -1 && this.tocLinks[index]) {
+          this.tocLinks[index].classList.add('active');
+          this.currentActiveIndex = index;
+        }
+      }
+    }
+
+    customElements.define('blog-post-{{ ai_gen_id }}', BlogPost{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Blog post template",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "The Future of Web Design"
+    },
+    {
+      "type": "textarea",
+      "id": "excerpt",
+      "label": "Excerpt",
+      "default": "Exploring the latest trends and technologies shaping the future of digital experiences."
+    },
+    {
+      "type": "richtext",
+      "id": "content",
+      "label": "Content",
+      "default": "<h2>Introduction</h2><p>Welcome to this comprehensive guide on modern web design principles and future trends.</p><h2>Design Principles</h2><p>Clean, minimal design continues to dominate the digital landscape.</p><h3>Typography</h3><p>Typography plays a crucial role in user experience and readability.</p><h3>Color Theory</h3><p>Understanding color psychology helps create more engaging interfaces.</p><h2>Future Trends</h2><p>Emerging technologies are reshaping how we approach web design.</p><h3>AI Integration</h3><p>Artificial intelligence is becoming increasingly important in design workflows.</p><h2>Conclusion</h2><p>The future of web design is bright and full of possibilities.</p>"
+    },
+    {
+      "type": "header",
+      "content": "Meta information"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_meta",
+      "label": "Show meta information",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "author",
+      "label": "Author",
+      "default": "Design Team"
+    },
+    {
+      "type": "text",
+      "id": "publish_date",
+      "label": "Publish date",
+      "default": "March 15, 2024"
+    },
+    {
+      "type": "text",
+      "id": "reading_time",
+      "label": "Reading time",
+      "default": "5"
+    },
+    {
+      "type": "header",
+      "content": "Table of contents"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_toc",
+      "label": "Show table of contents",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "toc_title",
+      "label": "Table of contents title",
+      "default": "Contents"
+    },
+    {
+      "type": "range",
+      "id": "toc_width",
+      "min": 200,
+      "max": 350,
+      "step": 10,
+      "unit": "px",
+      "label": "Table of contents width",
+      "default": 280
+    },
+    {
+      "type": "range",
+      "id": "toc_padding",
+      "min": 16,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Table of contents padding",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "sticky_offset",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Sticky offset from top",
+      "default": 20
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "max_width",
+      "min": 1000,
+      "max": 1600,
+      "step": 50,
+      "unit": "px",
+      "label": "Maximum width",
+      "default": 1200
+    },
+    {
+      "type": "range",
+      "id": "content_gap",
+      "min": 30,
+      "max": 80,
+      "step": 5,
+      "unit": "px",
+      "label": "Content gap",
+      "default": 50
+    },
+    {
+      "type": "range",
+      "id": "section_padding",
+      "min": 20,
+      "max": 80,
+      "step": 5,
+      "unit": "px",
+      "label": "Section padding",
+      "default": 40
+    },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "Text alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "min": 0,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "label": "Border radius",
+      "default": 8
+    },
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "font_picker",
+      "id": "heading_font",
+      "label": "Heading font",
+      "default": "inter_n6"
+    },
+    {
+      "type": "font_picker",
+      "id": "body_font",
+      "label": "Body font",
+      "default": "inter_n4"
+    },
+    {
+      "type": "range",
+      "id": "title_size",
+      "min": 24,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "label": "Title size",
+      "default": 42
+    },
+    {
+      "type": "range",
+      "id": "h1_size",
+      "min": 20,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "label": "H1 size",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "h2_size",
+      "min": 18,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "H2 size",
+      "default": 30
+    },
+    {
+      "type": "range",
+      "id": "h3_size",
+      "min": 16,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "label": "H3 size",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "h4_size",
+      "min": 14,
+      "max": 28,
+      "step": 2,
+      "unit": "px",
+      "label": "H4 size",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "h5_size",
+      "min": 12,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "label": "H5 size",
+      "default": 18
+    },
+    {
+      "type": "range",
+      "id": "h6_size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "H6 size",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "body_size",
+      "min": 14,
+      "max": 22,
+      "step": 1,
+      "unit": "px",
+      "label": "Body text size",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "excerpt_size",
+      "min": 16,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Excerpt size",
+      "default": 18
+    },
+    {
+      "type": "range",
+      "id": "meta_size",
+      "min": 12,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "label": "Meta text size",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "toc_title_size",
+      "min": 14,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "TOC title size",
+      "default": 18
+    },
+    {
+      "type": "range",
+      "id": "toc_link_size",
+      "min": 12,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "label": "TOC link size",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "line_height",
+      "min": 1.2,
+      "max": 2.0,
+      "step": 0.1,
+      "label": "Line height",
+      "default": 1.6
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "header_spacing",
+      "min": 20,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "label": "Header spacing",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "heading_spacing",
+      "min": 20,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "label": "Heading spacing",
+      "default": 30
+    },
+    {
+      "type": "range",
+      "id": "paragraph_spacing",
+      "min": 12,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "label": "Paragraph spacing",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "excerpt_spacing",
+      "min": 16,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Excerpt spacing",
+      "default": 24
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#1e1e1e"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading color",
+      "default": "#1e1e1e"
+    },
+    {
+      "type": "color",
+      "id": "meta_color",
+      "label": "Meta text color",
+      "default": "#666666"
+    },
+    {
+      "type": "color",
+      "id": "excerpt_color",
+      "label": "Excerpt color",
+      "default": "#666666"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent color",
+      "default": "#FBBF24"
+    },
+    {
+      "type": "color",
+      "id": "link_color",
+      "label": "Link color",
+      "default": "#1e1e1e"
+    },
+    {
+      "type": "color",
+      "id": "link_hover_color",
+      "label": "Link hover color",
+      "default": "#FBBF24"
+    },
+    {
+      "type": "header",
+      "content": "Table of contents colors"
+    },
+    {
+      "type": "color",
+      "id": "toc_background",
+      "label": "TOC background",
+      "default": "#f6f6f6"
+    },
+    {
+      "type": "color",
+      "id": "toc_border_color",
+      "label": "TOC border color",
+      "default": "#e2e2e2"
+    },
+    {
+      "type": "color",
+      "id": "toc_link_color",
+      "label": "TOC link color",
+      "default": "#666666"
+    },
+    {
+      "type": "color",
+      "id": "toc_link_hover_color",
+      "label": "TOC link hover color",
+      "default": "#1e1e1e"
+    },
+    {
+      "type": "color",
+      "id": "toc_hover_background",
+      "label": "TOC hover background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "toc_active_background",
+      "label": "TOC active background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "header",
+      "content": "Content styling"
+    },
+    {
+      "type": "color",
+      "id": "quote_color",
+      "label": "Quote text color",
+      "default": "#666666"
+    },
+    {
+      "type": "color",
+      "id": "quote_background",
+      "label": "Quote background",
+      "default": "#f6f6f6"
+    },
+    {
+      "type": "color",
+      "id": "code_color",
+      "label": "Code text color",
+      "default": "#1e1e1e"
+    },
+    {
+      "type": "color",
+      "id": "code_background",
+      "label": "Code background",
+      "default": "#f6f6f6"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Blog post template"
+    }
+  ]
+}
+{% endschema %}

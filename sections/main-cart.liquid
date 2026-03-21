@@ -1,0 +1,251 @@
+{{ 'section-main-cart.css' | asset_url | stylesheet_tag }}
+{{ 'cart-table.css' | asset_url | stylesheet_tag }}
+{{ 'cart-totals.css' | asset_url | stylesheet_tag }}
+{{ 'cart-free-shipping.css' | asset_url | stylesheet_tag }}
+{{ 'cart-note.css' | asset_url | stylesheet_tag }}
+{{ 'cart-discount-list.css' | asset_url | stylesheet_tag }}
+{{ 'cart-tax-note.css' | asset_url | stylesheet_tag }}
+{{ 'cart-attribute.css' | asset_url | stylesheet_tag }}
+
+{% capture continue_shopping %}
+  {% render 'cart-continue-shopping' %}
+{% endcapture %}
+
+{% liquid
+  assign section_id = section.id
+  assign color_scheme = section.settings.color_scheme
+  assign blocks = section.blocks
+  assign cart_attr_blocks = blocks | where: 'type', 'cart_attibutes'
+  assign cart_attributes_title = 'sections.cart.cart_attributes' | t
+%}
+
+<section {% render 'section-attr' %}>
+  <xo-cart id='{{ section_id }}' class='xo-main-cart section-{{ section_id }}-padding color-{{ color_scheme }}'>
+    <xo-container class='xo-main-cart__container'>
+      <xo-animate xo-cascade>
+        <xo-grid class='xo-main-cart__grid'>
+          <xo-cart-will-change
+            class='xo-main-cart__left{% if cart == empty %} xo-main-cart__left--empty{% endif %}'
+            xo-unique-id='cart-table-{{ section_id }}'
+            style='--md: 12; --lg: {% if cart != empty %} 8 {% else %} 12 {% endif %}'
+          >
+            {% if cart != empty %}
+              {% render 'cart-table' %}
+            {% else %}
+              {% assign title = 'sections.cart.empty' | t %}
+              {% render 'cart-empty', title: title, content: continue_shopping, icon_name: 'empty', icon_size: '11rem' %}
+            {% endif %}
+            <xo-cart-will-change xo-unique-id='continue-shopping-{{ section_id }}'>
+              {% if cart != empty %}
+                {% render 'space', spacing_dt: 33, spacing_mb: 20 %}
+                <div class='xo-main-cart__button'>
+                  {%- assign button_text = 'general.continue_shopping' | t -%}
+                  {%- render 'button', text: button_text, link: routes.all_products_collection_url, style: 'link', size: 'lg', icon: 'chevron-right', icon_size: 24 -%}
+                </div>
+              {% endif %}
+            </xo-cart-will-change>
+          </xo-cart-will-change>
+          <xo-cart-will-change xo-unique-id='cart-shipping-{{ section_id }}' style='--xs: 12; --md: 12; --lg: 4'>
+            {% if cart != empty %}
+              <div class='xo-main-cart__right{% if settings.enable_border_radius %} xo-main-cart__right--radius{% endif %}'>
+                {% for block in blocks %}
+                  {% case block.type %}
+                    {% when '@app' %}
+                      {% render block %}
+                    {% when 'free_shipping' %}
+                      {% render 'cart-free-shipping' %}
+                    {% when 'note' %}
+                      <xo-cart-will-change xo-unique-id='xo-cart-note-{{ section_id }}'>
+                        {% if cart != empty %}
+                          {% render 'cart-note', uid: 'main-cart', type: block.settings.type %}
+                        {% endif %}
+                      </xo-cart-will-change>
+                  {% endcase %}
+                {% endfor %}
+                {% if cart_attr_blocks.size > 0 %}
+                  <div class='xo-main-cart__cart-attributes'>
+                    {% capture collapse_content %}
+                      {% for cart_attr_item in cart_attr_blocks %}
+                          {% render 'cart-attribute', block: cart_attr_item %}
+                      {% endfor %}
+                    {% endcapture %}
+                    {% render 'collapse', name: 'cart-attributes', title: cart_attributes_title, content: collapse_content %}
+                  </div>
+                {% endif %}
+                <div class='xo-main-cart__wrapper'>
+                  {% render 'cart-totals' %}
+                  {% render 'cart-discount-list' %}
+                  {% render 'cart-tax-note' %}
+                </div>
+                <div class='xo-main-cart__action'>
+                  {% render 'cart-actions' %}
+                </div>
+              </div>
+            {% endif %}
+          </xo-cart-will-change>
+        </xo-grid>
+      </xo-animate>
+    </xo-container>
+  </xo-cart>
+</section>
+
+{% schema %}
+{
+  "name": "t:sections.main_cart.name",
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Section color scheme"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color"
+    },
+    {
+      "type": "color_background",
+      "id": "background_gradient",
+      "label": "Background gradient"
+    },
+    {
+      "type": "number",
+      "id": "padding_top_desktop",
+      "label": "Padding top desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_desktop",
+      "label": "Padding bottom desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_top_mobile",
+      "label": "Padding top mobile",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_mobile",
+      "label": "Padding bottom mobile",
+      "default": 50
+    }
+  ],
+  "blocks": [
+    {
+      "type": "@app"
+    },
+    {
+      "type": "free_shipping",
+      "name": "t:sections.main_cart.settings.free_shipping.label",
+      "limit": 1
+    },
+    {
+      "type": "note",
+      "name": "t:sections.main_cart.settings.note.label",
+      "settings": [
+        {
+          "type": "select",
+          "id": "type",
+          "label": "t:sections.main_cart.settings.type_of_note.label",
+          "options": [
+            {
+              "value": "regular",
+              "label": "t:sections.main_cart.settings.option_regular.label"
+            },
+            {
+              "value": "collapse",
+              "label": "t:sections.main_cart.settings.option_collapse.label"
+            }
+          ],
+          "default": "collapse"
+        }
+      ],
+      "limit": 1
+    },
+    {
+      "type": "cart_attibutes",
+      "name": "t:sections.main_cart.blocks.name",
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "t:sections.main_cart.blocks.settings.paragraph"
+        },
+        {
+          "type": "select",
+          "id": "attributes_type",
+          "label": "t:sections.main_cart.blocks.settings.attributes_type.label",
+          "options": [
+            {
+              "value": "text",
+              "label": "t:sections.main_cart.blocks.settings.attributes_type.options.text"
+            },
+            {
+              "value": "checkbox",
+              "label": "t:sections.main_cart.blocks.settings.attributes_type.options.checkbox"
+            },
+            {
+              "value": "radio",
+              "label": "t:sections.main_cart.blocks.settings.attributes_type.options.radio"
+            },
+            {
+              "value": "dropdown",
+              "label": "t:sections.main_cart.blocks.settings.attributes_type.options.dropdown"
+            }
+          ],
+          "default": "text"
+        },
+        {
+          "type": "text",
+          "id": "attributes_label",
+          "label": "t:sections.main_cart.blocks.settings.attributes_label.label",
+          "default": "Label"
+        },
+        {
+          "type": "header",
+          "content": "t:sections.main_cart.blocks.settings.attributes_checkbox_header.content",
+          "info": "t:sections.main_cart.blocks.settings.attributes_checkbox_header.info"
+        },
+        {
+          "type": "text",
+          "id": "attributes_checked_value",
+          "label": "t:sections.main_cart.blocks.settings.attributes_checked_value",
+          "default": "Yes"
+        },
+        {
+          "type": "text",
+          "id": "attributes_uncheck_value",
+          "label": "t:sections.main_cart.blocks.settings.attributes_uncheck_value",
+          "default": "No"
+        },
+        {
+          "type": "header",
+          "content": "t:sections.main_cart.blocks.settings.attributes_radio_header.content",
+          "info": "t:sections.main_cart.blocks.settings.attributes_radio_header.info"
+        },
+        {
+          "type": "text",
+          "id": "attributes_radio_options",
+          "label": "t:sections.main_cart.blocks.settings.attributes_options",
+          "info": "t:sections.main_cart.blocks.settings.attributes_info",
+          "default": "Option 1, Option 2, Option 3"
+        },
+        {
+          "type": "header",
+          "content": "t:sections.main_cart.blocks.settings.attributes_dropdown_header.content",
+          "info": "t:sections.main_cart.blocks.settings.attributes_dropdown_header.info"
+        },
+        {
+          "type": "text",
+          "id": "attributes_dropdown_options",
+          "label": "t:sections.main_cart.blocks.settings.attributes_options",
+          "info": "t:sections.main_cart.blocks.settings.attributes_info",
+          "default": "Option 1, Option 2, Option 3"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

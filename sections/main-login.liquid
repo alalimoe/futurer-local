@@ -1,0 +1,135 @@
+{{ 'section-main-login.css' | asset_url | stylesheet_tag }}
+
+{% liquid
+  assign class = section.settings.font_size_heading
+  assign heading = section.settings.heading
+  assign subheading = section.settings.sub_heading
+%}
+
+<section {% render 'section-attr' %}>
+  <div class='xo-login'>
+    <xo-container class='xo-login__container'>
+      <div class='xo-login__content'>
+        <xo-animate xo-cascade>
+          <div class='xo-login__header'>
+            {% if heading %}
+              <h3 class='xo-login__heading {{ class }}'>{{ heading }}</h3>
+            {% endif %}
+            {% if subheading %}
+              <div class='xo-login__sub-heading'>
+                <p>{{ subheading }}</p>
+              </div>
+            {% endif %}
+          </div>
+        </xo-animate>
+        <div class='xo-login__form'>
+          <xo-animate xo-cascade>
+            {% render 'login-form' %}
+            {% capture recover_form %}
+              {% render 'recover-password-form' %}
+            {% endcapture %}
+            <xo-modal xo-portal xo-name='forgot-your-password' style='z-index: 99999;'>
+              {% comment %} {% assign title = 'customer.recover_password.title' | t %} {% endcomment %}
+              {% render 'modal-content', content: recover_form %}
+            </xo-modal>
+          </xo-animate>
+        </div>
+      </div>
+    </xo-container>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "t:sections.main_login.name",
+  "settings": [
+    {
+      "type": "select",
+      "id": "font_size_heading",
+      "label": "Font size heading",
+      "default": "h4",
+      "options": [
+        {
+          "value": "h1",
+          "label": "Extra extra large"
+        },
+        {
+          "value": "h2",
+          "label": "Extra large"
+        },
+        {
+          "value": "h3",
+          "label": "Large"
+        },
+        {
+          "value": "h4",
+          "label": "Medium"
+        },
+        {
+          "value": "h5",
+          "label": "Small"
+        },
+        {
+          "value": "h6",
+          "label": "Extra small"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "t:sections.main_login.settings.heading.label",
+      "default": "Sign in"
+    },
+    {
+      "type": "richtext",
+      "id": "sub_heading",
+      "label": "t:sections.main_login.settings.sub_heading.label",
+      "default": "<p>If you have an account with us, please sign in.</p>"
+    },
+    {
+      "type": "header",
+      "content": "General settings"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Section color scheme"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color"
+    },
+    {
+      "type": "color_background",
+      "id": "background_gradient",
+      "label": "Background gradient"
+    },
+    {
+      "type": "number",
+      "id": "padding_top_desktop",
+      "label": "Padding top desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_desktop",
+      "label": "Padding bottom desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_top_mobile",
+      "label": "Padding top mobile",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_mobile",
+      "label": "Padding bottom mobile",
+      "default": 50
+    }
+  ]
+}
+{% endschema %}

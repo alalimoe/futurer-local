@@ -1,0 +1,32 @@
+{% comment %}
+  Renders a toast message.
+
+  Accepts:
+  - name: {String} Name of the toast (optional)
+  - type: {String} Type of the toast (optional)
+
+  Usage:
+  {% render 'toast',
+    name: 'my-toast',
+  %}
+{% endcomment %}
+
+<xo-toast
+  xo-name='{{ name }}'
+  xo-placement='bottom-center'
+  xo-class-name='xo-toast{% if type %} xo-toast--{{ type }}{% endif %}'
+  xo-close-button-placement='top-right'
+  xo-close-button-class-name='xo-toast__close'
+>
+  <div class='xo-toast__content'>
+    {% case type %}
+      {% when 'success' %}
+        {% render 'icon', name: 'success', color: '#316934' %}
+      {% when 'warning' %}
+        {% render 'icon', name: 'warning', color: '#d0830f' %}
+      {% when 'error' %}
+        {% render 'icon', name: 'error', color: '#d42d2d' %}
+    {% endcase %}
+    <div class='xo-toast__message'>{{ message }}</div>
+  </div>
+</xo-toast>

@@ -1,0 +1,113 @@
+{% comment %}
+  Renders a testimonial element with a given value
+
+  @param {String} heading - A string to use as the heading for the testimonial element (required)
+  @param {Object} block - An object to use as the blocks for the testimonial element (required)
+  @param {Number} active_index - An integer to set the active index of the testimonial element (optional)
+  @param {String} autoplay - A boolean to determine if the testimonial should autoplay (optional)
+  @param {Number} autoplay_speed - An integer to set the speed of autoplay in milliseconds (optional)
+
+  @example
+  {% render 'testimonial-box-9', heading: heading, block: block, active_index: active_index, autoplay: autoplay, autoplay_speed: autoplay_speed %}
+{% endcomment %}
+
+<div class="testimonial-box-9">
+  <div xo-parallax>
+    <xo-testimonial
+      xo-active-index="{{ active_index }}"
+      {% if autoplay == 'on' %}
+        xo-autoplay xo-autoplay-speed="{{ autoplay_speed }}"
+      {% endif %}
+      class="testimonial-box-9__inner"
+      data-length="{{ block.size }}"
+    >
+      <xo-animate xo-cascade>
+        <div class="testimonial-box-9__head">
+          {% if heading %}
+            {% render 'text', context: section %}
+          {% endif %}
+          <div class="testimonial-box-9__navigation">
+            <xo-testimonial-prev class="testimonial-box-9__button testimonial-box-9__button--prev">
+              {% render 'button-slide', icon: 'arrow-left', icon_size: '2.4rem', size: '3.6rem', direction: 'left', style: 'primary' %}
+            </xo-testimonial-prev>
+            <xo-testimonial-next class="testimonial-box-9__button testimonial-box-9__button--next">
+              {% render 'button-slide', icon: 'arrow-right', icon_size: '2.4rem', size: '3.6rem', direction: 'right', style: 'primary' %}
+            </xo-testimonial-next>
+          </div>
+        </div>
+      </xo-animate>
+      <div class="testimonial-box-9__body">
+        <xo-testimonial-content class="testimonial-box-9__content{% if settings.enable_border_radius %} testimonial-box-9__content--radius{% endif %}" xo-placement="top-right">
+          <xo-testimonial-content-slide class="testimonial-box-9__slide"></xo-testimonial-content-slide>
+          <xo-testimonial-content-slide class="testimonial-box-9__slide"></xo-testimonial-content-slide>
+        </xo-testimonial-content>
+        {% for item in block %}
+          {% liquid
+            assign image = item.settings.avatar
+            assign image_size = item.settings.avatar_size
+            assign content = item.settings.content
+            assign customer_name = item.settings.customer_name
+          %}
+          {% if image_size == 'medium' %}
+            {% capture keyframe %}
+                xo-keyframes="{
+                  '0%': { y: '120' },
+                  '100%': { y: '-120' },
+                }"
+              {% endcapture %}
+          {%- elsif image_size == 'large' -%}
+            {% capture keyframe %}
+                xo-keyframes="{
+                  '0%': { y: '140' },
+                  '100%': { y: '-140' },
+                }"
+              {% endcapture %}
+          {%- else -%}
+            {% capture keyframe %}
+                xo-keyframes="{
+                  '0%': { y: '100' },
+                  '100%': { y: '-100' },
+                }"
+              {% endcapture %}
+          {% endif %}
+          <xo-testimonial-item
+            xo-index="{{ forloop.index0 }}"
+            class="testimonial-box-9__item testimonial-box-9__item--{{ image_size }} testimonial-box-9__item--{{ forloop.index }}"
+            style="--image-size: {{ image_size }}"
+          >
+            <xo-parallax-scroll
+              {{ keyframe }}
+              xo-breakpoints="
+                {
+                  768: {
+                    '33.3%': { y: '20', scale: 0.8 },
+                    '100%': { y: '20', scale: 1 },
+                  }
+                }
+              "
+            >
+              <div class="testimonial-box-9__desktop">
+                <xo-magnetic xo-radius="2000" xo-radius-move="100">
+                  <xo-magnetic-content>
+                    <div class="testimonial-box-9__image{% if settings.enable_border_radius %} testimonial-box-9__image--radius{% endif %}">
+                      {% render 'image', image: image %}
+                    </div>
+                  </xo-magnetic-content>
+                </xo-magnetic>
+              </div>
+              <div class="testimonial-box-9__mobile">
+                <div class="testimonial-box-9__image{% if settings.enable_border_radius %} testimonial-box-9__image--radius{% endif %}">
+                  {% render 'image', image: image %}
+                </div>
+              </div>
+              <template class="testimonial-box-9__template">
+                <div class="testimonial-box-9__text">{{ content }}</div>
+                <div class="testimonial-box-9__author">{{ customer_name }}</div>
+              </template>
+            </xo-parallax-scroll>
+          </xo-testimonial-item>
+        {% endfor %}
+      </div>
+    </xo-testimonial>
+  </div>
+</div>

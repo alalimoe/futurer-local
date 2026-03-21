@@ -1,0 +1,29 @@
+{% comment %}
+  Renders an paginator attribute of xo-carousel.
+  Accepts:
+  - style: {string} Type of the carousel pagination (optional | value: '', 'sticks')
+  - align: {string}  Alignment of the carousel pagination (optional | value: 'left', 'center', 'right')
+  - position: {string} Position of the carousel pagination (optional | value: '','in-content')
+  - disabled: {boolean} Disable the carousel pagination (optional)
+  - mobile_disabled: {boolean} Disable the carousel pagination when using mobile (optional)
+  Usage:
+  {% render 'carousel-pagination',
+    style: '',
+    align: 'left' (default),
+    position: '',
+    disabled: true,
+    mobile_disabled: false
+  %}
+{% endcomment %}
+
+{% if is_dynamic_bullets %}
+  <xo-carousel-dynamic-bullets class='xo-carousel-dynamic-bullets'>
+{% endif %}
+<xo-carousel-pagination
+  class='xo-carousel-paginator{% if disabled == false -%} xo-carousel-paginator--disabled{%- endif %}{% if mobile_disabled -%} xo-carousel-paginator--mobile-disabled{%- endif %} {% if style != blank -%} xo-carousel-paginator--{{ style }}{%- endif -%}{% if settings.enable_border_radius %} xo-carousel-paginator--radius{% endif %}'
+  style='--pag-align: {{ align | default: 'left' }}'
+>
+</xo-carousel-pagination>
+{% if is_dynamic_bullets %}
+  </xo-carousel-dynamic-bullets>
+{% endif %}

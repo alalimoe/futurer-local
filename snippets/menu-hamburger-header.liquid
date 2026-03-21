@@ -1,0 +1,79 @@
+{% liquid
+  assign logo_transparent = section.settings.logo_transparent
+  assign logo_sticky = section.settings.logo_sticky
+  assign logo_alt = section.settings.logo.alt | default: shop.name | escape
+  assign height_dt = section.settings.logo_width_desktop | divided_by: section.settings.logo.aspect_ratio
+  assign height_mb = section.settings.logo_width_mobile | divided_by: section.settings.logo.aspect_ratio
+  assign width_mb = section.settings.logo_width_mobile
+  assign width_dt = section.settings.logo_width_desktop
+%}
+
+<div class='xo-menu-hamburger-header'>
+  <div class='xo-menu-hamburger__wrapper'>
+    <!-- logo -->
+    <div class='xo-menu-hamburger__logo'>
+      <a
+        href='{{ routes.root_url }}'
+        aria-label='Logo image'
+        title='Logo image'
+      >
+        {%- if logo_transparent != blank -%}
+          <img
+            class='xo-menu-hamburger__logo-img xo-menu-hamburger__logo-img--transparent'
+            src='{{ logo_transparent | image_url }}'
+            alt='{{ logo_alt }}'
+            style='--width_mobile: {{ width_mb }}px; --width_desktop: {{ width_dt }}px;--height_mobile: {{ height_mb }}px; --height_desktop: {{ height_dt }}px'
+            loading='lazy'
+            height='auto'
+            width='auto'
+          >
+          {% if logo_sticky != blank %}
+            <img
+              class='xo-menu-hamburger__logo-img xo-menu-hamburger__logo-img--sticky'
+              src='{{ logo_sticky | image_url }}'
+              alt='{{ logo_alt }}'
+              style='--width_mobile: {{ width_mb }}px; --width_desktop: {{ width_dt }}px;--height_mobile: {{ height_mb }}px; --height_desktop: {{ height_dt }}px'
+              loading='lazy'
+              height='auto'
+              width='auto'
+            >
+          {% endif %}
+        {%- else -%}
+          <span class='h4 xo-menu-hamburger__logo-heading-logo'>{{ shop.name }}</span>
+        {%- endif -%}
+      </a>
+    </div>
+
+    <!-- actions -->
+    <div class='xo-menu-hamburger__action'>
+      <!-- search -->
+      <div class='xo-menu-hamburger__search'>
+        <xo-modal-trigger class='xo-menu-hamburger__search-trigger' xo-name='search'>
+          {% render 'icon', name: 'search', size: '2rem' %}
+        </xo-modal-trigger>
+      </div>
+
+      <!-- cart -->
+      {% if settings.cart_type == 'page' %}
+        <a class='xo-menu-hamburger__action-cart focus-inset' href='{{ routes.cart_url }}'>
+          {% render 'icon', name: 'cart', size: '1.8rem' %}
+          <div class='xo-menu-hamburger__action-number'>{{ ' <xo-cart-size>' | append: cart.item_count | append: '</xo-cart-size> ' }}</div>
+        </a>
+      {% else %}
+        <xo-modal-trigger class='xo-menu-hamburger__action-cart' xo-name='cart'>
+          {% render 'icon', name: 'cart', size: '1.8rem' %}
+          <div class='xo-menu-hamburger__action-number'>{{ ' <xo-cart-size>' | append: cart.item_count | append: '</xo-cart-size> ' }}</div>
+        </xo-modal-trigger>
+      {% endif %}
+
+      <!-- button close -->
+      {% if show_icon == 'show' %}
+        <div class='xo-menu-hamburger__button-close'>
+          <xo-modal-trigger xo-name='{{ modal_name }}' class='xo-menu-hamburger__close-trigger'>
+            {% render 'icon', name: 'close', size: '2.8rem' %}
+          </xo-modal-trigger>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>

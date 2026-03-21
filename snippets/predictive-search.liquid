@@ -1,0 +1,88 @@
+{% comment %}
+  Renders a search input with predictive search results
+
+  Accepts:
+  - value: {String} The value of the search input
+  - label: {String} The label for the search input
+
+  Usage:
+  {% render 'predictive-search', value: '' %}
+{% endcomment %}
+
+{% liquid
+  unless value
+    assign value = ''
+  endunless
+  assign pages = 'templates.search.pages' | t
+  assign collections = 'templates.search.collections' | t
+  assign products = 'templates.search.products' | t
+  assign articles = 'templates.search.articles' | t
+%}
+
+<form action='{{ routes.search_url }}' method='get' role='search'>
+  <div
+    class='xo-predictive-search'
+    data-locales='
+      {
+        pages: "{{ pages }}",
+        collections: "{{ collections }}",
+        products: "{{ products }}",
+        articles: "{{ articles }}"
+      }
+    '
+  >
+    <div class='xo-predictive-search__input'>
+      {% render 'field-input', value: value, name: 'q', label: label, type: 'search', attr: "id='predictive-search' data-predictive-search-input='header'", block: true, id: 'search-input-header', placeholder: placeholder %}
+      <div class='xo-predictive-search__clear' data-predictive-search-reset='header'>
+        {% render 'icon', name: 'close', size: '3.2rem' %}
+      </div>
+      <div class='xo-predictive-search__search'>
+        {% render 'button', type: 'submit', icon: 'search-1', icon_size: '3rem', style: 'link' %}
+      </div>
+      <div class="xo-predictive-search__line">
+        <div class="xo-predictive-search__line-anim{% if settings.enable_border_radius %} xo-predictive-search__line-anim--radius{% endif %}"></div>
+      </div>
+    </div>
+    {%- if settings.predictive_search_enabled -%}
+      <div class='xo-predictive-search__result' data-predictive-search-result='header'></div>
+    {%- endif -%}
+  </div>
+</form>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const _inputChange = document.querySelector('.xo-field-input__input');
+    const _iconSearch = document.querySelector('.xo-predictive-search__search');
+    const _iconClear = document.querySelector('.xo-predictive-search__clear');
+
+    function handleInputChange() {
+      if (_inputChange.value.trim() !== '') {
+        _iconSearch.classList.add('active');
+      } else {
+        _iconSearch.classList.remove('active');
+      }
+    }
+
+    function handleClearIconClick() {
+      _inputChange.value = '';
+      _iconSearch.classList.remove('active');
+    }
+
+    _inputChange.addEventListener('input', handleInputChange);
+    _iconClear.addEventListener('click', handleClearIconClick);
+
+    // handleInputChange();
+
+    const _popularEls = document.querySelectorAll('.xo-main-predictive-search__item-popular');
+
+    _popularEls.forEach((item) => {
+      item.addEventListener('click', () => {
+        if (_inputChange) {
+          _inputChange.value = item.textContent.trim();
+          _inputChange.focus();
+          handleInputChange();
+        }
+      });
+    });
+  });
+</script>

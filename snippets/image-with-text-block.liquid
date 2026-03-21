@@ -1,0 +1,101 @@
+{% comment %}
+  Renders a image with text
+
+  @param {Object} block - Block
+  @param {String} image_dt - Image desktop
+  @param {String} aspect_ratio_dt - Aspect ratio desktop
+  @param {String} image_mb - Image mobile
+  @param {String} aspect_ratio_mb - Aspect ratio mobile
+  @param {String} color_schema - Color schema
+  @param {String} heading - Heading
+  @param {String} class - Class
+  @param {Object} button - Button
+
+  @example
+    {% render 'image-with-text-block',
+    image_dt: image_dt,
+    aspect_ratio_dt: aspect_ratio_dt,
+    image_mb: image_mb,
+    aspect_ratio_mb: aspect_ratio_mb,
+    color_schema: color_schema,
+    heading: heading,
+    class: class,
+    button: button
+  %}
+{% endcomment %}
+
+{% liquid
+  assign container_class = 'image-with-text-block'
+  assign container_style = ''
+  if settings.enable_border_radius
+    if border_radius != blank
+      assign border_radius_rem = border_radius | divided_by: 10.0
+      assign container_style = container_style | append: '--border-radius: ' | append: border_radius_rem | append: 'rem;'
+      if border_radius == 'auto'
+        assign container_class = container_class | append: ' image-with-text-block--radius-auto'
+      elsif border_radius == 'max'
+        assign container_class = container_class | append: ' image-with-text-block--radius-max'
+      elsif border_radius == 'none'
+        assign container_class = container_class | append: ' image-with-text-block--radius-none'
+      else
+        assign container_class = container_class | append: ' image-with-text-block--radius'
+      endif
+    else
+      assign container_class = container_class | append: ' image-with-text-block--radius'
+    endif
+  endif
+
+  assign content_class = 'image-with-text-block__content'
+  if color_scheme
+    assign content_class = content_class | append: ' color-' | append: color_scheme
+  endif
+
+  assign text_class = 'image-with-text-block__text'
+  if placement
+    assign text_class = text_class | append: ' image-with-text-block__text--' | append: placement
+  endif
+  if alignment
+    assign text_class = text_class | append: ' image-with-text-block__text--' | append: alignment
+  endif
+  if space_between
+    assign text_class = text_class | append: ' image-with-text-block__text--modifier'
+  endif
+%}
+
+<div class="{{ container_class }}" style="{{ container_style }}">
+  <div class="{{ content_class }}" style="--opacity: {{ background_overlay }}">
+    {% if video_enable %}
+      <div class="image-with-text-block__video" style="--aspect-ratio: {{ aspect_ratio_dt }}; --aspect-ratio-mb: {{ aspect_ratio_mb }};">
+        {% render 'video-button', video: video, video_url: video_url, cover_image: cover_image, button: button, enable_video_looping: enable_video_looping, button_enable: false %}
+      </div>
+    {% else %}
+      <a href="{{ button.button_link }}" class="image-with-text-block__link" title="Image button">
+        <div class="image-with-text-block__image image-with-text-block__image--desktop">
+          {% render 'animate-image', image: image_dt, border_radius: 0, aspect_ratio: aspect_ratio_dt, disable_alt: true, max_width: 100 %}
+        </div>
+        <div class="image-with-text-block__image image-with-text-block__image--mobile">
+          {% render 'animate-image', image: image_mb, border_radius: 0, aspect_ratio: aspect_ratio_mb, disable_alt: true, max_width: 100 %}
+        </div>
+      </a>
+    {% endif %}
+    <div class="{{ text_class }}">
+      {% if heading %}
+        <div class="image-with-text-block__heading">
+          {% render 'text', context: block %}
+        </div>
+      {% endif %}
+      <xo-animate xo-cascade>
+        <div class="image-with-text-block__button">
+          {% render 'button',
+            text: button.button_text,
+            link: button.button_link,
+            style: button.button_style,
+            size: button.button_size,
+            radius: settings.button_radius,
+            padding: settings.button_padding
+          %}
+        </div>
+      </xo-animate>
+    </div>
+  </div>
+</div>

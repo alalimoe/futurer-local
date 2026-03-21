@@ -1,0 +1,60 @@
+{% comment %}
+  Renders a testimonial element with a given value
+
+  Accepts:
+  - layout: {String} Layout (required)
+  - autoplay: {String} Autoplay slide (required)
+  - autoplay_time: {String} Set time for autoplay slide (required)
+
+  Usage:
+  {% render 'testimonial-box-1', layout: layout, autoplay: autoplay, autoplay_time: autoplay_time %}
+{% endcomment %}
+
+<div class="testimonial-box-1">
+  <xo-carousel
+    xo-per-view="1"
+    xo-per-move="1"
+    {% if autoplay == 'on' %}
+      xo-autoplay="{{ autoplay_time }}"
+      xo-loop
+    {% endif %}
+    xo-type="none"
+    xo-breakpoints='
+      {
+        768: {
+          perView: 1,
+          perMove: 1,
+          gap: 10,
+          overflow: "visible"
+        },
+      }
+    '
+  >
+    <xo-carousel-inner>
+      <xo-carousel-list>
+        {% for item in block %}
+          {% liquid
+            assign content = item.settings.content
+            assign name = item.settings.customer_name
+            assign image = item.settings.image
+            assign aspect_ratio = item.settings.aspect_ratio
+            if aspect_ratio == 'custom'
+              assign aspect_ratio = item.settings.aspect_ratio_width | append: '/' | append: item.settings.aspect_ratio_height
+            endif
+            assign button = item.settings
+          %}
+          <xo-carousel-slide>
+            <xo-grid class="testimonial-box-1__grid">
+              <div xo-cascade xo-oder="4" class="testimonial-box-1__left " style="--lg: 6; --md: 12; --xs: 12">
+                {% render 'testimonial-box', content: content, name: name, show_navigation: 'true', enable_show_icon: 'true', tag_1: 'div', tag_2: 'xo-animate' %}
+              </div>
+              <xo-animate xo-cascade xo-order="5" class="testimonial-box-1__right" style="--lg: 6; --md: 12; --xs: 12">
+                {% render 'image-button', image: image, aspect_ratio: aspect_ratio, button: button %}
+              </xo-animate>
+            </xo-grid>
+          </xo-carousel-slide>
+        {% endfor %}
+      </xo-carousel-list>
+    </xo-carousel-inner>
+  </xo-carousel>
+</div>

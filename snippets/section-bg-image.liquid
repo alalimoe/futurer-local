@@ -1,0 +1,82 @@
+{% comment %}
+  Renders a bg image
+
+  Usage:
+  {% render 'section-bg-image' %}
+{% endcomment %}
+
+{% liquid
+  assign background_type = section.settings.background_type
+  assign video_desktop = section.settings.background_video_desktop.sources[1].url
+  assign video_desktop = section.settings.background_video_desktop.sources[1].url
+  assign img_desktop = section.settings.background_image_desktop | image_url
+  assign img_mobile = section.settings.background_image_mobile | image_url
+%}
+
+{% capture bg_placeholder %}
+  <div class="xo-section-bg-image">
+    <div class="xo-section-bg-image__item">
+      <div class="xo-section-bg-image__url xo-background-lazyload">
+        {{ 'hero-apparel-1' | placeholder_svg_tag }}
+      </div>
+    </div>
+  </div>
+{% endcapture %}
+
+{% if background_type == 'image' %}
+  {% if img_desktop or img_mobile %}
+    <div
+      class="xo-section-bg-image xo-section-bg-image--image"
+      style="{% if img_desktop != blank %}--img-desktop: url('{{ img_desktop | image_url: width: 100 }}');{% endif %}{% if img_mobile != blank %}--img-mobile: url('{{ img_mobile | image_url: width: 100 }}');{% endif %}"
+    >
+      {% if section.settings.use_parallax %}
+        <xo-parallax xo-lerp-ease="0.4" class="xo-section-bg-image__item">
+          <xo-parallax-scroll
+            xo-keyframes="
+              {
+                '0%': { backgroundPositionY: '200px' },
+                '100%': { backgroundPositionY: '-200px' },
+              }
+            "
+            class="xo-section-bg-image__url xo-background-lazyload"
+          >
+          </xo-parallax-scroll>
+        </xo-parallax>
+      {% else %}
+        <div class="xo-section-bg-image__item"><div class="xo-section-bg-image__url xo-background-lazyload"></div></div>
+      {% endif %}
+    </div>
+  {% else %}
+    {% if section.settings.background_color == blank and section.settings.background_gradient == blank %}
+      {{ bg_placeholder }}
+    {% endif %}
+  {% endif %}
+{% else %}
+  {% if video_desktop or video_mobile %}
+    <div class="xo-section-bg-image xo-section-bg-image--video">
+      {% if section.settings.use_parallax %}
+        <xo-parallax xo-lerp-ease="0.4" class="xo-section-bg-image__item">
+          <xo-parallax-scroll
+            xo-keyframes="
+              {
+                '0%': { backgroundPositionY: '300px' },
+                '100%': { backgroundPositionY: '-300px' },
+              }
+            "
+            class="xo-section-bg-image__url xo-background-lazyload"
+          >
+            <xo-video-cover class="xo-section-bg-image__video xo-section-bg-image__video--desktop" xo-src="{{ video_desktop }}"></xo-video-cover>
+            <xo-video-cover class="xo-section-bg-image__video xo-section-bg-image__video--mobile" xo-src="{{ video_mobile }}"></xo-video-cover>
+          </xo-parallax-scroll>
+        </xo-parallax>
+      {% else %}
+        <xo-video-cover class="xo-section-bg-image__item xo-section-bg-image__item--desktop" xo-src="{{ video_desktop }}"></xo-video-cover>
+        <xo-video-cover class="xo-section-bg-image__item xo-section-bg-image__item--mobile" xo-src="{{ video_mobile }}"></xo-video-cover>
+      {% endif %}
+    </div>
+  {% else %}
+    {% if section.settings.background_color == blank and section.settings.background_gradient == blank %}
+      {{ bg_placeholder }}
+    {% endif %}
+  {% endif %}
+{% endif %}

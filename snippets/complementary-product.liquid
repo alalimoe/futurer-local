@@ -1,0 +1,82 @@
+{% comment %}
+  Renders a complementary products.
+
+  Accepts:
+  - intent: Recommendation intent (optional)
+  Usage:
+  {% render 'complementary-product', intent: 'complementary' %}
+{% endcomment %}
+
+<xo-product-recommendations
+  class="xo-complementary-product"
+  xo-url="{{ routes.product_recommendations_url }}?section_id={{ section.id }}&product_id={{ product.id }}&intent={{ intent }}"
+>
+  {% if heading %}
+    <div class="xo-complementary-product__head">
+      <xo-animate xo-cascade>
+        <div class="xo-complementary-product__heading">{{ heading }}</div>
+      </xo-animate>
+    </div>
+  {% endif %}
+  {% if recommendations.performed? and recommendations.products_count > 0 %}
+    <div class="xo-complementary-product__content">
+      <xo-carousel
+        xo-per-view="1"
+        xo-per-move="1"
+        xo-overflow="visible"
+        xo-active-index="0"
+        {% if autoplay == 'on' %}
+          xo-autoplay="{{ autoplay_time }}"
+          xo-rewind
+        {% endif %}
+        xo-gap="20"
+        xo-breakpoints='
+          {
+            600: {
+              perView: 1,
+              perMove: 1,
+              gap: 10,
+              overflow: "visible"
+            },
+            768: {
+              perView: 2,
+              perMove: 1,
+              gap: 10,
+              overflow: "visible"
+            },
+          }
+        '
+        xo-render-bullet="<span></span>"
+        class="xo-complementary-product__carousel"
+      >
+        <xo-carousel-inner>
+          <xo-carousel-list>
+            {% for product in recommendations.products %}
+              {%- assign placeholder_image = 'collection-1' -%}
+              <xo-carousel-slide>
+                {% render 'product-card-custom',
+                  product: product,
+                  show_image: show_image,
+                  show_secondary_image: show_secondary_image,
+                  show_price: show_price,
+                  card_color_scheme: card_color_scheme,
+                  media_aspect_ratio: media_aspect_ratio,
+                  placeholder_image: placeholder_image,
+                  modifier: true
+                %}
+              </xo-carousel-slide>
+            {% endfor %}
+          </xo-carousel-list>
+        </xo-carousel-inner>
+        {% if show_paginate == 'show' %}
+          <div class="xo-complementary-product__paginate">
+            {% render 'carousel-pagination', align: 'center', style: 'circle', is_dynamic_bullets: true, per_view: 3 %}
+          </div>
+        {% endif %}
+      </xo-carousel>
+    </div>
+  {%- else -%}
+    {%- assign title = 'sections.product_recommendation.empty' | t -%}
+    {% render 'collection-empty', title: title %}
+  {% endif %}
+</xo-product-recommendations>

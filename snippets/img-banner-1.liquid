@@ -1,0 +1,141 @@
+{% comment %}
+  Render an img banner
+
+  Accepts:
+  - tag: {String} Tag heading (required)
+  - heading: {String} Heading (required)
+  - button: {Object} Button (required)
+  Usage:
+  {%
+  render 'img-banner-1',
+  tag: tag,
+  heading: heading,
+  button: button,
+  %}
+{% endcomment %}
+
+{% liquid
+  assign text = heading
+  assign words = text | split: ' '
+  assign percent_initial_1 = 90
+  assign percent_initial_2 = 100
+  assign count = 0
+%}
+
+<div xo-parallax class="img-banner-1">
+  <div class="img-banner-1__inner">
+    {% if img_desktop != blank or img_mobile != blank %}
+      <xo-parallax-scroll
+        class="img-banner-1__pr"
+        xo-backface-visibility="visible"
+        {% if settings.enable_border_radius %}
+        {% endif %}
+        xo-keyframes="
+          {
+            '40%': { scale: 1, {% if settings.enable_border_radius %}borderRadius: 0{% endif %} },
+            '60%': { scale: 0.95, {% if settings.enable_border_radius %}borderRadius: 30{% endif %} },
+            '100%': { scale: 0.93, {% if settings.enable_border_radius %}borderRadius: 50{% endif %} },
+          }
+        "
+      >
+        <xo-parallax-scroll
+          class="img-banner-1__pr-2"
+          xo-backface-visibility="visible"
+          xo-keyframes="
+            {
+              '40%': { scale: 1, brightness: '100%' },
+              '100%': { scale: 2, brightness: '40%' },
+            }
+          "
+        >
+          <xo-animate
+            xo-cascade
+            xo-type="zoom-out"
+            xo-duration="2000"
+            class="img-banner-1__bg"
+            style="--img-desktop: url('{{ img_desktop }}'); --img-mobile: url('{{ img_mobile }}')"
+          ></xo-animate>
+        </xo-parallax-scroll>
+      </xo-parallax-scroll>
+    {%- else -%}
+      <xo-parallax-scroll
+        class="img-banner-1__pr"
+        xo-backface-visibility="visible"
+        xo-keyframes="
+          {
+            '40%': { scale: 1, {% if settings.enable_border_radius %}borderRadius: 0{% endif %} },
+            '60%': { scale: 0.95, {% if settings.enable_border_radius %}borderRadius: 30{% endif %} },
+            '100%': { scale: 0.93, {% if settings.enable_border_radius %}borderRadius: 50{% endif %} },
+          }
+        "
+      >
+        <xo-parallax-scroll
+          class="img-banner-1__pr-2"
+          xo-backface-visibility="visible"
+          xo-keyframes="
+            {
+              '40%': { scale: 1, brightness: '100%' },
+              '100%': { scale: 2, brightness: '40%' },
+            }
+          "
+        >
+          <xo-animate xo-cascade xo-type="zoom-out" xo-duration="2000" class="img-banner-1__bg">
+            {{ 'hero-apparel-1' | placeholder_svg_tag: 'placeholder-svg' }}
+          </xo-animate>
+        </xo-parallax-scroll>
+      </xo-parallax-scroll>
+    {% endif %}
+
+    <div class="img-banner-1__body">
+      <div class="img-banner-1__content{% if layout %} img-banner-1__content--{{ layout }}{% endif %}">
+        {% if heading %}
+          <h1 class="img-banner-1__heading{% if class %} {{ class }}{% endif %}">
+            {% for word in words %}
+              {% assign word_index = forloop.index %}
+              <span class="img-banner-1__word">
+                {% assign chars = word | split: '' %}
+                {% for char in chars %}
+                  {% assign count = count | plus: 1 %}
+                  {% assign percent_1 = percent_initial_1 | minus: count %}
+                  {% assign percent_2 = percent_initial_2 | minus: count %}
+                  <xo-animate xo-cascade xo-duration="1000" xo-strength="3" xo-easing="easeOutExpo">
+                    <xo-parallax-scroll xo-keyframes="{ '{{ percent_1 }}%': { y: '0%' }, '{{ percent_2 }}%': { y: '200%' } }">
+                      <span class="img-banner-1__char">{{ char }}</span>
+                    </xo-parallax-scroll>
+                  </xo-animate>
+                  {% if forloop.index == chars.size and word_index != words.size %}
+                    <span class="img-banner-1__char">&nbsp;</span>
+                  {% endif %}
+                {% endfor %}
+              </span>
+            {% endfor %}
+          </h1>
+        {% endif %}
+        <xo-animate xo-cascade xo-constant="150" xo-duration="500">
+          <xo-parallax-scroll
+            xo-keyframes="{ '55.5%': { y: 0, blur: 0, opacity: 1 }, '100%': { y: -150, blur: 10, opacity: 0 } }"
+            xo-breakpoints="
+              {
+                768: {
+                  '55.5%': { y: 0, blur: 0, opacity: 1 },
+                  '100%': { y: -150, blur: 10, opacity: 0 }
+                }
+              }
+            "
+          >
+            <div class="img-banner-1__button">
+              {% render 'button',
+                text: button.button_text,
+                link: button.button_link,
+                style: button.button_style,
+                size: button.button_size,
+                radius: settings.button_radius,
+                padding: settings.button_padding
+              %}
+            </div>
+          </xo-parallax-scroll>
+        </xo-animate>
+      </div>
+    </div>
+  </div>
+</div>

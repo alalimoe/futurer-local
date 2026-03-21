@@ -1,0 +1,65 @@
+{% comment %}
+  Renders a perfomance of product
+
+  Accepts:
+  - title: {String} Title (required)
+  - percent: {Number} Percent (required)
+  - sub_title: {String} Subtitle (required)
+  - block: {Object} Block (Optional)
+
+  Usage:
+  {% render 'perfomance', title: title, percent: percent, sub_title: sub_title, block: block %}
+{% endcomment %}
+
+<div class='perfomance'>
+  <div class='perfomance__box {% if settings.enable_border_radius %}perfomance__box--radius{% endif %}'>
+    {% if title %}
+      <div class='perfomance__title'>{{ title }}</div>
+    {% endif %}
+    <div class='perfomance__circle-bar'>
+      <xo-circle-bar
+        xo-stroke-width='10'
+        xo-size='170'
+        xo-track-color='rgba(var(--color-accent), 0.1)'
+        xo-thumb-color='rgba(var(--color-accent), 1)'
+        xo-name='circle-{{ number }}'
+        xo-animate-on-scroll
+        xo-value='{{ number }}'
+        xo-duration='1000'
+        class='perfomance__progress'
+      ></xo-circle-bar>
+    </div>
+    <div class='perfomance__specification'>
+      {% if number %}
+        <div class='perfomance__percent h3'>
+          <xo-countto xo-from='0' xo-to='{{ number }}' xo-duration='1000'>0</xo-countto>
+          <span>%</span>
+        </div>
+      {% endif %}
+      {% if sub_title %}
+        <div class='perfomance__sub-title'>{{ sub_title }}</div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const progress = document.querySelector('.perfomance__progress');
+    const svg = document.querySelector('.perfomance__progress svg');
+
+    const updateProgressSize = () => {
+      if (window.innerWidth < 768) {
+        console.log('Mobile device');
+        progress.setAttribute('xo-size', '147');
+      } else {
+        console.log('Desktop device');
+        progress.setAttribute('xo-size', '170');
+      }
+    };
+
+    updateProgressSize();
+
+    window.addEventListener('resize', updateProgressSize);
+  });
+</script>

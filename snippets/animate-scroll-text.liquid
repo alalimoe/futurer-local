@@ -1,0 +1,188 @@
+{% comment %}
+  Renders animate scroll text
+
+  Accepts:
+  - text: {String} Text (required)
+  - class: {String} Container class (optional)
+  - inner_class: {String} Inner class (optional)
+  - style: {String} Container style (optional)
+  - duration: {Number} Duration for animate text (optional). Default: 1000
+  - effect: {xo-animate type | default | none} Animate style (optional). Default: default
+  - order_type: {random | ltr | center} Order type of character (optional). Default: ltr
+  - highlight: {String} Highlight element (optional)
+  - highlight_class: {String} Highlight class (optional)
+  - highlight_style: {String} Highlight style (optional)
+
+  Usage:
+  <h2 class="fz:d1">
+    {% render 'animate-scroll-text', text: 'Lorem ipsum', effect: 'rotate-left-up' %}
+  </h2>
+{% endcomment %}
+
+{% liquid
+  assign container_class = 'xo-animate-st'
+  assign final_inner_class = 'xo-animate-st__inner'
+  assign word_class = 'xo-animate-st__word'
+  assign final_highlight_class = 'xo-animate-st__highlight'
+  if class
+    assign container_class = container_class | append: ' ' | append: class
+  endif
+  if inner_class
+    assign final_inner_class = final_inner_class | append: ' ' | append: inner_class
+  endif
+  if highlight_class
+    assign final_highlight_class = final_highlight_class | append: ' ' | append: highlight_class
+  endif
+  unless effect == 'fade-left' or effect == 'fade-right'
+    assign word_class = word_class | append: ' xo-animate-st__word--modifier'
+  endunless
+  assign effect = effect | default: 'default'
+  assign duration = duration | default: 1000
+  assign order_type = order_type | default: 'ltr'
+  assign duration_initial = duration | divided_by: 3.00
+  assign constant_initial = duration | minus: duration_initial
+  assign words = text | strip_html | split: ' '
+  assign words_length = text | strip_html | split: ''
+  assign constant = constant_initial | divided_by: words_length.size
+  assign origin = text | strip_html | replace: ' ' | split: '' | size | divided_by: 2
+  assign count = 0
+  assign highlight_start = '['
+  assign highlight_end = ']'
+  assign has_start = false
+  assign is_error = false
+  assign hightlights_start = text | strip_html | split: highlight_start
+%}
+
+<div class="{{ container_class }}" style="{{ style }}">
+  {% if effect == 'default' or effect == 'none' or text contains '<' %}
+    <span class="{{ final_inner_class }}">
+      <xo-animate
+        xo-cascade
+        {% if effect == 'none' %}
+          xo-disabled
+        {% endif %}
+      >
+        {%- if text contains '[' and text contains ']' -%}
+          {%- for word in words -%}
+            {%- assign chars_full = word | split: '' -%}
+            {%- if word contains ']' and has_start == false -%}
+              {%- unless word contains '[' -%}
+                {%- assign is_error = true -%}
+              {%- endunless -%}
+            {%- endif -%}
+            {%- if chars_full[0] == '[' and text contains ']' and is_error == false and hightlights_start.size == 2 -%}
+              {%- assign has_start = true -%}
+              {% # theme-check-disable UnclosedHTMLElement %}
+              <span class="{{ final_highlight_class }}" style="{{ highlight_style }}">
+                {% # theme-check-enable UnclosedHTMLElement %}
+                <xo-animate
+                  xo-visible
+                  xo-visible-binding="[xo-highlight-visible]"
+                  xo-duration="{{ duration_initial | times: 1.5 }}"
+                  xo-order="1"
+                  xo-constant="{{ duration }}"
+                  xo-abs="full"
+                  {% if effect == 'none' %}
+                    xo-disabled
+                  {% endif %}
+                >
+                  {{ highlight | strip }}
+                </xo-animate>
+            {%- endif -%}
+            {{- word | replace: highlight_start, '' | replace: highlight_end, '' -}}
+            {%- if chars_full[-1] == ']' and has_start and hightlights_start.size == 2 -%}
+              {%- assign has_start = false -%}
+              {% # theme-check-disable UnclosedHTMLElement %}
+              </span>
+              {% # theme-check-enable UnclosedHTMLElement %}
+            {%- endif -%}
+          {%- endfor -%}
+        {%- else -%}
+          {{ text }}
+        {% endif %}
+      </xo-animate>
+    </span>
+  {% else %}
+    {% assign visually_hidden_text = text | replace: '[', '' | replace: ']', '' %}
+    {% render 'visually-hidden', tag_name: 'span', content: visually_hidden_text %}
+    <xo-animate
+      class="xo-animate-st__anim"
+      xo-cascade
+      xo-item-used
+      xo-duration="{{ duration_initial }}"
+      xo-type="{{ effect }}"
+      {% if effect contains 'fade-' %}
+        xo-easing="spring"
+        xo-strength="3"
+      {% endif %}
+    >
+      <span class="{{ final_inner_class }}">
+        {%- for word in words -%}
+          {%- assign chars_full = word | split: '' -%}
+          {%- if word contains ']' and has_start == false -%}
+            {%- unless word contains '[' -%}
+              {%- assign is_error = true -%}
+            {%- endunless -%}
+          {%- endif -%}
+          {%- if chars_full[0] == '[' and text contains ']' and is_error == false and hightlights_start.size == 2 -%}
+            {%- assign has_start = true -%}
+            {%- # theme-check-disable UnclosedHTMLElement -%}
+            <span class="{{ final_highlight_class }}" style="{{ highlight_style }}">
+              {%- # theme-check-enable UnclosedHTMLElement -%}
+              <xo-animate
+                xo-visible
+                xo-visible-binding="[xo-highlight-visible]"
+                xo-duration="{{ duration_initial | times: 1.5 }}"
+                xo-order="1"
+                xo-constant="{{ duration }}"
+                xo-abs="full"
+              >
+                {{ highlight | strip }}
+              </xo-animate>
+          {%- endif -%}
+          <span class="{{ word_class }}">
+            {% liquid
+              assign chars = word | replace: highlight_start, '' | replace: highlight_end, '' | split: ''
+            %}
+            {% capture render_words %}
+              {%- for char in chars -%}
+                {% liquid
+                  assign count = count | plus: 1
+                  assign order = 0
+                  if order_type == 'center'
+                    if count > origin
+                      assign order = count | minus: origin
+                    else
+                      assign order = origin | minus: count
+                    endif
+                  elsif order_type == 'random'
+                    assign min = 0
+                    assign max = chars | size
+                    assign diff = max | minus: min
+                    assign order = 'now' | date: '%N' | modulo: diff | plus: min
+                  elsif order_type == 'ltr'
+                    assign order = count
+                  endif
+                %}
+                <xo-animate-item style="--xo-constant: {{ constant }}; --xo-order: {{ order }}">
+                  <span class="xo-animate-st__char">{{ char }}</span>
+                </xo-animate-item>
+              {%- endfor -%}
+            {% endcapture %}
+            {% assign render_words = render_words | replace: '<xo-animate-item ', '--><xo-animate-item ' | replace: '</xo-animate-item>', '</xo-animate-item><!--' %}
+            {% assign render_words = render_words | strip %}
+            {% assign render_words = '--' | append: render_words | append: '--' %}
+            {% assign render_words = render_words | replace: '---->', '' | replace: '<!----', '' %}
+            {{ render_words -}}
+          </span>
+          {%- if chars_full[-1] == ']' and has_start and hightlights_start.size == 2 -%}
+            {%- assign has_start = false -%}
+            {%- # theme-check-disable UnclosedHTMLElement -%}
+            </span>
+            {%- # theme-check-enable UnclosedHTMLElement -%}
+          {%- endif -%}
+        {%- endfor -%}
+      </span>
+    </xo-animate>
+  {% endif %}
+</div>

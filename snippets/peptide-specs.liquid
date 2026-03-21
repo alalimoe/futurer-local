@@ -1,0 +1,84 @@
+{%- comment -%} Peptide-specific attributes {%- endcomment -%}
+{%- assign p = product.metafields.peptide -%}
+
+{%- if p -%}
+<div class="peptide-specs">
+
+  {%- capture topRow -%}
+    {%- if p.sequence != blank -%}
+    <div class="spec">
+      <strong class="spec__label">Sequence:</strong>
+      <span class="spec__value">{{ p.sequence }}</span>
+    </div>
+    {%- endif -%}
+
+    {%- if p.cas != blank -%}
+    <div class="spec">
+      <strong class="spec__label">CAS:</strong>
+      <span class="spec__value">{{ p.cas }}</span>
+    </div>
+    {%- endif -%}
+
+    {%- if p.mw != blank -%}
+    <div class="spec">
+      <strong class="spec__label">Molecular weight:</strong>
+      <span class="spec__value">{{ p.mw }}</span>
+    </div>
+    {%- endif -%}
+
+    {%- if p.purity != blank -%}
+    <div class="spec">
+      <strong class="spec__label">Purity:</strong>
+      <span class="spec__value">{{ p.purity }}</span>
+    </div>
+    {%- endif -%}
+
+    {%- if p.form != blank -%}
+    <div class="spec">
+      <strong class="spec__label">Form:</strong>
+      <span class="spec__value">{{ p.form }}</span>
+    </div>
+    {%- endif -%}
+  {%- endcapture -%}
+
+  {%- if topRow != blank -%}
+    <h3>Peptide specifications</h3>
+    <div class="peptide-specs__grid">{{ topRow }}</div>
+  {%- endif -%}
+
+  {%- if p.storage != blank -%}
+    <h3>Storage</h3>
+    <p>{{ p.storage }}</p>
+  {%- endif -%}
+
+  {%- if p.reconstitution != blank -%}
+    <h3>Reconstitution</h3>
+    <p>{{ p.reconstitution }}</p>
+  {%- endif -%}
+
+  {%- if p.solubility != blank -%}
+    <h3>Solubility</h3>
+    <p>{{ p.solubility }}</p>
+  {%- endif -%}
+
+  {%- if p.shipping_note != blank -%}
+    <aside class="npx-note">{{ p.shipping_note }}</aside>
+  {%- endif -%}
+
+  {%- if p.research_disclaimer != blank -%}
+    <aside class="npx-disclaimer"><strong>Research use only:</strong> {{ p.research_disclaimer }}</aside>
+  {%- endif -%}
+
+  {%- comment -%} COA link (supports file_reference or pasted URL) {%- endcomment -%}
+  {%- assign coa = product.metafields.peptide.coa_file
+    | default: product.metafields.npx.coa_file
+    | default: product.metafields.custom.coa_file -%}
+  {%- if coa != blank -%}
+    {%- assign coa_url = coa.value.url | default: coa -%}
+    <p class="peptide-coa">
+      <a href="{{ coa_url }}" target="_blank" rel="noopener">Download Certificate of Analysis (PDF)</a>
+    </p>
+  {%- endif -%}
+
+</div>
+{%- endif -%}

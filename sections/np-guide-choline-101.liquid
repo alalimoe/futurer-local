@@ -1,0 +1,319 @@
+{% comment %} ======================= FILE: sections/np-guide-choline-101.liquid ======================= {% endcomment %}
+<section class="np-guide" data-section-id="{{ section.id }}">
+  <div class="np-container">
+    <header class="np-hero">
+      <h1>{{ section.settings.hero_title }}</h1>
+      {% if section.settings.hero_lead != blank %}
+        <p class="np-lead">{{ section.settings.hero_lead }}</p>
+      {% endif %}
+    </header>
+
+    {% assign tl_blocks = section.blocks | where: 'type', 'tl_dr_item' %}
+    {% if tl_blocks.size > 0 %}
+      <h2>TL;DR</h2>
+      <div class="np-callout">
+        <ul class="np-list">
+          {% for block in tl_blocks %}
+            <li>{{ block.settings.text }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+
+    {% assign how_blocks = section.blocks | where: 'type', 'how_item' %}
+    {% if how_blocks.size > 0 %}
+      <h2>How choline supports performance</h2>
+      <ul class="np-list">
+        {% for block in how_blocks %}
+          <li>{{ block.settings.text }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+
+    {% assign choice_blocks = section.blocks | where: 'type', 'choice_item' %}
+    {% if choice_blocks.size > 0 %}
+      <h2>Which one should I choose?</h2>
+      <div class="np-grid">
+        {% for block in choice_blocks %}
+          <article class="np-card">
+            <h3>{{ block.settings.heading }}</h3>
+            {% if block.settings.body != blank %}
+              <p>{{ block.settings.body }}</p>
+            {% endif %}
+            {% if block.settings.link_url != blank %}
+              <p><a class="np-link" href="{{ block.settings.link_url }}">{{ block.settings.link_label | default: 'Learn more' }}</a></p>
+            {% endif %}
+          </article>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {% assign stack_blocks = section.blocks | where: 'type', 'stack_item' %}
+    {% if stack_blocks.size > 0 %}
+      <h2>Your stack (examples)</h2>
+      <ul class="np-list">
+        {% for block in stack_blocks %}
+          <li>{{ block.settings.text }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+
+    {% assign routine_blocks = section.blocks | where: 'type', 'routine_item' %}
+    {% if routine_blocks.size > 0 %}
+      <h2>How to use (routine)</h2>
+      <ul class="np-list">
+        {% for block in routine_blocks %}
+          <li>{{ block.settings.text }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+
+    {% assign faq_blocks = section.blocks | where: 'type', 'faq' %}
+    {% if faq_blocks.size > 0 %}
+      <h2>FAQs</h2>
+      <div class="np-faqs">
+        {% for block in faq_blocks %}
+          <details>
+            <summary>{{ block.settings.question }}</summary>
+            <p>{{ block.settings.answer }}</p>
+          </details>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {% if section.settings.safety_note != blank %}
+      <h2>Safety & athlete note</h2>
+      <p class="np-muted">{{ section.settings.safety_note }}</p>
+    {% endif %}
+
+    {% assign cta_blocks = section.blocks | where: 'type', 'cta_link' %}
+    {% if cta_blocks.size > 0 %}
+      <h2>Shop the picks</h2>
+      <ul class="np-ctas">
+        {% for block in cta_blocks %}
+          <li><a class="np-link" href="{{ block.settings.url }}">{{ block.settings.label }}</a></li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+
+    {% if section.settings.delivery_note != blank %}
+      <hr class="np-divider">
+      <p class="np-muted"><strong>Delivery & returns:</strong> {{ section.settings.delivery_note }}</p>
+    {% endif %}
+  </div>
+
+  {%- comment -%} JSON‑LD: Article + dynamic FAQ from blocks {%- endcomment -%}
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"Article",
+    "headline": {{ section.settings.hero_title | json }},
+    "author":{"@type":"Organization","name":"Nootropix"},
+    "mainEntityOfPage": {{ canonical_url | json }}
+  }
+  </script>
+  {% if faq_blocks.size > 0 %}
+    {% capture faq_json %}
+    {
+      "@context":"https://schema.org",
+      "@type":"FAQPage",
+      "mainEntity":[
+        {% for b in faq_blocks %}
+          {
+            "@type":"Question",
+            "name": {{ b.settings.question | json }},
+            "acceptedAnswer": { "@type":"Answer", "text": {{ b.settings.answer | strip_html | json }} }
+          }{% unless forloop.last %},{% endunless %}
+        {% endfor %}
+      ]
+    }
+    {% endcapture %}
+    <script type="application/ld+json">{{ faq_json | strip }}</script>
+  {% endif %}
+
+  <style>
+    .np-container{max-width:var(--container-width-large);margin:0 auto;padding:24px 20px}
+    .np-hero h1{margin:0 0 8px 0}
+    .np-lead{opacity:.9;margin-top:8px}
+    .np-callout{background:rgba(0,0,0,.04);padding:12px 14px;border-radius:10px}
+    .np-list{padding-left:1.2em;margin:10px 0 16px 0}
+    .np-grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));margin:10px 0 18px 0}
+    .np-card{border:1px solid rgba(0,0,0,.08);border-radius:12px;padding:14px;transition:var(--transition-micro)}
+    .np-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-sm-hover)}
+    .np-link{text-decoration:underline}
+    .np-faqs details{margin:8px 0}
+    .np-divider{margin:18px 0}
+    .np-muted{opacity:.8}
+    .np-ctas{display:flex;flex-wrap:wrap;gap:10px;list-style:none;padding:0;margin:10px 0 0 0}
+    .np-ctas li{margin:0}
+    /* Inherit theme typography/colors; only light layout styles applied */
+  </style>
+</section>
+
+{% schema %}
+{
+  "name": "Guide — Choline 101",
+  "settings": [
+    {
+      "type": "text",
+      "id": "hero_title",
+      "label": "Hero title",
+      "default": "Choline 101: Alpha‑GPC vs CDP‑Choline vs DMAE"
+    },
+    {
+      "type": "textarea",
+      "id": "hero_lead",
+      "label": "Lead",
+      "default": "Choline donors help your brain make acetylcholine—the neurotransmitter for focus, working memory, and learning. Here’s how to choose one that fits your goal and stack."
+    },
+    {
+      "type": "textarea",
+      "id": "safety_note",
+      "label": "Safety note",
+      "default": "This page is educational and not medical advice. Talk to a qualified clinician if you’re pregnant, nursing, have a medical condition, or take medications. Athletes: always check the current WADA list and your federation’s rules."
+    },
+    {
+      "type": "textarea",
+      "id": "delivery_note",
+      "label": "Delivery & returns note",
+      "default": "4‑hour delivery within Dubai city limits; same/next‑day across the UAE. Free shipping ≥ 300 AED (UAE & international express). Easy returns within 3 days on unopened items."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "tl_dr_item",
+      "name": "TL;DR item",
+      "settings": [{ "type": "text", "id": "text", "label": "Bullet" }]
+    },
+    {
+      "type": "how_item",
+      "name": "How it helps bullet",
+      "settings": [{ "type": "text", "id": "text", "label": "Bullet" }]
+    },
+    {
+      "type": "choice_item",
+      "name": "Choice card",
+      "settings": [
+        { "type": "text", "id": "heading", "label": "Heading" },
+        { "type": "textarea", "id": "body", "label": "Body" },
+        { "type": "text", "id": "link_label", "label": "Link label", "default": "Shop" },
+        { "type": "url", "id": "link_url", "label": "Link URL" }
+      ]
+    },
+    {
+      "type": "stack_item",
+      "name": "Stack example",
+      "settings": [{ "type": "richtext", "id": "text", "label": "Text (supports links)" }]
+    },
+    {
+      "type": "routine_item",
+      "name": "Routine step",
+      "settings": [{ "type": "text", "id": "text", "label": "Text" }]
+    },
+    {
+      "type": "faq",
+      "name": "FAQ",
+      "settings": [
+        { "type": "text", "id": "question", "label": "Question" },
+        { "type": "textarea", "id": "answer", "label": "Answer" }
+      ]
+    },
+    {
+      "type": "cta_link",
+      "name": "Shop link",
+      "settings": [
+        { "type": "text", "id": "label", "label": "Label" },
+        { "type": "url", "id": "url", "label": "URL" }
+      ]
+    }
+  ],
+  "presets": [
+    { "name": "Guide — Choline 101" }
+  ]
+}
+{% endschema %}
+
+
+{% comment %} ======================= FILE: templates/page.choline-101.json ======================= {% endcomment %}
+{
+  "sections": {
+    "main": {
+      "type": "np-guide-choline-101",
+      "settings": {
+        "hero_title": "Choline 101: Alpha‑GPC vs CDP‑Choline vs DMAE",
+        "hero_lead": "Choline donors help your brain make acetylcholine—the neurotransmitter for focus, working memory, and learning. Here’s how to choose one that fits your goal and stack.",
+        "safety_note": "This page is educational and not medical advice. Talk to a qualified clinician if you’re pregnant, nursing, have a medical condition, or take medications. Athletes: always check the current WADA list and your federation’s rules.",
+        "delivery_note": "4‑hour delivery within Dubai city limits; same/next‑day across the UAE. Free shipping ≥ 300 AED (UAE & international express). Easy returns within 3 days on unopened items."
+      },
+      "blocks": {
+        "tl_1": { "type": "tl_dr_item", "settings": { "text": "Pick one choline donor at a time." } },
+        "tl_2": { "type": "tl_dr_item", "settings": { "text": "Alpha‑GPC: fast, clean focus & working memory." } },
+        "tl_3": { "type": "tl_dr_item", "settings": { "text": "CDP‑Choline (Citicoline): steady attention & learning; membrane support." } },
+        "tl_4": { "type": "tl_dr_item", "settings": { "text": "DMAE L‑Bitartrate: lighter daily support; keep expectations modest." } },
+        "tl_5": { "type": "tl_dr_item", "settings": { "text": "With racetams? Start low; evaluate. Many people prefer having a choline donor in racetam stacks." } },
+
+        "how_1": { "type": "how_item", "settings": { "text": "Acetylcholine availability: fuels focus, task switching, and short‑term recall." } },
+        "how_2": { "type": "how_item", "settings": { "text": "Signal fidelity: can smooth “wired but scattered” caffeine days when paired with L‑Theanine." } },
+        "how_3": { "type": "how_item", "settings": { "text": "Stack synergy: often pairs well with racetams and Lion’s Mane in learning blocks." } },
+
+        "choice_1": {
+          "type": "choice_item",
+          "settings": {
+            "heading": "Alpha‑GPC",
+            "body": "Great for immediate, clean focus and working memory. Popular for deep‑work mornings and exam days.",
+            "link_label": "Shop Alpha‑GPC",
+            "link_url": "/search?q=Alpha-GPC"
+          }
+        },
+        "choice_2": {
+          "type": "choice_item",
+          "settings": {
+            "heading": "CDP‑Choline (Citicoline)",
+            "body": "Steady attention and study stamina; supportive for learning blocks and longer cycles.",
+            "link_label": "Shop CDP‑Choline",
+            "link_url": "/search?q=CDP%20Citicoline"
+          }
+        },
+        "choice_3": {
+          "type": "choice_item",
+          "settings": {
+            "heading": "DMAE L‑Bitartrate",
+            "body": "Lighter daily support. A “nice‑to‑have” if you want a gentler option.",
+            "link_label": "Shop DMAE",
+            "link_url": "/search?q=DMAE"
+          }
+        },
+
+        "stack_1": { "type": "stack_item", "settings": { "text": "Focus baseline: Alpha‑GPC + L‑Theanine or <a href=\"/search?q=Caffeine%20L-Theanine\">Caffeine‑Theanine</a>." } },
+        "stack_2": { "type": "stack_item", "settings": { "text": "Study blocks: CDP‑Choline + a racetam (e.g., <a href=\"/search?q=Aniracetam\">Aniracetam</a> or <a href=\"/search?q=Pramiracetam\">Pramiracetam</a>)." } },
+        "stack_3": { "type": "stack_item", "settings": { "text": "Low‑key daily: DMAE + <a href=\"/search?q=Lion%27s%20Mane\">Lion’s Mane</a>; evaluate after 2 weeks." } },
+
+        "routine_1": { "type": "routine_item", "settings": { "text": "Morning focus: Take your chosen choline donor with water. If using caffeine, pair with L‑Theanine for smoothness." } },
+        "routine_2": { "type": "routine_item", "settings": { "text": "Study windows: 30–60 minutes before a 60–90 minute learning block (no notifications; take notes)." } },
+        "routine_3": { "type": "routine_item", "settings": { "text": "Racetams: Add only after you’ve tested your choline donor alone for a few days. Adjust one variable at a time." } },
+
+        "faq_1": { "type": "faq", "settings": { "question": "Can I take Alpha‑GPC and CDP‑Choline together?", "answer": "Keep it simple: choose one and evaluate for 7–14 days. Doubling up can cause fogginess in some people." } },
+        "faq_2": { "type": "faq", "settings": { "question": "Do I need choline with racetams?", "answer": "Not everyone does, but many people find a choline donor prevents “racetam headaches.” Start low; evaluate your response." } },
+        "faq_3": { "type": "faq", "settings": { "question": "Headache or brain fog?", "answer": "Lower the dose or try a different donor. Too much choline can feel “heavy.”" } },
+        "faq_4": { "type": "faq", "settings": { "question": "Timing with caffeine?", "answer": "Fine to combine. Many prefer caffeine + L‑Theanine + Alpha‑GPC for clean focus." } },
+        "faq_5": { "type": "faq", "settings": { "question": "Vegetarian/vegan?", "answer": "Alpha‑GPC and CDP‑Choline are suitable for most dietary patterns. Always check capsule materials on your specific product." } },
+
+        "cta_1": { "type": "cta_link", "settings": { "label": "Choline Bundle (Alpha‑GPC + CDP‑Choline + DMAE)", "url": "/search?q=Choline%20Bundle" } },
+        "cta_2": { "type": "cta_link", "settings": { "label": "Explore Racetams", "url": "/search?q=Racetam" } },
+        "cta_3": { "type": "cta_link", "settings": { "label": "Racetams 101", "url": "/pages/racetams-101" } },
+        "cta_4": { "type": "cta_link", "settings": { "label": "Lion’s Mane", "url": "/search?q=Lion%27s%20Mane" } },
+        "cta_5": { "type": "cta_link", "settings": { "label": "L‑Theanine", "url": "/search?q=L-Theanine" } }
+      },
+      "block_order": [
+        "tl_1","tl_2","tl_3","tl_4","tl_5",
+        "how_1","how_2","how_3",
+        "choice_1","choice_2","choice_3",
+        "stack_1","stack_2","stack_3",
+        "routine_1","routine_2","routine_3",
+        "faq_1","faq_2","faq_3","faq_4","faq_5",
+        "cta_1","cta_2","cta_3","cta_4","cta_5"
+      ]
+    }
+  },
+  "order": ["main"]
+}
