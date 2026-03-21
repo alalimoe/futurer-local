@@ -5,6 +5,34 @@ alwaysApply: true
 
 # Nootropix Design System
 
+## Shopify MCP Server (Mandatory)
+
+IMPORTANT: The Shopify MCP server (`user-shopify-dev-mcp`) is the **primary resource** for all theme development, validation, and documentation lookups. Use it before guessing and after every write.
+
+### Workflow
+
+1. **Session start:** Call `learn_shopify_api` with `api: "liquid"` to get a `conversationId` — all other MCP tools require it
+2. **Before writing schema or unfamiliar Liquid:** Call `search_docs_chunks` → `fetch_full_docs` to look up official Shopify docs (valid `tag` values, setting types, Liquid objects/filters)
+3. **After writing or modifying any theme file:** Call `validate_theme` with the changed files to catch invalid syntax, hallucinated Liquid, and incorrect schema before upload
+
+### Available Tools
+
+| Tool | When to Use |
+|------|-------------|
+| `learn_shopify_api` | First call in any session — required to obtain `conversationId` |
+| `search_docs_chunks` | Look up schema specs, Liquid objects, filter syntax, valid property values |
+| `fetch_full_docs` | Retrieve full doc pages found via search for deeper context |
+| `validate_theme` | **Post-write verification** of all created/modified theme files |
+| `validate_graphql_codeblocks` | When generating Storefront/Admin API queries |
+
+### Rules
+
+- NEVER skip `validate_theme` after modifying `.liquid`, `.json`, `.css`, or `.js` theme files
+- NEVER guess Shopify schema properties — look them up via `search_docs_chunks` first
+- When `validate_theme` reports errors, fix them and re-validate before considering the task complete
+- Use `fetch_full_docs` for full context when search chunks are insufficient
+- Prefer MCP documentation over web searches — Shopify docs via MCP are always current and authoritative
+
 ## Brand Colors
 
 All colors are CSS custom properties stored as RGB triplets, consumed via `rgba(var(--color-*))` or `color-mix()`.
