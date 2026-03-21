@@ -1,22 +1,11 @@
-{% comment %}
-SECTION: COA band
-Uses:
-- pep.coa_pdf (file_reference)
-- pep.coa_batch, pep.coa_assay_date, pep.coa_lab, pep.coa_version, pep.coa_status, pep.purity_percent
-- pdp.coa_image, pdp.hplc_image, pdp.coa_verified_on
-- pep.coa_archive (optional metaobject list of coa_archive_entry)
-Each coa_archive_entry can provide:
-- label, kind, lab, batch_id, verified_on, document_date, document_type
-- file (file_reference) and/or coa_url (URL)
-- coa_img (image file), hplc_img (image file)
-Independent lab (BT Labs) => render COA + HPLC images.
-Supplier-only docs => no images, only downloads / archive.
-{% endcomment %}
+{% doc %}
+  @name COA Band
+  @desc Full COA display section with archive selector, COA/HPLC images, batch metadata, and verification status. Distinguishes independent lab (BT Labs) vs supplier-only documents.
+{% enddoc %}
 
 {%- liquid
-  # ----- Core metafields -----
   assign pdp_coa_override = product.metafields.pdp.coa_url
-  assign coa_pdf_mf       = product.metafields.pep.coa_pdf
+  assign coa_pdf_mf = product.metafields.pep.coa_pdf
 
   assign coa_url = nil
   if pdp_coa_override and pdp_coa_override != blank
@@ -25,46 +14,38 @@ Supplier-only docs => no images, only downloads / archive.
     assign coa_url = coa_pdf_mf.value.url
   endif
 
-  assign coa_img_mf  = product.metafields.pdp.coa_image
+  assign coa_img_mf = product.metafields.pdp.coa_image
   assign hplc_img_mf = product.metafields.pdp.hplc_image
 
-  assign coa_img  = nil
+  assign coa_img = nil
   assign hplc_img = nil
-
   if coa_img_mf and coa_img_mf.value
     assign coa_img = coa_img_mf.value
   endif
-
   if hplc_img_mf and hplc_img_mf.value
     assign hplc_img = hplc_img_mf.value
   endif
 
-  # ----- COA metadata (batch / assay / lab / version / status / purity) -----
-  assign coa_batch     = product.metafields.pep.coa_batch | default: ''
+  assign coa_batch = product.metafields.pep.coa_batch | default: ''
   assign coa_assay_raw = product.metafields.pep.coa_assay_date
-  assign coa_assay     = ''
+  assign coa_assay = ''
   if coa_assay_raw
     assign coa_assay = coa_assay_raw | date: '%Y-%m-%d'
   endif
 
-  assign coa_lab     = product.metafields.pep.coa_lab | default: ''
+  assign coa_lab = product.metafields.pep.coa_lab | default: ''
   assign coa_version = product.metafields.pep.coa_version | default: '1.0.0'
-  assign coa_status  = product.metafields.pep.coa_status | default: 'current'
-  assign purity      = product.metafields.pep.purity_percent
-
+  assign coa_status = product.metafields.pep.coa_status | default: 'current'
+  assign purity = product.metafields.pep.purity_percent
   assign verified_on_mf = product.metafields.pdp.coa_verified_on
 
-  # ----- Archive list (optional metaobject list) -----
   assign archive = nil
   if product.metafields.pep.coa_archive and product.metafields.pep.coa_archive.value
     assign archive = product.metafields.pep.coa_archive.value
   endif
 
-  # ----- Fallbacks from archive metaobject -----
   if archive and archive.size > 0
     assign third_party_entry = nil
-
-    # Prefer independent lab entries (BT Labs etc.)
     for entry in archive
       assign entry_lab = entry.lab | default: '' | downcase
       if entry_lab contains 'bt' and entry_lab contains 'lab'
@@ -73,13 +54,11 @@ Supplier-only docs => no images, only downloads / archive.
       endif
     endfor
 
-    # Fallback: first archive entry if no explicit third-party one
     assign fallback_entry = third_party_entry
     if fallback_entry == nil
       assign fallback_entry = archive.first
     endif
 
-    # URL: prefer file.url, then coa_url
     assign fallback_url = ''
     if fallback_entry.file and fallback_entry.file != blank and fallback_entry.file.url
       assign fallback_url = fallback_entry.file.url
@@ -93,34 +72,25 @@ Supplier-only docs => no images, only downloads / archive.
       endif
     endif
 
-    # Batch / lab metadata (only if product-level is blank)
     if coa_batch == '' and fallback_entry.batch_id
       assign coa_batch = fallback_entry.batch_id
     endif
-
     if coa_lab == '' and fallback_entry.lab
       assign coa_lab = fallback_entry.lab
     endif
-
-    # Assay date fallback from document_date (if no assay already)
     if coa_assay == '' and fallback_entry.document_date
       assign coa_assay = fallback_entry.document_date | date: '%Y-%m-%d'
     endif
-
-    # Verified-on fallback (used in header)
     if fallback_entry.verified_on
       if verified_on_mf == blank or verified_on_mf == nil
         assign verified_on_mf = fallback_entry.verified_on
       endif
     endif
-
-    # Images: only override if PDP-level metafields are empty
     if fallback_entry.coa_img
       if coa_img == nil or coa_img == blank
         assign coa_img = fallback_entry.coa_img
       endif
     endif
-
     if fallback_entry.hplc_img
       if hplc_img == nil or hplc_img == blank
         assign hplc_img = fallback_entry.hplc_img
@@ -128,16 +98,14 @@ Supplier-only docs => no images, only downloads / archive.
     endif
   endif
 
-  # ----- Independent vs supplier (after fallbacks so lab is final) -----
   assign lab_down = coa_lab | downcase
   assign is_third_party = false
   if lab_down contains 'bt' and lab_down contains 'lab'
     assign is_third_party = true
   endif
 
-  # ----- Alt text & aria labels -----
-  assign coa_alt_override   = product.metafields.pdp.coa_alt
-  assign hplc_alt_override  = product.metafields.pdp.hplc_alt
+  assign coa_alt_override = product.metafields.pdp.coa_alt
+  assign hplc_alt_override = product.metafields.pdp.hplc_alt
 
   capture default_coa_alt
     echo 'COA – '
@@ -214,7 +182,6 @@ Supplier-only docs => no images, only downloads / archive.
   endcapture
   assign coa_button_aria = coa_button_aria | strip
 
-  # ----- Visibility gate -----
   assign has_primary_coa = false
   if coa_url and coa_url != blank
     assign has_primary_coa = true
@@ -227,90 +194,161 @@ Supplier-only docs => no images, only downloads / archive.
 -%}
 
 {% if should_render_pcb %}
-<section id="pep-coa-band" class="pcb-wrap">
-  <style>
-    #pep-coa-band{
-      --pcb-maxw: {{ section.settings.max_width | default: 1200 }}px;
-      --pcb-border:#E7E9ED; --pcb-bg:#FAFAFB; --pcb-card:#FFFFFF;
-      --pcb-text:#111; --pcb-muted:#6B7280;
-      --pcb-accent: {{ section.settings.accent_color | default: '#FBBF24' }};
-      --pcb-radius: var(--nx-radius); --pcb-shadow: 0 1px 6px rgba(16,24,40,.06);
+
+{%- style -%}
+  .xo-section--{{ section.id }} .pcb__head {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 0 0 1.4rem;
+    flex-wrap: wrap;
+  }
+
+  .xo-section--{{ section.id }} .pcb__title {
+    font-family: var(--font-heading-family, sans-serif);
+    font-weight: 600;
+    font-size: clamp(1.8rem, 2vw, 2.2rem);
+    color: rgba(var(--color-foreground));
+    margin: 0;
+    letter-spacing: -0.02em;
+    line-height: 1.3;
+  }
+
+  .xo-section--{{ section.id }} .pcb__verify {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.3rem 1rem;
+    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
+    border-radius: var(--button-radius);
+    background: color-mix(in srgb, rgba(var(--color-accent)) 8%, transparent);
+    font-size: calc(var(--font-body-scale, 1) * 1.1rem);
+    font-weight: 600;
+    color: rgba(var(--color-foreground));
+  }
+
+  .xo-section--{{ section.id }} .pcb__verify svg {
+    width: 1.2rem;
+    height: 1.2rem;
+  }
+
+  .xo-section--{{ section.id }} .pcb__meta {
+    margin-left: auto;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 50%, transparent);
+    font-size: calc(var(--font-body-scale, 1) * 1.2rem);
+  }
+
+  .xo-section--{{ section.id }} .pcb__card {
+    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 8%, transparent);
+    border-radius: var(--general-radius-3);
+    background: rgba(var(--color-background));
+    padding: 1.6rem;
+  }
+
+  .xo-section--{{ section.id }} .pcb__grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.4rem;
+  }
+
+  @media (max-width: 768px) {
+    .xo-section--{{ section.id }} .pcb__grid {
+      grid-template-columns: 1fr;
     }
-    .pcb-wrap{padding:24px var(--page-gutter);background:var(--pcb-bg);border-top:none;border-bottom:none;font-family:var(--font-body-family,sans-serif)}
-    .pcb-container{max-width:var(--pcb-maxw);margin:0 auto}
+  }
 
-    .pcb-head{display:flex;align-items:center;gap:10px;margin:0 0 14px;flex-wrap:wrap}
-    .pcb-title{font-family:var(--font-heading-family,sans-serif);font-weight:800;font-size:clamp(1.1rem,2vw,1.35rem);color:var(--pcb-text);margin:0;letter-spacing:-0.02em}
-    .pcb-verify{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border:none;border-radius:var(--nx-radius-pill);background:rgba(16,163,50,0.08);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);font-size:11px;font-weight:600;color:#0f5132}
-    .pcb-verify svg{width:12px;height:12px;display:block}
-    .pcb-meta{margin-left:auto;color:var(--pcb-muted);font-size:12px}
+  .xo-section--{{ section.id }} .pcb__col {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+  }
 
-    .pcb-card{border:none;border-radius:var(--pcb-radius);background:var(--pcb-card);padding:16px;box-shadow:var(--shadow-sm)}
-    .pcb-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
-    @media(max-width:1020px){ .pcb-grid{grid-template-columns:1fr} }
-    .pcb-col{display:flex;flex-direction:column;gap:12px}
+  .xo-section--{{ section.id }} .pcb__actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    flex-wrap: wrap;
+  }
 
-    .pcb-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-    .pcb-note{color:var(--pcb-muted)}
+  .xo-section--{{ section.id }} .pcb__note {
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 55%, transparent);
+    font-size: calc(var(--font-body-scale, 1) * 1.4rem);
+  }
 
-    .pcb-archive{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px}
-    .pcb-select{border:none;border-radius:var(--nx-radius-md);background:rgba(255,255,255,0.7);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);padding:8px 12px;box-shadow:var(--shadow-xs)}
-    .pcb-verified{color:var(--pcb-muted);font-size:12px}
+  .xo-section--{{ section.id }} .pcb__archive {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+  }
 
-    .pcb-sub{font-family:var(--font-heading-family,sans-serif);font-weight:700;color:var(--pcb-text);margin:2px 0 2px}
+  .xo-section--{{ section.id }} .pcb__archive strong {
+    font-weight: 600;
+  }
 
-    .pcb-imgframe{border:none;border-radius:var(--nx-radius-md);background:#fff;padding:8px;display:block;box-shadow:var(--shadow-sm);transition:var(--transition-premium)}
-    .pcb-imgframe:hover{box-shadow:var(--shadow-md);transform:translateY(-2px)}
-    .pcb-img{width:100%;height:auto;border-radius:var(--nx-radius-sm);display:block}
-    @media (min-width:1020px){
-      .pcb-imgframe.pcb-equal{
-        display:flex; align-items:center; justify-content:center;
-      }
-      .pcb-imgframe.pcb-equal .pcb-img{
-        max-height:100%; width:auto; height:auto; object-fit:contain;
-      }
+  .xo-section--{{ section.id }} .pcb__select {
+    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 12%, transparent);
+    border-radius: var(--general-radius-4);
+    background: rgba(var(--color-background));
+    padding: 0.8rem 1.2rem;
+    font-family: var(--font-body-family, sans-serif);
+    color: rgba(var(--color-foreground));
+  }
+
+  .xo-section--{{ section.id }} .pcb__verified {
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 50%, transparent);
+    font-size: calc(var(--font-body-scale, 1) * 1.2rem);
+  }
+
+  .xo-section--{{ section.id }} .pcb__sub {
+    font-family: var(--font-heading-family, sans-serif);
+    font-weight: 600;
+    color: rgba(var(--color-foreground));
+    margin: 0.2rem 0;
+  }
+
+  .xo-section--{{ section.id }} .pcb__imgframe {
+    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 8%, transparent);
+    border-radius: var(--general-radius-1);
+    background: rgba(var(--color-background));
+    padding: 0.8rem;
+    display: block;
+    transition: border-color 0.3s var(--out-soft, ease);
+  }
+
+  .xo-section--{{ section.id }} .pcb__imgframe:hover {
+    border-color: color-mix(in srgb, rgba(var(--color-accent)) 40%, transparent);
+  }
+
+  .xo-section--{{ section.id }} .pcb__img {
+    width: 100%;
+    height: auto;
+    border-radius: var(--general-radius-4);
+    display: block;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .xo-section--{{ section.id }} .pcb__imgframe {
+      transition: none;
     }
+  }
+{%- endstyle -%}
 
-    .pcb-ms{margin-top:10px}
-
-    @media (prefers-reduced-motion:no-preference){
-      .pcb-verify.is-in{ animation: pcbPulse 520ms cubic-bezier(0.22,1,0.36,1) 1; }
-      @keyframes pcbPulse{0%{transform:scale(.96);opacity:.9}60%{transform:scale(1.02)}100%{transform:scale(1);opacity:1}}
-      .pcb-imgframe{ position:relative; overflow:hidden; }
-      .pcb-imgframe.is-in::after{
-        content:""; position:absolute; inset:0 -40%;
-        transform:translateX(-120%); background:linear-gradient(90deg, transparent, rgba(255,255,255,.35), transparent);
-        animation: pcbSheen 700ms cubic-bezier(0.22,1,0.36,1) 1; border-radius:var(--nx-radius-md);
-      }
-      @keyframes pcbSheen{ to{ transform:translateX(120%);} }
-    }
-    @media (prefers-reduced-motion:reduce){
-      .pcb-imgframe{transition:none}
-      .pcb-imgframe:hover{transform:none}
-    }
-  </style>
-
-  <div class="pcb-container">
-    <!-- Header -->
-    <div class="pcb-head">
-      <h2 class="pcb-title">{{ section.settings.heading | default: 'Certificate(s) of Analysis (COA)' }}</h2>
-      <span class="pcb-verify" data-pcb-verify>
+<section id="pep-coa-band" {% render 'section-attr' %}>
+  <xo-container>
+    <div class="pcb__head">
+      <h2 class="pcb__title">{{ section.settings.heading | default: 'Certificate(s) of Analysis (COA)' }}</h2>
+      <span class="pcb__verify">
         <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9.5 12.5l2 2 4-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         {% case coa_status %}
-          {% when 'superseded' %}
-            Superseded COA
-          {% when 'pending' %}
-            COA pending
+          {% when 'superseded' %}Superseded COA
+          {% when 'pending' %}COA pending
           {% else %}
-            {% if is_third_party %}
-              Verified (independent lab)
-            {% else %}
-              Supplier COA
-            {% endif %}
+            {% if is_third_party %}Verified (independent lab){% else %}Supplier COA{% endif %}
         {% endcase %}
       </span>
       {% if verified_on_mf %}
-        <span class="pcb-meta">
+        <span class="pcb__meta">
           {% if verified_on_mf contains '-' or verified_on_mf contains '/' %}
             Last verified: {{ verified_on_mf | date: "%b %-d, %Y" }}
           {% else %}
@@ -318,31 +356,21 @@ Supplier-only docs => no images, only downloads / archive.
           {% endif %}
         </span>
       {% elsif coa_assay != blank %}
-        <span class="pcb-meta">Assay date: {{ coa_assay }}</span>
+        <span class="pcb__meta">Assay date: {{ coa_assay }}</span>
       {% endif %}
     </div>
 
-    <!-- Card content -->
-    <div class="pcb-card">
-      <div class="pcb-grid">
-        <!-- LEFT: Actions + archive + COA image -->
-        <div class="pcb-col">
-          <div class="pcb-actions">
-            <a class="btn btn--secondary" href="{{ coa_url }}" target="_blank" rel="noopener" aria-label="{{ coa_button_aria }}">
-              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path d="M12 5v14m7-7H5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-              </svg>
-              {{ section.settings.view_coa_label | default: 'View COA' }}
-            </a>
-            <a class="btn btn--secondary" href="{{ coa_url }}" target="_blank" rel="noopener" aria-label="{{ coa_button_aria }}">
-              Open in new tab
-            </a>
+    <div class="pcb__card">
+      <div class="pcb__grid">
+        <div class="pcb__col">
+          <div class="pcb__actions">
+            {% render 'button', text: section.settings.view_coa_label, link: coa_url, style: 'secondary', open_in_new_tab: true %}
           </div>
 
-          <div class="pcb-archive">
+          <div class="pcb__archive">
             <strong>COA archive</strong>
             {% if archive and archive.size > 0 %}
-              <select class="pcb-select" id="coaa-select">
+              <select class="pcb__select" id="coaa-select-{{ section.id }}">
                 {% for it in archive %}
                   {% assign opt_label = it.label | default: it.kind | default: it.batch_id | default: 'Entry ' | append: forloop.index %}
                   {% assign entry_url = '' %}
@@ -352,10 +380,7 @@ Supplier-only docs => no images, only downloads / archive.
                     {% assign entry_url = it.coa_url %}
                   {% endif %}
                   {% if entry_url != '' %}
-                    <option
-                      value="{{ entry_url | escape }}"
-                      {% if it.verified_on %}data-verified="{{ it.verified_on | escape }}"{% endif %}
-                    >
+                    <option value="{{ entry_url | escape }}" {% if it.verified_on %}data-verified="{{ it.verified_on | escape }}"{% endif %}>
                       {{ opt_label }}
                     </option>
                   {% endif %}
@@ -371,54 +396,41 @@ Supplier-only docs => no images, only downloads / archive.
                   {% assign first_url = first_entry.coa_url %}
                 {% endif %}
               {% endif %}
-
               {% if first_url != '' %}
-                <a
-                  class="btn btn--secondary"
-                  id="coaa-open"
-                  target="_blank"
-                  rel="noopener"
-                  href="{{ first_url }}"
-                  aria-label="Open archived document"
-                >
-                  Download
-                </a>
+                {% render 'button', text: 'Download', link: first_url, style: 'link', open_in_new_tab: true, attrs: 'id="coaa-open-' | append: section.id | append: '"' %}
               {% endif %}
 
-              <span class="pcb-verified" id="coaa-meta"></span>
+              <span class="pcb__verified" id="coaa-meta-{{ section.id }}"></span>
             {% else %}
-              <span class="pcb-verified">No additional archived COAs or supplier docs.</span>
+              <span class="pcb__verified">No additional archived COAs or supplier docs.</span>
             {% endif %}
           </div>
 
           <div>
-            <div class="pcb-sub">COA (image)</div>
+            <div class="pcb__sub">COA (image)</div>
             {% if is_third_party and coa_img %}
-              <a class="pcb-imgframe pcb-equal" href="{{ coa_url }}" target="_blank" rel="noopener">
-                <img class="pcb-img" src="{{ coa_img | image_url: width: 1200 }}" alt="{{ coa_alt }}" width="1200" height="{{ 1200 | divided_by: coa_img.aspect_ratio | round }}" loading="lazy">
+              <a class="pcb__imgframe" href="{{ coa_url }}" target="_blank" rel="noopener">
+                <img class="pcb__img" src="{{ coa_img | image_url: width: 1200 }}" alt="{{ coa_alt }}" width="1200" height="{{ 1200 | divided_by: coa_img.aspect_ratio | round }}" loading="lazy">
               </a>
             {% elsif is_third_party %}
-              <div class="pcb-note">Independent lab COA available, but no image preview uploaded.</div>
+              <div class="pcb__note">Independent lab COA available, but no image preview uploaded.</div>
             {% else %}
-              <div class="pcb-note">
-                Supplier COA is available via the buttons and archive above. No independent lab image is shown.
-              </div>
+              <div class="pcb__note">Supplier COA is available via the buttons and archive above. No independent lab image is shown.</div>
             {% endif %}
           </div>
         </div>
 
-        <!-- RIGHT: HPLC -->
-        <div class="pcb-col">
+        <div class="pcb__col">
           <div>
-            <div class="pcb-sub">HPLC</div>
+            <div class="pcb__sub">HPLC</div>
             {% if is_third_party and hplc_img %}
-              <a class="pcb-imgframe pcb-equal" href="{{ hplc_img | image_url: width: 1800 }}" target="_blank" rel="noopener">
-                <img class="pcb-img" src="{{ hplc_img | image_url: width: 1200 }}" alt="{{ hplc_alt }}" width="1200" height="{{ 1200 | divided_by: hplc_img.aspect_ratio | round }}" loading="lazy">
+              <a class="pcb__imgframe" href="{{ hplc_img | image_url: width: 1800 }}" target="_blank" rel="noopener">
+                <img class="pcb__img" src="{{ hplc_img | image_url: width: 1200 }}" alt="{{ hplc_alt }}" width="1200" height="{{ 1200 | divided_by: hplc_img.aspect_ratio | round }}" loading="lazy">
               </a>
             {% elsif is_third_party %}
-              <div class="pcb-note">No standalone HPLC image attached; see COA document for chromatogram.</div>
+              <div class="pcb__note">No standalone HPLC image attached; see COA document for chromatogram.</div>
             {% else %}
-              <div class="pcb-note">No independent lab HPLC image. See supplier document(s) for assay details.</div>
+              <div class="pcb__note">No independent lab HPLC image. See supplier document(s) for assay details.</div>
             {% endif %}
           </div>
         </div>
@@ -426,70 +438,25 @@ Supplier-only docs => no images, only downloads / archive.
     </div>
 
     {% if purity %}
-      <p class="pcb-verified" style="margin-top:10px;">
+      <p class="pcb__verified" style="margin-top: 1rem;">
         Purity: ≥{{ purity }}% (HPLC-verified)
       </p>
     {% endif %}
-  </div>
+  </xo-container>
 </section>
 
 <script>
-  (function(){
-    var root = document.getElementById('pep-coa-band'); if(!root) return;
-    var frames = Array.from(root.querySelectorAll('.pcb-imgframe.pcb-equal'));
-
-    function equalize(){
-      if (window.innerWidth < 1020) { frames.forEach(function(f){ f.style.height=''; }); return; }
-      frames.forEach(function(f){ f.style.height=''; });
-      var max = 0;
-      frames.forEach(function(f){ max = Math.max(max, f.getBoundingClientRect().height); });
-      if(max > 0){ frames.forEach(function(f){ f.style.height = Math.round(max) + 'px'; }); }
-    }
-
-    frames.forEach(function(f){
-      var img = f.querySelector('img'); if(!img) return;
-      if(img.complete){ equalize(); }
-      else { img.addEventListener('load', equalize, { once:true }); }
-    });
-
-    var to;
-    function onResize(){ clearTimeout(to); to = setTimeout(equalize, 120); }
-    window.addEventListener('resize', onResize, { passive:true });
-    document.addEventListener('DOMContentLoaded', equalize);
-    equalize();
-  })();
-
-  document.addEventListener('DOMContentLoaded', function(){
-    var root = document.getElementById('pep-coa-band'); if(!root) return;
-
-    // Archive select
-    var s = root.querySelector('#coaa-select');
-    if(s){
-      var btn = root.querySelector('#coaa-open');
-      var meta = root.querySelector('#coaa-meta');
-      s.addEventListener('change', function(){
-        if(btn) btn.href = s.value;
-        var v = s.options[s.selectedIndex].getAttribute('data-verified') || '';
-        if(meta) meta.textContent = v ? ('Verified: ' + v) : '';
-      });
-    }
-
-    // Entrance animation
-    try{
-      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        var io = new IntersectionObserver(function(entries){
-          entries.forEach(function(e){
-            if(e.isIntersecting){
-              var v = root.querySelector('[data-pcb-verify]'); if(v) v.classList.add('is-in');
-              root.querySelectorAll('.pcb-imgframe').forEach(function(fr){ fr.classList.add('is-in'); });
-              io.disconnect();
-            }
-          });
-        }, { threshold: 0.35 });
-        io.observe(root);
-      }
-    }catch(e){}
+(function(){
+  var s = document.getElementById('coaa-select-{{ section.id }}');
+  if (!s) return;
+  var btn = document.getElementById('coaa-open-{{ section.id }}');
+  var meta = document.getElementById('coaa-meta-{{ section.id }}');
+  s.addEventListener('change', function(){
+    if (btn) btn.href = s.value;
+    var v = s.options[s.selectedIndex].getAttribute('data-verified') || '';
+    if (meta) meta.textContent = v ? ('Verified: ' + v) : '';
   });
+})();
 </script>
 
 {% endif %}
@@ -497,11 +464,67 @@ Supplier-only docs => no images, only downloads / archive.
 {% schema %}
 {
   "name": "COA band",
+  "tag": "section",
+  "class": "section",
   "settings": [
-    { "type": "range", "id": "max_width", "min": 800, "max": 1600, "step": 10, "unit": "px", "label": "Container max width", "default": 1200 },
-    { "type": "color", "id": "accent_color", "label": "Accent color", "default": "#FBBF24" },
-    { "type": "text", "id": "heading", "label": "Heading", "default": "Certificate(s) of Analysis (COA)" },
-    { "type": "text", "id": "view_coa_label", "label": "COA button label", "default": "View COA" }
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "background-1"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Certificate(s) of Analysis (COA)"
+    },
+    {
+      "type": "text",
+      "id": "view_coa_label",
+      "label": "COA button label",
+      "default": "View COA"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_desktop",
+      "label": "Desktop top padding",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "default": 24,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_desktop",
+      "label": "Desktop bottom padding",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "default": 24,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "label": "Mobile top padding",
+      "min": 0,
+      "max": 60,
+      "step": 4,
+      "default": 20,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mobile",
+      "label": "Mobile bottom padding",
+      "min": 0,
+      "max": 60,
+      "step": 4,
+      "default": 20,
+      "unit": "px"
+    }
   ],
   "presets": [{ "name": "COA band" }]
 }

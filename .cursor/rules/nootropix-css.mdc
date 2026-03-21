@@ -1,0 +1,149 @@
+---
+description: CSS conventions, custom properties, and responsive patterns for the Nootropix Shopify theme
+globs: "assets/**/*.css"
+alwaysApply: false
+---
+
+# CSS Conventions
+
+## Architecture
+
+- Section-specific styles go in `assets/section-{name}.css`
+- Core styles: `assets/styles.css`, `assets/typography.css`, `assets/template-shopify.css`
+- Design tokens are injected into `:root` via adapter snippets (not defined in CSS files directly)
+- No Sass/.scss files — only native `.css` or `.css.liquid`
+
+## Token Adapters
+
+IMPORTANT: All design tokens flow through these adapter snippets in `snippets/`. Never redefine these values in CSS — reference them.
+
+| Adapter | Tokens Provided |
+|---------|----------------|
+| `colors-adapter` | Full color scheme system (40+ tokens per scheme) |
+| `typography-adapter` | Font families, sizes, scales, line heights |
+| `layout-adapter` | Page width, spacing, grid gaps |
+| `radius-variable-adapter` | All border-radius tokens |
+| `buttons-adapter` | Button styling tokens |
+| `inputs-adapter` | Input field tokens |
+| `media-adapter` | Media element tokens |
+| `modal-drawer-adapter` | Modal/drawer tokens |
+| `product-cards-adapter` | Product card tokens |
+| `article-cards-adapter` | Article card tokens |
+| `collection-cards-adapter` | Collection card tokens |
+| `variant-pills-adapter` | Variant pill tokens |
+| `general-js-adapter` | Animation/easing JS config |
+
+## Color Usage
+
+```css
+/* Correct — use CSS variables */
+color: rgba(var(--color-foreground));
+background: rgba(var(--color-accent));
+color: color-mix(in srgb, rgba(var(--color-foreground)) 75%, transparent);
+border-color: color-mix(in srgb, rgba(var(--color-foreground)) 20%, transparent);
+
+/* Wrong — never hardcode */
+color: #1e1e1e;
+background: #fbbf24;
+```
+
+IMPORTANT: Colors are stored as RGB triplets (e.g. `30,30,30`). Always wrap with `rgba()` or use `color-mix()` for opacity.
+
+## Responsive Pattern
+
+Mobile-first with 768px as the primary breakpoint:
+
+```css
+.component {
+  /* mobile styles (default) */
+}
+
+@media (min-width: 768px) {
+  .component {
+    /* desktop styles */
+  }
+}
+
+@media (min-width: 1400px) {
+  .component {
+    /* large desktop styles */
+  }
+}
+```
+
+Full breakpoint set: 576, 740, 768, 992, 1140, 1200, 1400, 1600, 1700, 1800, 1900px.
+
+## Fluid Typography
+
+Use the existing clamp pattern for fluid sizing:
+
+```css
+--size: clamp(
+  min(var(--pfs-min) * 1rem, var(--pfs-max) * 1rem),
+  calc(var(--m) * 100vw + var(--pfs-min) * 1rem - var(--m) * var(--min-viewport) * 1rem),
+  max(var(--pfs-max) * 1rem, var(--pfs-min) * 1rem)
+);
+/* Viewport range: --min-viewport: 40 (400px) to --max-viewport: 120 (1200px) */
+```
+
+## Easing
+
+Use named easing variables defined in `styles.css`:
+
+| Variable | Curve |
+|----------|-------|
+| `--out-soft` | `cubic-bezier(0, 0, .3, 1)` |
+| `--spring` | `cubic-bezier(.27, .79, .45, 1.24)` |
+| `--out-cubic` | `cubic-bezier(.215, .61, .355, 1)` |
+| `--in-out-quart` | `cubic-bezier(.77, 0, .175, 1)` |
+| `--out-quart` | `cubic-bezier(.165, .84, .44, 1)` |
+| `--in-out-sine` | `cubic-bezier(.445, .05, .55, .95)` |
+
+Common transition patterns:
+- Fast: `0.2s ease`
+- Medium: `0.3s ease-in-out`
+- Signature: `0.5s cubic-bezier(.25,.74,.22,.99)`
+
+## Scrollbar Styling
+
+The theme provides custom scrollbar tokens:
+
+```css
+--xo-scrollbar-width: 10px;
+--xo-scrollbar-radius: 5px;
+--xo-scrollbar-thumb-color: color-mix(in srgb, rgba(var(--color-foreground)) 20%, transparent);
+--xo-scrollbar-thumb-color-hover: color-mix(in srgb, rgba(var(--color-foreground)) 40%, transparent);
+--xo-scrollbar-track-color: transparent;
+```
+
+## Section Padding
+
+Sections receive padding via CSS custom properties set by `section-attr.liquid`:
+
+```css
+.xo-section {
+  padding-top: var(--pt_dt);
+  padding-bottom: var(--pb_dt);
+}
+
+@media (max-width: 767px) {
+  .xo-section {
+    padding-top: var(--pt_mb);
+    padding-bottom: var(--pb_mb);
+  }
+}
+```
+
+## Animations and Motion
+
+IMPORTANT: Always wrap entrance animations with reduced-motion media query:
+
+```css
+@media (prefers-reduced-motion: no-preference) {
+  .element {
+    animation: fade-up 0.5s var(--out-soft);
+  }
+}
+```
+
+Available keyframe animations: `shimmer`, `zoom-in`, `xo-loader-1/2/3`, `rotateClockwise`, `rotateCounterclockwise`.

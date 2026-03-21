@@ -1,58 +1,168 @@
-{% comment %}
-  Nootropics 101 — Make-style cards (configurable, desktop-tightened)
-  - Heading size/color, accent, background, radius, padding, title size, header min-height
-  - Icons optional (default hidden)
-  - CTAs aligned bottom across cards
-  - Accessible details/summary and FAQPage JSON-LD
-{% endcomment %}
+{% doc %}
+  @name Nootropics 101
+  @desc FAQ-style explainer section with card grid, accordion Q&A, optional icons, per-card CTAs, disclaimer, and FAQPage JSON-LD.
+{% enddoc %}
 
-<section id="nootropics-101-{{ section.id }}" class="nootropics-101 section noot101--make reveal-up-premium" aria-labelledby="noot101-heading-{{ section.id }}">
-  <div class="page-width">
-    <header class="noot101__header title-wrapper-with-link">
-      <h2 class="noot101__title" id="noot101-heading-{{ section.id }}">{{ section.settings.heading | escape }}</h2>
-      {% if section.settings.subheading != blank %}
-        <p class="noot101__subhead">{{ section.settings.subheading }}</p>
-      {% endif %}
-    </header>
+{%- style -%}
+  .xo-section--{{ section.id }} .noot101__grid xo-grid {
+    --grid-desktop-vertical-spacing: 1.6rem;
+    --grid-desktop-horizontal-spacing: 1.6rem;
+    --grid-mobile-vertical-spacing: 1.2rem;
+    --grid-mobile-horizontal-spacing: 1.2rem;
+  }
+
+  .xo-section--{{ section.id }} .noot101__card {
+    border-radius: var(--general-radius-3);
+    background: rgba(var(--color-background));
+    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 8%, transparent);
+    overflow: hidden;
+    transition: border-color 0.3s var(--out-soft, ease);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  .xo-section--{{ section.id }} .noot101__card:hover,
+  .xo-section--{{ section.id }} .noot101__card[open] {
+    border-color: color-mix(in srgb, rgba(var(--color-accent)) 40%, transparent);
+  }
+
+  .xo-section--{{ section.id }} .noot101__card[open] {
+    background: color-mix(in srgb, rgba(var(--color-accent)) 4%, rgba(var(--color-background)));
+  }
+
+  .xo-section--{{ section.id }} .noot101__summary {
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    padding: 2rem;
+    cursor: pointer;
+    min-height: 44px;
+    transition: background 0.3s var(--out-soft, ease);
+  }
+
+  .xo-section--{{ section.id }} .noot101__summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .xo-section--{{ section.id }} .noot101__summary::after {
+    content: '+';
+    margin-left: auto;
+    font-size: 2rem;
+    line-height: 1;
+    flex-shrink: 0;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 40%, transparent);
+    transition: transform 0.3s var(--out-soft, ease), color 0.3s var(--out-soft, ease);
+  }
+
+  .xo-section--{{ section.id }} .noot101__card[open] .noot101__summary::after {
+    transform: rotate(45deg);
+    color: rgba(var(--color-accent));
+  }
+
+  .xo-section--{{ section.id }} .noot101__question {
+    font-size: calc(var(--font-body-scale, 1) * 1.8rem);
+    line-height: 1.3;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    color: rgba(var(--color-foreground));
+    margin: 0;
+  }
+
+  .xo-section--{{ section.id }} .noot101__icon {
+    width: 3.6rem;
+    height: 3.6rem;
+    border-radius: var(--general-radius-1);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: rgba(var(--color-accent));
+    background: color-mix(in srgb, rgba(var(--color-accent)) 12%, transparent);
+  }
+
+  .xo-section--{{ section.id }} .noot101__answer {
+    padding: 0 2rem 2rem;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 75%, transparent);
+    line-height: 1.6;
+    font-size: calc(var(--font-body-scale, 1) * 1.5rem);
+  }
+
+  .xo-section--{{ section.id }} .noot101__answer p {
+    margin: 0 0 0.75rem;
+  }
+
+  .xo-section--{{ section.id }} .noot101__cta {
+    margin-top: 1.6rem;
+  }
+
+  .xo-section--{{ section.id }} .noot101__disclaimer {
+    margin-top: 2.4rem;
+    padding: 1.6rem 2rem;
+    border-radius: var(--general-radius-4);
+    background: rgba(var(--color-background-2));
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 70%, transparent);
+    line-height: 1.55;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .xo-section--{{ section.id }} .noot101__card,
+    .xo-section--{{ section.id }} .noot101__summary,
+    .xo-section--{{ section.id }} .noot101__summary::after {
+      transition: none;
+    }
+  }
+{%- endstyle -%}
+
+<section {% render 'section-attr' %}>
+  <xo-container>
+    {% render 'section-heading',
+      heading: section.settings.heading,
+      description: section.settings.subheading,
+      heading_tag: 'h2'
+    %}
 
     <div class="noot101__grid">
-      {% for block in section.blocks %}
-        {% assign icon = block.settings.icon %}
-        <article class="noot101__card reveal-child" style="--reveal-idx: {{ forloop.index0 }}" id="{{ block.settings.anchor | default: block.id }}" {{ block.shopify_attributes }}>
-          <details class="noot101__details" {% if block.settings.open_by_default %}open{% endif %}>
-            <summary class="noot101__summary" aria-expanded="{% if block.settings.open_by_default %}true{% else %}false{% endif %}">
-              {% if section.settings.show_icons %}
-                <span class="noot101__icon" aria-hidden="true">
-                  {% case icon %}
-                    {% when 'shield' %}
-                      <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M12 2l8 3v6c0 5-3.4 9.7-8 11-4.6-1.3-8-6-8-11V5l8-3z"/></svg>
-                    {% when 'rocket' %}
-                      <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M12 2c3.9 0 7 3.1 7 7 0 1.8-.7 3.5-2 4.8l-2.3 2.3-4.8-4.8L12 7c.6-.6 1.4-1 2.3-1-1.3-1.3-3-2-4.8-2C6.1 4 3 7.1 3 11v2l3-1 2 2-1 3h2c3.9 0 7.1-3.1 7.1-7 0-.9-.4-1.7-1-2.3z"/></svg>
-                    {% when 'layers' %}
-                      <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M12 3l10 5-10 5L2 8l10-5zm0 9l8.9-4.4L22 10l-10 5-10-5 1.1-2.4L12 12zm0 5l8.9-4.4L22 15l-10 5-10-5 1.1-2.4L12 17z"/></svg>
-                    {% else %}
-                      <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M8.5 3C6.6 3 5 4.6 5 6.5c-1.7.2-3 1.7-3 3.5s1.3 3.3 3 3.5V14c0 2.2 1.8 4 4 4h1v-2H9c-1.1 0-2-.9-2-2v-1h1.5c1.9 0 3.5-1.6 3.5-3.5V4H9C8.8 3.4 8.7 3 8.5 3zm7 0c-.2 0-.3.4-.5 1H13v4.5c0 1.9 1.6 3.5 3.5 3.5H18v1c0 1.1-.9 2-2 2h-1.5v2H15c2.2 0 4-1.8 4-4v-.5c1.7-.2 3-1.7 3-3.5s-1.3-3.3-3-3.5C19 4.6 17.4 3 15.5 3z"/></svg>
-                  {% endcase %}
-                </span>
-              {% endif %}
-              <h3 class="noot101__question h4">{{ block.settings.title | escape }}</h3>
-            </summary>
+      <xo-grid style="--lg: {{ section.settings.columns_desktop }}; --md: 2; --xs: 1;">
+        {% for block in section.blocks %}
+          <article id="{{ block.settings.anchor | default: block.id }}" {{ block.shopify_attributes }}>
+            <details class="noot101__card" {% if block.settings.open_by_default %}open{% endif %}>
+              <summary class="noot101__summary">
+                {% if section.settings.show_icons %}
+                  <span class="noot101__icon" aria-hidden="true">
+                    {% case block.settings.icon %}
+                      {% when 'shield' %}
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 2l8 3v6c0 5-3.4 9.7-8 11-4.6-1.3-8-6-8-11V5l8-3z"/></svg>
+                      {% when 'rocket' %}
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 2c3.9 0 7 3.1 7 7 0 1.8-.7 3.5-2 4.8l-2.3 2.3-4.8-4.8L12 7c.6-.6 1.4-1 2.3-1-1.3-1.3-3-2-4.8-2C6.1 4 3 7.1 3 11v2l3-1 2 2-1 3h2c3.9 0 7.1-3.1 7.1-7 0-.9-.4-1.7-1-2.3z"/></svg>
+                      {% when 'layers' %}
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 3l10 5-10 5L2 8l10-5zm0 9l8.9-4.4L22 10l-10 5-10-5 1.1-2.4L12 12zm0 5l8.9-4.4L22 15l-10 5-10-5 1.1-2.4L12 17z"/></svg>
+                      {% else %}
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M8.5 3C6.6 3 5 4.6 5 6.5c-1.7.2-3 1.7-3 3.5s1.3 3.3 3 3.5V14c0 2.2 1.8 4 4 4h1v-2H9c-1.1 0-2-.9-2-2v-1h1.5c1.9 0 3.5-1.6 3.5-3.5V4H9C8.8 3.4 8.7 3 8.5 3zm7 0c-.2 0-.3.4-.5 1H13v4.5c0 1.9 1.6 3.5 3.5 3.5H18v1c0 1.1-.9 2-2 2h-1.5v2H15c2.2 0 4-1.8 4-4v-.5c1.7-.2 3-1.7 3-3.5s-1.3-3.3-3-3.5C19 4.6 17.4 3 15.5 3z"/></svg>
+                    {% endcase %}
+                  </span>
+                {% endif %}
+                <h3 class="noot101__question">{{ block.settings.title | escape }}</h3>
+              </summary>
 
-            <div class="noot101__answer rte">
-              {{ block.settings.answer }}
+              <div class="noot101__answer rte">
+                {{ block.settings.answer }}
 
-              {% if block.settings.cta_label != blank and block.settings.cta_url != blank %}
-                <p class="noot101__cta">
-                  <a href="{{ block.settings.cta_url }}"
-                     class="noot101__cta-link noot101__cta-link--{{ section.settings.cta_style }} {% if section.settings.cta_style == 'button' %}button button--primary{% else %}link underlined-link{% endif %}">
-                    {{ block.settings.cta_label | escape }}
-                  </a>
-                </p>
-              {% endif %}
-            </div>
-          </details>
-        </article>
-      {% endfor %}
+                {% if block.settings.cta_label != blank and block.settings.cta_url != blank %}
+                  <div class="noot101__cta">
+                    {% render 'button',
+                      text: block.settings.cta_label,
+                      link: block.settings.cta_url,
+                      style: section.settings.cta_style
+                    %}
+                  </div>
+                {% endif %}
+              </div>
+            </details>
+          </article>
+        {% endfor %}
+      </xo-grid>
     </div>
 
     {% if section.settings.show_disclaimer %}
@@ -60,277 +170,26 @@
         <small>{{ section.settings.disclaimer_text }}</small>
       </aside>
     {% endif %}
-  </div>
-
-  {% if section.settings.enable_faq_schema and section.blocks.size > 0 %}
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "FAQPage",
-        "mainEntity": [
-          {% for block in section.blocks %}
-            {
-              "@type": "Question",
-              "name": {{ block.settings.title | json }},
-              "acceptedAnswer": { "@type": "Answer", "text": {{ block.settings.answer | strip_html | json }} }
-            }{% unless forloop.last %},{% endunless %}
-          {% endfor %}
-        ]
-      }
-    </script>
-  {% endif %}
+  </xo-container>
 </section>
 
-<style>
-  /* ====== Config → CSS variables ====== */
-  #nootropics-101-{{ section.id }} {
-    --accent: {{ section.settings.accent_color }};
-    --heading-color: {{ section.settings.heading_color }};
-    --heading-size: {{ section.settings.heading_size }}px; /* legacy fallback, unused */
-    --card-radius: {{ section.settings.card_radius }}px;
-    --card-title-size: {{ section.settings.card_title_size }}px;
-    --card-header-min-h: {{ section.settings.card_header_min_height }}px;
-    --pad: {{ section.settings.card_inner_padding }}px;
-    --summary-gap:
-      {% if section.settings.show_icons %}.75rem{% else %}0{% endif %};
-    --section-bg:
-      {% case section.settings.background %}
-        {% when 'transparent' %} transparent
-        {% when 'subtle' %} #f9fafb
-        {% else %} #fff
-      {% endcase %};
-    --premium-transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-    --premium-shadow: 0 12px 30px rgba(0, 0, 0, 0.06);
-    --premium-shadow-elevated: 0 20px 46px rgba(0, 0, 0, 0.12);
-  }
-
-  /* ====== Section baseline ====== */
-  #nootropics-101-{{ section.id }}.noot101--make {
-    background: var(--section-bg);
-    padding-top: clamp(40px, 5vw, 60px);
-    padding-bottom: clamp(40px, 5vw, 60px);
-  }
-
-  #nootropics-101-{{ section.id }} .noot101__title {
-    color: var(--color-text-main, var(--heading-color));
-    font-size: calc(var(--font-size-h3) * var(--scale-h3, 1));
-    line-height: 1.16;
-    font-weight: 800;
-    letter-spacing: -0.02em;
-    margin: 0 0 8px;
-  }
-  #nootropics-101-{{ section.id }} .noot101__subhead {
-    color: var(--color-text-muted, #4b5563);
-    line-height: 1.58;
-    max-width: 62ch;
-    margin: 0 0 14px;
-  }
-
-  #nootropics-101-{{ section.id }} .noot101__grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: clamp(14px, 2vw, 28px);
-    align-items: stretch;
-  }
-  @media (min-width: 750px) { #nootropics-101-{{ section.id }} .noot101__grid { grid-template-columns: repeat(2, 1fr); } }
-  @media (min-width: 1100px) { #nootropics-101-{{ section.id }} .noot101__grid { grid-template-columns: repeat(4, 1fr); } }
-
-  #nootropics-101-{{ section.id }} .noot101__grid:hover .noot101__card {
-    opacity: 0.62;
-  }
-
-  #nootropics-101-{{ section.id }} .noot101__grid:hover .noot101__card:hover,
-  #nootropics-101-{{ section.id }} .noot101__grid:hover .noot101__card:focus-within {
-    opacity: 1;
-  }
-
-  #nootropics-101-{{ section.id }} .noot101__card {
-    position: relative;
-    border-radius: var(--card-radius);
-    background: rgba(255, 255, 255, 0.72);
-    -webkit-backdrop-filter: blur(12px);
-    backdrop-filter: blur(12px);
-    overflow: hidden;
-    box-shadow: var(--premium-shadow);
-    transition: var(--premium-transition);
-    will-change: transform, box-shadow;
-    display: flex;
-    flex-direction: column;
-  }
-
-  #nootropics-101-{{ section.id }} .noot101__card::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    top: 0;
-    right: 0;
-    height: 3px;
-    border-radius: var(--card-radius) 0 0 var(--card-radius);
-    background: linear-gradient(180deg, var(--accent), color-mix(in srgb, var(--accent) 30%, #fff));
-    opacity: 0;
-    transform: scaleX(.3);
-    transform-origin: left;
-    transition: var(--premium-transition);
-  }
-
-  #nootropics-101-{{ section.id }} .noot101__card:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--premium-shadow-elevated);
-  }
-
-  #nootropics-101-{{ section.id }} .noot101__card:hover::after {
-    opacity: .95;
-    transform: scaleX(1);
-  }
-
-  #nootropics-101-{{ section.id }} .noot101__card:has(.noot101__details[open]) {
-    box-shadow: 0 18px 44px color-mix(in srgb, var(--accent) 16%, transparent), var(--premium-shadow-elevated);
-  }
-  #nootropics-101-{{ section.id }} .noot101__card:has(.noot101__details[open])::after { opacity: 1; transform: scaleX(1); }
-
-  #nootropics-101-{{ section.id }} .noot101__details { display: flex; flex-direction: column; height: 100%; }
-
-  #nootropics-101-{{ section.id }} .noot101__summary {
-    list-style: none;
-    display: flex;
-    align-items: center;
-    gap: var(--summary-gap);
-    padding: calc(var(--pad) - 2px) var(--pad) 6px var(--pad);
-    cursor: pointer;
-    min-height: var(--card-header-min-h);
-    transition: var(--premium-transition);
-  }
-
-  #nootropics-101-{{ section.id }} .noot101__details[open] .noot101__summary {
-    box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.5);
-    background: color-mix(in srgb, #fff 88%, var(--accent));
-  }
-
-  #nootropics-101-{{ section.id }} .noot101__question {
-    font-size: var(--card-title-size);
-    line-height: 1.2;
-    font-weight: 700;
-    letter-spacing: -0.015em;
-    color: var(--color-text-main, #111827);
-    margin: 0;
-  }
-
-  #nootropics-101-{{ section.id }} .noot101__icon {
-    width: 36px;
-    height: 36px;
-    border-radius: 10px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    color: color-mix(in srgb, var(--accent) 60%, #7a6900);
-    background: color-mix(in srgb, var(--accent) 12%, rgba(255, 255, 255, 0.72));
-    -webkit-backdrop-filter: blur(12px);
-    backdrop-filter: blur(12px);
-    transition: var(--premium-transition);
-  }
-  #nootropics-101-{{ section.id }} .noot101__details[open] .noot101__icon {
-    background: color-mix(in srgb, var(--accent) 18%, rgba(255, 255, 255, 0.72));
-  }
-
-  #nootropics-101-{{ section.id }} .noot101__answer {
-    padding: 10px var(--pad) calc(var(--pad) + 6px) var(--pad);
-    color: color-mix(in srgb, #26323e 82%, #7f8794);
-    line-height: 1.6;
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-  }
-  #nootropics-101-{{ section.id }} .noot101__answer p { margin: 0 0 .75rem; }
-
-  #nootropics-101-{{ section.id }} .noot101__cta { margin-top: auto; }
-  #nootropics-101-{{ section.id }} .noot101__cta-link {
-    font-weight: 700;
-    text-underline-offset: 3px;
-    transition: var(--premium-transition);
-  }
-  #nootropics-101-{{ section.id }} .noot101__cta-link--button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 44px;
-    padding: 0.7rem 1.3rem;
-    border: 1px solid var(--accent);
-    border-radius: 999px;
-    color: var(--accent) !important;
-    background: transparent !important;
-  }
-  #nootropics-101-{{ section.id }} .noot101__cta-link--button:hover {
-    color: var(--color-text-primary) !important;
-    background: var(--accent) !important;
-    transform: translateY(-2px) scale(0.98);
-  }
-
-  #nootropics-101-{{ section.id }} .noot101__disclaimer {
-    margin-top: clamp(12px, 1.5vw, 16px);
-    padding: 12px 14px;
-    border-radius: 12px;
-    background:
-      {% if section.settings.background == 'white' %}
-        #f7fafc
-      {% elsif section.settings.background == 'subtle' %}
-        #eef3f7
-      {% else %}
-        #f7fafc
-      {% endif %};
-    color: #334155;
-    box-shadow: var(--premium-shadow);
-    -webkit-backdrop-filter: blur(12px);
-    backdrop-filter: blur(12px);
-    line-height: 1.55;
-  }
-
-  #nootropics-101-{{ section.id }} .noot101__summary::-webkit-details-marker { display: none; }
-  #nootropics-101-{{ section.id }} .noot101__summary:after { content: '+'; margin-left: auto; transition: var(--premium-transition); }
-  #nootropics-101-{{ section.id }} .noot101__details[open] .noot101__summary:after { transform: rotate(45deg); }
-
-  /* Mobile refinements: tighter grid, breathing room */
-  @media (max-width: 749px) {
-    #nootropics-101-{{ section.id }} .noot101__grid { gap: 12px; }
-    #nootropics-101-{{ section.id }} .noot101__question { font-size: calc(var(--card-title-size) * 0.78); }
-    #nootropics-101-{{ section.id }} .noot101__answer { font-size: 0.95rem; }
-    #nootropics-101-{{ section.id }} .noot101__summary { min-height: var(--touch-min, 44px); padding: 14px 16px 8px 16px; }
-  }
-
-  /* Smooth answer open/close via grid transition */
-  #nootropics-101-{{ section.id }} .noot101__answer {
-    display: grid;
-    grid-template-rows: 1fr;
-    transition: grid-template-rows 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
-  }
-  #nootropics-101-{{ section.id }} .noot101__details:not([open]) .noot101__answer {
-    grid-template-rows: 0fr;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    #nootropics-101-{{ section.id }} .noot101__card,
-    #nootropics-101-{{ section.id }} .noot101__card::after,
-    #nootropics-101-{{ section.id }} .noot101__summary,
-    #nootropics-101-{{ section.id }} .noot101__summary:after,
-    #nootropics-101-{{ section.id }} .noot101__cta-link,
-    #nootropics-101-{{ section.id }} .noot101__answer,
-    #nootropics-101-{{ section.id }} .noot101__icon { transition: none; }
-  }
-</style>
-
-<script>
-  /* Toggle aria-expanded on details/summary for screen readers */
-  (function() {
-    var section = document.getElementById('nootropics-101-{{ section.id }}');
-    if (!section) return;
-    section.querySelectorAll('.noot101__details').forEach(function(d) {
-      var s = d.querySelector('.noot101__summary');
-      if (!s) return;
-      d.addEventListener('toggle', function() {
-        s.setAttribute('aria-expanded', d.open ? 'true' : 'false');
-      });
-    });
-  })();
-</script>
+{% if section.settings.enable_faq_schema and section.blocks.size > 0 %}
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {% for block in section.blocks %}
+          {
+            "@type": "Question",
+            "name": {{ block.settings.title | json }},
+            "acceptedAnswer": { "@type": "Answer", "text": {{ block.settings.answer | strip_html | json }} }
+          }{% unless forloop.last %},{% endunless %}
+        {% endfor %}
+      ]
+    }
+  </script>
+{% endif %}
 
 {% schema %}
 {
@@ -338,31 +197,39 @@
   "tag": "section",
   "class": "section",
   "settings": [
-    { "type": "text", "id": "heading", "label": "Heading", "default": "Nootropics 101" },
-    { "type": "textarea", "id": "subheading", "label": "Subheading", "default": "Short, clear answers to the questions people ask most—written in plain language and backed by our testing standards." },
-
-    { "type": "color", "id": "heading_color", "label": "Heading color", "default": "#1F2937" },
-    { "type": "range", "id": "heading_size", "label": "Heading size (px)", "min": 26, "max": 44, "step": 1, "default": 36 },
-
-    { "type": "color", "id": "accent_color", "label": "Accent color", "default": "#FFD400" },
     {
-      "type": "select",
-      "id": "background",
-      "label": "Section background",
-      "default": "white",
-      "options": [
-        { "value": "white", "label": "White" },
-        { "value": "subtle", "label": "Subtle gray" },
-        { "value": "transparent", "label": "Transparent (inherit page)" }
-      ]
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Nootropics 101"
     },
-    { "type": "range", "id": "card_radius", "label": "Card corner radius (px)", "min": 8, "max": 22, "step": 1, "default": 16 },
-
-    { "type": "checkbox", "id": "show_icons", "label": "Show icons in card headers", "default": false },
-    { "type": "range", "id": "card_title_size", "label": "Card title size (px)", "min": 22, "max": 40, "step": 1, "default": 32 },
-    { "type": "range", "id": "card_header_min_height", "label": "Card header min height (px)", "min": 60, "max": 120, "step": 2, "default": 84 },
-    { "type": "range", "id": "card_inner_padding", "label": "Card inner padding (px)", "min": 12, "max": 28, "step": 1, "default": 18 },
-
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Short, clear answers to the questions people ask most—written in plain language and backed by our testing standards."
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "background-1"
+    },
+    {
+      "type": "range",
+      "id": "columns_desktop",
+      "label": "Desktop columns",
+      "min": 2,
+      "max": 4,
+      "step": 1,
+      "default": 4
+    },
+    {
+      "type": "checkbox",
+      "id": "show_icons",
+      "label": "Show icons in card headers",
+      "default": false
+    },
     {
       "type": "select",
       "id": "cta_style",
@@ -370,33 +237,132 @@
       "default": "link",
       "options": [
         { "value": "link", "label": "Text link" },
-        { "value": "button", "label": "Button (primary)" }
+        { "value": "secondary", "label": "Button (secondary)" }
       ]
     },
-
-    { "type": "checkbox", "id": "show_disclaimer", "label": "Show compliance disclaimer", "default": true },
-    { "type": "richtext", "id": "disclaimer_text", "label": "Disclaimer text", "default": "<p>This content is for educational purposes only and is not a substitute for professional medical advice. Consult a qualified healthcare professional before use, especially if you take medication, are pregnant or nursing, or have a medical condition.</p>" },
-    { "type": "checkbox", "id": "enable_faq_schema", "label": "Output FAQ schema (JSON-LD)", "default": true }
+    {
+      "type": "checkbox",
+      "id": "show_disclaimer",
+      "label": "Show compliance disclaimer",
+      "default": true
+    },
+    {
+      "type": "richtext",
+      "id": "disclaimer_text",
+      "label": "Disclaimer text",
+      "default": "<p>This content is for educational purposes only and is not a substitute for professional medical advice. Consult a qualified healthcare professional before use, especially if you take medication, are pregnant or nursing, or have a medical condition.</p>"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_faq_schema",
+      "label": "Output FAQ schema (JSON-LD)",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "padding_top_desktop",
+      "label": "Desktop top padding",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "default": 60,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_desktop",
+      "label": "Desktop bottom padding",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "default": 60,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "label": "Mobile top padding",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "default": 40,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mobile",
+      "label": "Mobile bottom padding",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "default": 40,
+      "unit": "px"
+    }
   ],
   "blocks": [
     {
       "type": "qa",
       "name": "Q&A card",
       "settings": [
-        { "type": "text", "id": "title", "label": "Question / Card title", "default": "What are nootropics?" },
-        { "type": "richtext", "id": "answer", "label": "Answer (120–180 words)", "default": "<p>Nootropics are nutrients, plant extracts and synthetics that support aspects of cognition such as focus, attention, memory, motivation and stress resilience. They are not a single drug class. Common groups include cholinergics (for example Alpha-GPC and CDP-Choline), amino acids (L-Theanine, N-Acetyl-L-Tyrosine), adaptogens (Rhodiola, Lion’s Mane) and racetams. As with any supplement, quality and dosing matter. Look for products made in cGMP facilities with third-party testing to verify identity, potency and purity. Results vary by individual and goal, and no product is a substitute for sleep, nutrition, hydration and movement. If you are new, start with one simple, well-studied ingredient and evaluate how you feel over a couple of weeks before adding anything else.</p>" },
-        { "type": "select", "id": "icon", "label": "Icon (only used if icons enabled)", "default": "brain", "options": [
-          { "value": "brain", "label": "Brain" }, { "value": "shield", "label": "Shield" }, { "value": "rocket", "label": "Rocket" }, { "value": "layers", "label": "Layers" }
-        ]},
-        { "type": "checkbox", "id": "open_by_default", "label": "Open by default", "default": true },
-        { "type": "text", "id": "cta_label", "label": "CTA label", "default": "Read the beginner’s guide" },
-        { "type": "url", "id": "cta_url", "label": "CTA link" },
-        { "type": "text", "id": "anchor", "label": "Anchor ID (optional)" }
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Question / Card title",
+          "default": "What are nootropics?"
+        },
+        {
+          "type": "richtext",
+          "id": "answer",
+          "label": "Answer (120–180 words)",
+          "default": "<p>Nootropics are nutrients, plant extracts and synthetics that support aspects of cognition such as focus, attention, memory, motivation and stress resilience. They are not a single drug class. Common groups include cholinergics (for example Alpha-GPC and CDP-Choline), amino acids (L-Theanine, N-Acetyl-L-Tyrosine), adaptogens (Rhodiola, Lion's Mane) and racetams. As with any supplement, quality and dosing matter. Look for products made in cGMP facilities with third-party testing to verify identity, potency and purity. Results vary by individual and goal, and no product is a substitute for sleep, nutrition, hydration and movement. If you are new, start with one simple, well-studied ingredient and evaluate how you feel over a couple of weeks before adding anything else.</p>"
+        },
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "Icon (only used if icons enabled)",
+          "default": "brain",
+          "options": [
+            { "value": "brain", "label": "Brain" },
+            { "value": "shield", "label": "Shield" },
+            { "value": "rocket", "label": "Rocket" },
+            { "value": "layers", "label": "Layers" }
+          ]
+        },
+        {
+          "type": "checkbox",
+          "id": "open_by_default",
+          "label": "Open by default",
+          "default": true
+        },
+        {
+          "type": "text",
+          "id": "cta_label",
+          "label": "CTA label",
+          "default": "Read the beginner's guide"
+        },
+        {
+          "type": "url",
+          "id": "cta_url",
+          "label": "CTA link"
+        },
+        {
+          "type": "text",
+          "id": "anchor",
+          "label": "Anchor ID (optional)"
+        }
       ]
     }
   ],
   "presets": [
-    { "name": "Nootropics 101 (Explainer)", "blocks": [ { "type": "qa" }, { "type": "qa" }, { "type": "qa" }, { "type": "qa" } ] }
+    {
+      "name": "Nootropics 101 (Explainer)",
+      "blocks": [
+        { "type": "qa" },
+        { "type": "qa" },
+        { "type": "qa" },
+        { "type": "qa" }
+      ]
+    }
   ]
 }
 {% endschema %}

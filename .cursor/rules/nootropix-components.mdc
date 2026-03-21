@@ -1,0 +1,163 @@
+---
+description: Component architecture, web components, accessibility, and structural patterns for the Nootropix Shopify Liquid theme
+globs: "**/*.liquid"
+alwaysApply: false
+---
+
+# Component Patterns
+
+## Naming Convention
+
+Use `xo-` prefixed BEM: `xo-{block}__{element}--{modifier}`
+
+Examples: `xo-product-card__header`, `xo-btn--primary`, `xo-price--larger`
+
+Newer custom sections may use inline scoped `<style>` blocks with shorter BEM-ish classes (e.g. `t-chip`, `btn--ghost`), scoped by section ID: `#section-{{ section.id }} .class`.
+
+## Web Components
+
+All interactivity uses custom elements with `xo-` prefix and attribute-based config:
+
+| Component | Element | Key Attributes |
+|-----------|---------|---------------|
+| Container | `<xo-container>` | — |
+| Grid | `<xo-grid>` | `--lg`, `--md`, `--xs` column CSS vars |
+| Carousel | `<xo-carousel>` | `xo-per-view`, `xo-per-move`, `xo-loop`, `xo-autoplay`, `xo-breakpoints` (JSON) |
+| Modal | `<xo-modal>` + `<xo-modal-trigger>` | `xo-name` |
+| Collapse | `<xo-collapse>` + `<xo-collapse-trigger>` | named instances |
+| Tabs | `<xo-tabs>` + `<xo-tabs-trigger>` + `<xo-tabs-pane>` | `xo-name` |
+| Tooltip | `<xo-tooltip>` | `xo-title`, `xo-placement` |
+| Toast | `<xo-toast>` | type: `success` / `warning` / `error` |
+| Animation | `<xo-animate>` + `<xo-animate-item>` | `xo-cascade`, `xo-duration`, `xo-order`, `xo-type` |
+| Lazy image | `<xo-lazyload>` | `is: wc` attribute |
+| Video | `<xo-video-custom>` / `<xo-video-cover>` | poster, autoplay |
+| Product | `<xo-product>` | variant/product/section IDs |
+| Cart add | `<xo-cart-add>` | disables when unavailable |
+| Quantity | `<xo-cart-quantity>` + `<xo-cart-quantity-minus/plus>` | min/max/step |
+
+IMPORTANT: Reuse these existing web components instead of writing new JavaScript. Only create new JS when no existing component covers the use case.
+
+## Button System
+
+Render via `{% render 'button' %}` snippet. Three style variants:
+
+- **primary**: gold bg, dark text, pill-shaped (`--button-radius: 10rem`)
+- **secondary**: transparent bg, dark text/border, pill-shaped
+- **link**: text-only, no background
+
+Parameters: `style`, `size`, `link`, `text`, `icon`, `icon_position`
+
+Effects: `slide-up` (hover text animation), loading spinner. Icon support via `xo-btn__icon`.
+
+Icon-only buttons: `{% render 'button-icon' %}` with sizes `sm`/`md`/`lg`, types `boxed`/`circle`, effects `fill`/`rotate`/`slide-up`.
+
+## Section Structure
+
+Every section MUST use `{% render 'section-attr' %}` for standardized padding and color scheme:
+
+```liquid
+<section {% render 'section-attr', section: section %}>
+  <xo-container>
+    ...content...
+  </xo-container>
+</section>
+```
+
+This outputs: `class="xo-section color-{{ scheme }}"` plus CSS vars `--pt_dt`, `--pb_dt`, `--pt_mb`, `--pb_mb`, `--bg-color`, `--bg-gradient`.
+
+Sections MUST include a `{% schema %}` tag defining name, settings, blocks, and presets.
+
+## Blocks
+
+Theme blocks live in `/blocks/` as standalone `.liquid` files. They are reusable across multiple sections.
+
+- Reusable cross-section blocks → `blocks/{name}.liquid` with `{% schema %}` and `{% doc %}` tags
+- Section-specific blocks → defined within the section's `{% schema %}` tag
+- IMPORTANT: Support `@app` blocks in sections where merchants benefit from app extensions (product pages, cart, featured collections)
+- Don't make blocks too granular — group related settings (e.g. author + date + comments = one block)
+
+```liquid
+{% schema %}
+{
+  "name": "Section Name",
+  "blocks": [
+    { "type": "@theme" },
+    { "type": "@app" }
+  ]
+}
+{% endschema %}
+```
+
+## Grid Usage
+
+```liquid
+<xo-grid style="--lg: 4; --md: 2; --xs: 1;">
+  ...grid items...
+</xo-grid>
+```
+
+Column vars: `--xl`, `--lg`, `--md`, `--xs`. Gap vars: `--grid-desktop-*-spacing`, `--grid-mobile-*-spacing`.
+
+## Stack Layout
+
+```liquid
+<div class='xo-stack' style='--ai: center; --jc: space-between; --gap: 20; --dir: column'>
+```
+
+## Icons
+
+Use `{% render 'icon', name: 'arrow-right', size: '2.4rem', color: 'currentColor' %}`.
+
+116 inline SVG icons available via the central dispatcher `snippets/icon.liquid`. RTL auto-flips directional icons for Arabic/Farsi/Hebrew/Urdu.
+
+IMPORTANT: Do not install icon packages or use icon fonts. All icons are inline SVG snippets. Add new icons as `snippets/icon-{name}.liquid` and register in `snippets/icon.liquid`.
+
+## Images
+
+Use `{% render 'image' %}` snippet for all images:
+
+- Lazy loading via `<xo-lazyload>` with shimmer skeleton placeholder
+- Eager loading for above-fold content: `loading="eager"` + `fetchpriority="high"`
+- Aspect ratio via `--xo-ratio-percent` CSS variable
+- Focal point via `--x-pos` / `--y-pos`
+- Product images: `{% render 'product-image' %}` with hover secondary image swap
+
+## Price
+
+Use `{% render 'price' %}` for all pricing. Handles regular/sale price, compare-at, currency codes, and unit pricing. Modifier `xo-price--larger` for PDP.
+
+## Accessibility (Shopify Required)
+
+IMPORTANT: These are mandatory for Shopify theme compliance.
+
+### Images and Media
+- All images MUST include the `alt` attribute — use `image.alt` or pass an `alt` parameter
+- Decorative images use `alt=""` and `tabindex="-1"`
+
+### Forms
+- Form inputs MUST have a unique `id` with a matching `<label for="...">` attribute
+- Group related form fields with `<fieldset>` and `<legend>` where appropriate
+
+### Color Contrast
+- Text contrast: minimum 4.5:1 for body text, 3:1 for text larger than 18px
+- Non-text elements (borders, icons): minimum 3:1 contrast ratio
+- IMPORTANT: When using opacity-reduced text (`--font-body-color-opacity: 0.75`), verify the effective contrast still passes
+
+### Interactive Elements
+- Use `{% render 'visually-hidden' %}` for screen-reader-only text (e.g. price labels)
+- Add `aria-label` on all icon-only buttons and interactive custom elements
+- Add `role="button"` + `tabindex="0"` on clickable custom elements that aren't `<button>` or `<a>`
+- Focus order must match DOM order (top-to-bottom, left-to-right)
+- Visible focus indicator on all interactive elements — use `focus-inset` class
+
+### Touch Targets
+- Minimum touch target size: 24x24 CSS pixels for pointer inputs
+- Ensure adequate spacing between adjacent interactive elements on mobile
+
+### Semantic HTML
+- Use semantic elements: `<nav>`, `<main>`, `<section>`, `<article>`, `<header>`, `<footer>`
+- Headings h1–h6 must follow logical hierarchy (no skipping levels)
+- Use `<button>` for actions, `<a>` for navigation — not the reverse
+
+### Reduced Motion
+- IMPORTANT: Wrap entrance animations with `@media (prefers-reduced-motion: no-preference)` or respect the user preference in JS

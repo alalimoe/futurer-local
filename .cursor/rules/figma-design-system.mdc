@@ -1,0 +1,128 @@
+---
+description: Rules for implementing Figma designs into the Nootropix Shopify theme using the Figma MCP server
+globs: ["sections/**/*.liquid", "snippets/**/*.liquid", "blocks/**/*.liquid", "assets/**/*.css"]
+alwaysApply: false
+---
+
+# Figma-to-Code Workflow
+
+## Required Flow (do not skip)
+
+1. Run `get_design_context` first to fetch the structured representation for the exact Figma node(s)
+2. If the response is too large or truncated, run `get_metadata` for the high-level node map, then re-fetch only the required node(s)
+3. Run `get_screenshot` for a visual reference of the node variant being implemented
+4. Only after you have both design context and screenshot, download any needed assets and start implementation
+5. Translate the output (React + Tailwind) into Liquid + CSS following Nootropix conventions
+6. Validate against the Figma screenshot for 1:1 visual parity before marking complete
+
+## Translation Rules
+
+IMPORTANT: Figma MCP returns React + Tailwind — this must be translated to Liquid templates + CSS custom properties.
+
+### Colors
+- Map all Figma colors to `--color-*` CSS variables from the theme's color adapter
+- Never hardcode hex values — use `rgba(var(--color-*))` or `color-mix()`
+- If a Figma color has no matching token, check all 6 color schemes before creating a new one
+
+### Typography
+- Map Figma text to the heading scale (`--font-heading-*-scale`) or body vars
+- Use Inter font family — do not introduce new fonts
+- Apply tight negative `letter-spacing` on headings as the theme does
+
+### Spacing
+- Map Figma spacing to grid gap vars (`--grid-desktop-*-spacing`) or `--page-gap`
+- Use section padding vars (`--pt_dt`, `--pb_dt`, `--pt_mb`, `--pb_mb`) for vertical rhythm
+- Container width: `--page-width` (1600px max)
+
+### Border Radius
+- Map Figma corner radius to `--*-radius` tokens from `radius-variable-adapter`
+- Buttons: `--button-radius: 10rem` (pill)
+- Cards: `--product-card-radius: 2.8rem`, `--collection-card-radius: 2rem`
+- General: `--general-radius-1` (10px), `--general-radius-2` (15px), `--general-radius-3` (20px), `--general-radius-4` (6px)
+
+### Layout
+- Use `<xo-container>` for page-width containers
+- Use `<xo-grid>` with `--lg`, `--md`, `--xs` column vars for grids
+- Use `xo-stack` with `--ai`, `--jc`, `--gap`, `--dir` for flex layouts
+- Use `<xo-animate>` for scroll-triggered entrance animations
+
+### Components
+IMPORTANT: Reuse existing snippets before creating new ones:
+
+| Need | Use |
+|------|-----|
+| Buttons | `{% render 'button' %}` or `{% render 'button-icon' %}` |
+| Icons | `{% render 'icon', name: '...', size: '...', color: '...' %}` |
+| Images | `{% render 'image' %}` or `{% render 'product-image' %}` |
+| Pricing | `{% render 'price' %}` |
+| Badges | `{% render 'badge-sale' %}`, `{% render 'badge-new' %}`, `{% render 'badge-sold-out' %}` |
+| Headings | `{% render 'section-heading' %}` |
+| Collapse | `<xo-collapse>` + `<xo-collapse-trigger>` |
+| Carousel | `<xo-carousel>` with sub-components |
+| Modal | `<xo-modal>` + `<xo-modal-trigger>` |
+| Tabs | `<xo-tabs>` + sub-components |
+| Tooltips | `<xo-tooltip>` |
+
+## Component Placement
+
+| Type | Location | Naming |
+|------|----------|--------|
+| New sections | `sections/{name}.liquid` | Descriptive, lowercase, hyphenated |
+| New reusable partials | `snippets/{name}.liquid` | Descriptive, lowercase, hyphenated |
+| New cross-section blocks | `blocks/{name}.liquid` | With `{% schema %}` and `{% doc %}` tags |
+| Section CSS | `assets/section-{name}.css` | Matches section filename |
+
+## Section Boilerplate
+
+New sections must follow this structure:
+
+```liquid
+{{ 'section-{name}.css' | asset_url | stylesheet_tag }}
+
+<section {% render 'section-attr', section: section %}>
+  <xo-container>
+    {%- for block in section.blocks -%}
+      {%- case block.type -%}
+        {%- when '@app' -%}
+          {% render block %}
+        {%- when 'heading' -%}
+          ...
+      {%- endcase -%}
+    {%- endfor -%}
+  </xo-container>
+</section>
+
+{% schema %}
+{
+  "name": "Section Name",
+  "settings": [...],
+  "blocks": [
+    { "type": "@theme" },
+    { "type": "@app" }
+  ],
+  "presets": [
+    { "name": "Section Name" }
+  ]
+}
+{% endschema %}
+```
+
+## Asset Handling
+
+- IMPORTANT: If the Figma MCP server returns a localhost source for an image or SVG, use that source directly
+- IMPORTANT: DO NOT import or add new icon packages — all icons are inline SVG snippets
+- IMPORTANT: DO NOT use or create placeholders if a localhost source is provided
+- Store downloaded image assets in `assets/`
+- New icons: create `snippets/icon-{name}.liquid` and register the name in `snippets/icon.liquid`
+
+## Accessibility Checklist (per component)
+
+Before marking a Figma implementation as complete, verify:
+
+- [ ] All images have `alt` attributes
+- [ ] Interactive elements have `aria-label` where text isn't visible
+- [ ] Buttons use `<button>` or `<a>`, not `<div>` with click handlers
+- [ ] Color contrast passes 4.5:1 for body text, 3:1 for large text
+- [ ] Touch targets are at least 24x24 CSS pixels
+- [ ] Focus order matches visual layout order
+- [ ] Animations respect `prefers-reduced-motion`

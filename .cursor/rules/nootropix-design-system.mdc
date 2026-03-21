@@ -1,0 +1,142 @@
+---
+description: Nootropix design system tokens, brand guidelines, and core principles for the Futurer XO theme
+alwaysApply: true
+---
+
+# Nootropix Design System
+
+## Brand Colors
+
+All colors are CSS custom properties stored as RGB triplets, consumed via `rgba(var(--color-*))` or `color-mix()`.
+
+| Token | Hex | Usage |
+|-------|-----|-------|
+| `--color-accent` | `#fbbf24` | Primary gold — CTAs, links, highlights |
+| `--color-accent-2` | `#f8c500` | Gold alternate |
+| `--color-foreground` | `#1e1e1e` | Body text, headings |
+| `--color-foreground-3` | `#666666` | Muted/secondary text |
+| `--color-background` | `#ffffff` | Page background |
+| `--color-background-2` | `#f6f6f6` | Secondary backgrounds |
+| `--color-error` | `#da1e28` | Errors, sale badges |
+| `--color-success` | `#10a71f` | Success, "new" badges |
+
+IMPORTANT: Never hardcode hex colors. Always use `rgba(var(--color-*))` or `color-mix(in srgb, rgba(var(--color-foreground)) <opacity>, transparent)`.
+
+### Color Schemes
+
+Six schemes defined in `settings_data.json`, all pivoting around amber/gold accent:
+
+- `background-1` — Primary light (white bg, gold accent, dark text)
+- `background-2` — With gradient overlay
+- `inverse` — Light gray bg, inverted text
+- Two custom schemes — Gold-heavy variants
+- `scheme-premium-health` — Green CTA (`#5a9d6f`) on light gray
+
+Apply via class `color-{{ scheme }}` on section containers.
+
+### Button Color Tiers
+
+| Variant | Background | Text | Token prefix |
+|---------|-----------|------|-------------|
+| Primary | `#fbbf24` (gold) | `#1e1e1e` | `--color-button` |
+| Secondary | transparent | `#1e1e1e` | `--color-secondary-button` |
+| Tertiary | `#1e1e1e` | `#ffffff` | `--color-tertiary-button` |
+| Gray | `#eeeeee` | `#1e1e1e` | `--color-gray-button` |
+| Dark | `#1e1e1e` | `#ffffff` | `--color-dark-button` |
+| Light | `#ffffff` | `#1e1e1e` | `--color-light-button` |
+
+### Contrast Check
+
+Body text uses `--font-body-color-opacity: 0.75` which reduces effective contrast. When generating components with opacity-reduced text, verify the result still meets WCAG AA: 4.5:1 for body text, 3:1 for large text (18px+) and non-text elements like borders and icons.
+
+## Typography
+
+- Font: **Inter** for both body (weight 400) and headings (weight 600 / SemiBold)
+- Body: `1.5rem` mobile, `1.6rem` desktop, `0.75` opacity via `--font-body-color-opacity`
+- Headings: large with tight negative `letter-spacing`, line-height `1.3`
+- Fluid sizing via `clamp()` between viewport range 400px–1200px
+
+| Level | Scale | Mobile | Desktop 768px+ | Large 1400px+ |
+|-------|-------|--------|----------------|---------------|
+| H1 | 1.2 | ~53px | ~90px | ~120px |
+| H2 | 1.1 | ~40px | ~66px | ~83px |
+| H3 | 1.05 | ~34px | ~53px | ~63px |
+| H4 | 1.0 | 25px | 42px | 50px |
+| H5 | 1.0 | 24px | 31px | 42px |
+| H6 | 1.0 | 18px | 24px | 31px |
+
+## Spacing
+
+| Token | Value | Usage |
+|-------|-------|-------|
+| `--page-width` | `160rem` (1600px) | Max container width |
+| `--page-gap` | `2.4rem` (24px) | Desktop container side padding |
+| `--page-gap-mobile` | `2.2rem` (22px) | Mobile container side padding |
+| `--spacing-sections` | `28px` | Vertical section spacing |
+| `--grid-desktop-vertical-spacing` | `24px` | Grid row gap (desktop) |
+| `--grid-desktop-horizontal-spacing` | `24px` | Grid column gap (desktop) |
+| `--grid-mobile-vertical-spacing` | `12px` | Grid row gap (mobile) |
+| `--grid-mobile-horizontal-spacing` | `12px` | Grid column gap (mobile) |
+
+Container gaps use fluid `clamp()` for smooth responsive scaling.
+
+## Border Radius
+
+The theme uses a pill-shaped aesthetic for interactive elements and generous rounding on containers.
+
+| Category | Radius | Notes |
+|----------|--------|-------|
+| Buttons / Inputs | `10rem` / `8.6rem` | Fully pill-shaped |
+| Product cards | `2.8rem` (28px) | |
+| Collection cards / Modals / Tooltips / Mega menu | `2rem` (20px) | |
+| Badges | `1.6rem` (16px) | |
+| General large | `2rem` (20px) | |
+| General medium | `1.5rem` (15px) | |
+| General small / Images | `1rem` (10px) | |
+| General XS / Textareas / Add-to-cart | `0.6rem` (6px) | |
+| Tags | `0.5rem` (5px) | |
+| Circles | `50%` | |
+| Article cards / Drawers | `0` | Sharp edges |
+
+## Shadows
+
+All shadows are disabled (opacity: 0). Design is flat — use color contrast and spacing for visual depth, not box-shadows.
+
+## Breakpoints
+
+Primary split: **768px** (mobile ↔ desktop).
+
+| Name | Value | Role |
+|------|-------|------|
+| xs | 576px | Small → large phone |
+| sm | 740px | Large phone → small tablet |
+| **md** | **768px** | **Mobile ↔ Desktop** |
+| lg | 992px | Tablet → laptop |
+| xl | 1140px | Laptop |
+| xxl | 1200px | Desktop |
+| xxxl | 1400px | Large desktop |
+| page-width | 1600px | Max content |
+| ultra | 1700px | Ultra-wide |
+| ultra-2 | 1800px | Ultra-wide 2 |
+| ultra-3 | 1900px | Ultra-wide 3 |
+
+## Animations
+
+- Entrance: `fade-up`, `500ms`, scroll-triggered via `<xo-animate>`
+- Modals: `zoom`, `300ms`, decay easing
+- Drawers: `400ms`, decay easing
+- CSS transitions: fast `0.2s ease`, medium `0.3s ease-in-out`, signature `0.5s cubic-bezier(.25,.74,.22,.99)`
+- Named easings: `--out-soft`, `--spring`, `--out-cubic`, `--in-out-quart` (14 total in `styles.css`)
+- IMPORTANT: Respect `prefers-reduced-motion` in all new animation code
+
+## Performance
+
+IMPORTANT: Shopify's guiding principle is to build primarily with HTML and CSS, using JavaScript only as progressive enhancement.
+
+- Prefer HTML/CSS solutions over JavaScript for new components
+- Reuse existing `xo-*` web components rather than writing new JS from scratch
+- Keep new JS minimal — Shopify auto-minifies, but bundles should stay lean (target <16KB per file)
+- Use `loading="lazy"` on images below the fold; `loading="eager"` + `fetchpriority="high"` only for first viewport
+- No Sass/.scss files — only native `.css` files in `assets/`
+- Avoid third-party frameworks and large utility libraries
+- Wrap JS in function scopes (IIFE) to prevent namespace collisions

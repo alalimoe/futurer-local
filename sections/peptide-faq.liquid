@@ -1,4 +1,8 @@
-{% comment %} Peptide FAQ (clean render + JSON-LD) {% endcomment %}
+{% doc %}
+  @name Peptide FAQ
+  @desc FAQ accordion with JSON-LD structured data. Reads from pdp.faq metafield list, falls back to 6 manual Q&A settings. Uses native details/summary.
+{% enddoc %}
+
 {%- liquid
   assign faq_list = nil
   if product.metafields.pdp.faq and product.metafields.pdp.faq.value
@@ -6,63 +10,120 @@
   endif
 -%}
 
-<section id="peptide-faq-{{ section.id }}" class="pfq-wrap">
-  <style>
-    #peptide-faq-{{ section.id }}{ --bg:var(--color-surface-secondary); --card:var(--color-surface-primary); --r:14px; --txt:var(--color-text-primary); --mut:var(--color-text-secondary); --pfq-accent:var(--nx-accent,var(--color-accent-primary)); }
-    #peptide-faq-{{ section.id }} .pfq-outer{ padding:24px var(--page-gutter); background:var(--bg); border-top:none; font-family:var(--font-body-family,sans-serif); }
-    #peptide-faq-{{ section.id }} .pfq-container{ max-width:{{ section.settings.max_width | default: 1200 }}px; margin:0 auto; }
-    #peptide-faq-{{ section.id }} .pfq-title{ font-family:var(--font-heading-family,sans-serif); font-weight:800; font-size:clamp(1.1rem,2vw,1.35rem); margin:0 0 14px; color:var(--txt); letter-spacing:-0.02em; }
+{%- style -%}
+  .xo-section--{{ section.id }} .pfq__title {
+    font-family: var(--font-heading-family, sans-serif);
+    font-weight: 600;
+    font-size: clamp(1.8rem, 2vw, 2.2rem);
+    margin: 0 0 1.4rem;
+    color: rgba(var(--color-foreground));
+    letter-spacing: -0.02em;
+    line-height: 1.3;
+  }
 
-    #peptide-faq-{{ section.id }} details{ border:none; border-radius:var(--r); background:var(--card); margin-bottom:10px; overflow:hidden; box-shadow:var(--shadow-sm); transition:var(--transition-premium); }
-    #peptide-faq-{{ section.id }} details:hover{ box-shadow:var(--shadow-md-hover); transform:translateY(-1px); }
-    #peptide-faq-{{ section.id }} details[open]{ box-shadow:var(--shadow-md-hover); }
-    #peptide-faq-{{ section.id }} summary{ list-style:none; cursor:pointer; padding:14px 16px; font-family:var(--font-heading-family,sans-serif); font-weight:700; font-size:clamp(0.9rem,1.3vw,1rem); color:var(--txt); display:flex; justify-content:space-between; align-items:center; min-height:44px; gap:12px; transition:background 0.2s ease; }
-    #peptide-faq-{{ section.id }} summary:hover{ background:rgba(0,0,0,0.015); }
-    #peptide-faq-{{ section.id }} summary::-webkit-details-marker{ display:none; }
-    #peptide-faq-{{ section.id }} summary:focus-visible{ outline:2px solid var(--pfq-accent); outline-offset:2px; border-radius:var(--r); }
-    #peptide-faq-{{ section.id }} summary::after{
-      content:''; width:20px; height:20px; flex-shrink:0;
-      background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") no-repeat center;
-      transition:transform 0.3s var(--ease-premium);
+  .xo-section--{{ section.id }} details {
+    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 8%, transparent);
+    border-radius: var(--general-radius-3);
+    background: rgba(var(--color-background));
+    margin-bottom: 1rem;
+    overflow: hidden;
+    transition: border-color 0.2s var(--out-soft, ease);
+  }
+
+  .xo-section--{{ section.id }} details[open] {
+    border-color: color-mix(in srgb, rgba(var(--color-accent)) 30%, transparent);
+  }
+
+  .xo-section--{{ section.id }} summary {
+    list-style: none;
+    cursor: pointer;
+    padding: 1.4rem 1.6rem;
+    font-family: var(--font-heading-family, sans-serif);
+    font-weight: 600;
+    font-size: calc(var(--font-body-scale, 1) * 1.6rem);
+    color: rgba(var(--color-foreground));
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    min-height: 44px;
+    gap: 1.2rem;
+    line-height: 1.3;
+    transition: background 0.2s var(--out-soft, ease);
+  }
+
+  .xo-section--{{ section.id }} summary:hover {
+    background: color-mix(in srgb, rgba(var(--color-foreground)) 2%, transparent);
+  }
+
+  .xo-section--{{ section.id }} summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .xo-section--{{ section.id }} summary:focus-visible {
+    outline: 2px solid rgba(var(--color-accent));
+    outline-offset: 2px;
+    border-radius: var(--general-radius-3);
+  }
+
+  .xo-section--{{ section.id }} summary::after {
+    content: '';
+    width: 2rem;
+    height: 2rem;
+    flex-shrink: 0;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") no-repeat center;
+    transition: transform 0.3s var(--out-soft, ease);
+  }
+
+  .xo-section--{{ section.id }} details[open] summary::after {
+    transform: rotate(180deg);
+  }
+
+  .xo-section--{{ section.id }} .pfq__ans {
+    padding: 0 1.6rem 1.6rem;
+    color: rgba(var(--color-foreground));
+    opacity: 0.85;
+    line-height: 1.6;
+    font-size: calc(var(--font-body-scale, 1) * 1.4rem);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .xo-section--{{ section.id }} details {
+      transition: none;
     }
-    #peptide-faq-{{ section.id }} details[open] summary::after{ transform:rotate(180deg); }
-    #peptide-faq-{{ section.id }} .ans{ padding:0 16px 16px; color:var(--txt); opacity:0.85; line-height:1.6; font-size:clamp(0.85rem,1.2vw,0.9375rem); }
-    @media(prefers-reduced-motion:reduce){
-      #peptide-faq-{{ section.id }} details{transition:none}
-      #peptide-faq-{{ section.id }} details:hover{transform:none}
-      #peptide-faq-{{ section.id }} summary::after{transition:none}
+    .xo-section--{{ section.id }} summary::after {
+      transition: none;
     }
-  </style>
+  }
+{%- endstyle -%}
 
-  <div class="pfq-outer">
-    <div class="pfq-container">
-      <h2 class="pfq-title">{{ section.settings.heading | default: 'Frequently Asked Questions' }}</h2>
+<section {% render 'section-attr' %}>
+  <xo-container>
+    <h2 class="pfq__title">{{ section.settings.heading | default: 'Frequently Asked Questions' }}</h2>
 
-      <div class="pfq-acc">
-        {% if faq_list and faq_list.size > 0 %}
-          {% for f in faq_list %}
-            <details {% if forloop.first %}open{% endif %}>
-              <summary><span>{{ f.question }}</span></summary>
-              <div class="ans">{{ f.answer | metafield_tag }}</div>
+    <div class="pfq__acc">
+      {% if faq_list and faq_list.size > 0 %}
+        {% for f in faq_list %}
+          <details {% if forloop.first %}open{% endif %}>
+            <summary><span>{{ f.question }}</span></summary>
+            <div class="pfq__ans">{{ f.answer | metafield_tag }}</div>
+          </details>
+        {% endfor %}
+      {% else %}
+        {% for i in (1..6) %}
+          {% assign q_key = 'q' | append: i %}
+          {% assign a_key = 'a' | append: i %}
+          {% assign q = section.settings[q_key] %}
+          {% assign a = section.settings[a_key] %}
+          {% if q != blank and a != blank %}
+            <details {% if forloop.index == 1 %}open{% endif %}>
+              <summary><span>{{ q }}</span></summary>
+              <div class="pfq__ans">{{ a }}</div>
             </details>
-          {% endfor %}
-        {% else %}
-          {% for i in (1..6) %}
-            {% assign q_key = 'q' | append: i %}
-            {% assign a_key = 'a' | append: i %}
-            {% assign q = section.settings[q_key] %}
-            {% assign a = section.settings[a_key] %}
-            {% if q != blank and a != blank %}
-              <details {% if forloop.index == 1 %}open{% endif %}>
-                <summary><span>{{ q }}</span></summary>
-                <div class="ans">{{ a }}</div>
-              </details>
-            {% endif %}
-          {% endfor %}
-        {% endif %}
-      </div>
+          {% endif %}
+        {% endfor %}
+      {% endif %}
     </div>
-  </div>
+  </xo-container>
 </section>
 
 {%- capture faq_json -%}
@@ -93,18 +154,79 @@
 
 {% schema %}
 {
-  "name":"Peptide FAQ",
-  "settings":[
-    { "type":"range","id":"max_width","min":800,"max":1600,"step":10,"unit":"px","label":"Container max width","default":1200 },
-    { "type":"text","id":"heading","label":"Heading","default":"Frequently Asked Questions" },
-    { "type":"header","content":"Fallback Q&A (used if no metafield list)"},
-    { "type":"text","id":"q1","label":"Q1" },{ "type":"textarea","id":"a1","label":"A1" },
-    { "type":"text","id":"q2","label":"Q2" },{ "type":"textarea","id":"a2","label":"A2" },
-    { "type":"text","id":"q3","label":"Q3" },{ "type":"textarea","id":"a3","label":"A3" },
-    { "type":"text","id":"q4","label":"Q4" },{ "type":"textarea","id":"a4","label":"A4" },
-    { "type":"text","id":"q5","label":"Q5" },{ "type":"textarea","id":"a5","label":"A5" },
-    { "type":"text","id":"q6","label":"Q6" },{ "type":"textarea","id":"a6","label":"A6" }
+  "name": "Peptide FAQ",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "background-1"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Frequently Asked Questions"
+    },
+    {
+      "type": "header",
+      "content": "Fallback Q&A (used if no metafield list)"
+    },
+    { "type": "text", "id": "q1", "label": "Q1" },
+    { "type": "textarea", "id": "a1", "label": "A1" },
+    { "type": "text", "id": "q2", "label": "Q2" },
+    { "type": "textarea", "id": "a2", "label": "A2" },
+    { "type": "text", "id": "q3", "label": "Q3" },
+    { "type": "textarea", "id": "a3", "label": "A3" },
+    { "type": "text", "id": "q4", "label": "Q4" },
+    { "type": "textarea", "id": "a4", "label": "A4" },
+    { "type": "text", "id": "q5", "label": "Q5" },
+    { "type": "textarea", "id": "a5", "label": "A5" },
+    { "type": "text", "id": "q6", "label": "Q6" },
+    { "type": "textarea", "id": "a6", "label": "A6" },
+    {
+      "type": "range",
+      "id": "padding_top_desktop",
+      "label": "Desktop top padding",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "default": 24,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_desktop",
+      "label": "Desktop bottom padding",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "default": 24,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "label": "Mobile top padding",
+      "min": 0,
+      "max": 60,
+      "step": 4,
+      "default": 20,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mobile",
+      "label": "Mobile bottom padding",
+      "min": 0,
+      "max": 60,
+      "step": 4,
+      "default": 20,
+      "unit": "px"
+    }
   ],
-  "presets":[{"name":"Peptide FAQ"}]
+  "presets": [{ "name": "Peptide FAQ" }]
 }
 {% endschema %}

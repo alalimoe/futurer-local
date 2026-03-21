@@ -1,9 +1,7 @@
-{% comment %}
-SECTION: You might also like — merged Related + Recently viewed
-- Row 1: Related (Shopify recommendations → fallback to primary collection)
-- Row 2: Recently viewed (localStorage np_recent → fallback to primary collection)
-- Shared card design; equal-height visual.
-{% endcomment %}
+{% doc %}
+  @name You Might Also Like
+  @desc Related products (Shopify recommendations API) + recently viewed (localStorage). Server-side fallback from primary collection. JS needed for API calls and localStorage — no theme web component equivalent.
+{% enddoc %}
 
 {%- liquid
   assign primary_collection = collection
@@ -17,8 +15,7 @@ SECTION: You might also like — merged Related + Recently viewed
     assign primary_collection = product.collections.first
   endif
 
-  # server fallback seed
-  assign fallback = '' 
+  assign fallback = ''
   if primary_collection
     assign count = 0
     for p in primary_collection.products
@@ -27,8 +24,8 @@ SECTION: You might also like — merged Related + Recently viewed
         if p.featured_image
           assign img = p.featured_image | image_url: width: 640
         endif
-        assign item = '{"title":' | append: p.title | json | append: ',"url":' | append: p.url | json | append: ',"price":' | append: p.price | json | append: ',"image":' | append: img | json | append: ',"handle":' | append: p.handle | json | append: '}' 
-        if fallback != '' 
+        assign item = '{"title":' | append: p.title | json | append: ',"url":' | append: p.url | json | append: ',"price":' | append: p.price | json | append: ',"image":' | append: img | json | append: ',"handle":' | append: p.handle | json | append: '}'
+        if fallback != ''
           assign fallback = fallback | append: ','
         endif
         assign fallback = fallback | append: item
@@ -41,157 +38,302 @@ SECTION: You might also like — merged Related + Recently viewed
   endif
 -%}
 
-<section id="yml-{{ section.id }}" class="yml-wrap">
-  <style>
-    #yml-{{ section.id }}{
-      --yml-maxw: {{ section.settings.max_width | default: 1200 }}px;
-      --yml-b:#E7E9ED; --yml-bg:#fff; --yml-text:#111; --yml-muted:#6B7280; --yml-accent: {{ section.settings.accent_color | default: '#FBBF24' }};
-      --yml-r:14px; --yml-sh:0 1px 6px rgba(16,24,40,.06);
+{%- style -%}
+  .xo-section--{{ section.id }} .yml__title {
+    font-family: var(--font-heading-family, sans-serif);
+    font-weight: 600;
+    font-size: clamp(1.8rem, 2vw, 2.2rem);
+    margin: 0 0 1.4rem;
+    color: rgba(var(--color-foreground));
+    letter-spacing: -0.02em;
+    line-height: 1.3;
+  }
+
+  .xo-section--{{ section.id }} .yml__row {
+    margin-top: 1.4rem;
+  }
+
+  .xo-section--{{ section.id }} .yml__row h3 {
+    font-family: var(--font-heading-family, sans-serif);
+    margin: 0 0 1rem;
+    font-weight: 600;
+    color: rgba(var(--color-foreground));
+    font-size: clamp(1.6rem, 1.5vw, 1.8rem);
+    letter-spacing: -0.015em;
+    line-height: 1.3;
+  }
+
+  .xo-section--{{ section.id }} .yml__grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1.4rem;
+  }
+
+  @media (max-width: 992px) {
+    .xo-section--{{ section.id }} .yml__grid {
+      grid-template-columns: repeat(3, 1fr);
     }
-    #yml-{{ section.id }} .yml-outer{ padding:24px var(--page-gutter); border-top:none; background:#FAFAFB; font-family:var(--font-body-family,sans-serif); }
-    #yml-{{ section.id }} .yml-container{ max-width:var(--yml-maxw); margin:0 auto; }
-    #yml-{{ section.id }} .yml-title{ font-family:var(--font-heading-family,sans-serif); font-weight:800; font-size:clamp(1.1rem,2vw,1.35rem); margin:0 0 14px; color:var(--yml-text); letter-spacing:-0.02em; }
+  }
 
-    #yml-{{ section.id }} .yml-row{ margin-top:14px; }
-    #yml-{{ section.id }} .yml-row h3{ font-family:var(--font-heading-family,sans-serif); margin:0 0 10px; font-weight:800; color:var(--yml-text); font-size:clamp(1rem,1.5vw,1.125rem); letter-spacing:-0.015em; }
-
-    #yml-{{ section.id }} .yml-grid{ display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px; }
-    @media(max-width:1020px){ #yml-{{ section.id }} .yml-grid{ grid-template-columns:repeat(3,1fr); } }
-    @media(max-width:900px){  #yml-{{ section.id }} .yml-grid{ grid-template-columns:repeat(2,1fr); } }
-
-    #yml-{{ section.id }} .yml-card{
-      display:flex; flex-direction:column; min-height:100%;
-      border:none; border-radius:var(--yml-r); background:var(--yml-bg); padding:14px; box-shadow:var(--shadow-sm);
-      transition: var(--transition-premium);
+  @media (max-width: 768px) {
+    .xo-section--{{ section.id }} .yml__grid {
+      grid-template-columns: repeat(2, 1fr);
     }
-    #yml-{{ section.id }} .yml-card:hover{ box-shadow:var(--shadow-md); transform:translateY(-4px); }
+  }
 
-    #yml-{{ section.id }} .yml-media{ border:none; border-radius:var(--nx-radius-md); overflow:hidden; background:#fff; aspect-ratio:4/3; margin-bottom:10px; }
-    #yml-{{ section.id }} .yml-media img{ width:100%; height:100%; object-fit:cover; display:block; transition:transform 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
-    #yml-{{ section.id }} .yml-card:hover .yml-media img{ transform:scale(1.03); }
+  .xo-section--{{ section.id }} .yml__card {
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 8%, transparent);
+    border-radius: var(--general-radius-3);
+    background: rgba(var(--color-background));
+    padding: 1.4rem;
+    transition: border-color 0.3s var(--out-soft, ease);
+  }
 
-    #yml-{{ section.id }} .yml-name{ font-family:var(--font-heading-family,sans-serif); font-weight:700; font-size:clamp(0.85rem,1.2vw,0.9375rem); color:var(--yml-text); margin:0 0 6px; line-height:1.35; }
-    #yml-{{ section.id }} .yml-price{ font-family:var(--font-heading-family,sans-serif); font-weight:800; color:var(--yml-text); margin:0 0 10px; }
-    #yml-{{ section.id }} .yml-actions{ margin-top:auto; }
+  .xo-section--{{ section.id }} .yml__card:hover {
+    border-color: color-mix(in srgb, rgba(var(--color-accent)) 40%, transparent);
+  }
 
-    #yml-{{ section.id }} .yml-empty{ color:var(--yml-muted); }
-    #yml-{{ section.id }} a{ color:inherit; }
-    #yml-{{ section.id }} .yml-card a:focus-visible{ outline:2px solid var(--yml-accent); outline-offset:2px; border-radius:var(--yml-r); }
-    @media(prefers-reduced-motion:reduce){
-      #yml-{{ section.id }} .yml-card,#yml-{{ section.id }} .yml-media img{transition:none}
-      #yml-{{ section.id }} .yml-card:hover{transform:none}
-      #yml-{{ section.id }} .yml-card:hover .yml-media img{transform:none}
+  .xo-section--{{ section.id }} .yml__media {
+    border: none;
+    border-radius: var(--general-radius-1);
+    overflow: hidden;
+    background: rgba(var(--color-background));
+    aspect-ratio: 4/3;
+    margin-bottom: 1rem;
+    display: block;
+  }
+
+  .xo-section--{{ section.id }} .yml__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .xo-section--{{ section.id }} .yml__name {
+    font-family: var(--font-heading-family, sans-serif);
+    font-weight: 600;
+    font-size: calc(var(--font-body-scale, 1) * 1.4rem);
+    color: rgba(var(--color-foreground));
+    margin: 0 0 0.6rem;
+    line-height: 1.3;
+  }
+
+  .xo-section--{{ section.id }} .yml__price {
+    font-family: var(--font-heading-family, sans-serif);
+    font-weight: 600;
+    color: rgba(var(--color-foreground));
+    margin: 0 0 1rem;
+  }
+
+  .xo-section--{{ section.id }} .yml__actions {
+    margin-top: auto;
+  }
+
+  .xo-section--{{ section.id }} .yml__empty {
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 55%, transparent);
+  }
+
+  .xo-section--{{ section.id }} a {
+    color: inherit;
+  }
+
+  .xo-section--{{ section.id }} .yml__card a:focus-visible {
+    outline: 2px solid rgba(var(--color-accent));
+    outline-offset: 2px;
+    border-radius: var(--general-radius-3);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .xo-section--{{ section.id }} .yml__card {
+      transition: none;
     }
-  </style>
+  }
+{%- endstyle -%}
 
-  <div class="yml-outer">
-    <div class="yml-container">
-      <h2 class="yml-title">{{ section.settings.title | default: 'You might also like' }}</h2>
+<section {% render 'section-attr' %}>
+  <xo-container>
+    <h2 class="yml__title">{{ section.settings.title | default: 'You might also like' }}</h2>
 
-      <div class="yml-row" data-row-related style="display:none">
-        <h3>{{ section.settings.related_label | default: 'Related peptides' }}</h3>
-        <div class="yml-grid" data-rel-grid></div>
-      </div>
-
-      <div class="yml-row" data-row-recent style="display:none">
-        <h3>{{ section.settings.recent_label | default: 'Recently viewed' }}</h3>
-        <div class="yml-grid" data-rv-grid></div>
-      </div>
-
-      <script type="application/json" id="yml-fallback-{{ section.id }}">[{{ fallback }}]</script>
+    <div class="yml__row" data-row-related style="display:none">
+      <h3>{{ section.settings.related_label | default: 'Related peptides' }}</h3>
+      <div class="yml__grid" data-rel-grid></div>
     </div>
-  </div>
+
+    <div class="yml__row" data-row-recent style="display:none">
+      <h3>{{ section.settings.recent_label | default: 'Recently viewed' }}</h3>
+      <div class="yml__grid" data-rv-grid></div>
+    </div>
+
+    <script type="application/json" id="yml-fallback-{{ section.id }}">[{{ fallback }}]</script>
+  </xo-container>
 </section>
 
 <script>
-document.addEventListener('DOMContentLoaded', async function(){
-  const root   = document.getElementById('yml-{{ section.id }}'); if(!root) return;
-  const relRow = root.querySelector('[data-row-related]');
-  const relGrid= root.querySelector('[data-rel-grid]');
-  const rvRow  = root.querySelector('[data-row-recent]');
-  const rvGrid = root.querySelector('[data-rv-grid]');
-  const limit  = {{ section.settings.limit | default: 8 }};
-  const money  = {{ shop.money_format | json }};
-  const fmt = c => (window.Shopify && Shopify.formatMoney) ? Shopify.formatMoney(c, money) : (c/100).toFixed(2);
+(function(){
+  var root = document.querySelector('.xo-section--{{ section.id }}');
+  if (!root) return;
+  var relRow = root.querySelector('[data-row-related]');
+  var relGrid = root.querySelector('[data-rel-grid]');
+  var rvRow = root.querySelector('[data-row-recent]');
+  var rvGrid = root.querySelector('[data-rv-grid]');
+  var limit = {{ section.settings.limit | default: 8 }};
+  var money = {{ shop.money_format | json }};
 
-  function cardHTML(p){
-    const img = p.image || (p.images && p.images[0] && p.images[0].src);
-    const price = p.price || (p.variants && p.variants[0] && p.variants[0].price);
-    const url = p.url || ('/products/' + (p.handle || ''));
-    return `
-      <div class="yml-card">
-        <a class="yml-media" href="${url}">${img ? `<img loading="lazy" src="${img}${img.includes('://') ? '' : '?width=640'}" alt="${p.title || ''}">` : ''}</a>
-        <div class="yml-name">${p.title || ''}</div>
-        <div class="yml-price">${fmt(parseInt(price,10)||0)}</div>
-        <div class="yml-actions"><a class="btn btn--primary" href="${url}">View</a></div>
-      </div>`;
+  function fmt(c) {
+    return (window.Shopify && Shopify.formatMoney) ? Shopify.formatMoney(c, money) : (c / 100).toFixed(2);
   }
 
-  async function loadRelated(){
-    try{
-      const res = await fetch(`/recommendations/products.json?product_id={{ product.id }}&limit=${limit}`, { credentials:'same-origin' });
-      if(!res.ok) throw new Error('no recs');
-      const data = await res.json();
-      const items = (data && data.products) ? data.products : [];
-      if(items.length){
-        relRow.style.display = '';
-        items.forEach(p => relGrid.insertAdjacentHTML('beforeend', cardHTML(p)));
-        return true;
-      }
-      // fallback from server JSON
-      const fb = JSON.parse(document.getElementById('yml-fallback-{{ section.id }}').textContent || '[]');
-      if(fb.length){
-        relRow.style.display = '';
-        fb.slice(0, limit).forEach(p => relGrid.insertAdjacentHTML('beforeend', cardHTML(p)));
-        return true;
-      }
-    }catch(e){}
-    return false;
+  function cardHTML(p) {
+    var img = p.image || (p.images && p.images[0] && p.images[0].src);
+    var price = p.price || (p.variants && p.variants[0] && p.variants[0].price);
+    var url = p.url || ('/products/' + (p.handle || ''));
+    return '<div class="yml__card">' +
+      '<a class="yml__media" href="' + url + '">' + (img ? '<img loading="lazy" src="' + img + (img.indexOf('://') > -1 ? '' : '?width=640') + '" alt="' + (p.title || '') + '">' : '') + '</a>' +
+      '<div class="yml__name">' + (p.title || '') + '</div>' +
+      '<div class="yml__price">' + fmt(parseInt(price, 10) || 0) + '</div>' +
+      '<div class="yml__actions"><a class="xo-button xo-button--primary" href="' + url + '">View</a></div>' +
+      '</div>';
   }
 
-  async function loadRecent(){
-    const key = 'np_recent';
-    const current = {{ product.handle | json }};
-    try{
-      // init history
-      const existing = JSON.parse(localStorage.getItem(key) || '[]');
-      const updated  = Array.from(new Set([current].concat(existing)));
+  function loadRelated() {
+    return fetch('/recommendations/products.json?product_id={{ product.id }}&limit=' + limit, { credentials: 'same-origin' })
+      .then(function(res) { if (!res.ok) throw new Error('no recs'); return res.json(); })
+      .then(function(data) {
+        var items = (data && data.products) ? data.products : [];
+        if (items.length) {
+          relRow.style.display = '';
+          items.forEach(function(p) { relGrid.insertAdjacentHTML('beforeend', cardHTML(p)); });
+          return true;
+        }
+        var fbEl = document.getElementById('yml-fallback-{{ section.id }}');
+        var fb = fbEl ? JSON.parse(fbEl.textContent || '[]') : [];
+        if (fb.length) {
+          relRow.style.display = '';
+          fb.slice(0, limit).forEach(function(p) { relGrid.insertAdjacentHTML('beforeend', cardHTML(p)); });
+          return true;
+        }
+        return false;
+      })
+      .catch(function() { return false; });
+  }
+
+  function loadRecent() {
+    var key = 'np_recent';
+    var current = {{ product.handle | json }};
+    try {
+      var existing = JSON.parse(localStorage.getItem(key) || '[]');
+      var updated = [current].concat(existing.filter(function(h) { return h !== current; }));
       localStorage.setItem(key, JSON.stringify(updated));
-      const arr = (JSON.parse(localStorage.getItem(key) || '[]') || []).filter(h => h !== current).slice(0, limit);
-      if(!arr.length) return false;
+      var arr = updated.filter(function(h) { return h !== current; }).slice(0, limit);
+      if (!arr.length) return Promise.resolve(false);
 
-      for(const h of arr){
-        const r = await fetch('/products/'+h+'.js', { credentials:'same-origin' });
-        if(!r.ok) continue;
-        const p = await r.json();
-        rvGrid.insertAdjacentHTML('beforeend', cardHTML(p));
-      }
-      rvRow.style.display = '';
-      return true;
-    }catch(e){ return false; }
+      var chain = Promise.resolve();
+      arr.forEach(function(h) {
+        chain = chain.then(function() {
+          return fetch('/products/' + h + '.js', { credentials: 'same-origin' })
+            .then(function(r) { if (!r.ok) return; return r.json(); })
+            .then(function(p) { if (p) rvGrid.insertAdjacentHTML('beforeend', cardHTML(p)); });
+        });
+      });
+      return chain.then(function() {
+        if (rvGrid.children.length > 0) { rvRow.style.display = ''; return true; }
+        return false;
+      });
+    } catch (e) { return Promise.resolve(false); }
   }
 
-  const relOK = await loadRelated();
-  const rvOK  = await loadRecent();
-
-  // If related failed and recent also failed → hide whole section
-  if(!relOK && !rvOK){
-    root.style.display = 'none';
-  }
-});
+  Promise.all([loadRelated(), loadRecent()]).then(function(results) {
+    if (!results[0] && !results[1]) {
+      root.style.display = 'none';
+    }
+  });
+})();
 </script>
 
 {% schema %}
 {
-  "name":"You might also like",
-  "settings":[
-    { "type":"range","id":"max_width","min":800,"max":1600,"step":10,"unit":"px","label":"Container max width","default":1200 },
-    { "type":"color","id":"accent_color","label":"Accent color","default":"#FBBF24" },
-    { "type":"text","id":"title","label":"Section title","default":"You might also like" },
-    { "type":"text","id":"related_label","label":"Row 1 label (Related)","default":"Related peptides" },
-    { "type":"text","id":"recent_label","label":"Row 2 label (Recently viewed)","default":"Recently viewed" },
-    { "type":"range","id":"limit","min":2,"max":12,"step":1,"label":"Max items per row","default":8 }
+  "name": "You might also like",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "background-1"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Section title",
+      "default": "You might also like"
+    },
+    {
+      "type": "text",
+      "id": "related_label",
+      "label": "Row 1 label (Related)",
+      "default": "Related peptides"
+    },
+    {
+      "type": "text",
+      "id": "recent_label",
+      "label": "Row 2 label (Recently viewed)",
+      "default": "Recently viewed"
+    },
+    {
+      "type": "range",
+      "id": "limit",
+      "min": 2,
+      "max": 12,
+      "step": 1,
+      "label": "Max items per row",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "padding_top_desktop",
+      "label": "Desktop top padding",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "default": 24,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_desktop",
+      "label": "Desktop bottom padding",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "default": 24,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "label": "Mobile top padding",
+      "min": 0,
+      "max": 60,
+      "step": 4,
+      "default": 20,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mobile",
+      "label": "Mobile bottom padding",
+      "min": 0,
+      "max": 60,
+      "step": 4,
+      "default": 20,
+      "unit": "px"
+    }
   ],
-  "presets":[{"name":"You might also like"}]
+  "presets": [{ "name": "You might also like" }]
 }
 {% endschema %}

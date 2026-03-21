@@ -1,40 +1,26 @@
-{% comment %}
-───────────────────────────────────────────────
-SECTION: Quality & Testing (Accordion)
-Replaces: Product Quality Note
-Wires to metafields (same as previous):
-- peptide.form                 (single_line_text_field)
-- peptide.storage              (multi_line_text_field)
-- peptide.reconstitution       (multi_line_text_field)
-- peptide.research_disclaimer  (multi_line_text_field)
-- npx.safety_important         (multi_line_text_field)
-- npx.safety_general           (multi_line_text_field)
-- npx.disclaimer               (multi_line_text_field)
-
-Also auto-resolves COA link identical to peptide hero logic:
-- pdp.coa_url (string/url) > pep.coa_pdf (file) > peptide.coa_file[0]
-───────────────────────────────────────────────
-{% endcomment %}
+{% doc %}
+  @name Quality & Testing
+  @desc Accordion section displaying peptide quality info: purity, COA link, form, storage, reconstitution, safety, and disclaimer. Uses native details/summary (no JS). Reads from peptide/npx metafields.
+{% enddoc %}
 
 {%- liquid
-  assign form_mf        = product.metafields.peptide.form
-  assign storage_mf     = product.metafields.peptide.storage
-  assign recon_mf       = product.metafields.peptide.reconstitution
-  assign research_disc  = product.metafields.peptide.research_disclaimer
+  assign form_mf = product.metafields.peptide.form
+  assign storage_mf = product.metafields.peptide.storage
+  assign recon_mf = product.metafields.peptide.reconstitution
+  assign research_disc = product.metafields.peptide.research_disclaimer
 
-  assign safety_imp     = product.metafields.npx.safety_important
-  assign safety_gen     = product.metafields.npx.safety_general
-  assign disclaimer_mf  = product.metafields.npx.disclaimer
+  assign safety_imp = product.metafields.npx.safety_important
+  assign safety_gen = product.metafields.npx.safety_general
+  assign disclaimer_mf = product.metafields.npx.disclaimer
 
   assign has_any = false
   if form_mf or storage_mf or recon_mf or research_disc or safety_imp or safety_gen or disclaimer_mf
     assign has_any = true
   endif
 
-  # ---------- Resolve COA URL (priority: pdp.coa_url → pep.coa_pdf → peptide.coa_file[0]) ----------
-  assign pdp_coa_override    = product.metafields.pdp.coa_url
-  assign coa_pdf_mf          = product.metafields.pep.coa_pdf
-  assign coa_files_mf        = product.metafields.peptide.coa_file
+  assign pdp_coa_override = product.metafields.pdp.coa_url
+  assign coa_pdf_mf = product.metafields.pep.coa_pdf
+  assign coa_files_mf = product.metafields.peptide.coa_file
 
   assign coa_url = nil
   if pdp_coa_override and pdp_coa_override != blank
@@ -50,227 +36,361 @@ Also auto-resolves COA link identical to peptide hero logic:
 -%}
 
 {% if has_any or section.settings.fallback_note != blank %}
-<section id="quality-testing" class="qt-wrap" data-qt>
-  <style>
-    #quality-testing{
-      --qt-maxw: {{ section.settings.max_width | default: 1200 }}px;
-      --qt-border: {{ section.settings.border_color | default: '#E7E9ED' }};
-      --qt-bg: {{ section.settings.bg_color | default: '#FAFAFB' }};
-      --qt-card-bg: #FFFFFF;
-      --qt-muted: #6B7280;
-      --qt-text: #111111;
-      --qt-accent: {{ section.settings.accent_color | default: '#FBBF24' }};
-      --qt-radius: 14px;
+
+{%- style -%}
+  .xo-section--{{ section.id }} details {
+    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 8%, transparent);
+    border-radius: var(--general-radius-3);
+    background: rgba(var(--color-background));
+    overflow: hidden;
+  }
+
+  .xo-section--{{ section.id }} summary {
+    list-style: none;
+    cursor: pointer;
+    padding: 1.4rem 1.6rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    min-height: 44px;
+    gap: 1.2rem;
+    transition: background 0.2s var(--out-soft, ease);
+  }
+
+  .xo-section--{{ section.id }} summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .xo-section--{{ section.id }} summary:hover {
+    background: color-mix(in srgb, rgba(var(--color-foreground)) 2%, transparent);
+  }
+
+  .xo-section--{{ section.id }} summary:focus-visible {
+    outline: 2px solid rgba(var(--color-accent));
+    outline-offset: 2px;
+  }
+
+  .xo-section--{{ section.id }} .qt__left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .xo-section--{{ section.id }} .qt__ico {
+    width: 2.2rem;
+    height: 2.2rem;
+    flex: 0 0 2.2rem;
+    color: rgba(var(--color-foreground));
+  }
+
+  .xo-section--{{ section.id }} .qt__title {
+    font-family: var(--font-heading-family, sans-serif);
+    font-weight: 600;
+    font-size: calc(var(--font-body-scale, 1) * 1.6rem);
+    color: rgba(var(--color-foreground));
+    letter-spacing: -0.01em;
+    line-height: 1.3;
+  }
+
+  .xo-section--{{ section.id }} .qt__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+    margin-left: 1.6rem;
+  }
+
+  .xo-section--{{ section.id }} .qt__chip {
+    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 8%, transparent);
+    border-radius: var(--button-radius);
+    padding: 0.5rem 1.2rem;
+    background: rgba(var(--color-background));
+    font-size: calc(var(--font-body-scale, 1) * 1.2rem);
+    font-weight: 600;
+    color: rgba(var(--color-foreground));
+  }
+
+  .xo-section--{{ section.id }} .qt__caret {
+    transition: transform 0.2s var(--out-soft, ease);
+    color: rgba(var(--color-foreground));
+    flex-shrink: 0;
+  }
+
+  .xo-section--{{ section.id }} details[open] .qt__caret {
+    transform: rotate(180deg);
+  }
+
+  .xo-section--{{ section.id }} .qt__panel {
+    padding: 0 1.6rem 1.6rem;
+  }
+
+  .xo-section--{{ section.id }} .qt__bullets {
+    margin: 0 0 1.2rem 0;
+    padding-left: 1.8rem;
+    color: rgba(var(--color-foreground));
+    line-height: 1.6;
+  }
+
+  .xo-section--{{ section.id }} .qt__bullets li {
+    margin: 0.6rem 0;
+  }
+
+  .xo-section--{{ section.id }} .qt__verify-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .xo-section--{{ section.id }} .qt__verify {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.3rem 1rem;
+    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
+    border-radius: var(--button-radius);
+    background: color-mix(in srgb, rgba(var(--color-accent)) 8%, transparent);
+    font-size: calc(var(--font-body-scale, 1) * 1.1rem);
+    font-weight: 600;
+    color: rgba(var(--color-foreground));
+  }
+
+  .xo-section--{{ section.id }} .qt__verify svg {
+    width: 1.2rem;
+    height: 1.2rem;
+  }
+
+  .xo-section--{{ section.id }} .qt__coa-link {
+    text-decoration: none;
+    font-weight: 600;
+    color: rgba(var(--color-foreground));
+    border-bottom: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 20%, transparent);
+    transition: border-color 0.2s var(--out-soft, ease);
+  }
+
+  .xo-section--{{ section.id }} .qt__coa-link:hover {
+    border-color: rgba(var(--color-foreground));
+  }
+
+  .xo-section--{{ section.id }} .qt__coa-link:focus-visible {
+    outline: 2px solid rgba(var(--color-accent));
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  .xo-section--{{ section.id }} .qt__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.8rem;
+  }
+
+  @media (min-width: 768px) {
+    .xo-section--{{ section.id }} .qt__grid {
+      grid-template-columns: 1fr 1fr;
     }
-    .qt-wrap{padding:22px var(--page-gutter);background:var(--qt-bg);border-top:none;border-bottom:none;font-family:var(--font-body-family,sans-serif)}
-    .qt-container{max-width:var(--qt-maxw);margin:0 auto}
+  }
 
-    /* Header button (accordion trigger) */
-    .qt-head{
-      display:flex;align-items:center;justify-content:space-between;width:100%;
-      border:none;border-radius:var(--qt-radius);background:rgba(255,255,255,0.75);
-      -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
-      padding:14px 16px;min-height:44px;cursor:pointer;box-shadow:var(--shadow-sm);
-      transition:var(--transition-premium);
+  .xo-section--{{ section.id }} .qt__item {
+    background: color-mix(in srgb, rgba(var(--color-foreground)) 2%, rgba(var(--color-background)));
+    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 6%, transparent);
+    border-radius: var(--general-radius-1);
+    padding: 1.2rem 1.4rem;
+    color: rgba(var(--color-foreground));
+  }
+
+  .xo-section--{{ section.id }} .qt__item--warn {
+    background: color-mix(in srgb, rgba(var(--color-accent)) 6%, rgba(var(--color-background)));
+  }
+
+  .xo-section--{{ section.id }} .qt__item--small {
+    font-size: calc(var(--font-body-scale, 1) * 1.3rem);
+    opacity: 0.85;
+  }
+
+  .xo-section--{{ section.id }} .qt__label {
+    font-weight: 600;
+    margin-right: 0.6rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .xo-section--{{ section.id }} summary,
+    .xo-section--{{ section.id }} .qt__caret {
+      transition: none;
     }
-    .qt-head:focus-visible{outline:2px solid var(--qt-accent);outline-offset:2px}
-    .qt-head:hover{box-shadow:var(--shadow-md-hover);transform:translateY(-1px)}
-    .qt-left{display:flex;align-items:center;gap:10px}
-    .qt-ico{width:22px;height:22px;flex:0 0 22px;color:var(--color-text-primary)}
-    .qt-title{font-family:var(--font-heading-family,sans-serif);font-weight:800;font-size:clamp(0.9rem,1.3vw,1rem);color:var(--qt-text);letter-spacing:-0.01em}
-    .qt-points{display:flex;flex-wrap:wrap;gap:8px;margin-left:16px}
-    .qt-chip{border:none;border-radius:999px;padding:5px 12px;background:rgba(255,255,255,0.6);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);font-size:12px;box-shadow:var(--shadow-xs)}
-    .qt-right .qt-caret{transition:transform .2s ease; color:var(--color-text-primary)}
-    .qt-head[aria-expanded="true"] .qt-caret{transform:rotate(180deg)}
+  }
+{%- endstyle -%}
 
-    /* Panel */
-    .qt-panel{display:none;margin-top:12px}
-    .qt-panel.is-open{display:block}
-    .qt-card{border:none;border-radius:var(--qt-radius);background:var(--qt-card-bg);padding:16px;box-shadow:var(--shadow-sm)}
-    .qt-bullets{margin:0 0 12px 0;padding-left:18px;color:#1f2937}
-    .qt-bullets li{margin:6px 0}
-
-    /* K/V grid */
-    .qt-grid{display:grid;grid-template-columns:1fr;gap:8px}
-    @media(min-width:860px){ .qt-grid{grid-template-columns:1fr 1fr} }
-    .qt-item{background:rgba(255,255,255,0.7);border:none;border-radius:12px;padding:12px 14px;color:#1f2937;box-shadow:var(--shadow-xs);transition:var(--transition-premium)}
-    .qt-item:hover{box-shadow:var(--shadow-sm-hover);transform:translateY(-1px)}
-    .qt-item.warn{background:rgba(255,247,242,0.85)}
-    .qt-item.small{font-size:.92rem;color:#374151}
-    .qt-label{font-weight:600;margin-right:6px;color:var(--qt-text)}
-    .qt-text{color:var(--qt-text);opacity:0.85}
-
-    /* Verified badge */
-    .qt-verify{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border:none;border-radius:999px;background:rgba(16,163,50,0.08);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);font-size:11px;font-weight:600;color:#0f5132}
-    .qt-verify svg{width:12px;height:12px;display:block}
-
-    /* Hover underline for COA */
-    .qt-coa a{ position:relative; text-decoration:none; font-weight:600; color:var(--qt-text); }
-    .qt-coa a:focus-visible{outline:2px solid var(--qt-accent);outline-offset:2px;border-radius:4px}
-    .qt-coa a::after{content:""; position:absolute; left:50%; right:50%; bottom:-2px; height:1px; background: currentColor; transition:left .18s ease,right .18s ease;}
-    .qt-coa a:hover::after{ left:0; right:0; }
-
-    /* Micro-motions (respect reduced motion) */
-    @media (prefers-reduced-motion:no-preference){
-      .qt-verify.is-in{ animation: qtPulse 520ms cubic-bezier(0.22,1,0.36,1) 1; }
-      @keyframes qtPulse{0%{transform:scale(.96);opacity:.9}60%{transform:scale(1.02)}100%{transform:scale(1);opacity:1}}
-      .qt-head.is-in{ box-shadow:0 0 0 2px color-mix(in srgb, var(--qt-accent) 14%, transparent) inset; transition: box-shadow .7s ease; }
-    }
-    @media (prefers-reduced-motion:reduce){
-      .qt-head,.qt-item{transition:none}
-      .qt-head:hover,.qt-item:hover{transform:none}
-    }
-  </style>
-
-  <div class="qt-container">
-
-    <!-- Accordion header -->
-    <button class="qt-head"
-            type="button"
-            aria-expanded="{{ section.settings.default_open | default: true }}"
-            aria-controls="qt-panel">
-      <span class="qt-left">
-        {% if section.settings.icon == 'shield' %}
-          <svg class="qt-ico" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3l7 3v6c0 4.418-3.582 7.5-7 9-3.418-1.5-7-4.582-7-9V6l7-3z" stroke="currentColor" stroke-width="1.6" fill="none"/></svg>
-        {% else %}
-          <svg class="qt-ico" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 10h10M7 14h10M9 3h6l1 3h3v15H5V6h3l1-3z" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>
-        {% endif %}
-        <span class="qt-title">{{ section.settings.title | default: 'Quality & Testing' }}</span>
-        <span class="qt-points">
-          <span class="qt-chip">≥{{ section.settings.assay_floor | default: '99' }}% purity</span>
-          <span class="qt-chip">HPLC verified</span>
-          {% if coa_url %}<span class="qt-chip">Batch COA available</span>{% endif %}
+<section id="quality-testing" {% render 'section-attr' %}>
+  <xo-container>
+    <details {% if section.settings.default_open %}open{% endif %}>
+      <summary>
+        <span class="qt__left">
+          {% if section.settings.icon == 'shield' %}
+            <svg class="qt__ico" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3l7 3v6c0 4.418-3.582 7.5-7 9-3.418-1.5-7-4.582-7-9V6l7-3z" stroke="currentColor" stroke-width="1.6" fill="none"/></svg>
+          {% else %}
+            <svg class="qt__ico" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 10h10M7 14h10M9 3h6l1 3h3v15H5V6h3l1-3z" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>
+          {% endif %}
+          <span class="qt__title">{{ section.settings.title | default: 'Quality & Testing' }}</span>
+          <span class="qt__chips">
+            <span class="qt__chip">≥{{ section.settings.assay_floor | default: '99' }}% purity</span>
+            <span class="qt__chip">HPLC verified</span>
+            {% if coa_url %}<span class="qt__chip">Batch COA available</span>{% endif %}
+          </span>
         </span>
-      </span>
-      <span class="qt-right">
-        <svg class="qt-caret" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </span>
-    </button>
+        <svg class="qt__caret" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </summary>
 
-    <!-- Accordion panel -->
-    <div id="qt-panel"
-         class="qt-panel {% if section.settings.default_open %}is-open{% endif %}"
-         role="region"
-         aria-labelledby="quality-testing">
-      <div class="qt-card">
+      <div class="qt__panel">
         {% if section.settings.use_bullets %}
-          <ul class="qt-bullets">
+          <ul class="qt__bullets">
             <li>Each batch is tested for identity and purity (HPLC), targeting ≥{{ section.settings.assay_floor | default: '99' }}% assay.</li>
             {% if coa_url %}
-              <li class="qt-coa">Independent Certificate of Analysis available: <a href="{{ coa_url }}" target="_blank" rel="noopener">View COA</a>.</li>
+              <li>Independent Certificate of Analysis available: <a class="qt__coa-link" href="{{ coa_url }}" target="_blank" rel="noopener">View COA</a>.</li>
             {% else %}
               <li>COA available on request for current batches.</li>
             {% endif %}
-            <li>Zero-substitution policy — batches that don’t meet spec are never released.</li>
+            <li>Zero-substitution policy — batches that don't meet spec are never released.</li>
           </ul>
         {% elsif section.settings.fallback_note != blank %}
-          <div class="qt-fallback">{{ section.settings.fallback_note }}</div>
+          <div>{{ section.settings.fallback_note }}</div>
         {% endif %}
 
-        <!-- Verify badge row -->
-        <div class="qt-verify-row" style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-          <span class="qt-verify" data-qt-verify>
+        <div class="qt__verify-row">
+          <span class="qt__verify">
             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9.5 12.5l2 2 4-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             Verified
           </span>
           {% if coa_url %}
-            <span class="qt-coa"><a href="{{ coa_url }}" target="_blank" rel="noopener">View Verified COA</a></span>
+            <a class="qt__coa-link" href="{{ coa_url }}" target="_blank" rel="noopener">View Verified COA</a>
           {% endif %}
         </div>
 
-        <!-- Spec / safety grid -->
-        <div class="qt-grid">
+        <div class="qt__grid">
           {% if form_mf %}
-            <div class="qt-item"><span class="qt-label">Form:</span> <span class="qt-text">{{ form_mf | metafield_tag }}</span></div>
+            <div class="qt__item"><span class="qt__label">Form:</span> {{ form_mf | metafield_tag }}</div>
           {% endif %}
           {% if storage_mf %}
-            <div class="qt-item"><span class="qt-label">Storage:</span> <span class="qt-text">{{ storage_mf | metafield_tag }}</span></div>
+            <div class="qt__item"><span class="qt__label">Storage:</span> {{ storage_mf | metafield_tag }}</div>
           {% endif %}
           {% if recon_mf %}
-            <div class="qt-item"><span class="qt-label">Reconstitution:</span> <span class="qt-text">{{ recon_mf | metafield_tag }}</span></div>
+            <div class="qt__item"><span class="qt__label">Reconstitution:</span> {{ recon_mf | metafield_tag }}</div>
           {% endif %}
-
           {% if research_disc %}
-            <div class="qt-item warn">{{ research_disc | metafield_tag }}</div>
+            <div class="qt__item qt__item--warn">{{ research_disc | metafield_tag }}</div>
           {% endif %}
           {% if safety_imp %}
-            <div class="qt-item warn">{{ safety_imp | metafield_tag }}</div>
+            <div class="qt__item qt__item--warn">{{ safety_imp | metafield_tag }}</div>
           {% endif %}
           {% if safety_gen %}
-            <div class="qt-item">{{ safety_gen | metafield_tag }}</div>
+            <div class="qt__item">{{ safety_gen | metafield_tag }}</div>
           {% endif %}
           {% if disclaimer_mf %}
-            <div class="qt-item small">{{ disclaimer_mf | metafield_tag }}</div>
+            <div class="qt__item qt__item--small">{{ disclaimer_mf | metafield_tag }}</div>
           {% endif %}
-
           {% if form_mf == blank and storage_mf == blank and recon_mf == blank and research_disc == blank and safety_imp == blank and safety_gen == blank and disclaimer_mf == blank and section.settings.fallback_note != blank %}
-            <div class="qt-item">{{ section.settings.fallback_note }}</div>
+            <div class="qt__item">{{ section.settings.fallback_note }}</div>
           {% endif %}
         </div>
       </div>
-    </div>
-
-  </div>
+    </details>
+  </xo-container>
 </section>
+
 {% endif %}
-
-<script>
-document.addEventListener('DOMContentLoaded', function(){
-  var root = document.querySelector('#quality-testing');
-  if(!root) return;
-
-  var btn = root.querySelector('.qt-head');
-  var panel = root.querySelector('#qt-panel');
-  var verify = root.querySelector('[data-qt-verify]');
-
-  // Scroll entry highlight (once)
-  try{
-    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      var io = new IntersectionObserver(function(entries){
-        entries.forEach(function(e){
-          if(e.isIntersecting){
-            btn.classList.add('is-in');
-            verify && verify.classList.add('is-in');
-            io.disconnect();
-          }
-        });
-      }, { threshold: 0.35 });
-      io.observe(btn);
-    }
-  }catch(e){}
-
-  // Accordion toggle
-  btn.addEventListener('click', function(){
-    var open = btn.getAttribute('aria-expanded') === 'true';
-    btn.setAttribute('aria-expanded', String(!open));
-    panel.classList.toggle('is-open', !open);
-  });
-});
-</script>
 
 {% schema %}
 {
   "name": "Quality & Test",
+  "tag": "section",
+  "class": "section",
   "settings": [
-    { "type": "range", "id": "max_width", "min": 800, "max": 1600, "step": 10, "unit": "px", "label": "Container max width", "default": 1200 },
-    { "type": "color", "id": "bg_color", "label": "Section background", "default": "#FAFAFB" },
-    { "type": "color", "id": "border_color", "label": "Border color", "default": "#E7E9ED" },
-    { "type": "color", "id": "accent_color", "label": "Accent color", "default": "#FBBF24" },
-    { "type": "checkbox", "id": "default_open", "label": "Open by default", "default": true },
-
-    { "type": "text", "id": "title", "label": "Title", "default": "Quality & Testing" },
-    { "type": "select", "id": "icon", "label": "Icon", "default": "flask", "options": [
-      { "value": "flask", "label": "Lab flask" },
-      { "value": "shield", "label": "Shield" }
-    ]},
-
-    { "type": "checkbox", "id": "use_bullets", "label": "Show default proof-point bullets", "default": true },
-    { "type": "text", "id": "assay_floor", "label": "Assay proof-point floor (%)", "default": "99" },
-
-    { "type": "richtext", "id": "fallback_note", "label": "Fallback note (if no metafields present and bullets disabled)", "default": "<p>Lyophilized research peptide. Keep cold and away from light. For laboratory research only — not for human or veterinary use.</p>" }
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "background-1"
+    },
+    {
+      "type": "checkbox",
+      "id": "default_open",
+      "label": "Open by default",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "Quality & Testing"
+    },
+    {
+      "type": "select",
+      "id": "icon",
+      "label": "Icon",
+      "default": "flask",
+      "options": [
+        { "value": "flask", "label": "Lab flask" },
+        { "value": "shield", "label": "Shield" }
+      ]
+    },
+    {
+      "type": "checkbox",
+      "id": "use_bullets",
+      "label": "Show default proof-point bullets",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "assay_floor",
+      "label": "Assay proof-point floor (%)",
+      "default": "99"
+    },
+    {
+      "type": "richtext",
+      "id": "fallback_note",
+      "label": "Fallback note (if no metafields present and bullets disabled)",
+      "default": "<p>Lyophilized research peptide. Keep cold and away from light. For laboratory research only — not for human or veterinary use.</p>"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_desktop",
+      "label": "Desktop top padding",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "default": 24,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_desktop",
+      "label": "Desktop bottom padding",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "default": 24,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "label": "Mobile top padding",
+      "min": 0,
+      "max": 60,
+      "step": 4,
+      "default": 20,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mobile",
+      "label": "Mobile bottom padding",
+      "min": 0,
+      "max": 60,
+      "step": 4,
+      "default": 20,
+      "unit": "px"
+    }
   ],
-  "presets": [
-    { "name": "Quality & Testing (Accordion)" }
-  ]
+  "presets": [{ "name": "Quality & Testing (Accordion)" }]
 }
 {% endschema %}
