@@ -1,41 +1,116 @@
-<style>
-  .nx-rel{max-width:var(--container-width-large);margin:0 auto;padding:8px 16px}
-  .nx-grid{display:grid;gap:16px}
-  @media(min-width:860px){.nx-grid{grid-template-columns:repeat(3,1fr)}}
-  .nx-card{border:1px solid rgba(0,0,0,.1);border-radius:var(--nx-radius-md);padding:16px}
-  .nx-card a{text-decoration:none}
-</style>
+{%- style -%}
+  .xo-section--{{ section.id }} {
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
 
-<section class="nx-rel" id="related-guides">
-  <h2>Related Guides</h2>
-  <div class="nx-grid">
-    {% for block in section.blocks %}
-    <article class="nx-card" {{ block.shopify_attributes }}>
-      <h3><a href="{{ block.settings.url }}">{{ block.settings.title }}</a></h3>
-      <p>{{ block.settings.desc }}</p>
-    </article>
-    {% endfor %}
-  </div>
+  .xo-section--{{ section.id }} .rg__title {
+    font-size: clamp(1.5rem, 2.5vw, 2rem);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: rgba(var(--color-foreground));
+    margin: 0 0 16px;
+  }
+
+  .xo-section--{{ section.id }} .rg__grid {
+    display: grid;
+    gap: 16px;
+  }
+
+  .xo-section--{{ section.id }} .rg__card {
+    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
+    border-radius: var(--general-radius-1, 1rem);
+    padding: 16px;
+    transition: border-color 0.3s var(--out-soft, ease);
+  }
+
+  .xo-section--{{ section.id }} .rg__card:hover {
+    border-color: color-mix(in srgb, rgba(var(--color-foreground)) 25%, transparent);
+  }
+
+  .xo-section--{{ section.id }} .rg__card h3 {
+    font-size: clamp(1rem, 1.3vw, 1.15rem);
+    font-weight: 600;
+    margin: 0 0 6px;
+    color: rgba(var(--color-foreground));
+  }
+
+  .xo-section--{{ section.id }} .rg__card a {
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .xo-section--{{ section.id }} .rg__card a:hover {
+    text-decoration: underline;
+  }
+
+  .xo-section--{{ section.id }} .rg__card a:focus-visible {
+    outline: 2px solid rgba(var(--color-accent));
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  .xo-section--{{ section.id }} .rg__card p {
+    font-size: calc(var(--font-body-scale, 1) * 1.4rem);
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 55%, transparent);
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  @media (min-width: 768px) {
+    .xo-section--{{ section.id }} .rg__grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .xo-section--{{ section.id }} .rg__card {
+      transition: none;
+    }
+  }
+{%- endstyle -%}
+
+<section {% render 'section-attr' %}>
+  <xo-container>
+    <h2 class="rg__title">{{ section.settings.heading }}</h2>
+    <div class="rg__grid">
+      {% for block in section.blocks %}
+        <article class="rg__card" {{ block.shopify_attributes }}>
+          <h3><a href="{{ block.settings.url }}">{{ block.settings.title }}</a></h3>
+          <p>{{ block.settings.desc }}</p>
+        </article>
+      {% endfor %}
+    </div>
+  </xo-container>
 </section>
 
 {% schema %}
 {
   "name": "NX — Related Guides",
-  "settings": [],
+  "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "default" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Related Guides" },
+    { "type": "range", "id": "padding_top", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding top", "default": 8 },
+    { "type": "range", "id": "padding_bottom", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding bottom", "default": 16 }
+  ],
   "blocks": [
-    { "type": "link", "name": "Guide link", "settings": [
-      { "type": "text", "id": "title", "label": "Title" },
-      { "type": "url", "id": "url", "label": "URL" },
-      { "type": "textarea", "id": "desc", "label": "Short description" }
-    ]}
+    {
+      "type": "link",
+      "name": "Guide link",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Title" },
+        { "type": "url", "id": "url", "label": "URL" },
+        { "type": "textarea", "id": "desc", "label": "Short description" }
+      ]
+    }
   ],
   "presets": [
     {
       "name": "NX — Related Guides",
       "blocks": [
-        { "type":"link", "settings": { "title":"Piracetam vs Aniracetam", "url": "/blogs/posts/5-best-racetams", "desc":"Understand the key differences to pick the right racetam for your goals." } },
-        { "type":"link", "settings": { "title":"Best Nootropics for Learning & Memory", "url": "/blogs/posts/best-nootropics-for-studying-guide", "desc":"Stack ideas for studying, retention, and recall." } },
-        { "type":"link", "settings": { "title":"The Science of Neuroplasticity", "url": "/blogs/posts/nootropics-101", "desc":"How plasticity works and how to support it." } }
+        { "type": "link", "settings": { "title": "Piracetam vs Aniracetam", "url": "/blogs/posts/5-best-racetams", "desc": "Understand the key differences to pick the right racetam for your goals." } },
+        { "type": "link", "settings": { "title": "Best Nootropics for Learning & Memory", "url": "/blogs/posts/best-nootropics-for-studying-guide", "desc": "Stack ideas for studying, retention, and recall." } },
+        { "type": "link", "settings": { "title": "The Science of Neuroplasticity", "url": "/blogs/posts/nootropics-101", "desc": "How plasticity works and how to support it." } }
       ]
     }
   ]

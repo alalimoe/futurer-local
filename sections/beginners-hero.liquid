@@ -1,38 +1,156 @@
-{% schema %}
-{
-  "name": "Beginners Guide Hero",
-  "tag": "section",
-  "class": "section-beginners-hero",
-  "settings": [
-    { "type": "header", "content": "Content" },
-    { "type": "text", "id": "heading", "label": "Heading", "default": "Beginner's Guide to Nootropics" },
-    {
-      "type": "textarea",
-      "id": "subheading",
-      "label": "Subheading",
-      "default": "Start smarter — not stronger. Learn the basics, personalize a safe starting stack, and feel more focused with fewer unknowns."
-    },
-    { "type": "text", "id": "author_name", "label": "Author Name", "default": "Nootropix Research Team" },
-    { "type": "text", "id": "read_time", "label": "Reading Time", "default": "12 min read" },
-    { "type": "text", "id": "date_published", "label": "Date Published (YYYY-MM-DD)", "default": "2025-08-23" },
-    { "type": "header", "content": "Trust Signals" },
-    { "type": "text", "id": "trust_1", "label": "Trust Signal 1", "default": "5,763+ orders shipped" },
-    { "type": "text", "id": "trust_2", "label": "Trust Signal 2", "default": "Evidence-Based Protocols" },
-    { "type": "text", "id": "trust_3", "label": "Trust Signal 3", "default": "3rd-Party Lab Tested" },
-    { "type": "header", "content": "Call to Action" },
-    { "type": "text", "id": "cta_primary_text", "label": "Primary CTA Text", "default": "Build My Starter Stack" },
-    { "type": "url", "id": "cta_primary_url", "label": "Primary CTA URL" },
-    { "type": "text", "id": "cta_secondary_text", "label": "Secondary CTA Text", "default": "See the 60-Second Summary" },
-    { "type": "url", "id": "cta_secondary_url", "label": "Secondary CTA URL" },
-    { "type": "header", "content": "Colors" },
-    { "type": "color", "id": "bg_color", "label": "Background", "default": "#f9fafb" },
-    { "type": "color", "id": "accent_color", "label": "Accent", "default": "#FBBF24" }
-  ],
-  "presets": [{ "name": "Beginners Guide Hero" }]
-}
-{% endschema %}
+{%- style -%}
+  .xo-section--{{ section.id }} {
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+    text-align: center;
+  }
 
-{%- comment -%} ── JSON-LD: Article + BreadcrumbList ── {%- endcomment -%}
+  .bgh-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    z-index: 9999;
+    background: color-mix(in srgb, rgba(var(--color-foreground)) 6%, transparent);
+    pointer-events: none;
+  }
+
+  .bgh-progress__bar {
+    height: 100%;
+    width: 100%;
+    background: rgba(var(--color-accent));
+    transform: scaleX(0);
+    transform-origin: left;
+    will-change: transform;
+  }
+
+  .xo-section--{{ section.id }} .bgh-inner {
+    max-width: 760px;
+    margin: 0 auto;
+  }
+
+  .xo-section--{{ section.id }} .bgh-meta {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+
+  .xo-section--{{ section.id }} .bgh-meta-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: calc(var(--font-body-scale, 1) * 1.4rem);
+    font-weight: 500;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 55%, transparent);
+  }
+
+  .xo-section--{{ section.id }} .bgh-title {
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: rgba(var(--color-foreground));
+    margin: 0 0 20px;
+    line-height: 1.1;
+  }
+
+  .xo-section--{{ section.id }} .bgh-subtitle {
+    font-size: clamp(1rem, 1.5vw, 1.25rem);
+    line-height: 1.7;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 55%, transparent);
+    margin: 0 0 24px;
+    max-width: 620px;
+    margin-inline: auto;
+  }
+
+  .xo-section--{{ section.id }} .bgh-trust {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+  }
+
+  .xo-section--{{ section.id }} .bgh-trust-pill {
+    display: inline-flex;
+    align-items: center;
+    font-size: clamp(0.75rem, 1vw, 0.8125rem);
+    font-weight: 600;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 55%, transparent);
+    background: rgba(var(--color-background));
+    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 12%, transparent);
+    border-radius: var(--button-radius);
+    padding: 6px 14px;
+  }
+
+  .xo-section--{{ section.id }} .bgh-ctas {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .xo-section--{{ section.id }} .bgh-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 0.75rem 1.5rem;
+    font-size: calc(var(--font-body-scale, 1) * 1.5rem);
+    font-weight: 600;
+    border-radius: var(--button-radius);
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+    transition: opacity 0.3s var(--out-soft, ease);
+  }
+
+  .xo-section--{{ section.id }} .bgh-btn--primary {
+    background: rgba(var(--color-accent));
+    color: rgba(var(--color-foreground));
+  }
+
+  .xo-section--{{ section.id }} .bgh-btn--primary:hover {
+    opacity: 0.85;
+  }
+
+  .xo-section--{{ section.id }} .bgh-btn--secondary {
+    background: rgba(var(--color-background));
+    color: rgba(var(--color-foreground));
+    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 12%, transparent);
+  }
+
+  .xo-section--{{ section.id }} .bgh-btn--secondary:hover {
+    border-color: color-mix(in srgb, rgba(var(--color-foreground)) 25%, transparent);
+  }
+
+  .xo-section--{{ section.id }} .bgh-btn:focus-visible {
+    outline: 2px solid rgba(var(--color-accent));
+    outline-offset: 2px;
+  }
+
+  @media (max-width: 768px) {
+    .xo-section--{{ section.id }} .bgh-ctas {
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .xo-section--{{ section.id }} .bgh-btn {
+      width: 100%;
+      max-width: 320px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .xo-section--{{ section.id }} .bgh-btn,
+    .bgh-progress__bar {
+      transition: none;
+    }
+  }
+{%- endstyle -%}
+
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -59,60 +177,57 @@
 }
 </script>
 
-{%- comment -%} ── Reading Progress Bar ── {%- endcomment -%}
-<div class="bgh-progress" aria-hidden="true"><div class="bgh-progress__bar" id="bgh-progress-bar"></div></div>
+<div class="bgh-progress" aria-hidden="true"><div class="bgh-progress__bar" data-bgh-bar></div></div>
 
-<div class="bgh-wrapper" id="bgh-{{ section.id }}">
-  <div class="bgh-inner">
-    {%- comment -%} ── Meta row: author + reading time ── {%- endcomment -%}
-    <div class="bgh-meta">
-      {% if section.settings.author_name != blank %}
-        <span class="bgh-meta-item">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          {{ section.settings.author_name }}
-        </span>
+<section {% render 'section-attr' %}>
+  <xo-container>
+    <div class="bgh-inner">
+      <div class="bgh-meta">
+        {% if section.settings.author_name != blank %}
+          <span class="bgh-meta-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            {{ section.settings.author_name }}
+          </span>
+        {% endif %}
+        {% if section.settings.read_time != blank %}
+          <span class="bgh-meta-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            {{ section.settings.read_time }}
+          </span>
+        {% endif %}
+      </div>
+
+      <h1 class="bgh-title">{{ section.settings.heading }}</h1>
+
+      {% if section.settings.subheading != blank %}
+        <p class="bgh-subtitle">{{ section.settings.subheading }}</p>
       {% endif %}
-      {% if section.settings.read_time != blank %}
-        <span class="bgh-meta-item">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          {{ section.settings.read_time }}
-        </span>
+
+      {% if section.settings.trust_1 != blank or section.settings.trust_2 != blank or section.settings.trust_3 != blank %}
+        <div class="bgh-trust">
+          {% if section.settings.trust_1 != blank %}<span class="bgh-trust-pill">{{ section.settings.trust_1 }}</span>{% endif %}
+          {% if section.settings.trust_2 != blank %}<span class="bgh-trust-pill">{{ section.settings.trust_2 }}</span>{% endif %}
+          {% if section.settings.trust_3 != blank %}<span class="bgh-trust-pill">{{ section.settings.trust_3 }}</span>{% endif %}
+        </div>
+      {% endif %}
+
+      {% if section.settings.cta_primary_text != blank or section.settings.cta_secondary_text != blank %}
+        <div class="bgh-ctas">
+          {% if section.settings.cta_primary_text != blank %}
+            <a href="{{ section.settings.cta_primary_url | default: '#' }}" class="bgh-btn bgh-btn--primary">{{ section.settings.cta_primary_text }}</a>
+          {% endif %}
+          {% if section.settings.cta_secondary_text != blank %}
+            <a href="{{ section.settings.cta_secondary_url | default: '#' }}" class="bgh-btn bgh-btn--secondary">{{ section.settings.cta_secondary_text }}</a>
+          {% endif %}
+        </div>
       {% endif %}
     </div>
+  </xo-container>
+</section>
 
-    <h1 class="bgh-title">{{ section.settings.heading }}</h1>
-
-    {% if section.settings.subheading != blank %}
-      <p class="bgh-subtitle">{{ section.settings.subheading }}</p>
-    {% endif %}
-
-    {%- comment -%} ── Trust strip ── {%- endcomment -%}
-    {% if section.settings.trust_1 != blank or section.settings.trust_2 != blank or section.settings.trust_3 != blank %}
-      <div class="bgh-trust">
-        {% if section.settings.trust_1 != blank %}<span class="bgh-trust-pill">{{ section.settings.trust_1 }}</span>{% endif %}
-        {% if section.settings.trust_2 != blank %}<span class="bgh-trust-pill">{{ section.settings.trust_2 }}</span>{% endif %}
-        {% if section.settings.trust_3 != blank %}<span class="bgh-trust-pill">{{ section.settings.trust_3 }}</span>{% endif %}
-      </div>
-    {% endif %}
-
-    {%- comment -%} ── CTA buttons ── {%- endcomment -%}
-    {% if section.settings.cta_primary_text != blank or section.settings.cta_secondary_text != blank %}
-      <div class="bgh-ctas">
-        {% if section.settings.cta_primary_text != blank %}
-          <a href="{{ section.settings.cta_primary_url | default: '#' }}" class="bgh-btn bgh-btn--primary">{{ section.settings.cta_primary_text }}</a>
-        {% endif %}
-        {% if section.settings.cta_secondary_text != blank %}
-          <a href="{{ section.settings.cta_secondary_url | default: '#' }}" class="bgh-btn bgh-btn--secondary">{{ section.settings.cta_secondary_text }}</a>
-        {% endif %}
-      </div>
-    {% endif %}
-  </div>
-</div>
-
-{%- comment -%} ── Progress bar JS ── {%- endcomment -%}
 <script>
 (function() {
-  var bar = document.getElementById('bgh-progress-bar');
+  var bar = document.querySelector('[data-bgh-bar]');
   if (!bar) return;
   var ticking = false;
   window.addEventListener('scroll', function() {
@@ -130,170 +245,30 @@
 })();
 </script>
 
-<style>
-  /* ── Progress Bar ── */
-  .bgh-progress {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 3px;
-    z-index: 9999;
-    background: rgba(0,0,0,0.06);
-    pointer-events: none;
-  }
-  .bgh-progress__bar {
-    height: 100%;
-    width: 100%;
-    background: var(--color-accent-primary, #FBBF24);
-    transform: scaleX(0);
-    transform-origin: left;
-    will-change: transform;
-  }
-
-  #bgh-{{ section.id }} {
-    --bgh-bg: {{ section.settings.bg_color }};
-    --bgh-accent: {{ section.settings.accent_color }};
-    --bgh-text: var(--color-text-main, #111827);
-    --bgh-muted: var(--color-text-muted, #4b5563);
-    --bgh-border: var(--nx-pill-border, #E5E7EB);
-    --bgh-radius: var(--nx-radius, 14px);
-    --bgh-font: var(--font-body-family, sans-serif);
-    --bgh-font-heading: var(--font-heading-family, sans-serif);
-    --bgh-transition: var(--transition-smooth, all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1));
-    --bgh-touch: var(--touch-min, 44px);
-  }
-
-  .bgh-wrapper {
-    background: var(--bgh-bg);
-    padding: 80px var(--page-gutter) 56px;
-    text-align: center;
-    font-family: var(--bgh-font);
-    border-bottom: 1px solid var(--bgh-border);
-  }
-  .bgh-inner {
-    max-width: 760px;
-    margin: 0 auto;
-  }
-
-  /* ── Meta ── */
-  .bgh-meta {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-  }
-  .bgh-meta-item {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: var(--bgh-muted);
-  }
-
-  /* ── Title ── */
-  .bgh-title {
-    font-family: var(--bgh-font-heading);
-    font-size: calc(var(--font-size-h1) * var(--scale-h1, 1));
-    font-weight: 800;
-    letter-spacing: -0.02em;
-    color: var(--bgh-text);
-    margin: 0 0 20px;
-    line-height: 1.1;
-  }
-
-  /* ── Subtitle ── */
-  .bgh-subtitle {
-    font-size: clamp(1rem, 1.5vw, 1.25rem);
-    line-height: 1.7;
-    color: var(--bgh-muted);
-    margin: 0 0 24px;
-    max-width: 620px;
-    margin-inline: auto;
-  }
-
-  /* ── Trust strip ── */
-  .bgh-trust {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin-bottom: 28px;
-  }
-  .bgh-trust-pill {
-    display: inline-flex;
-    align-items: center;
-    font-size: 0.8125rem;
-    font-weight: 600;
-    color: var(--bgh-muted);
-    background: var(--color-bg-primary, #fff);
-    border: 1px solid var(--bgh-border);
-    border-radius: var(--nx-radius-pill);
-    padding: 6px 14px;
-  }
-
-  /* ── CTAs ── */
-  .bgh-ctas {
-    display: flex;
-    justify-content: center;
-    gap: 12px;
-    flex-wrap: wrap;
-  }
-  .bgh-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: var(--bgh-touch);
-    padding: 0.75rem 1.5rem;
-    font-family: var(--bgh-font);
-    font-size: 0.9375rem;
-    font-weight: 700;
-    border-radius: var(--bgh-radius);
-    text-decoration: none;
-    transition: var(--bgh-transition);
-    cursor: pointer;
-    border: none;
-  }
-  .bgh-btn--primary {
-    background: var(--bgh-accent);
-    color: var(--color-text-primary);
-    box-shadow: var(--shadow-gold-glow, 0 4px 14px rgba(251,191,36,0.25));
-  }
-  .bgh-btn--primary:hover {
-    box-shadow: var(--shadow-gold-glow-hover, 0 8px 24px rgba(251,191,36,0.35));
-    transform: translateY(-1px);
-  }
-  .bgh-btn--secondary {
-    background: var(--color-bg-primary, #fff);
-    color: var(--bgh-text);
-    border: 1px solid var(--bgh-border);
-    box-shadow: var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.04));
-  }
-  .bgh-btn--secondary:hover {
-    box-shadow: var(--shadow-md, 0 8px 24px rgba(0,0,0,0.06));
-    transform: translateY(-1px);
-  }
-
-  /* ── Accessibility ── */
-  .bgh-wrapper :focus-visible {
-    outline: 2px solid var(--bgh-accent);
-    outline-offset: 2px;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .bgh-wrapper *, .bgh-wrapper *::before, .bgh-wrapper *::after,
-    .bgh-progress__bar {
-      animation-duration: 0.01ms !important;
-      transition-duration: 0.01ms !important;
-    }
-  }
-
-  /* ── Responsive ── */
-  @media (max-width: 640px) {
-    .bgh-wrapper { padding: 60px var(--page-gutter) 40px; }
-    .bgh-ctas { flex-direction: column; align-items: center; }
-    .bgh-btn { width: 100%; max-width: 320px; }
-  }
-</style>
+{% schema %}
+{
+  "name": "Beginners Guide Hero",
+  "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "default" },
+    { "type": "header", "content": "Content" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Beginner's Guide to Nootropics" },
+    { "type": "textarea", "id": "subheading", "label": "Subheading", "default": "Start smarter — not stronger. Learn the basics, personalize a safe starting stack, and feel more focused with fewer unknowns." },
+    { "type": "text", "id": "author_name", "label": "Author Name", "default": "Nootropix Research Team" },
+    { "type": "text", "id": "read_time", "label": "Reading Time", "default": "12 min read" },
+    { "type": "text", "id": "date_published", "label": "Date Published (YYYY-MM-DD)", "default": "2025-08-23" },
+    { "type": "header", "content": "Trust Signals" },
+    { "type": "text", "id": "trust_1", "label": "Trust Signal 1", "default": "5,763+ orders shipped" },
+    { "type": "text", "id": "trust_2", "label": "Trust Signal 2", "default": "Evidence-Based Protocols" },
+    { "type": "text", "id": "trust_3", "label": "Trust Signal 3", "default": "3rd-Party Lab Tested" },
+    { "type": "header", "content": "Call to Action" },
+    { "type": "text", "id": "cta_primary_text", "label": "Primary CTA Text", "default": "Build My Starter Stack" },
+    { "type": "url", "id": "cta_primary_url", "label": "Primary CTA URL" },
+    { "type": "text", "id": "cta_secondary_text", "label": "Secondary CTA Text", "default": "See the 60-Second Summary" },
+    { "type": "url", "id": "cta_secondary_url", "label": "Secondary CTA URL" },
+    { "type": "header", "content": "Section Padding" },
+    { "type": "range", "id": "padding_top", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding top", "default": 80 },
+    { "type": "range", "id": "padding_bottom", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding bottom", "default": 56 }
+  ],
+  "presets": [{ "name": "Beginners Guide Hero" }]
+}
+{% endschema %}

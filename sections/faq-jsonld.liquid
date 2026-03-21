@@ -17,43 +17,72 @@
 -%}
 
 {%- if allow_render and section.blocks.size > 0 -%}
-  {%- comment -%}
-    Visible FAQ (optional). This is useful for users AND helps align content with schema.
-  {%- endcomment -%}
   {%- if show_visible_faq -%}
-    <section class="nootropix-faq" data-section-id="{{ section.id }}">
-      {%- if heading != blank -%}
-        <h2 class="nootropix-faq__heading">{{ heading }}</h2>
-      {%- endif -%}
+    {%- style -%}
+      .xo-section--{{ section.id }} {
+        padding-top: {{ section.settings.padding_top }}px;
+        padding-bottom: {{ section.settings.padding_bottom }}px;
+      }
 
-      <div class="nootropix-faq__items">
-        {%- for block in section.blocks -%}
-          {%- assign q = block.settings.question | strip -%}
-          {%- assign a = block.settings.answer | strip -%}
-          {%- if q != blank and a != blank -%}
-            <details class="nootropix-faq__item" {{ block.shopify_attributes }}>
-              <summary class="nootropix-faq__question">{{ q }}</summary>
-              <div class="nootropix-faq__answer rte">
-                {{ a }}
-              </div>
-            </details>
-          {%- endif -%}
-        {%- endfor -%}
-      </div>
+      .xo-section--{{ section.id }} .faq-ld__heading {
+        margin: 0 0 1rem 0;
+        font-weight: 600;
+        color: rgba(var(--color-foreground));
+      }
+
+      .xo-section--{{ section.id }} .faq-ld__item {
+        border-bottom: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 8%, transparent);
+        padding: 0.75rem 0;
+      }
+
+      .xo-section--{{ section.id }} .faq-ld__question {
+        cursor: pointer;
+        font-weight: 600;
+        color: rgba(var(--color-foreground));
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+      }
+
+      .xo-section--{{ section.id }} .faq-ld__question:focus-visible {
+        outline: 2px solid rgba(var(--color-accent));
+        outline-offset: 2px;
+        border-radius: 4px;
+      }
+
+      .xo-section--{{ section.id }} .faq-ld__question::-webkit-details-marker {
+        display: none;
+      }
+
+      .xo-section--{{ section.id }} .faq-ld__answer {
+        margin-top: 0.5rem;
+        color: rgba(var(--color-foreground));
+        line-height: 1.6;
+      }
+    {%- endstyle -%}
+
+    <section {% render 'section-attr' %}>
+      <xo-container>
+        {%- if heading != blank -%}
+          <h2 class="faq-ld__heading">{{ heading }}</h2>
+        {%- endif -%}
+
+        <div class="faq-ld__items">
+          {%- for block in section.blocks -%}
+            {%- assign q = block.settings.question | strip -%}
+            {%- assign a = block.settings.answer | strip -%}
+            {%- if q != blank and a != blank -%}
+              <details class="faq-ld__item" data-faq-item {{ block.shopify_attributes }}>
+                <summary class="faq-ld__question">{{ q }}</summary>
+                <div class="faq-ld__answer rte">{{ a }}</div>
+              </details>
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+      </xo-container>
     </section>
-
-    <style>
-      .nootropix-faq { margin-top: 2rem; }
-      .nootropix-faq__heading { margin: 0 0 1rem 0; }
-      .nootropix-faq__item { border-bottom: 1px solid rgba(0,0,0,.08); padding: .75rem 0; }
-      .nootropix-faq__question { cursor: pointer; font-weight: 600; }
-      .nootropix-faq__answer { margin-top: .5rem; }
-    </style>
   {%- endif -%}
 
-  {%- comment -%}
-    JSON-LD FAQPage schema. Must be a REAL <script type="application/ld+json">.
-  {%- endcomment -%}
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -86,6 +115,12 @@
   "name": "FAQ (JSON-LD)",
   "settings": [
     {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "default"
+    },
+    {
       "type": "checkbox",
       "id": "enable",
       "label": "Enable section",
@@ -108,6 +143,26 @@
       "id": "only_on_page_handle",
       "label": "Only render on this page handle (optional)",
       "info": "Example: science-bio-phenibut-alternative"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding top",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding bottom",
+      "default": 20
     }
   ],
   "blocks": [
@@ -115,16 +170,8 @@
       "type": "faq_item",
       "name": "FAQ item",
       "settings": [
-        {
-          "type": "text",
-          "id": "question",
-          "label": "Question"
-        },
-        {
-          "type": "richtext",
-          "id": "answer",
-          "label": "Answer"
-        }
+        { "type": "text", "id": "question", "label": "Question" },
+        { "type": "richtext", "id": "answer", "label": "Answer" }
       ]
     }
   ],

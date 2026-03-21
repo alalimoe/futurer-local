@@ -3,190 +3,344 @@
   assign faq_blocks   = section.blocks | where: "type", "faq"
 -%}
 
-<style>
-  /* ── Container ── */
-  .bgs { --bgs-max: 1200px; font-family: var(--font-body-family, sans-serif); color: var(--color-text-main, #111827); }
-  .bgs__wrap { max-width: var(--bgs-max); margin: 0 auto; padding: 0 var(--page-gutter); }
+{%- style -%}
+  .xo-section--{{ section.id }} {
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
 
-  /* ── Hero ── */
-  .bgs-hero { padding: clamp(48px, 8vw, 96px) 0 clamp(32px, 6vw, 64px); }
-  .bgs-hero__inner { display: flex; gap: clamp(24px, 4vw, 56px); align-items: center; }
-  .bgs-hero__content { flex: 1 1 58%; }
-  .bgs-hero__media  { flex: 1 1 42%; }
-  .bgs-hero__h1 {
-    font-family: var(--font-heading-family, sans-serif);
+  .xo-section--{{ section.id }} .bgs-hero {
+    padding: clamp(48px, 8vw, 96px) 0 clamp(32px, 6vw, 64px);
+  }
+
+  .xo-section--{{ section.id }} .bgs-hero__inner {
+    display: flex;
+    gap: clamp(24px, 4vw, 56px);
+    align-items: center;
+  }
+
+  .xo-section--{{ section.id }} .bgs-hero__content { flex: 1 1 58%; }
+  .xo-section--{{ section.id }} .bgs-hero__media { flex: 1 1 42%; }
+
+  .xo-section--{{ section.id }} .bgs-hero__h1 {
     font-size: clamp(2rem, 4vw, 3rem);
-    font-weight: 800;
+    font-weight: 600;
     letter-spacing: -0.025em;
     line-height: 1.15;
     margin: 0 0 16px;
+    color: rgba(var(--color-foreground));
   }
-  .bgs-hero__body { font-size: clamp(0.95rem, 1.2vw, 1.1rem); line-height: 1.7; color: var(--color-text-muted, #4b5563); margin: 0 0 24px; }
-  .bgs-hero__body p { margin: 0 0 12px; }
-  .bgs-hero__badges { display: flex; flex-wrap: wrap; gap: 10px; }
-  .bgs-hero__badge {
-    display: inline-flex; align-items: center; gap: 7px;
+
+  .xo-section--{{ section.id }} .bgs-hero__body {
+    font-size: calc(var(--font-body-scale, 1) * 1.5rem);
+    line-height: 1.7;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 55%, transparent);
+    margin: 0 0 24px;
+  }
+
+  .xo-section--{{ section.id }} .bgs-hero__body p { margin: 0 0 12px; }
+
+  .xo-section--{{ section.id }} .bgs-hero__badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .xo-section--{{ section.id }} .bgs-hero__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
     padding: 8px 14px;
-    border-radius: 999px;
-    background: rgba(251, 191, 36, 0.1);
-    font-size: 0.78rem; font-weight: 600; letter-spacing: 0.03em; text-transform: uppercase;
-    color: var(--color-text-main, #111827);
+    border-radius: var(--button-radius);
+    background: color-mix(in srgb, rgba(var(--color-accent)) 10%, transparent);
+    font-size: clamp(0.7rem, 1vw, 0.78rem);
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: rgba(var(--color-foreground));
     white-space: nowrap;
   }
-  .bgs-hero__badge-icon { width: 18px; height: 18px; flex-shrink: 0; color: var(--color-accent-primary, #FBBF24); }
-  .bgs-hero__img {
-    width: 100%; height: auto; display: block;
-    border-radius: 16px;
+
+  .xo-section--{{ section.id }} .bgs-hero__badge-icon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    color: rgba(var(--color-accent));
+  }
+
+  .xo-section--{{ section.id }} .bgs-hero__img {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: var(--general-radius-3, 2rem);
     object-fit: cover;
-    box-shadow: 0 12px 30px rgba(0,0,0,0.06);
   }
 
-  @media (max-width: 768px) {
-    .bgs-hero__inner { flex-direction: column; }
-    .bgs-hero__media { order: -1; }
-    .bgs-hero__img { aspect-ratio: 4/3; }
+  .xo-section--{{ section.id }} .bgs-stacks {
+    padding: clamp(32px, 6vw, 64px) 0;
   }
 
-  /* ── Stacks grid ── */
-  .bgs-stacks { padding: clamp(32px, 6vw, 64px) 0; }
-  .bgs-stacks__h2 {
-    font-family: var(--font-heading-family, sans-serif);
+  .xo-section--{{ section.id }} .bgs-stacks__h2 {
     font-size: clamp(1.6rem, 3vw, 2.4rem);
-    font-weight: 800; letter-spacing: -0.02em;
-    margin: 0 0 8px; text-align: center;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin: 0 0 8px;
+    text-align: center;
+    color: rgba(var(--color-foreground));
   }
-  .bgs-stacks__sub {
-    text-align: center; color: var(--color-text-muted, #4b5563);
-    font-size: clamp(0.9rem, 1.1vw, 1rem); margin: 0 0 32px;
+
+  .xo-section--{{ section.id }} .bgs-stacks__sub {
+    text-align: center;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 55%, transparent);
+    font-size: calc(var(--font-body-scale, 1) * 1.6rem);
+    margin: 0 0 32px;
   }
-  .bgs-stacks__grid {
+
+  .xo-section--{{ section.id }} .bgs-stacks__grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 24px;
   }
-  .bgs-card {
-    background: #fff;
-    border-radius: 14px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+
+  .xo-section--{{ section.id }} .bgs-card {
+    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 8%, transparent);
+    border-radius: var(--general-radius-3, 2rem);
     overflow: hidden;
-    display: flex; flex-direction: column;
-    transition: var(--transition-premium);
+    display: flex;
+    flex-direction: column;
+    transition: border-color 0.3s var(--out-soft, ease);
   }
-  .bgs-card:hover { box-shadow: 0 12px 30px rgba(0,0,0,0.06); transform: translateY(-2px); }
-  .bgs-card__img-wrap { position: relative; background: var(--color-bg-secondary, #f9fafb); }
-  .bgs-card__img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; }
-  .bgs-card__savings {
-    position: absolute; top: 12px; right: 12px;
-    background: var(--color-accent-primary, #FBBF24);
-    color: var(--color-accent-on-gold, #1e1e1e);
-    font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
-    padding: 5px 10px; border-radius: 999px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+
+  .xo-section--{{ section.id }} .bgs-card:hover {
+    border-color: color-mix(in srgb, rgba(var(--color-foreground)) 20%, transparent);
   }
-  .bgs-card__body { padding: 18px 18px 20px; flex: 1; display: flex; flex-direction: column; }
-  .bgs-card__title {
-    font-family: var(--font-heading-family, sans-serif);
+
+  .xo-section--{{ section.id }} .bgs-card__img-wrap {
+    position: relative;
+    background: color-mix(in srgb, rgba(var(--color-foreground)) 3%, transparent);
+  }
+
+  .xo-section--{{ section.id }} .bgs-card__img {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    display: block;
+  }
+
+  .xo-section--{{ section.id }} .bgs-card__savings {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: rgba(var(--color-accent));
+    color: rgba(var(--color-foreground));
+    font-size: clamp(0.65rem, 0.9vw, 0.72rem);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 5px 10px;
+    border-radius: var(--button-radius);
+  }
+
+  .xo-section--{{ section.id }} .bgs-card__body {
+    padding: 18px 18px 20px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .xo-section--{{ section.id }} .bgs-card__title {
     font-size: clamp(1.05rem, 1.4vw, 1.2rem);
-    font-weight: 700; letter-spacing: -0.01em;
+    font-weight: 600;
+    letter-spacing: -0.01em;
     margin: 0 0 10px;
+    color: rgba(var(--color-foreground));
   }
-  .bgs-card__compounds { list-style: none; padding: 0; margin: 0 0 16px; display: flex; flex-direction: column; gap: 4px; }
-  .bgs-card__compound {
-    font-size: 0.85rem; color: var(--color-text-muted, #4b5563);
-    display: flex; align-items: center; gap: 6px;
-  }
-  .bgs-card__compound::before {
-    content: ''; width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0;
-    background: var(--color-accent-primary, #FBBF24);
-  }
-  .bgs-card__cta {
-    margin-top: auto;
-    display: flex; align-items: center; justify-content: center;
-    width: 100%; min-height: 44px;
-    padding: 12px 20px;
-    border: none; border-radius: 10px; cursor: pointer;
-    background: var(--color-accent-primary, #FBBF24);
-    color: var(--color-accent-on-gold, #1e1e1e);
-    font-family: var(--font-body-family, sans-serif);
-    font-size: 0.88rem; font-weight: 700; letter-spacing: 0.02em;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.04);
-    transition: var(--transition-smooth);
-  }
-  .bgs-card__cta:hover { transform: translateY(-1px); filter: brightness(1.06); box-shadow: 0 4px 6px rgba(0,0,0,0.04), 0 16px 40px rgba(0,0,0,0.08); }
-  .bgs-card__cta:active { transform: scale(0.97); }
-  .bgs-card__cta:focus-visible { outline: 2px solid var(--color-accent-dark, #92400e); outline-offset: 3px; }
-  .bgs-card__cta[disabled] { opacity: 0.5; cursor: not-allowed; transform: none; filter: none; }
-  .bgs-card__price { margin-top: auto; padding-bottom: 10px; font-size: 1.05rem; font-weight: 700; }
-  .bgs-card__price s { opacity: 0.5; font-weight: 400; margin-right: 6px; }
-  .bgs-card__title a { color: inherit; text-decoration: none; transition: color 0.2s ease; }
-  .bgs-card__title a:hover { color: var(--color-accent-dark, #92400e); }
-  .bgs-card__img-wrap a { display: block; }
-  .bgs-stacks__empty { text-align: center; color: var(--color-text-muted, #6b7280); padding: 40px 0; font-size: 0.95rem; }
 
-  /* ── FAQ ── */
-  .bgs-faq { padding: clamp(32px, 6vw, 64px) 0; }
-  .bgs-faq__h2 {
-    font-family: var(--font-heading-family, sans-serif);
-    font-size: clamp(1.6rem, 3vw, 2.4rem);
-    font-weight: 800; letter-spacing: -0.02em;
-    margin: 0 0 24px; text-align: center;
+  .xo-section--{{ section.id }} .bgs-card__title a {
+    color: inherit;
+    text-decoration: none;
+    transition: opacity 0.2s var(--out-soft, ease);
   }
-  .bgs-faq__list { display: flex; flex-direction: column; gap: 12px; max-width: 800px; margin: 0 auto; }
-  .bgs-faq__item {
-    background: #fff; border-radius: 14px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.04);
-    transition: var(--transition-premium);
+
+  .xo-section--{{ section.id }} .bgs-card__title a:hover { opacity: 0.7; }
+  .xo-section--{{ section.id }} .bgs-card__img-wrap a { display: block; }
+
+  .xo-section--{{ section.id }} .bgs-card__compounds {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
   }
-  .bgs-faq__item:hover { box-shadow: 0 8px 28px rgba(0,0,0,0.06); }
-  .bgs-faq__item[open] { box-shadow: 0 8px 28px rgba(0,0,0,0.07); }
-  .bgs-faq__q {
-    display: flex; align-items: center; justify-content: space-between; gap: 12px;
-    padding: 16px 20px; cursor: pointer;
-    font-family: var(--font-heading-family, sans-serif);
-    font-size: clamp(0.95rem, 1.2vw, 1.05rem); font-weight: 600;
-    list-style: none; min-height: 44px;
-    transition: color 0.2s ease;
+
+  .xo-section--{{ section.id }} .bgs-card__compound {
+    font-size: calc(var(--font-body-scale, 1) * 1.36rem);
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 55%, transparent);
+    display: flex;
+    align-items: center;
+    gap: 6px;
   }
-  .bgs-faq__q::-webkit-details-marker { display: none; }
-  .bgs-faq__q::after {
+
+  .xo-section--{{ section.id }} .bgs-card__compound::before {
     content: '';
-    width: 20px; height: 20px; flex-shrink: 0;
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%234b5563' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") no-repeat center;
-    transition: transform 0.3s var(--ease-premium);
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    background: rgba(var(--color-accent));
   }
-  .bgs-faq__item[open] .bgs-faq__q::after { transform: rotate(180deg); }
-  .bgs-faq__item[open] .bgs-faq__q { color: var(--color-accent-dark, #92400e); }
-  .bgs-faq__q:focus-visible { outline: 2px solid var(--color-accent-dark, #92400e); outline-offset: -2px; border-radius: 14px; }
-  .bgs-faq__a { padding: 0 20px 18px; font-size: clamp(0.88rem, 1.1vw, 0.95rem); line-height: 1.7; color: var(--color-text-muted, #4b5563); }
-  .bgs-faq__a p { margin: 0 0 8px; }
-  .bgs-faq__a p:last-child { margin-bottom: 0; }
 
-  /* ── Trust footer ── */
-  .bgs-trust {
-    margin: clamp(24px, 4vw, 48px) 0 clamp(32px, 5vw, 56px);
-    background: var(--color-bg-secondary, #f9fafb);
-    border-radius: 14px;
-    padding: 20px 24px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+  .xo-section--{{ section.id }} .bgs-card__cta {
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 44px;
+    padding: 12px 20px;
+    border: none;
+    border-radius: var(--general-radius-1, 1rem);
+    cursor: pointer;
+    background: rgba(var(--color-accent));
+    color: rgba(var(--color-foreground));
+    font-size: calc(var(--font-body-scale, 1) * 1.4rem);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    transition: opacity 0.3s var(--out-soft, ease);
   }
-  .bgs-trust__text {
+
+  .xo-section--{{ section.id }} .bgs-card__cta:hover { opacity: 0.85; }
+  .xo-section--{{ section.id }} .bgs-card__cta:focus-visible { outline: 2px solid rgba(var(--color-accent)); outline-offset: 3px; }
+  .xo-section--{{ section.id }} .bgs-card__cta[disabled] { opacity: 0.5; cursor: not-allowed; }
+
+  .xo-section--{{ section.id }} .bgs-card__price {
+    margin-top: auto;
+    padding-bottom: 10px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: rgba(var(--color-foreground));
+  }
+
+  .xo-section--{{ section.id }} .bgs-card__price s {
+    opacity: 0.5;
+    font-weight: 400;
+    margin-right: 6px;
+  }
+
+  .xo-section--{{ section.id }} .bgs-stacks__empty {
+    text-align: center;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 55%, transparent);
+    padding: 40px 0;
+    font-size: calc(var(--font-body-scale, 1) * 1.5rem);
+  }
+
+  .xo-section--{{ section.id }} .bgs-faq {
+    padding: clamp(32px, 6vw, 64px) 0;
+  }
+
+  .xo-section--{{ section.id }} .bgs-faq__h2 {
+    font-size: clamp(1.6rem, 3vw, 2.4rem);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin: 0 0 24px;
+    text-align: center;
+    color: rgba(var(--color-foreground));
+  }
+
+  .xo-section--{{ section.id }} .bgs-faq__list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .xo-section--{{ section.id }} .bgs-faq__item {
+    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 8%, transparent);
+    border-radius: var(--general-radius-3, 2rem);
+    transition: border-color 0.3s var(--out-soft, ease);
+  }
+
+  .xo-section--{{ section.id }} .bgs-faq__item:hover {
+    border-color: color-mix(in srgb, rgba(var(--color-foreground)) 20%, transparent);
+  }
+
+  .xo-section--{{ section.id }} .bgs-faq__q {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 16px 20px;
+    cursor: pointer;
+    font-size: clamp(0.95rem, 1.2vw, 1.05rem);
+    font-weight: 600;
+    list-style: none;
+    min-height: 44px;
+    transition: color 0.2s var(--out-soft, ease);
+    color: rgba(var(--color-foreground));
+  }
+
+  .xo-section--{{ section.id }} .bgs-faq__q::-webkit-details-marker { display: none; }
+
+  .xo-section--{{ section.id }} .bgs-faq__q::after {
+    content: '';
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%234b5563' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") no-repeat center;
+    transition: transform 0.3s var(--out-soft, ease);
+  }
+
+  .xo-section--{{ section.id }} .bgs-faq__item[open] .bgs-faq__q::after { transform: rotate(180deg); }
+  .xo-section--{{ section.id }} .bgs-faq__item[open] .bgs-faq__q { color: rgba(var(--color-accent)); }
+  .xo-section--{{ section.id }} .bgs-faq__q:focus-visible { outline: 2px solid rgba(var(--color-accent)); outline-offset: -2px; border-radius: var(--general-radius-3, 2rem); }
+
+  .xo-section--{{ section.id }} .bgs-faq__a {
+    padding: 0 20px 18px;
+    font-size: clamp(0.88rem, 1.1vw, 0.95rem);
+    line-height: 1.7;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 70%, transparent);
+  }
+
+  .xo-section--{{ section.id }} .bgs-faq__a p { margin: 0 0 8px; }
+  .xo-section--{{ section.id }} .bgs-faq__a p:last-child { margin-bottom: 0; }
+
+  .xo-section--{{ section.id }} .bgs-trust {
+    margin: clamp(24px, 4vw, 48px) 0 clamp(32px, 5vw, 56px);
+    background: color-mix(in srgb, rgba(var(--color-foreground)) 3%, transparent);
+    border-radius: var(--general-radius-3, 2rem);
+    padding: 20px 24px;
+  }
+
+  .xo-section--{{ section.id }} .bgs-trust__text {
     font-size: clamp(0.75rem, 1vw, 0.82rem);
     line-height: 1.65;
-    color: var(--color-text-muted, #6b7280);
-    margin: 0; text-align: center;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 55%, transparent);
+    margin: 0;
+    text-align: center;
   }
 
-  /* ── Reduced motion ── */
+  @media (max-width: 768px) {
+    .xo-section--{{ section.id }} .bgs-hero__inner { flex-direction: column; }
+    .xo-section--{{ section.id }} .bgs-hero__media { order: -1; }
+    .xo-section--{{ section.id }} .bgs-hero__img { aspect-ratio: 4/3; }
+  }
+
   @media (prefers-reduced-motion: reduce) {
-    .bgs-card, .bgs-card__cta, .bgs-faq__item, .bgs-faq__q::after { transition: none; }
-    .bgs-card:hover, .bgs-card__cta:hover { transform: none; }
+    .xo-section--{{ section.id }} .bgs-card,
+    .xo-section--{{ section.id }} .bgs-card__cta,
+    .xo-section--{{ section.id }} .bgs-faq__item,
+    .xo-section--{{ section.id }} .bgs-faq__q::after,
+    .xo-section--{{ section.id }} .bgs-card__title a {
+      transition: none;
+    }
   }
-</style>
+{%- endstyle -%}
 
-<div class="bgs">
-  {%- comment -%}  ═══  1. HERO  ═══ {%- endcomment -%}
-  <section class="bgs-hero" aria-label="{{ section.settings.heading | escape }}">
-    <div class="bgs__wrap">
+<section {% render 'section-attr' %}>
+  <xo-container>
+    <div class="bgs-hero" aria-label="{{ section.settings.heading | escape }}">
       <div class="bgs-hero__inner">
         <div class="bgs-hero__content">
           <h1 class="bgs-hero__h1">{{ section.settings.heading }}</h1>
@@ -220,10 +374,7 @@
             <img
               class="bgs-hero__img"
               src="{{ hero_img | image_url: width: 800 }}"
-              srcset="{{ hero_img | image_url: width: 400 }} 400w,
-                      {{ hero_img | image_url: width: 600 }} 600w,
-                      {{ hero_img | image_url: width: 800 }} 800w,
-                      {{ hero_img | image_url: width: 1200 }} 1200w"
+              srcset="{{ hero_img | image_url: width: 400 }} 400w, {{ hero_img | image_url: width: 600 }} 600w, {{ hero_img | image_url: width: 800 }} 800w, {{ hero_img | image_url: width: 1200 }} 1200w"
               sizes="(max-width: 768px) 100vw, 42vw"
               alt="{{ section.settings.heading | escape }}"
               width="{{ hero_img.width }}"
@@ -235,19 +386,16 @@
         {%- endif -%}
       </div>
     </div>
-  </section>
 
-  {%- comment -%}  ═══  2. STACKS GRID  ═══ {%- endcomment -%}
-  {%- assign bgs_coll = section.settings.collection -%}
-  {%- assign bgs_has_collection = false -%}
-  {%- if bgs_coll != blank and bgs_coll.products.size > 0 -%}
-    {%- assign bgs_has_collection = true -%}
-  {%- endif -%}
+    {%- assign bgs_coll = section.settings.collection -%}
+    {%- assign bgs_has_collection = false -%}
+    {%- if bgs_coll != blank and bgs_coll.products.size > 0 -%}
+      {%- assign bgs_has_collection = true -%}
+    {%- endif -%}
 
-  {%- if bgs_has_collection or stack_blocks.size > 0 -%}
-    <section class="bgs-stacks" aria-labelledby="bgs-stacks-heading">
-      <div class="bgs__wrap">
-        <h2 class="bgs-stacks__h2" id="bgs-stacks-heading">{{ section.settings.stacks_heading }}</h2>
+    {%- if bgs_has_collection or stack_blocks.size > 0 -%}
+      <div class="bgs-stacks" aria-labelledby="bgs-stacks-heading-{{ section.id }}">
+        <h2 class="bgs-stacks__h2" id="bgs-stacks-heading-{{ section.id }}">{{ section.settings.stacks_heading }}</h2>
         {%- if section.settings.stacks_subheading != blank -%}
           <p class="bgs-stacks__sub">{{ section.settings.stacks_subheading }}</p>
         {%- endif -%}
@@ -258,39 +406,20 @@
               <article class="bgs-card">
                 <div class="bgs-card__img-wrap">
                   <a href="{{ product.url }}">
-                    <img
-                      class="bgs-card__img"
-                      src="{{ product.featured_image | image_url: width: 600 }}"
-                      alt="{{ product.featured_image.alt | default: product.title | escape }}"
-                      width="600"
-                      height="600"
-                      loading="lazy"
-                      decoding="async">
+                    <img class="bgs-card__img" src="{{ product.featured_image | image_url: width: 600 }}" alt="{{ product.featured_image.alt | default: product.title | escape }}" width="600" height="600" loading="lazy" decoding="async">
                   </a>
                   {%- if section.settings.global_savings_tag != blank -%}
                     <span class="bgs-card__savings">{{ section.settings.global_savings_tag }}</span>
                   {%- endif -%}
                 </div>
-
                 <div class="bgs-card__body">
-                  <h3 class="bgs-card__title">
-                    <a href="{{ product.url }}">{{ product.title }}</a>
-                  </h3>
-
+                  <h3 class="bgs-card__title"><a href="{{ product.url }}">{{ product.title }}</a></h3>
                   <div class="bgs-card__price">
-                    {%- if product.compare_at_price > product.price -%}
-                      <s>{{ product.compare_at_price | money }}</s>
-                    {%- endif -%}
+                    {%- if product.compare_at_price > product.price -%}<s>{{ product.compare_at_price | money }}</s>{%- endif -%}
                     {{ product.price | money }}
                   </div>
-
                   <xo-cart-add {% unless product.available %}xo-disabled{% endunless %}>
-                    <button
-                      type="button"
-                      class="bgs-card__cta"
-                      {% unless product.available %}disabled{% endunless %}
-                      aria-label="Add {{ product.title | escape }} to cart"
-                    >
+                    <button type="button" class="bgs-card__cta" {% unless product.available %}disabled{% endunless %} aria-label="Add {{ product.title | escape }} to cart">
                       {%- if product.available -%}Add to Cart{%- else -%}Sold Out{%- endif -%}
                     </button>
                     <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
@@ -308,23 +437,14 @@
               <article class="bgs-card" {{ block.shopify_attributes }}>
                 {%- if prod != blank -%}
                   <div class="bgs-card__img-wrap">
-                    <img
-                      class="bgs-card__img"
-                      src="{{ prod.featured_image | image_url: width: 600 }}"
-                      alt="{{ prod.featured_image.alt | default: prod.title | escape }}"
-                      width="600"
-                      height="600"
-                      loading="lazy"
-                      decoding="async">
+                    <img class="bgs-card__img" src="{{ prod.featured_image | image_url: width: 600 }}" alt="{{ prod.featured_image.alt | default: prod.title | escape }}" width="600" height="600" loading="lazy" decoding="async">
                     {%- if block.settings.savings_tag != blank -%}
                       <span class="bgs-card__savings">{{ block.settings.savings_tag }}</span>
                     {%- endif -%}
                   </div>
                 {%- endif -%}
-
                 <div class="bgs-card__body">
                   <h3 class="bgs-card__title">{{ block.settings.title | default: prod.title }}</h3>
-
                   {%- if block.settings.compounds != blank -%}
                     {%- assign items = block.settings.compounds | split: ',' -%}
                     <ul class="bgs-card__compounds">
@@ -336,29 +456,14 @@
                       {%- endfor -%}
                     </ul>
                   {%- endif -%}
-
                   {%- if prod != blank -%}
                     <div class="bgs-card__price">
-                      {%- if prod.compare_at_price > prod.price -%}
-                        <s>{{ prod.compare_at_price | money }}</s>
-                      {%- endif -%}
+                      {%- if prod.compare_at_price > prod.price -%}<s>{{ prod.compare_at_price | money }}</s>{%- endif -%}
                       {{ prod.price | money }}
                     </div>
-
-                    <xo-cart-add
-                      {% if prod.selected_or_first_available_variant.available == false %}xo-disabled{% endif %}
-                    >
-                      <button
-                        type="button"
-                        class="bgs-card__cta"
-                        {% if prod.selected_or_first_available_variant.available == false %}disabled{% endif %}
-                        aria-label="Add {{ block.settings.title | default: prod.title | escape }} to cart"
-                      >
-                        {%- if prod.selected_or_first_available_variant.available -%}
-                          Add Stack to Cart
-                        {%- else -%}
-                          Sold Out
-                        {%- endif -%}
+                    <xo-cart-add {% if prod.selected_or_first_available_variant.available == false %}xo-disabled{% endif %}>
+                      <button type="button" class="bgs-card__cta" {% if prod.selected_or_first_available_variant.available == false %}disabled{% endif %} aria-label="Add {{ block.settings.title | default: prod.title | escape }} to cart">
+                        {%- if prod.selected_or_first_available_variant.available -%}Add Stack to Cart{%- else -%}Sold Out{%- endif -%}
                       </button>
                       <input type="hidden" name="id" value="{{ prod.selected_or_first_available_variant.id }}">
                     </xo-cart-add>
@@ -369,92 +474,74 @@
           {%- endif -%}
         </div>
       </div>
-    </section>
-  {%- endif -%}
+    {%- endif -%}
 
-  {%- comment -%}  ═══  3. FAQ ACCORDION  ═══ {%- endcomment -%}
-  {%- if faq_blocks.size > 0 -%}
-    <section class="bgs-faq" aria-labelledby="bgs-faq-heading">
-      <div class="bgs__wrap">
-        <h2 class="bgs-faq__h2" id="bgs-faq-heading">{{ section.settings.faq_heading }}</h2>
-
+    {%- if faq_blocks.size > 0 -%}
+      <div class="bgs-faq" aria-labelledby="bgs-faq-heading-{{ section.id }}">
+        <h2 class="bgs-faq__h2" id="bgs-faq-heading-{{ section.id }}">{{ section.settings.faq_heading }}</h2>
         <div class="bgs-faq__list">
           {%- for block in faq_blocks -%}
             <details class="bgs-faq__item" {{ block.shopify_attributes }}>
-              <summary class="bgs-faq__q">
-                <span>{{ block.settings.question }}</span>
-              </summary>
+              <summary class="bgs-faq__q"><span>{{ block.settings.question }}</span></summary>
               <div class="bgs-faq__a rte">{{ block.settings.answer }}</div>
             </details>
           {%- endfor -%}
         </div>
       </div>
-    </section>
 
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": [
-        {%- for block in faq_blocks -%}
-        {
-          "@type": "Question",
-          "name": {{ block.settings.question | json }},
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": {{ block.settings.answer | strip_html | json }}
-          }
-        }{%- unless forloop.last -%},{%- endunless -%}
-        {%- endfor -%}
-      ]
-    }
-    </script>
-  {%- endif -%}
+      <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {%- for block in faq_blocks -%}
+          {
+            "@type": "Question",
+            "name": {{ block.settings.question | json }},
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": {{ block.settings.answer | strip_html | json }}
+            }
+          }{%- unless forloop.last -%},{%- endunless -%}
+          {%- endfor -%}
+        ]
+      }
+      </script>
+    {%- endif -%}
 
-  {%- comment -%}  ═══  4. TRUST / DISCLAIMER  ═══ {%- endcomment -%}
-  {%- if section.settings.disclaimer != blank -%}
-    <aside class="bgs-trust bgs__wrap" role="note" aria-label="Disclaimer">
-      <p class="bgs-trust__text">{{ section.settings.disclaimer }}</p>
-    </aside>
-  {%- endif -%}
-</div>
+    {%- if section.settings.disclaimer != blank -%}
+      <aside class="bgs-trust" role="note" aria-label="Disclaimer">
+        <p class="bgs-trust__text">{{ section.settings.disclaimer }}</p>
+      </aside>
+    {%- endif -%}
+  </xo-container>
+</section>
 
 {% schema %}
 {
   "name": "Beginner Stacks",
-  "tag": "div",
-  "class": "bgs-section",
   "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "default" },
     { "type": "header", "content": "Hero" },
     { "type": "text", "id": "heading", "label": "Heading", "default": "Beginner Nootropic Stacks" },
-    {
-      "type": "richtext",
-      "id": "subheading",
-      "label": "Value proposition",
-      "default": "<p>New to cognitive enhancement? Our beginner stacks combine synergistic compounds at clinically studied dosages — so you get meaningful results without the guesswork.</p><p>Every stack is third-party tested for purity and ships with a Certificate of Analysis. Start low, go slow, and build the foundation for long-term cognitive performance.</p>"
-    },
+    { "type": "richtext", "id": "subheading", "label": "Value proposition", "default": "<p>New to cognitive enhancement? Our beginner stacks combine synergistic compounds at clinically studied dosages — so you get meaningful results without the guesswork.</p><p>Every stack is third-party tested for purity and ships with a Certificate of Analysis. Start low, go slow, and build the foundation for long-term cognitive performance.</p>" },
     { "type": "image_picker", "id": "hero_image", "label": "Hero image" },
     { "type": "text", "id": "badge_1_text", "label": "Badge 1", "default": "3rd-Party Tested" },
     { "type": "text", "id": "badge_2_text", "label": "Badge 2", "default": "Pre-Calculated Dosages" },
     { "type": "text", "id": "badge_3_text", "label": "Badge 3", "default": "Synergy Optimized" },
-
     { "type": "header", "content": "Stacks Grid" },
     { "type": "collection", "id": "collection", "label": "Collection" },
     { "type": "range", "id": "products_limit", "min": 2, "max": 12, "step": 1, "default": 6, "label": "Max products" },
     { "type": "text", "id": "global_savings_tag", "label": "Savings badge (all cards)", "default": "Bundle Savings: 10% Off", "info": "Leave blank to hide. Only used when rendering from a collection." },
     { "type": "text", "id": "stacks_heading", "label": "Section heading", "default": "Choose Your Stack" },
     { "type": "text", "id": "stacks_subheading", "label": "Section subheading", "default": "Curated combinations designed for specific cognitive goals." },
-
     { "type": "header", "content": "FAQ" },
     { "type": "text", "id": "faq_heading", "label": "FAQ heading", "default": "How to Stack" },
-
     { "type": "header", "content": "Disclaimer" },
-    {
-      "type": "textarea",
-      "id": "disclaimer",
-      "label": "YMYL disclaimer",
-      "default": "These statements have not been evaluated by the Food and Drug Administration or any equivalent regulatory body. These products are intended for research and educational purposes only and are not intended to diagnose, treat, cure, or prevent any disease. Consult a qualified healthcare professional before starting any new supplement regimen."
-    }
+    { "type": "textarea", "id": "disclaimer", "label": "YMYL disclaimer", "default": "These statements have not been evaluated by the Food and Drug Administration or any equivalent regulatory body. These products are intended for research and educational purposes only and are not intended to diagnose, treat, cure, or prevent any disease. Consult a qualified healthcare professional before starting any new supplement regimen." },
+    { "type": "header", "content": "Section Padding" },
+    { "type": "range", "id": "padding_top", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding top", "default": 0 },
+    { "type": "range", "id": "padding_bottom", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding bottom", "default": 56 }
   ],
   "blocks": [
     {
@@ -480,51 +567,12 @@
     {
       "name": "Beginner Stacks",
       "blocks": [
-        {
-          "type": "stack",
-          "settings": {
-            "title": "Focus & Clarity Stack",
-            "compounds": "Caffeine + L-Theanine, Alpha-GPC, Lion's Mane",
-            "savings_tag": "Bundle Savings: 10% Off"
-          }
-        },
-        {
-          "type": "stack",
-          "settings": {
-            "title": "Memory & Learning Stack",
-            "compounds": "Bacopa Monnieri, Alpha-GPC, Omega-3 DHA",
-            "savings_tag": "Bundle Savings: 10% Off"
-          }
-        },
-        {
-          "type": "stack",
-          "settings": {
-            "title": "Calm Energy Stack",
-            "compounds": "L-Theanine, Ashwagandha KSM-66, Rhodiola Rosea",
-            "savings_tag": "Bundle Savings: 10% Off"
-          }
-        },
-        {
-          "type": "faq",
-          "settings": {
-            "question": "What is a nootropic stack and why should I use one?",
-            "answer": "<p>A nootropic stack is a combination of two or more cognitive-enhancing compounds taken together for synergistic effects. Well-designed stacks target complementary pathways in the brain — for example, pairing a cholinergic with a racetam — so the combined benefit exceeds what each compound delivers alone. Beginner stacks use conservative dosages and well-researched compounds to minimise risk while maximising results.</p>"
-          }
-        },
-        {
-          "type": "faq",
-          "settings": {
-            "question": "How should I dose and cycle a beginner stack?",
-            "answer": "<p>Start with the lowest effective dose listed on each product and take the stack at the same time each day, ideally with a meal containing healthy fats for better absorption. After 4–6 weeks of consistent use, take a 1-week break (\"off-cycle\") to prevent tolerance build-up. Track your focus, mood, and sleep in a simple journal so you can objectively assess what's working before adjusting dosages.</p>"
-          }
-        },
-        {
-          "type": "faq",
-          "settings": {
-            "question": "Are there any interactions I should be aware of?",
-            "answer": "<p>Our beginner stacks are formulated with widely-studied compounds that have established safety profiles at recommended dosages. However, if you are taking prescription medications — especially SSRIs, blood thinners, or stimulants — consult your physician before adding any supplement. Pregnant or nursing individuals should avoid nootropic supplementation unless explicitly cleared by a healthcare provider.</p>"
-          }
-        }
+        { "type": "stack", "settings": { "title": "Focus & Clarity Stack", "compounds": "Caffeine + L-Theanine, Alpha-GPC, Lion's Mane", "savings_tag": "Bundle Savings: 10% Off" } },
+        { "type": "stack", "settings": { "title": "Memory & Learning Stack", "compounds": "Bacopa Monnieri, Alpha-GPC, Omega-3 DHA", "savings_tag": "Bundle Savings: 10% Off" } },
+        { "type": "stack", "settings": { "title": "Calm Energy Stack", "compounds": "L-Theanine, Ashwagandha KSM-66, Rhodiola Rosea", "savings_tag": "Bundle Savings: 10% Off" } },
+        { "type": "faq", "settings": { "question": "What is a nootropic stack and why should I use one?", "answer": "<p>A nootropic stack is a combination of two or more cognitive-enhancing compounds taken together for synergistic effects. Well-designed stacks target complementary pathways in the brain — for example, pairing a cholinergic with a racetam — so the combined benefit exceeds what each compound delivers alone. Beginner stacks use conservative dosages and well-researched compounds to minimise risk while maximising results.</p>" } },
+        { "type": "faq", "settings": { "question": "How should I dose and cycle a beginner stack?", "answer": "<p>Start with the lowest effective dose listed on each product and take the stack at the same time each day, ideally with a meal containing healthy fats for better absorption. After 4–6 weeks of consistent use, take a 1-week break (\"off-cycle\") to prevent tolerance build-up. Track your focus, mood, and sleep in a simple journal so you can objectively assess what's working before adjusting dosages.</p>" } },
+        { "type": "faq", "settings": { "question": "Are there any interactions I should be aware of?", "answer": "<p>Our beginner stacks are formulated with widely-studied compounds that have established safety profiles at recommended dosages. However, if you are taking prescription medications — especially SSRIs, blood thinners, or stimulants — consult your physician before adding any supplement. Pregnant or nursing individuals should avoid nootropic supplementation unless explicitly cleared by a healthcare provider.</p>" } }
       ]
     }
   ]
