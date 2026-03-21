@@ -1,24 +1,10 @@
 {%- liquid
   assign npx_id = section.id | replace: '-', '' | replace: '_', '' | downcase
 
-  comment
-    ==========================================================
-    Nootropix — Product selection
-    - On PDP, `product` exists
-    - Else, allow selecting a demo product in theme editor
-    ==========================================================
-  endcomment
-
   assign p = product
   if p == blank and section.settings.demo_product != blank
     assign p = section.settings.demo_product
   endif
-
-  comment
-    ==========================================================
-    Nootropix — Form label (used for {form} placeholder)
-    ==========================================================
-  endcomment
 
   assign form_label = section.settings.form_label_override | default: '' | strip
   if form_label == blank
@@ -27,13 +13,6 @@
       assign form_label = 'powder'
     endif
   endif
-
-  comment
-    ==========================================================
-    Nootropix — Product description data layer
-    (mirrors product-description-metafields behavior)
-    ==========================================================
-  endcomment
 
   assign tldr_src = nil
   assign tldr_data = nil
@@ -57,15 +36,6 @@
 
   assign how_it_works_field = p.metafields.npx.how_it_works
   assign how_it_works_value = how_it_works_field.value | default: how_it_works_field
-
-  comment
-    ==========================================================
-    Legacy JSON parsing (string -> object/array), if present
-    We parse ONLY when it looks like JSON.
-    For arrays, Liquid `contains` checks membership, not substring,
-    so this will generally not accidentally parse arrays.
-    ==========================================================
-  endcomment
 -%}
 {% # theme-check-disable UnknownFilter %}
 {%- liquid
@@ -151,565 +121,578 @@
   assign visible_limit = section.settings.max_visible_items | default: 7
 -%}
 
-{% style %}
-  .npx-vts-{{ npx_id }}{
-    width:100%;
-    background:{{ section.settings.background_color }};
-    padding-top:{{ section.settings.padding_top }}px;
-    padding-bottom:{{ section.settings.padding_bottom }}px;
+{%- style -%}
+  .xo-section--{{ section.id }} {
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
   }
 
-  .npx-vts__inner-{{ npx_id }}{
-    max-width:{{ section.settings.max_width }}px;
-    margin:0 auto;
-    padding:0 var(--page-gutter);
+  .xo-section--{{ section.id }} .vts__inner {
+    max-width: {{ section.settings.max_width }}px;
+    margin: 0 auto;
   }
 
-  .npx-vts__header-{{ npx_id }}{
-    margin-bottom:{{ section.settings.header_spacing }}px;
+  .xo-section--{{ section.id }} .vts__header {
+    margin-bottom: {{ section.settings.header_spacing }}px;
   }
 
-  .npx-vts__title-{{ npx_id }}{
-    margin:0 0 10px 0;
-    font-size:{{ section.settings.title_font_size }}px;
-    font-weight:{{ section.settings.title_font_weight }};
-    color:{{ section.settings.title_color }};
-    line-height:1.2;
+  .xo-section--{{ section.id }} .vts__title {
+    margin: 0 0 10px 0;
+    font-size: {{ section.settings.title_font_size }}px;
+    font-weight: {{ section.settings.title_font_weight }};
+    color: rgba(var(--color-foreground));
+    line-height: 1.2;
   }
 
-  .npx-vts__subtitle-{{ npx_id }}{
-    color:{{ section.settings.subtitle_color }};
-    font-size:{{ section.settings.subtitle_font_size }}px;
-    line-height:1.6;
+  .xo-section--{{ section.id }} .vts__subtitle {
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 55%, transparent);
+    font-size: {{ section.settings.subtitle_font_size }}px;
+    line-height: 1.6;
   }
 
-  .npx-vts__timeline-wrap-{{ npx_id }}{
-    position:relative;
+  .xo-section--{{ section.id }} .vts__timeline-wrap {
+    position: relative;
   }
 
-  .npx-vts__line-{{ npx_id }}{
-    position:absolute;
-    left:{{ section.settings.dot_size | divided_by: 2 }}px;
-    top:0;
-    bottom:0;
-    width:{{ section.settings.line_width }}px;
-    background-color:{{ section.settings.line_color }};
-    transform:translateX(-50%);
+  .xo-section--{{ section.id }} .vts__line {
+    position: absolute;
+    left: {{ section.settings.dot_size | divided_by: 2 }}px;
+    top: 0;
+    bottom: 0;
+    width: {{ section.settings.line_width }}px;
+    background-color: color-mix(in srgb, rgba(var(--color-foreground)) 12%, transparent);
+    transform: translateX(-50%);
   }
 
-  .npx-vts__progress-{{ npx_id }}{
-    position:absolute;
-    left:0;
-    top:0;
-    width:100%;
-    height:0%;
-    background-color:{{ section.settings.active_line_color }};
-    transition:height .25s ease;
+  .xo-section--{{ section.id }} .vts__progress {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 0%;
+    background-color: rgba(var(--color-accent));
+    transition: height 0.25s var(--out-soft, ease);
   }
 
-  .npx-vts__items-{{ npx_id }}{
-    position:relative;
-    z-index:1;
+  .xo-section--{{ section.id }} .vts__items {
+    position: relative;
+    z-index: 1;
   }
 
-  .npx-vts__item-{{ npx_id }}{
-    display:flex;
-    gap:{{ section.settings.item_gap }}px;
-    margin-bottom:{{ section.settings.item_spacing }}px;
-    opacity:.55;
-    transition:opacity .2s ease;
+  .xo-section--{{ section.id }} .vts__item {
+    display: flex;
+    gap: {{ section.settings.item_gap }}px;
+    margin-bottom: {{ section.settings.item_spacing }}px;
+    opacity: 0.45;
+    transition: opacity 0.2s var(--out-soft, ease);
   }
 
-  .npx-vts__item-{{ npx_id }}.is-active{ opacity:1; }
-
-  .npx-vts__dot-wrap-{{ npx_id }}{
-    flex-shrink:0;
-    position:relative;
+  .xo-section--{{ section.id }} .vts__item.is-active {
+    opacity: 1;
   }
 
-  .npx-vts__dot-{{ npx_id }}{
-    width:{{ section.settings.dot_size }}px;
-    height:{{ section.settings.dot_size }}px;
-    border-radius:999px;
-    background-color:{{ section.settings.dot_color }};
-    border:{{ section.settings.dot_border_width }}px solid {{ section.settings.dot_border_color }};
-    transition:all .2s ease;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:{{ section.settings.dot_inner_font_size }}px;
-    color:{{ section.settings.dot_inner_color }};
-    line-height:1;
-    user-select:none;
+  .xo-section--{{ section.id }} .vts__dot-wrap {
+    flex-shrink: 0;
+    position: relative;
   }
 
-  .npx-vts__item-{{ npx_id }}.is-active .npx-vts__dot-{{ npx_id }}{
-    background-color:{{ section.settings.active_dot_color }};
-    border-color:{{ section.settings.active_dot_border_color }};
-    color:{{ section.settings.active_dot_inner_color }};
-    transform:scale(1.12);
+  .xo-section--{{ section.id }} .vts__dot {
+    width: {{ section.settings.dot_size }}px;
+    height: {{ section.settings.dot_size }}px;
+    border-radius: 999px;
+    background-color: rgba(var(--color-background));
+    border: {{ section.settings.dot_border_width }}px solid color-mix(in srgb, rgba(var(--color-foreground)) 15%, transparent);
+    transition: all 0.2s var(--out-soft, ease);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: {{ section.settings.dot_inner_font_size }}px;
+    color: rgba(var(--color-foreground));
+    line-height: 1;
+    user-select: none;
   }
 
-  .npx-vts__content-{{ npx_id }}{
-    flex:1;
-    min-width:0;
-    padding-top:{{ section.settings.content_padding_top }}px;
+  .xo-section--{{ section.id }} .vts__item.is-active .vts__dot {
+    background-color: rgba(var(--color-accent));
+    border-color: rgba(var(--color-accent));
+    color: rgba(var(--color-background));
+    transform: scale(1.12);
   }
 
-  .npx-vts__label-{{ npx_id }}{
-    font-size:{{ section.settings.label_font_size }}px;
-    font-weight:{{ section.settings.label_font_weight }};
-    color:{{ section.settings.label_color }};
-    margin:0 0 8px 0;
-    display:flex;
-    align-items:center;
-    gap:10px;
+  .xo-section--{{ section.id }} .vts__content {
+    flex: 1;
+    min-width: 0;
+    padding-top: {{ section.settings.content_padding_top }}px;
   }
 
-  .npx-vts__item-{{ npx_id }}.is-active .npx-vts__label-{{ npx_id }}{
-    color:{{ section.settings.active_label_color }};
+  .xo-section--{{ section.id }} .vts__label {
+    font-size: {{ section.settings.label_font_size }}px;
+    font-weight: {{ section.settings.label_font_weight }};
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 55%, transparent);
+    margin: 0 0 8px 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
   }
 
-  .npx-vts__label-button-{{ npx_id }}{
-    all:unset;
-    cursor:pointer;
-    display:inline-flex;
-    align-items:center;
-    gap:10px;
-    min-height:var(--touch-min, 44px);
-    transition:color .3s ease;
+  .xo-section--{{ section.id }} .vts__item.is-active .vts__label {
+    color: rgba(var(--color-foreground));
   }
 
-  .npx-vts__label-button-{{ npx_id }}:focus-visible{
-    outline:2px solid var(--color-accent-dark, #92400e);
-    outline-offset:3px;
-    border-radius:4px;
+  .xo-section--{{ section.id }} .vts__label-btn {
+    all: unset;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-height: var(--touch-min, 44px);
+    transition: color 0.3s var(--out-soft, ease);
   }
 
-  .npx-vts__text-{{ npx_id }}{
-    color:{{ section.settings.text_color }};
+  .xo-section--{{ section.id }} .vts__label-btn:focus-visible {
+    outline: 2px solid rgba(var(--color-accent));
+    outline-offset: 3px;
+    border-radius: 4px;
   }
 
-  .npx-vts__item-{{ npx_id }}.is-active .npx-vts__text-{{ npx_id }}{
-    color:{{ section.settings.active_text_color }};
+  .xo-section--{{ section.id }} .vts__text {
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 55%, transparent);
   }
 
-  /* Let your existing product-prose styles drive typography */
-  .npx-vts__text-{{ npx_id }} .product-prose{
-    font-size:{{ section.settings.text_font_size }}px;
-    line-height:1.7;
+  .xo-section--{{ section.id }} .vts__item.is-active .vts__text {
+    color: rgba(var(--color-foreground));
   }
 
-  .npx-vts__empty-{{ npx_id }}{
-    color:#999;
-    font-style:italic;
+  .xo-section--{{ section.id }} .vts__text .product-prose {
+    font-size: {{ section.settings.text_font_size }}px;
+    line-height: 1.7;
   }
 
-  .npx-vts__faq details{
-    border:none;
-    border-radius:10px;
-    padding:12px 14px;
-    margin:10px 0;
-    background:rgba(255,255,255,.7);
-    box-shadow:var(--shadow-sm);
-    transition:var(--transition-premium, all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1));
-  }
-  .npx-vts__faq details:hover{
-    box-shadow:var(--shadow-sm-hover);
-    transform:translateY(-1px);
-  }
-  .npx-vts__faq details[open]{
-    box-shadow:0 0 0 1px var(--color-accent-primary, #FBBF24), var(--shadow-gold-sm);
-  }
-  .npx-vts__faq summary{
-    cursor:pointer;
-    font-weight:600;
-    list-style:none;
-    min-height:var(--touch-min, 44px);
-    display:flex;
-    align-items:center;
-  }
-  .npx-vts__faq summary::-webkit-details-marker{ display:none; }
-  .npx-vts__faq summary:focus-visible{
-    outline:2px solid var(--color-accent-dark, #92400e);
-    outline-offset:2px;
-    border-radius:4px;
+  .xo-section--{{ section.id }} .vts__empty {
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 40%, transparent);
+    font-style: italic;
   }
 
-  @media (max-width: 749px){
-    .npx-vts__inner-{{ npx_id }}{ padding:0 var(--page-gutter); }
-    .npx-vts__title-{{ npx_id }}{ font-size:{{ section.settings.title_font_size | times: 0.9 }}px; }
-    .npx-vts__label-{{ npx_id }}{ font-size:{{ section.settings.label_font_size | times: 0.92 }}px; }
-    .npx-vts__text-{{ npx_id }} .product-prose{ font-size:{{ section.settings.text_font_size | times: 0.96 }}px; }
+  .xo-section--{{ section.id }} .vts__faq details {
+    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
+    border-radius: var(--general-radius-1, 1rem);
+    padding: 12px 14px;
+    margin: 10px 0;
+    background: color-mix(in srgb, rgba(var(--color-background)) 90%, transparent);
+    transition: border-color 0.3s var(--out-soft, ease);
   }
 
-  @media (prefers-reduced-motion: reduce){
-    .npx-vts__progress-{{ npx_id }},
-    .npx-vts__dot-{{ npx_id }},
-    .npx-vts__item-{{ npx_id }}{
-      transition:none !important;
+  .xo-section--{{ section.id }} .vts__faq details:hover {
+    border-color: color-mix(in srgb, rgba(var(--color-foreground)) 20%, transparent);
+  }
+
+  .xo-section--{{ section.id }} .vts__faq details[open] {
+    border-color: rgba(var(--color-accent));
+  }
+
+  .xo-section--{{ section.id }} .vts__faq summary {
+    cursor: pointer;
+    font-weight: 600;
+    list-style: none;
+    min-height: var(--touch-min, 44px);
+    display: flex;
+    align-items: center;
+  }
+
+  .xo-section--{{ section.id }} .vts__faq summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .xo-section--{{ section.id }} .vts__faq summary:focus-visible {
+    outline: 2px solid rgba(var(--color-accent));
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  @media (max-width: 768px) {
+    .xo-section--{{ section.id }} .vts__title {
+      font-size: {{ section.settings.title_font_size | times: 0.9 }}px;
+    }
+
+    .xo-section--{{ section.id }} .vts__label {
+      font-size: {{ section.settings.label_font_size | times: 0.92 }}px;
+    }
+
+    .xo-section--{{ section.id }} .vts__text .product-prose {
+      font-size: {{ section.settings.text_font_size | times: 0.96 }}px;
     }
   }
-{% endstyle %}
 
-<div class="npx-vts-{{ npx_id }} reveal-up-premium" aria-label="Product details and usage information" {{ section.shopify_attributes }}>
-  <div class="npx-vts__inner-{{ npx_id }}">
-    {%- if section.settings.title != blank or section.settings.subtitle != blank -%}
-      <div class="npx-vts__header-{{ npx_id }}">
-        {%- if section.settings.title != blank -%}
-          <h2 class="npx-vts__title-{{ npx_id }}">{{ section.settings.title }}</h2>
-        {%- endif -%}
-        {%- if section.settings.subtitle != blank -%}
-          <div class="npx-vts__subtitle-{{ npx_id }}">{{ section.settings.subtitle }}</div>
-        {%- endif -%}
-      </div>
-    {%- endif -%}
+  @media (prefers-reduced-motion: reduce) {
+    .xo-section--{{ section.id }} .vts__progress,
+    .xo-section--{{ section.id }} .vts__dot,
+    .xo-section--{{ section.id }} .vts__item,
+    .xo-section--{{ section.id }} .vts__label-btn,
+    .xo-section--{{ section.id }} .vts__faq details {
+      transition: none;
+    }
+  }
+{%- endstyle -%}
 
-    {%- if p == blank -%}
-      <div class="npx-vts__empty-{{ npx_id }}">
-        This section needs a product context. Add it to a product template, or select a “Demo product” in the section settings.
-      </div>
-    {%- else -%}
-
-      <npx-scroll-timeline-{{ npx_id }}
-        class="npx-vts__timeline-wrap-{{ npx_id }}"
-        data-offset="{{ section.settings.scroll_offset }}"
-        data-active-mode="{{ section.settings.active_mode }}"
-        data-click-scroll="{{ section.settings.enable_click_scroll }}"
-        data-scrollto-offset="{{ section.settings.scroll_to_offset }}"
-        style="display:block;"
-      >
-        <div class="npx-vts__line-{{ npx_id }}">
-          <div class="npx-vts__progress-{{ npx_id }}"></div>
+<section {% render 'section-attr' %}>
+  <xo-container>
+    <div class="vts__inner">
+      {%- if section.settings.title != blank or section.settings.subtitle != blank -%}
+        <div class="vts__header">
+          {%- if section.settings.title != blank -%}
+            <h2 class="vts__title">{{ section.settings.title }}</h2>
+          {%- endif -%}
+          {%- if section.settings.subtitle != blank -%}
+            <div class="vts__subtitle">{{ section.settings.subtitle }}</div>
+          {%- endif -%}
         </div>
+      {%- endif -%}
 
-        <div class="npx-vts__items-{{ npx_id }}">
-          {%- liquid
-            assign rendered_count = 0
-          -%}
+      {%- if p == blank -%}
+        <div class="vts__empty">
+          This section needs a product context. Add it to a product template, or select a "Demo product" in the section settings.
+        </div>
+      {%- else -%}
 
-          {%- for block in section.blocks -%}
-            {%- if block.type != 'item' -%}{%- continue -%}{%- endif -%}
-            {%- if rendered_count >= visible_limit -%}{%- break -%}{%- endif -%}
+        <npx-scroll-timeline-{{ npx_id }}
+          class="vts__timeline-wrap"
+          data-offset="{{ section.settings.scroll_offset }}"
+          data-active-mode="{{ section.settings.active_mode }}"
+          data-click-scroll="{{ section.settings.enable_click_scroll }}"
+          data-scrollto-offset="{{ section.settings.scroll_to_offset }}"
+          style="display:block;"
+        >
+          <div class="vts__line">
+            <div class="vts__progress"></div>
+          </div>
 
+          <div class="vts__items">
             {%- liquid
-              assign label = block.settings.label | default: '' | strip
-              assign label = label | replace: '{form}', form_label
-
-              assign source = block.settings.source
+              assign rendered_count = 0
             -%}
 
-            {%- capture content_html -%}
-              {%- case source -%}
+            {%- for block in section.blocks -%}
+              {%- if block.type != 'item' -%}{%- continue -%}{%- endif -%}
+              {%- if rendered_count >= visible_limit -%}{%- break -%}{%- endif -%}
 
-                {%- when 'tldr' -%}
-                  {%- if tldr_data != blank -%}
-                    {%- assign tldr_first = tldr_data | json | slice: 0, 1 -%}
-                    <div class="product-prose">
-                      {%- if tldr_first == '[' -%}
-                        <ul>
-                          {%- for item in tldr_data -%}
-                            {%- assign item_first = item | json | slice: 0, 1 -%}
-                            <li>
-                              {%- if item_first == '{' -%}
-                                {%- if item.text != blank -%}{{ item.text }}
-                                {%- elsif item.label != blank and item.description != blank -%}<strong>{{ item.label }}:</strong> {{ item.description }}
-                                {%- else -%}{{ item | json }}{%- endif -%}
-                              {%- else -%}
-                                {{ item }}
-                              {%- endif -%}
-                            </li>
-                          {%- endfor -%}
-                        </ul>
-                      {%- else -%}
-                        {%- assign lines = tldr_data | newline_to_br | split: '<br />' -%}
-                        <ul>
-                          {%- for l in lines -%}
-                            {%- assign ll = l | strip -%}
-                            {%- if ll != blank -%}<li>{{ ll }}</li>{%- endif -%}
-                          {%- endfor -%}
-                        </ul>
-                      {%- endif -%}
-                    </div>
-                  {%- endif -%}
+              {%- liquid
+                assign label = block.settings.label | default: '' | strip
+                assign label = label | replace: '{form}', form_label
 
-                {%- when 'what_it_is' -%}
-                  {%- if what_it_is_data != blank -%}
-                    {%- assign wi_first = what_it_is_data | json | slice: 0, 1 -%}
-                    <div class="product-prose">
-                      {%- if wi_first == '[' -%}
-                        <ul>
-                          {%- for item in what_it_is_data -%}<li>{{ item }}</li>{%- endfor -%}
-                        </ul>
-                      {%- elsif wi_first == '{' -%}
-                        <dl>
-                          {%- for kv in what_it_is_data -%}
-                            <dt><strong>{{ kv[0] }}</strong></dt>
-                            <dd>{{ kv[1] }}</dd>
-                          {%- endfor -%}
-                        </dl>
-                      {%- else -%}
-                        <p>{{ what_it_is_data | newline_to_br }}</p>
-                      {%- endif -%}
-                    </div>
-                  {%- endif -%}
+                assign source = block.settings.source
+              -%}
 
-                {%- when 'feel_timeline' -%}
-                  {%- if feel_data != blank -%}
-                    {%- assign feel_first = feel_data | json | slice: 0, 1 -%}
-                    <div class="product-prose">
-                      {%- if feel_first == '[' -%}
-                        <ul>
-                          {%- for f in feel_data -%}
-                            {%- assign f_label = f.label | default: f.title | default: f.time -%}
-                            {%- assign f_desc  = f.description | default: f.text | default: f.value -%}
-                            <li>
-                              {%- if f_label != blank and f_desc != blank -%}
-                                <strong>{{ f_label }}:</strong> {{ f_desc }}
-                              {%- elsif f_desc != blank -%}
-                                {{ f_desc }}
-                              {%- else -%}
-                                {{ f }}
-                              {%- endif -%}
-                            </li>
-                          {%- endfor -%}
-                        </ul>
-                      {%- else -%}
-                        <p>{{ feel_data | newline_to_br }}</p>
-                      {%- endif -%}
-                    </div>
-                  {%- endif -%}
+              {%- capture content_html -%}
+                {%- case source -%}
 
-                {%- when 'feel_note' -%}
-                  {%- if feel_note_data != blank -%}
-                    <div class="product-prose">
-                      <aside class="npx-note">{{ feel_note_data | newline_to_br }}</aside>
-                    </div>
-                  {%- endif -%}
-
-                {%- when 'how_it_works' -%}
-                  {%- if how_it_works_field != blank -%}
-                    <div class="product-prose">
-                      {%- if how_it_works_parsed != blank -%}
-                        {%- assign hiw_first = how_it_works_parsed | json | slice: 0, 1 -%}
-                        {%- if hiw_first == '[' -%}
+                  {%- when 'tldr' -%}
+                    {%- if tldr_data != blank -%}
+                      {%- assign tldr_first = tldr_data | json | slice: 0, 1 -%}
+                      <div class="product-prose">
+                        {%- if tldr_first == '[' -%}
                           <ul>
-                            {%- for item in how_it_works_parsed -%}<li>{{ item }}</li>{%- endfor -%}
+                            {%- for item in tldr_data -%}
+                              {%- assign item_first = item | json | slice: 0, 1 -%}
+                              <li>
+                                {%- if item_first == '{' -%}
+                                  {%- if item.text != blank -%}{{ item.text }}
+                                  {%- elsif item.label != blank and item.description != blank -%}<strong>{{ item.label }}:</strong> {{ item.description }}
+                                  {%- else -%}{{ item | json }}{%- endif -%}
+                                {%- else -%}
+                                  {{ item }}
+                                {%- endif -%}
+                              </li>
+                            {%- endfor -%}
                           </ul>
-                        {%- elsif hiw_first == '{' -%}
+                        {%- else -%}
+                          {%- assign lines = tldr_data | newline_to_br | split: '<br />' -%}
+                          <ul>
+                            {%- for l in lines -%}
+                              {%- assign ll = l | strip -%}
+                              {%- if ll != blank -%}<li>{{ ll }}</li>{%- endif -%}
+                            {%- endfor -%}
+                          </ul>
+                        {%- endif -%}
+                      </div>
+                    {%- endif -%}
+
+                  {%- when 'what_it_is' -%}
+                    {%- if what_it_is_data != blank -%}
+                      {%- assign wi_first = what_it_is_data | json | slice: 0, 1 -%}
+                      <div class="product-prose">
+                        {%- if wi_first == '[' -%}
+                          <ul>
+                            {%- for item in what_it_is_data -%}<li>{{ item }}</li>{%- endfor -%}
+                          </ul>
+                        {%- elsif wi_first == '{' -%}
                           <dl>
-                            {%- for kv in how_it_works_parsed -%}
+                            {%- for kv in what_it_is_data -%}
                               <dt><strong>{{ kv[0] }}</strong></dt>
                               <dd>{{ kv[1] }}</dd>
                             {%- endfor -%}
                           </dl>
                         {%- else -%}
-                          <p>{{ how_it_works_parsed | newline_to_br }}</p>
+                          <p>{{ what_it_is_data | newline_to_br }}</p>
                         {%- endif -%}
-                      {%- else -%}
-                        {{ how_it_works_field | metafield_tag }}
-                      {%- endif -%}
-                    </div>
-                  {%- endif -%}
+                      </div>
+                    {%- endif -%}
 
-                {%- when 'how_to_use' -%}
-                  {%- if how_data != blank -%}
-                    {%- assign how_first = how_data | json | slice: 0, 1 -%}
-                    <div class="product-prose">
-                      {%- if how_first == '[' -%}
-                        <ul>
-                          {%- for h in how_data -%}
-                            {%- assign h_label = h.label | default: h.title -%}
-                            {%- assign h_text  = h.text | default: h.description | default: h.value -%}
-                            <li>
-                              {%- if h_label != blank and h_text != blank -%}
-                                <strong>{{ h_label }}:</strong> {{ h_text }}
-                              {%- elsif h_text != blank -%}
-                                {{ h_text }}
-                              {%- else -%}
-                                {{ h }}
-                              {%- endif -%}
-                            </li>
-                          {%- endfor -%}
-                        </ul>
-                      {%- else -%}
-                        <p>{{ how_data | newline_to_br }}</p>
-                      {%- endif -%}
-                    </div>
-                  {%- endif -%}
-
-                {%- when 'why' -%}
-                  {%- if why_data != blank -%}
-                    {%- assign why_first = why_data | json | slice: 0, 1 -%}
-                    <div class="product-prose">
-                      {%- if why_first == '[' -%}
-                        <ul>
-                          {%- for w in why_data -%}<li>{{ w }}</li>{%- endfor -%}
-                        </ul>
-                      {%- else -%}
-                        {%- assign lines = why_data | newline_to_br | split: '<br />' -%}
-                        <ul>
-                          {%- for l in lines -%}
-                            {%- assign ll = l | strip -%}
-                            {%- if ll != blank -%}<li>{{ ll }}</li>{%- endif -%}
-                          {%- endfor -%}
-                        </ul>
-                      {%- endif -%}
-                    </div>
-                  {%- endif -%}
-
-                {%- when 'safety' -%}
-                  {%- if safety_important_data != blank or safety_general_data != blank or disclaimer_data != blank -%}
-                    <div class="product-prose">
-                      {%- if safety_important_data != blank -%}
-                        {%- assign si_first = safety_important_data | json | slice: 0, 1 -%}
-                        {%- if si_first == '[' -%}
-                          <aside class="npx-important">
-                            <strong>Important:</strong>
-                            <ul>
-                              {%- for item in safety_important_data -%}<li>{{ item }}</li>{%- endfor -%}
-                            </ul>
-                          </aside>
-                        {%- else -%}
-                          <aside class="npx-important"><strong>Important:</strong> {{ safety_important_data | newline_to_br }}</aside>
-                        {%- endif -%}
-                      {%- endif -%}
-
-                      {%- if safety_general_data != blank -%}
-                        {%- assign sg_first = safety_general_data | json | slice: 0, 1 -%}
-                        {%- if sg_first == '[' -%}
-                          <p><strong>General safety:</strong></p>
+                  {%- when 'feel_timeline' -%}
+                    {%- if feel_data != blank -%}
+                      {%- assign feel_first = feel_data | json | slice: 0, 1 -%}
+                      <div class="product-prose">
+                        {%- if feel_first == '[' -%}
                           <ul>
-                            {%- for item in safety_general_data -%}<li>{{ item }}</li>{%- endfor -%}
+                            {%- for f in feel_data -%}
+                              {%- assign f_label = f.label | default: f.title | default: f.time -%}
+                              {%- assign f_desc  = f.description | default: f.text | default: f.value -%}
+                              <li>
+                                {%- if f_label != blank and f_desc != blank -%}
+                                  <strong>{{ f_label }}:</strong> {{ f_desc }}
+                                {%- elsif f_desc != blank -%}
+                                  {{ f_desc }}
+                                {%- else -%}
+                                  {{ f }}
+                                {%- endif -%}
+                              </li>
+                            {%- endfor -%}
                           </ul>
                         {%- else -%}
-                          <p><strong>General safety:</strong> {{ safety_general_data | newline_to_br }}</p>
+                          <p>{{ feel_data | newline_to_br }}</p>
                         {%- endif -%}
-                      {%- endif -%}
+                      </div>
+                    {%- endif -%}
 
-                      {%- if disclaimer_data != blank -%}
-                        {%- assign d_first = disclaimer_data | json | slice: 0, 1 -%}
-                        {%- if d_first == '[' -%}
-                          <aside class="npx-disclaimer">
-                            <strong>Disclaimer:</strong>
+                  {%- when 'feel_note' -%}
+                    {%- if feel_note_data != blank -%}
+                      <div class="product-prose">
+                        <aside class="npx-note">{{ feel_note_data | newline_to_br }}</aside>
+                      </div>
+                    {%- endif -%}
+
+                  {%- when 'how_it_works' -%}
+                    {%- if how_it_works_field != blank -%}
+                      <div class="product-prose">
+                        {%- if how_it_works_parsed != blank -%}
+                          {%- assign hiw_first = how_it_works_parsed | json | slice: 0, 1 -%}
+                          {%- if hiw_first == '[' -%}
                             <ul>
-                              {%- for item in disclaimer_data -%}<li>{{ item }}</li>{%- endfor -%}
+                              {%- for item in how_it_works_parsed -%}<li>{{ item }}</li>{%- endfor -%}
                             </ul>
-                          </aside>
+                          {%- elsif hiw_first == '{' -%}
+                            <dl>
+                              {%- for kv in how_it_works_parsed -%}
+                                <dt><strong>{{ kv[0] }}</strong></dt>
+                                <dd>{{ kv[1] }}</dd>
+                              {%- endfor -%}
+                            </dl>
+                          {%- else -%}
+                            <p>{{ how_it_works_parsed | newline_to_br }}</p>
+                          {%- endif -%}
                         {%- else -%}
-                          <aside class="npx-disclaimer"><strong>Disclaimer:</strong> {{ disclaimer_data | newline_to_br }}</aside>
+                          {{ how_it_works_field | metafield_tag }}
                         {%- endif -%}
-                      {%- endif -%}
-                    </div>
-                  {%- endif -%}
+                      </div>
+                    {%- endif -%}
 
-                {%- when 'faq' -%}
-                  {%- if faq_data != blank -%}
-                    {%- assign faq_first = faq_data | json | slice: 0, 1 -%}
-                    <div class="product-prose npx-vts__faq">
-                      {%- if faq_first == '[' -%}
-                        {%- if section.settings.faq_style == 'accordion' -%}
-                          {%- for q in faq_data -%}
-                            <details>
-                              <summary>{{ q.q | default: q.question | default: q.title | default: 'Question ' | append: forloop.index }}</summary>
-                              <div style="margin-top:10px;">
+                  {%- when 'how_to_use' -%}
+                    {%- if how_data != blank -%}
+                      {%- assign how_first = how_data | json | slice: 0, 1 -%}
+                      <div class="product-prose">
+                        {%- if how_first == '[' -%}
+                          <ul>
+                            {%- for h in how_data -%}
+                              {%- assign h_label = h.label | default: h.title -%}
+                              {%- assign h_text  = h.text | default: h.description | default: h.value -%}
+                              <li>
+                                {%- if h_label != blank and h_text != blank -%}
+                                  <strong>{{ h_label }}:</strong> {{ h_text }}
+                                {%- elsif h_text != blank -%}
+                                  {{ h_text }}
+                                {%- else -%}
+                                  {{ h }}
+                                {%- endif -%}
+                              </li>
+                            {%- endfor -%}
+                          </ul>
+                        {%- else -%}
+                          <p>{{ how_data | newline_to_br }}</p>
+                        {%- endif -%}
+                      </div>
+                    {%- endif -%}
+
+                  {%- when 'why' -%}
+                    {%- if why_data != blank -%}
+                      {%- assign why_first = why_data | json | slice: 0, 1 -%}
+                      <div class="product-prose">
+                        {%- if why_first == '[' -%}
+                          <ul>
+                            {%- for w in why_data -%}<li>{{ w }}</li>{%- endfor -%}
+                          </ul>
+                        {%- else -%}
+                          {%- assign lines = why_data | newline_to_br | split: '<br />' -%}
+                          <ul>
+                            {%- for l in lines -%}
+                              {%- assign ll = l | strip -%}
+                              {%- if ll != blank -%}<li>{{ ll }}</li>{%- endif -%}
+                            {%- endfor -%}
+                          </ul>
+                        {%- endif -%}
+                      </div>
+                    {%- endif -%}
+
+                  {%- when 'safety' -%}
+                    {%- if safety_important_data != blank or safety_general_data != blank or disclaimer_data != blank -%}
+                      <div class="product-prose">
+                        {%- if safety_important_data != blank -%}
+                          {%- assign si_first = safety_important_data | json | slice: 0, 1 -%}
+                          {%- if si_first == '[' -%}
+                            <aside class="npx-important">
+                              <strong>Important:</strong>
+                              <ul>
+                                {%- for item in safety_important_data -%}<li>{{ item }}</li>{%- endfor -%}
+                              </ul>
+                            </aside>
+                          {%- else -%}
+                            <aside class="npx-important"><strong>Important:</strong> {{ safety_important_data | newline_to_br }}</aside>
+                          {%- endif -%}
+                        {%- endif -%}
+
+                        {%- if safety_general_data != blank -%}
+                          {%- assign sg_first = safety_general_data | json | slice: 0, 1 -%}
+                          {%- if sg_first == '[' -%}
+                            <p><strong>General safety:</strong></p>
+                            <ul>
+                              {%- for item in safety_general_data -%}<li>{{ item }}</li>{%- endfor -%}
+                            </ul>
+                          {%- else -%}
+                            <p><strong>General safety:</strong> {{ safety_general_data | newline_to_br }}</p>
+                          {%- endif -%}
+                        {%- endif -%}
+
+                        {%- if disclaimer_data != blank -%}
+                          {%- assign d_first = disclaimer_data | json | slice: 0, 1 -%}
+                          {%- if d_first == '[' -%}
+                            <aside class="npx-disclaimer">
+                              <strong>Disclaimer:</strong>
+                              <ul>
+                                {%- for item in disclaimer_data -%}<li>{{ item }}</li>{%- endfor -%}
+                              </ul>
+                            </aside>
+                          {%- else -%}
+                            <aside class="npx-disclaimer"><strong>Disclaimer:</strong> {{ disclaimer_data | newline_to_br }}</aside>
+                          {%- endif -%}
+                        {%- endif -%}
+                      </div>
+                    {%- endif -%}
+
+                  {%- when 'faq' -%}
+                    {%- if faq_data != blank -%}
+                      {%- assign faq_first = faq_data | json | slice: 0, 1 -%}
+                      <div class="product-prose vts__faq">
+                        {%- if faq_first == '[' -%}
+                          {%- if section.settings.faq_style == 'accordion' -%}
+                            {%- for q in faq_data -%}
+                              <details>
+                                <summary>{{ q.q | default: q.question | default: q.title | default: 'Question ' | append: forloop.index }}</summary>
+                                <div style="margin-top:10px;">
+                                  {{ q.a | default: q.answer | default: q.text | newline_to_br }}
+                                </div>
+                              </details>
+                            {%- endfor -%}
+                          {%- else -%}
+                            {%- for q in faq_data -%}
+                              <p>
+                                <strong>{{ forloop.index }}. {{ q.q | default: q.question | default: q.title }}</strong><br>
                                 {{ q.a | default: q.answer | default: q.text | newline_to_br }}
-                              </div>
-                            </details>
-                          {%- endfor -%}
+                              </p>
+                            {%- endfor -%}
+                          {%- endif -%}
                         {%- else -%}
-                          {%- for q in faq_data -%}
-                            <p>
-                              <strong>{{ forloop.index }}. {{ q.q | default: q.question | default: q.title }}</strong><br>
-                              {{ q.a | default: q.answer | default: q.text | newline_to_br }}
-                            </p>
-                          {%- endfor -%}
+                          <p>{{ faq_data | newline_to_br }}</p>
                         {%- endif -%}
-                      {%- else -%}
-                        <p>{{ faq_data | newline_to_br }}</p>
-                      {%- endif -%}
-                    </div>
-                  {%- endif -%}
+                      </div>
+                    {%- endif -%}
 
-                {%- when 'custom' -%}
-                  {%- if block.settings.custom_content != blank -%}
-                    <div class="product-prose">
-                      {{ block.settings.custom_content }}
-                    </div>
-                  {%- endif -%}
+                  {%- when 'custom' -%}
+                    {%- if block.settings.custom_content != blank -%}
+                      <div class="product-prose">
+                        {{ block.settings.custom_content }}
+                      </div>
+                    {%- endif -%}
 
-                {%- else -%}
-                  {%- comment -%}none/unconfigured{%- endcomment -%}
+                  {%- else -%}
 
-              {%- endcase -%}
-            {%- endcapture -%}
+                {%- endcase -%}
+              {%- endcapture -%}
 
-            {%- assign content_stripped = content_html | strip -%}
-            {%- liquid
-              assign should_render = true
-              if content_stripped == blank and block.settings.hide_if_empty
-                assign should_render = false
-              endif
-            -%}
-
-            {%- if should_render -%}
+              {%- assign content_stripped = content_html | strip -%}
               {%- liquid
-                assign rendered_count = rendered_count | plus: 1
-                assign rendered_index0 = rendered_count | minus: 1
+                assign should_render = true
+                if content_stripped == blank and block.settings.hide_if_empty
+                  assign should_render = false
+                endif
               -%}
 
-              <div class="npx-vts__item-{{ npx_id }}{% if rendered_count == 1 %} is-active{% endif %}"
-                   data-index="{{ rendered_index0 }}"
-                   style="scroll-margin-top:{{ section.settings.scroll_to_offset }}px;"
-                   {{ block.shopify_attributes }}>
-                <div class="npx-vts__dot-wrap-{{ npx_id }}">
-                  <div class="npx-vts__dot-{{ npx_id }}">
-                    {%- if section.settings.dot_inner_mode == 'number' -%}
-                      {{ rendered_count }}
+              {%- if should_render -%}
+                {%- liquid
+                  assign rendered_count = rendered_count | plus: 1
+                  assign rendered_index0 = rendered_count | minus: 1
+                -%}
+
+                <div class="vts__item{% if rendered_count == 1 %} is-active{% endif %}"
+                     data-index="{{ rendered_index0 }}"
+                     style="scroll-margin-top:{{ section.settings.scroll_to_offset }}px;"
+                     {{ block.shopify_attributes }}>
+                  <div class="vts__dot-wrap">
+                    <div class="vts__dot">
+                      {%- if section.settings.dot_inner_mode == 'number' -%}
+                        {{ rendered_count }}
+                      {%- endif -%}
+                    </div>
+                  </div>
+
+                  <div class="vts__content">
+                    {%- if label != blank -%}
+                      <div class="vts__label">
+                        {%- if section.settings.enable_click_scroll -%}
+                          <button class="vts__label-btn" type="button" data-scrollto="{{ rendered_index0 }}">
+                            {{ label }}
+                          </button>
+                        {%- else -%}
+                          {{ label }}
+                        {%- endif -%}
+                      </div>
+                    {%- endif -%}
+
+                    {%- if content_stripped != blank -%}
+                      <div class="vts__text">
+                        {{ content_html }}
+                      </div>
+                    {%- else -%}
+                      {%- if section.settings.show_empty_placeholder -%}
+                        <div class="vts__text vts__empty">
+                          {{ section.settings.empty_placeholder_text }}
+                        </div>
+                      {%- endif -%}
                     {%- endif -%}
                   </div>
                 </div>
+              {%- endif -%}
+            {%- endfor -%}
 
-                <div class="npx-vts__content-{{ npx_id }}">
-                  {%- if label != blank -%}
-                    <div class="npx-vts__label-{{ npx_id }}">
-                      {%- if section.settings.enable_click_scroll -%}
-                        <button class="npx-vts__label-button-{{ npx_id }}" type="button" data-scrollto="{{ rendered_index0 }}">
-                          {{ label }}
-                        </button>
-                      {%- else -%}
-                        {{ label }}
-                      {%- endif -%}
-                    </div>
-                  {%- endif -%}
-
-                  {%- if content_stripped != blank -%}
-                    <div class="npx-vts__text-{{ npx_id }}">
-                      {{ content_html }}
-                    </div>
-                  {%- else -%}
-                    {%- if section.settings.show_empty_placeholder -%}
-                      <div class="npx-vts__text-{{ npx_id }} npx-vts__empty-{{ npx_id }}">
-                        {{ section.settings.empty_placeholder_text }}
-                      </div>
-                    {%- endif -%}
-                  {%- endif -%}
-                </div>
+            {%- if rendered_count == 0 -%}
+              <div class="vts__empty">
+                No configured items have content for this product.
               </div>
             {%- endif -%}
-          {%- endfor -%}
+          </div>
+        </npx-scroll-timeline-{{ npx_id }}>
 
-          {%- if rendered_count == 0 -%}
-            <div class="npx-vts__empty-{{ npx_id }}">
-              No configured items have content for this product.
-            </div>
-          {%- endif -%}
-        </div>
-      </npx-scroll-timeline-{{ npx_id }}>
-
-    {%- endif -%}
-  </div>
-</div>
+      {%- endif -%}
+    </div>
+  </xo-container>
+</section>
 
 <script>
   (function() {
@@ -733,7 +716,7 @@
 
       connectedCallback() {
         this.items = Array.from(this.querySelectorAll('[data-index]'));
-        this.progressBar = this.querySelector('.npx-vts__progress-{{ npx_id }}');
+        this.progressBar = this.querySelector('.vts__progress');
 
         this.offsetPct = parseInt(this.dataset.offset, 10) || 50;
         this.activeMode = (this.dataset.activeMode || 'cumulative').toLowerCase();
@@ -781,7 +764,6 @@
             if (top <= triggerY) activeIndex = i;
           }
 
-          // Apply active states
           this.items.forEach((item, idx) => {
             if (this.activeMode === 'single') {
               item.classList.toggle('is-active', idx === activeIndex);
@@ -790,7 +772,6 @@
             }
           });
 
-          // Progress (based on index)
           let progress = 0;
           if (this.items.length > 1 && activeIndex >= 0) {
             progress = (activeIndex / (this.items.length - 1)) * 100;
@@ -807,9 +788,14 @@
 {% schema %}
 {
   "name": "Visual Trust Stack",
-  "tag": "aside",
   "class": "npx-visual-trust-stack",
   "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "default"
+    },
     {
       "type": "header",
       "content": "Content"
@@ -846,7 +832,6 @@
       "label": "Empty placeholder text",
       "default": "No content for this tab (or not configured)."
     },
-
     {
       "type": "header",
       "content": "Header"
@@ -861,7 +846,7 @@
       "type": "richtext",
       "id": "subtitle",
       "label": "Subtitle",
-      "default": "<p>Fast answers, clear expectations, and safety notes—pulled directly from the product’s metafields.</p>"
+      "default": "<p>Fast answers, clear expectations, and safety notes—pulled directly from the product's metafields.</p>"
     },
     {
       "type": "range",
@@ -873,23 +858,85 @@
       "unit": "px",
       "default": 24
     },
-
     {
       "type": "header",
       "content": "Layout"
     },
-    { "type": "range", "id": "max_width", "label": "Maximum width", "min": 420, "max": 1200, "step": 30, "unit": "px", "default": 1200 },
-    { "type": "range", "id": "padding_top", "label": "Padding top", "min": 0, "max": 100, "step": 4, "unit": "px", "default": 32 },
-    { "type": "range", "id": "padding_bottom", "label": "Padding bottom", "min": 0, "max": 100, "step": 4, "unit": "px", "default": 32 },
-    { "type": "range", "id": "item_spacing", "label": "Item spacing", "min": 16, "max": 90, "step": 2, "unit": "px", "default": 36 },
-    { "type": "range", "id": "item_gap", "label": "Gap between dot and content", "min": 10, "max": 56, "step": 2, "unit": "px", "default": 28 },
-    { "type": "range", "id": "content_padding_top", "label": "Content top padding", "min": 0, "max": 24, "step": 2, "unit": "px", "default": 0 },
-
+    {
+      "type": "range",
+      "id": "max_width",
+      "label": "Maximum content width",
+      "min": 420,
+      "max": 1200,
+      "step": 30,
+      "unit": "px",
+      "default": 1200
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "item_spacing",
+      "label": "Item spacing",
+      "min": 16,
+      "max": 90,
+      "step": 2,
+      "unit": "px",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "item_gap",
+      "label": "Gap between dot and content",
+      "min": 10,
+      "max": 56,
+      "step": 2,
+      "unit": "px",
+      "default": 28
+    },
+    {
+      "type": "range",
+      "id": "content_padding_top",
+      "label": "Content top padding",
+      "min": 0,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 0
+    },
     {
       "type": "header",
       "content": "Scroll behavior"
     },
-    { "type": "range", "id": "scroll_offset", "label": "Activation point", "min": 10, "max": 90, "step": 5, "unit": "%", "default": 50, "info": "Percentage from top of viewport where items activate" },
+    {
+      "type": "range",
+      "id": "scroll_offset",
+      "label": "Activation point",
+      "min": 10,
+      "max": 90,
+      "step": 5,
+      "unit": "%",
+      "default": 50,
+      "info": "Percentage from top of viewport where items activate"
+    },
     {
       "type": "select",
       "id": "active_mode",
@@ -916,25 +963,40 @@
       "unit": "px",
       "default": 0
     },
-
     {
       "type": "header",
-      "content": "Timeline line"
+      "content": "Timeline"
     },
-    { "type": "range", "id": "line_width", "label": "Line width", "min": 1, "max": 6, "step": 1, "unit": "px", "default": 2 },
-    { "type": "color", "id": "line_color", "label": "Line color", "default": "#e6e6e6" },
-    { "type": "color", "id": "active_line_color", "label": "Active line color", "default": "#5a9d6f" },
-
     {
-      "type": "header",
-      "content": "Dots"
+      "type": "range",
+      "id": "line_width",
+      "label": "Line width",
+      "min": 1,
+      "max": 6,
+      "step": 1,
+      "unit": "px",
+      "default": 2
     },
-    { "type": "range", "id": "dot_size", "label": "Dot size", "min": 10, "max": 26, "step": 2, "unit": "px", "default": 16 },
-    { "type": "range", "id": "dot_border_width", "label": "Dot border width", "min": 0, "max": 4, "step": 1, "unit": "px", "default": 2 },
-    { "type": "color", "id": "dot_color", "label": "Dot color", "default": "#ffffff" },
-    { "type": "color", "id": "dot_border_color", "label": "Dot border color", "default": "#e0e0e0" },
-    { "type": "color", "id": "active_dot_color", "label": "Active dot color", "default": "#5a9d6f" },
-    { "type": "color", "id": "active_dot_border_color", "label": "Active dot border color", "default": "#5a9d6f" },
+    {
+      "type": "range",
+      "id": "dot_size",
+      "label": "Dot size",
+      "min": 10,
+      "max": 26,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "dot_border_width",
+      "label": "Dot border width",
+      "min": 0,
+      "max": 4,
+      "step": 1,
+      "unit": "px",
+      "default": 2
+    },
     {
       "type": "select",
       "id": "dot_inner_mode",
@@ -945,15 +1007,30 @@
       ],
       "default": "none"
     },
-    { "type": "range", "id": "dot_inner_font_size", "label": "Dot number size", "min": 8, "max": 14, "step": 1, "unit": "px", "default": 10 },
-    { "type": "color", "id": "dot_inner_color", "label": "Dot number color", "default": "#2a2a2a" },
-    { "type": "color", "id": "active_dot_inner_color", "label": "Active dot number color", "default": "#ffffff" },
-
+    {
+      "type": "range",
+      "id": "dot_inner_font_size",
+      "label": "Dot number size",
+      "min": 8,
+      "max": 14,
+      "step": 1,
+      "unit": "px",
+      "default": 10
+    },
     {
       "type": "header",
       "content": "Typography"
     },
-    { "type": "range", "id": "title_font_size", "label": "Title font size", "min": 18, "max": 44, "step": 2, "unit": "px", "default": 28 },
+    {
+      "type": "range",
+      "id": "title_font_size",
+      "label": "Title font size",
+      "min": 18,
+      "max": 44,
+      "step": 2,
+      "unit": "px",
+      "default": 28
+    },
     {
       "type": "select",
       "id": "title_font_weight",
@@ -961,13 +1038,30 @@
       "options": [
         { "value": "400", "label": "Normal" },
         { "value": "500", "label": "Medium" },
-        { "value": "600", "label": "Semi-bold" },
-        { "value": "700", "label": "Bold" }
+        { "value": "600", "label": "Semi-bold" }
       ],
       "default": "600"
     },
-    { "type": "range", "id": "subtitle_font_size", "label": "Subtitle font size", "min": 12, "max": 20, "step": 1, "unit": "px", "default": 14 },
-    { "type": "range", "id": "label_font_size", "label": "Label font size", "min": 12, "max": 28, "step": 1, "unit": "px", "default": 18 },
+    {
+      "type": "range",
+      "id": "subtitle_font_size",
+      "label": "Subtitle font size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "label_font_size",
+      "label": "Label font size",
+      "min": 12,
+      "max": 28,
+      "step": 1,
+      "unit": "px",
+      "default": 18
+    },
     {
       "type": "select",
       "id": "label_font_weight",
@@ -975,25 +1069,20 @@
       "options": [
         { "value": "400", "label": "Normal" },
         { "value": "500", "label": "Medium" },
-        { "value": "600", "label": "Semi-bold" },
-        { "value": "700", "label": "Bold" }
+        { "value": "600", "label": "Semi-bold" }
       ],
       "default": "600"
     },
-    { "type": "range", "id": "text_font_size", "label": "Body text size", "min": 12, "max": 22, "step": 1, "unit": "px", "default": 14 },
-
     {
-      "type": "header",
-      "content": "Colors"
+      "type": "range",
+      "id": "text_font_size",
+      "label": "Body text size",
+      "min": 12,
+      "max": 22,
+      "step": 1,
+      "unit": "px",
+      "default": 14
     },
-    { "type": "color", "id": "background_color", "label": "Background", "default": "#ffffff" },
-    { "type": "color", "id": "title_color", "label": "Title", "default": "#111111" },
-    { "type": "color", "id": "subtitle_color", "label": "Subtitle", "default": "#5b5b5b" },
-    { "type": "color", "id": "label_color", "label": "Label", "default": "#666666" },
-    { "type": "color", "id": "active_label_color", "label": "Active label", "default": "#1f1f1f" },
-    { "type": "color", "id": "text_color", "label": "Text", "default": "#999999" },
-    { "type": "color", "id": "active_text_color", "label": "Active text", "default": "#1f1f1f" },
-
     {
       "type": "header",
       "content": "FAQ"
@@ -1060,7 +1149,7 @@
       "blocks": [
         { "type": "item", "settings": { "label": "TL;DR", "source": "tldr" } },
         { "type": "item", "settings": { "label": "What it is", "source": "what_it_is" } },
-        { "type": "item", "settings": { "label": "What you’ll feel (and when)", "source": "feel_timeline" } },
+        { "type": "item", "settings": { "label": "What you'll feel (and when)", "source": "feel_timeline" } },
         { "type": "item", "settings": { "label": "How it works", "source": "how_it_works" } },
         { "type": "item", "settings": { "label": "How to use", "source": "how_to_use" } },
         { "type": "item", "settings": { "label": "Why {form}?", "source": "why" } },
