@@ -1,4 +1,4 @@
-s{%- style -%}
+{%- style -%}
   .xo-section--{{ section.id }} {
     padding-top: {{ section.settings.padding_top }}px;
     padding-bottom: {{ section.settings.padding_bottom }}px;
@@ -379,6 +379,32 @@ s{%- style -%}
   </xo-container>
 </section>
 
+{%- assign has_faq_ld = false -%}
+{%- for block in section.blocks -%}
+  {%- if block.type == 'faq' and block.settings.question != blank and block.settings.answer != blank -%}
+    {%- assign has_faq_ld = true -%}
+    {%- break -%}
+  {%- endif -%}
+{%- endfor -%}
+
+{%- if has_faq_ld -%}
+  {%- capture faq_json -%}
+  [
+    {%- assign first = true -%}
+    {%- for block in section.blocks -%}
+      {%- if block.type == 'faq' and block.settings.question != blank and block.settings.answer != blank -%}
+        {%- if first == false -%},{%- endif -%}
+        {"@type":"Question","name":{{ block.settings.question | strip | json }},"acceptedAnswer":{"@type":"Answer","text":{{ block.settings.answer | strip | json }}}}
+        {%- assign first = false -%}
+      {%- endif -%}
+    {%- endfor -%}
+  ]
+  {%- endcapture -%}
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"FAQPage","mainEntity":{{ faq_json | strip }}}
+  </script>
+{%- endif -%}
+
 {% schema %}
 {
   "name": "Quality & COA",
@@ -627,6 +653,9 @@ s{%- style -%}
           "label": "Answer"
         }
       ]
+    },
+    {
+      "type": "@app"
     }
   ],
   "presets": [

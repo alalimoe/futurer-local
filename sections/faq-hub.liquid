@@ -30,14 +30,10 @@
     transition: border-color 0.3s var(--out-soft, ease);
   }
 
-  .xo-section--{{ section.id }} .fh__search:focus {
-    outline: none;
-    border-color: rgba(var(--color-accent));
-  }
-
   .xo-section--{{ section.id }} .fh__search:focus-visible {
     outline: 2px solid rgba(var(--color-accent));
     outline-offset: 2px;
+    border-color: rgba(var(--color-accent));
   }
 
   .xo-section--{{ section.id }} .fh__search::placeholder {
@@ -116,7 +112,9 @@
     content: '';
     width: 20px;
     height: 20px;
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") no-repeat center;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") no-repeat center;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") no-repeat center;
+    background-color: color-mix(in srgb, rgba(var(--color-foreground)) 50%, transparent);
     transition: transform 0.3s var(--out-soft, ease);
     flex-shrink: 0;
   }
@@ -167,8 +165,53 @@
 
   .xo-section--{{ section.id }} .fh__sources {
     margin-top: 12px;
-    font-size: 13px;
+    font-size: 0.8125rem;
     opacity: 0.7;
+  }
+
+  .xo-section--{{ section.id }} .fh__toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 14px;
+    gap: 12px;
+  }
+
+  .xo-section--{{ section.id }} .fh__count {
+    font-size: clamp(0.75rem, 1.1vw, 0.8125rem);
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 55%, transparent);
+    margin: 0;
+  }
+
+  .xo-section--{{ section.id }} .fh__expand-btn {
+    font-size: clamp(0.75rem, 1.1vw, 0.8125rem);
+    color: rgba(var(--color-accent));
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px 0;
+    font-weight: 600;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .xo-section--{{ section.id }} .fh__expand-btn:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .xo-section--{{ section.id }} .fh__expand-btn:focus-visible {
+    outline: 2px solid rgba(var(--color-accent));
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  .xo-section--{{ section.id }} .fh__empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 55%, transparent);
+    font-size: clamp(0.85rem, 1.3vw, 0.9375rem);
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -192,21 +235,29 @@
           {% assign cats = section.blocks | map: 'settings' | map: 'category' | uniq %}
           {% for c in cats %}
             {% if c != blank %}
-              <button class="fh__chip" data-faq-local-chip="{{ c | escape }}">{{ c }}</button>
+              <button class="fh__chip" data-faq-local-chip="{{ c | escape }}" aria-pressed="false">{{ c }}</button>
             {% endif %}
           {% endfor %}
-          <button class="fh__chip fh__chip--clear" data-faq-local-chip="*">All</button>
+          <button class="fh__chip fh__chip--clear" data-faq-local-chip="*" aria-pressed="true">All</button>
         </div>
       {% endunless %}
     </div>
 
+    <div class="fh__toolbar">
+      <p class="fh__count" data-faq-count aria-live="polite"></p>
+      <button class="fh__expand-btn" data-faq-expand-all aria-expanded="false">Expand all</button>
+    </div>
+
     <div class="fh__list" data-faq-list>
+      <p class="fh__empty" data-faq-empty style="display:none;">No matching questions — try a different search or category.</p>
       {% for block in section.blocks %}
         {% if block.type == 'faq' %}
           <details class="fh__item"
+                   id="faq-{{ block.id }}"
                    data-faq-item
                    data-category="{{ block.settings.category | escape }}"
-                   data-tags="{{ block.settings.tags | downcase | escape }}">
+                   data-tags="{{ block.settings.tags | downcase | escape }}"
+                   {{ block.shopify_attributes }}>
             <summary class="fh__q">
               <span class="fh__cat">{{ block.settings.category }}</span>
               <span class="fh__question">{{ block.settings.question }}</span>
@@ -235,120 +286,34 @@
   </xo-container>
 </section>
 
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "@id": "{{ request.origin }}{{ request.path }}#faq",
-  "mainEntity": [
-    {
-      "@type": "Question",
-      "name": "How fast is delivery in Dubai?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Usually same-day, with a 4-hour option shown at checkout during the day. Order before the cut-off and we'll deliver by evening."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "What are the cut-offs for same-day and the 4-hour service in Dubai?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Same-day deliveries aim to arrive by ~10pm when you order before the daily cut-off. The 4-hour service is typically available for orders placed before ~6pm."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Will the courier call or WhatsApp me in Dubai?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes. Keep your phone available during your window and add building or gate notes at checkout so the driver can reach you easily."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Can I pay Cash on Delivery (COD) in Dubai?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes—COD is available for eligible Dubai addresses and appears at checkout. Please prepare the exact amount; proof of delivery is provided."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Do you cover the whole UAE?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes—next-day coverage across the UAE. Order before the cut-off to receive by evening; orders after the cut-off are booked for the next window."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "When should I expect my UAE order?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Plan for delivery by end-of-day when ordered before the cut-off. If anything changes, we'll update you and rebook the earliest window."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "How should I format my UAE address?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Use: Building/Community → Street → Area → Emirate, plus phone number with country code. Add entrance or reception details for faster access."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "How long do international DHL deliveries take?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Most arrive in about 4–6 business days. Customs may add time depending on the country."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Do DHL tracking dates ever change?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "They're estimates and can shift with flights or customs. If your parcel goes beyond your expected window, contact us and we'll escalate with DHL."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "What does a DHL \"Exception\" status mean?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "It's a temporary stop—often a customs check or local delivery event. We monitor exceptions and update you; if an item can't clear, we'll offer a reship, split shipment, or a refund."
-      }
-    }
-  ]
-}
-</script>
+{%- assign has_faq_ld = false -%}
+{%- for block in section.blocks -%}
+  {%- if block.type == 'faq' and block.settings.question != blank and block.settings.answer != blank -%}
+    {%- assign has_faq_ld = true -%}
+    {%- break -%}
+  {%- endif -%}
+{%- endfor -%}
 
-{% # theme-check-disable UnknownFilter %}
-<script type="application/ld+json">
-{
-  "@context":"https://schema.org",
-  "@type":"BreadcrumbList",
-  "itemListElement":[
-    { "@type":"ListItem","position":1,"name":"Home","item":"{{ routes.root_url | absolute_url }}" },
-    { "@type":"ListItem","position":2,"name":"Help & FAQ","item":"{{ request.origin }}{{ request.path }}" }
+{%- if has_faq_ld -%}
+  {%- capture faq_json -%}
+  [
+    {%- assign first = true -%}
+    {%- for block in section.blocks -%}
+      {%- if block.type == 'faq' and block.settings.question != blank and block.settings.answer != blank -%}
+        {%- if first == false -%},{%- endif -%}
+        {"@type":"Question","name":{{ block.settings.question | strip | json }},"acceptedAnswer":{"@type":"Answer","text":{{ block.settings.answer | strip_html | strip | json }}}}
+        {%- assign first = false -%}
+      {%- endif -%}
+    {%- endfor -%}
   ]
-}
-</script>
-{% # theme-check-enable UnknownFilter %}
+  {%- endcapture -%}
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"FAQPage","@id":"{{ request.origin }}{{ request.path }}#faq","mainEntity":{{ faq_json | strip }}}
+  </script>
+{%- endif -%}
 
 <script type="application/ld+json">
-{
-  "@context":"https://schema.org",
-  "@type":"WebSite",
-  "url":"{{ request.origin }}",
-  "potentialAction":{
-    "@type":"SearchAction",
-    "target":"{{ request.origin }}/search?q={search_term_string}",
-    "query-input":"required name=search_term_string"
-  }
-}
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"{{ request.origin }}{{ routes.root_url }}"},{"@type":"ListItem","position":2,"name":"{{ page.title | escape }}","item":"{{ request.origin }}{{ request.path }}"}]}
 </script>
 
 <script>
@@ -360,34 +325,80 @@
     var chips = section.querySelectorAll('[data-faq-local-chip]');
     var list = section.querySelector('[data-faq-list]');
     var items = list ? list.querySelectorAll('[data-faq-item]') : [];
+    var countEl = section.querySelector('[data-faq-count]');
+    var emptyEl = section.querySelector('[data-faq-empty]');
+    var expandBtn = section.querySelector('[data-faq-expand-all]');
+    var total = items.length;
+    var debounceTimer;
+
+    function updateCount(visible) {
+      if (countEl) countEl.textContent = 'Showing ' + visible + ' of ' + total + ' questions';
+      if (emptyEl) emptyEl.style.display = visible === 0 ? '' : 'none';
+    }
 
     function applyFilters() {
       var term = (q && q.value ? q.value.toLowerCase() : '').trim();
       var activeChip = section.querySelector('.fh__chip--active');
       var cat = activeChip ? activeChip.getAttribute('data-faq-local-chip') : '*';
+      var visible = 0;
 
-      items.forEach(function(el){
+      items.forEach(function(el) {
         var t = (el.getAttribute('data-tags') || '').toLowerCase();
         var c = el.getAttribute('data-category') || '';
         var qtext = (el.querySelector('.fh__question')?.textContent || '').toLowerCase();
         var content = (el.querySelector('.fh__a')?.textContent || '').toLowerCase();
         var matchTerm = !term || t.includes(term) || qtext.includes(term) || content.includes(term);
         var matchCat = (cat === '*') || (c === cat);
-        el.style.display = (matchTerm && matchCat) ? '' : 'none';
+        var show = matchTerm && matchCat;
+        el.style.display = show ? '' : 'none';
+        if (show) visible++;
+      });
+
+      updateCount(visible);
+    }
+
+    if (q) {
+      q.addEventListener('input', function() {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(applyFilters, 200);
       });
     }
 
-    if (q) q.addEventListener('input', applyFilters);
-    chips.forEach(function(b){
-      b.addEventListener('click', function(){
-        chips.forEach(function(x){ x.classList.remove('fh__chip--active'); });
+    chips.forEach(function(b) {
+      b.addEventListener('click', function() {
+        chips.forEach(function(x) {
+          x.classList.remove('fh__chip--active');
+          x.setAttribute('aria-pressed', 'false');
+        });
         b.classList.add('fh__chip--active');
+        b.setAttribute('aria-pressed', 'true');
         applyFilters();
       });
     });
 
+    if (expandBtn) {
+      expandBtn.addEventListener('click', function() {
+        var expanded = expandBtn.getAttribute('aria-expanded') === 'true';
+        items.forEach(function(el) {
+          if (el.style.display !== 'none') el.open = !expanded;
+        });
+        expandBtn.setAttribute('aria-expanded', String(!expanded));
+        expandBtn.textContent = expanded ? 'Expand all' : 'Collapse all';
+      });
+    }
+
     var allBtn = section.querySelector('[data-faq-local-chip="*"]');
     if (allBtn) allBtn.classList.add('fh__chip--active');
+    updateCount(total);
+
+    var hash = window.location.hash;
+    if (hash && hash.startsWith('#faq-')) {
+      var target = document.getElementById(hash.slice(1));
+      if (target) {
+        target.open = true;
+        target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
   })();
 </script>
 
@@ -415,6 +426,9 @@
         { "type": "richtext", "id": "answer", "label": "Answer", "default": "<p><strong>Usually the same day or next day.</strong> At checkout, you'll see the fastest options available for your address.</p><p><a href=\"/pages/track-order\" target=\"_blank\" rel=\"noopener\">Track your order</a></p>" },
         { "type": "textarea", "id": "sources", "label": "Internal source URLs (one per line, Staff-only)" }
       ]
+    },
+    {
+      "type": "@app"
     }
   ],
   "presets": [{ "name": "Nootropix FAQ Hub" }]
