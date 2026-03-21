@@ -4,7 +4,7 @@
 {% enddoc %}
 {% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
 
-{% style %}
+{%- style -%}
   .ai-breadcrumbs-{{ ai_gen_id }} {
     display: block;
     width: 100%;
@@ -20,8 +20,6 @@
     gap: {{ block.settings.item_spacing }}px;
     row-gap: {{ block.settings.row_gap }}px;
     font-size: {{ block.settings.font_size }}px;
-    font-family: {{ block.settings.font_family.family }}, {{ block.settings.font_family.fallback_families }};
-    font-weight: {{ block.settings.font_family.weight }};
     line-height: 1.6;
   }
 
@@ -33,7 +31,7 @@
   }
 
   .ai-breadcrumbs-link-{{ ai_gen_id }} {
-    color: {{ block.settings.link_color }};
+    color: rgba(var(--color-foreground-3));
     text-decoration: none;
     transition: color 0.2s ease;
     display: inline-flex;
@@ -41,12 +39,12 @@
   }
 
   .ai-breadcrumbs-link-{{ ai_gen_id }}:hover {
-    color: {{ block.settings.link_hover_color }};
+    color: rgba(var(--color-foreground));
     text-decoration: {{ block.settings.hover_underline }};
   }
 
   .ai-breadcrumbs-current-{{ ai_gen_id }} {
-    color: {{ block.settings.current_color }};
+    color: rgba(var(--color-foreground));
     font-weight: {{ block.settings.current_font_weight }};
     overflow: hidden;
     text-overflow: ellipsis;
@@ -54,7 +52,7 @@
   }
 
   .ai-breadcrumbs-separator-{{ ai_gen_id }} {
-    color: {{ block.settings.separator_color }};
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 20%, transparent);
     user-select: none;
     flex-shrink: 0;
   }
@@ -66,7 +64,7 @@
     flex-shrink: 0;
   }
 
-  @media screen and (max-width: 749px) {
+  @media screen and (max-width: 768px) {
     .ai-breadcrumbs-{{ ai_gen_id }} {
       padding: {{ block.settings.padding_vertical_mobile }}px {{ block.settings.padding_horizontal_mobile }}px;
     }
@@ -90,23 +88,10 @@
       max-width: 200px;
     }
   }
-
-  @media screen and (min-width: 750px) and (max-width: 989px) {
-    .ai-breadcrumbs-{{ ai_gen_id }} {
-      padding: {{ block.settings.padding_vertical_desktop }}px {{ block.settings.padding_horizontal_desktop | times: 0.7 }}px;
-    }
-  }
-{% endstyle %}
+{%- endstyle -%}
 
 <breadcrumbs-{{ ai_gen_id }} class="ai-breadcrumbs-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
   <nav aria-label="Breadcrumb" class="ai-breadcrumbs-container-{{ ai_gen_id }}">
-    {% liquid
-      assign breadcrumb_items = '' | split: ''
-      assign home_item = '{"@type": "ListItem", "position": 1, "name": "Home", "item": "' | append: shop.url | append: '"}'
-      assign breadcrumb_items = breadcrumb_items | concat: home_item | split: ''
-      assign position = 2
-    %}
-
     <div class="ai-breadcrumbs-item-{{ ai_gen_id }}">
       <a href="{{ routes.root_url }}" class="ai-breadcrumbs-link-{{ ai_gen_id }}" aria-label="Home">
         {% if block.settings.show_home_icon %}
@@ -125,8 +110,6 @@
       <div class="ai-breadcrumbs-item-{{ ai_gen_id }}">
         <span class="ai-breadcrumbs-current-{{ ai_gen_id }}" aria-current="page">{{ collection.title }}</span>
       </div>
-      {% assign collection_item = '{"@type": "ListItem", "position": ' | append: position | append: ', "name": "' | append: collection.title | append: '", "item": "' | append: collection.url | append: '"}' %}
-      {% assign breadcrumb_items = breadcrumb_items | push: collection_item %}
 
     {% elsif template.name == 'product' and product %}
       {% if collection %}
@@ -134,71 +117,49 @@
           <a href="{{ collection.url }}" class="ai-breadcrumbs-link-{{ ai_gen_id }}">{{ collection.title }}</a>
           <span class="ai-breadcrumbs-separator-{{ ai_gen_id }}" aria-hidden="true">{{ block.settings.separator }}</span>
         </div>
-        {% assign collection_item = '{"@type": "ListItem", "position": ' | append: position | append: ', "name": "' | append: collection.title | append: '", "item": "' | append: collection.url | append: '"}' %}
-        {% assign breadcrumb_items = breadcrumb_items | push: collection_item %}
-        {% assign position = position | plus: 1 %}
       {% endif %}
       <div class="ai-breadcrumbs-item-{{ ai_gen_id }}">
         <span class="ai-breadcrumbs-current-{{ ai_gen_id }}" aria-current="page">{{ product.title }}</span>
       </div>
-      {% assign product_item = '{"@type": "ListItem", "position": ' | append: position | append: ', "name": "' | append: product.title | append: '", "item": "' | append: product.url | append: '"}' %}
-      {% assign breadcrumb_items = breadcrumb_items | push: product_item %}
 
     {% elsif template.name == 'page' and page %}
       <div class="ai-breadcrumbs-item-{{ ai_gen_id }}">
         <span class="ai-breadcrumbs-current-{{ ai_gen_id }}" aria-current="page">{{ page.title }}</span>
       </div>
-      {% assign page_item = '{"@type": "ListItem", "position": ' | append: position | append: ', "name": "' | append: page.title | append: '", "item": "' | append: page.url | append: '"}' %}
-      {% assign breadcrumb_items = breadcrumb_items | push: page_item %}
 
     {% elsif template.name == 'blog' and blog %}
       <div class="ai-breadcrumbs-item-{{ ai_gen_id }}">
         <span class="ai-breadcrumbs-current-{{ ai_gen_id }}" aria-current="page">{{ blog.title }}</span>
       </div>
-      {% assign blog_item = '{"@type": "ListItem", "position": ' | append: position | append: ', "name": "' | append: blog.title | append: '", "item": "' | append: blog.url | append: '"}' %}
-      {% assign breadcrumb_items = breadcrumb_items | push: blog_item %}
 
     {% elsif template.name == 'article' and article %}
       <div class="ai-breadcrumbs-item-{{ ai_gen_id }}">
         <a href="{{ blog.url }}" class="ai-breadcrumbs-link-{{ ai_gen_id }}">{{ blog.title }}</a>
         <span class="ai-breadcrumbs-separator-{{ ai_gen_id }}" aria-hidden="true">{{ block.settings.separator }}</span>
       </div>
-      {% assign blog_item = '{"@type": "ListItem", "position": ' | append: position | append: ', "name": "' | append: blog.title | append: '", "item": "' | append: blog.url | append: '"}' %}
-      {% assign breadcrumb_items = breadcrumb_items | push: blog_item %}
-      {% assign position = position | plus: 1 %}
       <div class="ai-breadcrumbs-item-{{ ai_gen_id }}">
         <span class="ai-breadcrumbs-current-{{ ai_gen_id }}" aria-current="page">{{ article.title }}</span>
       </div>
-      {% assign article_item = '{"@type": "ListItem", "position": ' | append: position | append: ', "name": "' | append: article.title | append: '", "item": "' | append: article.url | append: '"}' %}
-      {% assign breadcrumb_items = breadcrumb_items | push: article_item %}
 
     {% elsif template.name == 'search' %}
       <div class="ai-breadcrumbs-item-{{ ai_gen_id }}">
         <span class="ai-breadcrumbs-current-{{ ai_gen_id }}" aria-current="page">Search results</span>
       </div>
-      {% assign search_item = '{"@type": "ListItem", "position": ' | append: position | append: ', "name": "Search results"}' %}
-      {% assign breadcrumb_items = breadcrumb_items | push: search_item %}
 
     {% elsif template.name == 'cart' %}
       <div class="ai-breadcrumbs-item-{{ ai_gen_id }}">
         <span class="ai-breadcrumbs-current-{{ ai_gen_id }}" aria-current="page">Cart</span>
       </div>
-      {% assign cart_item = '{"@type": "ListItem", "position": ' | append: position | append: ', "name": "Cart", "item": "' | append: routes.cart_url | append: '"}' %}
-      {% assign breadcrumb_items = breadcrumb_items | push: cart_item %}
 
     {% elsif template.name == 'list-collections' %}
       <div class="ai-breadcrumbs-item-{{ ai_gen_id }}">
         <span class="ai-breadcrumbs-current-{{ ai_gen_id }}" aria-current="page">Collections</span>
       </div>
-      {% assign collections_item = '{"@type": "ListItem", "position": ' | append: position | append: ', "name": "Collections", "item": "' | append: routes.collections_url | append: '"}' %}
-      {% assign breadcrumb_items = breadcrumb_items | push: collections_item %}
 
     {% elsif template.name == 'account' or template.name == 'login' or template.name == 'register' %}
       <div class="ai-breadcrumbs-item-{{ ai_gen_id }}">
         <span class="ai-breadcrumbs-current-{{ ai_gen_id }}" aria-current="page">Account</span>
       </div>
-      {% assign account_item = '{"@type": "ListItem", "position": ' | append: position | append: ', "name": "Account", "item": "' | append: routes.account_url | append: '"}' %}
-      {% assign breadcrumb_items = breadcrumb_items | push: account_item %}
     {% endif %}
   </nav>
 
@@ -304,38 +265,16 @@
   {% endif %}
 </breadcrumbs-{{ ai_gen_id }}>
 
-<script>
-  (function() {
-    class Breadcrumbs{{ ai_gen_id }} extends HTMLElement {
-      constructor() {
-        super();
-      }
-
-      connectedCallback() {
-        this.init();
-      }
-
-      init() {
-        const links = this.querySelectorAll('.ai-breadcrumbs-link-{{ ai_gen_id }}');
-        links.forEach(link => {
-          link.addEventListener('click', (e) => {
-            const url = link.getAttribute('href');
-            if (url && url !== '#') {
-              sessionStorage.setItem('breadcrumb_referrer', window.location.href);
-            }
-          });
-        });
-      }
-    }
-
-    customElements.define('breadcrumbs-{{ ai_gen_id }}', Breadcrumbs{{ ai_gen_id }});
-  })();
-</script>
-
 {% schema %}
 {
   "name": "SEO breadcrumbs",
   "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "default"
+    },
     {
       "type": "header",
       "content": "Content"
@@ -389,12 +328,6 @@
       "content": "Typography"
     },
     {
-      "type": "font_picker",
-      "id": "font_family",
-      "label": "Font",
-      "default": "inter_n4"
-    },
-    {
       "type": "range",
       "id": "font_size",
       "label": "Desktop font size",
@@ -430,10 +363,6 @@
         {
           "value": "600",
           "label": "Semibold"
-        },
-        {
-          "value": "700",
-          "label": "Bold"
         }
       ],
       "default": "500"
@@ -461,34 +390,6 @@
       "step": 2,
       "unit": "px",
       "default": 14
-    },
-    {
-      "type": "header",
-      "content": "Colors"
-    },
-    {
-      "type": "color",
-      "id": "link_color",
-      "label": "Link",
-      "default": "#666666"
-    },
-    {
-      "type": "color",
-      "id": "link_hover_color",
-      "label": "Link hover",
-      "default": "#1e1e1e"
-    },
-    {
-      "type": "color",
-      "id": "current_color",
-      "label": "Current page",
-      "default": "#1e1e1e"
-    },
-    {
-      "type": "color",
-      "id": "separator_color",
-      "label": "Separator",
-      "default": "#cccccc"
     },
     {
       "type": "header",

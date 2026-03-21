@@ -2,13 +2,13 @@
   @prompt
     Quick Actions / Jump Links (new block)
     
-    A horizontal “pill” nav that anchors to sections below:
+    A horizontal "pill" nav that anchors to sections below:
     
     TL;DR
     
     How to use
     
-    What you’ll feel
+    What you'll feel
     
     Safety
     
@@ -18,7 +18,7 @@
     
     Controls:
     
-    Toggle: “Sticky on scroll” (desktop on; mobile optional)
+    Toggle: "Sticky on scroll" (desktop on; mobile optional)
     
     Toggle: show icons
     
@@ -30,12 +30,12 @@
 {% enddoc %}
 {% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
 
-{% style %}
+{%- style -%}
   .ai-jump-links-{{ ai_gen_id }} {
     display: block;
     width: 100%;
-    background-color: {{ block.settings.background_color }};
-    border-bottom: 1px solid {{ block.settings.border_color }};
+    background-color: rgba(var(--color-background));
+    border-bottom: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 12%, transparent);
     z-index: 100;
   }
 
@@ -62,28 +62,28 @@
     align-items: center;
     gap: 8px;
     padding: {{ block.settings.pill_padding_vertical }}px {{ block.settings.pill_padding_horizontal }}px;
-    background-color: {{ block.settings.pill_background }};
-    color: {{ block.settings.pill_text_color }};
-    border: 1px solid {{ block.settings.pill_border_color }};
+    background-color: rgba(var(--color-background-2));
+    color: rgba(var(--color-foreground));
+    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 12%, transparent);
     border-radius: {{ block.settings.pill_border_radius }}px;
     text-decoration: none;
     white-space: nowrap;
     font-size: {{ block.settings.font_size }}px;
     font-weight: 500;
-    transition: var(--transition-fast);
+    transition: 0.3s var(--out-soft, ease);
     cursor: pointer;
   }
 
   .ai-jump-links-item-{{ ai_gen_id }}:hover {
-    background-color: {{ block.settings.pill_hover_background }};
-    color: {{ block.settings.pill_hover_text_color }};
-    border-color: {{ block.settings.pill_hover_border_color }};
+    background-color: rgba(var(--color-accent));
+    color: rgba(var(--color-foreground));
+    border-color: rgba(var(--color-accent));
   }
 
   .ai-jump-links-item-{{ ai_gen_id }}.active {
-    background-color: {{ block.settings.pill_active_background }};
-    color: {{ block.settings.pill_active_text_color }};
-    border-color: {{ block.settings.pill_active_border_color }};
+    background-color: rgba(var(--color-accent));
+    color: rgba(var(--color-foreground));
+    border-color: rgba(var(--color-accent));
   }
 
   .ai-jump-links-icon-{{ ai_gen_id }} {
@@ -92,7 +92,7 @@
     flex-shrink: 0;
   }
 
-  @media screen and (max-width: 749px) {
+  @media screen and (max-width: 768px) {
     .ai-jump-links-{{ ai_gen_id }}.sticky-mobile {
       position: sticky;
       top: 0;
@@ -102,10 +102,10 @@
       padding: {{ block.settings.padding_vertical_mobile }}px {{ block.settings.padding_horizontal_mobile }}px;
     }
   }
-{% endstyle %}
+{%- endstyle -%}
 
 <jump-links-{{ ai_gen_id }}
-  class="ai-jump-links-{{ ai_gen_id }} {% if block.settings.sticky_desktop %}sticky{% endif %} {% if block.settings.sticky_mobile %}sticky-mobile{% endif %}"
+  class="ai-jump-links-{{ ai_gen_id }} color-{{ block.settings.color_scheme }} {% if block.settings.sticky_desktop %}sticky{% endif %} {% if block.settings.sticky_mobile %}sticky-mobile{% endif %}"
   {{ block.shopify_attributes }}
   data-offset="{{ block.settings.scroll_offset }}"
 >
@@ -281,8 +281,13 @@
 {% schema %}
 {
   "name": "Quick jump links",
-  "tag": null,
   "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "default"
+    },
     {
       "type": "header",
       "content": "Sticky behavior"
@@ -416,76 +421,6 @@
       "unit": "px",
       "label": "Pill border radius",
       "default": 20
-    },
-    {
-      "type": "header",
-      "content": "Colors"
-    },
-    {
-      "type": "color",
-      "id": "background_color",
-      "label": "Background",
-      "default": "#ffffff"
-    },
-    {
-      "type": "color",
-      "id": "border_color",
-      "label": "Border",
-      "default": "#e8e8e8"
-    },
-    {
-      "type": "color",
-      "id": "pill_background",
-      "label": "Pill background",
-      "default": "#f9f9f9"
-    },
-    {
-      "type": "color",
-      "id": "pill_text_color",
-      "label": "Pill text",
-      "default": "#2a2a2a"
-    },
-    {
-      "type": "color",
-      "id": "pill_border_color",
-      "label": "Pill border",
-      "default": "#e8e8e8"
-    },
-    {
-      "type": "color",
-      "id": "pill_hover_background",
-      "label": "Pill hover background",
-      "default": "#5a9d6f"
-    },
-    {
-      "type": "color",
-      "id": "pill_hover_text_color",
-      "label": "Pill hover text",
-      "default": "#ffffff"
-    },
-    {
-      "type": "color",
-      "id": "pill_hover_border_color",
-      "label": "Pill hover border",
-      "default": "#5a9d6f"
-    },
-    {
-      "type": "color",
-      "id": "pill_active_background",
-      "label": "Pill active background",
-      "default": "#5a9d6f"
-    },
-    {
-      "type": "color",
-      "id": "pill_active_text_color",
-      "label": "Pill active text",
-      "default": "#ffffff"
-    },
-    {
-      "type": "color",
-      "id": "pill_active_border_color",
-      "label": "Pill active border",
-      "default": "#5a9d6f"
     },
     {
       "type": "header",

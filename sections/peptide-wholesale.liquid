@@ -1,0 +1,479 @@
+{%- liquid
+  assign peptide_blocks = section.blocks | where: "type", "peptide"
+  assign heading = section.settings.heading | default: "Peptide Wholesale & Research Supply"
+  assign description = section.settings.description
+  assign contact_email = section.settings.email | default: "research@nootropix.shop"
+-%}
+
+{%- style -%}
+  .xo-section--{{ section.id }} {
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+
+  .xo-section--{{ section.id }} .pw__header {
+    text-align: center;
+    margin-bottom: clamp(32px, 5vw, 56px);
+  }
+
+  .xo-section--{{ section.id }} .pw__heading {
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    line-height: 1.3;
+    margin: 0 0 12px;
+    color: rgba(var(--color-foreground));
+  }
+
+  .xo-section--{{ section.id }} .pw__desc {
+    font-size: calc(var(--font-body-scale, 1) * 1.5rem);
+    line-height: 1.7;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 60%, transparent);
+    max-width: 72ch;
+    margin: 0 auto;
+  }
+
+  .xo-section--{{ section.id }} .pw__table-wrap {
+    background: rgba(var(--color-background-2));
+    border-radius: 2rem;
+    padding: clamp(20px, 3vw, 32px);
+    margin-bottom: clamp(32px, 5vw, 56px);
+    overflow-x: auto;
+  }
+
+  .xo-section--{{ section.id }} .pw__table-heading {
+    font-size: clamp(1.4rem, 2vw, 1.8rem);
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    line-height: 1.3;
+    margin: 0 0 16px;
+    color: rgba(var(--color-foreground));
+  }
+
+  .xo-section--{{ section.id }} .pw__table {
+    width: 100%;
+    text-align: left;
+    border-collapse: collapse;
+    font-size: calc(var(--font-body-scale, 1) * 1.4rem);
+  }
+
+  .xo-section--{{ section.id }} .pw__table th {
+    font-weight: 600;
+    padding: 12px 16px 12px 0;
+    border-bottom: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 12%, transparent);
+    color: rgba(var(--color-foreground));
+    white-space: nowrap;
+  }
+
+  .xo-section--{{ section.id }} .pw__table td {
+    padding: 12px 16px 12px 0;
+    border-bottom: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 8%, transparent);
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 75%, transparent);
+  }
+
+  .xo-section--{{ section.id }} .pw__table tbody tr:last-child td {
+    border-bottom: 0;
+  }
+
+  .xo-section--{{ section.id }} .pw__table-note {
+    font-size: calc(var(--font-body-scale, 1) * 1.3rem);
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 50%, transparent);
+    margin: 16px 0 0;
+  }
+
+  .xo-section--{{ section.id }} .pw__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: clamp(24px, 4vw, 40px);
+    margin-bottom: clamp(32px, 5vw, 56px);
+  }
+
+  @media (min-width: 768px) {
+    .xo-section--{{ section.id }} .pw__grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .xo-section--{{ section.id }} .pw__col-heading {
+    font-size: clamp(1.4rem, 2vw, 1.8rem);
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    line-height: 1.3;
+    margin: 0 0 16px;
+    color: rgba(var(--color-foreground));
+  }
+
+  .xo-section--{{ section.id }} .pw__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .xo-section--{{ section.id }} .pw__list li {
+    font-size: calc(var(--font-body-scale, 1) * 1.4rem);
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 75%, transparent);
+    padding: 6px 0;
+    line-height: 1.6;
+  }
+
+  .xo-section--{{ section.id }} .pw__list--ordered {
+    list-style: decimal;
+    padding-left: 20px;
+  }
+
+  .xo-section--{{ section.id }} .pw__form-wrap {
+    background: rgba(var(--color-background-2));
+    border-radius: 2rem;
+    padding: clamp(20px, 3vw, 32px);
+  }
+
+  .xo-section--{{ section.id }} .pw__form-heading {
+    font-size: clamp(1.4rem, 2vw, 1.8rem);
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    line-height: 1.3;
+    margin: 0 0 20px;
+    text-align: center;
+    color: rgba(var(--color-foreground));
+  }
+
+  .xo-section--{{ section.id }} .pw__form {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  @media (min-width: 768px) {
+    .xo-section--{{ section.id }} .pw__form {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .xo-section--{{ section.id }} .pw__field--full {
+    grid-column: 1 / -1;
+  }
+
+  .xo-section--{{ section.id }} .pw__form input,
+  .xo-section--{{ section.id }} .pw__form textarea {
+    display: block;
+    width: 100%;
+    min-height: var(--touch-min, 44px);
+    padding: 12px 16px;
+    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 15%, transparent);
+    border-radius: var(--button-radius, 8px);
+    background: rgba(var(--color-background));
+    font-family: inherit;
+    font-size: calc(var(--font-body-scale, 1) * 1.4rem);
+    color: rgba(var(--color-foreground));
+    transition: border-color 0.3s var(--out-soft, ease), outline-color 0.3s var(--out-soft, ease);
+  }
+
+  .xo-section--{{ section.id }} .pw__form input::placeholder,
+  .xo-section--{{ section.id }} .pw__form textarea::placeholder {
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 40%, transparent);
+  }
+
+  .xo-section--{{ section.id }} .pw__form input:focus-visible,
+  .xo-section--{{ section.id }} .pw__form textarea:focus-visible {
+    outline: 2px solid rgba(var(--color-accent));
+    outline-offset: 2px;
+    border-color: rgba(var(--color-accent));
+  }
+
+  .xo-section--{{ section.id }} .pw__submit-wrap {
+    grid-column: 1 / -1;
+    text-align: center;
+    margin-top: 8px;
+  }
+
+  .xo-section--{{ section.id }} .pw__submit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(var(--color-accent));
+    color: rgba(var(--color-foreground));
+    font-weight: 600;
+    font-size: calc(var(--font-body-scale, 1) * 1.5rem);
+    min-height: var(--touch-min, 44px);
+    padding: 12px 32px;
+    border: 2px solid transparent;
+    border-radius: var(--button-radius, 8px);
+    cursor: pointer;
+    transition: opacity 0.3s var(--out-soft, ease), transform 0.3s var(--out-soft, ease);
+  }
+
+  .xo-section--{{ section.id }} .pw__submit:hover {
+    opacity: 0.88;
+  }
+
+  .xo-section--{{ section.id }} .pw__submit:active {
+    transform: scale(0.98);
+  }
+
+  .xo-section--{{ section.id }} .pw__submit:focus-visible {
+    outline: 2px solid rgba(var(--color-accent));
+    outline-offset: 3px;
+  }
+
+  .xo-section--{{ section.id }} .pw__contact-note {
+    text-align: center;
+    font-size: calc(var(--font-body-scale, 1) * 1.3rem);
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 50%, transparent);
+    margin: 16px 0 0;
+  }
+
+  .xo-section--{{ section.id }} .pw__contact-note a {
+    color: rgba(var(--color-foreground));
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .xo-section--{{ section.id }} .pw__success {
+    text-align: center;
+    padding: 24px;
+    color: rgba(var(--color-success));
+    font-weight: 600;
+  }
+
+  .xo-section--{{ section.id }} .pw__errors {
+    grid-column: 1 / -1;
+    color: rgba(var(--color-error));
+    font-size: calc(var(--font-body-scale, 1) * 1.3rem);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .xo-section--{{ section.id }} .pw__form input,
+    .xo-section--{{ section.id }} .pw__form textarea,
+    .xo-section--{{ section.id }} .pw__submit {
+      transition: none;
+    }
+    .xo-section--{{ section.id }} .pw__submit:active {
+      transform: none;
+    }
+  }
+{%- endstyle -%}
+
+<section {% render 'section-attr' %}>
+  <xo-container>
+    <header class="pw__header">
+      <h1 class="pw__heading">{{ heading | escape }}</h1>
+      {%- if description != blank -%}
+        <p class="pw__desc">{{ description | escape }}</p>
+      {%- endif -%}
+    </header>
+
+    {%- if peptide_blocks.size > 0 -%}
+      <div class="pw__table-wrap">
+        <h2 class="pw__table-heading">Bulk Availability (≥ 1 g per peptide)</h2>
+        <table class="pw__table" aria-label="Bulk peptide availability">
+          <thead>
+            <tr>
+              <th>Peptide</th>
+              <th>Purity</th>
+              <th>Format</th>
+              <th>MOQ</th>
+              <th>Lead Time</th>
+            </tr>
+          </thead>
+          <tbody>
+            {%- for block in peptide_blocks -%}
+              <tr {{ block.shopify_attributes }}>
+                <td>{{ block.settings.name | escape }}</td>
+                <td>{{ block.settings.purity | escape }}</td>
+                <td>{{ block.settings.format | escape }}</td>
+                <td>{{ block.settings.moq | escape }}</td>
+                <td>{{ block.settings.lead_time | escape }}</td>
+              </tr>
+            {%- endfor -%}
+          </tbody>
+        </table>
+        <p class="pw__table-note">
+          All lots include COA, HPLC + MS data, and are stored under controlled temperature.
+          Custom synthesis requests (≥ 5 g or > 99.5% purity) available upon request.
+        </p>
+      </div>
+    {%- endif -%}
+
+    <div class="pw__grid">
+      <div>
+        <h2 class="pw__col-heading">Why Partner with Nootropix Research Supply</h2>
+        <ul class="pw__list">
+          <li>Local UAE fulfillment — minimize customs friction</li>
+          <li>GMP-compliant suppliers with analytical COA included</li>
+          <li>Fast turnaround — replies within 1 business day</li>
+          <li>Temperature-controlled logistics</li>
+          <li>Confidential B2B handling & documentation</li>
+        </ul>
+      </div>
+
+      <div>
+        <h2 class="pw__col-heading">How It Works</h2>
+        <ol class="pw__list pw__list--ordered">
+          <li>Submit the enquiry form with your organization details & target quantities.</li>
+          <li>We respond within 1 business day with pricing, COA, and ETA.</li>
+          <li>Confirm your quote via bank transfer or card payment.</li>
+          <li>Orders ship securely with documentation and tracking provided.</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="pw__form-wrap">
+      <h2 class="pw__form-heading" id="wholesale-form-heading-{{ section.id }}">Apply for Peptide Supply</h2>
+
+      {%- form 'contact', id: 'PeptideWholesaleForm', class: 'pw__form', aria-labelledby: 'wholesale-form-heading-' | append: section.id -%}
+        {%- if form.posted_successfully? -%}
+          <p class="pw__success pw__field--full" role="status">Thank you — we'll reply within 1 business day.</p>
+        {%- else -%}
+          {%- if form.errors -%}
+            <p class="pw__errors" role="alert">Please check the highlighted fields and try again.</p>
+          {%- endif -%}
+
+          <input type="hidden" name="contact[tags]" value="peptide, wholesale, enquiry">
+
+          <div class="pw__field">
+            <label class="visually-hidden" for="pw-company-{{ section.id }}">Company / Lab Name</label>
+            <input
+              id="pw-company-{{ section.id }}"
+              type="text"
+              name="contact[company]"
+              placeholder="Company / Lab Name *"
+              required
+              autocomplete="organization"
+            >
+          </div>
+
+          <div class="pw__field">
+            <label class="visually-hidden" for="pw-email-{{ section.id }}">Email</label>
+            <input
+              id="pw-email-{{ section.id }}"
+              type="email"
+              name="contact[email]"
+              placeholder="Email *"
+              required
+              autocomplete="email"
+            >
+          </div>
+
+          <div class="pw__field">
+            <label class="visually-hidden" for="pw-name-{{ section.id }}">Contact Person</label>
+            <input
+              id="pw-name-{{ section.id }}"
+              type="text"
+              name="contact[name]"
+              placeholder="Contact Person *"
+              required
+              autocomplete="name"
+            >
+          </div>
+
+          <div class="pw__field">
+            <label class="visually-hidden" for="pw-phone-{{ section.id }}">Phone</label>
+            <input
+              id="pw-phone-{{ section.id }}"
+              type="tel"
+              name="contact[phone]"
+              placeholder="Phone (optional)"
+              autocomplete="tel"
+            >
+          </div>
+
+          <div class="pw__field pw__field--full">
+            <label class="visually-hidden" for="pw-quantity-{{ section.id }}">Quantity</label>
+            <input
+              id="pw-quantity-{{ section.id }}"
+              type="text"
+              name="contact[quantity]"
+              placeholder="Quantity (e.g. 10 × 1 g vials)"
+            >
+          </div>
+
+          <div class="pw__field pw__field--full">
+            <label class="visually-hidden" for="pw-products-{{ section.id }}">Peptides of Interest</label>
+            <textarea
+              id="pw-products-{{ section.id }}"
+              name="contact[products]"
+              placeholder="Peptides of Interest (e.g. BPC 157 1 g, TB-500 2 g…)"
+              rows="3"
+            ></textarea>
+          </div>
+
+          <div class="pw__field pw__field--full">
+            <label class="visually-hidden" for="pw-message-{{ section.id }}">Additional Notes</label>
+            <textarea
+              id="pw-message-{{ section.id }}"
+              name="contact[body]"
+              placeholder="Additional Notes / Research Use Details"
+              rows="3"
+            ></textarea>
+          </div>
+
+          <div class="pw__submit-wrap">
+            <button type="submit" class="pw__submit">Send Enquiry</button>
+          </div>
+        {%- endif -%}
+      {%- endform -%}
+
+      <p class="pw__contact-note">
+        Prefer direct contact? Email us at
+        <a href="mailto:{{ contact_email }}">{{ contact_email }}</a>
+      </p>
+    </div>
+  </xo-container>
+</section>
+
+{% schema %}
+{
+  "name": "Peptide Wholesale",
+  "tag": "section",
+  "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "default" },
+    { "type": "header", "content": "Content" },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Peptide Wholesale & Research Supply"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description",
+      "default": "High-purity peptides for research, clinical, and formulation use — available in bulk quantities (≥ 1 g). We supply verified peptides directly to research facilities, clinics, and compounding labs across the UAE and internationally. Fast response times. COAs on file. Shipments fulfilled from Dubai."
+    },
+    {
+      "type": "text",
+      "id": "email",
+      "label": "Contact email",
+      "default": "research@nootropix.shop"
+    },
+    { "type": "header", "content": "Section Padding" },
+    { "type": "range", "id": "padding_top", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding top", "default": 48 },
+    { "type": "range", "id": "padding_bottom", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding bottom", "default": 56 }
+  ],
+  "blocks": [
+    {
+      "type": "peptide",
+      "name": "Peptide",
+      "settings": [
+        { "type": "text", "id": "name", "label": "Peptide name" },
+        { "type": "text", "id": "purity", "label": "Purity", "default": "≥ 99%" },
+        { "type": "text", "id": "format", "label": "Format", "default": "Lyophilized powder" },
+        { "type": "text", "id": "moq", "label": "MOQ", "default": "1 g +" },
+        { "type": "text", "id": "lead_time", "label": "Lead time", "default": "1–3 business days" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Peptide Wholesale",
+      "blocks": [
+        { "type": "peptide", "settings": { "name": "BPC-157 (Arginate)", "purity": "≥ 99%", "format": "Lyophilized powder", "moq": "1 g +", "lead_time": "1–3 business days" } },
+        { "type": "peptide", "settings": { "name": "TB-500 (Thymosin β-4 Fragment 17-23)", "purity": "≥ 98%", "format": "Lyophilized powder", "moq": "1 g +", "lead_time": "1–3 business days" } },
+        { "type": "peptide", "settings": { "name": "GHK-Cu (Copper Peptide)", "purity": "≥ 99%", "format": "Lyophilized powder", "moq": "1 g +", "lead_time": "1–3 business days" } },
+        { "type": "peptide", "settings": { "name": "CJC-1295 + Ipamorelin (Combo)", "purity": "≥ 98%", "format": "Lyophilized powder", "moq": "1 g +", "lead_time": "3–5 business days" } },
+        { "type": "peptide", "settings": { "name": "Melanotan II", "purity": "≥ 98%", "format": "Lyophilized powder", "moq": "1 g +", "lead_time": "3–5 business days" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

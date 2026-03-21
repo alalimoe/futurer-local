@@ -1,6 +1,6 @@
 {% doc %}
   @prompt
-    Create a theme section “Quickstart Header + Navigation” with product picker + page metafield fallback quickstart_product, includes hero + jump-link chips, modern card design, responsive and accessible.
+    Create a theme section "Quickstart Header + Navigation" with product picker + page metafield fallback quickstart_product, includes hero + jump-link chips, modern card design, responsive and accessible.
 {% enddoc %}
 {% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
 
@@ -14,11 +14,11 @@
   endif
 %}
 
-{% style %}
+{%- style -%}
   .ai-quickstart-header-{{ ai_gen_id }} {
     width: 100%;
     display: block;
-    background: {{ block.settings.background_color }};
+    background: rgba(var(--color-background-2));
     padding: {{ block.settings.section_padding_top }}px var(--page-gutter) {{ block.settings.section_padding_bottom }}px;
   }
 
@@ -43,7 +43,7 @@
 
   .ai-quickstart-header__heading-{{ ai_gen_id }} {
     line-height: 1.2;
-    color: {{ block.settings.heading_color }};
+    color: rgba(var(--color-foreground));
     margin: 0;
     font-weight: 600;
   }
@@ -51,7 +51,7 @@
   .ai-quickstart-header__description-{{ ai_gen_id }} {
     font-size: {{ block.settings.description_size }}px;
     line-height: 1.6;
-    color: {{ block.settings.description_color }};
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 75%, transparent);
     margin: 0;
   }
 
@@ -60,7 +60,7 @@
     width: 100%;
     border-radius: {{ block.settings.image_border_radius }}px;
     overflow: hidden;
-    background: {{ block.settings.image_background }};
+    background: rgba(var(--color-background));
   }
 
   .ai-quickstart-header__image-{{ ai_gen_id }} {
@@ -76,7 +76,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--color-surface-secondary);
+    background: rgba(var(--color-background-2));
   }
 
   .ai-quickstart-header__image-placeholder-{{ ai_gen_id }} svg {
@@ -98,29 +98,28 @@
     display: inline-flex;
     align-items: center;
     padding: {{ block.settings.chip_padding_vertical }}px {{ block.settings.chip_padding_horizontal }}px;
-    background: {{ block.settings.chip_background }};
-    color: {{ block.settings.chip_text_color }};
-    border: {{ block.settings.chip_border_width }}px solid {{ block.settings.chip_border_color }};
+    background: rgba(var(--color-background));
+    color: rgba(var(--color-foreground));
+    border: {{ block.settings.chip_border_width }}px solid color-mix(in srgb, rgba(var(--color-foreground)) 12%, transparent);
     border-radius: {{ block.settings.chip_border_radius }}px;
     font-size: {{ block.settings.chip_font_size }}px;
     font-weight: 500;
     text-decoration: none;
-    transition: var(--transition-smooth);
+    transition: 0.3s var(--out-soft, ease);
     cursor: pointer;
   }
 
   .ai-quickstart-header__chip-{{ ai_gen_id }}:hover {
-    background: {{ block.settings.chip_hover_background }};
-    color: {{ block.settings.chip_hover_text_color }};
-    border-color: {{ block.settings.chip_hover_border_color }};
+    background: rgba(var(--color-accent));
+    color: rgba(var(--color-foreground));
+    border-color: rgba(var(--color-accent));
     transform: translateY(-2px);
-    box-shadow: var(--shadow-sm);
   }
 
   .ai-quickstart-header__empty-state-{{ ai_gen_id }} {
     text-align: center;
     padding: 40px 20px;
-    color: #666;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 40%, transparent);
     font-size: 14px;
   }
 
@@ -138,10 +137,10 @@
       justify-content: center;
     }
   }
-{% endstyle %}
+{%- endstyle -%}
 
 <quickstart-header-{{ ai_gen_id }}
-  class="ai-quickstart-header-{{ ai_gen_id }}"
+  class="ai-quickstart-header-{{ ai_gen_id }} color-{{ block.settings.color_scheme }}"
   {{ block.shopify_attributes }}
 >
   <div class="ai-quickstart-header__container-{{ ai_gen_id }}">
@@ -259,8 +258,13 @@
 {% schema %}
 {
   "name": "Quickstart header",
-  "tag": null,
   "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "default"
+    },
     {
       "type": "header",
       "content": "Product"
@@ -296,12 +300,6 @@
       "default": "h1"
     },
     {
-      "type": "color",
-      "id": "heading_color",
-      "label": "Heading color",
-      "default": "#2a2a2a"
-    },
-    {
       "type": "richtext",
       "id": "description",
       "label": "Description",
@@ -318,12 +316,6 @@
       "default": 16
     },
     {
-      "type": "color",
-      "id": "description_color",
-      "label": "Description color",
-      "default": "#666666"
-    },
-    {
       "type": "header",
       "content": "Navigation chips"
     },
@@ -338,18 +330,9 @@
       "id": "chip_alignment",
       "label": "Alignment",
       "options": [
-        {
-          "value": "flex-start",
-          "label": "Left"
-        },
-        {
-          "value": "center",
-          "label": "Center"
-        },
-        {
-          "value": "flex-end",
-          "label": "Right"
-        }
+        { "value": "flex-start", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "flex-end", "label": "Right" }
       ],
       "default": "flex-start"
     },
@@ -412,42 +395,6 @@
       "unit": "px",
       "label": "Border width",
       "default": 1
-    },
-    {
-      "type": "color",
-      "id": "chip_background",
-      "label": "Background",
-      "default": "#ffffff"
-    },
-    {
-      "type": "color",
-      "id": "chip_text_color",
-      "label": "Text color",
-      "default": "#2a2a2a"
-    },
-    {
-      "type": "color",
-      "id": "chip_border_color",
-      "label": "Border color",
-      "default": "#e8e8e8"
-    },
-    {
-      "type": "color",
-      "id": "chip_hover_background",
-      "label": "Hover background",
-      "default": "#5a9d6f"
-    },
-    {
-      "type": "color",
-      "id": "chip_hover_text_color",
-      "label": "Hover text color",
-      "default": "#ffffff"
-    },
-    {
-      "type": "color",
-      "id": "chip_hover_border_color",
-      "label": "Hover border color",
-      "default": "#5a9d6f"
     },
     {
       "type": "range",
@@ -664,18 +611,6 @@
       "unit": "px",
       "label": "Image border radius",
       "default": 12
-    },
-    {
-      "type": "color",
-      "id": "background_color",
-      "label": "Background",
-      "default": "#f9f9f9"
-    },
-    {
-      "type": "color",
-      "id": "image_background",
-      "label": "Image background",
-      "default": "#ffffff"
     }
   ],
   "presets": [

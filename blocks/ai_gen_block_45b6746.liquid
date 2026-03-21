@@ -4,27 +4,26 @@
 {% enddoc %}
 {% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
 
-{% style %}
+{%- style -%}
   .ai-page-embed-{{ ai_gen_id }} {
     display: block;
     width: 100%;
     max-width: {{ block.settings.max_width }}px;
     margin: 0 auto;
     padding: {{ block.settings.padding_vertical }}px {{ block.settings.padding_horizontal }}px;
-    background-color: {{ block.settings.background_color }};
+    background-color: rgba(var(--color-background));
   }
 
   .ai-page-embed-container-{{ ai_gen_id }} {
     width: 100%;
-    background-color: {{ block.settings.content_background }};
+    background-color: rgba(var(--color-background-2));
     border-radius: {{ block.settings.border_radius }}px;
     overflow: hidden;
-    box-shadow: {{ block.settings.shadow_horizontal }}px {{ block.settings.shadow_vertical }}px {{ block.settings.shadow_blur }}px {{ block.settings.shadow_color }};
   }
 
   .ai-page-embed-content-{{ ai_gen_id }} {
     padding: {{ block.settings.content_padding }}px;
-    color: {{ block.settings.text_color }};
+    color: rgba(var(--color-foreground));
     line-height: 1.6;
   }
 
@@ -34,7 +33,7 @@
   .ai-page-embed-content-{{ ai_gen_id }} h4,
   .ai-page-embed-content-{{ ai_gen_id }} h5,
   .ai-page-embed-content-{{ ai_gen_id }} h6 {
-    color: {{ block.settings.heading_color }};
+    color: rgba(var(--color-foreground));
     margin-top: 1.5em;
     margin-bottom: 0.5em;
   }
@@ -50,7 +49,7 @@
   }
 
   .ai-page-embed-content-{{ ai_gen_id }} a {
-    color: {{ block.settings.link_color }};
+    color: rgba(var(--color-accent));
     text-decoration: none;
     transition: opacity 0.2s ease;
   }
@@ -85,18 +84,18 @@
   .ai-page-embed-content-{{ ai_gen_id }} td {
     padding: 12px;
     text-align: left;
-    border-bottom: 1px solid {{ block.settings.border_color }};
+    border-bottom: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 15%, transparent);
   }
 
   .ai-page-embed-content-{{ ai_gen_id }} th {
     font-weight: 600;
-    color: {{ block.settings.heading_color }};
+    color: rgba(var(--color-foreground));
   }
 
   .ai-page-embed-metafields-{{ ai_gen_id }} {
     margin-top: 40px;
     padding-top: 40px;
-    border-top: 1px solid {{ block.settings.border_color }};
+    border-top: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 15%, transparent);
   }
 
   .ai-page-embed-metafield-{{ ai_gen_id }} {
@@ -105,7 +104,7 @@
 
   .ai-page-embed-metafield-label-{{ ai_gen_id }} {
     font-weight: 600;
-    color: {{ block.settings.heading_color }};
+    color: rgba(var(--color-foreground));
     margin-bottom: 8px;
     font-size: 14px;
     text-transform: uppercase;
@@ -113,17 +112,17 @@
   }
 
   .ai-page-embed-metafield-value-{{ ai_gen_id }} {
-    color: {{ block.settings.text_color }};
+    color: rgba(var(--color-foreground));
   }
 
   .ai-page-embed-empty-{{ ai_gen_id }} {
     padding: 60px 20px;
     text-align: center;
-    color: #999;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 40%, transparent);
     font-size: 14px;
   }
 
-  @media screen and (max-width: 749px) {
+  @media screen and (max-width: 768px) {
     .ai-page-embed-{{ ai_gen_id }} {
       padding: {{ block.settings.padding_vertical | times: 0.6 }}px {{ block.settings.padding_horizontal | times: 0.6 }}px;
     }
@@ -137,10 +136,10 @@
       padding-top: 30px;
     }
   }
-{% endstyle %}
+{%- endstyle -%}
 
 <page-embed-{{ ai_gen_id }}
-  class="ai-page-embed-{{ ai_gen_id }}"
+  class="ai-page-embed-{{ ai_gen_id }} color-{{ block.settings.color_scheme }}"
   {{ block.shopify_attributes }}
 >
   <div class="ai-page-embed-container-{{ ai_gen_id }}">
@@ -174,14 +173,14 @@
                         <a href="{{ metafield.value }}" target="_blank" rel="noopener noreferrer">{{ metafield.value }}</a>
                       {% elsif metafield.type == 'file_reference' %}
                         {% if metafield.value.media_type == 'image' %}
-                          <img src="{{ metafield.value | image_url: width: 800 }}" alt="{{ metafield.value.alt }}" loading="lazy">
+                          <img src="{{ metafield.value | image_url: width: 800 }}" alt="{{ metafield.value.alt }}" loading="lazy" width="800" height="600">
                         {% else %}
                           <a href="{{ metafield.value.url }}" target="_blank" rel="noopener noreferrer">{{ metafield.value.url }}</a>
                         {% endif %}
                       {% elsif metafield.type == 'list.file_reference' %}
                         {% for file in metafield.value %}
                           {% if file.media_type == 'image' %}
-                            <img src="{{ file | image_url: width: 800 }}" alt="{{ file.alt }}" loading="lazy" style="margin-bottom: 10px;">
+                            <img src="{{ file | image_url: width: 800 }}" alt="{{ file.alt }}" loading="lazy" width="800" height="600" style="margin-bottom: 10px;">
                           {% else %}
                             <a href="{{ file.url }}" target="_blank" rel="noopener noreferrer">{{ file.url }}</a>
                           {% endif %}
@@ -199,7 +198,7 @@
                           No
                         {% endif %}
                       {% elsif metafield.type == 'json' %}
-                        <pre style="background: #f5f5f5; padding: 12px; border-radius: 4px; overflow-x: auto;">{{ metafield.value | json }}</pre>
+                        <pre style="background: rgba(var(--color-background-2)); padding: 12px; border-radius: 4px; overflow-x: auto;">{{ metafield.value | json }}</pre>
                       {% else %}
                         {{ metafield.value }}
                       {% endif %}
@@ -248,8 +247,13 @@
 {% schema %}
 {
   "name": "Page embed",
-  "tag": null,
   "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "default"
+    },
     {
       "type": "header",
       "content": "Page"
@@ -314,42 +318,6 @@
       "content": "Style"
     },
     {
-      "type": "color",
-      "id": "background_color",
-      "label": "Background",
-      "default": "#ffffff"
-    },
-    {
-      "type": "color",
-      "id": "content_background",
-      "label": "Content background",
-      "default": "#f9f9f9"
-    },
-    {
-      "type": "color",
-      "id": "text_color",
-      "label": "Text",
-      "default": "#2a2a2a"
-    },
-    {
-      "type": "color",
-      "id": "heading_color",
-      "label": "Headings",
-      "default": "#2a2a2a"
-    },
-    {
-      "type": "color",
-      "id": "link_color",
-      "label": "Links",
-      "default": "#5a9d6f"
-    },
-    {
-      "type": "color",
-      "id": "border_color",
-      "label": "Borders",
-      "default": "#e8e8e8"
-    },
-    {
       "type": "range",
       "id": "border_radius",
       "label": "Border radius",
@@ -368,46 +336,6 @@
       "step": 2,
       "unit": "px",
       "default": 4
-    },
-    {
-      "type": "header",
-      "content": "Shadow"
-    },
-    {
-      "type": "range",
-      "id": "shadow_horizontal",
-      "label": "Horizontal offset",
-      "min": -20,
-      "max": 20,
-      "step": 1,
-      "unit": "px",
-      "default": 0
-    },
-    {
-      "type": "range",
-      "id": "shadow_vertical",
-      "label": "Vertical offset",
-      "min": -20,
-      "max": 20,
-      "step": 1,
-      "unit": "px",
-      "default": 2
-    },
-    {
-      "type": "range",
-      "id": "shadow_blur",
-      "label": "Blur",
-      "min": 0,
-      "max": 40,
-      "step": 2,
-      "unit": "px",
-      "default": 8
-    },
-    {
-      "type": "color",
-      "id": "shadow_color",
-      "label": "Shadow color",
-      "default": "rgba(0,0,0,0.08)"
     }
   ],
   "presets": [

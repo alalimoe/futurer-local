@@ -9,11 +9,11 @@
 {% enddoc %}
 {% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
 
-{% style %}
+{%- style -%}
   .ai-quickstart-header-{{ ai_gen_id }} {
     display: block;
     width: 100%;
-    background-color: {{ block.settings.background_color }};
+    background-color: rgba(var(--color-background-2));
     padding: {{ block.settings.padding_top }}px var(--page-gutter) {{ block.settings.padding_bottom }}px;
   }
 
@@ -23,9 +23,9 @@
   }
 
   .ai-quickstart-header__card-{{ ai_gen_id }} {
-    background-color: {{ block.settings.card_background }};
-    border: 1px solid {{ block.settings.border_color }};
-    border-radius: var(--nx-radius-md);
+    background-color: rgba(var(--color-background));
+    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 12%, transparent);
+    border-radius: 1.5rem;
     padding: 40px;
     margin-bottom: 24px;
   }
@@ -45,7 +45,7 @@
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    color: {{ block.settings.eyebrow_color }};
+    color: rgba(var(--color-accent));
     margin-bottom: 12px;
   }
 
@@ -53,14 +53,14 @@
     font-size: 36px;
     font-weight: 600;
     line-height: 1.2;
-    color: {{ block.settings.heading_color }};
+    color: rgba(var(--color-foreground));
     margin: 0 0 16px;
   }
 
   .ai-quickstart-header__intro-{{ ai_gen_id }} {
     font-size: 16px;
     line-height: 1.6;
-    color: {{ block.settings.text_color }};
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 75%, transparent);
     margin-bottom: 24px;
   }
 
@@ -72,15 +72,15 @@
   .ai-quickstart-header__image-{{ ai_gen_id }} {
     width: 100%;
     height: auto;
-    border-radius: var(--nx-radius-sm);
+    border-radius: 1rem;
     object-fit: cover;
   }
 
   .ai-quickstart-header__image-placeholder-{{ ai_gen_id }} {
     width: 100%;
     aspect-ratio: 1;
-    background-color: var(--color-surface-secondary);
-    border-radius: var(--nx-radius-sm);
+    background-color: rgba(var(--color-background-2));
+    border-radius: 1rem;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -97,25 +97,25 @@
     align-items: center;
     gap: 8px;
     padding: 12px 24px;
-    background-color: {{ block.settings.button_background }};
-    color: {{ block.settings.button_text_color }};
-    border: 1px solid {{ block.settings.button_border_color }};
+    background-color: rgba(var(--color-background));
+    color: rgba(var(--color-foreground));
+    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 12%, transparent);
     border-radius: 6px;
     text-decoration: none;
     font-size: 14px;
     font-weight: 500;
-    transition: var(--transition-fast);
+    transition: 0.3s var(--out-soft, ease);
   }
 
   .ai-quickstart-header__button-{{ ai_gen_id }}:hover {
-    background-color: {{ block.settings.button_hover_background }};
-    border-color: {{ block.settings.button_hover_border }};
+    background-color: rgba(var(--color-background-2));
+    border-color: color-mix(in srgb, rgba(var(--color-foreground)) 20%, transparent);
   }
 
   .ai-quickstart-header__nav-{{ ai_gen_id }} {
-    background-color: {{ block.settings.nav_background }};
-    border: 1px solid {{ block.settings.border_color }};
-    border-radius: var(--nx-radius-md);
+    background-color: rgba(var(--color-background));
+    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 12%, transparent);
+    border-radius: 1.5rem;
     padding: 20px;
   }
 
@@ -128,7 +128,7 @@
   .ai-quickstart-header__nav-title-{{ ai_gen_id }} {
     font-size: 14px;
     font-weight: 600;
-    color: {{ block.settings.heading_color }};
+    color: rgba(var(--color-foreground));
     margin-bottom: 16px;
   }
 
@@ -145,19 +145,19 @@
     display: inline-flex;
     align-items: center;
     padding: 8px 16px;
-    background-color: {{ block.settings.chip_background }};
-    color: {{ block.settings.chip_text_color }};
-    border: 1px solid {{ block.settings.chip_border_color }};
-    border-radius: var(--nx-radius-lg);
+    background-color: rgba(var(--color-background-2));
+    color: rgba(var(--color-foreground));
+    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 12%, transparent);
+    border-radius: 2rem;
     text-decoration: none;
     font-size: 13px;
     font-weight: 500;
-    transition: var(--transition-fast);
+    transition: 0.3s var(--out-soft, ease);
   }
 
   .ai-quickstart-header__nav-chip-{{ ai_gen_id }}:hover {
-    background-color: {{ block.settings.chip_hover_background }};
-    border-color: {{ block.settings.chip_hover_border }};
+    background-color: rgba(var(--color-accent));
+    border-color: rgba(var(--color-accent));
     transform: translateY(-1px);
   }
 
@@ -184,9 +184,9 @@
       top: 0;
     }
   }
-{% endstyle %}
+{%- endstyle -%}
 
-<quickstart-header-{{ ai_gen_id }} class="ai-quickstart-header-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+<quickstart-header-{{ ai_gen_id }} class="ai-quickstart-header-{{ ai_gen_id }} color-{{ block.settings.color_scheme }}" {{ block.shopify_attributes }}>
   <div class="ai-quickstart-header__container-{{ ai_gen_id }}">
     <div class="ai-quickstart-header__card-{{ ai_gen_id }}">
       <div class="ai-quickstart-header__content-{{ ai_gen_id }}">
@@ -342,8 +342,13 @@
 {% schema %}
 {
   "name": "Quickstart header",
-  "tag": null,
   "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "default"
+    },
     {
       "type": "header",
       "content": "Product"
@@ -438,120 +443,6 @@
       "step": 4,
       "unit": "px",
       "default": 40
-    },
-    {
-      "type": "header",
-      "content": "Colors"
-    },
-    {
-      "type": "color",
-      "id": "background_color",
-      "label": "Background",
-      "default": "#f9f9f9"
-    },
-    {
-      "type": "color",
-      "id": "card_background",
-      "label": "Card background",
-      "default": "#ffffff"
-    },
-    {
-      "type": "color",
-      "id": "nav_background",
-      "label": "Navigation background",
-      "default": "#ffffff"
-    },
-    {
-      "type": "color",
-      "id": "border_color",
-      "label": "Border",
-      "default": "#e8e8e8"
-    },
-    {
-      "type": "color",
-      "id": "eyebrow_color",
-      "label": "Eyebrow text",
-      "default": "#5a9d6f"
-    },
-    {
-      "type": "color",
-      "id": "heading_color",
-      "label": "Heading",
-      "default": "#2a2a2a"
-    },
-    {
-      "type": "color",
-      "id": "text_color",
-      "label": "Body text",
-      "default": "#666666"
-    },
-    {
-      "type": "header",
-      "content": "Button colors"
-    },
-    {
-      "type": "color",
-      "id": "button_background",
-      "label": "Background",
-      "default": "#ffffff"
-    },
-    {
-      "type": "color",
-      "id": "button_text_color",
-      "label": "Text",
-      "default": "#2a2a2a"
-    },
-    {
-      "type": "color",
-      "id": "button_border_color",
-      "label": "Border",
-      "default": "#e8e8e8"
-    },
-    {
-      "type": "color",
-      "id": "button_hover_background",
-      "label": "Hover background",
-      "default": "#f9f9f9"
-    },
-    {
-      "type": "color",
-      "id": "button_hover_border",
-      "label": "Hover border",
-      "default": "#d4d4d4"
-    },
-    {
-      "type": "header",
-      "content": "Navigation chip colors"
-    },
-    {
-      "type": "color",
-      "id": "chip_background",
-      "label": "Background",
-      "default": "#f9f9f9"
-    },
-    {
-      "type": "color",
-      "id": "chip_text_color",
-      "label": "Text",
-      "default": "#2a2a2a"
-    },
-    {
-      "type": "color",
-      "id": "chip_border_color",
-      "label": "Border",
-      "default": "#e8e8e8"
-    },
-    {
-      "type": "color",
-      "id": "chip_hover_background",
-      "label": "Hover background",
-      "default": "#5a9d6f"
-    },
-    {
-      "type": "color",
-      "id": "chip_hover_border",
-      "label": "Hover border",
-      "default": "#5a9d6f"
     }
   ],
   "presets": [

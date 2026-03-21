@@ -4,9 +4,9 @@
     
     A styled callout that is always visible near top:
     
-    “Read safety + interactions before use.”
+    "Read safety + interactions before use."
     
-    Button anchor: “Jump to Safety”
+    Button anchor: "Jump to Safety"
     
     Controls:
     
@@ -18,17 +18,16 @@
 {% enddoc %}
 {% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
 
-{% style %}
+{%- style -%}
   .ai-safety-banner-{{ ai_gen_id }} {
     display: block;
     width: 100%;
     position: sticky;
     top: 0;
     z-index: 100;
-    background-color: {{ block.settings.background_color }};
-    border: {{ block.settings.border_thickness }}px solid {{ block.settings.border_color }};
+    background-color: color-mix(in srgb, rgba(var(--color-accent)) 10%, rgba(var(--color-background)));
+    border: {{ block.settings.border_thickness }}px solid rgba(var(--color-accent));
     padding: 16px var(--page-gutter);
-    box-shadow: var(--shadow-sm);
   }
 
   .ai-safety-banner-{{ ai_gen_id }}--hidden {
@@ -45,15 +44,15 @@
   }
 
   .ai-safety-banner__text-{{ ai_gen_id }} {
-    color: {{ block.settings.text_color }};
+    color: rgba(var(--color-foreground));
     font-size: 16px;
     margin: 0;
     flex-grow: 1;
   }
 
   .ai-safety-banner__button-{{ ai_gen_id }} {
-    background-color: {{ block.settings.button_background }};
-    color: {{ block.settings.button_text_color }};
+    background-color: rgba(var(--color-accent));
+    color: rgba(var(--color-foreground));
     border: none;
     padding: 10px 20px;
     border-radius: 4px;
@@ -62,14 +61,14 @@
     font-weight: 600;
     text-decoration: none;
     white-space: nowrap;
-    transition: background-color 0.3s ease;
+    transition: background-color 0.3s var(--out-soft, ease);
   }
 
   .ai-safety-banner__button-{{ ai_gen_id }}:hover {
-    background-color: {{ block.settings.button_hover_background }};
+    background-color: color-mix(in srgb, rgba(var(--color-accent)) 85%, transparent);
   }
 
-  @media screen and (max-width: 749px) {
+  @media screen and (max-width: 768px) {
     .ai-safety-banner__container-{{ ai_gen_id }} {
       flex-direction: column;
       align-items: flex-start;
@@ -81,10 +80,10 @@
       text-align: center;
     }
   }
-{% endstyle %}
+{%- endstyle -%}
 
 <safety-banner-{{ ai_gen_id }}
-  class="ai-safety-banner-{{ ai_gen_id }} {% unless block.settings.show_banner %}ai-safety-banner-{{ ai_gen_id }}--hidden{% endunless %}"
+  class="ai-safety-banner-{{ ai_gen_id }} color-{{ block.settings.color_scheme }} {% unless block.settings.show_banner %}ai-safety-banner-{{ ai_gen_id }}--hidden{% endunless %}"
   {{ block.shopify_attributes }}
 >
   <div class="ai-safety-banner__container-{{ ai_gen_id }}">
@@ -140,8 +139,13 @@
 {% schema %}
 {
   "name": "Safety banner",
-  "tag": null,
   "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "default"
+    },
     {
       "type": "header",
       "content": "Content"
@@ -180,24 +184,6 @@
       "content": "Style"
     },
     {
-      "type": "color",
-      "id": "background_color",
-      "label": "Background color",
-      "default": "#fff9e6"
-    },
-    {
-      "type": "color",
-      "id": "text_color",
-      "label": "Text color",
-      "default": "#2a2a2a"
-    },
-    {
-      "type": "color",
-      "id": "border_color",
-      "label": "Border color",
-      "default": "#FBBF24"
-    },
-    {
       "type": "range",
       "id": "border_thickness",
       "min": 0,
@@ -206,28 +192,6 @@
       "unit": "px",
       "label": "Border thickness",
       "default": 2
-    },
-    {
-      "type": "header",
-      "content": "Button"
-    },
-    {
-      "type": "color",
-      "id": "button_background",
-      "label": "Background color",
-      "default": "#5a9d6f"
-    },
-    {
-      "type": "color",
-      "id": "button_hover_background",
-      "label": "Hover background color",
-      "default": "#4a8d5f"
-    },
-    {
-      "type": "color",
-      "id": "button_text_color",
-      "label": "Text color",
-      "default": "#ffffff"
     }
   ],
   "presets": [

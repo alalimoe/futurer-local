@@ -4,14 +4,14 @@
 {% enddoc %}
 {% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
 
-{% style %}
+{%- style -%}
   .ai-promo-section-{{ ai_gen_id }} {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     padding: {{ block.settings.section_padding }}px var(--page-gutter);
-    background-color: {{ block.settings.section_background }};
+    background-color: rgba(var(--color-background));
     gap: 10px;
   }
 
@@ -26,7 +26,7 @@
   .ai-promo-label-{{ ai_gen_id }} {
     font-size: {{ block.settings.font_size }}px;
     font-weight: 600;
-    color: {{ block.settings.button_text_color }};
+    color: rgba(var(--color-foreground));
     letter-spacing: -0.01em;
   }
 
@@ -35,16 +35,16 @@
     align-items: center;
     gap: 6px;
     padding: 8px 16px;
-    background: {{ block.settings.code_background }};
-    color: {{ block.settings.code_text_color }};
-    border: 1.5px dashed rgba(251, 191, 36, 0.4);
-    border-radius: var(--nx-radius-sm);
+    background: rgba(var(--color-background-2));
+    color: rgba(var(--color-foreground));
+    border: 1.5px dashed color-mix(in srgb, rgba(var(--color-accent)) 40%, transparent);
+    border-radius: var(--general-radius-xs, 4px);
     font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
-    font-weight: 700;
+    font-weight: 600;
     font-size: {{ block.settings.font_size }}px;
     letter-spacing: 0.06em;
     cursor: pointer;
-    transition: var(--transition-smooth);
+    transition: 0.3s var(--out-soft, ease);
     position: relative;
     -webkit-user-select: none;
     user-select: none;
@@ -52,8 +52,7 @@
 
   .ai-promo-chip-{{ ai_gen_id }}:hover {
     transform: translateY(-1px);
-    box-shadow: var(--shadow-gold-sm);
-    border-color: rgba(251, 191, 36, 0.7);
+    border-color: color-mix(in srgb, rgba(var(--color-accent)) 70%, transparent);
   }
 
   .ai-promo-chip-{{ ai_gen_id }}:active {
@@ -73,18 +72,18 @@
   }
 
   .ai-promo-chip-{{ ai_gen_id }}[data-copied="true"] {
-    border-color: #22c55e;
-    background: rgba(34, 197, 94, 0.08);
+    border-color: rgba(var(--color-success));
+    background: color-mix(in srgb, rgba(var(--color-success)) 8%, transparent);
   }
 
   .ai-promo-chip-{{ ai_gen_id }}[data-copied="true"] .ai-promo-chip__icon-{{ ai_gen_id }} {
     opacity: 1;
-    color: #22c55e;
+    color: rgba(var(--color-success));
   }
 
   .ai-promo-hint-{{ ai_gen_id }} {
     font-size: {{ block.settings.font_size | minus: 3 }}px;
-    color: {{ block.settings.button_text_color }};
+    color: rgba(var(--color-foreground));
     opacity: 0.5;
     text-align: center;
     transition: all 0.3s ease;
@@ -93,10 +92,10 @@
 
   .ai-promo-hint-{{ ai_gen_id }}[data-state="copied"] {
     opacity: 0.8;
-    color: #22c55e;
+    color: rgba(var(--color-success));
   }
 
-  @media screen and (max-width: 749px) {
+  @media screen and (max-width: 768px) {
     .ai-promo-label-{{ ai_gen_id }} {
       font-size: {{ block.settings.font_size | times: 0.88 }}px;
     }
@@ -108,9 +107,9 @@
       font-size: {{ block.settings.font_size | minus: 4 }}px;
     }
   }
-{% endstyle %}
+{%- endstyle -%}
 
-<div class="ai-promo-section-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+<div class="ai-promo-section-{{ ai_gen_id }} color-{{ block.settings.color_scheme }}" {{ block.shopify_attributes }}>
   <div class="ai-promo-row-{{ ai_gen_id }}">
     <span class="ai-promo-label-{{ ai_gen_id }}">{{ block.settings.button_text }}</span>
     <button
@@ -192,6 +191,12 @@
       "content": "Style"
     },
     {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "background-1"
+    },
+    {
       "type": "range",
       "id": "font_size",
       "min": 12,
@@ -210,41 +215,12 @@
       "unit": "px",
       "label": "Section padding",
       "default": 24
-    },
-    {
-      "type": "header",
-      "content": "Colors"
-    },
-    {
-      "type": "color",
-      "id": "section_background",
-      "label": "Section background",
-      "default": "#ffffff"
-    },
-    {
-      "type": "color",
-      "id": "button_text_color",
-      "label": "Label text color",
-      "default": "#111827"
-    },
-    {
-      "type": "color",
-      "id": "code_background",
-      "label": "Code chip background",
-      "default": "#fefce8"
-    },
-    {
-      "type": "color",
-      "id": "code_text_color",
-      "label": "Code chip text color",
-      "default": "#111827"
     }
   ],
   "presets": [
     {
       "name": "Promo button"
     }
-  ],
-  "tag": null
+  ]
 }
 {% endschema %}

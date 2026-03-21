@@ -1,10 +1,10 @@
 {% doc %}
   @prompt
-    A "post‑purchase reference” page template to use across all SKUs designed for educational content. the section should be clean and premium designed, with 7 blocks, each block with a customizable headline + drop down data source selection that will render selected data source as the block's content 
+    A "post‑purchase reference" page template to use across all SKUs designed for educational content. the section should be clean and premium designed, with 7 blocks, each block with a customizable headline + drop down data source selection that will render selected data source as the block's content 
 {% enddoc %}
 {% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
 
-{% style %}
+{%- style -%}
   .ai-reference-block-{{ ai_gen_id }} {
     display: block;
     width: 100%;
@@ -15,20 +15,20 @@
     max-width: 800px;
     margin: 0 auto;
     padding: 32px var(--page-gutter);
-    background-color: {{ block.settings.background_color }};
+    background-color: rgba(var(--color-background));
     border-radius: {{ block.settings.border_radius }}px;
-    border: {{ block.settings.border_width }}px solid {{ block.settings.border_color }};
+    border: {{ block.settings.border_width }}px solid color-mix(in srgb, rgba(var(--color-foreground)) 12%, transparent);
   }
 
   .ai-reference-block__heading-{{ ai_gen_id }} {
-    color: {{ block.settings.heading_color }};
+    color: rgba(var(--color-foreground));
     margin: 0 0 16px 0;
     font-weight: 600;
     letter-spacing: -0.02em;
   }
 
   .ai-reference-block__content-{{ ai_gen_id }} {
-    color: {{ block.settings.text_color }};
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 75%, transparent);
     font-size: {{ block.settings.text_size }}px;
     line-height: 1.6;
   }
@@ -62,7 +62,7 @@
   }
 
   .ai-reference-block__content-{{ ai_gen_id }} a {
-    color: {{ block.settings.link_color }};
+    color: rgba(var(--color-accent));
     text-decoration: underline;
   }
 
@@ -81,16 +81,16 @@
     display: flex;
     gap: 16px;
     padding: 20px;
-    background-color: {{ block.settings.product_bg_color }};
+    background-color: rgba(var(--color-background-2));
     border-radius: {{ block.settings.border_radius }}px;
-    border: 1px solid {{ block.settings.border_color }};
+    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 12%, transparent);
   }
 
   .ai-reference-block__product-image-{{ ai_gen_id }} {
     width: 100px;
     height: 100px;
     flex-shrink: 0;
-    border-radius: var(--nx-radius-sm);
+    border-radius: 1rem;
     overflow: hidden;
   }
 
@@ -108,12 +108,12 @@
     font-size: 18px;
     font-weight: 600;
     margin: 0 0 8px 0;
-    color: {{ block.settings.heading_color }};
+    color: rgba(var(--color-foreground));
   }
 
   .ai-reference-block__product-description-{{ ai_gen_id }} {
     font-size: 14px;
-    color: {{ block.settings.text_color }};
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 75%, transparent);
     margin-bottom: 12px;
     line-height: 1.5;
   }
@@ -121,18 +121,18 @@
   .ai-reference-block__product-price-{{ ai_gen_id }} {
     font-size: 16px;
     font-weight: 600;
-    color: {{ block.settings.heading_color }};
+    color: rgba(var(--color-foreground));
   }
 
   .ai-reference-block__empty-{{ ai_gen_id }} {
     padding: 40px 20px;
     text-align: center;
-    color: {{ block.settings.text_color }};
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 40%, transparent);
     opacity: 0.6;
     font-style: italic;
   }
 
-  @media screen and (max-width: 749px) {
+  @media screen and (max-width: 768px) {
     .ai-reference-block__container-{{ ai_gen_id }} {
       padding: 24px var(--page-gutter);
     }
@@ -146,9 +146,9 @@
       height: 200px;
     }
   }
-{% endstyle %}
+{%- endstyle -%}
 
-<div class="ai-reference-block-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+<div class="ai-reference-block-{{ ai_gen_id }} color-{{ block.settings.color_scheme }}" {{ block.shopify_attributes }}>
   <div class="ai-reference-block__container-{{ ai_gen_id }}">
     {% if block.settings.heading != blank %}
       <h2 class="ai-reference-block__heading-{{ ai_gen_id }} {{ block.settings.heading_size }}">{{ block.settings.heading }}</h2>
@@ -276,8 +276,13 @@
 {% schema %}
 {
   "name": "Reference content block",
-  "tag": null,
   "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "default"
+    },
     {
       "type": "header",
       "content": "Content"
@@ -293,34 +298,13 @@
       "id": "content_source",
       "label": "Content source",
       "options": [
-        {
-          "value": "richtext",
-          "label": "Rich text"
-        },
-        {
-          "value": "page",
-          "label": "Page"
-        },
-        {
-          "value": "article",
-          "label": "Article"
-        },
-        {
-          "value": "product",
-          "label": "Product"
-        },
-        {
-          "value": "image",
-          "label": "Image"
-        },
-        {
-          "value": "video",
-          "label": "Video"
-        },
-        {
-          "value": "html",
-          "label": "Custom HTML"
-        }
+        { "value": "richtext", "label": "Rich text" },
+        { "value": "page", "label": "Page" },
+        { "value": "article", "label": "Article" },
+        { "value": "product", "label": "Product" },
+        { "value": "image", "label": "Image" },
+        { "value": "video", "label": "Video" },
+        { "value": "html", "label": "Custom HTML" }
       ],
       "default": "richtext"
     },
@@ -394,36 +378,6 @@
       "default": 16
     },
     {
-      "type": "color",
-      "id": "background_color",
-      "label": "Background",
-      "default": "#ffffff"
-    },
-    {
-      "type": "color",
-      "id": "heading_color",
-      "label": "Heading",
-      "default": "#2a2a2a"
-    },
-    {
-      "type": "color",
-      "id": "text_color",
-      "label": "Text",
-      "default": "#666666"
-    },
-    {
-      "type": "color",
-      "id": "link_color",
-      "label": "Links",
-      "default": "#5a9d6f"
-    },
-    {
-      "type": "color",
-      "id": "product_bg_color",
-      "label": "Product card background",
-      "default": "#f9f9f9"
-    },
-    {
       "type": "range",
       "id": "border_radius",
       "label": "Border radius",
@@ -452,12 +406,6 @@
       "step": 1,
       "unit": "px",
       "default": 1
-    },
-    {
-      "type": "color",
-      "id": "border_color",
-      "label": "Border",
-      "default": "#e8e8e8"
     }
   ],
   "presets": [

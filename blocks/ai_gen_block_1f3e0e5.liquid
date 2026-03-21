@@ -4,11 +4,11 @@
     
     Content:
     
-    Eyebrow: “Quickstart guide”
+    Eyebrow: "Quickstart guide"
     
     H1: Dynamic product title
     
-    Subtext: 1–2 lines: “Save this page for dosing, timing, and safety.”
+    Subtext: 1–2 lines: "Save this page for dosing, timing, and safety."
     
     Optional: product image (small), dosage form badge (Capsules / Powder)
     
@@ -18,9 +18,9 @@
     
     Show/hide product image
     
-    Show/hide “Back to product” button
+    Show/hide "Back to product" button
     
-    Optional “Copy link” / “Email me this guide” button (can just be a button link for now)
+    Optional "Copy link" / "Email me this guide" button (can just be a button link for now)
     
     UX notes:
     
@@ -28,12 +28,12 @@
 {% enddoc %}
 {% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
 
-{% style %}
+{%- style -%}
   .ai-quickstart-hero-{{ ai_gen_id }} {
     display: block;
     width: 100%;
     padding: 60px var(--page-gutter);
-    background-color: {{ block.settings.background_color }};
+    background-color: rgba(var(--color-background-2));
   }
 
   .ai-quickstart-hero__container-{{ ai_gen_id }} {
@@ -47,20 +47,20 @@
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 1px;
-    color: {{ block.settings.eyebrow_color }};
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 40%, transparent);
     margin: 0 0 16px;
   }
 
   .ai-quickstart-hero__heading-{{ ai_gen_id }} {
     font-weight: 600;
-    color: {{ block.settings.heading_color }};
+    color: rgba(var(--color-foreground));
     margin: 0 0 20px;
     line-height: 1.2;
   }
 
   .ai-quickstart-hero__subtext-{{ ai_gen_id }} {
     font-size: {{ block.settings.subtext_size }}px;
-    color: {{ block.settings.subtext_color }};
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 75%, transparent);
     margin: 0 0 32px;
     line-height: 1.5;
   }
@@ -76,7 +76,7 @@
   .ai-quickstart-hero__product-image-{{ ai_gen_id }} {
     width: 80px;
     height: 80px;
-    border-radius: var(--nx-radius-sm);
+    border-radius: 1rem;
     overflow: hidden;
     flex-shrink: 0;
   }
@@ -90,9 +90,9 @@
   .ai-quickstart-hero__badge-{{ ai_gen_id }} {
     display: inline-block;
     padding: 6px 16px;
-    background-color: {{ block.settings.badge_background }};
-    color: {{ block.settings.badge_text_color }};
-    border-radius: var(--nx-radius-lg);
+    background-color: rgba(var(--color-accent));
+    color: rgba(var(--color-foreground));
+    border-radius: 2rem;
     font-size: 13px;
     font-weight: 500;
   }
@@ -110,33 +110,33 @@
     align-items: center;
     justify-content: center;
     padding: 12px 24px;
-    background-color: {{ block.settings.button_background }};
-    color: {{ block.settings.button_text_color }};
-    border: 1px solid {{ block.settings.button_border_color }};
+    background-color: rgba(var(--color-accent));
+    color: rgba(var(--color-foreground));
+    border: 1px solid rgba(var(--color-accent));
     border-radius: 6px;
     font-size: 15px;
     font-weight: 500;
     text-decoration: none;
-    transition: var(--transition-fast);
+    transition: 0.3s var(--out-soft, ease);
   }
 
   .ai-quickstart-hero__button-{{ ai_gen_id }}:hover {
-    background-color: {{ block.settings.button_hover_background }};
-    color: {{ block.settings.button_hover_text_color }};
+    background-color: color-mix(in srgb, rgba(var(--color-accent)) 85%, transparent);
+    color: rgba(var(--color-foreground));
   }
 
   .ai-quickstart-hero__button--secondary-{{ ai_gen_id }} {
     background-color: transparent;
-    color: {{ block.settings.secondary_button_text_color }};
-    border-color: {{ block.settings.secondary_button_border_color }};
+    color: rgba(var(--color-foreground));
+    border-color: color-mix(in srgb, rgba(var(--color-foreground)) 20%, transparent);
   }
 
   .ai-quickstart-hero__button--secondary-{{ ai_gen_id }}:hover {
-    background-color: {{ block.settings.secondary_button_hover_background }};
-    color: {{ block.settings.secondary_button_hover_text_color }};
+    background-color: rgba(var(--color-background-2));
+    color: rgba(var(--color-foreground));
   }
 
-  @media screen and (max-width: 749px) {
+  @media screen and (max-width: 768px) {
     .ai-quickstart-hero-{{ ai_gen_id }} {
       padding: 40px var(--page-gutter);
     }
@@ -154,10 +154,10 @@
       width: 100%;
     }
   }
-{% endstyle %}
+{%- endstyle -%}
 
 <quickstart-hero-{{ ai_gen_id }}
-  class="ai-quickstart-hero-{{ ai_gen_id }}"
+  class="ai-quickstart-hero-{{ ai_gen_id }} color-{{ block.settings.color_scheme }}"
   {{ block.shopify_attributes }}
 >
   <div class="ai-quickstart-hero__container-{{ ai_gen_id }}">
@@ -230,8 +230,13 @@
 {% schema %}
 {
   "name": "Quickstart hero",
-  "tag": null,
   "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "default"
+    },
     {
       "type": "header",
       "content": "Content"
@@ -320,100 +325,6 @@
       "step": 50,
       "unit": "px",
       "default": 700
-    },
-    {
-      "type": "header",
-      "content": "Colors"
-    },
-    {
-      "type": "color",
-      "id": "background_color",
-      "label": "Background",
-      "default": "#f9f9f9"
-    },
-    {
-      "type": "color",
-      "id": "eyebrow_color",
-      "label": "Eyebrow",
-      "default": "#666666"
-    },
-    {
-      "type": "color",
-      "id": "heading_color",
-      "label": "Heading",
-      "default": "#2a2a2a"
-    },
-    {
-      "type": "color",
-      "id": "subtext_color",
-      "label": "Subtext",
-      "default": "#666666"
-    },
-    {
-      "type": "color",
-      "id": "badge_background",
-      "label": "Badge background",
-      "default": "#5a9d6f"
-    },
-    {
-      "type": "color",
-      "id": "badge_text_color",
-      "label": "Badge text",
-      "default": "#ffffff"
-    },
-    {
-      "type": "color",
-      "id": "button_background",
-      "label": "Primary button background",
-      "default": "#5a9d6f"
-    },
-    {
-      "type": "color",
-      "id": "button_text_color",
-      "label": "Primary button text",
-      "default": "#ffffff"
-    },
-    {
-      "type": "color",
-      "id": "button_border_color",
-      "label": "Primary button border",
-      "default": "#5a9d6f"
-    },
-    {
-      "type": "color",
-      "id": "button_hover_background",
-      "label": "Primary button hover background",
-      "default": "#4a8d5f"
-    },
-    {
-      "type": "color",
-      "id": "button_hover_text_color",
-      "label": "Primary button hover text",
-      "default": "#ffffff"
-    },
-    {
-      "type": "color",
-      "id": "secondary_button_text_color",
-      "label": "Secondary button text",
-      "default": "#2a2a2a"
-    },
-    {
-      "type": "color",
-      "id": "secondary_button_border_color",
-      "label": "Secondary button border",
-      "default": "#d4d4d4"
-    },
-    {
-      "type": "color",
-      "id": "secondary_button_hover_background",
-      "label": "Secondary button hover background",
-      "default": "#f0f0f0"
-    },
-    {
-      "type": "color",
-      "id": "secondary_button_hover_text_color",
-      "label": "Secondary button hover text",
-      "default": "#2a2a2a"
     },
     {
       "type": "header",

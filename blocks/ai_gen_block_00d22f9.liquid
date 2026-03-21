@@ -1,8 +1,8 @@
 {% doc %}
   @prompt
-    Template → Section B: “The Reference Stack” (container)
+    Template → Section B: "The Reference Stack" (container)
     
-    This is the meat: the 7 “reference blocks” you described.
+    This is the meat: the 7 "reference blocks" you described.
     
     Blocks inside Section B (in this order)
     
@@ -14,7 +14,7 @@
     
     Block B1 — TL;DR (metafield driven)
     Block B2 — What it is
-    Block B3 — What you’ll feel (timeline)
+    Block B3 — What you'll feel (timeline)
     Block B4 — How it works
     Block B5 — How to use
     Block B6 — Why {form}?
@@ -43,7 +43,7 @@
 {% enddoc %}
 {% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
 
-{% style %}
+{%- style -%}
   .ai-reference-block-{{ ai_gen_id }} {
     display: block;
     width: 100%;
@@ -51,11 +51,11 @@
   }
 
   .ai-reference-block__card-{{ ai_gen_id }} {
-    background-color: {{ block.settings.card_background }};
-    border: {{ block.settings.border_width }}px solid {{ block.settings.border_color }};
+    background-color: rgba(var(--color-background));
+    border: {{ block.settings.border_width }}px solid color-mix(in srgb, rgba(var(--color-foreground)) 12%, transparent);
     border-radius: {{ block.settings.border_radius }}px;
     padding: {{ block.settings.card_padding }}px;
-    transition: all 0.3s ease;
+    transition: all 0.3s var(--out-soft, ease);
   }
 
   .ai-reference-block__plain-{{ ai_gen_id }} {
@@ -66,7 +66,7 @@
 
   .ai-reference-block__heading-{{ ai_gen_id }} {
     font-weight: {{ block.settings.heading_weight }};
-    color: {{ block.settings.heading_color }};
+    color: rgba(var(--color-foreground));
     margin: 0 0 {{ block.settings.heading_spacing }}px 0;
     line-height: 1.3;
   }
@@ -74,7 +74,7 @@
   .ai-reference-block__content-{{ ai_gen_id }} {
     font-size: {{ block.settings.content_size }}px;
     line-height: {{ block.settings.content_line_height }};
-    color: {{ block.settings.content_color }};
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 75%, transparent);
   }
 
   .ai-reference-block__content-{{ ai_gen_id }} p {
@@ -100,38 +100,38 @@
   }
 
   .ai-reference-block__accordion-{{ ai_gen_id }} {
-    border: {{ block.settings.border_width }}px solid {{ block.settings.border_color }};
+    border: {{ block.settings.border_width }}px solid color-mix(in srgb, rgba(var(--color-foreground)) 12%, transparent);
     border-radius: {{ block.settings.border_radius }}px;
     overflow: hidden;
   }
 
   .ai-reference-block__accordion-header-{{ ai_gen_id }} {
     width: 100%;
-    background-color: {{ block.settings.accordion_header_bg }};
+    background-color: rgba(var(--color-background-2));
     border: none;
     padding: {{ block.settings.accordion_padding }}px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: background-color 0.3s var(--out-soft, ease);
     text-align: left;
   }
 
   .ai-reference-block__accordion-header-{{ ai_gen_id }}:hover {
-    background-color: {{ block.settings.accordion_header_hover }};
+    background-color: color-mix(in srgb, rgba(var(--color-foreground)) 6%, rgba(var(--color-background)));
   }
 
   .ai-reference-block__accordion-title-{{ ai_gen_id }} {
     font-weight: {{ block.settings.heading_weight }};
-    color: {{ block.settings.heading_color }};
+    color: rgba(var(--color-foreground));
     margin: 0;
   }
 
   .ai-reference-block__accordion-icon-{{ ai_gen_id }} {
     width: 20px;
     height: 20px;
-    transition: transform 0.3s ease;
+    transition: transform 0.3s var(--out-soft, ease);
     flex-shrink: 0;
     margin-left: 16px;
   }
@@ -139,7 +139,7 @@
   .ai-reference-block__accordion-icon-{{ ai_gen_id }} svg {
     width: 100%;
     height: 100%;
-    stroke: {{ block.settings.heading_color }};
+    stroke: rgba(var(--color-foreground));
   }
 
   .ai-reference-block__accordion-header-{{ ai_gen_id }}[aria-expanded="true"] .ai-reference-block__accordion-icon-{{ ai_gen_id }} {
@@ -149,8 +149,8 @@
   .ai-reference-block__accordion-body-{{ ai_gen_id }} {
     max-height: 0;
     overflow: hidden;
-    transition: max-height 0.4s ease;
-    background-color: {{ block.settings.card_background }};
+    transition: max-height 0.4s var(--out-soft, ease);
+    background-color: rgba(var(--color-background));
   }
 
   .ai-reference-block__accordion-body-{{ ai_gen_id }}.active {
@@ -161,7 +161,7 @@
     padding: 0 {{ block.settings.accordion_padding }}px {{ block.settings.accordion_padding }}px;
     font-size: {{ block.settings.content_size }}px;
     line-height: {{ block.settings.content_line_height }};
-    color: {{ block.settings.content_color }};
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 75%, transparent);
   }
 
   .ai-reference-block__accordion-content-{{ ai_gen_id }} p {
@@ -185,13 +185,13 @@
   .ai-reference-block__empty-{{ ai_gen_id }} {
     padding: 40px 20px;
     text-align: center;
-    color: #999;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 40%, transparent);
     font-style: italic;
-    background-color: var(--color-surface-secondary);
+    background-color: rgba(var(--color-background-2));
     border-radius: {{ block.settings.border_radius }}px;
   }
 
-  @media screen and (max-width: 749px) {
+  @media screen and (max-width: 768px) {
     .ai-reference-block__content-{{ ai_gen_id }} {
       font-size: calc({{ block.settings.content_size }}px * 0.95);
     }
@@ -200,10 +200,10 @@
       font-size: calc({{ block.settings.content_size }}px * 0.95);
     }
   }
-{% endstyle %}
+{%- endstyle -%}
 
 <reference-block-{{ ai_gen_id }}
-  class="ai-reference-block-{{ ai_gen_id }}"
+  class="ai-reference-block-{{ ai_gen_id }} color-{{ block.settings.color_scheme }}"
   {{ block.shopify_attributes }}
 >
   {% liquid
@@ -338,8 +338,13 @@
 {% schema %}
 {
   "name": "Reference content",
-  "tag": null,
   "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "default"
+    },
     {
       "type": "header",
       "content": "Content"
@@ -449,7 +454,7 @@
       "id": "heading_weight",
       "label": "Heading weight",
       "min": 400,
-      "max": 700,
+      "max": 600,
       "step": 100,
       "default": 600
     },
@@ -487,12 +492,6 @@
       "content": "Card style"
     },
     {
-      "type": "color",
-      "id": "card_background",
-      "label": "Background",
-      "default": "#ffffff"
-    },
-    {
       "type": "range",
       "id": "card_padding",
       "label": "Padding",
@@ -523,12 +522,6 @@
       "default": 1
     },
     {
-      "type": "color",
-      "id": "border_color",
-      "label": "Border color",
-      "default": "#e8e8e8"
-    },
-    {
       "type": "range",
       "id": "border_radius",
       "label": "Border radius",
@@ -543,18 +536,6 @@
       "content": "Accordion style"
     },
     {
-      "type": "color",
-      "id": "accordion_header_bg",
-      "label": "Header background",
-      "default": "#f9f9f9"
-    },
-    {
-      "type": "color",
-      "id": "accordion_header_hover",
-      "label": "Header hover background",
-      "default": "#f0f0f0"
-    },
-    {
       "type": "range",
       "id": "accordion_padding",
       "label": "Padding",
@@ -563,22 +544,6 @@
       "step": 4,
       "unit": "px",
       "default": 20
-    },
-    {
-      "type": "header",
-      "content": "Colors"
-    },
-    {
-      "type": "color",
-      "id": "heading_color",
-      "label": "Heading",
-      "default": "#2a2a2a"
-    },
-    {
-      "type": "color",
-      "id": "content_color",
-      "label": "Content",
-      "default": "#666666"
     },
     {
       "type": "header",

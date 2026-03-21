@@ -4,30 +4,29 @@
 {% enddoc %}
 {% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
 
-{% style %}
+{%- style -%}
   .ai-heading-description-{{ ai_gen_id }} {
     display: block;
     width: 100%;
-    padding: {{ block.settings.padding_top }}px {{ block.settings.padding_horizontal }}px {{ block.settings.padding_bottom }}px;
-    background-color: {{ block.settings.background_color }};
+    padding: {{ block.settings.padding_top }}px 0 {{ block.settings.padding_bottom }}px;
+    background-color: rgba(var(--color-background));
     text-align: {{ block.settings.text_alignment }};
   }
 
   .ai-heading-description__container-{{ ai_gen_id }} {
-    max-width: {{ block.settings.content_width }}px;
     margin: 0 auto;
   }
 
   .ai-heading-description__heading-{{ ai_gen_id }} {
     margin: 0 0 {{ block.settings.spacing }}px;
-    color: {{ block.settings.heading_color }};
+    color: rgba(var(--color-foreground));
     font-weight: {{ block.settings.heading_weight }};
     line-height: 1.2;
   }
 
   .ai-heading-description__description-{{ ai_gen_id }} {
     margin: 0;
-    color: {{ block.settings.description_color }};
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 60%, transparent);
     font-size: {{ block.settings.description_size }}px;
     line-height: 1.6;
   }
@@ -40,9 +39,9 @@
     margin-bottom: 0;
   }
 
-  @media screen and (max-width: 749px) {
+  @media screen and (max-width: 768px) {
     .ai-heading-description-{{ ai_gen_id }} {
-      padding: {{ block.settings.padding_top | times: 0.7 }}px {{ block.settings.padding_horizontal | times: 0.7 }}px {{ block.settings.padding_bottom | times: 0.7 }}px;
+      padding: {{ block.settings.padding_top | times: 0.7 }}px 0 {{ block.settings.padding_bottom | times: 0.7 }}px;
     }
 
     .ai-heading-description__heading-{{ ai_gen_id }} {
@@ -53,9 +52,9 @@
       font-size: {{ block.settings.description_size | times: 0.9 }}px;
     }
   }
-{% endstyle %}
+{%- endstyle -%}
 
-<div class="ai-heading-description-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+<div class="ai-heading-description-{{ ai_gen_id }} color-{{ block.settings.color_scheme }}" {{ block.shopify_attributes }}>
   <div class="ai-heading-description__container-{{ ai_gen_id }}">
     {% if block.settings.heading != blank %}
       <h2 class="ai-heading-description__heading-{{ ai_gen_id }} {{ block.settings.heading_size }}">
@@ -74,7 +73,6 @@
 {% schema %}
 {
   "name": "Heading + description",
-  "tag": null,
   "settings": [
     {
       "type": "header",
@@ -97,14 +95,10 @@
       "content": "Layout"
     },
     {
-      "type": "range",
-      "id": "content_width",
-      "min": 400,
-      "max": 1600,
-      "step": 50,
-      "unit": "px",
-      "label": "Content width",
-      "default": 800
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "background-1"
     },
     {
       "type": "select",
@@ -180,19 +174,9 @@
         {
           "value": "600",
           "label": "Semibold"
-        },
-        {
-          "value": "700",
-          "label": "Bold"
         }
       ],
       "default": "600"
-    },
-    {
-      "type": "color",
-      "id": "heading_color",
-      "label": "Color",
-      "default": "#2a2a2a"
     },
     {
       "type": "header",
@@ -207,12 +191,6 @@
       "unit": "px",
       "label": "Size",
       "default": 16
-    },
-    {
-      "type": "color",
-      "id": "description_color",
-      "label": "Color",
-      "default": "#666666"
     },
     {
       "type": "header",
@@ -237,22 +215,6 @@
       "unit": "px",
       "label": "Bottom padding",
       "default": 40
-    },
-    {
-      "type": "range",
-      "id": "padding_horizontal",
-      "min": 0,
-      "max": 100,
-      "step": 4,
-      "unit": "px",
-      "label": "Horizontal padding",
-      "default": 20
-    },
-    {
-      "type": "color",
-      "id": "background_color",
-      "label": "Background color",
-      "default": "#f9f9f9"
     }
   ],
   "presets": [

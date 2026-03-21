@@ -4,20 +4,20 @@
 {% enddoc %}
 {% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
 
-{% style %}
+{%- style -%}
   .ai-intro-blurb-{{ ai_gen_id }} {
     padding: {{ block.settings.padding_top }}px {{ block.settings.padding_horizontal }}px {{ block.settings.padding_bottom }}px;
-    background-color: {{ block.settings.background_color }};
+    background-color: rgba(var(--color-background));
     text-align: {{ block.settings.text_alignment }};
     max-width: {{ block.settings.max_width }}px;
     margin: 0 auto;
     {% if block.settings.enable_border_radius %}
-      border-radius: var(--nx-radius-sm);
+      border-radius: var(--general-radius-xs, 4px);
     {% endif %}
   }
 
   .ai-intro-blurb-heading-{{ ai_gen_id }} {
-    color: {{ block.settings.heading_color }};
+    color: rgba(var(--color-foreground));
     font-weight: {{ block.settings.heading_weight }};
     margin: 0 0 {{ block.settings.heading_spacing }}px;
     line-height: 1.2;
@@ -27,7 +27,7 @@
   }
 
   .ai-intro-blurb-text-{{ ai_gen_id }} {
-    color: {{ block.settings.text_color }};
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 60%, transparent);
     font-size: {{ block.settings.text_size }}px;
     line-height: {{ block.settings.text_line_height }};
     margin: 0;
@@ -53,24 +53,24 @@
     align-items: center;
     justify-content: center;
     padding: 12px 24px;
-    background-color: {{ block.settings.button_color }};
-    color: {{ block.settings.button_text_color }};
+    background-color: rgba(var(--color-accent));
+    color: rgba(var(--color-foreground));
     text-decoration: none;
     border-radius: 4px;
     font-size: {{ block.settings.button_text_size }}px;
     font-weight: 500;
-    transition: var(--transition-smooth);
+    transition: 0.3s var(--out-soft, ease);
     border: none;
     cursor: pointer;
   }
 
   .ai-intro-blurb-button-{{ ai_gen_id }}:hover {
-    background-color: {{ block.settings.button_hover_color }};
-    color: {{ block.settings.button_hover_text_color }};
+    background-color: rgba(var(--color-accent-2));
+    color: rgba(var(--color-foreground));
     transform: translateY(-1px);
   }
 
-  @media screen and (max-width: 749px) {
+  @media screen and (max-width: 768px) {
     .ai-intro-blurb-{{ ai_gen_id }} {
       padding: {{ block.settings.padding_top | times: 0.7 }}px {{ block.settings.padding_horizontal | times: 0.7 }}px {{ block.settings.padding_bottom | times: 0.7 }}px;
     }
@@ -79,9 +79,9 @@
       font-size: {{ block.settings.text_size | times: 0.9 }}px;
     }
   }
-{% endstyle %}
+{%- endstyle -%}
 
-<div class="ai-intro-blurb-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+<div class="ai-intro-blurb-{{ ai_gen_id }} color-{{ block.settings.color_scheme }}" {{ block.shopify_attributes }}>
   {% if block.settings.heading != blank %}
     <h2 class="ai-intro-blurb-heading-{{ ai_gen_id }} {{ block.settings.heading_size }}">
       {{ block.settings.heading }}
@@ -136,6 +136,12 @@
     {
       "type": "header",
       "content": "Layout"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "background-1"
     },
     {
       "type": "select",
@@ -229,52 +235,6 @@
     },
     {
       "type": "header",
-      "content": "Colors"
-    },
-    {
-      "type": "color",
-      "id": "background_color",
-      "label": "Background color",
-      "default": "#ffffff"
-    },
-    {
-      "type": "color",
-      "id": "heading_color",
-      "label": "Heading color",
-      "default": "#1e1e1e"
-    },
-    {
-      "type": "color",
-      "id": "text_color",
-      "label": "Text color",
-      "default": "#666666"
-    },
-    {
-      "type": "color",
-      "id": "button_color",
-      "label": "Button background color",
-      "default": "#FBBF24"
-    },
-    {
-      "type": "color",
-      "id": "button_text_color",
-      "label": "Button text color",
-      "default": "#1e1e1e"
-    },
-    {
-      "type": "color",
-      "id": "button_hover_color",
-      "label": "Button hover background color",
-      "default": "#f8c500"
-    },
-    {
-      "type": "color",
-      "id": "button_hover_text_color",
-      "label": "Button hover text color",
-      "default": "#1e1e1e"
-    },
-    {
-      "type": "header",
       "content": "Typography"
     },
     {
@@ -313,10 +273,6 @@
         {
           "value": "600",
           "label": "Semi-bold"
-        },
-        {
-          "value": "700",
-          "label": "Bold"
         }
       ],
       "default": "600"
