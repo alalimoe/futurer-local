@@ -11,16 +11,30 @@
       "default": "Key Takeaways (TL;DR)"
     },
     {
-      "type": "color",
-      "id": "bg_color",
-      "label": "Background",
-      "default": "#fafafb"
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme"
+    },
+    { "type": "header", "content": "Spacing" },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding top",
+      "default": 0
     },
     {
-      "type": "color",
-      "id": "accent_color",
-      "label": "Accent (Left Border)",
-      "default": "#FBBF24"
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding bottom",
+      "default": 48
     }
   ],
   "blocks": [
@@ -34,7 +48,8 @@
           "label": "Takeaway text"
         }
       ]
-    }
+    },
+    { "type": "@app" }
   ],
   "max_blocks": 8,
   "presets": [
@@ -51,100 +66,65 @@
 {% endschema %}
 
 {%- assign s = section.settings -%}
-{%- assign sid = section.id -%}
-
-<div class="ptldr-wrapper" id="ptldr-{{ sid }}">
-  <div class="ptldr-container">
-    <div class="ptldr-card">
-      <h2 class="ptldr-heading">{{ s.heading }}</h2>
-      {% if section.blocks.size > 0 %}
-        <ul class="ptldr-list" role="list">
-          {% for block in section.blocks %}
-            <li class="ptldr-item" {{ block.shopify_attributes }}>{{ block.settings.text }}</li>
-          {% endfor %}
-        </ul>
-      {% endif %}
-    </div>
-  </div>
-</div>
 
 {%- style -%}
-  #ptldr-{{ sid }} {
-    --ptldr-bg: {{ s.bg_color }};
-    --ptldr-accent: {{ s.accent_color }};
-    --ptldr-font: var(--font-body-family, sans-serif);
-    --ptldr-text: var(--color-text-main, #111827);
-    --ptldr-muted: var(--color-text-muted, #4b5563);
-    --ptldr-radius: var(--nx-radius, 14px);
-    --ptldr-shadow-sm: var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.04));
-    --ptldr-shadow-md: var(--shadow-md, 0 12px 30px rgba(0,0,0,0.06));
-    --ptldr-transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-    content-visibility: auto;
+  .xo-section--{{ section.id }} {
+    padding-top: {{ s.padding_top }}px;
+    padding-bottom: {{ s.padding_bottom }}px;
   }
 
-  .ptldr-wrapper {
-    background: var(--ptldr-bg);
-    padding: 0 20px 48px;
-    font-family: var(--ptldr-font);
-  }
-
-  .ptldr-container {
+  .xo-section--{{ section.id }} .ptldr-container {
     max-width: 800px;
     margin: 0 auto;
   }
 
-  .ptldr-card {
-    background: var(--color-bg-primary, #fff);
-    border-radius: var(--ptldr-radius);
-    padding: 32px 32px 28px;
-    box-shadow: var(--ptldr-shadow-sm);
+  .xo-section--{{ section.id }} .ptldr-card {
+    background: rgba(var(--color-background));
+    border-radius: var(--general-radius-3, 2rem);
+    padding: 32px 32px 28px 36px;
     position: relative;
-    padding-left: 36px;
-    transition: var(--ptldr-transition);
+    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
   }
-  .ptldr-card::before {
+
+  .xo-section--{{ section.id }} .ptldr-card::before {
     content: '';
     position: absolute;
     left: 0;
     top: 0;
     bottom: 0;
     width: 4px;
-    background: var(--ptldr-accent);
-    border-radius: var(--ptldr-radius) 0 0 var(--ptldr-radius);
-    box-shadow: 0 0 12px var(--ptldr-accent);
-  }
-  .ptldr-card:hover {
-    box-shadow: var(--ptldr-shadow-md);
-    transform: translateY(-2px);
+    background: rgba(var(--color-accent));
+    border-radius: var(--general-radius-3, 2rem) 0 0 var(--general-radius-3, 2rem);
   }
 
-  .ptldr-heading {
-    font-family: var(--font-heading-family, sans-serif);
+  .xo-section--{{ section.id }} .ptldr-heading {
+    font-family: var(--font-heading-family);
     font-size: clamp(20px, 2.5vw, 24px);
-    font-weight: 800;
-    color: var(--ptldr-text);
+    font-weight: 600;
+    color: rgba(var(--color-foreground));
     margin: 0 0 20px;
     letter-spacing: -0.3px;
   }
 
-  .ptldr-list {
+  .xo-section--{{ section.id }} .ptldr-list {
     margin: 0;
     padding: 0;
     list-style: none;
   }
 
-  .ptldr-item {
+  .xo-section--{{ section.id }} .ptldr-item {
     position: relative;
     padding: 10px 0 10px 24px;
     font-size: 15px;
     line-height: 1.7;
-    color: var(--ptldr-muted);
-  }
-  .ptldr-item + .ptldr-item {
-    box-shadow: inset 0 1px 0 rgba(15,23,42,0.06);
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 60%, transparent);
   }
 
-  .ptldr-item::before {
+  .xo-section--{{ section.id }} .ptldr-item + .ptldr-item {
+    border-top: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
+  }
+
+  .xo-section--{{ section.id }} .ptldr-item::before {
     content: '';
     position: absolute;
     left: 0;
@@ -152,27 +132,53 @@
     transform: translateY(-50%);
     width: 8px;
     height: 8px;
-    background: var(--ptldr-accent);
+    background: rgba(var(--color-accent));
     border-radius: 50%;
-    box-shadow: 0 0 6px var(--ptldr-accent);
   }
 
-  .ptldr-item strong { color: var(--ptldr-text); font-weight: 700; }
-  .ptldr-item p { margin: 0; }
+  .xo-section--{{ section.id }} .ptldr-item strong {
+    color: rgba(var(--color-foreground));
+    font-weight: 600;
+  }
 
-  .ptldr-wrapper :focus-visible {
-    outline: 2px solid var(--color-accent-primary, #FBBF24);
+  .xo-section--{{ section.id }} .ptldr-item p {
+    margin: 0;
+  }
+
+  .xo-section--{{ section.id }} :focus-visible {
+    outline: 2px solid rgba(var(--color-accent));
     outline-offset: 2px;
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .ptldr-wrapper *, .ptldr-wrapper *::before, .ptldr-wrapper *::after {
+    .xo-section--{{ section.id }} *,
+    .xo-section--{{ section.id }} *::before,
+    .xo-section--{{ section.id }} *::after {
       animation-duration: 0.01ms !important;
       transition-duration: 0.01ms !important;
     }
   }
 
-  @media (max-width: 600px) {
-    .ptldr-card { padding: 24px 20px 20px 28px; }
+  @media (max-width: 768px) {
+    .xo-section--{{ section.id }} .ptldr-card {
+      padding: 24px 20px 20px 28px;
+    }
   }
 {%- endstyle -%}
+
+<section {% render 'section-attr' %}>
+  <xo-container>
+    <div class="ptldr-container">
+      <div class="ptldr-card">
+        <h2 class="ptldr-heading">{{ s.heading }}</h2>
+        {% if section.blocks.size > 0 %}
+          <ul class="ptldr-list" role="list">
+            {% for block in section.blocks %}
+              <li class="ptldr-item" {{ block.shopify_attributes }}>{{ block.settings.text }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      </div>
+    </div>
+  </xo-container>
+</section>

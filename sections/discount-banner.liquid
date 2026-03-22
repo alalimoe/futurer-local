@@ -1,45 +1,105 @@
 {% comment %} Discount banner — reusable {% endcomment %}
-{%- assign sid = section.id | replace:'_','' | downcase -%}
-<style>
-#disc-{{ sid }}{ --b:var(--color-border-default); }
-#disc-{{ sid }} .d-wrap{ padding:18px var(--page-gutter); border-top:1px solid var(--b); background:var(--color-surface-secondary); }
-#disc-{{ sid }} .d-container{ max-width:{{ section.settings.maxw | default:1200 }}px; margin:0 auto; }
-#disc-{{ sid }} .d-box{
-  display:flex; justify-content:space-between; align-items:center; gap:12px;
-  border:1px solid var(--b); border-radius:14px; background:rgba(251,191,36,.12); padding:12px 14px;
-}
-#disc-{{ sid }} .d-code{ background:var(--color-surface-primary); border:1px dashed var(--color-border-default); border-radius:8px; padding:2px 6px; margin-left:6px; }
-#disc-{{ sid }} .d-btn{ display:inline-flex; align-items:center; justify-content:center; height:44px; padding:0 14px; border-radius:12px; border:0; background:var(--color-accent-primary); color:var(--color-text-primary); font-weight:800; text-decoration:none; }
-</style>
 
-<section id="disc-{{ sid }}" class="pdp-section" aria-label="First-order discount">
-  <div class="d-wrap">
-    <div class="d-container">
-      <div class="d-box">
-        <div>
-          <strong>{{ section.settings.heading | default: 'Get 10% off your first order' }}</strong>
-          <span>{{ section.settings.sub | default: 'Use code at checkout' }}</span>
-          {% if section.settings.code %}<code class="d-code">{{ section.settings.code }}</code>{% endif %}
-        </div>
-        {% if section.settings.cta_label and section.settings.cta_link %}
-          <a class="d-btn" href="{{ section.settings.cta_link }}">{{ section.settings.cta_label }}</a>
-        {% endif %}
+{%- style -%}
+  .xo-section--{{ section.id }} {
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+
+  .xo-section--{{ section.id }} .d-box {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    border: 1px solid color-mix(in srgb, rgba(var(--color-accent)) 30%, transparent);
+    border-radius: var(--general-radius-1, 1rem);
+    background: color-mix(in srgb, rgba(var(--color-accent)) 12%, transparent);
+    padding: 12px 14px;
+  }
+  @media (max-width: 768px) {
+    .xo-section--{{ section.id }} .d-box {
+      flex-direction: column;
+      text-align: center;
+    }
+  }
+
+  .xo-section--{{ section.id }} .d-box strong {
+    color: rgba(var(--color-foreground));
+    font-weight: 600;
+  }
+
+  .xo-section--{{ section.id }} .d-box span {
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 60%, transparent);
+  }
+
+  .xo-section--{{ section.id }} .d-code {
+    background: rgba(var(--color-background));
+    border: 1px dashed color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
+    border-radius: var(--general-radius-3, 2rem);
+    padding: 2px 6px;
+    margin-left: 6px;
+    font-weight: 600;
+    color: rgba(var(--color-foreground));
+  }
+
+  .xo-section--{{ section.id }} .d-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 44px;
+    padding: 0 14px;
+    border-radius: var(--button-radius);
+    border: 0;
+    background: rgba(var(--color-accent));
+    color: rgba(var(--color-foreground));
+    font-weight: 600;
+    text-decoration: none;
+    transition: opacity 0.2s var(--out-soft, ease);
+  }
+  .xo-section--{{ section.id }} .d-btn:hover {
+    opacity: 0.85;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .xo-section--{{ section.id }} .d-btn {
+      transition: none;
+    }
+  }
+{%- endstyle -%}
+
+<section {% render 'section-attr' %}>
+  <xo-container>
+    <div class="d-box">
+      <div>
+        <strong>{{ section.settings.heading | default: 'Get 10% off your first order' }}</strong>
+        <span>{{ section.settings.sub | default: 'Use code at checkout' }}</span>
+        {% if section.settings.code %}<code class="d-code">{{ section.settings.code }}</code>{% endif %}
       </div>
+      {% if section.settings.cta_label and section.settings.cta_link %}
+        <a class="d-btn" href="{{ section.settings.cta_link }}">{{ section.settings.cta_label }}</a>
+      {% endif %}
     </div>
-  </div>
+  </xo-container>
 </section>
 
 {% schema %}
 {
-  "name":"Discount banner",
-  "settings":[
-    { "type":"range","id":"maxw","min":800,"max":1600,"step":10,"unit":"px","label":"Max width","default":1200 },
-    { "type":"text","id":"heading","label":"Heading","default":"Get 10% off your first order" },
-    { "type":"text","id":"sub","label":"Subtext","default":"Use code at checkout" },
-    { "type":"text","id":"code","label":"Discount code","default":"PEPTIDE10" },
-    { "type":"text","id":"cta_label","label":"CTA label","default":"Apply at checkout" },
-    { "type":"url","id":"cta_link","label":"CTA link","default":"/" }
+  "name": "Discount banner",
+  "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "default" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Get 10% off your first order" },
+    { "type": "text", "id": "sub", "label": "Subtext", "default": "Use code at checkout" },
+    { "type": "text", "id": "code", "label": "Discount code", "default": "PEPTIDE10" },
+    { "type": "text", "id": "cta_label", "label": "CTA label", "default": "Apply at checkout" },
+    { "type": "url", "id": "cta_link", "label": "CTA link", "default": "/" },
+    { "type": "range", "id": "padding_top", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding top", "default": 20 },
+    { "type": "range", "id": "padding_bottom", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding bottom", "default": 20 }
   ],
-  "presets":[{ "name":"Discount banner" }]
+  "blocks": [
+    {
+      "type": "@app"
+    }
+  ],
+  "presets": [{ "name": "Discount banner" }]
 }
 {% endschema %}

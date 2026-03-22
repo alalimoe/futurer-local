@@ -1,12 +1,188 @@
+{%- style -%}
+  .xo-section--{{ section.id }} {
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+
+  .xo-section--{{ section.id }} .clq-container {
+    max-width: 750px;
+    margin: 0 auto;
+  }
+
+  .xo-section--{{ section.id }} .clq-title {
+    text-align: center;
+    font-size: clamp(1.75rem, 3vw, 2.25rem);
+    font-weight: 600;
+    color: rgba(var(--color-foreground));
+    margin: 0 0 48px;
+    letter-spacing: -0.02em;
+  }
+
+  .xo-section--{{ section.id }} .clq-list {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .xo-section--{{ section.id }} .clq-item {
+    border-bottom: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
+    transition: border-color 0.3s var(--out-soft, ease);
+  }
+
+  .xo-section--{{ section.id }} .clq-item:first-child {
+    border-top: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
+  }
+
+  .xo-section--{{ section.id }} .clq-item[open] {
+    border-bottom-color: rgba(var(--color-accent));
+  }
+
+  .xo-section--{{ section.id }} .clq-q {
+    padding: 24px 0;
+    font-weight: 600;
+    font-size: 1.0625rem;
+    color: rgba(var(--color-foreground));
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    list-style: none;
+    transition: color 0.2s var(--out-soft, ease);
+    min-height: 44px;
+  }
+
+  .xo-section--{{ section.id }} .clq-q::-webkit-details-marker {
+    display: none;
+  }
+
+  .xo-section--{{ section.id }} .clq-q:hover {
+    color: rgba(var(--color-accent));
+  }
+
+  .xo-section--{{ section.id }} .clq-icon {
+    width: 24px;
+    height: 24px;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 60%, transparent);
+    transition: transform 0.3s var(--out-soft, ease);
+    flex-shrink: 0;
+  }
+
+  .xo-section--{{ section.id }} .clq-item[open] .clq-icon {
+    transform: rotate(180deg);
+    color: rgba(var(--color-accent));
+  }
+
+  .xo-section--{{ section.id }} .clq-a {
+    padding: 0 0 28px 0;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 60%, transparent);
+    font-size: 1rem;
+    line-height: 1.75;
+  }
+
+  .xo-section--{{ section.id }} .clq-a-inner {
+    border-left: 2px solid rgba(var(--color-accent));
+    padding-left: 16px;
+  }
+
+  .xo-section--{{ section.id }} :focus-visible {
+    outline: 2px solid rgba(var(--color-accent));
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .xo-section--{{ section.id }} .clq-item,
+    .xo-section--{{ section.id }} .clq-q,
+    .xo-section--{{ section.id }} .clq-icon {
+      transition: none;
+    }
+  }
+{%- endstyle -%}
+
+{%- comment -%} ── FAQPage JSON-LD ── {%- endcomment -%}
+{%- assign has_faq_ld = false -%}
+{%- for block in section.blocks -%}
+  {%- if block.type == 'faq' and block.settings.question != blank and block.settings.answer != blank -%}
+    {%- assign has_faq_ld = true -%}
+    {%- break -%}
+  {%- endif -%}
+{%- endfor -%}
+
+{%- if has_faq_ld -%}
+  {%- capture faq_json -%}
+  [
+    {%- assign first = true -%}
+    {%- for block in section.blocks -%}
+      {%- if block.type == 'faq' and block.settings.question != blank and block.settings.answer != blank -%}
+        {%- if first == false -%},{%- endif -%}
+        {"@type":"Question","name":{{ block.settings.question | strip | json }},"acceptedAnswer":{"@type":"Answer","text":{{ block.settings.answer | strip_html | strip | json }}}}
+        {%- assign first = false -%}
+      {%- endif -%}
+    {%- endfor -%}
+  ]
+  {%- endcapture -%}
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"FAQPage","mainEntity":{{ faq_json | strip }}}
+  </script>
+{%- endif -%}
+
+<section {% render 'section-attr' %}>
+  <xo-container>
+    <div class="clq-container">
+      {% if section.settings.title != blank %}
+        <h2 class="clq-title">{{ section.settings.title }}</h2>
+      {% endif %}
+      <div class="clq-list">
+        {% for block in section.blocks %}
+          {% if block.type == 'faq' %}
+            <details class="clq-item" {{ block.shopify_attributes }}>
+              <summary class="clq-q">
+                {{ block.settings.question }}
+                <span class="clq-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+                </span>
+              </summary>
+              <div class="clq-a"><div class="clq-a-inner">{{ block.settings.answer }}</div></div>
+            </details>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+  </xo-container>
+</section>
+
 {% schema %}
 {
   "name": "COA Library FAQ",
   "tag": "section",
   "class": "section-coa-library-faq",
   "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "default"
+    },
     { "type": "text", "id": "title", "label": "Heading", "default": "Frequently Asked Questions" },
-    { "type": "color", "id": "bg_color", "label": "Background", "default": "#ffffff" },
-    { "type": "color", "id": "accent_color", "label": "Accent", "default": "#FBBF24" }
+    { "type": "header", "content": "Spacing" },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding top",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding bottom",
+      "default": 80
+    }
   ],
   "blocks": [
     {
@@ -16,7 +192,8 @@
         { "type": "text", "id": "question", "label": "Question" },
         { "type": "textarea", "id": "answer", "label": "Answer" }
       ]
-    }
+    },
+    { "type": "@app" }
   ],
   "presets": [
     {
@@ -29,139 +206,3 @@
   ]
 }
 {% endschema %}
-
-{%- comment -%} ── FAQPage JSON-LD ── {%- endcomment -%}
-{% if section.blocks.size > 0 %}
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "mainEntity": [
-    {%- for block in section.blocks -%}
-    {
-      "@type": "Question",
-      "name": {{ block.settings.question | json }},
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": {{ block.settings.answer | strip_html | json }}
-      }
-    }{%- unless forloop.last -%},{%- endunless -%}
-    {%- endfor -%}
-  ]
-}
-</script>
-{% endif %}
-
-<div class="clq-wrapper" id="clq-{{ section.id }}">
-  <div class="clq-container">
-    {% if section.settings.title != blank %}
-      <h2 class="clq-title">{{ section.settings.title }}</h2>
-    {% endif %}
-    <div class="clq-list">
-      {% for block in section.blocks %}
-        <details class="clq-item" {{ block.shopify_attributes }}>
-          <summary class="clq-q">
-            {{ block.settings.question }}
-            <span class="clq-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
-            </span>
-          </summary>
-          <div class="clq-a"><div class="clq-a-inner">{{ block.settings.answer }}</div></div>
-        </details>
-      {% endfor %}
-    </div>
-  </div>
-</div>
-
-<style>
-  #clq-{{ section.id }} {
-    --clq-bg: {{ section.settings.bg_color }};
-    --clq-accent: {{ section.settings.accent_color }};
-    --clq-text: var(--color-text-main, #111827);
-    --clq-muted: var(--color-text-muted, #4b5563);
-    --clq-border: var(--nx-pill-border, #E5E7EB);
-    --clq-font: var(--font-body-family, sans-serif);
-    --clq-font-heading: var(--font-heading-family, sans-serif);
-    --clq-transition: var(--transition-smooth, all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1));
-  }
-
-  .clq-wrapper {
-    padding: 80px var(--page-gutter);
-    background: var(--clq-bg);
-    font-family: var(--clq-font);
-  }
-  .clq-container {
-    max-width: 750px;
-    margin: 0 auto;
-  }
-  .clq-title {
-    text-align: center;
-    font-family: var(--clq-font-heading);
-    font-size: clamp(1.75rem, 3vw, 2.25rem);
-    font-weight: 800;
-    color: var(--clq-text);
-    margin: 0 0 48px;
-    letter-spacing: -0.02em;
-  }
-
-  .clq-list { display: flex; flex-direction: column; }
-  .clq-item {
-    border-bottom: 1px solid var(--clq-border);
-    transition: var(--clq-transition);
-  }
-  .clq-item:first-child { border-top: 1px solid var(--clq-border); }
-
-  .clq-q {
-    padding: 24px 0;
-    font-weight: 700;
-    font-size: 1.0625rem;
-    color: var(--clq-text);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    cursor: pointer;
-    list-style: none;
-    transition: color 0.2s;
-    min-height: var(--touch-min, 44px);
-  }
-  .clq-q::-webkit-details-marker { display: none; }
-  .clq-q:hover { color: var(--clq-accent); }
-
-  .clq-icon {
-    width: 24px;
-    height: 24px;
-    color: var(--clq-muted);
-    transition: transform 0.3s ease;
-    flex-shrink: 0;
-  }
-  .clq-item[open] .clq-icon { transform: rotate(180deg); color: var(--clq-accent); }
-
-  .clq-a {
-    padding: 0 0 28px 0;
-    color: var(--clq-muted);
-    font-size: 1rem;
-    line-height: 1.75;
-    animation: clqSlide 0.3s ease-out;
-  }
-  .clq-a-inner {
-    border-left: 2px solid var(--clq-accent);
-    padding-left: 16px;
-  }
-
-  @keyframes clqSlide {
-    from { opacity: 0; transform: translateY(-5px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  .clq-wrapper :focus-visible {
-    outline: 2px solid var(--clq-accent);
-    outline-offset: 2px;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .clq-wrapper *, .clq-wrapper *::before, .clq-wrapper *::after {
-      animation-duration: 0.01ms !important;
-      transition-duration: 0.01ms !important;
-    }
-  }
-</style>

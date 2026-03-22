@@ -1,48 +1,295 @@
-{% schema %}
-{
-  "name": "COA Library Grid",
-  "tag": "section",
-  "class": "section-coa-library-grid",
-  "settings": [
-    { "type": "text", "id": "heading", "label": "Heading", "default": "COA Library" },
-    { "type": "textarea", "id": "intro_text", "label": "Intro Text", "default": "Access certificates of analysis for our most requested products. All COAs are third-party verified and updated regularly." },
-    { "type": "collection", "id": "coa_collection", "label": "COA Products Collection", "info": "Select a collection whose products have pep.* COA metafields. The grid auto-populates from product data." },
-    { "type": "checkbox", "id": "show_search", "label": "Show Search Bar", "default": true },
-    { "type": "checkbox", "id": "show_category_chips", "label": "Show Category Chips", "default": true },
-    { "type": "textarea", "id": "disclaimer_text", "label": "Disclaimer", "default": "Testing panels can differ by compound and lab. Always defer to the Methods / Scope section on the COA for what was (and wasn't) tested." },
-    { "type": "header", "content": "Browse by Category" },
-    { "type": "checkbox", "id": "show_browse", "label": "Show Browse Cards", "default": true },
-    { "type": "text", "id": "browse_heading", "label": "Browse Heading", "default": "COAs by category" },
-    { "type": "header", "content": "Colors" },
-    { "type": "color", "id": "bg_color", "label": "Background", "default": "#f9fafb" },
-    { "type": "color", "id": "accent_color", "label": "Accent", "default": "#FBBF24" }
-  ],
-  "blocks": [
-    {
-      "type": "browse_card",
-      "name": "Browse Card",
-      "settings": [
-        { "type": "text", "id": "title", "label": "Title" },
-        { "type": "textarea", "id": "description", "label": "Description" },
-        { "type": "text", "id": "button_1_text", "label": "Button 1 Text" },
-        { "type": "url", "id": "button_1_url", "label": "Button 1 URL" },
-        { "type": "text", "id": "button_2_text", "label": "Button 2 Text" },
-        { "type": "url", "id": "button_2_url", "label": "Button 2 URL" }
-      ]
+{%- style -%}
+  .xo-section--{{ section.id }} {
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+
+  .xo-section--{{ section.id }} .clg-inner {
+    max-width: var(--page-width);
+    margin: 0 auto;
+  }
+
+  .xo-section--{{ section.id }} .clg-header {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+
+  .xo-section--{{ section.id }} .clg-heading {
+    font-size: clamp(1.75rem, 3vw, 2.25rem);
+    font-weight: 600;
+    color: rgba(var(--color-foreground));
+    margin: 0 0 12px;
+    letter-spacing: -0.02em;
+  }
+
+  .xo-section--{{ section.id }} .clg-intro {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 60%, transparent);
+    margin: 0;
+    max-width: 640px;
+    margin-inline: auto;
+  }
+
+  .xo-section--{{ section.id }} .clg-controls {
+    margin-bottom: 28px;
+  }
+
+  .xo-section--{{ section.id }} .clg-search-wrap {
+    position: relative;
+    margin-bottom: 16px;
+    max-width: 480px;
+    margin-inline: auto;
+  }
+
+  .xo-section--{{ section.id }} .clg-search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 60%, transparent);
+    pointer-events: none;
+  }
+
+  .xo-section--{{ section.id }} .clg-search {
+    width: 100%;
+    padding: 12px 14px 12px 40px;
+    font-size: 0.9375rem;
+    border: 1.5px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
+    border-radius: var(--button-radius, 10rem);
+    background: rgba(var(--color-background));
+    color: rgba(var(--color-foreground));
+    min-height: 44px;
+    transition: border-color 0.3s var(--out-soft, ease);
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  .xo-section--{{ section.id }} .clg-search:focus {
+    outline: none;
+    border-color: rgba(var(--color-accent));
+  }
+
+  .xo-section--{{ section.id }} .clg-chips {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .xo-section--{{ section.id }} .clg-chip {
+    padding: 8px 16px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 60%, transparent);
+    background: rgba(var(--color-background));
+    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
+    border-radius: var(--button-radius, 10rem);
+    cursor: pointer;
+    transition: border-color 0.3s var(--out-soft, ease), color 0.3s var(--out-soft, ease), background 0.3s var(--out-soft, ease);
+    min-height: 44px;
+  }
+
+  .xo-section--{{ section.id }} .clg-chip:hover {
+    border-color: rgba(var(--color-accent));
+    color: rgba(var(--color-foreground));
+  }
+
+  .xo-section--{{ section.id }} .clg-chip--active {
+    background: rgba(var(--color-accent));
+    color: rgba(var(--color-foreground));
+    border-color: rgba(var(--color-accent));
+  }
+
+  .xo-section--{{ section.id }} .clg-table-wrap {
+    overflow-x: auto;
+    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
+    border-radius: var(--general-radius-1, 1rem);
+    margin-bottom: 16px;
+    background: rgba(var(--color-background));
+  }
+
+  .xo-section--{{ section.id }} .clg-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .xo-section--{{ section.id }} .clg-table thead {
+    background: rgba(var(--color-background-2));
+  }
+
+  .xo-section--{{ section.id }} .clg-table th {
+    padding: 14px 16px;
+    text-align: left;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 60%, transparent);
+    border-bottom: 2px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
+    white-space: nowrap;
+  }
+
+  .xo-section--{{ section.id }} .clg-table td {
+    padding: 14px 16px;
+    font-size: 0.9375rem;
+    color: rgba(var(--color-foreground));
+    border-bottom: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
+    vertical-align: middle;
+  }
+
+  .xo-section--{{ section.id }} .clg-table tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  .xo-section--{{ section.id }} .clg-table tbody tr:hover {
+    background: color-mix(in srgb, rgba(var(--color-accent)) 4%, transparent);
+  }
+
+  .xo-section--{{ section.id }} .clg-product-link {
+    color: rgba(var(--color-foreground));
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 0.2s var(--out-soft, ease);
+  }
+
+  .xo-section--{{ section.id }} .clg-product-link:hover {
+    color: rgba(var(--color-accent));
+  }
+
+  .xo-section--{{ section.id }} .clg-purity {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    background: color-mix(in srgb, rgba(var(--color-success, 16, 167, 31)) 8%, transparent);
+    color: rgba(var(--color-success, 16, 167, 31));
+    border-radius: var(--button-radius, 10rem);
+    font-size: 0.8125rem;
+    font-weight: 600;
+  }
+
+  .xo-section--{{ section.id }} .clg-cell-actions {
+    white-space: nowrap;
+  }
+
+  .xo-section--{{ section.id }} .clg-action-link {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: rgba(var(--color-accent));
+    background: color-mix(in srgb, rgba(var(--color-accent)) 8%, transparent);
+    border-radius: var(--general-radius-1, 1rem);
+    text-decoration: none;
+    transition: background 0.3s var(--out-soft, ease);
+    margin-right: 6px;
+    min-height: 44px;
+  }
+
+  .xo-section--{{ section.id }} .clg-action-link:hover {
+    background: color-mix(in srgb, rgba(var(--color-accent)) 18%, transparent);
+  }
+
+  .xo-section--{{ section.id }} .clg-no-results,
+  .xo-section--{{ section.id }} .clg-empty {
+    text-align: center;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 60%, transparent);
+    padding: 40px 0;
+    font-size: 0.95rem;
+  }
+
+  .xo-section--{{ section.id }} .clg-disclaimer {
+    font-size: 0.8125rem;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 60%, transparent);
+    font-style: italic;
+    line-height: 1.5;
+    margin: 0 0 48px;
+  }
+
+  .xo-section--{{ section.id }} .clg-browse-heading {
+    font-size: clamp(1.25rem, 2vw, 1.75rem);
+    font-weight: 600;
+    color: rgba(var(--color-foreground));
+    margin: 0 0 24px;
+    letter-spacing: -0.02em;
+  }
+
+  .xo-section--{{ section.id }} .clg-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+  }
+
+  .xo-section--{{ section.id }} .clg-card {
+    background: rgba(var(--color-background));
+    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
+    border-radius: var(--general-radius-1, 1rem);
+    padding: 28px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    transition: border-color 0.3s var(--out-soft, ease);
+  }
+
+  .xo-section--{{ section.id }} .clg-card:hover {
+    border-color: rgba(var(--color-accent));
+  }
+
+  .xo-section--{{ section.id }} .clg-card-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: rgba(var(--color-foreground));
+    margin: 0;
+  }
+
+  .xo-section--{{ section.id }} .clg-card-desc {
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 60%, transparent);
+    margin: 0;
+    flex-grow: 1;
+  }
+
+  .xo-section--{{ section.id }} .clg-card-btns {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .xo-section--{{ section.id }} :focus-visible {
+    outline: 2px solid rgba(var(--color-accent));
+    outline-offset: 2px;
+  }
+
+  .xo-section--{{ section.id }} .clg-search:focus-visible {
+    outline: none;
+    border-color: rgba(var(--color-accent));
+  }
+
+  @media (max-width: 768px) {
+    .xo-section--{{ section.id }} .clg-table th,
+    .xo-section--{{ section.id }} .clg-table td {
+      padding: 10px 12px;
+      font-size: 0.8125rem;
     }
-  ],
-  "presets": [
-    {
-      "name": "COA Library Grid",
-      "blocks": [
-        { "type": "browse_card", "settings": { "title": "Peptides", "description": "COAs are listed on each product page. We're also consolidating them here for easier lookup.", "button_1_text": "Shop Peptides", "button_1_url": "/" } },
-        { "type": "browse_card", "settings": { "title": "Nootropics", "description": "COAs are shown where applicable. Look for the COA block on the product page.", "button_1_text": "Shop Nootropics", "button_1_url": "/" } },
-        { "type": "browse_card", "settings": { "title": "Phenibut", "description": "COAs + batch verification + shipping restrictions.", "button_1_text": "Phenibut Hub", "button_1_url": "/", "button_2_text": "Shipping Restrictions", "button_2_url": "/" } }
-      ]
+
+    .xo-section--{{ section.id }} .clg-cards {
+      grid-template-columns: 1fr;
     }
-  ]
-}
-{% endschema %}
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .xo-section--{{ section.id }} .clf-step,
+    .xo-section--{{ section.id }} .clg-chip,
+    .xo-section--{{ section.id }} .clg-search,
+    .xo-section--{{ section.id }} .clg-card,
+    .xo-section--{{ section.id }} .clg-product-link,
+    .xo-section--{{ section.id }} .clg-action-link {
+      transition: none;
+    }
+  }
+{%- endstyle -%}
 
 {%- assign clg_browse = section.blocks | where: "type", "browse_card" -%}
 
@@ -54,152 +301,154 @@
   {%- assign clg_has_products = true -%}
 {%- endif -%}
 
-<div class="clg-wrapper" id="clg-{{ section.id }}">
-  <div class="clg-inner">
+<section {% render 'section-attr' %}>
+  <xo-container>
+    <div class="clg-inner">
 
-    {%- comment -%} ── Header ── {%- endcomment -%}
-    <div class="clg-header" id="coa-library">
-      {% if section.settings.heading != blank %}
-        <h2 class="clg-heading">{{ section.settings.heading }}</h2>
-      {% endif %}
-      {% if section.settings.intro_text != blank %}
-        <p class="clg-intro">{{ section.settings.intro_text }}</p>
-      {% endif %}
-    </div>
-
-    {%- comment -%} ── Search + Category Chips ── {%- endcomment -%}
-    {% if section.settings.show_search or section.settings.show_category_chips %}
-      <div class="clg-controls">
-        {% if section.settings.show_search %}
-          <div class="clg-search-wrap">
-            <svg class="clg-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <input type="text" class="clg-search" placeholder="Search by product name or report ID…" aria-label="Search COAs" data-clg-search autocomplete="off">
-          </div>
+      {%- comment -%} ── Header ── {%- endcomment -%}
+      <div class="clg-header" id="coa-library">
+        {% if section.settings.heading != blank %}
+          <h2 class="clg-heading">{{ section.settings.heading }}</h2>
         {% endif %}
-        {% if section.settings.show_category_chips %}
-          <div class="clg-chips" role="group" aria-label="Filter by category">
-            <button type="button" class="clg-chip clg-chip--active" data-clg-filter="all">All</button>
-            <button type="button" class="clg-chip" data-clg-filter="peptides">Peptides</button>
-            <button type="button" class="clg-chip" data-clg-filter="nootropics">Nootropics</button>
-            <button type="button" class="clg-chip" data-clg-filter="phenibut">Phenibut</button>
-          </div>
+        {% if section.settings.intro_text != blank %}
+          <p class="clg-intro">{{ section.settings.intro_text }}</p>
         {% endif %}
       </div>
-    {% endif %}
 
-    {%- comment -%} ── COA Table ── {%- endcomment -%}
-    {% if clg_has_products %}
-      <div class="clg-table-wrap">
-        <table class="clg-table">
-          <thead>
-            <tr>
-              <th>Product</th>
-              <th>Form</th>
-              <th>Purity</th>
-              <th>Lab</th>
-              <th>Last Verified</th>
-              <th>COA</th>
-            </tr>
-          </thead>
-          <tbody>
-            {%- for clg_prod in clg_products -%}
-              {%- assign clg_status = clg_prod.metafields.pep.coa_status | default: 'current' -%}
-              {%- if clg_status == 'hidden' -%}{%- continue -%}{%- endif -%}
-
-              {%- comment -%} Resolve COA URL: pdp override → pep.coa_pdf file_reference {%- endcomment -%}
-              {%- assign clg_coa_url = nil -%}
-              {%- assign clg_pdp_override = clg_prod.metafields.pdp.coa_url -%}
-              {%- assign clg_coa_pdf_mf = clg_prod.metafields.pep.coa_pdf -%}
-              {%- if clg_pdp_override and clg_pdp_override != blank -%}
-                {%- assign clg_coa_url = clg_pdp_override -%}
-              {%- elsif clg_coa_pdf_mf and clg_coa_pdf_mf.value and clg_coa_pdf_mf.value.url -%}
-                {%- assign clg_coa_url = clg_coa_pdf_mf.value.url -%}
-              {%- endif -%}
-
-              {%- assign clg_purity = clg_prod.metafields.pep.purity_percent -%}
-              {%- assign clg_lab = clg_prod.metafields.pep.coa_lab | default: 'BT Labs' -%}
-              {%- assign clg_batch = clg_prod.metafields.pep.coa_batch | default: '' -%}
-              {%- assign clg_form = clg_prod.metafields.peptide.form | default: '' -%}
-              {%- assign clg_assay_raw = clg_prod.metafields.pep.coa_assay_date -%}
-              {%- assign clg_date = '' -%}
-              {%- if clg_assay_raw -%}
-                {%- assign clg_date = clg_assay_raw | date: '%Y-%m-%d' -%}
-              {%- endif -%}
-
-              {%- comment -%} Category from product type {%- endcomment -%}
-              {%- assign clg_raw_type = clg_prod.type | downcase | strip -%}
-              {%- assign clg_cat = 'all' -%}
-              {%- if clg_raw_type contains 'peptide' -%}
-                {%- assign clg_cat = 'peptides' -%}
-              {%- elsif clg_raw_type contains 'nootropic' -%}
-                {%- assign clg_cat = 'nootropics' -%}
-              {%- elsif clg_raw_type contains 'phenibut' -%}
-                {%- assign clg_cat = 'phenibut' -%}
-              {%- endif -%}
-
-              <tr class="clg-row" data-clg-category="{{ clg_cat }}" data-clg-name="{{ clg_prod.title | downcase | escape }}" data-clg-report="{{ clg_batch | downcase | escape }}">
-                <td class="clg-cell-product">
-                  <a href="{{ clg_prod.url }}" class="clg-product-link">{{ clg_prod.title }}</a>
-                </td>
-                <td>{{ clg_form }}</td>
-                <td>{% if clg_purity != blank %}<span class="clg-purity">{{ clg_purity }}%</span>{% endif %}</td>
-                <td>{{ clg_lab }}</td>
-                <td>{{ clg_date }}</td>
-                <td class="clg-cell-actions">
-                  {% if clg_coa_url != blank %}
-                    <a href="{{ clg_coa_url }}" class="clg-action-link" target="_blank" rel="noopener">View</a>
-                    <a href="{{ clg_coa_url }}" class="clg-action-link" download>Download</a>
-                  {% endif %}
-                </td>
-              </tr>
-            {%- endfor -%}
-          </tbody>
-        </table>
-      </div>
-
-      <p class="clg-no-results" data-clg-empty style="display:none;">No COAs match your search.</p>
-    {% else %}
-      <p class="clg-empty">Select a collection in the Theme Editor to populate COA entries.</p>
-    {% endif %}
-
-    {% if section.settings.disclaimer_text != blank %}
-      <p class="clg-disclaimer">{{ section.settings.disclaimer_text }}</p>
-    {% endif %}
-
-    {%- comment -%} ── Browse Cards ── {%- endcomment -%}
-    {% if section.settings.show_browse and clg_browse.size > 0 %}
-      {% if section.settings.browse_heading != blank %}
-        <h3 class="clg-browse-heading">{{ section.settings.browse_heading }}</h3>
-      {% endif %}
-      <div class="clg-cards">
-        {%- for block in clg_browse -%}
-          <article class="clg-card" {{ block.shopify_attributes }}>
-            {% if block.settings.title != blank %}
-              <h4 class="clg-card-title">{{ block.settings.title }}</h4>
-            {% endif %}
-            {% if block.settings.description != blank %}
-              <p class="clg-card-desc">{{ block.settings.description }}</p>
-            {% endif %}
-            <div class="clg-card-btns">
-              {% if block.settings.button_1_text != blank and block.settings.button_1_url != blank %}
-                <a href="{{ block.settings.button_1_url }}" class="btn btn--primary">{{ block.settings.button_1_text }}</a>
-              {% endif %}
-              {% if block.settings.button_2_text != blank and block.settings.button_2_url != blank %}
-                <a href="{{ block.settings.button_2_url }}" class="btn btn--secondary">{{ block.settings.button_2_text }}</a>
-              {% endif %}
+      {%- comment -%} ── Search + Category Chips ── {%- endcomment -%}
+      {% if section.settings.show_search or section.settings.show_category_chips %}
+        <div class="clg-controls">
+          {% if section.settings.show_search %}
+            <div class="clg-search-wrap">
+              <svg class="clg-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" class="clg-search" placeholder="Search by product name or report ID…" aria-label="Search COAs" data-clg-search autocomplete="off">
             </div>
-          </article>
-        {%- endfor -%}
-      </div>
-    {% endif %}
+          {% endif %}
+          {% if section.settings.show_category_chips %}
+            <div class="clg-chips" role="group" aria-label="Filter by category">
+              <button type="button" class="clg-chip clg-chip--active" data-clg-filter="all">All</button>
+              <button type="button" class="clg-chip" data-clg-filter="peptides">Peptides</button>
+              <button type="button" class="clg-chip" data-clg-filter="nootropics">Nootropics</button>
+              <button type="button" class="clg-chip" data-clg-filter="phenibut">Phenibut</button>
+            </div>
+          {% endif %}
+        </div>
+      {% endif %}
 
-  </div>
-</div>
+      {%- comment -%} ── COA Table ── {%- endcomment -%}
+      {% if clg_has_products %}
+        <div class="clg-table-wrap">
+          <table class="clg-table">
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Form</th>
+                <th>Purity</th>
+                <th>Lab</th>
+                <th>Last Verified</th>
+                <th>COA</th>
+              </tr>
+            </thead>
+            <tbody>
+              {%- for clg_prod in clg_products -%}
+                {%- assign clg_status = clg_prod.metafields.pep.coa_status | default: 'current' -%}
+                {%- if clg_status == 'hidden' -%}{%- continue -%}{%- endif -%}
+
+                {%- comment -%} Resolve COA URL: pdp override → pep.coa_pdf file_reference {%- endcomment -%}
+                {%- assign clg_coa_url = nil -%}
+                {%- assign clg_pdp_override = clg_prod.metafields.pdp.coa_url -%}
+                {%- assign clg_coa_pdf_mf = clg_prod.metafields.pep.coa_pdf -%}
+                {%- if clg_pdp_override and clg_pdp_override != blank -%}
+                  {%- assign clg_coa_url = clg_pdp_override -%}
+                {%- elsif clg_coa_pdf_mf and clg_coa_pdf_mf.value and clg_coa_pdf_mf.value.url -%}
+                  {%- assign clg_coa_url = clg_coa_pdf_mf.value.url -%}
+                {%- endif -%}
+
+                {%- assign clg_purity = clg_prod.metafields.pep.purity_percent -%}
+                {%- assign clg_lab = clg_prod.metafields.pep.coa_lab | default: 'BT Labs' -%}
+                {%- assign clg_batch = clg_prod.metafields.pep.coa_batch | default: '' -%}
+                {%- assign clg_form = clg_prod.metafields.peptide.form | default: '' -%}
+                {%- assign clg_assay_raw = clg_prod.metafields.pep.coa_assay_date -%}
+                {%- assign clg_date = '' -%}
+                {%- if clg_assay_raw -%}
+                  {%- assign clg_date = clg_assay_raw | date: '%Y-%m-%d' -%}
+                {%- endif -%}
+
+                {%- comment -%} Category from product type {%- endcomment -%}
+                {%- assign clg_raw_type = clg_prod.type | downcase | strip -%}
+                {%- assign clg_cat = 'all' -%}
+                {%- if clg_raw_type contains 'peptide' -%}
+                  {%- assign clg_cat = 'peptides' -%}
+                {%- elsif clg_raw_type contains 'nootropic' -%}
+                  {%- assign clg_cat = 'nootropics' -%}
+                {%- elsif clg_raw_type contains 'phenibut' -%}
+                  {%- assign clg_cat = 'phenibut' -%}
+                {%- endif -%}
+
+                <tr class="clg-row" data-clg-category="{{ clg_cat }}" data-clg-name="{{ clg_prod.title | downcase | escape }}" data-clg-report="{{ clg_batch | downcase | escape }}">
+                  <td class="clg-cell-product">
+                    <a href="{{ clg_prod.url }}" class="clg-product-link">{{ clg_prod.title }}</a>
+                  </td>
+                  <td>{{ clg_form }}</td>
+                  <td>{% if clg_purity != blank %}<span class="clg-purity">{{ clg_purity }}%</span>{% endif %}</td>
+                  <td>{{ clg_lab }}</td>
+                  <td>{{ clg_date }}</td>
+                  <td class="clg-cell-actions">
+                    {% if clg_coa_url != blank %}
+                      <a href="{{ clg_coa_url }}" class="clg-action-link" target="_blank" rel="noopener">View</a>
+                      <a href="{{ clg_coa_url }}" class="clg-action-link" download>Download</a>
+                    {% endif %}
+                  </td>
+                </tr>
+              {%- endfor -%}
+            </tbody>
+          </table>
+        </div>
+
+        <p class="clg-no-results" data-clg-empty style="display:none;">No COAs match your search.</p>
+      {% else %}
+        <p class="clg-empty">Select a collection in the Theme Editor to populate COA entries.</p>
+      {% endif %}
+
+      {% if section.settings.disclaimer_text != blank %}
+        <p class="clg-disclaimer">{{ section.settings.disclaimer_text }}</p>
+      {% endif %}
+
+      {%- comment -%} ── Browse Cards ── {%- endcomment -%}
+      {% if section.settings.show_browse and clg_browse.size > 0 %}
+        {% if section.settings.browse_heading != blank %}
+          <h3 class="clg-browse-heading">{{ section.settings.browse_heading }}</h3>
+        {% endif %}
+        <div class="clg-cards">
+          {%- for block in clg_browse -%}
+            <article class="clg-card" {{ block.shopify_attributes }}>
+              {% if block.settings.title != blank %}
+                <h4 class="clg-card-title">{{ block.settings.title }}</h4>
+              {% endif %}
+              {% if block.settings.description != blank %}
+                <p class="clg-card-desc">{{ block.settings.description }}</p>
+              {% endif %}
+              <div class="clg-card-btns">
+                {% if block.settings.button_1_text != blank and block.settings.button_1_url != blank %}
+                  <a href="{{ block.settings.button_1_url }}" class="btn btn--primary">{{ block.settings.button_1_text }}</a>
+                {% endif %}
+                {% if block.settings.button_2_text != blank and block.settings.button_2_url != blank %}
+                  <a href="{{ block.settings.button_2_url }}" class="btn btn--secondary">{{ block.settings.button_2_text }}</a>
+                {% endif %}
+              </div>
+            </article>
+          {%- endfor -%}
+        </div>
+      {% endif %}
+
+    </div>
+  </xo-container>
+</section>
 
 {%- comment -%} ── Inline JS: Search + Filter ── {%- endcomment -%}
 <script>
 (function() {
-  var root = document.getElementById('clg-{{ section.id }}');
+  var root = document.querySelector('.xo-section--{{ section.id }}');
   if (!root) return;
 
   var searchInput = root.querySelector('[data-clg-search]');
@@ -243,267 +492,73 @@
 })();
 </script>
 
-<style>
-  #clg-{{ section.id }} {
-    --clg-bg: {{ section.settings.bg_color }};
-    --clg-accent: {{ section.settings.accent_color }};
-    --clg-text: var(--color-text-main, #111827);
-    --clg-muted: var(--color-text-muted, #4b5563);
-    --clg-border: var(--nx-pill-border, #E5E7EB);
-    --clg-radius: var(--nx-radius, 14px);
-    --clg-font: var(--font-body-family, sans-serif);
-    --clg-font-heading: var(--font-heading-family, sans-serif);
-    --clg-transition: var(--transition-smooth, all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1));
-    --clg-touch: var(--touch-min, 44px);
-  }
-
-  .clg-wrapper {
-    background: var(--clg-bg);
-    padding: 64px var(--page-gutter);
-    font-family: var(--clg-font);
-  }
-  .clg-inner {
-    max-width: var(--container-width-large);
-    margin: 0 auto;
-  }
-
-  .clg-header { text-align: center; margin-bottom: 40px; }
-  .clg-heading {
-    font-family: var(--clg-font-heading);
-    font-size: clamp(1.75rem, 3vw, 2.25rem);
-    font-weight: 800;
-    color: var(--clg-text);
-    margin: 0 0 12px;
-    letter-spacing: -0.02em;
-  }
-  .clg-intro {
-    font-size: 1rem;
-    line-height: 1.7;
-    color: var(--clg-muted);
-    margin: 0;
-    max-width: 640px;
-    margin-inline: auto;
-  }
-
-  /* ── Controls ── */
-  .clg-controls { margin-bottom: 28px; }
-  .clg-search-wrap {
-    position: relative;
-    margin-bottom: 16px;
-    max-width: 480px;
-    margin-inline: auto;
-  }
-  .clg-search-icon {
-    position: absolute;
-    left: 14px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--clg-muted);
-    pointer-events: none;
-  }
-  .clg-search {
-    width: 100%;
-    padding: 12px 14px 12px 40px;
-    font-size: 0.9375rem;
-    font-family: var(--clg-font);
-    border: 1.5px solid var(--clg-border);
-    border-radius: var(--clg-radius);
-    background: var(--color-bg-primary, #fff);
-    color: var(--clg-text);
-    min-height: var(--clg-touch);
-    transition: var(--clg-transition);
-    -webkit-appearance: none;
-    appearance: none;
-  }
-  .clg-search:focus {
-    outline: none;
-    border-color: var(--clg-accent);
-    box-shadow: var(--focus-ring);
-  }
-
-  .clg-chips {
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-    flex-wrap: wrap;
-  }
-  .clg-chip {
-    padding: 8px 16px;
-    font-size: 0.875rem;
-    font-family: var(--clg-font);
-    font-weight: 600;
-    color: var(--clg-muted);
-    background: var(--color-bg-primary, #fff);
-    border: 1px solid var(--clg-border);
-    border-radius: 100px;
-    cursor: pointer;
-    transition: var(--clg-transition);
-    min-height: var(--clg-touch);
-  }
-  .clg-chip:hover { border-color: var(--clg-accent); color: var(--clg-text); }
-  .clg-chip--active {
-    background: var(--clg-accent);
-    color: var(--color-text-primary);
-    border-color: var(--clg-accent);
-    box-shadow: var(--shadow-gold-sm);
-  }
-
-  /* ── Table ── */
-  .clg-table-wrap {
-    overflow-x: auto;
-    border: 1px solid var(--clg-border);
-    border-radius: var(--clg-radius);
-    margin-bottom: 16px;
-    background: var(--color-bg-primary, #fff);
-  }
-  .clg-table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-  .clg-table thead { background: var(--color-bg-secondary, #f9fafb); }
-  .clg-table th {
-    padding: 14px 16px;
-    text-align: left;
-    font-size: 0.8125rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: var(--clg-muted);
-    border-bottom: 2px solid var(--clg-border);
-    white-space: nowrap;
-  }
-  .clg-table td {
-    padding: 14px 16px;
-    font-size: 0.9375rem;
-    color: var(--clg-text);
-    border-bottom: 1px solid var(--clg-border);
-    vertical-align: middle;
-  }
-  .clg-table tbody tr:last-child td { border-bottom: none; }
-  .clg-table tbody tr:hover { background: rgba(251, 191, 36, 0.04); }
-
-  .clg-product-link {
-    color: var(--clg-text);
-    font-weight: 600;
-    text-decoration: none;
-    transition: color 0.2s;
-  }
-  .clg-product-link:hover { color: var(--color-accent-dark, #92400e); }
-
-  .clg-purity {
-    display: inline-flex;
-    align-items: center;
-    padding: 2px 8px;
-    background: rgba(16, 163, 50, 0.08);
-    color: #0f5132;
-    border-radius: 100px;
-    font-size: 0.8125rem;
-    font-weight: 600;
-  }
-
-  .clg-cell-actions { white-space: nowrap; }
-  .clg-action-link {
-    display: inline-flex;
-    align-items: center;
-    padding: 6px 12px;
-    font-size: 0.8125rem;
-    font-weight: 600;
-    color: var(--color-accent-dark, #92400e);
-    background: rgba(251, 191, 36, 0.08);
-    border-radius: 8px;
-    text-decoration: none;
-    transition: var(--clg-transition);
-    margin-right: 6px;
-    min-height: var(--clg-touch);
-  }
-  .clg-action-link:hover {
-    background: rgba(251, 191, 36, 0.18);
-  }
-
-  .clg-no-results, .clg-empty {
-    text-align: center;
-    color: var(--clg-muted);
-    padding: 40px 0;
-    font-size: 0.95rem;
-  }
-
-  .clg-disclaimer {
-    font-size: 0.8125rem;
-    color: var(--clg-muted);
-    font-style: italic;
-    line-height: 1.5;
-    margin: 0 0 48px;
-  }
-
-  /* ── Browse Cards ── */
-  .clg-browse-heading {
-    font-family: var(--clg-font-heading);
-    font-size: clamp(1.25rem, 2vw, 1.75rem);
-    font-weight: 800;
-    color: var(--clg-text);
-    margin: 0 0 24px;
-    letter-spacing: -0.02em;
-  }
-  .clg-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 20px;
-  }
-  .clg-card {
-    background: var(--color-bg-primary, #fff);
-    border: 1px solid var(--clg-border);
-    border-radius: var(--clg-radius);
-    padding: 28px 24px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    transition: var(--clg-transition);
-  }
-  .clg-card:hover {
-    border-color: var(--clg-accent);
-    box-shadow: var(--shadow-md, 0 8px 24px rgba(0,0,0,0.06));
-    transform: translateY(-2px);
-  }
-  .clg-card-title {
-    font-family: var(--clg-font-heading);
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: var(--clg-text);
-    margin: 0;
-  }
-  .clg-card-desc {
-    font-size: 0.9375rem;
-    line-height: 1.6;
-    color: var(--clg-muted);
-    margin: 0;
-    flex-grow: 1;
-  }
-  .clg-card-btns {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .clg-wrapper :focus-visible {
-    outline: 2px solid var(--clg-accent);
-    outline-offset: 2px;
-  }
-  .clg-search:focus-visible {
-    outline: none;
-    border-color: var(--clg-accent);
-    box-shadow: var(--focus-ring);
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .clg-wrapper *, .clg-wrapper *::before, .clg-wrapper *::after {
-      animation-duration: 0.01ms !important;
-      transition-duration: 0.01ms !important;
+{% schema %}
+{
+  "name": "COA Library Grid",
+  "tag": "section",
+  "class": "section-coa-library-grid",
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "default"
+    },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "COA Library" },
+    { "type": "textarea", "id": "intro_text", "label": "Intro Text", "default": "Access certificates of analysis for our most requested products. All COAs are third-party verified and updated regularly." },
+    { "type": "collection", "id": "coa_collection", "label": "COA Products Collection", "info": "Select a collection whose products have pep.* COA metafields. The grid auto-populates from product data." },
+    { "type": "checkbox", "id": "show_search", "label": "Show Search Bar", "default": true },
+    { "type": "checkbox", "id": "show_category_chips", "label": "Show Category Chips", "default": true },
+    { "type": "textarea", "id": "disclaimer_text", "label": "Disclaimer", "default": "Testing panels can differ by compound and lab. Always defer to the Methods / Scope section on the COA for what was (and wasn't) tested." },
+    { "type": "header", "content": "Browse by Category" },
+    { "type": "checkbox", "id": "show_browse", "label": "Show Browse Cards", "default": true },
+    { "type": "text", "id": "browse_heading", "label": "Browse Heading", "default": "COAs by category" },
+    { "type": "header", "content": "Spacing" },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding top",
+      "default": 64
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding bottom",
+      "default": 64
     }
-  }
-
-  @media (max-width: 768px) {
-    .clg-wrapper { padding: 48px var(--page-gutter); }
-    .clg-table th, .clg-table td { padding: 10px 12px; font-size: 0.8125rem; }
-    .clg-cards { grid-template-columns: 1fr; }
-  }
-</style>
+  ],
+  "blocks": [
+    {
+      "type": "browse_card",
+      "name": "Browse Card",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Title" },
+        { "type": "textarea", "id": "description", "label": "Description" },
+        { "type": "text", "id": "button_1_text", "label": "Button 1 Text" },
+        { "type": "url", "id": "button_1_url", "label": "Button 1 URL" },
+        { "type": "text", "id": "button_2_text", "label": "Button 2 Text" },
+        { "type": "url", "id": "button_2_url", "label": "Button 2 URL" }
+      ]
+    },
+    { "type": "@app" }
+  ],
+  "presets": [
+    {
+      "name": "COA Library Grid",
+      "blocks": [
+        { "type": "browse_card", "settings": { "title": "Peptides", "description": "COAs are listed on each product page. We're also consolidating them here for easier lookup.", "button_1_text": "Shop Peptides", "button_1_url": "/" } },
+        { "type": "browse_card", "settings": { "title": "Nootropics", "description": "COAs are shown where applicable. Look for the COA block on the product page.", "button_1_text": "Shop Nootropics", "button_1_url": "/" } },
+        { "type": "browse_card", "settings": { "title": "Phenibut", "description": "COAs + batch verification + shipping restrictions.", "button_1_text": "Phenibut Hub", "button_1_url": "/", "button_2_text": "Shipping Restrictions", "button_2_url": "/" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

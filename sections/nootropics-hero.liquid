@@ -28,33 +28,192 @@ Keeps original gallery/content structure and settings while providing:
 • Improved ARIA labels and scroll-margin to play nice with sticky jump chips
 {%- endcomment -%}
 
-<section id="nootropics-hero" class="npx-hero" {% render 'section-attr' %} aria-label="Product details">
-  <style>
-    #nootropics-hero{
-      --npx-maxw:  {{ section.settings.max_width | default: 1400 }}px;
-      --npx-pad-t: {{ section.settings.padding_top_desktop | default: 50 }}px;
-      --npx-pad-b: {{ section.settings.padding_bottom_desktop | default: 50 }}px;
+{%- style -%}
+  .xo-section--{{ section.id }} {
+    padding-top: {{ section.settings.padding_top_desktop | default: 50 }}px;
+    padding-bottom: {{ section.settings.padding_bottom_desktop | default: 50 }}px;
+    scroll-margin-top: 84px;
+  }
+
+  @media (max-width: 768px) {
+    .xo-section--{{ section.id }} {
+      padding-top: {{ section.settings.padding_top_mobile | default: 50 }}px;
+      padding-bottom: {{ section.settings.padding_bottom_mobile | default: 50 }}px;
     }
-    @media (max-width: 740px){
-      #nootropics-hero{
-        --npx-pad-t: {{ section.settings.padding_top_mobile | default: 50 }}px;
-        --npx-pad-b: {{ section.settings.padding_bottom_mobile | default: 50 }}px;
-      }
+  }
+
+  .xo-section--{{ section.id }} .npx-wrap {
+    max-width: {{ section.settings.max_width | default: 1400 }}px;
+    margin: 0 auto;
+  }
+
+  .xo-section--{{ section.id }} .nh-facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .xo-section--{{ section.id }} .nh-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
+    border-radius: var(--general-radius-1, 1rem);
+    background: rgba(var(--color-background));
+    line-height: 1.2;
+  }
+
+  .xo-section--{{ section.id }} .nh-chip .l {
+    font-weight: 600;
+    color: rgba(var(--color-foreground));
+  }
+
+  .xo-section--{{ section.id }} .nh-chip .v {
+    color: rgba(var(--color-foreground));
+  }
+
+  .xo-section--{{ section.id }} .nh-rating {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .xo-section--{{ section.id }} .nh-rating .stars .s {
+    font-size: 16px;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 20%, transparent);
+    display: inline-block;
+  }
+
+  .xo-section--{{ section.id }} .nh-rating .stars .s--on {
+    color: rgba(var(--color-accent));
+  }
+
+  .xo-section--{{ section.id }} .nh-rating .stars .s--half {
+    color: transparent;
+    background: linear-gradient(90deg, rgba(var(--color-accent)) 50%, color-mix(in srgb, rgba(var(--color-foreground)) 20%, transparent) 50%);
+    -webkit-background-clip: text;
+    background-clip: text;
+  }
+
+  .xo-section--{{ section.id }} .nh-rating .rtext {
+    color: rgba(var(--color-foreground));
+    font-weight: 600;
+  }
+
+  .xo-section--{{ section.id }} .nh-rating .rcnt {
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 60%, transparent);
+    font-weight: 400;
+    margin-left: 4px;
+  }
+
+  .xo-section--{{ section.id }} .nh-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  .xo-section--{{ section.id }} .nh-badge {
+    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
+    background: rgba(var(--color-background));
+    border-radius: var(--button-radius);
+    padding: 6px 10px;
+    font-weight: 600;
+    line-height: 1.1;
+    color: rgba(var(--color-foreground));
+  }
+
+  .xo-section--{{ section.id }} .nh-per {
+    margin-top: 8px;
+    color: rgba(var(--color-foreground));
+    font-weight: 600;
+  }
+
+  .xo-section--{{ section.id }} .nh-per span {
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 60%, transparent);
+    font-weight: 400;
+  }
+
+  .xo-section--{{ section.id }} .nh-micro {
+    list-style: none;
+    margin: 8px 0 0;
+    padding: 0;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 60%, transparent);
+  }
+
+  .xo-section--{{ section.id }} .nh-micro li {
+    margin: 4px 0;
+  }
+
+  .xo-section--{{ section.id }} .nh-stock {
+    margin-top: 6px;
+    font-weight: 600;
+    color: rgba(var(--color-error, 218, 30, 40));
+    background: rgba(var(--color-background-2));
+    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
+    border-radius: var(--general-radius-1, 1rem);
+    padding: 6px 10px;
+    display: inline-block;
+  }
+
+  .xo-section--{{ section.id }} .nh-disclaimer {
+    margin-top: 10px;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 60%, transparent);
+    font-size: 12px;
+    line-height: 1.5;
+    background: rgba(var(--color-background-2));
+    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
+    border-radius: var(--general-radius-1, 1rem);
+    padding: 8px 10px;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .xo-section--{{ section.id }} .nh-chip,
+    .xo-section--{{ section.id }} .nh-disclaimer {
+      opacity: 0;
+      transform: translateY(6px);
     }
-    #nootropics-hero .npx-wrap{ max-width: var(--npx-maxw); margin: 0 auto; padding: var(--npx-pad-t) var(--page-gutter) var(--npx-pad-b); }
-    /* So sticky jump chips land cleanly */
-    #nootropics-hero { scroll-margin-top: 84px; }
-    /* Nootropics Quick Facts */
-#nootropics-hero .nh-facts{
-  display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;
-}
-#nootropics-hero .nh-chip{
-  display:inline-flex; align-items:center; gap:6px;
-  padding:6px 10px; border:1px solid var(--color-border-default); border-radius:var(--nx-radius-md); background:var(--color-surface-primary);
-  line-height:1.2; box-shadow:var(--shadow-xs);
-}
-#nootropics-hero .nh-chip .l{ font-weight:700; color:var(--color-text-primary); }
-#nootropics-hero .nh-chip .v{ color:var(--color-text-primary); }
+    .xo-section--{{ section.id }} .nh-chip.nx_in,
+    .xo-section--{{ section.id }} .nh-disclaimer.nx_in {
+      opacity: 1;
+      transform: none;
+      transition: opacity 0.22s var(--out-soft, ease), transform 0.22s var(--out-soft, ease);
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .xo-section--{{ section.id }} .nh-badge,
+    .xo-section--{{ section.id }} .nh-per,
+    .xo-section--{{ section.id }} .nh-micro li,
+    .xo-section--{{ section.id }} .nh-stock {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    .xo-section--{{ section.id }} .nx_in2 {
+      opacity: 1;
+      transform: none;
+      transition: opacity 0.22s var(--out-soft, ease), transform 0.22s var(--out-soft, ease);
+    }
+  }
+
+  .xo-section--{{ section.id }} :focus-visible {
+    outline: 2px solid rgba(var(--color-accent));
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .xo-section--{{ section.id }} *,
+    .xo-section--{{ section.id }} *::before,
+    .xo-section--{{ section.id }} *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+{%- endstyle -%}
+
 {%- comment -%} Rating, badges, price-per-serving, delivery notes, low stock {%- endcomment -%}
 {%- liquid
   assign r_val   = product.metafields.reviews.rating
@@ -65,7 +224,9 @@ Keeps original gallery/content structure and settings while providing:
   assign ret_p   = product.metafields.pdp.return_promise
 -%}
 
-{%- comment -%} Rating row (fixed) {%- endcomment -%}
+<section id="nootropics-hero" class="npx-hero" {% render 'section-attr' %} aria-label="Product details">
+
+{%- comment -%} Rating row {%- endcomment -%}
 {%- assign r_val = product.metafields.reviews.rating -%}
 {%- assign r_cnt = product.metafields.reviews.rating_count -%}
 {% if r_val or r_cnt %}
@@ -117,59 +278,10 @@ Keeps original gallery/content structure and settings while providing:
 <!-- Low stock cue -->
 <div class="nh-stock" data-low-stock style="display:none"></div>
 
-#nootropics-hero .nh-disclaimer{
-  margin-top:10px; color:var(--color-text-secondary); font-size:12px; line-height:1.5;
-  background:var(--color-surface-secondary); border:1px solid var(--color-border-default); border-radius:var(--nx-radius-md); padding:8px 10px;
-}
-
-/* gentle enter motion, respects reduced-motion */
-@media (prefers-reduced-motion: no-preference){
-  #nootropics-hero .nh-chip, #nootropics-hero .nh-disclaimer { opacity:0; transform:translateY(6px); }
-  #nootropics-hero .nh-chip.nx_in, #nootropics-hero .nh-disclaimer.nx_in { opacity:1; transform:none; transition:opacity .22s ease, transform .22s ease; }
-}
-/* Rating row */
-#nootropics-hero .nh-rating{display:flex;align-items:center;gap:8px;margin-top:10px}
-#nootropics-hero .nh-rating .stars .s{font-size:16px; color:#D1D5DB; display:inline-block}
-#nootropics-hero .nh-rating .stars .s--on{color:#F59E0B}
-#nootropics-hero .nh-rating .stars .s--half{
-  color: transparent;
-  background: linear-gradient(90deg, #F59E0B 50%, #D1D5DB 50%);
-  -webkit-background-clip: text;
-  background-clip: text;
-}
-
-#nootropics-hero .nh-rating .rtext{color:var(--color-text-primary);font-weight:600}
-#nootropics-hero .nh-rating .rcnt{color:var(--color-text-secondary);font-weight:400;margin-left:4px}
-
-/* Badges */
-#nootropics-hero .nh-badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
-#nootropics-hero .nh-badge{border:1px solid var(--color-border-default);background:var(--color-surface-primary);border-radius:var(--nx-radius-pill);padding:6px 10px;font-weight:600;line-height:1.1}
-
-/* Price per serving */
-#nootropics-hero .nh-per{margin-top:8px;color:var(--color-text-primary);font-weight:700}
-#nootropics-hero .nh-per span{color:var(--color-text-secondary);font-weight:500}
-
-/* Shipping/returns microcopy */
-#nootropics-hero .nh-micro{list-style:none;margin:8px 0 0;padding:0;color:var(--color-text-secondary)}
-#nootropics-hero .nh-micro li{margin:4px 0}
-
-/* Low stock */
-#nootropics-hero .nh-stock{margin-top:6px;font-weight:700;color:var(--color-warning-text);background:var(--color-warning-bg);border:1px solid #FED7AA;border-radius:var(--nx-radius-sm);padding:6px 10px;display:inline-block}
-
-/* Motion */
-@media (prefers-reduced-motion:no-preference){
-  #nootropics-hero .nh-badge,#nootropics-hero .nh-per,#nootropics-hero .nh-micro li,#nootropics-hero .nh-stock{
-    opacity:0; transform:translateY(6px)
-  }
-  #nootropics-hero .nx_in2{opacity:1; transform:none; transition:opacity .22s ease, transform .22s ease}
-}
-
-  </style>
 <script>
 document.addEventListener('DOMContentLoaded', function(){
   var root = document.getElementById('nootropics-hero'); if(!root) return;
 
-  // ---- price per serving + low stock
   var perEl  = root.querySelector('[data-per-serving]');
   var stockEl= root.querySelector('[data-low-stock]');
   var servings = {{ product.metafields.supp.servings_per_container | default: 0 | json }};
@@ -180,10 +292,8 @@ document.addEventListener('DOMContentLoaded', function(){
   function fmt(cents){ try{return Shopify.formatMoney(cents, moneyFormat);}catch(e){return (cents/100).toFixed(2);} }
 
   function findSelectedVariantId(){
-    // Try native input first
     var idInput = root.querySelector('input[name="id"]');
     if(idInput && idInput.value) return parseInt(idInput.value,10);
-    // Fallback: guess by selected options
     return {{ product.selected_or_first_available_variant.id }};
   }
 
@@ -192,7 +302,6 @@ document.addEventListener('DOMContentLoaded', function(){
     var v = variants.find(function(x){ return x.id === vid; });
     if(!v) return;
 
-    // price per serving
     if(perEl && servings > 0){
       var per = Math.round(v.price / servings);
       perEl.style.display = '';
@@ -200,7 +309,6 @@ document.addEventListener('DOMContentLoaded', function(){
       perEl.classList.add('nx_in2');
     }
 
-    // low stock cue
     if(stockEl){
       if(v.inventory_management && v.inventory_policy !== 'continue' && typeof v.inventory_quantity === 'number' && v.inventory_quantity <= lowThr){
         stockEl.style.display = '';
@@ -212,7 +320,6 @@ document.addEventListener('DOMContentLoaded', function(){
     }
   }
 
-  // Listen for variant changes (works with most themes)
   document.addEventListener('change', function(e){
     if(e.target && e.target.name && e.target.name.indexOf('options[') === 0) updateMeta();
   });
@@ -220,10 +327,8 @@ document.addEventListener('DOMContentLoaded', function(){
     if(e.target && e.target.closest('.product-form__submit')) setTimeout(updateMeta, 0);
   });
 
-  // Run on entry
   updateMeta();
 
-  // extend your existing IO for initial animation of new elements
   try{
     if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       var io2 = new IntersectionObserver(function(entries){
@@ -319,7 +424,6 @@ document.addEventListener('DOMContentLoaded', function(){
   assign caps_mf      = product.metafields.supp.capsule_count
   assign compnote_mf  = product.metafields.supp.compliance_note
 
-  # Backward-compat aliases (if you previously stored in pdp.*)
   if benefit_mf == blank and product.metafields.pdp.benefit_1
     assign benefit_mf = product.metafields.pdp.benefit_1
   endif
@@ -374,7 +478,7 @@ document.addEventListener('DOMContentLoaded', function(){
       </xo-product>
 
       {%- comment -%}
-      Keep the theme’s product JSON-LD to avoid SEO regressions.
+      Keep the theme's product JSON-LD to avoid SEO regressions.
       {%- endcomment -%}
       {% render 'main-product-ld-json' %}
       {% # theme-check-disable UnknownFilter %}
@@ -468,10 +572,10 @@ document.addEventListener('DOMContentLoaded', function(){
 
     { "type": "header", "content": "General settings" },
     { "type": "number", "id": "max_width", "label": "Max width (px)", "default": 1400 },
-    { "type": "number", "id": "padding_top_desktop", "label": "Padding top (desktop, px)", "default": 50 },
-    { "type": "number", "id": "padding_bottom_desktop", "label": "Padding bottom (desktop, px)", "default": 50 },
-    { "type": "number", "id": "padding_top_mobile", "label": "Padding top (mobile, px)", "default": 50 },
-    { "type": "number", "id": "padding_bottom_mobile", "label": "Padding bottom (mobile, px)", "default": 50 },
+    { "type": "range", "id": "padding_top_desktop", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding top (desktop)", "default": 48 },
+    { "type": "range", "id": "padding_bottom_desktop", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding bottom (desktop)", "default": 48 },
+    { "type": "range", "id": "padding_top_mobile", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding top (mobile)", "default": 48 },
+    { "type": "range", "id": "padding_bottom_mobile", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding bottom (mobile)", "default": 48 },
 
     { "type": "color_scheme", "id": "color_scheme", "label": "Section color scheme" },
     { "type": "color", "id": "background_color", "label": "Background color" },

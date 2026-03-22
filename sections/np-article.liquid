@@ -1,15 +1,10 @@
-<style>
-  /* Scoped Vanilla CSS */
-  #Section-{{ section.id }} {
-    /* Layout Variables */
+{%- style -%}
+  .xo-section--{{ section.id }} {
     --max-width: {{ section.settings.max_width }}px;
-    --section-padding-y: {{ section.settings.section_padding | divided_by: 10.0 }}rem;
     --content-gap: {{ section.settings.content_gap | divided_by: 10.0 }}rem;
     --toc-width: {{ section.settings.toc_width }}px;
-    --border-radius: {{ section.settings.border_radius }}px;
     --sticky-offset: {{ section.settings.sticky_offset }}px;
 
-    /* Typography Variables */
     --line-height: {{ section.settings.line_height }};
     --title-size: {{ section.settings.title_size | divided_by: 10.0 }}rem;
     --body-size: {{ section.settings.body_size | divided_by: 10.0 }}rem;
@@ -18,28 +13,12 @@
     --h2: {{ section.settings.h2_size | divided_by: 10.0 }}rem;
     --h3: {{ section.settings.h3_size | divided_by: 10.0 }}rem;
 
-    /* Nootropix Color System */
-    --color-bg: {{ section.settings.background_color }};
-    --color-text: {{ section.settings.text_color }};
-    --color-heading: {{ section.settings.heading_color }};
-    --color-meta: {{ section.settings.meta_color }};
-    --color-accent: {{ section.settings.accent_color }};
-    --color-accent-dark: {{ section.settings.accent_dark_color }};
-    --toc-bg: {{ section.settings.toc_background }};
-    --toc-border: {{ section.settings.toc_border_color }};
-
-    background-color: var(--color-bg);
-    color: var(--color-text);
-    padding: var(--section-padding-y) var(--page-gutter);
-    {% if section.settings.body_font != blank %}
-      font-family: {{ section.settings.body_font.family }}, {{ section.settings.body_font.fallback_families }};
-      font-weight: {{ section.settings.body_font.weight }};
-    {% endif %}
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Hardware-Accelerated Progress Bar */
   .np-reading-progress-container {
     position: fixed;
     top: 0;
@@ -50,11 +29,11 @@
     z-index: 9999;
     pointer-events: none;
   }
-  
+
   .np-reading-progress-bar {
     height: 100%;
     width: 100%;
-    background-color: var(--color-accent);
+    background-color: rgba(var(--color-accent));
     transform-origin: left;
     transform: scaleX(0);
     will-change: transform;
@@ -62,18 +41,31 @@
     border-bottom-right-radius: 2px;
   }
 
-  /* Keyframe Animations */
-  @keyframes npFadeInUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+  @media (prefers-reduced-motion: no-preference) {
+    @keyframes npFadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .np-animate-in {
+      animation: npFadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
   }
 
-  .np-animate-in {
-    animation: npFadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  @media (prefers-reduced-motion: reduce) {
+    .np-animate-in {
+      animation: none;
+    }
+
+    .xo-section--{{ section.id }} *,
+    .xo-section--{{ section.id }} *::before,
+    .xo-section--{{ section.id }} *::after {
+      transition-duration: 0.01ms !important;
+      animation-duration: 0.01ms !important;
+    }
   }
 
-  /* Layout */
-  #Section-{{ section.id }} .np-container {
+  .xo-section--{{ section.id }} .np-container {
     max-width: var(--max-width);
     margin: 0 auto;
     display: grid;
@@ -82,14 +74,13 @@
     align-items: start;
   }
 
-  /* Premium Breadcrumb / Back Link */
   .np-back-link {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
     font-size: 0.875rem;
     font-weight: 600;
-    color: var(--color-meta);
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 55%, transparent);
     text-decoration: none;
     margin-bottom: 2rem;
     transition: color 0.3s ease;
@@ -97,21 +88,19 @@
     letter-spacing: 0.05em;
   }
 
-  .np-back-link:hover { color: var(--color-accent-dark); }
+  .np-back-link:hover { color: rgba(var(--color-foreground)); }
   .np-back-link svg { width: 16px; height: 16px; transition: transform 0.3s ease; }
   .np-back-link:hover svg { transform: translateX(-4px); }
 
-  /* Hero Image */
-  #Section-{{ section.id }} .np-hero {
+  .xo-section--{{ section.id }} .np-hero {
     margin: 0 0 3.5rem 0;
-    border-radius: var(--border-radius);
+    border-radius: var(--general-radius-1, 1rem);
     overflow: hidden;
-    box-shadow: var(--shadow-md);
     position: relative;
-    background-color: var(--toc-bg); /* Blur-up fallback */
+    background-color: rgba(var(--color-background-2));
   }
-  
-  #Section-{{ section.id }} .np-hero img {
+
+  .xo-section--{{ section.id }} .np-hero img {
     display: block;
     width: 100%;
     height: auto;
@@ -119,55 +108,52 @@
     transition: transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
 
-  #Section-{{ section.id }} .np-hero:hover img { transform: scale(1.02); }
+  .xo-section--{{ section.id }} .np-hero:hover img { transform: scale(1.02); }
 
-  /* Sticky Table of Contents — glassmorphism */
-  #Section-{{ section.id }} .np-toc-wrapper {
+  .xo-section--{{ section.id }} .np-toc-wrapper {
     position: sticky;
     top: var(--sticky-offset);
-    background: rgba(255, 255, 255, 0.7);
-    -webkit-backdrop-filter: blur(12px);
-    backdrop-filter: blur(12px);
+    background: rgba(var(--color-background-2));
     border: none;
-    border-radius: var(--border-radius);
+    border-radius: var(--general-radius-1, 1rem);
     padding: 2rem;
     max-height: calc(100vh - var(--sticky-offset) - 2rem);
     overflow-y: auto;
-    box-shadow: var(--shadow-sm);
   }
 
-  #Section-{{ section.id }} .np-toc-wrapper::-webkit-scrollbar { width: 4px; }
-  #Section-{{ section.id }} .np-toc-wrapper::-webkit-scrollbar-thumb { background: var(--toc-border); border-radius: 4px; }
+  .xo-section--{{ section.id }} .np-toc-wrapper::-webkit-scrollbar { width: 4px; }
+  .xo-section--{{ section.id }} .np-toc-wrapper::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
+    border-radius: 4px;
+  }
 
-  #Section-{{ section.id }} .np-toc__title {
+  .xo-section--{{ section.id }} .np-toc__title {
     font-size: 1.125rem;
-    color: var(--color-heading);
+    color: rgba(var(--color-foreground));
     margin: 0 0 1.5rem 0;
     padding-bottom: 1rem;
-    border-bottom: 1px solid var(--toc-border);
+    border-bottom: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    {% if section.settings.heading_font != blank %}
-      font-family: {{ section.settings.heading_font.family }}, {{ section.settings.heading_font.fallback_families }};
-      font-weight: 700;
-    {% endif %}
+    font-weight: 600;
   }
 
-  #Section-{{ section.id }} .np-toc__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.5rem; }
-  
-  #Section-{{ section.id }} .np-toc__link {
+  .xo-section--{{ section.id }} .np-toc__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.5rem; }
+
+  .xo-section--{{ section.id }} .np-toc__link {
     display: flex;
     align-items: center;
-    color: var(--color-meta);
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 55%, transparent);
     font-size: 0.95rem;
     font-weight: 500;
     text-decoration: none;
     padding: 0.25rem 0 0.25rem 1rem;
     position: relative;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    min-height: var(--touch-min, 44px);
   }
 
-  #Section-{{ section.id }} .np-toc__link::before {
+  .xo-section--{{ section.id }} .np-toc__link::before {
     content: '';
     position: absolute;
     left: 0;
@@ -175,30 +161,33 @@
     transform: translateY(-50%);
     height: 0%;
     width: 2px;
-    background-color: var(--color-accent);
+    background-color: rgba(var(--color-accent));
     transition: height 0.3s ease;
   }
 
-  #Section-{{ section.id }} .np-toc__link:hover { color: var(--color-heading); }
-  
-  #Section-{{ section.id }} .np-toc__link.active { color: var(--color-heading); font-weight: 600; }
-  #Section-{{ section.id }} .np-toc__link.active::before { height: 100%; }
+  .xo-section--{{ section.id }} .np-toc__link:hover { color: rgba(var(--color-foreground)); }
 
-  /* Article Header */
-  #Section-{{ section.id }} .np-header { margin-bottom: 4rem; text-align: {{ section.settings.text_alignment }}; }
-  
-  #Section-{{ section.id }} .np-title {
+  .xo-section--{{ section.id }} .np-toc__link.active { color: rgba(var(--color-foreground)); font-weight: 600; }
+  .xo-section--{{ section.id }} .np-toc__link.active::before { height: 100%; }
+
+  .xo-section--{{ section.id }} .np-toc__link:focus-visible {
+    outline: 2px solid rgba(var(--color-foreground));
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  .xo-section--{{ section.id }} .np-header { margin-bottom: 4rem; text-align: {{ section.settings.text_alignment }}; }
+
+  .xo-section--{{ section.id }} .np-title {
     font-size: var(--title-size);
-    color: var(--color-heading);
+    color: rgba(var(--color-foreground));
     line-height: 1.1;
     margin: 0 0 1.5rem 0;
     letter-spacing: -0.02em;
-    {% if section.settings.heading_font != blank %}
-      font-family: {{ section.settings.heading_font.family }}, {{ section.settings.heading_font.fallback_families }};
-    {% endif %}
+    font-weight: 600;
   }
 
-  #Section-{{ section.id }} .np-meta-container {
+  .xo-section--{{ section.id }} .np-meta-container {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -206,29 +195,28 @@
     gap: 1.5rem;
   }
 
-  #Section-{{ section.id }} .np-meta {
+  .xo-section--{{ section.id }} .np-meta {
     display: inline-flex;
     flex-wrap: wrap;
     align-items: center;
     gap: 0.75rem;
     font-size: var(--meta-size);
-    color: var(--color-meta);
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 55%, transparent);
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }
 
-  #Section-{{ section.id }} .np-meta__dot { color: var(--color-accent); font-weight: bold; }
+  .xo-section--{{ section.id }} .np-meta__dot { color: rgba(var(--color-accent)); font-weight: 600; }
 
-  /* Native Share Button — ghost style */
   .np-share-btn {
     background: transparent;
-    border: 2px solid var(--color-accent, #FBBF24);
-    border-radius: 50px;
+    border: 2px solid rgba(var(--color-accent));
+    border-radius: var(--button-radius);
     padding: 0.5rem 1.2rem;
     font-size: 0.75rem;
-    font-weight: 700;
-    color: var(--color-heading);
+    font-weight: 600;
+    color: rgba(var(--color-foreground));
     cursor: pointer;
     display: inline-flex;
     align-items: center;
@@ -236,22 +224,19 @@
     text-transform: uppercase;
     letter-spacing: 0.05em;
     transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-  }
-  .np-share-btn:hover {
-    background: var(--color-accent, #FBBF24);
-    transform: scale(0.98);
-    box-shadow: var(--shadow-gold-sm);
+    min-height: var(--touch-min, 44px);
+    min-width: var(--touch-min, 44px);
   }
 
   .np-share-btn:hover {
-    border-color: var(--color-accent);
-    color: var(--color-accent-dark);
-    background: var(--toc-bg);
+    border-color: rgba(var(--color-accent));
+    color: rgba(var(--color-foreground));
+    background: rgba(var(--color-background-2));
   }
 
-  #Section-{{ section.id }} .np-excerpt {
+  .xo-section--{{ section.id }} .np-excerpt {
     font-size: calc(var(--body-size) * 1.15);
-    color: var(--color-meta);
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 55%, transparent);
     margin-top: 2rem;
     line-height: 1.6;
     font-weight: 400;
@@ -259,71 +244,67 @@
     {% if section.settings.text_alignment == 'center' %}margin-left: auto; margin-right: auto;{% endif %}
   }
 
-  /* Rich Text Body Formatting */
-  #Section-{{ section.id }} .np-body {
+  .xo-section--{{ section.id }} .np-body {
     font-size: var(--body-size);
     line-height: var(--line-height);
   }
 
-  #Section-{{ section.id }} .np-body h2, 
-  #Section-{{ section.id }} .np-body h3 {
-    color: var(--color-heading);
+  .xo-section--{{ section.id }} .np-body h2,
+  .xo-section--{{ section.id }} .np-body h3 {
+    color: rgba(var(--color-foreground));
     margin: 3.5rem 0 1.5rem 0;
     line-height: 1.2;
     scroll-margin-top: calc(var(--sticky-offset) + 2rem);
-    {% if section.settings.heading_font != blank %}
-      font-family: {{ section.settings.heading_font.family }}, {{ section.settings.heading_font.fallback_families }};
-    {% endif %}
+    font-weight: 600;
   }
 
-  #Section-{{ section.id }} .np-body h2 { font-size: var(--h2); letter-spacing: -0.01em; }
-  #Section-{{ section.id }} .np-body h3 { font-size: var(--h3); }
+  .xo-section--{{ section.id }} .np-body h2 { font-size: var(--h2); letter-spacing: -0.01em; }
+  .xo-section--{{ section.id }} .np-body h3 { font-size: var(--h3); }
 
-  #Section-{{ section.id }} .np-body p { margin-bottom: 1.75rem; color: var(--color-text); }
+  .xo-section--{{ section.id }} .np-body p { margin-bottom: 1.75rem; color: rgba(var(--color-foreground)); }
 
-  #Section-{{ section.id }} .np-body a {
-    color: var(--color-heading);
+  .xo-section--{{ section.id }} .np-body a {
+    color: rgba(var(--color-foreground));
     text-decoration: underline;
-    text-decoration-color: var(--color-accent);
+    text-decoration-color: rgba(var(--color-accent));
     text-decoration-thickness: 2px;
     text-underline-offset: 4px;
     transition: all 0.3s ease;
     font-weight: 600;
   }
 
-  #Section-{{ section.id }} .np-body a:hover {
-    color: var(--color-accent-dark);
-    text-decoration-color: var(--color-accent-dark);
-    background-color: rgba(251, 191, 36, 0.1);
+  .xo-section--{{ section.id }} .np-body a:hover {
+    color: rgba(var(--color-accent));
+    text-decoration-color: rgba(var(--color-accent));
+    background-color: color-mix(in srgb, rgba(var(--color-accent)) 10%, transparent);
   }
 
-  #Section-{{ section.id }} .np-body blockquote {
+  .xo-section--{{ section.id }} .np-body blockquote {
     position: relative;
     border-left: none;
     margin: 3rem 0;
     padding: 2.5rem 3rem;
     font-style: italic;
-    color: var(--color-heading);
-    background: var(--toc-bg);
-    border-radius: var(--border-radius);
+    color: rgba(var(--color-foreground));
+    background: rgba(var(--color-background-2));
+    border-radius: var(--general-radius-1, 1rem);
     font-size: calc(var(--body-size) * 1.2);
-    box-shadow: inset 4px 0 0 var(--color-accent);
+    box-shadow: inset 4px 0 0 rgba(var(--color-accent));
   }
 
-  #Section-{{ section.id }} .np-body img {
-    border-radius: var(--border-radius);
+  .xo-section--{{ section.id }} .np-body img {
+    border-radius: var(--general-radius-1, 1rem);
     margin: 3rem 0;
     width: 100%;
     height: auto;
-    box-shadow: var(--shadow-sm);
   }
 
-  #Section-{{ section.id }} .np-body ul, 
-  #Section-{{ section.id }} .np-body ol { margin: 2rem 0; padding-left: 1rem; }
-  #Section-{{ section.id }} .np-body li { margin-bottom: 0.75rem; position: relative; }
-  
-  #Section-{{ section.id }} .np-body ul { list-style: none; }
-  #Section-{{ section.id }} .np-body ul li::before {
+  .xo-section--{{ section.id }} .np-body ul,
+  .xo-section--{{ section.id }} .np-body ol { margin: 2rem 0; padding-left: 1rem; }
+  .xo-section--{{ section.id }} .np-body li { margin-bottom: 0.75rem; position: relative; }
+
+  .xo-section--{{ section.id }} .np-body ul { list-style: none; }
+  .xo-section--{{ section.id }} .np-body ul li::before {
     content: "";
     position: absolute;
     left: -1.25rem;
@@ -331,143 +312,124 @@
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background-color: var(--color-accent);
+    background-color: rgba(var(--color-accent));
   }
 
-  /* TOC link: accessible min touch target */
-  #Section-{{ section.id }} .np-toc__link {
-    min-height: var(--touch-min, 44px);
-  }
-
-  /* Focus styles for TOC links */
-  #Section-{{ section.id }} .np-toc__link:focus-visible {
-    outline: 2px solid var(--color-accent-dark, #92400e);
-    outline-offset: 2px;
-    border-radius: 4px;
-  }
-
-  /* Share button touch target */
-  .np-share-btn {
-    min-height: var(--touch-min, 44px);
-    min-width: var(--touch-min, 44px);
-  }
-
-  /* Responsive Design */
-  @media (max-width: 1024px) {
-    #Section-{{ section.id }} .np-container { grid-template-columns: 1fr; gap: 3rem; }
-    #Section-{{ section.id }} .np-toc-wrapper {
+  @media (max-width: 992px) {
+    .xo-section--{{ section.id }} .np-container { grid-template-columns: 1fr; gap: 3rem; }
+    .xo-section--{{ section.id }} .np-toc-wrapper {
       position: relative;
       top: 0;
       order: -1;
       max-height: none;
       padding: 1.5rem;
-      border-radius: calc(var(--border-radius) / 1.5);
+      border-radius: var(--general-radius-1, 1rem);
     }
-    #Section-{{ section.id }} .np-title { font-size: calc(var(--title-size) * 0.75); }
-    #Section-{{ section.id }} .np-body h2 { font-size: calc(var(--h2) * 0.85); }
-    #Section-{{ section.id }} .np-body blockquote { padding: 1.5rem 2rem; font-size: calc(var(--body-size) * 1.1); }
+    .xo-section--{{ section.id }} .np-title { font-size: calc(var(--title-size) * 0.75); }
+    .xo-section--{{ section.id }} .np-body h2 { font-size: calc(var(--h2) * 0.85); }
+    .xo-section--{{ section.id }} .np-body blockquote { padding: 1.5rem 2rem; font-size: calc(var(--body-size) * 1.1); }
   }
 
-  /* Small phones: tighter article spacing */
-  @media (max-width: 480px) {
-    #Section-{{ section.id }} { padding-inline: var(--page-gutter); }
-    #Section-{{ section.id }} .np-header { margin-bottom: 2.5rem; }
-    #Section-{{ section.id }} .np-body p { margin-bottom: 1.25rem; }
-    #Section-{{ section.id }} .np-body img { margin: 2rem 0; }
-    #Section-{{ section.id }} .np-body blockquote { padding: 1.25rem 1.5rem; margin: 2rem 0; }
+  @media (max-width: 768px) {
+    .xo-section--{{ section.id }} .np-header { margin-bottom: 2.5rem; }
+    .xo-section--{{ section.id }} .np-body p { margin-bottom: 1.25rem; }
+    .xo-section--{{ section.id }} .np-body img { margin: 2rem 0; }
+    .xo-section--{{ section.id }} .np-body blockquote { padding: 1.25rem 1.5rem; margin: 2rem 0; }
   }
-</style>
+{%- endstyle -%}
 
 <div class="np-reading-progress-container" aria-hidden="true">
   <div class="np-reading-progress-bar" id="np-progress-bar-{{ section.id }}"></div>
 </div>
 
-<section class="nootropix-premium-section" id="Section-{{ section.id }}">
-  <div class="np-container np-animate-in">
-    
-    {% if section.settings.show_toc %}
-      <aside class="np-toc-wrapper" aria-label="Table of contents">
-        <h3 class="np-toc__title">{{ section.settings.toc_title }}</h3>
-        <nav>
-          <ul class="np-toc__list" id="np-toc-list-{{ section.id }}">
+<section {% render 'section-attr' %}>
+  <xo-container>
+    <div class="np-container np-animate-in">
+
+      {% if section.settings.show_toc %}
+        <aside class="np-toc-wrapper" aria-label="Table of contents">
+          <h3 class="np-toc__title">{{ section.settings.toc_title }}</h3>
+          <nav>
+            <ul class="np-toc__list" id="np-toc-list-{{ section.id }}">
             </ul>
-        </nav>
-      </aside>
-    {% endif %}
-
-    <article class="np-content" itemscope itemtype="http://schema.org/BlogPosting">
-      
-      <a href="{{ blog.url }}" class="np-back-link">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-        </svg>
-        Back to {{ blog.title }}
-      </a>
-
-      <header class="np-header">
-        <h1 class="np-title" itemprop="headline">{{ article.title | escape }}</h1>
-
-        <div class="np-meta-container">
-          <div class="np-meta">
-            {% if section.settings.show_author %}
-              <span class="np-meta__item" itemprop="author" itemscope itemtype="http://schema.org/Person">
-                <span itemprop="name">{{ article.author }}</span>
-              </span>
-            {% endif %}
-            
-            {% if section.settings.show_date %}
-              {% if section.settings.show_author %}<span class="np-meta__dot">&middot;</span>{% endif %}
-              <time class="np-meta__item" datetime="{{ article.published_at | date: '%Y-%m-%d' }}" itemprop="datePublished">
-                {{ article.published_at | date: "%B %e, %Y" }}
-              </time>
-            {% endif %}
-            
-            {% if section.settings.show_reading_time %}
-              {% assign words = article.content | strip_html | split: ' ' | size %}
-              {% assign minutes = words | divided_by: 200 | ceil %}
-              {% if minutes == 0 %}{% assign minutes = 1 %}{% endif %}
-              {% if section.settings.show_date or section.settings.show_author %}<span class="np-meta__dot">&middot;</span>{% endif %}
-              <span class="np-meta__item">{{ minutes }} min read</span>
-            {% endif %}
-          </div>
-
-          <button class="np-share-btn" id="np-share-{{ section.id }}" aria-label="Share this article" aria-live="polite">
-            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
-            <span class="np-share-text">Share</span>
-          </button>
-        </div>
-
-        {% if article.excerpt != blank and section.settings.show_excerpt %}
-          <p class="np-excerpt" itemprop="description">{{ article.excerpt | strip_html | escape }}</p>
-        {% endif %}
-      </header>
-
-      {% if section.settings.show_featured_image and article.image %}
-        <figure class="np-hero" itemprop="image" itemscope itemtype="http://schema.org/ImageObject">
-          {%- assign hero_alt = article.image.alt | default: article.title | escape -%}
-          {{ article.image | image_url: width: 2000 | image_tag: 
-            loading: 'eager', 
-            fetchpriority: 'high',
-            sizes: '(max-width: 768px) 100vw, (max-width: 1200px) 70vw, 1200px',
-            widths: '400, 600, 800, 1200, 1600, 2000',
-            alt: hero_alt, 
-            class: 'np-hero-img' 
-          }}
-          <meta itemprop="url" content="{{ article.image | image_url: width: 2000 }}">
-        </figure>
+          </nav>
+        </aside>
       {% endif %}
 
-      <div class="np-body rte" id="np-body-{{ section.id }}" itemprop="articleBody">
-        {{ article.content }}
-      </div>
-    </article>
-    
-  </div>
+      <article class="np-content" itemscope itemtype="https://schema.org/BlogPosting">
+
+        <a href="{{ blog.url }}" class="np-back-link">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          Back to {{ blog.title }}
+        </a>
+
+        <header class="np-header">
+          <h1 class="np-title" itemprop="headline">{{ article.title | escape }}</h1>
+
+          <div class="np-meta-container">
+            <div class="np-meta">
+              {% if section.settings.show_author %}
+                <span class="np-meta__item" itemprop="author" itemscope itemtype="https://schema.org/Person">
+                  <span itemprop="name">{{ article.author }}</span>
+                </span>
+              {% endif %}
+
+              {% if section.settings.show_date %}
+                {% if section.settings.show_author %}<span class="np-meta__dot">&middot;</span>{% endif %}
+                <time class="np-meta__item" datetime="{{ article.published_at | date: '%Y-%m-%d' }}" itemprop="datePublished">
+                  {{ article.published_at | date: "%B %e, %Y" }}
+                </time>
+              {% endif %}
+
+              {% if section.settings.show_reading_time %}
+                {% assign words = article.content | strip_html | split: ' ' | size %}
+                {% assign minutes = words | divided_by: 200 | ceil %}
+                {% if minutes == 0 %}{% assign minutes = 1 %}{% endif %}
+                {% if section.settings.show_date or section.settings.show_author %}<span class="np-meta__dot">&middot;</span>{% endif %}
+                <span class="np-meta__item">{{ minutes }} min read</span>
+              {% endif %}
+            </div>
+
+            <button class="np-share-btn" id="np-share-{{ section.id }}" aria-label="Share this article" aria-live="polite">
+              <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
+              <span class="np-share-text">Share</span>
+            </button>
+          </div>
+
+          {% if article.excerpt != blank and section.settings.show_excerpt %}
+            <p class="np-excerpt" itemprop="description">{{ article.excerpt | strip_html | escape }}</p>
+          {% endif %}
+        </header>
+
+        {% if section.settings.show_featured_image and article.image %}
+          <figure class="np-hero" itemprop="image" itemscope itemtype="https://schema.org/ImageObject">
+            {%- assign hero_alt = article.image.alt | default: article.title | escape -%}
+            {{ article.image | image_url: width: 2000 | image_tag: 
+              loading: 'eager', 
+              fetchpriority: 'high',
+              sizes: '(max-width: 768px) 100vw, (max-width: 1200px) 70vw, 1200px',
+              widths: '400, 600, 800, 1200, 1600, 2000',
+              alt: hero_alt, 
+              class: 'np-hero-img' 
+            }}
+            <meta itemprop="url" content="{{ article.image | image_url: width: 2000 }}">
+          </figure>
+        {% endif %}
+
+        <div class="np-body rte" id="np-body-{{ section.id }}" itemprop="articleBody">
+          {{ article.content }}
+        </div>
+      </article>
+
+    </div>
+  </xo-container>
 </section>
 
 <script type="application/ld+json">
 {
-  "@context": "http://schema.org",
+  "@context": "https://schema.org",
   "@type": "BlogPosting",
   "mainEntityOfPage": {
     "@type": "WebPage",
@@ -610,7 +572,7 @@
             navigator.clipboard.writeText(window.location.href);
             textSpan.innerHTML = 'Link Copied!';
             this.shareButton.style.borderColor = 'var(--color-accent)';
-            this.shareButton.style.color = 'var(--color-accent-dark)';
+            this.shareButton.style.color = 'rgba(var(--color-foreground))';
             
             setTimeout(() => { 
               textSpan.innerHTML = originalText; 
@@ -632,45 +594,37 @@
   "name": "NP Premium Article",
   "settings": [
     { "type": "header", "content": "Layout & Sizing" },
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "default" },
     { "type": "range", "id": "max_width", "min": 1000, "max": 1600, "step": 50, "unit": "px", "label": "Max Width", "default": 1200 },
-    { "type": "range", "id": "section_padding", "min": 20, "max": 120, "step": 10, "unit": "px", "label": "Vertical Padding", "default": 80 },
     { "type": "range", "id": "content_gap", "min": 30, "max": 100, "step": 5, "unit": "px", "label": "Column Gap", "default": 60 },
     { "type": "select", "id": "text_alignment", "label": "Header Text Alignment", "options": [{"value": "left", "label": "Left"}, {"value": "center", "label": "Center"}], "default": "center" },
-    { "type": "range", "id": "border_radius", "min": 0, "max": 24, "step": 2, "unit": "px", "label": "Border Radius", "default": 12 },
     { "type": "range", "id": "sticky_offset", "min": 0, "max": 150, "step": 5, "unit": "px", "label": "Sticky Header Offset", "default": 40 },
-    
+
     { "type": "header", "content": "Table of Contents" },
     { "type": "checkbox", "id": "show_toc", "label": "Enable Sticky TOC", "default": true },
     { "type": "text", "id": "toc_title", "label": "TOC Heading", "default": "In this article" },
     { "type": "range", "id": "toc_width", "min": 200, "max": 400, "step": 10, "unit": "px", "label": "TOC Column Width", "default": 280 },
-    
+
     { "type": "header", "content": "Typography Options" },
-    { "type": "font_picker", "id": "heading_font", "label": "Heading Font", "default": "inter_n7" },
-    { "type": "font_picker", "id": "body_font", "label": "Body Font", "default": "inter_n4" },
     { "type": "range", "id": "title_size", "min": 24, "max": 64, "step": 2, "unit": "px", "label": "H1 Title Size", "default": 48 },
     { "type": "range", "id": "h2_size", "min": 20, "max": 48, "step": 2, "unit": "px", "label": "H2 Size", "default": 32 },
     { "type": "range", "id": "h3_size", "min": 18, "max": 36, "step": 2, "unit": "px", "label": "H3 Size", "default": 24 },
     { "type": "range", "id": "body_size", "min": 14, "max": 24, "step": 1, "unit": "px", "label": "Base Text Size", "default": 18 },
     { "type": "range", "id": "meta_size", "min": 12, "max": 18, "step": 1, "unit": "px", "label": "Meta Text Size", "default": 13 },
     { "type": "range", "id": "line_height", "min": 1.4, "max": 2.2, "step": 0.1, "label": "Body Line Height", "default": 1.7 },
-    
-    { "type": "header", "content": "Nootropix Colors" },
-    { "type": "color", "id": "background_color", "label": "Main Background", "default": "#ffffff" },
-    { "type": "color", "id": "toc_background", "label": "TOC / Quote Background", "default": "#f9fafb" },
-    { "type": "color", "id": "text_color", "label": "Body Text", "default": "#111827" },
-    { "type": "color", "id": "heading_color", "label": "Headings", "default": "#111827" },
-    { "type": "color", "id": "meta_color", "label": "Meta Details", "default": "#6b7280" },
-    { "type": "color", "id": "toc_border_color", "label": "Subtle Borders", "default": "#e5e7eb" },
-    { "type": "color", "id": "accent_color", "label": "Primary Accent (Gold)", "default": "#FBBF24" },
-    { "type": "color", "id": "accent_dark_color", "label": "Hover Accent (Amber)", "default": "#b45309" },
 
     { "type": "header", "content": "Article Meta" },
     { "type": "checkbox", "id": "show_featured_image", "label": "Show Featured Image", "default": true },
     { "type": "checkbox", "id": "show_author", "label": "Show Author", "default": true },
     { "type": "checkbox", "id": "show_date", "label": "Show Date", "default": true },
     { "type": "checkbox", "id": "show_reading_time", "label": "Show Reading Time", "default": true },
-    { "type": "checkbox", "id": "show_excerpt", "label": "Show Excerpt", "default": true }
+    { "type": "checkbox", "id": "show_excerpt", "label": "Show Excerpt", "default": true },
+
+    { "type": "header", "content": "Spacing" },
+    { "type": "range", "id": "padding_top", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding top", "default": 40 },
+    { "type": "range", "id": "padding_bottom", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding bottom", "default": 40 }
   ],
+  "blocks": [{ "type": "@app" }],
   "presets": [
     { "name": "NP Premium Article" }
   ]

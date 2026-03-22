@@ -1,35 +1,171 @@
+{%- style -%}
+  .xo-section--{{ section.id }} {
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+
+  .xo-section--{{ section.id }} .faq-header {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+
+  .xo-section--{{ section.id }} .faq-title {
+    font-family: var(--font-heading-family);
+    font-size: clamp(1.4rem, 2.5vw, 1.75rem);
+    font-weight: 600;
+    margin: 0 0 10px;
+    color: rgba(var(--color-foreground));
+    letter-spacing: -0.025em;
+    line-height: 1.2;
+  }
+
+  .xo-section--{{ section.id }} .faq-subtitle {
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 60%, transparent);
+    font-size: clamp(0.875rem, 1.5vw, 1rem);
+  }
+
+  .xo-section--{{ section.id }} .faq-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .xo-section--{{ section.id }} .faq-item {
+    background: rgba(var(--color-background));
+    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
+    border-radius: var(--general-radius-1, 1rem);
+    overflow: hidden;
+    transition: border-color 0.3s var(--out-soft, ease);
+  }
+
+  .xo-section--{{ section.id }} .faq-item[open] {
+    border-color: rgba(var(--color-accent));
+  }
+
+  .xo-section--{{ section.id }} .faq-question {
+    padding: 20px 24px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: rgba(var(--color-foreground));
+  }
+
+  .xo-section--{{ section.id }} .faq-question::-webkit-details-marker {
+    display: none;
+  }
+
+  .xo-section--{{ section.id }} .faq-icon {
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 60%, transparent);
+    transition: transform 0.3s var(--out-soft, ease);
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    margin-left: 16px;
+  }
+
+  .xo-section--{{ section.id }} .faq-item[open] .faq-icon {
+    transform: rotate(180deg);
+    color: rgba(var(--color-accent));
+  }
+
+  .xo-section--{{ section.id }} .faq-answer {
+    padding: 0 24px 24px 24px;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 60%, transparent);
+    line-height: 1.6;
+    font-size: 0.9375rem;
+    animation: faqFadeIn-{{ section.id }} 0.3s var(--out-soft, ease);
+  }
+
+  .xo-section--{{ section.id }} .faq-answer strong {
+    color: rgba(var(--color-foreground));
+  }
+
+  @keyframes faqFadeIn-{{ section.id }} {
+    from {
+      opacity: 0;
+      transform: translateY(-5px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .xo-section--{{ section.id }} *,
+    .xo-section--{{ section.id }} *::before,
+    .xo-section--{{ section.id }} *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+{%- endstyle -%}
+
+<section {% render 'section-attr' %}>
+  <xo-container>
+
+    <div class="faq-header">
+      <h2 class="faq-title">{{ section.settings.heading }}</h2>
+      <p class="faq-subtitle">{{ section.settings.subheading }}</p>
+    </div>
+
+    <div class="faq-list">
+      {% for block in section.blocks %}
+        {% if block.type == 'faq' %}
+          <details class="faq-item" {{ block.shopify_attributes }}>
+            <summary class="faq-question">
+              <span>{{ block.settings.question }}</span>
+              <div class="faq-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+              </div>
+            </summary>
+            <div class="faq-answer">
+              {{ block.settings.answer }}
+            </div>
+          </details>
+        {% endif %}
+      {% endfor %}
+    </div>
+
+  </xo-container>
+</section>
+
+{% if section.blocks.size > 0 %}
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'faq' and block.settings.question != blank -%}
+            {
+              "@type": "Question",
+              "name": {{ block.settings.question | json }},
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": {{ block.settings.answer | strip_html | json }}
+              }
+            }{% unless forloop.last %},{% endunless %}
+          {%- endif -%}
+        {%- endfor -%}
+      ]
+    }
+  </script>
+{% endif %}
+
 {% schema %}
 {
   "name": "Peptide FAQ Accordion",
   "tag": "section",
   "class": "section-peptide-faq",
   "settings": [
-    {
-      "type": "header",
-      "content": "Theme Colors"
-    },
-    {
-      "type": "color",
-      "id": "bg_color",
-      "label": "Background Color",
-      "default": "#ffffff"
-    },
-    {
-      "type": "color",
-      "id": "accent_color",
-      "label": "Accent Color (Gold)",
-      "default": "#fbbf24"
-    },
-    {
-      "type": "color",
-      "id": "text_color",
-      "label": "Text Color",
-      "default": "#111827"
-    },
-    {
-      "type": "header",
-      "content": "Content"
-    },
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "default" },
     {
       "type": "text",
       "id": "heading",
@@ -41,7 +177,10 @@
       "id": "subheading",
       "label": "Subheading",
       "default": "Troubleshooting your research process."
-    }
+    },
+    { "type": "header", "content": "Spacing" },
+    { "type": "range", "id": "padding_top", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding top", "default": 80 },
+    { "type": "range", "id": "padding_bottom", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding bottom", "default": 80 }
   ],
   "blocks": [
     {
@@ -59,7 +198,8 @@
           "label": "Answer"
         }
       ]
-    }
+    },
+    { "type": "@app" }
   ],
   "presets": [
     {
@@ -98,138 +238,3 @@
   ]
 }
 {% endschema %}
-
-<div class="faq-wrapper">
-  <div class="faq-container">
-    
-    <div class="faq-header">
-      <h2 class="faq-title">{{ section.settings.heading }}</h2>
-      <p class="faq-subtitle">{{ section.settings.subheading }}</p>
-    </div>
-
-    <div class="faq-list">
-      {% for block in section.blocks %}
-      <details class="faq-item">
-        <summary class="faq-question">
-          <span>{{ block.settings.question }}</span>
-          <div class="faq-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
-          </div>
-        </summary>
-        <div class="faq-answer">
-          {{ block.settings.answer }}
-        </div>
-      </details>
-      {% endfor %}
-    </div>
-
-  </div>
-</div>
-
-<style>
-  :root {
-    --faq-bg: {{ section.settings.bg_color }};
-    --faq-accent: {{ section.settings.accent_color }};
-    --faq-text: {{ section.settings.text_color }};
-    --faq-border: #e5e7eb;
-    --faq-muted: #6b7280;
-    --faq-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  }
-
-  .faq-wrapper {
-    background-color: var(--faq-bg);
-    color: var(--faq-text);
-    padding: 60px 20px 80px; /* Extra bottom padding */
-    font-family: var(--faq-font);
-    border-top: 1px solid #f3f4f6;
-  }
-  
-  .faq-container {
-    max-width: 800px;
-    margin: 0 auto;
-  }
-
-  /* HEADER */
-  .faq-header {
-    text-align: center;
-    margin-bottom: 40px;
-  }
-  .faq-title {
-    font-size: 28px;
-    font-weight: 800;
-    margin: 0 0 10px;
-    color: var(--faq-text);
-  }
-  .faq-subtitle {
-    color: var(--faq-muted);
-    font-size: 16px;
-  }
-
-  /* ACCORDION ITEMS */
-  .faq-list {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-
-  .faq-item {
-    background: #ffffff;
-    border: 1px solid var(--faq-border);
-    border-radius: 12px;
-    overflow: hidden;
-    transition: var(--transition-smooth);
-  }
-
-  .faq-item[open] {
-    border-color: var(--faq-accent);
-    box-shadow: var(--shadow-xs);
-  }
-
-  /* QUESTION (Summary) */
-  .faq-question {
-    padding: 20px 24px;
-    font-weight: 600;
-    font-size: 16px;
-    cursor: pointer;
-    list-style: none; /* Hides default marker */
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    color: var(--faq-text);
-  }
-  
-  /* Hide default marker in Webkit */
-  .faq-question::-webkit-details-marker {
-    display: none;
-  }
-
-  .faq-icon {
-    color: var(--faq-muted);
-    transition: transform 0.3s ease;
-    display: flex;
-    align-items: center;
-  }
-
-  .faq-item[open] .faq-icon {
-    transform: rotate(180deg);
-    color: #b45309; /* Dark gold */
-  }
-
-  /* ANSWER */
-  .faq-answer {
-    padding: 0 24px 24px 24px;
-    color: var(--faq-muted);
-    line-height: 1.6;
-    font-size: 15px;
-    animation: fadeIn 0.3s ease-in-out;
-  }
-  
-  .faq-answer strong {
-    color: var(--faq-text);
-  }
-
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-5px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-</style>

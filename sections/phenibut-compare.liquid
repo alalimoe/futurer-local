@@ -1,6 +1,6 @@
 {% comment %}
-  Compare — Premium refactored section
-  - Native <table>, ItemList JSON-LD, design tokens, reduced-motion
+  Compare — XO theme design system
+  - Native <table>, ItemList JSON-LD, reduced-motion
 {% endcomment %}
 
 {%- comment -%} ── JSON-LD: ItemList (alternatives) ── {%- endcomment -%}
@@ -27,8 +27,106 @@
 </script>
 {% endif %}
 
-<section id="phb-cp-{{ section.id }}" class="phb-compare" aria-labelledby="phb-compare-title-{{ section.id }}">
-  <div class="phb-compare__container">
+{%- style -%}
+  .xo-section--{{ section.id }} {
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+
+  .xo-section--{{ section.id }} .phb-compare__title {
+    font-size: clamp(22px, 4.2vw, 36px);
+    line-height: 1.2;
+    color: rgba(var(--color-foreground));
+    margin: 0;
+    font-weight: 600;
+  }
+
+  .xo-section--{{ section.id }} .phb-compare__intro {
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 75%, transparent);
+    line-height: 1.6;
+  }
+
+  .xo-section--{{ section.id }} .phb-compare__table-wrap {
+    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
+    border-radius: var(--general-radius-1, 1rem);
+    overflow: hidden;
+    margin-top: 16px;
+  }
+
+  .xo-section--{{ section.id }} .phb-compare__table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .xo-section--{{ section.id }} .phb-compare__table thead {
+    background: rgba(var(--color-background-2));
+  }
+
+  .xo-section--{{ section.id }} .phb-compare__table th {
+    text-align: left;
+    padding: 10px 12px;
+    font-weight: 600;
+    color: rgba(var(--color-foreground));
+    font-size: 14px;
+  }
+
+  .xo-section--{{ section.id }} .phb-compare__table td {
+    padding: 12px;
+    color: rgba(var(--color-foreground));
+    font-size: 15px;
+    line-height: 1.6;
+    border-top: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
+  }
+
+  .xo-section--{{ section.id }} .phb-compare__table td p {
+    margin: 0;
+  }
+
+  .xo-section--{{ section.id }} :focus-visible {
+    outline: 2px solid rgba(var(--color-accent));
+    outline-offset: 2px;
+  }
+
+  @media (max-width: 768px) {
+    .xo-section--{{ section.id }} .phb-compare__table thead {
+      display: none;
+    }
+
+    .xo-section--{{ section.id }} .phb-compare__table tr {
+      display: block;
+      padding: 12px;
+      border-top: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
+    }
+
+    .xo-section--{{ section.id }} .phb-compare__table tbody tr:first-child {
+      border-top: none;
+    }
+
+    .xo-section--{{ section.id }} .phb-compare__table td {
+      display: block;
+      padding: 4px 0;
+      border-top: none;
+    }
+
+    .xo-section--{{ section.id }} .phb-compare__table td::before {
+      content: attr(data-label) ": ";
+      font-weight: 600;
+      color: rgba(var(--color-foreground));
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .xo-section--{{ section.id }} *,
+    .xo-section--{{ section.id }} *::before,
+    .xo-section--{{ section.id }} *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+{%- endstyle -%}
+
+<section {% render 'section-attr' %} aria-labelledby="phb-compare-title-{{ section.id }}">
+  <xo-container>
     <h2 id="phb-compare-title-{{ section.id }}" class="phb-compare__title">{{ section.settings.heading | escape }}</h2>
     {% if section.settings.intro != blank %}
       <div class="phb-compare__intro">{{ section.settings.intro }}</div>
@@ -60,62 +158,8 @@
         </tbody>
       </table>
     </div>
-  </div>
+  </xo-container>
 </section>
-
-{%- style -%}
-#phb-cp-{{ section.id }} {
-  content-visibility: auto;
-  contain-intrinsic-size: 1px 700px;
-  --phb-bg: {{ section.settings.background_color }};
-  --phb-max: {{ section.settings.max_width }}px;
-  --phb-py: {{ section.settings.padding_y }}px;
-  --phb-accent: var(--color-accent-primary, #FBBF24);
-  --phb-heading: var(--color-text-main, #0A2342);
-  --phb-text: var(--color-text-main, #0e1726);
-  --phb-muted: var(--color-text-muted, #4b5563);
-  --phb-card-border: var(--nx-pill-border, rgba(0,0,0,.06));
-  --phb-radius: var(--nx-radius, 14px);
-  --phb-font: var(--font-body-family, sans-serif);
-  --phb-font-heading: var(--font-heading-family, sans-serif);
-  --phb-thead-bg: var(--color-bg-secondary, #f7fafb);
-  background: var(--phb-bg);
-  font-family: var(--phb-font);
-}
-#phb-cp-{{ section.id }} .phb-compare__container { max-width: var(--phb-max); margin: 0 auto; padding: var(--phb-py) 16px; display: grid; gap: 16px; }
-#phb-cp-{{ section.id }} .phb-compare__title {
-  font-family: var(--phb-font-heading);
-  font-size: clamp(22px, 4.2vw, 36px); line-height: 1.2; color: var(--phb-heading); margin: 0;
-}
-#phb-cp-{{ section.id }} .phb-compare__intro { color: var(--phb-text); line-height: 1.6; }
-#phb-cp-{{ section.id }} .phb-compare__table-wrap { border: 1px solid var(--phb-card-border); border-radius: var(--phb-radius); overflow: hidden; }
-#phb-cp-{{ section.id }} .phb-compare__table { width: 100%; border-collapse: collapse; }
-#phb-cp-{{ section.id }} .phb-compare__table thead { background: var(--phb-thead-bg); }
-#phb-cp-{{ section.id }} .phb-compare__table th {
-  text-align: left; padding: 10px 12px; font-weight: 700; color: var(--phb-heading); font-size: 14px;
-}
-#phb-cp-{{ section.id }} .phb-compare__table td {
-  padding: 12px; color: var(--phb-text); font-size: 15px; line-height: 1.6;
-  border-top: 1px solid var(--phb-card-border);
-}
-#phb-cp-{{ section.id }} .phb-compare__table td p { margin: 0; }
-#phb-cp-{{ section.id }} :focus-visible { outline: 2px solid var(--phb-accent); outline-offset: 2px; }
-@media (max-width: 989px) {
-  #phb-cp-{{ section.id }} .phb-compare__table thead { display: none; }
-  #phb-cp-{{ section.id }} .phb-compare__table tr { display: block; padding: 12px; border-top: 1px solid var(--phb-card-border); }
-  #phb-cp-{{ section.id }} .phb-compare__table tbody tr:first-child { border-top: none; }
-  #phb-cp-{{ section.id }} .phb-compare__table td { display: block; padding: 4px 0; border-top: none; }
-  #phb-cp-{{ section.id }} .phb-compare__table td::before { content: attr(data-label) ": "; font-weight: 700; color: var(--phb-heading); }
-}
-@media (prefers-reduced-motion: reduce) {
-  #phb-cp-{{ section.id }} *,
-  #phb-cp-{{ section.id }} *::before,
-  #phb-cp-{{ section.id }} *::after {
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-{%- endstyle -%}
 
 {% schema %}
 {
@@ -123,12 +167,13 @@
   "tag": "section",
   "class": "section-phenibut-compare",
   "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "default" },
     { "type": "text", "id": "anchor_id", "label": "Anchor ID", "default": "alternatives" },
     { "type": "text", "id": "heading", "label": "Heading", "default": "Phenibut vs Alternatives" },
     { "type": "richtext", "id": "intro", "label": "Intro", "default": "<p>How Phenibut compares to gentler options you might try first.</p>" },
-    { "type": "color", "id": "background_color", "label": "Background", "default": "#FFFFFF" },
-    { "type": "range", "id": "max_width", "label": "Max width (px)", "min": 720, "max": 1400, "step": 20, "default": 1200 },
-    { "type": "range", "id": "padding_y", "label": "Vertical padding (px)", "min": 40, "max": 160, "step": 4, "default": 64 }
+    { "type": "header", "content": "Spacing" },
+    { "type": "range", "id": "padding_top", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding top", "default": 40 },
+    { "type": "range", "id": "padding_bottom", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding bottom", "default": 40 }
   ],
   "blocks": [
     { "type": "alt_row", "name": "Alternative row", "settings": [
@@ -137,7 +182,8 @@
       { "type": "text", "id": "best_for", "label": "Best for", "default": "Smooth focus; daytime calm" },
       { "type": "text", "id": "onset", "label": "Onset", "default": "30–60 min" },
       { "type": "richtext", "id": "notes", "label": "Notes", "default": "<p>Well‑tolerated; pairs with caffeine.</p>" }
-    ] }
+    ] },
+    { "type": "@app" }
   ],
   "max_blocks": 8,
   "presets": [

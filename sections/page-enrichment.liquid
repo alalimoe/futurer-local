@@ -70,21 +70,113 @@
 -%}
 
 {%- if has_any -%}
-  <section class="nx-page-enrichment" data-section-id="{{ section.id }}">
+{%- style -%}
+  .xo-section--{{ section.id }} {
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+
+  .xo-section--{{ section.id }} .npe-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 1rem;
+    font-size: 0.9rem;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 60%, transparent);
+    margin-bottom: 1rem;
+  }
+
+  .xo-section--{{ section.id }} .npe-box {
+    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
+    border-radius: var(--general-radius-1, 1rem);
+    padding: 1rem;
+    margin: 0 0 1rem 0;
+  }
+
+  .xo-section--{{ section.id }} .npe-label {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: rgba(var(--color-foreground));
+  }
+
+  .xo-section--{{ section.id }} .npe-body {
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 60%, transparent);
+    line-height: 1.7;
+  }
+
+  .xo-section--{{ section.id }} .npe-list {
+    margin: 0.25rem 0 0 1.25rem;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 60%, transparent);
+  }
+
+  .xo-section--{{ section.id }} .npe-h {
+    margin: 1.5rem 0 0.75rem;
+    font-weight: 600;
+    color: rgba(var(--color-foreground));
+  }
+
+  .xo-section--{{ section.id }} .npe-related-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+  }
+
+  .xo-section--{{ section.id }} .npe-related-title {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    color: rgba(var(--color-foreground));
+  }
+
+  .xo-section--{{ section.id }} .npe-related-col a {
+    color: rgba(var(--color-accent));
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    transition: opacity 0.2s var(--out-soft, ease);
+  }
+
+  .xo-section--{{ section.id }} .npe-related-col a:hover {
+    opacity: 0.8;
+  }
+
+  .xo-section--{{ section.id }} .npe-notes {
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 60%, transparent);
+  }
+
+  .xo-section--{{ section.id }} .npe-references .rte {
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 60%, transparent);
+    line-height: 1.7;
+  }
+
+  .xo-section--{{ section.id }} :focus-visible {
+    outline: 2px solid rgba(var(--color-accent));
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .xo-section--{{ section.id }} *,
+    .xo-section--{{ section.id }} *::before,
+    .xo-section--{{ section.id }} *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+{%- endstyle -%}
+
+  <section {% render 'section-attr' %} data-section-id="{{ section.id }}">
+    <xo-container>
 
     {%- if show_meta -%}
       {%- if has_meta -%}
-        <div class="nx-page-enrichment__meta">
+        <div class="npe-meta">
           {%- if author != blank -%}
-            <span class="nx-page-enrichment__meta-item">By {{ author }}</span>
+            <span>By {{ author }}</span>
           {%- endif -%}
 
           {%- if date_published != blank -%}
-            <span class="nx-page-enrichment__meta-item">Published {{ date_published | date: "%-d %b %Y" }}</span>
+            <span>Published {{ date_published | date: "%-d %b %Y" }}</span>
           {%- endif -%}
 
           {%- if last_reviewed != blank -%}
-            <span class="nx-page-enrichment__meta-item">Last reviewed {{ last_reviewed | date: "%-d %b %Y" }}</span>
+            <span>Last reviewed {{ last_reviewed | date: "%-d %b %Y" }}</span>
           {%- endif -%}
         </div>
       {%- endif -%}
@@ -92,9 +184,9 @@
 
     {%- if show_tldr -%}
       {%- if tldr != blank -%}
-        <div class="nx-page-enrichment__box">
-          <div class="nx-page-enrichment__label">TL;DR</div>
-          <div class="nx-page-enrichment__body rte">
+        <div class="npe-box">
+          <div class="npe-label">TL;DR</div>
+          <div class="npe-body rte">
             {{ tldr | escape | newline_to_br }}
           </div>
         </div>
@@ -103,11 +195,11 @@
 
     {%- if show_takeaways -%}
       {%- if takeaways_raw != blank -%}
-        <div class="nx-page-enrichment__box">
-          <div class="nx-page-enrichment__label">Key takeaways</div>
+        <div class="npe-box">
+          <div class="npe-label">Key takeaways</div>
 
           {%- if takeaways.size > 1 -%}
-            <ul class="nx-page-enrichment__list">
+            <ul class="npe-list">
               {%- for item in takeaways -%}
                 {%- assign clean = item | strip -%}
                 {%- if clean != blank -%}
@@ -116,7 +208,7 @@
               {%- endfor -%}
             </ul>
           {%- else -%}
-            <div class="nx-page-enrichment__body">
+            <div class="npe-body">
               {{ takeaways_raw }}
             </div>
           {%- endif -%}
@@ -126,13 +218,13 @@
 
     {%- if show_related -%}
       {%- if has_related -%}
-        <div class="nx-page-enrichment__related">
-          <h2 class="nx-page-enrichment__h">Related</h2>
+        <div class="npe-related">
+          <h2 class="npe-h">Related</h2>
 
-          <div class="nx-page-enrichment__related-grid">
+          <div class="npe-related-grid">
             {%- if related_pages != blank -%}
-              <div class="nx-page-enrichment__related-col">
-                <div class="nx-page-enrichment__related-title">Pages</div>
+              <div class="npe-related-col">
+                <div class="npe-related-title">Pages</div>
                 <ul>
                   {%- for p in related_pages -%}
                     <li><a href="{{ p.url }}">{{ p.title }}</a></li>
@@ -142,8 +234,8 @@
             {%- endif -%}
 
             {%- if related_products != blank -%}
-              <div class="nx-page-enrichment__related-col">
-                <div class="nx-page-enrichment__related-title">Products</div>
+              <div class="npe-related-col">
+                <div class="npe-related-title">Products</div>
                 <ul>
                   {%- for pr in related_products -%}
                     <li><a href="{{ pr.url }}">{{ pr.title }}</a></li>
@@ -153,8 +245,8 @@
             {%- endif -%}
 
             {%- if related_collections != blank -%}
-              <div class="nx-page-enrichment__related-col">
-                <div class="nx-page-enrichment__related-title">Collections</div>
+              <div class="npe-related-col">
+                <div class="npe-related-title">Collections</div>
                 <ul>
                   {%- for c in related_collections -%}
                     <li><a href="{{ c.url }}">{{ c.title }}</a></li>
@@ -169,11 +261,11 @@
 
     {%- if show_references -%}
       {%- if has_references -%}
-        <div class="nx-page-enrichment__references">
-          <h2 class="nx-page-enrichment__h">References</h2>
+        <div class="npe-references">
+          <h2 class="npe-h">References</h2>
 
           {%- if citation_notes != blank -%}
-            <p class="nx-page-enrichment__notes">{{ citation_notes }}</p>
+            <p class="npe-notes">{{ citation_notes }}</p>
           {%- endif -%}
 
           {%- if references_text != blank -%}
@@ -215,31 +307,47 @@
       {%- endif -%}
     {%- endif -%}
 
+    </xo-container>
   </section>
-
-  <style>
-    .nx-page-enrichment { margin: 1.5rem 0; }
-    .nx-page-enrichment__meta { display: flex; flex-wrap: wrap; gap: .75rem 1rem; font-size: .9rem; opacity: .8; margin-bottom: 1rem; }
-    .nx-page-enrichment__box { border: 1px solid rgba(0,0,0,.08); border-radius: var(--nx-radius-md); padding: 1rem; margin: 0 0 1rem 0; }
-    .nx-page-enrichment__label { font-weight: 700; margin-bottom: .5rem; }
-    .nx-page-enrichment__list { margin: .25rem 0 0 1.25rem; }
-    .nx-page-enrichment__h { margin: 1.5rem 0 .75rem; }
-    .nx-page-enrichment__related-grid { display: grid; grid-template-columns: repeat( auto-fit, minmax(220px, 1fr) ); gap: 1rem; }
-    .nx-page-enrichment__related-title { font-weight: 700; margin-bottom: .25rem; }
-    .nx-page-enrichment__notes { opacity: .85; }
-  </style>
 {%- endif -%}
 
 {% schema %}
 {
   "name": "Page enrichment",
+  "tag": "section",
+  "class": "section-page-enrichment",
   "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme" },
     { "type": "checkbox", "id": "show_meta", "label": "Show author + dates", "default": true },
     { "type": "checkbox", "id": "show_tldr", "label": "Show TL;DR box", "default": true },
     { "type": "checkbox", "id": "show_takeaways", "label": "Show key takeaways box", "default": true },
     { "type": "checkbox", "id": "show_related", "label": "Show related links", "default": true },
     { "type": "checkbox", "id": "show_references", "label": "Show references", "default": true },
-    { "type": "checkbox", "id": "emit_faq_schema", "label": "Emit FAQPage JSON-LD (from custom.faq_json)", "default": true }
+    { "type": "checkbox", "id": "emit_faq_schema", "label": "Emit FAQPage JSON-LD (from custom.faq_json)", "default": true },
+    { "type": "header", "content": "Spacing" },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding top",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding bottom",
+      "default": 24
+    }
+  ],
+  "blocks": [
+    { "type": "@app" }
   ],
   "presets": [
     { "name": "Page enrichment" }

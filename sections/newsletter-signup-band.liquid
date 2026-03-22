@@ -1,54 +1,141 @@
 {% comment %} Simple signup band (can be swapped to your form app snippet) {% endcomment %}
-<section class="nl-band">
-  <div class="container">
-    <div class="left">
-      <div class="h">{{ section.settings.heading }}</div>
-      <div class="p">{{ section.settings.subtext }}</div>
-    </div>
-    <div class="right">
-      <form method="post" action="{{ routes.predictive_search_url | default: '/' }}" onsubmit="return false;">
-        <input type="email" placeholder="{{ section.settings.placeholder }}" aria-label="Email" autocomplete="email">
-        <button type="button">{{ section.settings.cta }}</button>
-      </form>
-    </div>
-  </div>
-</section>
 
-<style>
-.nl-band{padding:22px var(--page-gutter);border-top:none;font-family:var(--font-body-family,sans-serif)}
-.nl-band .container{max-width:var(--container-width-max);margin:0 auto;display:flex;gap:16px;align-items:center;justify-content:space-between;flex-wrap:wrap}
-.nl-band .h{font-family:var(--font-heading-family,sans-serif);font-weight:800;font-size:clamp(1.1rem,2vw,1.35rem);letter-spacing:-0.02em;color:var(--nx-text,#111)}
-.nl-band .p{color:var(--nx-muted,#6B7280);line-height:1.5;font-size:clamp(0.85rem,1.2vw,0.9375rem)}
-.nl-band .right form{display:flex;gap:8px}
-.nl-band .right input{
-  border:none;border-radius:var(--nx-radius-md);padding:10px 14px;min-height:44px;box-sizing:border-box;
-  font-family:var(--font-body-family,sans-serif);font-size:clamp(0.85rem,1.2vw,0.9375rem);
-  background:rgba(255,255,255,0.7);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
-  box-shadow:var(--shadow-xs);
-  transition:all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-}
-.nl-band .right input:focus{outline:none;box-shadow:var(--shadow-gold-focus);background:rgba(255,255,255,0.9)}
-.nl-band .right input:focus-visible{outline:2px solid var(--nx-accent,#FBBF24);outline-offset:2px}
-.nl-band .right button{
-  border:2px solid var(--nx-accent,#FBBF24);border-radius:var(--nx-radius-md);background:transparent;color:var(--color-text-primary);font-weight:800;
-  padding:10px 18px;min-height:44px;cursor:pointer;font-size:clamp(0.85rem,1.2vw,0.9375rem);
-  box-shadow:var(--shadow-sm);
-  transition:all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-}
-.nl-band .right button:hover{background:var(--nx-accent,#FBBF24);transform:translateY(-1px);box-shadow:var(--shadow-gold-sm)}
-.nl-band .right button:active{transform:scale(0.97)}
-.nl-band .right button:focus-visible{outline:2px solid var(--nx-accent,#FBBF24);outline-offset:2px}
-@media(prefers-reduced-motion:reduce){.nl-band .right input,.nl-band .right button{transition:none}.nl-band .right button:hover{transform:none}}
-</style>
+{%- style -%}
+  .xo-section--{{ section.id }} {
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+    font-family: var(--font-body-family);
+  }
+
+  .xo-section--{{ section.id }} .nlb-wrap {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+
+  .xo-section--{{ section.id }} .nlb-heading {
+    font-family: var(--font-heading-family);
+    font-weight: 600;
+    font-size: clamp(1.1rem, 2vw, 1.35rem);
+    letter-spacing: -0.02em;
+    color: rgba(var(--color-foreground));
+    margin: 0;
+  }
+
+  .xo-section--{{ section.id }} .nlb-subtext {
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 60%, transparent);
+    line-height: 1.5;
+    font-size: clamp(0.85rem, 1.2vw, 0.9375rem);
+    margin: 4px 0 0;
+  }
+
+  .xo-section--{{ section.id }} .nlb-form {
+    display: flex;
+    gap: 8px;
+  }
+
+  .xo-section--{{ section.id }} .nlb-input {
+    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
+    border-radius: var(--button-radius);
+    padding: 10px 14px;
+    min-height: 44px;
+    box-sizing: border-box;
+    font-family: var(--font-body-family);
+    font-size: clamp(0.85rem, 1.2vw, 0.9375rem);
+    background: rgba(var(--color-background));
+    color: rgba(var(--color-foreground));
+    transition: border-color 0.3s var(--out-soft, ease);
+  }
+
+  .xo-section--{{ section.id }} .nlb-input:focus {
+    outline: none;
+    border-color: rgba(var(--color-accent));
+  }
+
+  .xo-section--{{ section.id }} .nlb-input:focus-visible {
+    outline: 2px solid rgba(var(--color-accent));
+    outline-offset: 2px;
+  }
+
+  .xo-section--{{ section.id }} .nlb-input::placeholder {
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 40%, transparent);
+  }
+
+  .xo-section--{{ section.id }} .nlb-btn {
+    border: 2px solid rgba(var(--color-accent));
+    border-radius: var(--button-radius);
+    background: transparent;
+    color: rgba(var(--color-foreground));
+    font-weight: 600;
+    padding: 10px 18px;
+    min-height: 44px;
+    cursor: pointer;
+    font-size: clamp(0.85rem, 1.2vw, 0.9375rem);
+    font-family: var(--font-body-family);
+    transition: background 0.3s var(--out-soft, ease), transform 0.3s var(--out-soft, ease);
+  }
+
+  .xo-section--{{ section.id }} .nlb-btn:hover {
+    background: rgba(var(--color-accent));
+    transform: translateY(-1px);
+  }
+
+  .xo-section--{{ section.id }} .nlb-btn:active {
+    transform: scale(0.97);
+  }
+
+  .xo-section--{{ section.id }} .nlb-btn:focus-visible {
+    outline: 2px solid rgba(var(--color-accent));
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .xo-section--{{ section.id }} .nlb-input,
+    .xo-section--{{ section.id }} .nlb-btn {
+      transition: none;
+    }
+
+    .xo-section--{{ section.id }} .nlb-btn:hover {
+      transform: none;
+    }
+  }
+{%- endstyle -%}
+
+<section {% render 'section-attr' %}>
+  <xo-container>
+    <div class="nlb-wrap">
+      <div class="nlb-left">
+        <div class="nlb-heading">{{ section.settings.heading }}</div>
+        <div class="nlb-subtext">{{ section.settings.subtext }}</div>
+      </div>
+      <div class="nlb-right">
+        <form class="nlb-form" method="post" action="{{ routes.predictive_search_url | default: '/' }}" onsubmit="return false;">
+          <input class="nlb-input" type="email" placeholder="{{ section.settings.placeholder }}" aria-label="Email" autocomplete="email">
+          <button class="nlb-btn" type="button">{{ section.settings.cta }}</button>
+        </form>
+      </div>
+    </div>
+  </xo-container>
+</section>
 
 {% schema %}
 {
   "name": "Newsletter signup band",
+  "tag": "section",
   "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "default" },
     { "type": "text", "id": "heading", "label": "Heading", "default": "Be the first to know" },
     { "type": "text", "id": "subtext", "label": "Subtext", "default": "Get research updates, product drops, and COA postings." },
     { "type": "text", "id": "placeholder", "label": "Placeholder", "default": "you@lab.edu" },
-    { "type": "text", "id": "cta", "label": "CTA", "default": "Subscribe" }
+    { "type": "text", "id": "cta", "label": "CTA", "default": "Subscribe" },
+    { "type": "header", "content": "Spacing" },
+    { "type": "range", "id": "padding_top", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding top", "default": 24 },
+    { "type": "range", "id": "padding_bottom", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding bottom", "default": 24 }
+  ],
+  "blocks": [
+    { "type": "@app" }
   ],
   "presets": [{ "name": "Newsletter signup band" }]
 }
