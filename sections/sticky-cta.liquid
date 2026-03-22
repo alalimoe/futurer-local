@@ -1,35 +1,83 @@
-<section id="phb-sticky-cta-{{ section.id }}" class="phb-sticky-cta" aria-label="Page actions">
-  <a href="{{ section.settings.primary_href | escape }}" class="btn btn--primary">{{ section.settings.primary_label | escape }}</a>
-  <a href="{{ section.settings.secondary_href | escape }}" class="btn btn--ghost">{{ section.settings.secondary_label | escape }}</a>
-</section>
+{% comment %}
+  Sticky CTA (Mobile) — XO theme design system
+  - Fixed position bar, safe-area-inset, reduced-motion
+{% endcomment %}
 
-<style>
-  /* Hidden by default; shown only on mobile */
-  #phb-sticky-cta-{{ section.id }}{
-    display:none;
-    position:fixed; left:0; right:0; bottom:0; z-index:50;
-    gap:10px;
-    padding:10px 14px calc(10px + env(safe-area-inset-bottom));
-    background:rgba(10,35,66,.96);
-    -webkit-backdrop-filter:saturate(140%) blur(4px);
-    backdrop-filter:saturate(140%) blur(4px);
+{%- style -%}
+  .xo-section--{{ section.id }} {
+    display: none;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 50;
+    gap: 10px;
+    padding: 10px var(--page-gap, 2.4rem) calc(10px + env(safe-area-inset-bottom));
+    background: color-mix(in srgb, rgba(var(--color-foreground)) 96%, transparent);
+    -webkit-backdrop-filter: saturate(140%) blur(4px);
+    backdrop-filter: saturate(140%) blur(4px);
   }
-  #phb-sticky-cta-{{ section.id }} .btn{
-    flex:1; display:inline-block; text-align:center;
-    padding:12px 16px; border-radius:10px; font-weight:700;
-    text-decoration:none; border:2px solid #fff;
-  }
-  #phb-sticky-cta-{{ section.id }} .btn--primary{ background:#fff; color:#0A2342; }
-  #phb-sticky-cta-{{ section.id }} .btn--ghost{ background:transparent; color:#fff; }
 
-  /* Reserve a bit of space so the bar doesn't cover bottom content (toggleable in schema) */
-  @media (max-width: 989px){
-    #phb-sticky-cta-{{ section.id }}{ display:flex; }
+  .xo-section--{{ section.id }} .phb-sticky__btn {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 12px 16px;
+    min-height: 44px;
+    border-radius: var(--button-radius, 10rem);
+    font-weight: 600;
+    text-decoration: none;
+    border: 2px solid rgba(var(--color-background));
+    transition: opacity 0.3s var(--out-soft, ease);
+  }
+
+  .xo-section--{{ section.id }} .phb-sticky__btn:hover {
+    opacity: 0.85;
+  }
+
+  .xo-section--{{ section.id }} .phb-sticky__btn:focus-visible {
+    outline: 2px solid rgba(var(--color-accent));
+    outline-offset: 2px;
+  }
+
+  .xo-section--{{ section.id }} .phb-sticky__btn--primary {
+    background: rgba(var(--color-background));
+    color: rgba(var(--color-foreground));
+  }
+
+  .xo-section--{{ section.id }} .phb-sticky__btn--ghost {
+    background: transparent;
+    color: rgba(var(--color-background));
+  }
+
+  @media (max-width: 768px) {
+    .xo-section--{{ section.id }} {
+      display: flex;
+    }
+
     {% if section.settings.reserve_space_mobile %}
-    body{ padding-bottom: calc(64px + env(safe-area-inset-bottom)); }
+    body {
+      padding-bottom: calc(64px + env(safe-area-inset-bottom));
+    }
     {% endif %}
   }
-</style>
+
+  @media (prefers-reduced-motion: reduce) {
+    .xo-section--{{ section.id }} *,
+    .xo-section--{{ section.id }} *::before,
+    .xo-section--{{ section.id }} *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+{%- endstyle -%}
+
+<section {% render 'section-attr' %} aria-label="Page actions">
+  <a href="{{ section.settings.primary_href | escape }}" class="phb-sticky__btn phb-sticky__btn--primary">{{ section.settings.primary_label | escape }}</a>
+  <a href="{{ section.settings.secondary_href | escape }}" class="phb-sticky__btn phb-sticky__btn--ghost">{{ section.settings.secondary_label | escape }}</a>
+</section>
 
 {% schema %}
 {
@@ -37,15 +85,19 @@
   "tag": "section",
   "class": "section-phb-sticky-cta",
   "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "default" },
     { "type": "text", "id": "primary_label", "label": "Primary label", "default": "Shop Phenibut" },
     { "type": "text", "id": "primary_href", "label": "Primary link (URL or #anchor)", "default": "#shop-phenibut" },
-
     { "type": "text", "id": "secondary_label", "label": "Secondary label", "default": "Safety" },
     { "type": "text", "id": "secondary_href", "label": "Secondary link (URL or #anchor)", "default": "#safety" },
-
-    { "type": "checkbox", "id": "reserve_space_mobile", "label": "Reserve bottom space on mobile", "default": true }
+    { "type": "checkbox", "id": "reserve_space_mobile", "label": "Reserve bottom space on mobile", "default": true },
+    { "type": "header", "content": "Spacing" },
+    { "type": "range", "id": "padding_top", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding top", "default": 0 },
+    { "type": "range", "id": "padding_bottom", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding bottom", "default": 0 }
   ],
-  "blocks": [],
+  "blocks": [
+    { "type": "@app" }
+  ],
   "presets": [ { "name": "Sticky CTA (Mobile)" } ]
 }
 {% endschema %}

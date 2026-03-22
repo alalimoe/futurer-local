@@ -1,193 +1,523 @@
 {%- style -%}
-  #ProtocolJourney-{{ section.id }} {
-    --pj-primary: {{ section.settings.color_primary }};
-    --pj-bg: {{ section.settings.color_bg }};
-    --pj-text: {{ section.settings.color_text }};
-    --pj-card: {{ section.settings.color_card_bg }};
-    --pj-border: {{ section.settings.color_border }};
-    --pj-warning-bg: #fef2f2;
-    --pj-warning-text: #ef4444;
-    max-width: {{ section.settings.max_width }}px;
-    margin: {{ section.settings.margin_top }}px auto {{ section.settings.margin_bottom }}px auto;
-    font-family: inherit;
-    color: var(--pj-text);
-    padding: 20px var(--page-gutter);
+  .xo-section--{{ section.id }} {
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
   }
-  #ProtocolJourney-{{ section.id }} * { box-sizing: border-box; }
-  .pj-header { text-align: center; margin-bottom: 2.5rem; }
-  .pj-header h2 { font-size: 2.25rem; margin-bottom: 0.5rem; font-weight: 800; color: var(--pj-text); line-height: 1.2; }
-  .pj-header p { color: inherit; opacity: 0.7; font-size: 1.05rem; max-width: 650px; margin: 0 auto; }
-  .phase-title { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 800; color: var(--pj-primary); margin-bottom: 16px; border-bottom: 1px solid var(--pj-border); padding-bottom: 8px; }
-  .pj-step { background: var(--pj-bg); border: 1px solid var(--pj-border); border-radius: var(--nx-radius-md); padding: 24px; margin-bottom: 24px; display: none; transition: opacity 0.4s ease; opacity: 0; transform: translateY(10px); }
-  .pj-step.active { display: block; opacity: 1; transform: translateY(0); animation: pjFadeIn 0.5s ease forwards; box-shadow: var(--shadow-sm); }
-  .pj-split-step { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-top: 16px; }
-  .pj-split-col { display: flex; flex-direction: column; gap: 12px; }
-  .pj-split-title { font-size: 0.95rem; font-weight: 700; color: var(--pj-text); border-bottom: 1px solid var(--pj-border); padding-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.8; }
-  .pj-explainer { background: var(--pj-card); border-left: 3px solid var(--pj-primary); padding: 16px 20px; margin: 0 0 24px 20px; font-size: 0.95rem; border-radius: 0 8px 8px 0; line-height: 1.6; display: none; color: var(--pj-text); opacity: 0.9; }
-  .pj-explainer.active { display: block; animation: pjFadeIn 0.5s ease forwards; }
-  .step-title { font-size: 1.15rem; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 12px; }
-  .step-badge { background: var(--pj-primary); color: var(--color-text-primary); width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.875rem; font-weight: 700; flex-shrink: 0; }
-  .pj-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; }
-  .pj-btn { padding: 14px 12px; border: 2px solid var(--pj-border); background: var(--pj-bg); border-radius: var(--nx-radius-sm); cursor: pointer; font-size: 0.95rem; font-weight: 600; transition: var(--transition-fast); text-align: center; color: var(--pj-text); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; position: relative; outline: none; }
-  .pj-btn span.sub { font-size: 0.75rem; opacity: 0.6; font-weight: 500; line-height: 1.2; }
-  .pj-btn:hover { border-color: var(--pj-primary); }
-  .pj-btn.selected { background: var(--pj-primary); color: var(--color-text-primary); border-color: var(--pj-primary); }
-  .pj-btn.selected span.sub { color: var(--color-text-primary); opacity: 0.8; }
-  .pj-btn:focus-visible { box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.4); border-color: var(--pj-primary); }
-  .rec-badge { background: var(--pj-primary); color: var(--color-text-primary); font-size: 0.6rem; padding: 3px 6px; border-radius: 4px; margin-top: 2px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; display: inline-block; }
-  .pj-btn.selected .rec-badge { background: #000; color: var(--pj-primary); }
-  .pj-recipe-card { background: var(--pj-bg); border: 2px solid var(--pj-border); border-radius: var(--nx-radius-md); padding: 0; overflow: hidden; margin-top: 10px; text-align: left; }
-  .pj-formula-banner { background: #fdfbf7; color: var(--pj-text); padding: 20px 24px; text-align: center; font-size: 1.1rem; font-weight: 500; border-bottom: 1px solid var(--pj-border); line-height: 1.5; }
-  .pj-formula-banner .hl { color: var(--pj-primary); font-weight: 800; background: #000; padding: 2px 8px; border-radius: 4px; display: inline-block; }
-  .pj-step-list { display: flex; flex-direction: column; background: var(--pj-bg); }
-  .pj-step-row { display: flex; flex-direction: column; padding: 24px 28px; border-bottom: 1px solid var(--pj-border); position: relative; opacity: 0; transform: translateY(10px); }
-  .pj-step-row:last-child { border-bottom: none; }
-  .pj-row-header { font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 800; color: var(--pj-text); opacity: 0.7; display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
-  .pj-row-header span { font-size: 1.15rem; font-weight: 800; color: var(--pj-text); opacity: 1; text-transform: none; letter-spacing: normal;}
-  .pj-row-desc { font-size: 0.95rem; opacity: 0.85; line-height: 1.6; }
-  .pj-step-highlight { background: #fdfbf7; }
-  .pj-step-highlight .pj-row-header { color: #d97706; opacity: 1; }
-  .pj-step-highlight .pj-row-header span { color: #d97706; font-size: 1.35rem; }
-  .pj-step.active .pj-step-row { animation: pjFadeInUp 0.5s ease forwards; }
-  .pj-step.active .pj-step-row:nth-child(1) { animation-delay: 0.1s; }
-  .pj-step.active .pj-step-row:nth-child(2) { animation-delay: 0.25s; }
-  .pj-step.active .pj-step-row:nth-child(3) { animation-delay: 0.4s; }
-  .pj-step.active .pj-step-row:nth-child(4) { animation-delay: 0.55s; }
-  .pj-action-row { padding: 20px; text-align: center; background: var(--pj-bg); border-top: 1px solid var(--pj-border); }
-  .pj-copy-btn { background: var(--pj-text); color: var(--pj-bg); border: none; padding: 14px 28px; border-radius: var(--nx-radius-sm); font-size: 1rem; font-weight: 700; cursor: pointer; transition: var(--transition-fast); display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; outline: none; }
-  .pj-copy-btn:hover { opacity: 0.9; }
-  .pj-copy-btn:focus-visible { box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.4); }
-  .pj-copy-btn.success { background: #10b981; color: #fff; }
-  .pj-warning { color: var(--pj-warning-text); background: var(--pj-warning-bg); border: 1px solid var(--pj-warning-text); padding: 12px; border-radius: var(--nx-radius-sm); font-size: 0.85rem; margin-top: 16px; font-weight: 600; text-align: left; display: none; line-height: 1.4; }
-  .pj-disclaimer { font-size: 0.8rem; opacity: 0.6; text-align: center; margin-top: 24px; line-height: 1.4; }
-  @keyframes pjFadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-  @keyframes pjFadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-  @media (max-width: 768px) { 
-    .pj-split-step { grid-template-columns: 1fr; gap: 32px; } 
-    .pj-step-row { padding: 20px; }
+
+  .xo-section--{{ section.id }} .pj-inner {
+    max-width: {{ section.settings.max_width }}px;
+    margin: 0 auto;
+    color: rgba(var(--color-foreground));
+  }
+
+  .xo-section--{{ section.id }} .pj-inner * {
+    box-sizing: border-box;
+  }
+
+  .xo-section--{{ section.id }} .pj-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+  }
+
+  .xo-section--{{ section.id }} .pj-header h2 {
+    font-family: var(--font-heading-family);
+    font-size: 2.25rem;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: rgba(var(--color-foreground));
+    line-height: 1.2;
+  }
+
+  .xo-section--{{ section.id }} .pj-header p {
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 60%, transparent);
+    font-size: 1.05rem;
+    max-width: 650px;
+    margin: 0 auto;
+  }
+
+  .xo-section--{{ section.id }} .phase-title {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 600;
+    color: rgba(var(--color-accent));
+    margin-bottom: 16px;
+    border-bottom: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
+    padding-bottom: 8px;
+  }
+
+  .xo-section--{{ section.id }} .pj-step {
+    background: rgba(var(--color-background));
+    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
+    border-radius: var(--general-radius-1, 1rem);
+    padding: 24px;
+    margin-bottom: 24px;
+    display: none;
+    transition: opacity 0.4s var(--out-soft, ease);
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  .xo-section--{{ section.id }} .pj-step.active {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+    animation: pjFadeIn-{{ section.id }} 0.5s ease forwards;
+  }
+
+  .xo-section--{{ section.id }} .pj-split-step {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    margin-top: 16px;
+  }
+
+  .xo-section--{{ section.id }} .pj-split-col {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .xo-section--{{ section.id }} .pj-split-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: rgba(var(--color-foreground));
+    border-bottom: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
+    padding-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    opacity: 0.8;
+  }
+
+  .xo-section--{{ section.id }} .pj-explainer {
+    background: rgba(var(--color-background-2));
+    border-left: 3px solid rgba(var(--color-accent));
+    padding: 16px 20px;
+    margin: 0 0 24px 20px;
+    font-size: 0.95rem;
+    border-radius: 0 var(--general-radius-1, 1rem) var(--general-radius-1, 1rem) 0;
+    line-height: 1.6;
+    display: none;
+    color: rgba(var(--color-foreground));
+    opacity: 0.9;
+  }
+
+  .xo-section--{{ section.id }} .pj-explainer.active {
+    display: block;
+    animation: pjFadeIn-{{ section.id }} 0.5s ease forwards;
+  }
+
+  .xo-section--{{ section.id }} .step-title {
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .xo-section--{{ section.id }} .step-badge {
+    background: rgba(var(--color-accent));
+    color: rgba(var(--color-foreground));
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.875rem;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  .xo-section--{{ section.id }} .pj-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 12px;
+  }
+
+  .xo-section--{{ section.id }} .pj-btn {
+    padding: 14px 12px;
+    border: 2px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
+    background: rgba(var(--color-background));
+    border-radius: var(--general-radius-1, 1rem);
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 600;
+    transition: border-color 0.2s var(--out-soft, ease);
+    text-align: center;
+    color: rgba(var(--color-foreground));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    position: relative;
+    outline: none;
+  }
+
+  .xo-section--{{ section.id }} .pj-btn span.sub {
+    font-size: 0.75rem;
+    opacity: 0.6;
+    font-weight: 500;
+    line-height: 1.2;
+  }
+
+  .xo-section--{{ section.id }} .pj-btn:hover {
+    border-color: rgba(var(--color-accent));
+  }
+
+  .xo-section--{{ section.id }} .pj-btn.selected {
+    background: rgba(var(--color-accent));
+    color: rgba(var(--color-foreground));
+    border-color: rgba(var(--color-accent));
+  }
+
+  .xo-section--{{ section.id }} .pj-btn.selected span.sub {
+    color: rgba(var(--color-foreground));
+    opacity: 0.8;
+  }
+
+  .xo-section--{{ section.id }} .pj-btn:focus-visible {
+    outline: 2px solid rgba(var(--color-accent));
+    outline-offset: 2px;
+  }
+
+  .xo-section--{{ section.id }} .rec-badge {
+    background: rgba(var(--color-accent));
+    color: rgba(var(--color-foreground));
+    font-size: 0.6rem;
+    padding: 3px 6px;
+    border-radius: 4px;
+    margin-top: 2px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: inline-block;
+  }
+
+  .xo-section--{{ section.id }} .pj-btn.selected .rec-badge {
+    background: rgba(var(--color-foreground));
+    color: rgba(var(--color-accent));
+  }
+
+  .xo-section--{{ section.id }} .pj-recipe-card {
+    background: rgba(var(--color-background));
+    border: 2px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
+    border-radius: var(--general-radius-1, 1rem);
+    padding: 0;
+    overflow: hidden;
+    margin-top: 10px;
+    text-align: left;
+  }
+
+  .xo-section--{{ section.id }} .pj-formula-banner {
+    background: rgba(var(--color-background-2));
+    color: rgba(var(--color-foreground));
+    padding: 20px 24px;
+    text-align: center;
+    font-size: 1.1rem;
+    font-weight: 500;
+    border-bottom: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
+    line-height: 1.5;
+  }
+
+  .xo-section--{{ section.id }} .pj-formula-banner .hl {
+    color: rgba(var(--color-accent));
+    font-weight: 600;
+    background: rgba(var(--color-foreground));
+    padding: 2px 8px;
+    border-radius: 4px;
+    display: inline-block;
+  }
+
+  .xo-section--{{ section.id }} .pj-step-list {
+    display: flex;
+    flex-direction: column;
+    background: rgba(var(--color-background));
+  }
+
+  .xo-section--{{ section.id }} .pj-step-row {
+    display: flex;
+    flex-direction: column;
+    padding: 24px 28px;
+    border-bottom: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
+    position: relative;
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  .xo-section--{{ section.id }} .pj-step-row:last-child {
+    border-bottom: none;
+  }
+
+  .xo-section--{{ section.id }} .pj-row-header {
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+    color: rgba(var(--color-foreground));
+    opacity: 0.7;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+  }
+
+  .xo-section--{{ section.id }} .pj-row-header span {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: rgba(var(--color-foreground));
+    opacity: 1;
+    text-transform: none;
+    letter-spacing: normal;
+  }
+
+  .xo-section--{{ section.id }} .pj-row-desc {
+    font-size: 0.95rem;
+    opacity: 0.85;
+    line-height: 1.6;
+  }
+
+  .xo-section--{{ section.id }} .pj-step-highlight {
+    background: rgba(var(--color-background-2));
+  }
+
+  .xo-section--{{ section.id }} .pj-step-highlight .pj-row-header {
+    color: rgba(var(--color-accent));
+    opacity: 1;
+  }
+
+  .xo-section--{{ section.id }} .pj-step-highlight .pj-row-header span {
+    color: rgba(var(--color-accent));
+    font-size: 1.35rem;
+  }
+
+  .xo-section--{{ section.id }} .pj-step.active .pj-step-row {
+    animation: pjFadeInUp-{{ section.id }} 0.5s ease forwards;
+  }
+
+  .xo-section--{{ section.id }} .pj-step.active .pj-step-row:nth-child(1) { animation-delay: 0.1s; }
+  .xo-section--{{ section.id }} .pj-step.active .pj-step-row:nth-child(2) { animation-delay: 0.25s; }
+  .xo-section--{{ section.id }} .pj-step.active .pj-step-row:nth-child(3) { animation-delay: 0.4s; }
+  .xo-section--{{ section.id }} .pj-step.active .pj-step-row:nth-child(4) { animation-delay: 0.55s; }
+
+  .xo-section--{{ section.id }} .pj-action-row {
+    padding: 20px;
+    text-align: center;
+    background: rgba(var(--color-background));
+    border-top: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
+  }
+
+  .xo-section--{{ section.id }} .pj-copy-btn {
+    background: rgba(var(--color-foreground));
+    color: rgba(var(--color-background));
+    border: none;
+    padding: 14px 28px;
+    border-radius: var(--button-radius);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s var(--out-soft, ease);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    outline: none;
+  }
+
+  .xo-section--{{ section.id }} .pj-copy-btn:hover {
+    opacity: 0.9;
+  }
+
+  .xo-section--{{ section.id }} .pj-copy-btn:focus-visible {
+    outline: 2px solid rgba(var(--color-accent));
+    outline-offset: 2px;
+  }
+
+  .xo-section--{{ section.id }} .pj-copy-btn.success {
+    background: rgba(var(--color-success));
+    color: rgba(var(--color-background));
+  }
+
+  .xo-section--{{ section.id }} .pj-warning {
+    color: rgba(var(--color-error));
+    background: color-mix(in srgb, rgba(var(--color-error)) 8%, transparent);
+    border: 1px solid rgba(var(--color-error));
+    padding: 12px;
+    border-radius: var(--general-radius-1, 1rem);
+    font-size: 0.85rem;
+    margin-top: 16px;
+    font-weight: 600;
+    text-align: left;
+    display: none;
+    line-height: 1.4;
+  }
+
+  .xo-section--{{ section.id }} .pj-disclaimer {
+    font-size: 0.8rem;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 60%, transparent);
+    text-align: center;
+    margin-top: 24px;
+    line-height: 1.4;
+  }
+
+  @keyframes pjFadeIn-{{ section.id }} {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes pjFadeInUp-{{ section.id }} {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 768px) {
+    .xo-section--{{ section.id }} .pj-split-step {
+      grid-template-columns: 1fr;
+      gap: 32px;
+    }
+
+    .xo-section--{{ section.id }} .pj-step-row {
+      padding: 20px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .xo-section--{{ section.id }} *,
+    .xo-section--{{ section.id }} *::before,
+    .xo-section--{{ section.id }} *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 {%- endstyle -%}
 
-<div id="ProtocolJourney-{{ section.id }}" data-section-id="{{ section.id }}">
-  <div class="pj-header">
-    <h2>{{ section.settings.heading }}</h2>
-    <p>{{ section.settings.subheading }}</p>
-  </div>
-
-  <div id="phase-1-{{ section.id }}">
-    <div class="phase-title">Phase 1: Exploration</div>
-
-    <div class="pj-step active" id="pj-step-1-{{ section.id }}">
-      <div class="step-title"><span class="step-badge">1</span> What is your primary research interest?</div>
-      <div class="pj-grid">
-        {% if section.settings.goal_1 != blank %}<button type="button" class="pj-btn goal-btn" data-goal="goal_1">{{ section.settings.goal_1 }}</button>{% endif %}
-        {% if section.settings.goal_2 != blank %}<button type="button" class="pj-btn goal-btn" data-goal="goal_2">{{ section.settings.goal_2 }}</button>{% endif %}
-        {% if section.settings.goal_3 != blank %}<button type="button" class="pj-btn goal-btn" data-goal="goal_3">{{ section.settings.goal_3 }}</button>{% endif %}
-        {% if section.settings.goal_4 != blank %}<button type="button" class="pj-btn goal-btn" data-goal="goal_4">{{ section.settings.goal_4 }}</button>{% endif %}
+<section {% render 'section-attr' %}>
+  <xo-container>
+    <div class="pj-inner" id="ProtocolJourney-{{ section.id }}" data-section-id="{{ section.id }}">
+      <div class="pj-header">
+        <h2>{{ section.settings.heading }}</h2>
+        <p>{{ section.settings.subheading }}</p>
       </div>
-    </div>
 
-    <div class="pj-explainer" id="explainer-1-{{ section.id }}" aria-live="polite">
-      <em>Research objectives dictate compound selection. Based on your goal, these are the clinical standards evaluated globally.</em>
-    </div>
+      <div id="phase-1-{{ section.id }}">
+        <div class="phase-title">Phase 1: Exploration</div>
 
-    <div class="pj-step" id="pj-step-2-{{ section.id }}">
-      <div class="step-title"><span class="step-badge">2</span> Associated Peptides</div>
-      <p style="font-size: 0.85rem; opacity: 0.7; margin-top: -8px; margin-bottom: 16px;">Select a compound to learn more about its standard research profile.</p>
-      <div class="pj-grid" id="peptides-container-{{ section.id }}"></div>
-    </div>
-
-    <div class="pj-explainer" id="explainer-2-{{ section.id }}" aria-live="polite"></div>
-  </div>
-
-  <div id="phase-2-{{ section.id }}" style="display: none;">
-    <div class="phase-title" style="margin-top: 20px;">Phase 2: Laboratory Protocol Guide</div>
-
-    <div class="pj-step" id="pj-step-3-{{ section.id }}">
-      <div class="step-title"><span class="step-badge">3</span> Your Physical Inventory</div>
-      <p style="font-size: 0.85rem; opacity: 0.7; margin-top: -8px; margin-bottom: 16px;">Select the vial size you are using, and the capacity of your U-100 insulin syringe.</p>
-      
-      <div class="pj-split-step">
-        <div class="pj-split-col">
-          <div class="pj-split-title">1. Vial Quantity (Powder)</div>
-          <div class="pj-grid" style="grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));" id="vials-container-{{ section.id }}"></div>
+        <div class="pj-step active" id="pj-step-1-{{ section.id }}">
+          <div class="step-title"><span class="step-badge">1</span> What is your primary research interest?</div>
+          <div class="pj-grid">
+            {% if section.settings.goal_1 != blank %}<button type="button" class="pj-btn goal-btn" data-goal="goal_1">{{ section.settings.goal_1 }}</button>{% endif %}
+            {% if section.settings.goal_2 != blank %}<button type="button" class="pj-btn goal-btn" data-goal="goal_2">{{ section.settings.goal_2 }}</button>{% endif %}
+            {% if section.settings.goal_3 != blank %}<button type="button" class="pj-btn goal-btn" data-goal="goal_3">{{ section.settings.goal_3 }}</button>{% endif %}
+            {% if section.settings.goal_4 != blank %}<button type="button" class="pj-btn goal-btn" data-goal="goal_4">{{ section.settings.goal_4 }}</button>{% endif %}
+          </div>
         </div>
-        
-        <div class="pj-split-col">
-          <div class="pj-split-title">2. Syringe Capacity (U-100)</div>
-          <div class="pj-grid" style="grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));">
-            <button type="button" class="pj-btn syringe-btn" data-vol="0.3" data-units="30">0.3 mL <span class="sub">30 U max</span></button>
-            <button type="button" class="pj-btn syringe-btn" data-vol="0.5" data-units="50">0.5 mL <span class="sub">50 U max</span></button>
-            <button type="button" class="pj-btn syringe-btn" data-vol="1.0" data-units="100">1.0 mL <span class="sub">100 U max</span></button>
+
+        <div class="pj-explainer" id="explainer-1-{{ section.id }}" aria-live="polite">
+          <em>Research objectives dictate compound selection. Based on your goal, these are the clinical standards evaluated globally.</em>
+        </div>
+
+        <div class="pj-step" id="pj-step-2-{{ section.id }}">
+          <div class="step-title"><span class="step-badge">2</span> Associated Peptides</div>
+          <p style="font-size: 0.85rem; opacity: 0.7; margin-top: -8px; margin-bottom: 16px;">Select a compound to learn more about its standard research profile.</p>
+          <div class="pj-grid" id="peptides-container-{{ section.id }}"></div>
+        </div>
+
+        <div class="pj-explainer" id="explainer-2-{{ section.id }}" aria-live="polite"></div>
+      </div>
+
+      <div id="phase-2-{{ section.id }}" style="display: none;">
+        <div class="phase-title" style="margin-top: 20px;">Phase 2: Laboratory Protocol Guide</div>
+
+        <div class="pj-step" id="pj-step-3-{{ section.id }}">
+          <div class="step-title"><span class="step-badge">3</span> Your Physical Inventory</div>
+          <p style="font-size: 0.85rem; opacity: 0.7; margin-top: -8px; margin-bottom: 16px;">Select the vial size you are using, and the capacity of your U-100 insulin syringe.</p>
+
+          <div class="pj-split-step">
+            <div class="pj-split-col">
+              <div class="pj-split-title">1. Vial Quantity (Powder)</div>
+              <div class="pj-grid" style="grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));" id="vials-container-{{ section.id }}"></div>
+            </div>
+
+            <div class="pj-split-col">
+              <div class="pj-split-title">2. Syringe Capacity (U-100)</div>
+              <div class="pj-grid" style="grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));">
+                <button type="button" class="pj-btn syringe-btn" data-vol="0.3" data-units="30">0.3 mL <span class="sub">30 U max</span></button>
+                <button type="button" class="pj-btn syringe-btn" data-vol="0.5" data-units="50">0.5 mL <span class="sub">50 U max</span></button>
+                <button type="button" class="pj-btn syringe-btn" data-vol="1.0" data-units="100">1.0 mL <span class="sub">100 U max</span></button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pj-step" id="pj-step-4-{{ section.id }}" style="opacity: 0.85; padding-bottom: 16px; background: transparent; border: 1px dashed color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);">
+          <div class="step-title" style="margin-bottom: 0; font-size: 1.05rem;"><span class="step-badge" style="width:24px; height:24px; font-size:0.75rem;">4</span> Adjustable Lab Variables</div>
+          <p style="font-size: 0.85rem; opacity: 0.8; margin-top: 8px;">We auto-generated your recipe below based on standard protocols. Adjust the dials here to dynamically scale your dose or dilution.</p>
+
+          <div class="pj-split-step">
+            <div class="pj-split-col">
+              <div class="pj-split-title">1. Target Dose</div>
+              <div class="pj-grid" style="grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));" id="dose-container-{{ section.id }}"></div>
+            </div>
+
+            <div class="pj-split-col">
+              <div class="pj-split-title">2. Amount of BAC Water</div>
+              <div class="pj-grid" style="grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));" id="water-container-{{ section.id }}"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pj-step" id="pj-step-5-{{ section.id }}">
+          <div class="step-title"><span class="step-badge">5</span> Your Final Protocol</div>
+          <div class="pj-recipe-card">
+
+            <div class="pj-formula-banner" id="recipe-summary-{{ section.id }}">
+              Quick Formula: --
+            </div>
+
+            <div class="pj-step-list">
+              <div class="pj-step-row">
+                <div class="pj-row-header">Step 1: Preparation &rarr; <span id="out-water-{{ section.id }}">--</span></div>
+                <div class="pj-row-desc" id="exp-water-{{ section.id }}">--</div>
+              </div>
+              <div class="pj-step-row">
+                <div class="pj-row-header">Step 2: Administration &rarr; <span id="out-dose-{{ section.id }}">--</span></div>
+                <div class="pj-row-desc" id="exp-dose-{{ section.id }}">--</div>
+              </div>
+              <div class="pj-step-row pj-step-highlight">
+                <div class="pj-row-header">Step 3: Syringe Draw To &rarr; <span id="out-units-{{ section.id }}">--</span></div>
+                <div class="pj-row-desc" id="exp-units-{{ section.id }}">--</div>
+                <div class="pj-warning" id="capacity-warning-{{ section.id }}"></div>
+              </div>
+              <div class="pj-step-row">
+                <div class="pj-row-header">Step 4: Vial Lifespan &rarr; <span id="out-yield-{{ section.id }}">--</span></div>
+                <div class="pj-row-desc" id="exp-yield-{{ section.id }}">--</div>
+              </div>
+            </div>
+
+            <div class="pj-action-row">
+              <button type="button" class="pj-copy-btn" id="copy-btn-{{ section.id }}">
+                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                <span id="copy-text-{{ section.id }}">Copy Protocol to Notes</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
+
+      <p class="pj-disclaimer">{{ section.settings.disclaimer }}</p>
     </div>
-
-    <div class="pj-step" id="pj-step-4-{{ section.id }}" style="opacity: 0.85; padding-bottom: 16px; background: transparent; border: 1px dashed var(--pj-border);">
-      <div class="step-title" style="margin-bottom: 0; font-size: 1.05rem;"><span class="step-badge" style="width:24px; height:24px; font-size:0.75rem;">4</span> Adjustable Lab Variables</div>
-      <p style="font-size: 0.85rem; opacity: 0.8; margin-top: 8px;">We auto-generated your recipe below based on standard protocols. Adjust the dials here to dynamically scale your dose or dilution.</p>
-      
-      <div class="pj-split-step">
-        <div class="pj-split-col">
-          <div class="pj-split-title">1. Target Dose</div>
-          <div class="pj-grid" style="grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));" id="dose-container-{{ section.id }}"></div>
-        </div>
-
-        <div class="pj-split-col">
-          <div class="pj-split-title">2. Amount of BAC Water</div>
-          <div class="pj-grid" style="grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));" id="water-container-{{ section.id }}"></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="pj-step" id="pj-step-5-{{ section.id }}">
-      <div class="step-title"><span class="step-badge">5</span> Your Final Protocol</div>
-      <div class="pj-recipe-card">
-        
-        <div class="pj-formula-banner" id="recipe-summary-{{ section.id }}">
-          Quick Formula: --
-        </div>
-        
-        <div class="pj-step-list">
-          <div class="pj-step-row">
-            <div class="pj-row-header">Step 1: Preparation &rarr; <span id="out-water-{{ section.id }}">--</span></div>
-            <div class="pj-row-desc" id="exp-water-{{ section.id }}">--</div>
-          </div>
-          <div class="pj-step-row">
-            <div class="pj-row-header">Step 2: Administration &rarr; <span id="out-dose-{{ section.id }}">--</span></div>
-            <div class="pj-row-desc" id="exp-dose-{{ section.id }}">--</div>
-          </div>
-          <div class="pj-step-row pj-step-highlight">
-            <div class="pj-row-header">Step 3: Syringe Draw To &rarr; <span id="out-units-{{ section.id }}">--</span></div>
-            <div class="pj-row-desc" id="exp-units-{{ section.id }}">--</div>
-            <div class="pj-warning" id="capacity-warning-{{ section.id }}"></div>
-          </div>
-          <div class="pj-step-row">
-            <div class="pj-row-header">Step 4: Vial Lifespan &rarr; <span id="out-yield-{{ section.id }}">--</span></div>
-            <div class="pj-row-desc" id="exp-yield-{{ section.id }}">--</div>
-          </div>
-        </div>
-
-        <div class="pj-action-row">
-          <button type="button" class="pj-copy-btn" id="copy-btn-{{ section.id }}">
-            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
-            <span id="copy-text-{{ section.id }}">Copy Protocol to Notes</span>
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <p class="pj-disclaimer">{{ section.settings.disclaimer }}</p>
-</div>
+  </xo-container>
+</section>
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {
   const wrapper = document.getElementById('ProtocolJourney-{{ section.id }}');
   if (!wrapper) return;
 
-  // Cache all frequently-used nodes once to cut DOM churn
   const cache = {
     phase2: wrapper.querySelector('#phase-2-{{ section.id }}'),
     step: [
@@ -257,7 +587,6 @@ document.addEventListener("DOMContentLoaded", function() {
     window.scrollTo({ top: y, behavior: 'smooth' });
   }
 
-  // Phase 1 goal buttons
   wrapper.querySelectorAll('.goal-btn').forEach(btn => {
     attachButtonBehavior(btn, function() {
       resetSelection('.goal-btn');
@@ -293,7 +622,6 @@ document.addEventListener("DOMContentLoaded", function() {
     btnElement.classList.add('selected');
     state.peptideObj = pepObj;
 
-    // Auto-select 1 mL syringe when present
     resetSelection('.syringe-btn');
     const defaultSyringe = wrapper.querySelector('.syringe-btn[data-vol="1.0"]');
     if (defaultSyringe) {
@@ -336,7 +664,6 @@ document.addEventListener("DOMContentLoaded", function() {
     setTimeout(() => scrollToElem(cache.step[2]), 150);
   }
 
-  // Syringe buttons
   cache.syringeButtons.forEach(btn => {
     attachButtonBehavior(btn, function() {
       resetSelection('.syringe-btn');
@@ -347,7 +674,6 @@ document.addEventListener("DOMContentLoaded", function() {
     });
   });
 
-  // Phase 2 selections
   function selectSize(btnElement, size, index) {
     resetSelection('.size-btn');
     btnElement.classList.add('selected');
@@ -371,9 +697,9 @@ document.addEventListener("DOMContentLoaded", function() {
     cache.step[4].style.display = 'block';
     cache.step[4].style.opacity = 0.85;
     cache.step[4].style.transform = 'translateY(0)';
-    cache.step[4].style.animation = 'pjFadeIn 0.5s ease forwards';
+    cache.step[4].style.animation = 'pjFadeIn-{{ section.id }} 0.5s ease forwards';
     cache.step[4].classList.add('active');
-    cache.step[4].offsetHeight; // force repaint for animation reset
+    cache.step[4].offsetHeight;
     cache.step[4].classList.add('active');
     setTimeout(() => scrollToElem(cache.step[3]), 150);
   }
@@ -475,7 +801,6 @@ document.addEventListener("DOMContentLoaded", function() {
     if (shouldScroll) setTimeout(() => scrollToElem(cache.step[4]), 150);
   }
 
-  // Copy to clipboard with fallback
   cache.copyBtn.addEventListener('click', function() {
     const { peptideObj, vialMg, waterVol, targetDoseMcg, syringeMaxUnits } = state;
     if (!peptideObj || !vialMg || !waterVol || !targetDoseMcg || !syringeMaxUnits) return;
@@ -540,7 +865,10 @@ Step 4: Vial Lifespan -> ${totalDoses} ${dosesLabelText}: At this specific dose 
 {% schema %}
 {
   "name": "Protocol Journey Tool",
+  "tag": "section",
+  "class": "section-protocol-generator",
   "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "default" },
     { "type": "header", "content": "Text & Headlines" },
     { "type": "text", "id": "heading", "label": "Heading", "default": "Research Protocol Journey" },
     { "type": "textarea", "id": "subheading", "label": "Subheading", "default": "Explore research applications or skip directly to calculating your exact standard laboratory protocol." },
@@ -550,15 +878,11 @@ Step 4: Vial Lifespan -> ${totalDoses} ${dosesLabelText}: At this specific dose 
     { "type": "text", "id": "goal_2", "label": "Goal 2 Label", "default": "Skin, Hair & Anti-Aging" },
     { "type": "text", "id": "goal_3", "label": "Goal 3 Label", "default": "Cognition & Focus" },
     { "type": "text", "id": "goal_4", "label": "Goal 4 Label", "default": "Mood & Social Wellness" },
-    { "type": "header", "content": "Theme Styling & Colors" },
+    { "type": "header", "content": "Layout" },
     { "type": "range", "id": "max_width", "min": 600, "max": 1200, "step": 50, "unit": "px", "label": "Maximum Width", "default": 850 },
-    { "type": "range", "id": "margin_top", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Margin Top", "default": 40 },
-    { "type": "range", "id": "margin_bottom", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Margin Bottom", "default": 40 },
-    { "type": "color", "id": "color_primary", "label": "Primary Accent (Yellow)", "default": "#FBBF24" },
-    { "type": "color", "id": "color_bg", "label": "Background Color", "default": "#ffffff" },
-    { "type": "color", "id": "color_card_bg", "label": "Inner Card/Hint Background", "default": "#fdfbf7" },
-    { "type": "color", "id": "color_border", "label": "Border Color", "default": "#e5e7eb" },
-    { "type": "color", "id": "color_text", "label": "Text Color", "default": "#111827" }
+    { "type": "header", "content": "Spacing" },
+    { "type": "range", "id": "padding_top", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding top", "default": 40 },
+    { "type": "range", "id": "padding_bottom", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding bottom", "default": 40 }
   ],
   "blocks": [
     {
@@ -584,7 +908,8 @@ Step 4: Vial Lifespan -> ${totalDoses} ${dosesLabelText}: At this specific dose 
         { "type": "text", "id": "available_doses", "label": "Adjustable Dose Options (mcg)", "info": "Provide custom dose options separated by commas." },
         { "type": "richtext", "id": "educational_hint", "label": "Educational Hint Text" }
       ]
-    }
+    },
+    { "type": "@app" }
   ],
   "presets": [
     {

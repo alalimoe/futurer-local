@@ -1,43 +1,106 @@
-{% schema %}
-{
-  "name": "UAE Explainer",
-  "tag": "section",
-  "class": "section-uae-explainer",
-  "settings": [
-    { "type": "text", "id": "heading", "label": "Heading", "default": "What Are Nootropics?" },
-    { "type": "textarea", "id": "body", "label": "Body Text", "default": "Nootropics are substances used to support focus, memory, mood, and mental performance. Always follow label directions. If you have a medical condition or take prescription meds, consult a professional." },
-    { "type": "textarea", "id": "disclaimer", "label": "Disclaimer", "default": "This content is educational only — not medical advice." },
-    { "type": "header", "content": "Colors" },
-    { "type": "color", "id": "bg_color", "label": "Background", "default": "#ffffff" },
-    { "type": "color", "id": "accent_color", "label": "Accent", "default": "#FBBF24" }
-  ],
-  "blocks": [
-    {
-      "type": "category",
-      "name": "Category Card",
-      "settings": [
-        { "type": "text", "id": "title", "label": "Title" },
-        { "type": "textarea", "id": "desc", "label": "Description" },
-        { "type": "url", "id": "url", "label": "Link (optional)" }
-      ]
-    }
-  ],
-  "presets": [
-    {
-      "name": "UAE Explainer",
-      "blocks": [
-        { "type": "category", "settings": { "title": "Cholinergics", "desc": "Alpha-GPC, CDP-Choline — support acetylcholine for memory and focus." } },
-        { "type": "category", "settings": { "title": "Racetams", "desc": "Phenylpiracetam, Aniracetam, Noopept — cognitive enhancers with varied profiles." } },
-        { "type": "category", "settings": { "title": "Amino Acids", "desc": "L-Theanine, N-Acetyl-L-Tyrosine — building blocks for calm focus and stress resilience." } },
-        { "type": "category", "settings": { "title": "Natural Extracts", "desc": "Lion's Mane, Rhodiola — time-tested botanicals for neuroprotection and adaptation." } }
-      ]
-    }
-  ]
-}
-{% endschema %}
+{%- style -%}
+  .xo-section--{{ section.id }} {
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
 
-<div class="uaex-wrapper" id="uae-explainer">
-  <div class="uaex-inner">
+  .xo-section--{{ section.id }} .uaex-heading {
+    font-family: var(--font-heading-family);
+    font-size: clamp(1.75rem, 3vw, 2.25rem);
+    font-weight: 600;
+    color: rgba(var(--color-foreground));
+    margin: 0 0 16px;
+    text-align: center;
+    letter-spacing: -0.02em;
+  }
+
+  .xo-section--{{ section.id }} .uaex-body {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 60%, transparent);
+    text-align: center;
+    max-width: 640px;
+    margin: 0 auto 40px;
+  }
+
+  .xo-section--{{ section.id }} .uaex-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  .xo-section--{{ section.id }} .uaex-card {
+    padding: 24px;
+    background: rgba(var(--color-background-2));
+    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
+    border-radius: var(--general-radius-3, 2rem);
+    transition: border-color 0.3s var(--out-soft, ease);
+  }
+
+  .xo-section--{{ section.id }} .uaex-card:hover {
+    border-color: rgba(var(--color-accent));
+  }
+
+  .xo-section--{{ section.id }} .uaex-card-title {
+    font-family: var(--font-heading-family);
+    font-size: 1.0625rem;
+    font-weight: 600;
+    color: rgba(var(--color-foreground));
+    margin: 0 0 8px;
+  }
+
+  .xo-section--{{ section.id }} .uaex-card-desc {
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 60%, transparent);
+    margin: 0 0 12px;
+  }
+
+  .xo-section--{{ section.id }} .uaex-card-link {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: rgba(var(--color-accent));
+    text-decoration: none;
+  }
+
+  .xo-section--{{ section.id }} .uaex-card-link:hover {
+    text-decoration: underline;
+  }
+
+  .xo-section--{{ section.id }} .uaex-disclaimer {
+    text-align: center;
+    font-size: 0.8125rem;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 60%, transparent);
+    background: rgba(var(--color-background-2));
+    padding: 12px 16px;
+    border-radius: var(--general-radius-1, 1rem);
+    margin: 0;
+  }
+
+  .xo-section--{{ section.id }} :focus-visible {
+    outline: 2px solid rgba(var(--color-accent));
+    outline-offset: 2px;
+  }
+
+  @media (max-width: 768px) {
+    .xo-section--{{ section.id }} .uaex-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .xo-section--{{ section.id }} *,
+    .xo-section--{{ section.id }} *::before,
+    .xo-section--{{ section.id }} *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+{%- endstyle -%}
+
+<section id="uae-explainer" {% render 'section-attr' %}>
+  <xo-container>
     {% if section.settings.heading != blank %}
       <h2 class="uaex-heading">{{ section.settings.heading }}</h2>
     {% endif %}
@@ -65,50 +128,45 @@
     {% if section.settings.disclaimer != blank %}
       <p class="uaex-disclaimer">{{ section.settings.disclaimer }}</p>
     {% endif %}
-  </div>
-</div>
+  </xo-container>
+</section>
 
-<style>
-  .uaex-wrapper {
-    --uaex-bg: {{ section.settings.bg_color }};
-    --uaex-accent: {{ section.settings.accent_color }};
-    --uaex-text: var(--color-text-main, #111827);
-    --uaex-muted: var(--color-text-muted, #4b5563);
-    --uaex-border: var(--nx-pill-border, #E5E7EB);
-    --uaex-radius: var(--nx-radius, 14px);
-    --uaex-font: var(--font-body-family, sans-serif);
-    --uaex-font-heading: var(--font-heading-family, sans-serif);
-    --uaex-transition: var(--transition-smooth, all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1));
-    background: var(--uaex-bg); padding: 80px var(--page-gutter); font-family: var(--uaex-font);
-  }
-  .uaex-inner { max-width: var(--container-width-narrow); margin: 0 auto; }
-  .uaex-heading {
-    font-family: var(--uaex-font-heading); font-size: clamp(1.75rem, 3vw, 2.25rem);
-    font-weight: 800; color: var(--uaex-text); margin: 0 0 16px; text-align: center; letter-spacing: -0.02em;
-  }
-  .uaex-body { font-size: 1rem; line-height: 1.7; color: var(--uaex-muted); text-align: center; max-width: 640px; margin: 0 auto 40px; }
-
-  .uaex-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 32px; }
-  .uaex-card {
-    padding: 24px; background: var(--color-bg-secondary, #f9fafb); border: 1px solid var(--uaex-border);
-    border-radius: var(--uaex-radius); transition: var(--uaex-transition);
-  }
-  .uaex-card:hover { border-color: var(--uaex-accent); box-shadow: var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.04)); }
-  .uaex-card-title { font-family: var(--uaex-font-heading); font-size: 1.0625rem; font-weight: 700; color: var(--uaex-text); margin: 0 0 8px; }
-  .uaex-card-desc { font-size: 0.875rem; line-height: 1.6; color: var(--uaex-muted); margin: 0 0 12px; }
-  .uaex-card-link { font-size: 0.875rem; font-weight: 700; color: var(--uaex-accent); text-decoration: none; }
-  .uaex-card-link:hover { text-decoration: underline; }
-
-  .uaex-disclaimer {
-    text-align: center; font-size: 0.8125rem; color: var(--uaex-muted);
-    background: var(--color-bg-secondary, #f1f5f9); padding: 12px 16px;
-    border-radius: var(--uaex-radius); margin: 0;
-  }
-
-  .uaex-wrapper :focus-visible { outline: 2px solid var(--uaex-accent); outline-offset: 2px; }
-  @media (prefers-reduced-motion: reduce) { .uaex-wrapper *, .uaex-wrapper *::before, .uaex-wrapper *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
-  @media (max-width: 640px) {
-    .uaex-wrapper { padding: 56px var(--page-gutter); }
-    .uaex-grid { grid-template-columns: 1fr; }
-  }
-</style>
+{% schema %}
+{
+  "name": "UAE Explainer",
+  "tag": "section",
+  "class": "section-uae-explainer",
+  "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "default" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "What Are Nootropics?" },
+    { "type": "textarea", "id": "body", "label": "Body Text", "default": "Nootropics are substances used to support focus, memory, mood, and mental performance. Always follow label directions. If you have a medical condition or take prescription meds, consult a professional." },
+    { "type": "textarea", "id": "disclaimer", "label": "Disclaimer", "default": "This content is educational only — not medical advice." },
+    { "type": "header", "content": "Spacing" },
+    { "type": "range", "id": "padding_top", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding top", "default": 80 },
+    { "type": "range", "id": "padding_bottom", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding bottom", "default": 80 }
+  ],
+  "blocks": [
+    {
+      "type": "category",
+      "name": "Category Card",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Title" },
+        { "type": "textarea", "id": "desc", "label": "Description" },
+        { "type": "url", "id": "url", "label": "Link (optional)" }
+      ]
+    },
+    { "type": "@app" }
+  ],
+  "presets": [
+    {
+      "name": "UAE Explainer",
+      "blocks": [
+        { "type": "category", "settings": { "title": "Cholinergics", "desc": "Alpha-GPC, CDP-Choline — support acetylcholine for memory and focus." } },
+        { "type": "category", "settings": { "title": "Racetams", "desc": "Phenylpiracetam, Aniracetam, Noopept — cognitive enhancers with varied profiles." } },
+        { "type": "category", "settings": { "title": "Amino Acids", "desc": "L-Theanine, N-Acetyl-L-Tyrosine — building blocks for calm focus and stress resilience." } },
+        { "type": "category", "settings": { "title": "Natural Extracts", "desc": "Lion's Mane, Rhodiola — time-tested botanicals for neuroprotection and adaptation." } }
+      ]
+    }
+  ]
+}
+{% endschema %}

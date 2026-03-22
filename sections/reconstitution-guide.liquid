@@ -1,19 +1,147 @@
+{%- style -%}
+  .xo-section--{{ section.id }} {
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+
+  .xo-section--{{ section.id }} .pg-header {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+
+  .xo-section--{{ section.id }} .pg-header h2 {
+    font-family: var(--font-heading-family);
+    font-size: clamp(1.4rem, 2.5vw, 1.75rem);
+    font-weight: 600;
+    margin: 0 0 10px;
+    color: rgba(var(--color-foreground));
+    letter-spacing: -0.025em;
+    line-height: 1.2;
+  }
+
+  .xo-section--{{ section.id }} .pg-header p {
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 60%, transparent);
+    font-size: clamp(0.875rem, 1.5vw, 1rem);
+  }
+
+  .xo-section--{{ section.id }} .pg-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+  }
+
+  @media (max-width: 992px) {
+    .xo-section--{{ section.id }} .pg-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .xo-section--{{ section.id }} .pg-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .xo-section--{{ section.id }} .pg-card {
+    background: rgba(var(--color-background));
+    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
+    padding: 24px;
+    border-radius: var(--general-radius-1, 1rem);
+    position: relative;
+    transition: border-color 0.3s var(--out-soft, ease);
+    opacity: 0;
+    transform: translateY(16px);
+    animation: pg-reveal-{{ section.id }} 0.5s ease forwards;
+    animation-delay: calc(var(--reveal-idx, 0) * 80ms);
+  }
+
+  .xo-section--{{ section.id }} .pg-card:hover {
+    border-color: rgba(var(--color-accent));
+  }
+
+  .xo-section--{{ section.id }} .pg-number {
+    width: 32px;
+    height: 32px;
+    background: rgba(var(--color-accent));
+    color: rgba(var(--color-foreground));
+    font-weight: 600;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+    font-size: 13px;
+  }
+
+  .xo-section--{{ section.id }} .pg-card h3 {
+    font-family: var(--font-heading-family);
+    font-weight: 600;
+    font-size: clamp(0.95rem, 1.5vw, 1.125rem);
+    margin: 0 0 8px;
+    color: rgba(var(--color-foreground));
+    letter-spacing: -0.01em;
+  }
+
+  .xo-section--{{ section.id }} .pg-card p {
+    font-size: clamp(0.8rem, 1.2vw, 0.875rem);
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 60%, transparent);
+    line-height: 1.55;
+    margin: 0;
+  }
+
+  @keyframes pg-reveal-{{ section.id }} {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .xo-section--{{ section.id }} *,
+    .xo-section--{{ section.id }} *::before,
+    .xo-section--{{ section.id }} *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+
+    .xo-section--{{ section.id }} .pg-card {
+      opacity: 1;
+      transform: none;
+    }
+  }
+{%- endstyle -%}
+
+<section {% render 'section-attr' %}>
+  <xo-container>
+    <div class="pg-header">
+      <h2>Reconstitution Protocol</h2>
+      <p>Follow these standard laboratory procedures for optimal stability.</p>
+    </div>
+
+    <div class="pg-grid">
+      {% for block in section.blocks %}
+        {% if block.type == 'step' %}
+          <div class="pg-card" style="--reveal-idx: {{ forloop.index0 }};" {{ block.shopify_attributes }}>
+            <div class="pg-number">{{ forloop.index }}</div>
+            <h3>{{ block.settings.title }}</h3>
+            <p>{{ block.settings.text }}</p>
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </xo-container>
+</section>
+
 {% schema %}
 {
-  "name": "Peptide Guide Steps",
+  "name": "Reconstitution Guide",
+  "tag": "section",
+  "class": "section-reconstitution-guide",
   "settings": [
-    {
-      "type": "color",
-      "id": "bg_color",
-      "label": "Background",
-      "default": "#ffffff"
-    },
-    {
-      "type": "color",
-      "id": "accent_color",
-      "label": "Accent Color",
-      "default": "#fbbf24"
-    }
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "default" },
+    { "type": "header", "content": "Spacing" },
+    { "type": "range", "id": "padding_top", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding top", "default": 80 },
+    { "type": "range", "id": "padding_bottom", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding bottom", "default": 80 }
   ],
   "blocks": [
     {
@@ -31,11 +159,12 @@
           "label": "Description"
         }
       ]
-    }
+    },
+    { "type": "@app" }
   ],
   "presets": [
     {
-      "name": "Peptide Guide Steps",
+      "name": "Reconstitution Guide",
       "blocks": [
         {
           "type": "step",
@@ -70,123 +199,3 @@
   ]
 }
 {% endschema %}
-
-<div class="pg-section">
-  <div class="pg-container">
-    <div class="pg-header">
-      <h2>Reconstitution Protocol</h2>
-      <p>Follow these standard laboratory procedures for optimal stability.</p>
-    </div>
-    
-    <div class="pg-grid">
-      {% for block in section.blocks %}
-      <div class="pg-card reveal-child" style="--reveal-idx: {{ forloop.index0 }};" {{ block.shopify_attributes }}>
-        <div class="pg-number">{{ forloop.index }}</div>
-        <h3>{{ block.settings.title }}</h3>
-        <p>{{ block.settings.text }}</p>
-      </div>
-      {% endfor %}
-    </div>
-  </div>
-</div>
-
-<style>
-  .pg-section {
-    background-color: {{ section.settings.bg_color }};
-    padding: clamp(32px, 6vw, 60px) var(--page-gutter);
-    font-family: var(--font-body-family, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif);
-  }
-  .pg-container {
-    max-width: var(--container-width-medium);
-    margin: 0 auto;
-  }
-  .pg-header {
-    text-align: center;
-    margin-bottom: 40px;
-  }
-  .pg-header h2 {
-    font-family: var(--font-heading-family, inherit);
-    font-size: clamp(1.4rem, 2.5vw, 1.75rem);
-    font-weight: 800;
-    margin: 0 0 10px;
-    color: var(--nx-text, #0B0B0B);
-    letter-spacing: -0.025em;
-    line-height: 1.2;
-  }
-  .pg-header p {
-    color: var(--nx-muted, #6b7280);
-    font-size: clamp(0.875rem, 1.5vw, 1rem);
-  }
-  
-  .pg-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
-  }
-  @media(max-width: 900px) {
-    .pg-grid { grid-template-columns: repeat(2, 1fr); }
-  }
-  @media(max-width: 560px) {
-    .pg-grid { grid-template-columns: 1fr; }
-  }
-
-  .pg-card {
-    background: #fff;
-    border: none;
-    padding: 24px;
-    border-radius: 12px;
-    position: relative;
-    box-shadow: var(--shadow-sm);
-    transition: all 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
-    opacity: 0;
-    transform: translateY(16px);
-    animation: pg-reveal 0.5s ease forwards;
-    animation-delay: calc(var(--reveal-idx, 0) * 80ms);
-  }
-  .pg-card:hover {
-    transform: translateY(-3px);
-    box-shadow: var(--shadow-md-hover);
-  }
-  
-  .pg-number {
-    width: 32px;
-    height: 32px;
-    background: {{ section.settings.accent_color }};
-    color: var(--color-text-primary);
-    font-weight: 700;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 16px;
-    font-size: 13px;
-  }
-  .pg-card h3 {
-    font-family: var(--font-heading-family, inherit);
-    font-weight: 700;
-    font-size: clamp(0.95rem, 1.5vw, 1.125rem);
-    margin: 0 0 8px;
-    color: var(--nx-text, #0B0B0B);
-    letter-spacing: -0.01em;
-  }
-  .pg-card p {
-    font-size: clamp(0.8rem, 1.2vw, 0.875rem);
-    color: var(--nx-muted, #6b7280);
-    line-height: 1.55;
-    margin: 0;
-  }
-
-  @keyframes pg-reveal {
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .pg-card {
-      opacity: 1;
-      transform: none;
-      animation: none;
-      transition: none;
-    }
-    .pg-card:hover { transform: none; }
-  }
-</style>

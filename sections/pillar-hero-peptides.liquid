@@ -8,149 +8,242 @@ PILLAR HERO — PEPTIDES
 {% endcomment %}
 {{ 'pillar-ui.css' | asset_url | stylesheet_tag }}
 
-{%- assign sid = section.id | replace: '_', '' | downcase -%}
+{%- style -%}
+  .xo-section--{{ section.id }} {
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
 
-<style>
-  /* ---- Layout ---- */
-  #pillar-hero-{{ sid }}{
-    position:relative; width:100%; aspect-ratio:16/9; overflow:hidden;
-    display:flex; align-items: {{ section.settings.vert_align }}; justify-content:flex-start;
+  .xo-section--{{ section.id }} .ph-hero {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    display: flex;
+    align-items: {{ section.settings.vert_align }};
+    justify-content: flex-start;
   }
-  @media (max-width: 749px){
-    #pillar-hero-{{ sid }}{ aspect-ratio: {{ section.settings.mobile_aspect_ratio }}; }
+  @media (max-width: 768px) {
+    .xo-section--{{ section.id }} .ph-hero {
+      aspect-ratio: {{ section.settings.mobile_aspect_ratio }};
+    }
   }
-  #pillar-hero-{{ sid }} .ph-bg{ position:absolute; inset:0; z-index:1; }
-  #pillar-hero-{{ sid }} .ph-bg img{ width:100%; height:100%; object-fit:cover; object-position:center; }
-  #pillar-hero-{{ sid }} .ph-overlay{
-    position:absolute; inset:0; z-index:2;
+
+  .xo-section--{{ section.id }} .ph-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
+  .xo-section--{{ section.id }} .ph-bg img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+
+  .xo-section--{{ section.id }} .ph-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
     background: {{ section.settings.overlay_color }};
     opacity: {{ section.settings.overlay_opacity | divided_by: 100.0 }};
   }
 
-  /* ---- Content ---- */
-  #pillar-hero-{{ sid }} .ph-inner{
-    position:relative; z-index:3; width:100%;
-    max-width: {{ section.settings.max_width }}px; padding: {{ section.settings.pad }}px;
-    color:#fff; text-align:left;
-    display:flex; flex-direction:column; justify-content:flex-start; align-items:flex-start;
+  .xo-section--{{ section.id }} .ph-inner {
+    position: relative;
+    z-index: 3;
+    width: 100%;
+    max-width: {{ section.settings.max_width }}px;
+    padding: {{ section.settings.pad }}px;
+    color: rgba(var(--color-background));
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
   }
-  @media (max-width: 749px){
-    #pillar-hero-{{ sid }} .ph-inner{ padding: {{ section.settings.pad_mobile }}px; }
-  }
-
-  /* ---- Breadcrumbs ---- */
-  #pillar-hero-{{ sid }} .ph-bc{ margin-bottom: {{ section.settings.bc_gap }}px; font-size: {{ section.settings.bc_size }}px; color: {{ section.settings.bc_color }}; }
-  #pillar-hero-{{ sid }} .ph-bc a{ color: {{ section.settings.bc_link }}; text-decoration:none; position:relative; }
-  #pillar-hero-{{ sid }} .ph-bc a::after{ content:""; position:absolute; left:50%; right:50%; bottom:-2px; height:1px; background: currentColor; transition:left .18s,right .18s; }
-  #pillar-hero-{{ sid }} .ph-bc a:hover::after{ left:0; right:0; }
-  #pillar-hero-{{ sid }} .ph-bc .sep{ margin:0 8px; opacity:.9; }
-
-  /* ---- Headline / Subheadline ---- */
-  #pillar-hero-{{ sid }} .ph-h1{
-    margin:0 0 {{ section.settings.h1_gap }}px; color: {{ section.settings.h1_color }};
-    font-size: clamp(28px, 3.2vw, {{ section.settings.h1_size }}px); font-weight: {{ section.settings.h1_weight }};
-    line-height:1.15;
-  }
-  #pillar-hero-{{ sid }} .ph-sub{
-    margin:0 0 {{ section.settings.sub_gap }}px; color: {{ section.settings.sub_color }};
-    max-width: {{ section.settings.h1_max }}px; font-size: {{ section.settings.sub_size }}px; line-height:1.5;
-  }
-  @media (max-width: 749px){
-    #pillar-hero-{{ sid }} .ph-h1{ font-size: calc({{ section.settings.h1_size }}px * .72); }
-    #pillar-hero-{{ sid }} .ph-sub{ font-size: calc({{ section.settings.sub_size }}px * .9); }
+  @media (max-width: 768px) {
+    .xo-section--{{ section.id }} .ph-inner {
+      padding: {{ section.settings.pad_mobile }}px;
+    }
   }
 
-  /* ---- Badges ---- */
-  #pillar-hero-{{ sid }} .ph-badges{ display:flex; gap: {{ section.settings.badge_gap }}px; flex-wrap:wrap; margin:0 0 {{ section.settings.badge_gap }}px; }
-  #pillar-hero-{{ sid }} .ph-badge{
-    display:inline-flex; align-items:center; gap:8px;
+  .xo-section--{{ section.id }} .ph-bc {
+    margin-bottom: {{ section.settings.bc_gap }}px;
+    font-size: {{ section.settings.bc_size }}px;
+    color: rgba(var(--color-background));
+  }
+  .xo-section--{{ section.id }} .ph-bc a {
+    color: rgba(var(--color-accent));
+    text-decoration: none;
+    position: relative;
+  }
+  .xo-section--{{ section.id }} .ph-bc a::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    right: 50%;
+    bottom: -2px;
+    height: 1px;
+    background: currentColor;
+    transition: left 0.18s var(--out-soft, ease), right 0.18s var(--out-soft, ease);
+  }
+  .xo-section--{{ section.id }} .ph-bc a:hover::after {
+    left: 0;
+    right: 0;
+  }
+  .xo-section--{{ section.id }} .ph-bc .sep {
+    margin: 0 8px;
+    opacity: 0.9;
+  }
+
+  .xo-section--{{ section.id }} .ph-h1 {
+    margin: 0 0 {{ section.settings.h1_gap }}px;
+    color: rgba(var(--color-background));
+    font-size: clamp(28px, 3.2vw, {{ section.settings.h1_size }}px);
+    font-weight: 600;
+    line-height: 1.15;
+  }
+
+  .xo-section--{{ section.id }} .ph-sub {
+    margin: 0 0 {{ section.settings.sub_gap }}px;
+    color: color-mix(in srgb, rgba(var(--color-background)) 85%, transparent);
+    max-width: {{ section.settings.h1_max }}px;
+    font-size: {{ section.settings.sub_size }}px;
+    line-height: 1.5;
+  }
+
+  @media (max-width: 768px) {
+    .xo-section--{{ section.id }} .ph-h1 {
+      font-size: calc({{ section.settings.h1_size }}px * 0.72);
+    }
+    .xo-section--{{ section.id }} .ph-sub {
+      font-size: calc({{ section.settings.sub_size }}px * 0.9);
+    }
+  }
+
+  .xo-section--{{ section.id }} .ph-badges {
+    display: flex;
+    gap: {{ section.settings.badge_gap }}px;
+    flex-wrap: wrap;
+    margin: 0 0 {{ section.settings.badge_gap }}px;
+  }
+  .xo-section--{{ section.id }} .ph-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
     padding: {{ section.settings.badge_py }}px {{ section.settings.badge_px }}px;
-    background: {{ section.settings.badge_bg }}; color: {{ section.settings.badge_text }};
-    border-radius: {{ section.settings.badge_radius }}px; font-size: {{ section.settings.badge_size }}px; font-weight: {{ section.settings.badge_weight }};
-    border:1px solid rgba(255,255,255,.18);
+    background: rgba(var(--color-accent));
+    color: rgba(var(--color-foreground));
+    border-radius: var(--button-radius);
+    font-size: {{ section.settings.badge_size }}px;
+    font-weight: 600;
+    border: 1px solid color-mix(in srgb, rgba(var(--color-background)) 18%, transparent);
   }
-  #pillar-hero-{{ sid }} .ph-ico{ width: {{ section.settings.badge_ico }}px; height: {{ section.settings.badge_ico }}px; display:inline-block; color: currentColor; }
-
-  #pillar-hero-{{ sid }} .ph-ctas{ display:flex; gap: {{ section.settings.btn_gap }}px; flex-wrap:wrap; }
-
-  @media (max-width: 749px){
-    #pillar-hero-{{ sid }} .ph-ctas{ flex-direction:column; align-items:stretch; }
-    #pillar-hero-{{ sid }} .ph-ctas .btn{ text-align:center; width:100%; }
+  .xo-section--{{ section.id }} .ph-ico {
+    width: {{ section.settings.badge_ico }}px;
+    height: {{ section.settings.badge_ico }}px;
+    display: inline-block;
+    color: currentColor;
   }
-</style>
 
-<section id="pillar-hero-{{ sid }}" aria-label="Peptides hero">
-  <div class="ph-bg">
-    {% if section.settings.bg %}
-      {% assign img = section.settings.bg %}
-      <img
-        src="{{ img | image_url: width: 1600 }}"
-        srcset="
-          {{ img | image_url: width: 768 }} 768w,
-          {{ img | image_url: width: 1200 }} 1200w,
-          {{ img | image_url: width: 1600 }} 1600w,
-          {{ img | image_url: width: 2200 }} 2200w
-        "
-        sizes="(max-width: 749px) 100vw, 100vw"
-        alt="{{ img.alt | default: section.settings.h1 }}"
-        width="1600"
-        height="{{ 1600 | divided_by: img.aspect_ratio | round }}"
-        loading="eager"
-        decoding="async"
-      >
-    {% else %}
-      <div style="width:100%;height:100%;background:#F4F4F5;"></div>
+  .xo-section--{{ section.id }} .ph-ctas {
+    display: flex;
+    gap: {{ section.settings.btn_gap }}px;
+    flex-wrap: wrap;
+  }
+  @media (max-width: 768px) {
+    .xo-section--{{ section.id }} .ph-ctas {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .xo-section--{{ section.id }} .ph-ctas .btn {
+      text-align: center;
+      width: 100%;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .xo-section--{{ section.id }} .ph-bc a::after {
+      transition: none;
+    }
+  }
+{%- endstyle -%}
+
+<section {% render 'section-attr' %}>
+  <div class="ph-hero">
+    <div class="ph-bg">
+      {% if section.settings.bg %}
+        {% assign img = section.settings.bg %}
+        <img
+          src="{{ img | image_url: width: 1600 }}"
+          srcset="
+            {{ img | image_url: width: 768 }} 768w,
+            {{ img | image_url: width: 1200 }} 1200w,
+            {{ img | image_url: width: 1600 }} 1600w,
+            {{ img | image_url: width: 2200 }} 2200w
+          "
+          sizes="(max-width: 768px) 100vw, 100vw"
+          alt="{{ img.alt | default: section.settings.h1 }}"
+          width="1600"
+          height="{{ 1600 | divided_by: img.aspect_ratio | round }}"
+          loading="eager"
+          decoding="async"
+        >
+      {% else %}
+        <div style="width:100%;height:100%;background:rgba(var(--color-background-2));"></div>
+      {% endif %}
+    </div>
+
+    {% if section.settings.show_overlay %}
+      <div class="ph-overlay"></div>
     {% endif %}
-  </div>
 
-  {% if section.settings.show_overlay %}
-    <div class="ph-overlay"></div>
-  {% endif %}
+    <div class="ph-inner">
+      {% if section.settings.show_breadcrumbs %}
+        <nav class="ph-bc" aria-label="Breadcrumb">
+          <a href="{{ routes.root_url }}">Home</a><span class="sep">/</span>
+          <span aria-current="page">{{ section.settings.h1 | default: 'Peptides' }}</span>
+        </nav>
+      {% endif %}
 
-  <div class="ph-inner">
-    {% if section.settings.show_breadcrumbs %}
-      <nav class="ph-bc" aria-label="Breadcrumb">
-        <a href="{{ routes.root_url }}">Home</a><span class="sep">/</span>
-        <span aria-current="page">{{ section.settings.h1 | default: 'Peptides' }}</span>
-      </nav>
-    {% endif %}
+      {% if section.settings.h1 != blank %}
+        <h1 class="ph-h1">{{ section.settings.h1 }}</h1>
+      {% endif %}
 
-    {% if section.settings.h1 != blank %}
-      <h1 class="ph-h1">{{ section.settings.h1 }}</h1>
-    {% endif %}
+      {% if section.settings.sub != blank %}
+        <p class="ph-sub">{{ section.settings.sub }}</p>
+      {% endif %}
 
-    {% if section.settings.sub != blank %}
-      <p class="ph-sub">{{ section.settings.sub }}</p>
-    {% endif %}
+      {% if section.settings.show_badges %}
+        <div class="ph-badges" role="list">
+          {% for i in (1..4) %}
+            {% assign t_key = 'badge_' | append: i | append: '_text' %}
+            {% assign show_key = 'badge_' | append: i | append: '_show' %}
+            {% assign t = section.settings[t_key] %}
+            {% assign show = section.settings[show_key] %}
+            {% if t != blank %}
+              <span class="ph-badge" role="listitem">
+                {% if show %}
+                  <span class="ph-ico" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </span>
+                {% endif %}
+                {{ t }}
+              </span>
+            {% endif %}
+          {% endfor %}
+        </div>
+      {% endif %}
 
-    {% if section.settings.show_badges %}
-      <div class="ph-badges" role="list">
-        {% for i in (1..4) %}
-          {% assign t_key = 'badge_' | append: i | append: '_text' %}
-          {% assign show_key = 'badge_' | append: i | append: '_show' %}
-          {% assign t = section.settings[t_key] %}
-          {% assign show = section.settings[show_key] %}
-          {% if t != blank %}
-            <span class="ph-badge" role="listitem">
-              {% if show %}
-                <span class="ph-ico" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </span>
-              {% endif %}
-              {{ t }}
-            </span>
-          {% endif %}
-        {% endfor %}
+      <div class="ph-ctas">
+        {% if section.settings.btn1_label and section.settings.btn1_link %}
+          <a class="btn btn--primary" href="{{ section.settings.btn1_link }}">{{ section.settings.btn1_label }}</a>
+        {% endif %}
+        {% if section.settings.btn2_label and section.settings.btn2_link %}
+          <a class="btn btn--ghost" href="{{ section.settings.btn2_link }}">{{ section.settings.btn2_label }}</a>
+        {% endif %}
       </div>
-    {% endif %}
-
-    <div class="ph-ctas">
-      {% if section.settings.btn1_label and section.settings.btn1_link %}
-        <a class="btn btn--primary" href="{{ section.settings.btn1_link }}">{{ section.settings.btn1_label }}</a>
-      {% endif %}
-      {% if section.settings.btn2_label and section.settings.btn2_link %}
-        <a class="btn btn--ghost" href="{{ section.settings.btn2_link }}">{{ section.settings.btn2_label }}</a>
-      {% endif %}
     </div>
   </div>
 </section>
@@ -171,82 +264,71 @@ PILLAR HERO — PEPTIDES
 {
   "name": "Pillar · Peptides — Hero",
   "settings": [
-    { "type":"image_picker", "id":"bg", "label":"Background image" },
-    { "type":"checkbox", "id":"show_overlay", "label":"Show overlay", "default": true },
-    { "type":"color", "id":"overlay_color", "label":"Overlay color", "default":"#000000" },
-    { "type":"range", "id":"overlay_opacity", "label":"Overlay opacity", "min":0, "max":100, "step":5, "unit":"%", "default":40 },
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "default" },
+    { "type": "image_picker", "id": "bg", "label": "Background image" },
+    { "type": "checkbox", "id": "show_overlay", "label": "Show overlay", "default": true },
+    { "type": "color", "id": "overlay_color", "label": "Overlay color", "default": "#000000" },
+    { "type": "range", "id": "overlay_opacity", "label": "Overlay opacity", "min": 0, "max": 100, "step": 5, "unit": "%", "default": 40 },
 
-    { "type":"header", "content":"Layout" },
-    { "type":"select", "id":"vert_align", "label":"Vertical alignment", "options":[
-      { "value":"flex-start", "label":"Top" }, { "value":"center", "label":"Center" }, { "value":"flex-end", "label":"Bottom" }
-    ], "default":"center" },
-    { "type":"range", "id":"max_width", "label":"Content max width", "min":480, "max":1200, "step":20, "unit":"px", "default":880 },
-    { "type":"range", "id":"pad", "label":"Content padding (desktop)", "min":20, "max":100, "step":10, "unit":"px", "default":40 },
-    { "type":"range", "id":"pad_mobile", "label":"Content padding (mobile)", "min":10, "max":50, "step":5, "unit":"px", "default":10 },
-    { "type":"select", "id":"mobile_aspect_ratio", "label":"Mobile aspect ratio", "options":[
-      { "value":"16 / 9", "label":"16:9" }, { "value":"4 / 3", "label":"4:3" }, { "value":"1 / 1", "label":"1:1" }, { "value":"3 / 4", "label":"3:4" }
-    ], "default":"4 / 3" },
+    { "type": "header", "content": "Layout" },
+    { "type": "select", "id": "vert_align", "label": "Vertical alignment", "options": [
+      { "value": "flex-start", "label": "Top" }, { "value": "center", "label": "Center" }, { "value": "flex-end", "label": "Bottom" }
+    ], "default": "center" },
+    { "type": "range", "id": "max_width", "label": "Content max width", "min": 480, "max": 1200, "step": 20, "unit": "px", "default": 880 },
+    { "type": "range", "id": "pad", "label": "Content padding (desktop)", "min": 20, "max": 100, "step": 10, "unit": "px", "default": 40 },
+    { "type": "range", "id": "pad_mobile", "label": "Content padding (mobile)", "min": 10, "max": 50, "step": 5, "unit": "px", "default": 10 },
+    { "type": "select", "id": "mobile_aspect_ratio", "label": "Mobile aspect ratio", "options": [
+      { "value": "16 / 9", "label": "16:9" }, { "value": "4 / 3", "label": "4:3" }, { "value": "1 / 1", "label": "1:1" }, { "value": "3 / 4", "label": "3:4" }
+    ], "default": "4 / 3" },
 
-    { "type":"header", "content":"Breadcrumbs" },
-    { "type":"checkbox", "id":"show_breadcrumbs", "label":"Show breadcrumbs", "default": true },
-    { "type":"range", "id":"bc_size", "label":"Font size", "min":10, "max":22, "step":1, "unit":"px", "default":14 },
-    { "type":"range", "id":"bc_gap", "label":"Spacing below", "min":0, "max":40, "step":4, "unit":"px", "default":4 },
-    { "type":"color", "id":"bc_color", "label":"Text color", "default":"#ffffff" },
-    { "type":"color", "id":"bc_link", "label":"Link color", "default":"#FBBF24" },
+    { "type": "header", "content": "Breadcrumbs" },
+    { "type": "checkbox", "id": "show_breadcrumbs", "label": "Show breadcrumbs", "default": true },
+    { "type": "range", "id": "bc_size", "label": "Font size", "min": 10, "max": 22, "step": 1, "unit": "px", "default": 14 },
+    { "type": "range", "id": "bc_gap", "label": "Spacing below", "min": 0, "max": 40, "step": 4, "unit": "px", "default": 4 },
 
-    { "type":"header", "content":"Headline & Subheadline" },
-    { "type":"text", "id":"h1", "label":"Headline", "default":"Peptides, verified & fast." },
-    { "type":"range", "id":"h1_size", "label":"H1 size", "min":28, "max":88, "step":2, "unit":"px", "default":56 },
-    { "type":"select", "id":"h1_weight", "label":"H1 weight", "options":[
-      { "value":"700", "label":"Bold" }, { "value":"800", "label":"Extra bold" }, { "value":"900", "label":"Black" }
-    ], "default":"900" },
-    { "type":"color", "id":"h1_color", "label":"H1 color", "default":"#ffffff" },
-    { "type":"range", "id":"h1_gap", "label":"Spacing under H1", "min":0, "max":60, "step":4, "unit":"px", "default":20 },
-    { "type":"range", "id":"h1_max", "label":"Max text width", "min":480, "max":1200, "step":20, "unit":"px", "default":920 },
+    { "type": "header", "content": "Headline & Subheadline" },
+    { "type": "text", "id": "h1", "label": "Headline", "default": "Peptides, verified & fast." },
+    { "type": "range", "id": "h1_size", "label": "H1 size", "min": 28, "max": 88, "step": 2, "unit": "px", "default": 56 },
+    { "type": "range", "id": "h1_gap", "label": "Spacing under H1", "min": 0, "max": 60, "step": 4, "unit": "px", "default": 20 },
+    { "type": "range", "id": "h1_max", "label": "Max text width", "min": 480, "max": 1200, "step": 20, "unit": "px", "default": 920 },
 
-    { "type":"textarea", "id":"sub", "label":"Subheadline", "default":"Research-grade peptides with third-party COAs. Same-day Dubai delivery; worldwide express shipping." },
-    { "type":"range", "id":"sub_size", "label":"Subheadline size", "min":14, "max":28, "step":1, "unit":"px", "default":18 },
-    { "type":"color", "id":"sub_color", "label":"Subheadline color", "default":"#ffffff" },
-    { "type":"range", "id":"sub_gap", "label":"Spacing under subheadline", "min":0, "max":60, "step":4, "unit":"px", "default":16 },
+    { "type": "textarea", "id": "sub", "label": "Subheadline", "default": "Research-grade peptides with third-party COAs. Same-day Dubai delivery; worldwide express shipping." },
+    { "type": "range", "id": "sub_size", "label": "Subheadline size", "min": 14, "max": 28, "step": 1, "unit": "px", "default": 18 },
+    { "type": "range", "id": "sub_gap", "label": "Spacing under subheadline", "min": 0, "max": 60, "step": 4, "unit": "px", "default": 16 },
 
-    { "type":"header", "content":"Badges (4)" },
-    { "type":"checkbox", "id":"show_badges", "label":"Show badges", "default": true },
-    { "type":"range", "id":"badge_gap", "label":"Gap & bottom spacing", "min":4, "max":30, "step":2, "unit":"px", "default":12 },
-    { "type":"range", "id":"badge_py", "label":"Badge vertical padding", "min":4, "max":20, "step":2, "unit":"px", "default":8 },
-    { "type":"range", "id":"badge_px", "label":"Badge horizontal padding", "min":8, "max":28, "step":2, "unit":"px", "default":14 },
-    { "type":"range", "id":"badge_radius", "label":"Badge radius", "min":0, "max":30, "step":2, "unit":"px", "default":20 },
-    { "type":"range", "id":"badge_size", "label":"Badge font size", "min":10, "max":18, "step":1, "unit":"px", "default":13 },
-    { "type":"select", "id":"badge_weight", "label":"Badge font weight", "options":[
-      { "value":"500", "label":"Medium" }, { "value":"600", "label":"Semi-bold" }, { "value":"700", "label":"Bold" }
-    ], "default":"600" },
-    { "type":"color", "id":"badge_bg", "label":"Badge background", "default":"#FBBF24" },
-    { "type":"color", "id":"badge_text", "label":"Badge text color", "default":"#1e1e1e" },
-    { "type":"range", "id":"badge_ico", "label":"Badge icon size", "min":12, "max":24, "step":1, "unit":"px", "default":16 },
+    { "type": "header", "content": "Badges (4)" },
+    { "type": "checkbox", "id": "show_badges", "label": "Show badges", "default": true },
+    { "type": "range", "id": "badge_gap", "label": "Gap & bottom spacing", "min": 4, "max": 30, "step": 2, "unit": "px", "default": 12 },
+    { "type": "range", "id": "badge_py", "label": "Badge vertical padding", "min": 4, "max": 20, "step": 2, "unit": "px", "default": 8 },
+    { "type": "range", "id": "badge_px", "label": "Badge horizontal padding", "min": 8, "max": 28, "step": 2, "unit": "px", "default": 14 },
+    { "type": "range", "id": "badge_size", "label": "Badge font size", "min": 10, "max": 18, "step": 1, "unit": "px", "default": 13 },
+    { "type": "range", "id": "badge_ico", "label": "Badge icon size", "min": 12, "max": 24, "step": 1, "unit": "px", "default": 16 },
 
-    { "type":"text", "id":"badge_1_text", "label":"Badge 1", "default":"COA on page" },
-    { "type":"checkbox", "id":"badge_1_show", "label":"Show icon", "default": true },
-    { "type":"text", "id":"badge_2_text", "label":"Badge 2", "default": "Same-day Dubai delivery" },
-    { "type":"checkbox", "id":"badge_2_show", "label":"Show icon", "default": true },
-    { "type":"text", "id":"badge_3_text", "label":"Badge 3", "default": "Free intl. shipping $120+" },
-    { "type":"checkbox", "id":"badge_3_show", "label":"Show icon", "default": true },
-    { "type":"text", "id":"badge_4_text", "label":"Badge 4", "default": "Research use only" },
-    { "type":"checkbox", "id":"badge_4_show", "label":"Show icon", "default": true },
+    { "type": "text", "id": "badge_1_text", "label": "Badge 1", "default": "COA on page" },
+    { "type": "checkbox", "id": "badge_1_show", "label": "Show icon", "default": true },
+    { "type": "text", "id": "badge_2_text", "label": "Badge 2", "default": "Same-day Dubai delivery" },
+    { "type": "checkbox", "id": "badge_2_show", "label": "Show icon", "default": true },
+    { "type": "text", "id": "badge_3_text", "label": "Badge 3", "default": "Free intl. shipping $120+" },
+    { "type": "checkbox", "id": "badge_3_show", "label": "Show icon", "default": true },
+    { "type": "text", "id": "badge_4_text", "label": "Badge 4", "default": "Research use only" },
+    { "type": "checkbox", "id": "badge_4_show", "label": "Show icon", "default": true },
 
-    { "type":"header", "content":"CTAs" },
-    { "type":"text", "id":"btn1_label", "label":"Primary button label", "default":"Shop peptides" },
-    { "type":"url",  "id":"btn1_link",  "label":"Primary button link", "default": "/" },
-    { "type":"text", "id":"btn2_label", "label":"Secondary button label", "default":"Request lab pricing" },
-    { "type":"url",  "id":"btn2_link",  "label":"Secondary button link", "default": "/" },
-    { "type":"range", "id":"btn_gap", "label":"Gap between buttons", "min":8, "max":28, "step":2, "unit":"px", "default":12 },
-    { "type":"range", "id":"btn_size", "label":"Button font size", "min":12, "max":22, "step":1, "unit":"px", "default":16 },
-    { "type":"select", "id":"btn_weight", "label":"Button weight", "options":[
-      { "value":"600", "label":"Semi-bold" }, { "value":"700", "label":"Bold" }
-    ], "default":"700" },
-    { "type":"range", "id":"btn_py", "label":"Button vertical padding (base)", "min":8, "max":22, "step":1, "unit":"px", "default":14 },
-    { "type":"range", "id":"btn_px", "label":"Button horizontal padding (base)", "min":12, "max":60, "step":2, "unit":"px", "default":32 },
-    { "type":"range", "id":"btn_radius", "label":"Button radius", "min":0, "max":20, "step":1, "unit":"px", "default":12 },
-    { "type":"range", "id":"btn_border", "label":"Button border width", "min":0, "max":3, "step":1, "unit":"px", "default":2 }
+    { "type": "header", "content": "CTAs" },
+    { "type": "text", "id": "btn1_label", "label": "Primary button label", "default": "Shop peptides" },
+    { "type": "url", "id": "btn1_link", "label": "Primary button link", "default": "/" },
+    { "type": "text", "id": "btn2_label", "label": "Secondary button label", "default": "Request lab pricing" },
+    { "type": "url", "id": "btn2_link", "label": "Secondary button link", "default": "/" },
+    { "type": "range", "id": "btn_gap", "label": "Gap between buttons", "min": 8, "max": 28, "step": 2, "unit": "px", "default": 12 },
+
+    { "type": "header", "content": "Spacing" },
+    { "type": "range", "id": "padding_top", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding top", "default": 0 },
+    { "type": "range", "id": "padding_bottom", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding bottom", "default": 0 }
   ],
-  "presets": [{ "name":"Pillar · Peptides — Hero" }]
+  "blocks": [
+    {
+      "type": "@app"
+    }
+  ],
+  "presets": [{ "name": "Pillar · Peptides — Hero" }]
 }
 {% endschema %}

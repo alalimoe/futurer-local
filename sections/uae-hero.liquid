@@ -1,42 +1,183 @@
-{% schema %}
-{
-  "name": "UAE Hero",
-  "tag": "section",
-  "class": "section-uae-hero",
-  "settings": [
-    { "type": "header", "content": "Content" },
-    { "type": "text", "id": "heading", "label": "Heading (H1)", "default": "Nootropics in the UAE" },
-    { "type": "textarea", "id": "subheading", "label": "Subheading", "default": "Same-day Dubai delivery, next-day across the Emirates, and DHL Express worldwide — with live tracking from checkout to doorstep." },
-    { "type": "header", "content": "Trust Signals" },
-    { "type": "text", "id": "trust_1", "label": "Trust 1", "default": "4-Hour Dubai Delivery" },
-    { "type": "text", "id": "trust_2", "label": "Trust 2", "default": "DHL Express International" },
-    { "type": "text", "id": "trust_3", "label": "Trust 3", "default": "3rd-Party Lab Tested" },
-    { "type": "header", "content": "Call to Action" },
-    { "type": "text", "id": "cta_text", "label": "CTA Text", "default": "Shop All Nootropics" },
-    { "type": "url", "id": "cta_url", "label": "CTA URL" },
-    { "type": "header", "content": "Background Image" },
-    { "type": "image_picker", "id": "bg_desktop", "label": "Desktop Image" },
-    { "type": "image_picker", "id": "bg_mobile", "label": "Mobile Image" },
-    { "type": "header", "content": "Jump Links (TOC)" },
-    { "type": "text", "id": "toc_1_text", "label": "Link 1 Text", "default": "Delivery" },
-    { "type": "text", "id": "toc_1_anchor", "label": "Link 1 Anchor", "default": "#uae-delivery" },
-    { "type": "text", "id": "toc_2_text", "label": "Link 2 Text", "default": "Legality" },
-    { "type": "text", "id": "toc_2_anchor", "label": "Link 2 Anchor", "default": "#uae-legality" },
-    { "type": "text", "id": "toc_3_text", "label": "Link 3 Text", "default": "Shop" },
-    { "type": "text", "id": "toc_3_anchor", "label": "Link 3 Anchor", "default": "#uae-shop" },
-    { "type": "text", "id": "toc_4_text", "label": "Link 4 Text", "default": "Stack Guide" },
-    { "type": "text", "id": "toc_4_anchor", "label": "Link 4 Anchor", "default": "#uae-stacks" },
-    { "type": "text", "id": "toc_5_text", "label": "Link 5 Text", "default": "Pricing" },
-    { "type": "text", "id": "toc_5_anchor", "label": "Link 5 Anchor", "default": "#uae-pricing" },
-    { "type": "text", "id": "toc_6_text", "label": "Link 6 Text", "default": "بالعربي" },
-    { "type": "text", "id": "toc_6_anchor", "label": "Link 6 Anchor", "default": "#uae-arabic" },
-    { "type": "header", "content": "Colors" },
-    { "type": "color", "id": "bg_color", "label": "Fallback BG", "default": "#0f172a" },
-    { "type": "color", "id": "accent_color", "label": "Accent", "default": "#FBBF24" }
-  ],
-  "presets": [{ "name": "UAE Hero" }]
-}
-{% endschema %}
+{%- style -%}
+  .xo-section--{{ section.id }} {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .xo-section--{{ section.id }} .uah-bg {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .xo-section--{{ section.id }} .uah-bg-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .xo-section--{{ section.id }} .uah-overlay {
+    position: absolute;
+    inset: 0;
+    background: color-mix(in srgb, rgba(var(--color-foreground)) 65%, transparent);
+  }
+
+  .xo-section--{{ section.id }} .uah-inner {
+    position: relative;
+    z-index: 1;
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: center;
+    padding: {{ section.settings.padding_top }}px 0 {{ section.settings.padding_bottom }}px;
+  }
+
+  .xo-section--{{ section.id }} .uah-trust {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+  }
+
+  .xo-section--{{ section.id }} .uah-pill {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: rgba(var(--color-background));
+    background: color-mix(in srgb, rgba(var(--color-background)) 12%, transparent);
+    border: 1px solid color-mix(in srgb, rgba(var(--color-background)) 20%, transparent);
+    border-radius: var(--button-radius);
+    padding: 6px 14px;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  .xo-section--{{ section.id }} .uah-title {
+    font-family: var(--font-heading-family);
+    font-size: clamp(2rem, 5vw, 3.25rem);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin: 0 0 20px;
+    line-height: 1.1;
+    color: rgba(var(--color-background));
+  }
+
+  .xo-section--{{ section.id }} .uah-subtitle {
+    font-size: clamp(1rem, 1.5vw, 1.125rem);
+    line-height: 1.7;
+    color: color-mix(in srgb, rgba(var(--color-background)) 80%, transparent);
+    margin: 0 0 32px;
+    max-width: 640px;
+    margin-inline: auto;
+  }
+
+  .xo-section--{{ section.id }} .uah-ctas {
+    display: flex;
+    justify-content: center;
+  }
+
+  .xo-section--{{ section.id }} .uah-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 0.75rem 2rem;
+    font-family: var(--font-body-family);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    background: rgba(var(--color-accent));
+    color: rgba(var(--color-foreground));
+    border: none;
+    border-radius: var(--button-radius);
+    text-decoration: none;
+    transition: opacity 0.3s var(--out-soft, ease);
+    cursor: pointer;
+  }
+
+  .xo-section--{{ section.id }} .uah-btn:hover {
+    opacity: 0.85;
+  }
+
+  .xo-section--{{ section.id }} .uah-toc {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    background: color-mix(in srgb, rgba(var(--color-background)) 85%, transparent);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
+  }
+
+  .xo-section--{{ section.id }} .uah-toc-inner {
+    max-width: var(--page-width);
+    margin: 0 auto;
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding: 10px var(--page-gap);
+  }
+
+  .xo-section--{{ section.id }} .uah-toc-inner::-webkit-scrollbar {
+    display: none;
+  }
+
+  .xo-section--{{ section.id }} .uah-toc-link {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 16px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    font-family: var(--font-body-family);
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 60%, transparent);
+    border-radius: var(--button-radius);
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background 0.3s var(--out-soft, ease), color 0.3s var(--out-soft, ease);
+    min-height: 44px;
+  }
+
+  .xo-section--{{ section.id }} .uah-toc-link:hover {
+    background: rgba(var(--color-background-2));
+    color: rgba(var(--color-foreground));
+  }
+
+  .xo-section--{{ section.id }} :focus-visible {
+    outline: 2px solid rgba(var(--color-accent));
+    outline-offset: 2px;
+  }
+
+  @media (max-width: 768px) {
+    .xo-section--{{ section.id }} .uah-inner {
+      padding-top: 80px;
+      padding-bottom: 56px;
+    }
+
+    .xo-section--{{ section.id }} .uah-btn {
+      width: 100%;
+      max-width: 320px;
+    }
+
+    .xo-section--{{ section.id }} .uah-toc-inner {
+      padding-left: var(--page-gap-mobile);
+      padding-right: var(--page-gap-mobile);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .xo-section--{{ section.id }} *,
+    .xo-section--{{ section.id }} *::before,
+    .xo-section--{{ section.id }} *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+{%- endstyle -%}
 
 {%- comment -%} ── JSON-LD: WebPage + BreadcrumbList ── {%- endcomment -%}
 <script type="application/ld+json">
@@ -65,7 +206,7 @@
 }
 </script>
 
-<div class="uah-wrapper" id="uah-{{ section.id }}">
+<section {% render 'section-attr' %}>
   {%- if section.settings.bg_desktop != blank -%}
     <picture class="uah-bg">
       {%- if section.settings.bg_mobile != blank -%}
@@ -78,137 +219,84 @@
     <div class="uah-overlay"></div>
   {%- endif -%}
 
-  <div class="uah-inner">
-    {% if section.settings.trust_1 != blank or section.settings.trust_2 != blank or section.settings.trust_3 != blank %}
-      <div class="uah-trust">
-        {% if section.settings.trust_1 != blank %}<span class="uah-pill">{{ section.settings.trust_1 }}</span>{% endif %}
-        {% if section.settings.trust_2 != blank %}<span class="uah-pill">{{ section.settings.trust_2 }}</span>{% endif %}
-        {% if section.settings.trust_3 != blank %}<span class="uah-pill">{{ section.settings.trust_3 }}</span>{% endif %}
-      </div>
-    {% endif %}
+  <xo-container>
+    <div class="uah-inner">
+      {% if section.settings.trust_1 != blank or section.settings.trust_2 != blank or section.settings.trust_3 != blank %}
+        <div class="uah-trust">
+          {% if section.settings.trust_1 != blank %}<span class="uah-pill">{{ section.settings.trust_1 }}</span>{% endif %}
+          {% if section.settings.trust_2 != blank %}<span class="uah-pill">{{ section.settings.trust_2 }}</span>{% endif %}
+          {% if section.settings.trust_3 != blank %}<span class="uah-pill">{{ section.settings.trust_3 }}</span>{% endif %}
+        </div>
+      {% endif %}
 
-    <h1 class="uah-title">{{ section.settings.heading }}</h1>
+      <h1 class="uah-title">{{ section.settings.heading }}</h1>
 
-    {% if section.settings.subheading != blank %}
-      <p class="uah-subtitle">{{ section.settings.subheading }}</p>
-    {% endif %}
+      {% if section.settings.subheading != blank %}
+        <p class="uah-subtitle">{{ section.settings.subheading }}</p>
+      {% endif %}
 
-    {% if section.settings.cta_text != blank %}
-      <div class="uah-ctas">
-        <a href="{{ section.settings.cta_url | default: '/collections/all-nootropics' }}" class="uah-btn">{{ section.settings.cta_text }}</a>
-      </div>
-    {% endif %}
-  </div>
-</div>
+      {% if section.settings.cta_text != blank %}
+        <div class="uah-ctas">
+          <a href="{{ section.settings.cta_url | default: '/collections/all-nootropics' }}" class="uah-btn">{{ section.settings.cta_text }}</a>
+        </div>
+      {% endif %}
+    </div>
+  </xo-container>
 
-{%- comment -%} ── Sticky TOC ── {%- endcomment -%}
-<nav class="uah-toc" id="uah-toc-{{ section.id }}" aria-label="Page navigation">
-  <div class="uah-toc-inner">
-    {%- for i in (1..6) -%}
-      {%- assign t_key = 'toc_' | append: i | append: '_text' -%}
-      {%- assign a_key = 'toc_' | append: i | append: '_anchor' -%}
-      {%- if section.settings[t_key] != blank -%}
-        <a href="{{ section.settings[a_key] }}" class="uah-toc-link">{{ section.settings[t_key] }}</a>
-      {%- endif -%}
-    {%- endfor -%}
-  </div>
-</nav>
+  {%- comment -%} ── Sticky TOC ── {%- endcomment -%}
+  <nav class="uah-toc" aria-label="Page navigation">
+    <div class="uah-toc-inner">
+      {%- for i in (1..6) -%}
+        {%- assign t_key = 'toc_' | append: i | append: '_text' -%}
+        {%- assign a_key = 'toc_' | append: i | append: '_anchor' -%}
+        {%- if section.settings[t_key] != blank -%}
+          <a href="{{ section.settings[a_key] }}" class="uah-toc-link">{{ section.settings[t_key] }}</a>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+  </nav>
+</section>
 
-<style>
-  #uah-{{ section.id }} {
-    --uah-bg: {{ section.settings.bg_color }};
-    --uah-accent: {{ section.settings.accent_color }};
-    --uah-font: var(--font-body-family, sans-serif);
-    --uah-font-heading: var(--font-heading-family, sans-serif);
-    --uah-radius: var(--nx-radius, 14px);
-    --uah-transition: var(--transition-smooth, all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1));
-    --uah-touch: var(--touch-min, 44px);
-  }
-
-  .uah-wrapper {
-    position: relative;
-    background: var(--uah-bg);
-    padding: 100px var(--page-gutter) 72px;
-    text-align: center;
-    font-family: var(--uah-font);
-    overflow: hidden;
-    color: #fff;
-  }
-  .uah-bg { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
-  .uah-bg-img { width: 100%; height: 100%; object-fit: cover; }
-  .uah-overlay { position: absolute; inset: 0; background: rgba(15,23,42,0.65); }
-  .uah-inner { position: relative; z-index: 1; max-width: 800px; margin: 0 auto; }
-
-  .uah-trust { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-bottom: 24px; }
-  .uah-pill {
-    display: inline-flex; align-items: center;
-    font-size: 0.8125rem; font-weight: 600;
-    color: #fff; background: rgba(255,255,255,0.12);
-    border: 1px solid rgba(255,255,255,0.2);
-    border-radius: 100px; padding: 6px 14px;
-    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-  }
-
-  .uah-title {
-    font-family: var(--uah-font-heading);
-    font-size: clamp(2rem, 5vw, 3.25rem);
-    font-weight: 800; letter-spacing: -0.02em;
-    margin: 0 0 20px; line-height: 1.1; color: #fff;
-  }
-  .uah-subtitle {
-    font-size: clamp(1rem, 1.5vw, 1.125rem);
-    line-height: 1.7; color: rgba(255,255,255,0.8);
-    margin: 0 0 32px; max-width: 640px; margin-inline: auto;
-  }
-  .uah-ctas { display: flex; justify-content: center; }
-  .uah-btn {
-    display: inline-flex; align-items: center; justify-content: center;
-    min-height: var(--uah-touch); padding: 0.75rem 2rem;
-    font-family: var(--uah-font); font-size: 0.9375rem; font-weight: 700;
-    background: var(--uah-accent); color: var(--color-text-primary); border: none;
-    border-radius: var(--uah-radius); text-decoration: none;
-    transition: var(--uah-transition); cursor: pointer;
-    box-shadow: var(--shadow-gold-sm);
-  }
-  .uah-btn:hover { box-shadow: var(--shadow-gold-glow); transform: translateY(-1px); }
-
-  /* Sticky TOC */
-  .uah-toc {
-    position: sticky; top: 0; z-index: 40;
-    background: var(--glass-bg-strong, rgba(255,255,255,0.85));
-    backdrop-filter: var(--glass-blur-strong, blur(20px));
-    -webkit-backdrop-filter: var(--glass-blur-strong, blur(20px));
-    border-bottom: 1px solid var(--nx-pill-border, #E5E7EB);
-    padding: 0 var(--page-gutter);
-  }
-  .uah-toc-inner {
-    max-width: var(--container-width-narrow); margin: 0 auto;
-    display: flex; gap: 4px; overflow-x: auto;
-    scrollbar-width: none; -ms-overflow-style: none;
-    padding: 10px 0;
-  }
-  .uah-toc-inner::-webkit-scrollbar { display: none; }
-  .uah-toc-link {
-    flex-shrink: 0; display: inline-flex; align-items: center;
-    padding: 8px 16px; font-size: 0.875rem; font-weight: 600;
-    font-family: var(--font-body-family, sans-serif);
-    color: var(--color-text-muted, #4b5563);
-    border-radius: 100px; text-decoration: none; white-space: nowrap;
-    transition: var(--transition-smooth, all 0.3s ease);
-    min-height: var(--touch-min, 44px);
-  }
-  .uah-toc-link:hover { background: var(--color-bg-secondary, #f1f5f9); color: var(--color-text-main, #111827); }
-
-  .uah-wrapper :focus-visible, .uah-toc :focus-visible { outline: 2px solid var(--uah-accent); outline-offset: 2px; }
-
-  @media (prefers-reduced-motion: reduce) {
-    .uah-wrapper *, .uah-wrapper *::before, .uah-wrapper *::after,
-    .uah-toc *, .uah-toc *::before, .uah-toc *::after {
-      animation-duration: 0.01ms !important; transition-duration: 0.01ms !important;
-    }
-  }
-  @media (max-width: 640px) {
-    .uah-wrapper { padding: 80px var(--page-gutter) 56px; }
-    .uah-btn { width: 100%; max-width: 320px; }
-  }
-</style>
+{% schema %}
+{
+  "name": "UAE Hero",
+  "tag": "section",
+  "class": "section-uae-hero",
+  "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "default" },
+    { "type": "header", "content": "Content" },
+    { "type": "text", "id": "heading", "label": "Heading (H1)", "default": "Nootropics in the UAE" },
+    { "type": "textarea", "id": "subheading", "label": "Subheading", "default": "Same-day Dubai delivery, next-day across the Emirates, and DHL Express worldwide — with live tracking from checkout to doorstep." },
+    { "type": "header", "content": "Trust Signals" },
+    { "type": "text", "id": "trust_1", "label": "Trust 1", "default": "4-Hour Dubai Delivery" },
+    { "type": "text", "id": "trust_2", "label": "Trust 2", "default": "DHL Express International" },
+    { "type": "text", "id": "trust_3", "label": "Trust 3", "default": "3rd-Party Lab Tested" },
+    { "type": "header", "content": "Call to Action" },
+    { "type": "text", "id": "cta_text", "label": "CTA Text", "default": "Shop All Nootropics" },
+    { "type": "url", "id": "cta_url", "label": "CTA URL" },
+    { "type": "header", "content": "Background Image" },
+    { "type": "image_picker", "id": "bg_desktop", "label": "Desktop Image" },
+    { "type": "image_picker", "id": "bg_mobile", "label": "Mobile Image" },
+    { "type": "header", "content": "Jump Links (TOC)" },
+    { "type": "text", "id": "toc_1_text", "label": "Link 1 Text", "default": "Delivery" },
+    { "type": "text", "id": "toc_1_anchor", "label": "Link 1 Anchor", "default": "#uae-delivery" },
+    { "type": "text", "id": "toc_2_text", "label": "Link 2 Text", "default": "Legality" },
+    { "type": "text", "id": "toc_2_anchor", "label": "Link 2 Anchor", "default": "#uae-legality" },
+    { "type": "text", "id": "toc_3_text", "label": "Link 3 Text", "default": "Shop" },
+    { "type": "text", "id": "toc_3_anchor", "label": "Link 3 Anchor", "default": "#uae-shop" },
+    { "type": "text", "id": "toc_4_text", "label": "Link 4 Text", "default": "Stack Guide" },
+    { "type": "text", "id": "toc_4_anchor", "label": "Link 4 Anchor", "default": "#uae-stacks" },
+    { "type": "text", "id": "toc_5_text", "label": "Link 5 Text", "default": "Pricing" },
+    { "type": "text", "id": "toc_5_anchor", "label": "Link 5 Anchor", "default": "#uae-pricing" },
+    { "type": "text", "id": "toc_6_text", "label": "Link 6 Text", "default": "بالعربي" },
+    { "type": "text", "id": "toc_6_anchor", "label": "Link 6 Anchor", "default": "#uae-arabic" },
+    { "type": "header", "content": "Spacing" },
+    { "type": "range", "id": "padding_top", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding top", "default": 100 },
+    { "type": "range", "id": "padding_bottom", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding bottom", "default": 72 }
+  ],
+  "blocks": [
+    { "type": "@app" }
+  ],
+  "presets": [{ "name": "UAE Hero" }]
+}
+{% endschema %}

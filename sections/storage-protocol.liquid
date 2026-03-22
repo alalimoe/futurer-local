@@ -1,72 +1,187 @@
-{% schema %}
-{
-  "name": "Storage Protocol",
-  "tag": "section",
-  "class": "section-storage-protocol",
-  "settings": [
-    {
-      "type": "header",
-      "content": "Theme Colors"
-    },
-    {
-      "type": "color",
-      "id": "bg_color",
-      "label": "Background Color",
-      "default": "#ffffff"
-    },
-    {
-      "type": "color",
-      "id": "card_bg",
-      "label": "Card Background",
-      "default": "#f9fafb"
-    },
-    {
-      "type": "color",
-      "id": "accent_color",
-      "label": "Accent Color (Gold)",
-      "default": "#fbbf24"
-    },
-    {
-      "type": "color",
-      "id": "text_color",
-      "label": "Text Color",
-      "default": "#111827"
-    },
-    {
-      "type": "header",
-      "content": "Text Content"
-    },
-    {
-      "type": "text",
-      "id": "heading",
-      "label": "Heading",
-      "default": "Storage & Stability"
-    },
-    {
-      "type": "text",
-      "id": "subheading",
-      "label": "Subheading",
-      "default": "Follow these guidelines to maintain compound potency."
-    }
-  ],
-  "presets": [
-    {
-      "name": "Storage Protocol"
-    }
-  ]
-}
-{% endschema %}
+{%- style -%}
+  .xo-section--{{ section.id }} {
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
 
-<div class="sp-wrapper">
-  <div class="sp-container">
-    
+  .xo-section--{{ section.id }} .sp-header {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+
+  .xo-section--{{ section.id }} .sp-title {
+    font-family: var(--font-heading-family);
+    font-size: clamp(1.4rem, 2.5vw, 1.75rem);
+    font-weight: 600;
+    margin: 0 0 10px;
+    color: rgba(var(--color-foreground));
+    letter-spacing: -0.025em;
+    line-height: 1.2;
+  }
+
+  .xo-section--{{ section.id }} .sp-subtitle {
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 60%, transparent);
+    font-size: clamp(0.875rem, 1.5vw, 1rem);
+  }
+
+  .xo-section--{{ section.id }} .sp-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  @media (max-width: 768px) {
+    .xo-section--{{ section.id }} .sp-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .xo-section--{{ section.id }} .sp-card {
+    background: rgba(var(--color-background-2));
+    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
+    border-radius: var(--general-radius-3, 2rem);
+    overflow: hidden;
+    transition: border-color 0.3s var(--out-soft, ease);
+  }
+
+  .xo-section--{{ section.id }} .sp-card:hover {
+    border-color: color-mix(in srgb, rgba(var(--color-foreground)) 20%, transparent);
+  }
+
+  .xo-section--{{ section.id }} .sp-card.active-card {
+    border-color: rgba(var(--color-accent));
+    background: rgba(var(--color-background));
+  }
+
+  .xo-section--{{ section.id }} .sp-card-header {
+    padding: 24px;
+    border-bottom: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    background: color-mix(in srgb, rgba(var(--color-background)) 50%, transparent);
+  }
+
+  .xo-section--{{ section.id }} .sp-icon-box {
+    width: 48px;
+    height: 48px;
+    background: rgba(var(--color-background-2));
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 60%, transparent);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+  }
+
+  .xo-section--{{ section.id }} .active-icon {
+    background: rgba(var(--color-accent));
+    color: rgba(var(--color-foreground));
+  }
+
+  .xo-section--{{ section.id }} .sp-card-title {
+    font-family: var(--font-heading-family);
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin: 0 0 8px;
+    color: rgba(var(--color-foreground));
+  }
+
+  .xo-section--{{ section.id }} .sp-badge {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: rgba(var(--color-background-2));
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 60%, transparent);
+    padding: 4px 10px;
+    border-radius: var(--button-radius);
+    font-weight: 600;
+  }
+
+  .xo-section--{{ section.id }} .active-badge {
+    background: color-mix(in srgb, rgba(var(--color-accent)) 15%, transparent);
+    color: rgba(var(--color-accent));
+    border: 1px solid rgba(var(--color-accent));
+  }
+
+  .xo-section--{{ section.id }} .sp-card-body {
+    padding: 24px;
+  }
+
+  .xo-section--{{ section.id }} .sp-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 8%, transparent);
+  }
+
+  .xo-section--{{ section.id }} .sp-row:last-of-type {
+    border-bottom: none;
+    padding-bottom: 0;
+    margin-bottom: 20px;
+  }
+
+  .xo-section--{{ section.id }} .sp-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 60%, transparent);
+    text-transform: uppercase;
+  }
+
+  .xo-section--{{ section.id }} .sp-value {
+    font-size: 15px;
+    font-weight: 600;
+    color: rgba(var(--color-foreground));
+  }
+
+  .xo-section--{{ section.id }} .sp-note {
+    background: rgba(var(--color-background-2));
+    padding: 12px;
+    border-radius: var(--general-radius-1, 1rem);
+    font-size: 13px;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 60%, transparent);
+    display: flex;
+    gap: 8px;
+    align-items: start;
+    line-height: 1.4;
+  }
+
+  .xo-section--{{ section.id }} .sp-note svg {
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .xo-section--{{ section.id }} .warning-note {
+    background: color-mix(in srgb, rgba(var(--color-error)) 8%, transparent);
+    color: rgba(var(--color-error));
+    border: 1px solid color-mix(in srgb, rgba(var(--color-error)) 30%, transparent);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .xo-section--{{ section.id }} *,
+    .xo-section--{{ section.id }} *::before,
+    .xo-section--{{ section.id }} *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+{%- endstyle -%}
+
+<section {% render 'section-attr' %}>
+  <xo-container>
+
     <div class="sp-header">
       <h2 class="sp-title">{{ section.settings.heading }}</h2>
       <p class="sp-subtitle">{{ section.settings.subheading }}</p>
     </div>
 
     <div class="sp-grid">
-      
+
       <div class="sp-card">
         <div class="sp-card-header">
           <div class="sp-icon-box">
@@ -75,7 +190,7 @@
           <h3 class="sp-card-title">Lyophilized (Powder)</h3>
           <span class="sp-badge">Before Mixing</span>
         </div>
-        
+
         <div class="sp-card-body">
           <div class="sp-row">
             <span class="sp-label">Location</span>
@@ -100,7 +215,7 @@
           <h3 class="sp-card-title">Reconstituted (Liquid)</h3>
           <span class="sp-badge active-badge">After Mixing</span>
         </div>
-        
+
         <div class="sp-card-body">
           <div class="sp-row">
             <span class="sp-label">Location</span>
@@ -118,179 +233,40 @@
       </div>
 
     </div>
-  </div>
-</div>
 
-<style>
-  :root {
-    --sp-bg: {{ section.settings.bg_color }};
-    --sp-card-bg: {{ section.settings.card_bg }};
-    --sp-accent: {{ section.settings.accent_color }};
-    --sp-text: {{ section.settings.text_color }};
-    --sp-border: var(--color-border-default);
-    --sp-muted: var(--color-text-secondary);
-    --sp-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  }
+  </xo-container>
+</section>
 
-  .sp-wrapper {
-    background-color: var(--sp-bg);
-    color: var(--sp-text);
-    padding: 60px var(--page-gutter);
-    font-family: var(--sp-font);
-    line-height: 1.5;
-  }
-  
-  .sp-container {
-    max-width: var(--container-width-narrow);
-    margin: 0 auto;
-  }
-
-  /* HEADER */
-  .sp-header {
-    text-align: center;
-    margin-bottom: 40px;
-  }
-  .sp-title {
-    font-size: 28px;
-    font-weight: 800;
-    margin: 0 0 10px;
-    color: var(--sp-text);
-  }
-  .sp-subtitle {
-    color: var(--sp-muted);
-    font-size: 16px;
-  }
-
-  /* GRID */
-  .sp-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 30px;
-  }
-  @media(max-width: 768px) {
-    .sp-grid { grid-template-columns: 1fr; }
-  }
-
-  /* CARDS */
-  .sp-card {
-    background: var(--sp-card-bg);
-    border: 1px solid var(--sp-border);
-    border-radius: 12px;
-    overflow: hidden;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-  }
-  .sp-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
-    border-color: var(--color-border-default);
-  }
-
-  /* Active Card Styling (Liquid) */
-  .sp-card.active-card {
-    border-color: var(--sp-accent);
-    background: var(--color-surface-primary);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-  }
-
-  /* HEADER INSIDE CARD */
-  .sp-card-header {
-    padding: 24px;
-    border-bottom: 1px solid var(--sp-border);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    background: rgba(255,255,255,0.5);
-  }
-  .sp-icon-box {
-    width: 48px;
-    height: 48px;
-    background: var(--color-border-default);
-    color: var(--color-ui-charcoal-hover);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 16px;
-  }
-  .active-icon {
-    background: var(--sp-accent);
-    color: var(--color-text-primary);
-  }
-
-  .sp-card-title {
-    font-size: 18px;
-    font-weight: 700;
-    margin: 0 0 8px;
-    color: var(--sp-text);
-  }
-
-  .sp-badge {
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    background: var(--color-border-default);
-    color: var(--color-ui-charcoal-hover);
-    padding: 4px 10px;
-    border-radius: 99px;
-    font-weight: 700;
-  }
-  .active-badge {
-    background: var(--color-warning-bg);
-    color: var(--color-warning-text);
-    border: 1px solid var(--sp-accent);
-  }
-
-  /* BODY */
-  .sp-card-body {
-    padding: 24px;
-  }
-
-  .sp-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid var(--color-surface-secondary);
-  }
-  .sp-row:last-of-type {
-    border-bottom: none;
-    padding-bottom: 0;
-    margin-bottom: 20px;
-  }
-
-  .sp-label {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--sp-muted);
-    text-transform: uppercase;
-  }
-  .sp-value {
-    font-size: 15px;
-    font-weight: 700;
-    color: var(--sp-text);
-  }
-
-  /* NOTES */
-  .sp-note {
-    background: var(--color-surface-secondary);
-    padding: 12px;
-    border-radius: 8px;
-    font-size: 13px;
-    color: var(--color-text-secondary);
-    display: flex;
-    gap: 8px;
-    align-items: start;
-    line-height: 1.4;
-  }
-  .sp-note svg {
-    flex-shrink: 0;
-    margin-top: 2px;
-  }
-  .warning-note {
-    background: var(--color-error-bg);
-    color: var(--color-error-text);
-    border: 1px solid var(--color-error);
-  }
-</style>
+{% schema %}
+{
+  "name": "Storage Protocol",
+  "tag": "section",
+  "class": "section-storage-protocol",
+  "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "default" },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Storage & Stability"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Follow these guidelines to maintain compound potency."
+    },
+    { "type": "header", "content": "Spacing" },
+    { "type": "range", "id": "padding_top", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding top", "default": 80 },
+    { "type": "range", "id": "padding_bottom", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding bottom", "default": 80 }
+  ],
+  "blocks": [
+    { "type": "@app" }
+  ],
+  "presets": [
+    {
+      "name": "Storage Protocol"
+    }
+  ]
+}
+{% endschema %}

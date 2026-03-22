@@ -1,36 +1,67 @@
 {% comment %} About our peptides — intro copy {% endcomment %}
-{%- assign _id = section.id | replace:'_','' | downcase -%}
-<style>
-#pintro-{{ _id }}{ --b:#E7E9ED; --text:#111; }
-#pintro-{{ _id }} .i-wrap{ padding:24px 16px; border-top:1px solid var(--b); background:#FAFAFB; }
-#pintro-{{ _id }} .i-container{ max-width:{{ section.settings.maxw | default:1200 }}px; margin:0 auto; }
-#pintro-{{ _id }} .i-grid{ display:grid; grid-template-columns:320px 1fr; gap:18px; }
-@media(max-width:900px){ #pintro-{{ _id }} .i-grid{ grid-template-columns:1fr; } }
-#pintro-{{ _id }} .i-title{ margin:0; color:var(--text); font-weight:800; }
-#pintro-{{ _id }} .i-body{ background:#fff; border:1px solid var(--b); border-radius:14px; padding:14px; }
-</style>
 
-<section id="about-peptides" class="pdp-section" aria-label="{{ section.settings.title | escape }}">
-  <div id="pintro-{{ _id }}" class="i-wrap">
-    <div class="i-container">
-      <div class="i-grid">
-        <div><h2 class="i-title">{{ section.settings.title | default: 'About our peptides' }}</h2></div>
-        <div class="i-body">
-          {{ section.settings.rich | default: "<p>Every batch is independently tested for identity (FTIR), purity & potency (HPLC). We publish downloadable COAs and ship fast, worldwide. Research use only.</p>" }}
-        </div>
+{%- style -%}
+  .xo-section--{{ section.id }} {
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+
+  .xo-section--{{ section.id }} .i-grid {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 18px;
+  }
+  @media (max-width: 768px) {
+    .xo-section--{{ section.id }} .i-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .xo-section--{{ section.id }} .i-title {
+    margin: 0;
+    color: rgba(var(--color-foreground));
+    font-weight: 600;
+  }
+
+  .xo-section--{{ section.id }} .i-body {
+    background: rgba(var(--color-background));
+    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
+    border-radius: var(--general-radius-1, 1rem);
+    padding: 14px;
+  }
+
+  .xo-section--{{ section.id }} .i-body p {
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 60%, transparent);
+    margin: 0;
+  }
+{%- endstyle -%}
+
+<section {% render 'section-attr' %}>
+  <xo-container>
+    <div class="i-grid">
+      <div><h2 class="i-title">{{ section.settings.title | default: 'About our peptides' }}</h2></div>
+      <div class="i-body">
+        {{ section.settings.rich | default: "<p>Every batch is independently tested for identity (FTIR), purity & potency (HPLC). We publish downloadable COAs and ship fast, worldwide. Research use only.</p>" }}
       </div>
     </div>
-  </div>
+  </xo-container>
 </section>
 
 {% schema %}
 {
-  "name":"Pillar intro",
-  "settings":[
-    { "type":"range","id":"maxw","min":800,"max":1600,"step":10,"unit":"px","label":"Max width","default":1200 },
-    { "type":"text","id":"title","label":"Heading","default":"About our peptides" },
-    { "type":"richtext","id":"rich","label":"Body" }
+  "name": "Pillar intro",
+  "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "default" },
+    { "type": "text", "id": "title", "label": "Heading", "default": "About our peptides" },
+    { "type": "richtext", "id": "rich", "label": "Body" },
+    { "type": "range", "id": "padding_top", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding top", "default": 24 },
+    { "type": "range", "id": "padding_bottom", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding bottom", "default": 24 }
   ],
-  "presets":[{ "name":"Pillar intro" }]
+  "blocks": [
+    {
+      "type": "@app"
+    }
+  ],
+  "presets": [{ "name": "Pillar intro" }]
 }
 {% endschema %}
