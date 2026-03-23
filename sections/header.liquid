@@ -56,26 +56,27 @@
   <div class='xo-header__left{% if header_style == 'style-5' %} xo-header__left--modifier{% endif %}'>
     <a
       href='{{ routes.root_url }}'
-      aria-label="Logo image"
-      title="Logo image">
+      aria-label="{{ shop.name }} — {{ 'general.home' | t }}"
+>
       {%- if logo_transparent != blank -%}
         <img
           class='xo-header__logo-img xo-header__logo-img--transparent'
           src='{{ logo_transparent | image_url }}'
           alt='{{ logo_alt }}'
           style='--width_mobile: {{ width_mb }}px; --width_desktop: {{ width_dt }}px;--height_mobile: {{ height_mb }}px; --height_desktop: {{ height_dt }}px'
-          loading='lazy'
-          height='auto'
-          width='auto'>
+          loading='eager'
+          fetchpriority='high'
+          width='{{ logo_transparent.width }}'
+          height='{{ logo_transparent.height }}'>
         {% if logo_sticky != blank %}
           <img
             class='xo-header__logo-img xo-header__logo-img--sticky'
             src='{{ logo_sticky | image_url }}'
             alt='{{ logo_alt }}'
             style='--width_mobile: {{ width_mb }}px; --width_desktop: {{ width_dt }}px;--height_mobile: {{ height_mb }}px; --height_desktop: {{ height_dt }}px'
-            loading='lazy'
-            height='auto'
-            width='auto'>
+            loading='eager'
+            width='{{ logo_sticky.width }}'
+            height='{{ logo_sticky.height }}'>
         {% endif %}
       {%- else -%}
         <span class='h4 xo-header__logo-heading-logo'>{{ shop.name }}</span>
@@ -181,7 +182,7 @@
                   xo-name="search"
                   tabindex="0"
                   role="button"
-                  aria-label="search-button"
+                  aria-label="{{ 'general.tooltip.search' | t }}"
                 >
                   {% render 'icon', name: 'search', size: '1.6rem' %}
                 </xo-modal-trigger>
@@ -196,8 +197,7 @@
                   <a
                     href="{%- if customer -%}{{ routes.account_url }}{%- else -%}{{ routes.account_login_url }}{%- endif -%}"
                     class="xo-header__right-item xo-header__right-item--account"
-                    aria-label="Account"
-                    title="Account"
+                    aria-label="{{ 'general.tooltip.sign_in' | t }}"
                   >
                     {% if customer %}
                       {% render 'icon', name: 'user', size: '1.6rem' %}
@@ -217,11 +217,11 @@
                   <a
                     class="xo-header__right-item xo-header__right-item--cart"
                     href="{{ routes.cart_url }}"
-                    aria-label="Cart"
+                    aria-label="{{ 'general.tooltip.cart' | t }}"
                   >
                     {% render 'icon', name: 'cart', size: '1.6rem' %}
                     <div>
-                      <xo-cart-size class="xo-header__right-number">{{ cart.item_count }}</xo-cart-size>
+                      <xo-cart-size class="xo-header__right-number">{%- if cart.item_count > 0 -%}{{ cart.item_count }}{%- endif -%}</xo-cart-size>
                     </div>
                   </a>
                 {% else %}
@@ -230,11 +230,11 @@
                     xo-name="cart"
                     tabindex="0"
                     role="button"
-                    aria-label="cart-button"
+                    aria-label="{{ 'general.tooltip.cart' | t }}"
                   >
                     {% render 'icon', name: 'cart', size: '1.6rem' %}
                     <div>
-                      <xo-cart-size class="xo-header__right-number">{{ cart.item_count }}</xo-cart-size>
+                      <xo-cart-size class="xo-header__right-number">{%- if cart.item_count > 0 -%}{{ cart.item_count }}{%- endif -%}</xo-cart-size>
                     </div>
                   </xo-modal-trigger>
                 {% endif %}
@@ -253,6 +253,23 @@
     </xo-sticky>
   </div>
 </header>
+
+<script>
+(function(){
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var obs = new MutationObserver(function(muts){
+    muts.forEach(function(m){
+      var el = m.target;
+      el.classList.remove('is-updated');
+      void el.offsetWidth;
+      if(el.textContent.trim() !== '') el.classList.add('is-updated');
+    });
+  });
+  document.querySelectorAll('xo-cart-size').forEach(function(el){
+    obs.observe(el, { childList: true, characterData: true, subtree: true });
+  });
+})();
+</script>
 
 {% render 'header-ld-json' %}
 
