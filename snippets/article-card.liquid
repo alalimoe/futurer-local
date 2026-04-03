@@ -46,9 +46,13 @@
 
 {%- if article and article != empty -%}
   <{{ tag_name }} xo-cascade class='{{ container_class }}'>
-    {%- if show_image == true and article.image -%}
+    {%- if show_image == true -%}
       <a href='{{ article.url }}' class='xo-article-card__image {% if settings.enable_border_radius %}xo-article-card__image--radius{% endif %}'>
-        {% render 'image', image: article.image, aspect_ratio: final_aspect_ratio, lazyload: lazyload, disable_alt: true %}
+        {%- if article.image -%}
+          {% render 'image', image: article.image, aspect_ratio: final_aspect_ratio, lazyload: lazyload, disable_alt: true %}
+        {%- else -%}
+          {% render 'image', placeholder: placeholder_image | default: 'blog-apparel-1', aspect_ratio: final_aspect_ratio %}
+        {%- endif -%}
         {%- if show_tags -%}
           <div class='xo-article-card__tag'>
             {% render 'blog-tags', all_tags: article.tags %}
