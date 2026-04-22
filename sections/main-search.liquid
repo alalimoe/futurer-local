@@ -21,6 +21,14 @@
   <xo-filters-top></xo-filters-top>
   <xo-filters xo-section-id='{{ section.id }}' xo-money-format='{{ 100 | money }}' class='xo-filters-main-search'>
     <div class='main-search'>
+      {%- capture search_h1_text -%}
+        {%- if search.performed and search.terms != blank -%}
+          {{ 'templates.search.title' | t }}: {{ search.terms | strip | escape }}
+        {%- else -%}
+          {{ 'general.search.search' | t }}
+        {%- endif -%}
+      {%- endcapture -%}
+      {% render 'visually-hidden', tag_name: 'h1', content: search_h1_text, inline: false %}
       <xo-animate xo-cascade>
         <div class='main-search__header {% if color_schema_header %} color-{{ color_schema_header }} {% endif %}'>
           <xo-container>
