@@ -12,6 +12,22 @@
     backdrop-filter: blur(16px) saturate(180%);
   }
 
+  .xo-section--{{ section.id }} .sjc__wrap {
+    position: relative;
+  }
+
+  .xo-section--{{ section.id }} .sjc__wrap::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 4rem;
+    background: linear-gradient(to right, transparent, color-mix(in srgb, rgba(var(--color-background)) 85%, transparent));
+    pointer-events: none;
+    z-index: 1;
+  }
+
   .xo-section--{{ section.id }} .sjc__row {
     display: flex;
     gap: 0.8rem;
@@ -19,7 +35,12 @@
     flex-wrap: nowrap;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
     padding: 0.8rem 0;
+  }
+
+  .xo-section--{{ section.id }} .sjc__row::-webkit-scrollbar {
+    display: none;
   }
 
   .xo-section--{{ section.id }} .sjc__chip {
@@ -73,6 +94,7 @@
 
 <section {% render 'section-attr' %}>
   <xo-container>
+    <div class="sjc__wrap">
     <nav class="sjc__row" role="navigation" aria-label="On-page navigation">
       <button class="sjc__chip" type="button" data-target="#peptide-research"><span class="sjc__dot" aria-hidden="true"></span>{{ section.settings.label_overview | default: 'Overview' }}</button>
       <button class="sjc__chip" type="button" data-target="#pep-coa-band"><span class="sjc__dot" aria-hidden="true"></span>{{ section.settings.label_coa | default: 'COA' }}</button>
@@ -80,6 +102,7 @@
       <button class="sjc__chip" type="button" data-target="#pep-storage"><span class="sjc__dot" aria-hidden="true"></span>{{ section.settings.label_storage | default: 'Storage' }}</button>
       <button class="sjc__chip" type="button" data-target="#peptide-compare"><span class="sjc__dot" aria-hidden="true"></span>{{ section.settings.label_compare | default: 'Compare' }}</button>
     </nav>
+    </div>
   </xo-container>
 </section>
 

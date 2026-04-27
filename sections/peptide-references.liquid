@@ -1,7 +1,6 @@
-{% doc %}
-  @name Peptide References
-  @desc Citation cards from pep.reference.scientific_reference_list plus optional featured articles from pep.featured_articles. Uses xo-animate for entrance animation (replaces custom IntersectionObserver JS).
-{% enddoc %}
+{% comment %}
+  Peptide references: citation cards from pep.reference metaobject.
+{% endcomment %}
 
 {%- liquid
   assign pep_ref = product.metafields.pep.reference
@@ -222,7 +221,11 @@
                   {% elsif journal %}
                     <div class="prf__titleline">{{ journal }}</div>
                   {% endif %}
-                  <a class="prf__link" href="{{ u }}" target="_blank" rel="noopener">{{ u }}</a>
+                  {%- if title or journal -%}
+                    <a class="prf__link" href="{{ u }}" target="_blank" rel="noopener">View source →</a>
+                  {%- else -%}
+                    <a class="prf__link" href="{{ u }}" target="_blank" rel="noopener">{{ host }} →</a>
+                  {%- endif -%}
                   <div class="prf__meta">
                     {% if is_pubmed %}<span class="prf__chip prf__chip--pubmed">PubMed</span>{% endif %}
                     {% if doi %}<span class="prf__chip prf__chip--doi">DOI: {{ doi }}</span>{% endif %}

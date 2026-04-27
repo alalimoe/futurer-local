@@ -124,6 +124,21 @@
     margin-top: auto;
   }
 
+  .xo-section--{{ section.id }} .yml__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: calc(var(--font-body-scale, 1) * 1.2rem);
+    font-weight: 600;
+    padding: 0.3rem 0.8rem;
+    border-radius: var(--button-radius, 10rem);
+    border: 1px solid color-mix(in srgb, rgba(var(--color-accent)) 35%, transparent);
+    background: color-mix(in srgb, rgba(var(--color-accent)) 7%, rgba(var(--color-background)));
+    color: rgba(var(--color-foreground));
+    margin: 0 0 0.8rem;
+    line-height: 1.1;
+  }
+
   .xo-section--{{ section.id }} .yml__empty {
     color: color-mix(in srgb, rgba(var(--color-foreground)) 55%, transparent);
   }
@@ -168,9 +183,13 @@
                     >
                   {% endif %}
                 </a>
-                <div class="yml__name">{{ p.title }}</div>
+                <a class="yml__name" href="{{ p.url }}">{{ p.title }}</a>
+                {% assign card_assay = p.metafields.pdp.assay_percent %}
+                {% if card_assay %}
+                  <div class="yml__badge">≥{{ card_assay }}% HPLC</div>
+                {% endif %}
                 <div class="yml__price">{{ p.price | money }}</div>
-                <div class="yml__actions"><a class="xo-button xo-button--primary" href="{{ p.url }}">View</a></div>
+                <div class="yml__actions"><a class="xo-button xo-button--primary" href="{{ p.url }}">Shop now</a></div>
               </div>
               {% assign ssr_n = ssr_n | plus: 1 %}
               {% if ssr_n >= section.settings.limit %}
@@ -222,11 +241,15 @@
     var imgTag = src
       ? '<img loading="lazy" width="640" height="480" src="' + esc(src) + '" alt="' + esc(p.title) + '">'
       : '';
+    var tags = (p.tags || []);
+    var hasHplc = tags.some(function(t) { return /hplc/i.test(t); });
+    var badgeHTML = hasHplc ? '<div class="yml__badge">HPLC verified</div>' : '';
     return '<div class="yml__card">' +
       '<a class="yml__media" href="' + esc(url) + '">' + imgTag + '</a>' +
-      '<div class="yml__name">' + esc(p.title) + '</div>' +
+      '<a class="yml__name" href="' + esc(url) + '">' + esc(p.title) + '</a>' +
+      badgeHTML +
       '<div class="yml__price">' + fmt(parseInt(price, 10) || 0) + '</div>' +
-      '<div class="yml__actions"><a class="xo-button xo-button--primary" href="' + esc(url) + '">View</a></div>' +
+      '<div class="yml__actions"><a class="xo-button xo-button--primary" href="' + esc(url) + '">Shop now</a></div>' +
       '</div>';
   }
 
