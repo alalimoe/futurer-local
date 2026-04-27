@@ -1,7 +1,6 @@
-{% doc %}
-  @name You Might Also Like
-  @desc Related products (Shopify recommendations API) + recently viewed (localStorage). Server-side fallback from primary collection. JS needed for API calls and localStorage — no theme web component equivalent.
-{% enddoc %}
+{% comment %}
+  You might also like: recommendations API + recent views; SSR collection fallback.
+{% endcomment %}
 
 {%- liquid
   assign primary_collection = collection
@@ -15,26 +14,18 @@
     assign primary_collection = product.collections.first
   endif
 
-  assign fallback = ''
+  assign rel_ssr_count = 0
   if primary_collection
     assign count = 0
     for p in primary_collection.products
       if p.id != product.id
-        assign img = ''
-        if p.featured_image
-          assign img = p.featured_image | image_url: width: 640
-        endif
-        assign item = '{"title":' | append: p.title | json | append: ',"url":' | append: p.url | json | append: ',"price":' | append: p.price | json | append: ',"image":' | append: img | json | append: ',"handle":' | append: p.handle | json | append: '}'
-        if fallback != ''
-          assign fallback = fallback | append: ','
-        endif
-        assign fallback = fallback | append: item
         assign count = count | plus: 1
         if count >= section.settings.limit
           break
         endif
       endif
     endfor
+    assign rel_ssr_count = count
   endif
 -%}
 
@@ -158,17 +149,43 @@
   <xo-container>
     <h2 class="yml__title">{{ section.settings.title | default: 'You might also like' }}</h2>
 
-    <div class="yml__row" data-row-related style="display:none">
+    <div class="yml__row" data-row-related {% if rel_ssr_count == 0 %}style="display:none"{% endif %}>
       <h3>{{ section.settings.related_label | default: 'Related peptides' }}</h3>
-      <div class="yml__grid" data-rel-grid></div>
+      <div class="yml__grid" data-rel-grid>
+        {% if primary_collection and rel_ssr_count > 0 %}
+          {% assign ssr_n = 0 %}
+          {% for p in primary_collection.products %}
+            {% if p.id != product.id %}
+              <div class="yml__card">
+                <a class="yml__media" href="{{ p.url }}">
+                  {% if p.featured_image %}
+                    <img
+                      loading="lazy"
+                      src="{{ p.featured_image | image_url: width: 640 }}"
+                      alt="{{ p.featured_image.alt | default: p.title | escape }}"
+                      width="640"
+                      height="{{ 640 | divided_by: p.featured_image.aspect_ratio | round }}"
+                    >
+                  {% endif %}
+                </a>
+                <div class="yml__name">{{ p.title }}</div>
+                <div class="yml__price">{{ p.price | money }}</div>
+                <div class="yml__actions"><a class="xo-button xo-button--primary" href="{{ p.url }}">View</a></div>
+              </div>
+              {% assign ssr_n = ssr_n | plus: 1 %}
+              {% if ssr_n >= section.settings.limit %}
+                {% break %}
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+      </div>
     </div>
 
     <div class="yml__row" data-row-recent style="display:none">
       <h3>{{ section.settings.recent_label | default: 'Recently viewed' }}</h3>
       <div class="yml__grid" data-rv-grid></div>
     </div>
-
-    <script type="application/json" id="yml-fallback-{{ section.id }}">[{{ fallback }}]</script>
   </xo-container>
 </section>
 
@@ -187,15 +204,29 @@
     return (window.Shopify && Shopify.formatMoney) ? Shopify.formatMoney(c, money) : (c / 100).toFixed(2);
   }
 
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+  }
+
+  function productImgSrc(p) {
+    if (p.featured_image && p.featured_image.src) return p.featured_image.src;
+    if (p.images && p.images[0] && p.images[0].src) return p.images[0].src;
+    return '';
+  }
+
   function cardHTML(p) {
-    var img = p.image || (p.images && p.images[0] && p.images[0].src);
+    var img = productImgSrc(p);
     var price = p.price || (p.variants && p.variants[0] && p.variants[0].price);
     var url = p.url || ('/products/' + (p.handle || ''));
+    var src = img ? (img.indexOf('?') > -1 ? img + '&width=640' : img + '?width=640') : '';
+    var imgTag = src
+      ? '<img loading="lazy" width="640" height="480" src="' + esc(src) + '" alt="' + esc(p.title) + '">'
+      : '';
     return '<div class="yml__card">' +
-      '<a class="yml__media" href="' + url + '">' + (img ? '<img loading="lazy" src="' + img + (img.indexOf('://') > -1 ? '' : '?width=640') + '" alt="' + (p.title || '') + '">' : '') + '</a>' +
-      '<div class="yml__name">' + (p.title || '') + '</div>' +
+      '<a class="yml__media" href="' + esc(url) + '">' + imgTag + '</a>' +
+      '<div class="yml__name">' + esc(p.title) + '</div>' +
       '<div class="yml__price">' + fmt(parseInt(price, 10) || 0) + '</div>' +
-      '<div class="yml__actions"><a class="xo-button xo-button--primary" href="' + url + '">View</a></div>' +
+      '<div class="yml__actions"><a class="xo-button xo-button--primary" href="' + esc(url) + '">View</a></div>' +
       '</div>';
   }
 
@@ -206,19 +237,23 @@
         var items = (data && data.products) ? data.products : [];
         if (items.length) {
           relRow.style.display = '';
+          relGrid.innerHTML = '';
           items.forEach(function(p) { relGrid.insertAdjacentHTML('beforeend', cardHTML(p)); });
           return true;
         }
-        var fbEl = document.getElementById('yml-fallback-{{ section.id }}');
-        var fb = fbEl ? JSON.parse(fbEl.textContent || '[]') : [];
-        if (fb.length) {
+        if (relGrid.children.length > 0) {
           relRow.style.display = '';
-          fb.slice(0, limit).forEach(function(p) { relGrid.insertAdjacentHTML('beforeend', cardHTML(p)); });
           return true;
         }
         return false;
       })
-      .catch(function() { return false; });
+      .catch(function() {
+        if (relGrid.children.length > 0) {
+          relRow.style.display = '';
+          return true;
+        }
+        return false;
+      });
   }
 
   function loadRecent() {

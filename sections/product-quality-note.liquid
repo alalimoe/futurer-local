@@ -1,7 +1,6 @@
-{% doc %}
-  @name Quality & Testing
-  @desc Accordion section displaying peptide quality info: purity, COA link, form, storage, reconstitution, safety, and disclaimer. Uses native details/summary (no JS). Reads from peptide/npx metafields.
-{% enddoc %}
+{% comment %}
+  Quality & testing accordion: metafields + optional COA links.
+{% endcomment %}
 
 {%- liquid
   assign form_mf = product.metafields.peptide.form
@@ -220,7 +219,7 @@
   }
 {%- endstyle -%}
 
-<section id="quality-testing" {% render 'section-attr' %}>
+<section id="pep-storage" {% render 'section-attr' %}>
   <xo-container>
     <details {% if section.settings.default_open %}open{% endif %}>
       <summary>
@@ -234,7 +233,7 @@
           <span class="qt__chips">
             <span class="qt__chip">≥{{ section.settings.assay_floor | default: '99' }}% purity</span>
             <span class="qt__chip">HPLC verified</span>
-            {% if coa_url %}<span class="qt__chip">Batch COA available</span>{% endif %}
+            {% if coa_url and section.settings.show_coa_link %}<span class="qt__chip">Batch COA available</span>{% endif %}
           </span>
         </span>
         <svg class="qt__caret" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -244,7 +243,7 @@
         {% if section.settings.use_bullets %}
           <ul class="qt__bullets">
             <li>Each batch is tested for identity and purity (HPLC), targeting ≥{{ section.settings.assay_floor | default: '99' }}% assay.</li>
-            {% if coa_url %}
+            {% if coa_url and section.settings.show_coa_link %}
               <li>Independent Certificate of Analysis available: <a class="qt__coa-link" href="{{ coa_url }}" target="_blank" rel="noopener">View COA</a>.</li>
             {% else %}
               <li>COA available on request for current batches.</li>
@@ -256,11 +255,8 @@
         {% endif %}
 
         <div class="qt__verify-row">
-          <span class="qt__verify">
-            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9.5 12.5l2 2 4-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            Verified
-          </span>
-          {% if coa_url %}
+          {% render 'pep-verify-badge', class: 'qt__verify', label: 'Verified' %}
+          {% if coa_url and section.settings.show_coa_link %}
             <a class="qt__coa-link" href="{{ coa_url }}" target="_blank" rel="noopener">View Verified COA</a>
           {% endif %}
         </div>
@@ -331,6 +327,13 @@
         { "value": "flask", "label": "Lab flask" },
         { "value": "shield", "label": "Shield" }
       ]
+    },
+    {
+      "type": "checkbox",
+      "id": "show_coa_link",
+      "label": "Show COA links in this section",
+      "default": true,
+      "info": "Turn off if the COA band appears on the same page to avoid duplicate CTAs."
     },
     {
       "type": "checkbox",

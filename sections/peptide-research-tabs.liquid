@@ -1,17 +1,5 @@
 {% comment %}
-───────────────────────────────────────────────
-SECTION: Peptide Research Tabs (refined)
-Data sources:
-- product.metafields.pep.reference → pep_peptide (metaobject)
-- product.metafields.pep.sections  → list of pep_section (ordered by 'order')
-Fields used:
-  pep_peptide.summary (rich), mechanism (rich), research_applications (list)
-  sequence, molecular_formula, molecular_weight, pubchem_cid, pubchem_url
-  warnings (fallback)
-Notes:
-- Use metafield_tag on rich text to avoid JSON-looking output.
-- Adds kinetic cues & keyboard-friendly tabs.
-───────────────────────────────────────────────
+  Peptide research tabs: overview, structure, research accordion. Anchor id peptide-research for sticky nav.
 {% endcomment %}
 
 {%- liquid
@@ -39,9 +27,7 @@ Notes:
 -%}
 
 {%- style -%}
-  .xo-section--{{ section.id }} {
-    padding-top: {{ section.settings.padding_top }}px;
-    padding-bottom: {{ section.settings.padding_bottom }}px;
+  .xo-section--{{ section.id }} .xo-container {
     font-family: var(--font-body-family);
   }
 
@@ -300,7 +286,7 @@ Notes:
   }
 {%- endstyle -%}
 
-<section {% render 'section-attr' %}>
+<section id="peptide-research" {% render 'section-attr' %}>
   <xo-container>
     <div class="pr-tabbar" role="tablist" aria-label="Peptide research">
       <button class="pr-tab" role="tab" aria-selected="true" aria-controls="pr-tab-overview-{{ section.id }}" id="pr-tabbtn-overview-{{ section.id }}" data-tab="overview">{{ section.settings.tab_label_overview }}</button>
@@ -466,8 +452,9 @@ document.addEventListener('DOMContentLoaded', function(){
 {
   "name": "Peptide research tabs",
   "tag": "section",
+  "class": "section",
   "settings": [
-    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "default" },
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "background-1" },
 
     { "type": "text", "id": "tab_label_overview", "label": "Overview tab label", "default": "Overview" },
     { "type": "text", "id": "tab_label_structure", "label": "Structure tab label", "default": "Structure" },
@@ -477,9 +464,10 @@ document.addEventListener('DOMContentLoaded', function(){
     { "type": "text", "id": "applications_heading", "label": "Applications heading", "default": "Research applications" },
     { "type": "text", "id": "research_fallback", "label": "Research fallback", "default": "Research sections will appear here when attached via pep.sections." },
 
-    { "type": "header", "content": "Spacing" },
-    { "type": "range", "id": "padding_top", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding top", "default": 28 },
-    { "type": "range", "id": "padding_bottom", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding bottom", "default": 28 }
+    { "type": "range", "id": "padding_top_desktop", "label": "Desktop top padding", "min": 0, "max": 100, "step": 4, "default": 28, "unit": "px" },
+    { "type": "range", "id": "padding_bottom_desktop", "label": "Desktop bottom padding", "min": 0, "max": 100, "step": 4, "default": 28, "unit": "px" },
+    { "type": "range", "id": "padding_top_mobile", "label": "Mobile top padding", "min": 0, "max": 80, "step": 4, "default": 24, "unit": "px" },
+    { "type": "range", "id": "padding_bottom_mobile", "label": "Mobile bottom padding", "min": 0, "max": 80, "step": 4, "default": 24, "unit": "px" }
   ],
   "blocks": [
     { "type": "@app" }

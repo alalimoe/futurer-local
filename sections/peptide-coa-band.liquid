@@ -1,7 +1,6 @@
-{% doc %}
-  @name COA Band
-  @desc Full COA display section with archive selector, COA/HPLC images, batch metadata, and verification status. Distinguishes independent lab (BT Labs) vs supplier-only documents.
-{% enddoc %}
+{% comment %}
+  COA band: archive, images, batch metadata, third-party vs supplier COA.
+{% endcomment %}
 
 {%- liquid
   assign pdp_coa_override = product.metafields.pdp.coa_url
@@ -191,6 +190,20 @@
   if has_primary_coa and coa_status != 'pending' and coa_status != 'hidden'
     assign should_render_pcb = true
   endif
+
+  assign pcb_verify_label = 'Supplier COA'
+  case coa_status
+    when 'superseded'
+      assign pcb_verify_label = 'Superseded COA'
+    when 'pending'
+      assign pcb_verify_label = 'COA pending'
+    else
+      if is_third_party
+        assign pcb_verify_label = 'Verified (independent lab)'
+      else
+        assign pcb_verify_label = 'Supplier COA'
+      endif
+  endcase
 -%}
 
 {% if should_render_pcb %}
@@ -338,15 +351,7 @@
   <xo-container>
     <div class="pcb__head">
       <h2 class="pcb__title">{{ section.settings.heading | default: 'Certificate(s) of Analysis (COA)' }}</h2>
-      <span class="pcb__verify">
-        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9.5 12.5l2 2 4-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        {% case coa_status %}
-          {% when 'superseded' %}Superseded COA
-          {% when 'pending' %}COA pending
-          {% else %}
-            {% if is_third_party %}Verified (independent lab){% else %}Supplier COA{% endif %}
-        {% endcase %}
-      </span>
+      {% render 'pep-verify-badge', class: 'pcb__verify', label: pcb_verify_label %}
       {% if verified_on_mf %}
         <span class="pcb__meta">
           {% if verified_on_mf contains '-' or verified_on_mf contains '/' %}
@@ -364,7 +369,7 @@
       <div class="pcb__grid">
         <div class="pcb__col">
           <div class="pcb__actions">
-            {% render 'button', text: section.settings.view_coa_label, link: coa_url, style: 'secondary', open_in_new_tab: true %}
+            {% render 'button', text: section.settings.view_coa_label, link: coa_url, style: 'link', open_in_new_tab: true %}
           </div>
 
           <div class="pcb__archive">
