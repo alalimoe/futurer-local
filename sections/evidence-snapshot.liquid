@@ -1,3 +1,6 @@
+{% comment %}
+  Evidence snapshot: metaobject claims as numbered accordions; citations below notes.
+{% endcomment %}
 {%- assign snapshot_ref = product.metafields.evidence.snapshot -%}
 {%- assign snapshot = snapshot_ref.value | default: snapshot_ref -%}
 {%- assign claims = snapshot.claims_list.value | default: snapshot.claims_list -%}
@@ -11,9 +14,9 @@
   }
 
   .xo-section--{{ section.id }} .es__wrap {
-    padding: 18px;
-    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
+    padding: 18px 0;
     border-radius: var(--general-radius-3, 2rem);
+    background: color-mix(in srgb, rgba(var(--color-foreground)) 2.5%, rgba(var(--color-background)));
   }
 
   .xo-section--{{ section.id }} .es__eyebrow {
@@ -35,110 +38,193 @@
   .xo-section--{{ section.id }} .es__hint {
     font-size: calc(var(--font-body-scale, 1) * 1.3rem);
     color: color-mix(in srgb, rgba(var(--color-foreground)) 55%, transparent);
+    margin-top: 0.4rem;
   }
 
   .xo-section--{{ section.id }} .es__grid {
     list-style: none;
-    margin: 14px 0 0;
+    margin: 1.4rem 0 0;
     padding: 0;
     display: grid;
     grid-template-columns: 1fr;
-    gap: 18px;
+    gap: 10px;
+  }
+
+  .xo-section--{{ section.id }} .es__grid > li {
+    margin: 0;
+    padding: 0;
   }
 
   .xo-section--{{ section.id }} .es-claim {
-    display: grid;
-    grid-template-columns: 32px 1fr;
-    gap: 12px;
-    padding: 14px;
     border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 8%, transparent);
     border-radius: var(--general-radius-1, 1rem);
+    background: rgba(var(--color-background));
+    overflow: hidden;
     transition: border-color 0.3s var(--out-soft, ease);
   }
 
   .xo-section--{{ section.id }} .es-claim:hover {
-    border-color: color-mix(in srgb, rgba(var(--color-foreground)) 20%, transparent);
+    border-color: color-mix(in srgb, rgba(var(--color-foreground)) 16%, transparent);
   }
 
-  .xo-section--{{ section.id }} .es-claim__icon {
-    width: 28px;
-    height: 28px;
+  .xo-section--{{ section.id }} .es-claim[open] {
+    border-color: color-mix(in srgb, rgba(var(--color-accent)) 35%, transparent);
+  }
+
+  .xo-section--{{ section.id }} .es-claim summary {
+    list-style: none;
     display: flex;
     align-items: center;
+    gap: 1rem;
+    padding: 1.2rem 1.4rem;
+    cursor: pointer;
+    min-height: 44px;
+    font-family: var(--font-heading-family, sans-serif);
+    font-weight: 600;
+    font-size: calc(var(--font-body-scale, 1) * 1.5rem);
+    color: rgba(var(--color-foreground));
+    line-height: 1.25;
+  }
+
+  .xo-section--{{ section.id }} .es-claim summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .xo-section--{{ section.id }} .es-claim summary:focus-visible {
+    outline: 2px solid rgba(var(--color-accent));
+    outline-offset: -2px;
+  }
+
+  .xo-section--{{ section.id }} .es-claim__num {
+    flex-shrink: 0;
+    width: 2.8rem;
+    height: 2.8rem;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
     justify-content: center;
-    border-radius: 8px;
-    background: color-mix(in srgb, rgba(var(--color-accent)) 15%, transparent);
-    font-size: 16px;
+    font-size: calc(var(--font-body-scale, 1) * 1.3rem);
+    font-weight: 600;
+    border: 1.5px solid rgba(var(--color-accent));
+    color: rgba(var(--color-foreground));
+    background: color-mix(in srgb, rgba(var(--color-accent)) 10%, rgba(var(--color-background)));
   }
 
   .xo-section--{{ section.id }} .es-claim__headline {
-    font-weight: 600;
-    margin: 0 0 6px;
-    color: rgba(var(--color-foreground));
+    flex: 1;
+    min-width: 0;
+    text-align: start;
+  }
+
+  .xo-section--{{ section.id }} .es-claim__chev {
+    flex-shrink: 0;
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 45%, transparent);
+    transition: transform 0.25s var(--out-soft, ease);
+  }
+
+  .xo-section--{{ section.id }} .es-claim[open] .es-claim__chev {
+    transform: rotate(180deg);
+  }
+
+  .xo-section--{{ section.id }} .es-claim__body {
+    padding: 0 1.4rem 1.4rem 1.4rem;
+    padding-left: calc(1.4rem + 2.8rem + 1rem);
   }
 
   .xo-section--{{ section.id }} .es-claim__notes {
     font-size: calc(var(--font-body-scale, 1) * 1.4rem);
     color: rgba(var(--color-foreground));
-    line-height: 1.5;
+    line-height: 1.55;
+    opacity: 0.88;
+  }
+
+  .xo-section--{{ section.id }} .es-claim__notes p {
+    margin: 0 0 0.6rem;
   }
 
   .xo-section--{{ section.id }} .es-claim__notes p:last-child {
-    display: inline;
+    margin-bottom: 0;
   }
 
-  .xo-section--{{ section.id }} .es-claim__notes .es-ref {
-    margin-left: 6px;
+  .xo-section--{{ section.id }} .es-claim__cite {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 8%, transparent);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    align-items: center;
+  }
+
+  .xo-section--{{ section.id }} .es-claim__cite-label {
+    font-size: calc(var(--font-body-scale, 1) * 1.2rem);
+    font-weight: 600;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 55%, transparent);
   }
 
   .xo-section--{{ section.id }} .es-ref {
     display: inline-flex;
     align-items: center;
+    gap: 0.4rem;
     font-weight: 600;
-    font-size: calc(var(--font-body-scale, 1) * 1.2rem);
-    line-height: 1;
-    padding: 2px 6px;
-    border-radius: 6px;
-    background: color-mix(in srgb, rgba(var(--color-foreground)) 5%, transparent);
+    font-size: calc(var(--font-body-scale, 1) * 1.3rem);
+    line-height: 1.2;
+    padding: 0.5rem 1rem;
+    border-radius: var(--button-radius, 10rem);
+    border: 1px solid color-mix(in srgb, rgba(var(--color-accent)) 40%, transparent);
+    background: color-mix(in srgb, rgba(var(--color-accent)) 8%, rgba(var(--color-background)));
     color: rgba(var(--color-accent));
     text-decoration: none;
-    transition: background 0.3s var(--out-soft, ease), color 0.3s var(--out-soft, ease);
+    transition: background 0.3s var(--out-soft, ease), color 0.3s var(--out-soft, ease), border-color 0.3s var(--out-soft, ease);
   }
 
   .xo-section--{{ section.id }} .es-ref:hover {
     background: rgba(var(--color-accent));
     color: rgba(var(--color-background));
+    border-color: rgba(var(--color-accent));
   }
 
   .xo-section--{{ section.id }} .es-ref:focus-visible {
     outline: 2px solid rgba(var(--color-accent));
     outline-offset: 2px;
-    border-radius: 6px;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    @keyframes es-slide-in {
+      from { opacity: 0; transform: translateY(-0.5rem); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .xo-section--{{ section.id }} .es-claim[open] .es-claim__body {
+      animation: es-slide-in 0.22s var(--out-soft, ease) both;
+    }
   }
 
   @media (min-width: 768px) {
     .xo-section--{{ section.id }} .es__wrap {
-      padding: 24px 28px;
+      padding: 24px 0;
     }
 
     .xo-section--{{ section.id }} .es__grid {
       grid-template-columns: 1fr 1fr;
+      gap: 14px;
     }
   }
 
   @media (max-width: 768px) {
-    .xo-section--{{ section.id }} .es__grid {
-      gap: 12px;
-    }
-
-    .xo-section--{{ section.id }} .es-claim {
-      padding: 10px;
+    .xo-section--{{ section.id }} .es-claim__body {
+      padding-left: 1.4rem;
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
     .xo-section--{{ section.id }} .es-claim,
-    .xo-section--{{ section.id }} .es-ref {
+    .xo-section--{{ section.id }} .es-ref,
+    .xo-section--{{ section.id }} .es-claim__chev {
       transition: none;
     }
   }
@@ -146,8 +232,8 @@
 
 <section {% render 'section-attr' %}>
   <xo-container>
-    <xo-animate xo-animation="fade-up">
-      <div class="es__wrap" id="evidence-snapshot" aria-label="Clinical evidence snapshot">
+    <div class="es__wrap" id="evidence-snapshot" aria-label="Clinical evidence snapshot">
+      <xo-animate xo-animation="fade-up">
         <header class="es__header">
           <div class="es__eyebrow">{{ section.settings.eyebrow_text }}</div>
           <h3 class="es__title">
@@ -157,34 +243,50 @@
             {{ section.settings.hint_text }}
           </div>
         </header>
+      </xo-animate>
 
+      <xo-animate xo-animation="fade-up" xo-cascade>
         <ul class="es__grid" role="list">
           {%- for claim in claims -%}
             {%- assign headline = claim.headline.value | default: claim.headline -%}
-            {%- assign source   = claim.sources.value  | default: claim.sources  -%}
-            {%- assign lbl      = source.label.value   | default: source.label   -%}
-            {%- assign url      = source.pubmed_url.value | default: source.pubmed_url -%}
+            {%- assign source = claim.sources.value | default: claim.sources -%}
+            {%- assign lbl = '' -%}
+            {%- assign url = '' -%}
+            {%- if source -%}
+              {%- assign lbl = source.label.value | default: source.label -%}
+              {%- assign url = source.pubmed_url.value | default: source.pubmed_url -%}
+            {%- endif -%}
+            {%- assign notes_html = claim.notes | metafield_tag -%}
 
-            <li class="es-claim">
-              <div class="es-claim__icon" aria-hidden="true">⚡</div>
-              <div class="es-claim__body">
-                <div class="es-claim__headline">{{ headline }}</div>
-
-                <div class="es-claim__notes">
-                  {%- assign notes_html = claim.notes | metafield_tag -%}
-                  {{ notes_html }}
+            <li>
+              <details class="es-claim" name="evidence-claims-{{ section.id }}" {% if forloop.first %}open{% endif %}>
+                <summary>
+                  <span class="es-claim__num" aria-hidden="true">{{ forloop.index }}</span>
+                  <span class="es-claim__headline">{{ headline }}</span>
+                  <span class="es-claim__chev" aria-hidden="true">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                  </span>
+                </summary>
+                <div class="es-claim__body">
+                  <div class="es-claim__notes rte">{{ notes_html }}</div>
                   {%- if url != blank and lbl != blank -%}
                     {%- unless notes_html contains lbl -%}
-                      <a class="es-ref" href="{{ url }}" target="_blank" rel="nofollow noopener">[{{ lbl }}]</a>
+                      <div class="es-claim__cite">
+                        <span class="es-claim__cite-label">Source</span>
+                        <a class="es-ref" href="{{ url }}" target="_blank" rel="nofollow noopener">
+                          {{ lbl }}
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
+                        </a>
+                      </div>
                     {%- endunless -%}
                   {%- endif -%}
                 </div>
-              </div>
+              </details>
             </li>
           {%- endfor -%}
         </ul>
-      </div>
-    </xo-animate>
+      </xo-animate>
+    </div>
   </xo-container>
 </section>
 
@@ -221,7 +323,7 @@
       "type": "text",
       "id": "hint_text",
       "label": "Hint text",
-      "default": "Hover or tap the numbered chips to see the study details."
+      "default": "Tap a finding to read the study detail."
     },
     {
       "type": "header",
