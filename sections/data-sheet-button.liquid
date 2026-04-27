@@ -1,15 +1,19 @@
-{% doc %}
-  @name Data Sheet Button
-  @desc Renders a download button when pep.data_sheet_pdf metafield is present. Uses theme button snippet.
-{% enddoc %}
+{% comment %}
+  Data sheet download link; optional hide when no PDF.
+{% endcomment %}
 
 {%- liquid
   assign ds = nil
   if product.metafields.pep.data_sheet_pdf and product.metafields.pep.data_sheet_pdf.value and product.metafields.pep.data_sheet_pdf.value.url
     assign ds = product.metafields.pep.data_sheet_pdf.value.url
   endif
+  assign hide_empty = section.settings.hide_when_empty
+  if hide_empty == nil
+    assign hide_empty = true
+  endif
 -%}
 
+{% if ds or hide_empty == false %}
 {%- style -%}
   .xo-section--{{ section.id }} .ds__card {
     display: flex;
@@ -45,7 +49,7 @@
         {% render 'button',
           text: section.settings.label,
           link: ds,
-          style: 'secondary',
+          style: 'link',
           open_in_new_tab: true
         %}
       {% else %}
@@ -54,6 +58,7 @@
     </div>
   </xo-container>
 </section>
+{% endif %}
 
 {% schema %}
 {
@@ -78,6 +83,12 @@
       "id": "label",
       "label": "Button label",
       "default": "Download Data Sheet (PDF)"
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_when_empty",
+      "label": "Hide section when no data sheet",
+      "default": true
     },
     {
       "type": "range",

@@ -1,7 +1,6 @@
-{% doc %}
-  @name Sticky Jump Chips
-  @desc Sticky on-page navigation bar with scroll-spy highlighting. Place directly under the hero section. Targets section IDs via configurable labels. JS retained for smooth scroll and scrollspy (no theme web component equivalent).
-{% enddoc %}
+{% comment %}
+  Sticky jump chips: on-page nav with scroll-spy; configurable section targets.
+{% endcomment %}
 
 {%- style -%}
   .xo-section--{{ section.id }} {
@@ -91,6 +90,15 @@
   var chips = wrap.querySelectorAll('.sjc__chip');
   var topOffset = {{ section.settings.sticky_top | default: 64 }};
 
+  chips.forEach(function(btn) {
+    var sel = btn.getAttribute('data-target');
+    if (!sel || !document.querySelector(sel)) {
+      btn.style.display = 'none';
+      btn.setAttribute('aria-hidden', 'true');
+      btn.setAttribute('tabindex', '-1');
+    }
+  });
+
   function scrollToTarget(sel) {
     var el = document.querySelector(sel);
     if (!el) return;
@@ -102,16 +110,24 @@
     }
   }
 
+  function visibleChips() {
+    return Array.from(chips).filter(function(c) { return c.getAttribute('aria-hidden') !== 'true'; });
+  }
+
   chips.forEach(function(btn) {
     btn.addEventListener('click', function() {
+      if (btn.getAttribute('aria-hidden') === 'true') return;
       scrollToTarget(btn.getAttribute('data-target'));
     });
     btn.addEventListener('keydown', function(e) {
       if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
-        var all = Array.from(chips);
+        var all = visibleChips();
+        if (all.length < 2) return;
         var i = all.indexOf(btn);
+        if (i < 0) return;
         var next = e.key === 'ArrowRight' ? (i + 1) % all.length : (i - 1 + all.length) % all.length;
         all[next].focus();
+        e.preventDefault();
       }
     });
   });

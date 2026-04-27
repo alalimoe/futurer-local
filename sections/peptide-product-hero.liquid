@@ -1,7 +1,6 @@
-{% doc %}
-  @name Peptide Product Hero
-  @desc PDP hero for peptide products. Two-column layout with theme media carousel (left) and product info with peptide-specific metadata, COA, HPLC/MS, purity verification, and microcopy (right). Built on xo-product for native variant reactivity — zero custom JS.
-{% enddoc %}
+{% comment %}
+  Peptide PDP hero: media carousel + buy box + specs; xo-product variant sync.
+{% endcomment %}
 
 {%- liquid
   assign selected_variant = product.selected_or_first_available_variant
@@ -118,6 +117,15 @@
 
   assign atc_label = section.settings.atc_label | default: 'Add to Cart'
   assign sold_out_text = 'products.product.sold_out' | t | default: 'Sold Out'
+
+  assign bc_collection = nil
+  assign pc_handle = product.metafields.pdp.primary_collection
+  if pc_handle and collections[pc_handle]
+    assign bc_collection = collections[pc_handle]
+  endif
+  if bc_collection == nil and product.collections.size > 0
+    assign bc_collection = product.collections.first
+  endif
 -%}
 
 {{ 'product-info-media-carousel.css' | asset_url | stylesheet_tag }}
@@ -145,6 +153,11 @@
     outline: 2px solid rgba(var(--color-accent));
     outline-offset: 2px;
     border-radius: 4px;
+  }
+
+  .xo-section--{{ section.id }} .xo-product-variant .xo-field-radio__label,
+  .xo-section--{{ section.id }} .xo-product-variant__inner-name .xo-product-variant__value-selected {
+    text-transform: lowercase;
   }
 
   .xo-section--{{ section.id }} .pp__ref {
@@ -398,7 +411,6 @@
         <nav class="pp__breadcrumbs" aria-label="Breadcrumb">
           <a href="{{ routes.root_url }}">Home</a>
           <span aria-hidden="true"> / </span>
-          {%- assign bc_collection = product.collections | first -%}
           {% if bc_collection %}
             <a href="{{ bc_collection.url }}">{{ bc_collection.title }}</a>
           {% else %}
@@ -570,10 +582,7 @@
 
               {% if coa_url %}
                 <div class="pp__coa-row">
-                  <span class="pp__verify" title="Batch verified">
-                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9.5 12.5l2 2 4-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    Verified
-                  </span>
+                  {% render 'pep-verify-badge', class: 'pp__verify', label: 'Verified', title: 'Batch verified' %}
                   <a href="{{ coa_url }}" target="_blank" rel="noopener">View Verified COA</a>
                 </div>
               {% endif %}
@@ -608,7 +617,7 @@
                   {% render 'button',
                     text: section.settings.coa_label,
                     link: coa_url,
-                    style: 'secondary',
+                    style: 'link',
                     open_in_new_tab: true
                   %}
                 {% endif %}
