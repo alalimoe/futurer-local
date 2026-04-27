@@ -118,40 +118,54 @@
   <xo-container>
     <xo-animate xo-animation="fade-up" xo-cascade>
     <div class="evs__row" role="status" aria-label="Quality evidence snapshot">
-      <a {% if has_coa %}href="{{ coa_url }}" target="_blank" rel="noopener"{% endif %}
-         class="evs__chip {% if has_coa %}evs__chip--on{% else %}evs__chip--off{% endif %}"
-         aria-label="Certificate of Analysis {% if has_coa %}available{% else %}not available{% endif %}">
-        <svg class="ico" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path d="M6 4h12v16H6z" stroke="currentColor" stroke-width="1.6"/>
-          <path d="M9 8h6M9 12h6M9 16h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-        </svg>
-        <span>COA</span>{% if has_coa %}<span aria-hidden="true">✓</span>{% endif %}
-      </a>
+      {% if has_coa %}
+        <a href="{{ coa_url }}" target="_blank" rel="noopener"
+           class="evs__chip evs__chip--on"
+           aria-label="Certificate of Analysis — view document">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M6 4h12v16H6z" stroke="currentColor" stroke-width="1.6"/>
+            <path d="M9 8h6M9 12h6M9 16h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          </svg>
+          <span>COA</span><span aria-hidden="true">✓</span>
+        </a>
+      {% endif %}
 
-      <span class="evs__chip {% if has_hplc %}evs__chip--on{% else %}evs__chip--off{% endif %}"
-            aria-label="HPLC {% if has_hplc %}verified{% else %}not attached{% endif %}">
-        <svg class="ico" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path d="M5 17h14M7 17V7m4 10V9m4 8V5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-        </svg>
-        <span>HPLC</span>{% if has_hplc %}<span aria-hidden="true">✓</span>{% endif %}
-      </span>
+      {% if has_hplc %}
+        <span class="evs__chip evs__chip--on" aria-label="HPLC chromatogram verified">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M5 17h14M7 17V7m4 10V9m4 8V5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          </svg>
+          <span>HPLC</span><span aria-hidden="true">✓</span>
+        </span>
+      {% endif %}
 
-      <span class="evs__chip {% if has_ms %}evs__chip--on{% else %}evs__chip--off{% endif %}"
-            aria-label="Mass spectrometry {% if has_ms %}available{% else %}not attached{% endif %}">
-        <svg class="ico" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path d="M4 12h4l2 6 3-12 2 6h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        <span>MS</span>{% if has_ms %}<span aria-hidden="true">✓</span>{% endif %}
-      </span>
+      {% if has_ms %}
+        <span class="evs__chip evs__chip--on" aria-label="Mass spectrometry confirmed">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M4 12h4l2 6 3-12 2 6h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span>MS</span><span aria-hidden="true">✓</span>
+        </span>
+      {% endif %}
 
       {% if assay %}
-        <span class="evs__chip evs__chip--on" aria-label="Assay">
+        <span class="evs__chip evs__chip--on" aria-label="Assay result">
           <svg class="ico" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path d="M8 5h8l1 3-9 11H6l9-11H7l1-3z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
           <span>Assay</span><span aria-hidden="true">≥{{ assay }}%</span>
         </span>
       {% endif %}
+
+      {% unless has_coa or has_hplc or has_ms or assay %}
+        <span class="evs__chip evs__chip--off" aria-label="Quality documentation pending">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/>
+            <path d="M12 8v4m0 4h.01" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          </svg>
+          <span>QC pending</span>
+        </span>
+      {% endunless %}
     </div>
     </xo-animate>
   </xo-container>
