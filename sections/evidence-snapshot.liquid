@@ -206,12 +206,24 @@
 
   @media (min-width: 768px) {
     .xo-section--{{ section.id }} .es__wrap {
-      padding: 24px 0;
+      padding: 32px 0;
+    }
+
+    .xo-section--{{ section.id }} .es__header {
+      margin-bottom: 2rem;
+    }
+
+    .xo-section--{{ section.id }} .es-claim summary {
+      padding: 1.4rem 1.8rem;
+    }
+
+    .xo-section--{{ section.id }} .es-claim__body {
+      padding: 0 1.8rem 1.6rem calc(1.8rem + 2.8rem + 1rem);
     }
 
     .xo-section--{{ section.id }} .es__grid {
       grid-template-columns: 1fr 1fr;
-      gap: 14px;
+      gap: 16px;
     }
   }
 
@@ -259,7 +271,7 @@
             {%- assign notes_html = claim.notes | metafield_tag -%}
 
             <li>
-              <details class="es-claim" name="evidence-claims-{{ section.id }}" {% if forloop.first %}open{% endif %}>
+              <details class="es-claim" name="evidence-claims-{{ section.id }}" open>
                 <summary>
                   <span class="es-claim__num" aria-hidden="true">{{ forloop.index }}</span>
                   <span class="es-claim__headline">{{ headline }}</span>
@@ -289,6 +301,32 @@
     </div>
   </xo-container>
 </section>
+
+<script>
+(function () {
+  var MQ = window.matchMedia('(min-width: 768px)');
+  var section = document.querySelector('.evidence-snapshot-section');
+  if (!section) return;
+  var items = Array.from(section.querySelectorAll('details.es-claim'));
+  if (!items.length) return;
+  var savedName = items[0].getAttribute('name');
+
+  function apply(isDesktop) {
+    items.forEach(function (el, i) {
+      if (isDesktop) {
+        el.removeAttribute('name');
+        el.open = true;
+      } else {
+        if (savedName) el.setAttribute('name', savedName);
+        el.open = i === 0;
+      }
+    });
+  }
+
+  apply(MQ.matches);
+  MQ.addEventListener('change', function (e) { apply(e.matches); });
+})();
+</script>
 
 {%- endif -%}
 
