@@ -42,6 +42,10 @@
             <h1 class="xo-product-info-content__title h4 {{ style_title }}" {{ block.shopify_attributes }}>
               {{ product.title }}
             </h1>
+            {%- assign benefit = product.metafields.custom.benefit_statement.value -%}
+            {%- if benefit != blank -%}
+              <p class="xo-product-info-content__benefit">{{ benefit }}</p>
+            {%- endif -%}
           </xo-animate>
 
           <!-- description -->
@@ -92,6 +96,12 @@
                   {%- render 'quantity', size: 'md', variant: product.selected_or_first_available_variant, product: product, is_cart: false %}
                 </div>
               </xo-animate>
+              {%- if product.selected_or_first_available_variant.available -%}
+                <p class="xo-product-info-content__stock-badge">
+                  <span class="xo-product-info-content__stock-dot" aria-hidden="true"></span>
+                  {{ 'products.product.stock_ships_today' | t }}
+                </p>
+              {%- endif -%}
               <div class="xo-product-info-content__group">
                 <xo-animate xo-cascade class="xo-product-info-content__add-cart">
                   {% form 'product', product, xo-buy-ignore: 'true' %}
@@ -125,6 +135,10 @@
                   {% endif %}
                 </xo-animate>
               </div>
+              <p class="xo-product-info-content__guarantee">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                {{ 'products.product.delivery_refund_guarantee' | t }}
+              </p>
             </div>
           </div>
 
