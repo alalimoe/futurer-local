@@ -1,11 +1,24 @@
 {% comment %}
   Evidence snapshot: metaobject claims as numbered accordions; citations below notes.
+  Supports evidence.snapshots (List) for stacked products, falls back to evidence.snapshot (One).
 {% endcomment %}
-{%- assign snapshot_ref = product.metafields.evidence.snapshot -%}
-{%- assign snapshot = snapshot_ref.value | default: snapshot_ref -%}
-{%- assign claims = snapshot.claims_list.value | default: snapshot.claims_list -%}
+{%- assign snapshots = product.metafields.evidence.snapshots.value -%}
+{%- assign use_list = true -%}
+{%- if snapshots == blank or snapshots.size == 0 -%}
+  {%- assign use_list = false -%}
+{%- endif -%}
+{%- unless use_list -%}
+  {%- assign snapshot = product.metafields.evidence.snapshot.value | default: product.metafields.evidence.snapshot -%}
+{%- endunless -%}
 
-{%- if snapshot and claims -%}
+{%- assign has_content = false -%}
+{%- if use_list and snapshots.size > 0 -%}
+  {%- assign has_content = true -%}
+{%- elsif snapshot -%}
+  {%- assign has_content = true -%}
+{%- endif -%}
+
+{%- if has_content -%}
 
 {%- style -%}
   .xo-section--{{ section.id }} {
@@ -240,23 +253,32 @@
       transition: none;
     }
   }
+
+  .xo-section--{{ section.id }} .es__wrap + .es__wrap {
+    margin-top: 1.6rem;
+  }
 {%- endstyle -%}
 
 <section {% render 'section-attr' %}>
   <xo-container>
-    <div class="es__wrap" id="evidence-snapshot" aria-label="Clinical evidence snapshot">
+    {%- if use_list -%}
+      {%- for snapshot in snapshots -%}
+        {%- assign claims = snapshot.claims_list.value | default: snapshot.claims_list -%}
+        {%- if claims and claims.size > 0 -%}
+          {%- assign wrap_id = '' -%}
+          {%- if forloop.first -%}{%- assign wrap_id = 'evidence-snapshot' -%}{%- endif -%}
+    <div class="es__wrap"{% if wrap_id != '' %} id="{{ wrap_id }}"{% endif %} aria-label="Clinical evidence snapshot">
       <xo-animate xo-animation="fade-up">
         <header class="es__header">
           <div class="es__eyebrow">{{ section.settings.eyebrow_text }}</div>
           <h3 class="es__title">
             {{ snapshot.title.value | default: snapshot.title | default: section.settings.heading_text }}
           </h3>
-          <div class="es__hint">
-            {{ section.settings.hint_text }}
-          </div>
+          {%- if forloop.first -%}
+          <div class="es__hint">{{ section.settings.hint_text }}</div>
+          {%- endif -%}
         </header>
       </xo-animate>
-
       <xo-animate xo-animation="fade-up" xo-cascade>
         <ul class="es__grid" role="list">
           {%- for claim in claims -%}
@@ -269,7 +291,62 @@
               {%- assign url = source.pubmed_url.value | default: source.pubmed_url -%}
             {%- endif -%}
             {%- assign notes_html = claim.notes | metafield_tag -%}
-
+            <li>
+              <details class="es-claim" name="evidence-claims-{{ section.id }}-{{ forloop.parentloop.index }}" open>
+                <summary>
+                  <span class="es-claim__num" aria-hidden="true">{{ forloop.index }}</span>
+                  <span class="es-claim__headline">{{ headline }}</span>
+                  <span class="es-claim__chev" aria-hidden="true">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                  </span>
+                </summary>
+                <div class="es-claim__body">
+                  <div class="es-claim__notes rte">{{ notes_html }}</div>
+                  {%- if url != blank and lbl != blank -%}
+                    {%- unless notes_html contains lbl -%}
+                      <div class="es-claim__cite">
+                        <span class="es-claim__cite-label">Source</span>
+                        <a class="es-ref" href="{{ url }}" target="_blank" rel="nofollow noopener">
+                          {{ lbl }}
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
+                        </a>
+                      </div>
+                    {%- endunless -%}
+                  {%- endif -%}
+                </div>
+              </details>
+            </li>
+          {%- endfor -%}
+        </ul>
+      </xo-animate>
+    </div>
+        {%- endif -%}
+      {%- endfor -%}
+    {%- else -%}
+      {%- assign claims = snapshot.claims_list.value | default: snapshot.claims_list -%}
+      {%- if claims and claims.size > 0 -%}
+    <div class="es__wrap" id="evidence-snapshot" aria-label="Clinical evidence snapshot">
+      <xo-animate xo-animation="fade-up">
+        <header class="es__header">
+          <div class="es__eyebrow">{{ section.settings.eyebrow_text }}</div>
+          <h3 class="es__title">
+            {{ snapshot.title.value | default: snapshot.title | default: section.settings.heading_text }}
+          </h3>
+          <div class="es__hint">{{ section.settings.hint_text }}</div>
+        </header>
+      </xo-animate>
+      <xo-animate xo-animation="fade-up" xo-cascade>
+        <ul class="es__grid" role="list">
+          {%- for claim in claims -%}
+            {%- assign headline = claim.headline.value | default: claim.headline -%}
+            {%- assign source = claim.sources.value | default: claim.sources -%}
+            {%- assign lbl = '' -%}
+            {%- assign url = '' -%}
+            {%- if source -%}
+              {%- assign lbl = source.label.value | default: source.label -%}
+              {%- assign url = source.pubmed_url.value | default: source.pubmed_url -%}
+            {%- endif -%}
+            {%- assign notes_html = claim.notes | metafield_tag -%}
             <li>
               <details class="es-claim" name="evidence-claims-{{ section.id }}" open>
                 <summary>
@@ -299,6 +376,8 @@
         </ul>
       </xo-animate>
     </div>
+      {%- endif -%}
+    {%- endif -%}
   </xo-container>
 </section>
 
@@ -309,16 +388,19 @@
   if (!section) return;
   var items = Array.from(section.querySelectorAll('details.es-claim'));
   if (!items.length) return;
-  var savedName = items[0].getAttribute('name');
 
   function apply(isDesktop) {
-    items.forEach(function (el, i) {
+    items.forEach(function (el) {
       if (isDesktop) {
         el.removeAttribute('name');
         el.open = true;
       } else {
+        var wrap = el.closest('.es__wrap');
+        var siblings = wrap ? Array.from(wrap.querySelectorAll('details.es-claim')) : [el];
+        var savedName = el.dataset.savedName || el.getAttribute('name') || '';
+        if (!el.dataset.savedName && savedName) el.dataset.savedName = savedName;
         if (savedName) el.setAttribute('name', savedName);
-        el.open = i === 0;
+        el.open = siblings.indexOf(el) === 0;
       }
     });
   }
