@@ -17,6 +17,17 @@ Two import paths, both reading the same JSON files:
 | **Matrixify CSV** (`generate-matrixify-csv.mjs` → `data/matrixify/*.csv`) | You want a one-off bulk import via the Matrixify app |
 | **Admin API** (`import-evidence-claims.mjs`) | You want a scriptable, repeatable import that runs against your custom-app token |
 
+### Duplicate `[PubMed]` in `notes` (cleanup)
+
+If rich-text notes contain **both** a plain-text citation like `[PubMed ↗] [` and the same label inside an inline link (duplicate on the storefront), run:
+
+```bash
+npm run clean:notes:dry    # preview
+npm run clean:notes       # apply (requires write_metaobjects)
+```
+
+Optional: `node clean-claim-notes.mjs --handle=<claim-handle> --dry-run`
+
 A claim's `source` field is **optional**. Claims without a source render in
 Liquid as a plain paragraph with no `[PubMed]` chip — used for descriptor /
 educational claims where there is no specific study to cite.
@@ -50,6 +61,7 @@ scripts/
 │   └── csv.mjs                 Tiny CSV writer
 ├── generate-matrixify-csv.mjs  CSV generator
 ├── import-evidence-claims.mjs  Admin API runner
+├── clean-claim-notes.mjs       Strip duplicate plain-text PubMed before inline links
 ├── .env.example                (admin API path) required env vars
 ├── package.json                Convenience npm scripts
 └── README.md                   This file
