@@ -1,57 +1,80 @@
 {%- comment -%}
   Evidence Snapshot — 1-line teaser under product titles
-  Uses your existing data shape:
-    product.metafields.evidence.snapshot (metaobject)
-      → claims_list (list of claim metaobjects)
-        claim.headline (short label, e.g., "Workout boost")
-        (optional) claim.show_in_snapshot (boolean)
-        (optional) claim.priority (number; lower shows first)
-  Behavior:
-    1) If any claims have show_in_snapshot = true → use only those.
-    2) If priority exists → sort by priority; otherwise keep list order.
-    3) Show up to 3 claim.headline values separated by •
-    4) Link to your full block at #evidence-snapshot
+  Supports evidence.snapshots (List) for stacked products, falls back to evidence.snapshot (One).
+  Collects up to 3 headlines across all snapshots (combined).
 {%- endcomment -%}
 
-{%- assign snapshot_ref = product.metafields.evidence.snapshot -%}
-{%- assign snapshot     = snapshot_ref.value | default: snapshot_ref -%}
-{%- assign claims       = snapshot.claims_list.value | default: snapshot.claims_list -%}
+{%- assign snapshots = product.metafields.evidence.snapshots.value -%}
+{%- assign use_list = true -%}
+{%- if snapshots == blank or snapshots.size == 0 -%}
+  {%- assign use_list = false -%}
+{%- endif -%}
+{%- unless use_list -%}
+  {%- assign snapshot = product.metafields.evidence.snapshot.value | default: product.metafields.evidence.snapshot -%}
+{%- endunless -%}
 
-{%- if claims and claims.size > 0 -%}
-  {%- comment -%} Step 1: filter on optional show_in_snapshot flag {%- endcomment -%}
-  {%- assign flagged = claims | where: 'show_in_snapshot', true -%}
-  {%- if flagged.size > 0 -%}
-    {%- assign working = flagged -%}
-  {%- else -%}
-    {%- assign working = claims -%}
-  {%- endif -%}
+{%- assign collected = '' -%}
+{%- assign count = 0 -%}
 
-  {%- comment -%} Step 2: sort by optional priority only if any claim has it {%- endcomment -%}
-  {%- assign has_priority = false -%}
-  {%- for c in working -%}
-    {%- assign p = c.priority.value | default: c.priority -%}
-    {%- if p != blank -%}{%- assign has_priority = true -%}{%- break -%}{%- endif -%}
-  {%- endfor -%}
-  {%- if has_priority -%}
-    {%- assign sorted = working | sort: 'priority' -%}
-  {%- else -%}
-    {%- assign sorted = working -%}
-  {%- endif -%}
-
-  {%- assign top3 = sorted | slice: 0, 3 -%}
-
-  {%- assign labels = '' -%}
-  {%- for c in top3 -%}
-    {%- assign headline = c.headline.value | default: c.headline | default: '' -%}
-    {%- if headline != '' -%}
-      {%- capture labels -%}{{ labels }}{% if forloop.index0 > 0 %} • {% endif %}{{ headline }}{%- endcapture -%}
+{%- if use_list -%}
+  {%- for snap in snapshots -%}
+    {%- if count >= 3 -%}{%- break -%}{%- endif -%}
+    {%- assign claims = snap.claims_list.value | default: snap.claims_list -%}
+    {%- if claims and claims.size > 0 -%}
+      {%- assign flagged = claims | where: 'show_in_snapshot', true -%}
+      {%- if flagged.size > 0 -%}
+        {%- assign working = flagged -%}
+      {%- else -%}
+        {%- assign working = claims -%}
+      {%- endif -%}
+      {%- assign has_priority = false -%}
+      {%- for c in working -%}
+        {%- assign p = c.priority.value | default: c.priority -%}
+        {%- if p != blank -%}{%- assign has_priority = true -%}{%- break -%}{%- endif -%}
+      {%- endfor -%}
+      {%- if has_priority -%}
+        {%- assign working = working | sort: 'priority' -%}
+      {%- endif -%}
+      {%- for c in working -%}
+        {%- if count >= 3 -%}{%- break -%}{%- endif -%}
+        {%- assign headline = c.headline.value | default: c.headline | default: '' -%}
+        {%- if headline != '' -%}
+          {%- capture collected -%}{{ collected }}{% if count > 0 %} • {% endif %}{{ headline }}{%- endcapture -%}
+          {%- assign count = count | plus: 1 -%}
+        {%- endif -%}
+      {%- endfor -%}
     {%- endif -%}
   {%- endfor -%}
-
-  {%- if labels != '' -%}
-    <div class="es-line" aria-label="Top evidence-backed benefits">
-      <span class="es-line__labels">{{ labels }}</span>
-      <a class="es-line__more" href="{{ product.url }}#evidence-snapshot" aria-label="See study references">[See references ▸]</a>
-    </div>
+{%- else -%}
+  {%- assign claims = snapshot.claims_list.value | default: snapshot.claims_list -%}
+  {%- if claims and claims.size > 0 -%}
+    {%- assign flagged = claims | where: 'show_in_snapshot', true -%}
+    {%- if flagged.size > 0 -%}
+      {%- assign working = flagged -%}
+    {%- else -%}
+      {%- assign working = claims -%}
+    {%- endif -%}
+    {%- assign has_priority = false -%}
+    {%- for c in working -%}
+      {%- assign p = c.priority.value | default: c.priority -%}
+      {%- if p != blank -%}{%- assign has_priority = true -%}{%- break -%}{%- endif -%}
+    {%- endfor -%}
+    {%- if has_priority -%}
+      {%- assign working = working | sort: 'priority' -%}
+    {%- endif -%}
+    {%- assign top3 = working | slice: 0, 3 -%}
+    {%- for c in top3 -%}
+      {%- assign headline = c.headline.value | default: c.headline | default: '' -%}
+      {%- if headline != '' -%}
+        {%- capture collected -%}{{ collected }}{% if forloop.index0 > 0 %} • {% endif %}{{ headline }}{%- endcapture -%}
+      {%- endif -%}
+    {%- endfor -%}
   {%- endif -%}
+{%- endif -%}
+
+{%- if collected != '' -%}
+  <div class="es-line" aria-label="Top evidence-backed benefits">
+    <span class="es-line__labels">{{ collected }}</span>
+    <a class="es-line__more" href="{{ product.url }}#evidence-snapshot" aria-label="See study references">[See references ▸]</a>
+  </div>
 {%- endif -%}
