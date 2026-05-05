@@ -1,11 +1,16 @@
 {%- liquid
-  assign enable_quick_add = enable_quick_add | default: false
+  assign enable_quick_add = false
   assign p = product
   assign v = p.selected_or_first_available_variant
   assign money = v.price | money
 -%}
 <article class="pep-card">
   <a href="{{ p.url }}" class="pep-card-media" aria-label="{{ p.title | escape }}">
+    {% if settings.product_card_show_badge %}
+      <span class="pep-card-badges">
+        {% render 'badge-last-chance', product: p %}
+      </span>
+    {% endif %}
     {% if p.featured_media %}
       {{ p.featured_media | image_url: width: 700 | image_tag: alt: p.title, loading: 'lazy', class: 'pep-card-img' }}
     {% else %}
@@ -31,7 +36,8 @@
 
 <style>
   .pep-card{border:1px solid var(--pep-border);border-radius:var(--nx-radius);background:#fff;overflow:hidden;display:flex;flex-direction:column}
-  .pep-card-media{display:block;background:#fff}
+  .pep-card-media{display:block;background:#fff;position:relative}
+  .pep-card-badges{position:absolute;top:8px;left:8px;z-index:1;display:flex;flex-wrap:wrap;gap:6px;pointer-events:none}
   .pep-card-img{width:100%;aspect-ratio:1/1;object-fit:contain}
   .pep-card-ph{height:260px;display:flex;align-items:center;justify-content:center;color:#9AA3AE;background:#F5F7FA}
   .pep-card-body{padding:12px;display:flex;flex-direction:column;gap:8px}

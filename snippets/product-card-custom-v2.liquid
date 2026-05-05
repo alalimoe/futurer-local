@@ -8,6 +8,13 @@
   {% render 'product-card-custom-v2', product: product %}
 {% endcomment %}
 
+{% liquid
+  assign show_product_badges = settings.product_card_show_badge
+  if show_badge != nil
+    assign show_product_badges = show_badge
+  endif
+%}
+
 <xo-product
   xo-selected-or-first-available-variant-id="{{ product.selected_or_first_available_variant.id }}"
   xo-product-id="{{ product.id }}"
@@ -63,6 +70,11 @@
           {% endif %}
         </div>
         <div class="xo-product-card-custom-v2__bottom">
+          {% if show_product_badges %}
+            <div class="xo-product-card-custom-v2__badge-row">
+              {% render 'badge-last-chance', product: product %}
+            </div>
+          {% endif %}
           <div class="xo-product-card-custom-v2__price">
             {% render 'price', product: product, show_badge: show_badge, use_variant: true, reverse: true %}
           </div>

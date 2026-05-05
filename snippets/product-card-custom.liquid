@@ -10,6 +10,10 @@
 
 {% liquid
   assign final_aspect_ratio = media_aspect_ratio | default: '1'
+  assign show_product_badges = settings.product_card_show_badge
+  if show_badge != nil
+    assign show_product_badges = show_badge
+  endif
 %}
 
 {% if product and product != empty %}
@@ -60,6 +64,11 @@
           {% endif %}
         </div>
         <div class="product-card-custom__bottom">
+          {% if show_product_badges %}
+            <div class="product-card-custom__badges">
+              {% render 'badge-last-chance', product: product %}
+            </div>
+          {% endif %}
           {% if show_price %}
             <div class="product-card-custom__price">
               {% render 'price', product: product, show_badge: show_badge, use_variant: true, reverse: true %}
