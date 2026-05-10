@@ -50,6 +50,16 @@
   assign guide_url_1 = s.guide_1_link | default: '/pages/beginners-guide-to-nootropics'
   assign guide_url_2 = s.guide_2_link | default: '/pages/quality-and-trust-certificate-of-analysis'
   assign guide_url_3 = s.guide_3_link | default: '/pages/quality-and-trust-storage-handling'
+  assign hero_primary_link = s.hero_cta_link | default: routes.all_products_collection_url
+  assign hero_secondary_link = s.hero_cta_2_link | default: '#pd-quality'
+  assign hero_primary_text = s.hero_cta_text | default: 'Browse Nootropics'
+  assign hero_secondary_text = s.hero_cta_2_text | default: 'View Quality & COA Info'
+  assign delivery_btn_link = s.delivery_cta_link | default: routes.all_products_collection_url
+  assign delivery_btn_text = s.delivery_cta_text | default: 'Check delivery options at checkout'
+  assign coa_btn_link = s.coa_cta_link | default: '/pages/coa-library'
+  assign coa_btn_text = s.coa_cta_text | default: 'View COA Library'
+  assign final_btn_link = s.cta_link | default: routes.all_products_collection_url
+  assign final_btn_text = s.cta_text | default: 'Browse Nootropics'
 -%}
 
 {%- comment -%} ── JSON-LD: Article ── {%- endcomment -%}
@@ -141,35 +151,44 @@
 }
 </script>
 
-<section id="pillar-dubai-{{ sid }}" class="pd-section" aria-labelledby="pd-title-{{ sid }}">
+<section id="pillar-dubai-{{ sid }}" class="pd-section xo-section--{{ section.id }}" aria-labelledby="pd-title-{{ sid }}">
   <div class="pd-inner">
 
     {%- comment -%} ── HERO ── {%- endcomment -%}
     <header class="pd-hero"{% if s.hero_image != blank %} style="background-image:url({{ s.hero_image | image_url: width: 1600 }});"{% endif %}>
       <div class="pd-hero-overlay">
-        <h1 id="pd-title-{{ sid }}" class="pd-hero-title">{{ s.hero_title | default: default_hero_title }}</h1>
-        <p class="pd-hero-sub">{{ s.hero_subtitle | default: default_hero_sub }}</p>
-        <div class="pd-hero-actions">
-          <a href="{{ s.hero_cta_link | default: routes.all_products_collection_url }}" class="btn btn--primary">{{ s.hero_cta_text | default: "Browse Nootropics" }}</a>
-          <a href="{{ s.hero_cta_2_link | default: '#pd-quality' }}" class="btn btn--ghost">{{ s.hero_cta_2_text | default: "View Quality & COA Info" }}</a>
-        </div>
-        <ul class="pd-hero-bullets" role="list">
-          <li>{{ s.hero_bullet_1 | default: "Ships from Dubai" }}</li>
-          <li>{{ s.hero_bullet_2 | default: "UAE and international delivery options" }}</li>
-          <li>{{ s.hero_bullet_3 | default: "COAs or batch documentation where available" }}</li>
-          <li>{{ s.hero_bullet_4 | default: "Customer support before and after ordering" }}</li>
-        </ul>
+        <xo-animate xo-animation="fade-up">
+          <div class="pd-hero-inner">
+            <h1 id="pd-title-{{ sid }}" class="pd-hero-title">{{ s.hero_title | default: default_hero_title }}</h1>
+            <p class="pd-hero-sub">{{ s.hero_subtitle | default: default_hero_sub }}</p>
+            <div class="pd-hero-actions">
+              {% render 'button', style: 'primary', text: hero_primary_text, link: hero_primary_link, class: 'pd-hero-btn' %}
+              {% render 'button', style: 'secondary', text: hero_secondary_text, link: hero_secondary_link, class: 'pd-hero-btn pd-hero-btn--secondary' %}
+            </div>
+            <ul class="pd-hero-bullets" role="list">
+              <li>{{ s.hero_bullet_1 | default: "Ships from Dubai" }}</li>
+              <li>{{ s.hero_bullet_2 | default: "UAE and international delivery options" }}</li>
+              <li>{{ s.hero_bullet_3 | default: "COAs or batch documentation where available" }}</li>
+              <li>{{ s.hero_bullet_4 | default: "Customer support before and after ordering" }}</li>
+            </ul>
+          </div>
+        </xo-animate>
       </div>
     </header>
 
     {%- comment -%} ── COMPLIANCE NOTICE ── {%- endcomment -%}
     <aside class="pd-notice" role="note">
-      <div class="pd-notice-inner">
-        {% if s.compliance_notice != blank %}
-          {{ s.compliance_notice }}
-        {% else %}
-          <p><strong>Important:</strong> Product information on Nootropix is provided for general educational purposes only. Our products are not intended to diagnose, treat, cure, or prevent any disease, and we do not provide medical advice or personalized dosing guidance.</p>
-        {% endif %}
+      <div class="pd-notice-row">
+        <span class="pd-notice-icon" aria-hidden="true">
+          {%- render 'icon', name: 'info', size: '1.8rem', color: 'rgba(var(--color-accent), 1)' -%}
+        </span>
+        <div class="pd-notice-copy">
+          {% if s.compliance_notice != blank %}
+            {{ s.compliance_notice }}
+          {% else %}
+            <p><strong>Important:</strong> Product information on Nootropix is provided for general educational purposes only. Our products are not intended to diagnose, treat, cure, or prevent any disease, and we do not provide medical advice or personalized dosing guidance.</p>
+          {% endif %}
+        </div>
       </div>
     </aside>
 
@@ -177,24 +196,28 @@
     <section aria-labelledby="pd-why-heading-{{ sid }}">
       <span class="pd-kicker">Trust</span>
       <h2 id="pd-why-heading-{{ sid }}" class="pd-heading">Why UAE buyers choose Nootropix</h2>
-      <div class="pd-why-grid">
+      <xo-animate class="pd-why-grid" xo-animation="fade-up" xo-cascade>
         <article class="pd-why-card">
+          <span class="pd-why-num" aria-hidden="true">1</span>
           <h3 class="pd-why-title">{{ s.wc_1_title | default: "Fast UAE delivery" }}</h3>
           <p class="pd-why-desc">{{ s.wc_1_desc | default: "Orders ship from Dubai, with fast courier options available across the UAE depending on location, order timing, and courier availability." }}</p>
         </article>
         <article class="pd-why-card">
+          <span class="pd-why-num" aria-hidden="true">2</span>
           <h3 class="pd-why-title">{{ s.wc_2_title | default: "Quality-first sourcing" }}</h3>
           <p class="pd-why-desc">{{ s.wc_2_desc | default: "We prioritize reputable sourcing, clear product details, and quality documentation such as COAs where available." }}</p>
         </article>
         <article class="pd-why-card">
+          <span class="pd-why-num" aria-hidden="true">3</span>
           <h3 class="pd-why-title">{{ s.wc_3_title | default: "Heat-aware packing" }}</h3>
           <p class="pd-why-desc">{{ s.wc_3_desc | default: "Orders are packed with UAE conditions in mind, and customers receive clear storage and handling guidance after delivery." }}</p>
         </article>
         <article class="pd-why-card">
+          <span class="pd-why-num" aria-hidden="true">4</span>
           <h3 class="pd-why-title">{{ s.wc_4_title | default: "Human support" }}</h3>
           <p class="pd-why-desc">{{ s.wc_4_desc | default: "Have a question before ordering? Our support team can help with availability, shipping, documentation, and order issues." }}</p>
         </article>
-      </div>
+      </xo-animate>
     </section>
 
     {%- comment -%} ── COMPARISON TABLE ── {%- endcomment -%}
@@ -213,27 +236,52 @@
           <tbody>
             <tr>
               <td data-label="Buying factor"><strong>UAE delivery</strong></td>
-              <td data-label="Nootropix" class="pd-table-highlight">{{ s.compare_nx_delivery | default: "Ships from Dubai" }}</td>
+              <td data-label="Nootropix" class="pd-table-highlight">
+                <span class="pd-table-nx">
+                  <span class="pd-table-check" aria-hidden="true">{% render 'icon', name: 'check', size: '1.4rem', color: 'rgba(var(--color-accent), 1)' %}</span>
+                  <span class="pd-table-nx-text">{{ s.compare_nx_delivery | default: "Ships from Dubai" }}</span>
+                </span>
+              </td>
               <td data-label="Typical overseas ordering">{{ s.compare_other_delivery | default: "Often delayed by customs/logistics" }}</td>
             </tr>
             <tr>
               <td data-label="Buying factor"><strong>Support</strong></td>
-              <td data-label="Nootropix" class="pd-table-highlight">{{ s.compare_nx_support | default: "Local support team" }}</td>
+              <td data-label="Nootropix" class="pd-table-highlight">
+                <span class="pd-table-nx">
+                  <span class="pd-table-check" aria-hidden="true">{% render 'icon', name: 'check', size: '1.4rem', color: 'rgba(var(--color-accent), 1)' %}</span>
+                  <span class="pd-table-nx-text">{{ s.compare_nx_support | default: "Local support team" }}</span>
+                </span>
+              </td>
               <td data-label="Typical overseas ordering">{{ s.compare_other_support | default: "Often slower or timezone-limited" }}</td>
             </tr>
             <tr>
               <td data-label="Buying factor"><strong>Product info</strong></td>
-              <td data-label="Nootropix" class="pd-table-highlight">{{ s.compare_nx_info | default: "Clear PDPs and documentation where available" }}</td>
+              <td data-label="Nootropix" class="pd-table-highlight">
+                <span class="pd-table-nx">
+                  <span class="pd-table-check" aria-hidden="true">{% render 'icon', name: 'check', size: '1.4rem', color: 'rgba(var(--color-accent), 1)' %}</span>
+                  <span class="pd-table-nx-text">{{ s.compare_nx_info | default: "Clear PDPs and documentation where available" }}</span>
+                </span>
+              </td>
               <td data-label="Typical overseas ordering">{{ s.compare_other_info | default: "Varies by supplier" }}</td>
             </tr>
             <tr>
               <td data-label="Buying factor"><strong>Storage guidance</strong></td>
-              <td data-label="Nootropix" class="pd-table-highlight">{{ s.compare_nx_storage | default: "UAE-aware handling info" }}</td>
+              <td data-label="Nootropix" class="pd-table-highlight">
+                <span class="pd-table-nx">
+                  <span class="pd-table-check" aria-hidden="true">{% render 'icon', name: 'check', size: '1.4rem', color: 'rgba(var(--color-accent), 1)' %}</span>
+                  <span class="pd-table-nx-text">{{ s.compare_nx_storage | default: "UAE-aware handling info" }}</span>
+                </span>
+              </td>
               <td data-label="Typical overseas ordering">{{ s.compare_other_storage | default: "Often generic" }}</td>
             </tr>
             <tr>
               <td data-label="Buying factor"><strong>Checkout</strong></td>
-              <td data-label="Nootropix" class="pd-table-highlight">{{ s.compare_nx_checkout | default: "UAE-friendly checkout" }}</td>
+              <td data-label="Nootropix" class="pd-table-highlight">
+                <span class="pd-table-nx">
+                  <span class="pd-table-check" aria-hidden="true">{% render 'icon', name: 'check', size: '1.4rem', color: 'rgba(var(--color-accent), 1)' %}</span>
+                  <span class="pd-table-nx-text">{{ s.compare_nx_checkout | default: "UAE-friendly checkout" }}</span>
+                </span>
+              </td>
               <td data-label="Typical overseas ordering">{{ s.compare_other_checkout | default: "Varies by region" }}</td>
             </tr>
           </tbody>
@@ -243,7 +291,10 @@
 
     {%- comment -%} ── RESPONSIBLE CHOICE ── {%- endcomment -%}
     <section aria-labelledby="pd-responsible-heading-{{ sid }}">
-      <span class="pd-kicker">Education</span>
+      <span class="pd-kicker pd-kicker--row">
+        <span class="pd-kicker__icon" aria-hidden="true">{% render 'icon', name: 'note', size: '1.25rem', color: 'currentColor' %}</span>
+        <span class="pd-kicker__text">Education</span>
+      </span>
       <h2 id="pd-responsible-heading-{{ sid }}" class="pd-heading">How to choose a product responsibly</h2>
       <div class="pd-responsible-intro">
         {% if s.responsible_choice_text != blank %}
@@ -253,9 +304,18 @@
         {% endif %}
       </div>
       <div class="pd-guide-links">
-        <a class="pd-guide-card" href="{{ guide_url_1 }}"><span class="pd-guide-card-title">{{ s.guide_1_text | default: "Beginner's Guide to Nootropics" }}</span></a>
-        <a class="pd-guide-card" href="{{ guide_url_2 }}"><span class="pd-guide-card-title">{{ s.guide_2_text | default: "How to Read a COA" }}</span></a>
-        <a class="pd-guide-card" href="{{ guide_url_3 }}"><span class="pd-guide-card-title">{{ s.guide_3_text | default: "Storage & Handling Guide" }}</span></a>
+        <a class="pd-guide-card" href="{{ guide_url_1 }}">
+          <span class="pd-guide-label">{{ s.guide_1_text | default: "Beginner's Guide to Nootropics" }}</span>
+          <span class="pd-guide-arrow" aria-hidden="true">{% render 'icon', name: 'arrow-right', size: '1.6rem', color: 'rgba(var(--color-accent), 1)' %}</span>
+        </a>
+        <a class="pd-guide-card" href="{{ guide_url_2 }}">
+          <span class="pd-guide-label">{{ s.guide_2_text | default: "How to Read a COA" }}</span>
+          <span class="pd-guide-arrow" aria-hidden="true">{% render 'icon', name: 'arrow-right', size: '1.6rem', color: 'rgba(var(--color-accent), 1)' %}</span>
+        </a>
+        <a class="pd-guide-card" href="{{ guide_url_3 }}">
+          <span class="pd-guide-label">{{ s.guide_3_text | default: "Storage & Handling Guide" }}</span>
+          <span class="pd-guide-arrow" aria-hidden="true">{% render 'icon', name: 'arrow-right', size: '1.6rem', color: 'rgba(var(--color-accent), 1)' %}</span>
+        </a>
       </div>
     </section>
 
@@ -263,85 +323,125 @@
     <section aria-labelledby="pd-cat-heading-{{ sid }}">
       <span class="pd-kicker">Shop</span>
       <h2 id="pd-cat-heading-{{ sid }}" class="pd-heading">Browse by category</h2>
-      <nav class="pd-cat-grid" aria-label="Product categories">
-        <a class="pd-cat-tile" href="{{ cat_url_1 }}">{{ s.cat_1_title | default: "Capsules" }}</a>
-        <a class="pd-cat-tile" href="{{ cat_url_2 }}">{{ s.cat_2_title | default: "Powders" }}</a>
-        <a class="pd-cat-tile" href="{{ cat_url_3 }}">{{ s.cat_3_title | default: "Natural & Mushroom Extracts" }}</a>
-        <a class="pd-cat-tile" href="{{ cat_url_4 }}">{{ s.cat_4_title | default: "Racetams" }}</a>
-        <a class="pd-cat-tile" href="{{ cat_url_5 }}">{{ s.cat_5_title | default: "Cholinergics" }}</a>
-        <a class="pd-cat-tile" href="{{ cat_url_6 }}">{{ s.cat_6_title | default: "Stacks & Bundles" }}</a>
+      <nav class="pd-cat-nav" aria-label="Product categories">
+      <xo-animate class="pd-cat-grid" xo-animation="fade-up" xo-cascade>
+        <a class="pd-cat-tile" href="{{ cat_url_1 }}">
+          <span class="pd-cat-title">{{ s.cat_1_title | default: "Capsules" }}</span>
+          <span class="pd-cat-arrow" aria-hidden="true">{% render 'icon', name: 'arrow-right', size: '1.4rem', color: 'rgba(var(--color-accent), 1)' %}</span>
+        </a>
+        <a class="pd-cat-tile" href="{{ cat_url_2 }}">
+          <span class="pd-cat-title">{{ s.cat_2_title | default: "Powders" }}</span>
+          <span class="pd-cat-arrow" aria-hidden="true">{% render 'icon', name: 'arrow-right', size: '1.4rem', color: 'rgba(var(--color-accent), 1)' %}</span>
+        </a>
+        <a class="pd-cat-tile" href="{{ cat_url_3 }}">
+          <span class="pd-cat-title">{{ s.cat_3_title | default: "Natural & Mushroom Extracts" }}</span>
+          <span class="pd-cat-arrow" aria-hidden="true">{% render 'icon', name: 'arrow-right', size: '1.4rem', color: 'rgba(var(--color-accent), 1)' %}</span>
+        </a>
+        <a class="pd-cat-tile" href="{{ cat_url_4 }}">
+          <span class="pd-cat-title">{{ s.cat_4_title | default: "Racetams" }}</span>
+          <span class="pd-cat-arrow" aria-hidden="true">{% render 'icon', name: 'arrow-right', size: '1.4rem', color: 'rgba(var(--color-accent), 1)' %}</span>
+        </a>
+        <a class="pd-cat-tile" href="{{ cat_url_5 }}">
+          <span class="pd-cat-title">{{ s.cat_5_title | default: "Cholinergics" }}</span>
+          <span class="pd-cat-arrow" aria-hidden="true">{% render 'icon', name: 'arrow-right', size: '1.4rem', color: 'rgba(var(--color-accent), 1)' %}</span>
+        </a>
+        <a class="pd-cat-tile" href="{{ cat_url_6 }}">
+          <span class="pd-cat-title">{{ s.cat_6_title | default: "Stacks & Bundles" }}</span>
+          <span class="pd-cat-arrow" aria-hidden="true">{% render 'icon', name: 'arrow-right', size: '1.4rem', color: 'rgba(var(--color-accent), 1)' %}</span>
+        </a>
+      </xo-animate>
       </nav>
     </section>
 
-    {%- comment -%} ── DELIVERY ── {%- endcomment -%}
-    <section class="pd-panel pd-delivery" aria-labelledby="pd-delivery-heading-{{ sid }}">
-      <h2 id="pd-delivery-heading-{{ sid }}" class="pd-heading">{{ s.delivery_heading | default: "Delivery in Dubai & across the UAE" }}</h2>
-      <div class="pd-panel-body">
-        {% if s.delivery_text != blank %}
-          {{ s.delivery_text }}
-        {% else %}
-          <p>Nootropix ships orders from Dubai. Delivery speed depends on your location, order timing, courier availability, and checkout option selected. Dubai orders may qualify for fast local delivery, while other UAE cities are typically served through same-day or next-day courier options where available.</p>
-        {% endif %}
-      </div>
-      <a class="btn btn--primary" href="{{ s.delivery_cta_link | default: routes.all_products_collection_url }}">{{ s.delivery_cta_text | default: "Check delivery options at checkout" }}</a>
-    </section>
+    {%- comment -%} ── DELIVERY + QUALITY (ROW) ── {%- endcomment -%}
+    <div class="pd-panels-row">
+      <section class="pd-panel pd-delivery" aria-labelledby="pd-delivery-heading-{{ sid }}">
+        <span class="pd-panel-kicker">Delivery</span>
+        <h2 id="pd-delivery-heading-{{ sid }}" class="pd-heading pd-heading--panel">{{ s.delivery_heading | default: "Delivery in Dubai & across the UAE" }}</h2>
+        <div class="pd-panel-body">
+          {% if s.delivery_text != blank %}
+            {{ s.delivery_text }}
+          {% else %}
+            <p>Nootropix ships orders from Dubai. Delivery speed depends on your location, order timing, courier availability, and checkout option selected. Dubai orders may qualify for fast local delivery, while other UAE cities are typically served through same-day or next-day courier options where available.</p>
+          {% endif %}
+        </div>
+        <div class="pd-panel-foot">
+          {% render 'button', style: 'primary', text: delivery_btn_text, link: delivery_btn_link, block: true %}
+        </div>
+      </section>
 
-    {%- comment -%} ── QUALITY / COA ── {%- endcomment -%}
-    <section id="pd-quality" class="pd-panel pd-coa" aria-labelledby="pd-coa-heading-{{ sid }}">
-      <h2 id="pd-coa-heading-{{ sid }}" class="pd-heading">{{ s.coa_heading | default: "Quality documentation" }}</h2>
-      <div class="pd-panel-body">
-        {% if s.coa_text != blank %}
-          {{ s.coa_text }}
-        {% else %}
-          <p>Where available, Nootropix provides COAs or batch-related documentation to help customers review identity, purity, and quality information. Documentation availability may vary by product and batch.</p>
-        {% endif %}
-      </div>
-      <a class="btn btn--ghost" href="{{ s.coa_cta_link | default: '/pages/coa-library' }}">{{ s.coa_cta_text | default: "View COA Library" }}</a>
-    </section>
+      <section id="pd-quality" class="pd-panel pd-coa" aria-labelledby="pd-coa-heading-{{ sid }}">
+        <span class="pd-panel-kicker">Quality</span>
+        <h2 id="pd-coa-heading-{{ sid }}" class="pd-heading pd-heading--panel">{{ s.coa_heading | default: "Quality documentation" }}</h2>
+        <div class="pd-panel-body">
+          {% if s.coa_text != blank %}
+            {{ s.coa_text }}
+          {% else %}
+            <p>Where available, Nootropix provides COAs or batch-related documentation to help customers review identity, purity, and quality information. Documentation availability may vary by product and batch.</p>
+          {% endif %}
+        </div>
+        <div class="pd-panel-foot">
+          {% render 'button', style: 'secondary', text: coa_btn_text, link: coa_btn_link, block: true %}
+        </div>
+      </section>
+    </div>
 
     {%- comment -%} ── FAQ ── {%- endcomment -%}
     <section aria-labelledby="pd-faq-heading-{{ sid }}">
       <span class="pd-kicker">FAQ</span>
       <h2 id="pd-faq-heading-{{ sid }}" class="pd-heading">Questions about ordering in the UAE</h2>
 
+      <xo-animate class="pd-faq-list" xo-animation="fade-up" xo-cascade>
       {% if faq_blocks.size > 0 %}
         {% for block in faq_blocks %}
           <details class="pd-faq" {{ block.shopify_attributes }}>
-            <summary class="pd-faq-q">{{ block.settings.q }}<span class="pd-faq-chevron" aria-hidden="true"></span></summary>
-            <div class="pd-faq-answer"><div class="pd-faq-inner"><p>{{ block.settings.a }}</p></div></div>
+            <summary class="pd-faq-q">
+              <span class="pd-faq-q-text">{{ block.settings.q }}</span>
+              <span class="pd-faq-chev" aria-hidden="true">{% render 'icon', name: 'arrow-down', size: '2rem', color: 'currentColor' %}</span>
+            </summary>
+            <div class="pd-faq-body">
+              <div class="pd-faq-inner"><p>{{ block.settings.a }}</p></div>
+            </div>
           </details>
         {% endfor %}
       {% else %}
         <details class="pd-faq">
-          <summary class="pd-faq-q">Do you deliver nootropics in Dubai?<span class="pd-faq-chevron" aria-hidden="true"></span></summary>
-          <div class="pd-faq-answer"><div class="pd-faq-inner"><p>Yes. Nootropix ships from Dubai and offers fast UAE delivery options depending on location, order timing, and courier availability.</p></div></div>
+          <summary class="pd-faq-q">
+            <span class="pd-faq-q-text">Do you deliver nootropics in Dubai?</span>
+            <span class="pd-faq-chev" aria-hidden="true">{% render 'icon', name: 'arrow-down', size: '2rem', color: 'currentColor' %}</span>
+          </summary>
+          <div class="pd-faq-body">
+            <div class="pd-faq-inner"><p>Yes. Nootropix ships from Dubai and offers fast UAE delivery options depending on location, order timing, and courier availability.</p></div>
+          </div>
         </details>
       {% endif %}
+      </xo-animate>
     </section>
 
     {%- comment -%} ── FINAL CTA ── {%- endcomment -%}
     <section class="pd-final-cta" aria-label="Browse products">
       <h2 class="pd-heading">{{ s.final_heading | default: "Browse Nootropics" }}</h2>
       <p class="pd-body-muted">{{ s.final_body | default: "Nootropix ships nootropics and related products from Dubai, with fast UAE delivery options and quality documentation where available." }}</p>
-      <a class="btn btn--primary" href="{{ s.cta_link | default: routes.all_products_collection_url }}">{{ s.cta_text | default: "Browse Nootropics" }}</a>
+      {% render 'button', style: 'primary', text: final_btn_text, link: final_btn_link, block: true, class: 'pd-final-btn' %}
+      <p class="pd-final-support">
+        Questions? Contact <a href="mailto:support@nootropix.shop" class="pd-final-support-link">support@nootropix.shop</a>
+      </p>
     </section>
 
   </div>
 </section>
 
 {%- style -%}
-#pillar-dubai-{{ sid }} {
+.xo-section--{{ section.id }} {
   --section-max-width: {{ s.max_width | default: 1100 }}px;
   --pd-py: {{ s.padding_y | default: 56 }}px;
   --pd-accent: rgba(var(--color-accent), 1);
   --pd-accent-soft: color-mix(in srgb, rgba(var(--color-accent)) 14%, transparent);
   --pd-accent-border: color-mix(in srgb, rgba(var(--color-accent)) 45%, transparent);
   --pd-text: rgba(var(--color-foreground), 1);
-  --pd-muted: color-mix(in srgb, rgba(var(--color-foreground)) 65%, transparent);
+  --pd-muted: color-mix(in srgb, rgba(var(--color-foreground)) 55%, transparent);
   --pd-bg: {{ s.background_color | default: 'rgb(var(--color-background))' }};
   --pd-bg-alt: rgba(var(--color-background-2), 1);
-  --pd-radius: 2rem;
-  --pd-transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
   --pd-font: var(--font-body-family, sans-serif);
   --pd-font-heading: var(--font-heading-family, sans-serif);
 
@@ -353,7 +453,7 @@
   contain-intrinsic-size: 1px 5000px;
 }
 
-#pillar-dubai-{{ sid }} .pd-inner {
+.xo-section--{{ section.id }} .pd-inner {
   max-width: var(--section-max-width);
   margin: 0 auto;
   padding: var(--pd-py) var(--page-gutter, 2.2rem);
@@ -362,19 +462,28 @@
   gap: 40px;
 }
 @media (min-width: 990px) {
-  #pillar-dubai-{{ sid }} .pd-inner { gap: 56px; }
+  .xo-section--{{ section.id }} .pd-inner { gap: 56px; }
 }
 
-#pillar-dubai-{{ sid }} .pd-kicker {
+.xo-section--{{ section.id }} .pd-kicker {
   display: block;
   text-transform: uppercase;
   letter-spacing: 0.12em;
   font-weight: 700;
   font-size: 12px;
-  color: color-mix(in srgb, rgba(var(--color-foreground)) 75%, rgba(var(--color-accent)));
+  color: color-mix(in srgb, rgba(var(--color-foreground)) 40%, rgba(var(--color-accent)));
   margin-bottom: 6px;
 }
-#pillar-dubai-{{ sid }} .pd-heading {
+.xo-section--{{ section.id }} .pd-kicker--row {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.xo-section--{{ section.id }} .pd-kicker__icon {
+  display: inline-flex;
+  color: rgba(var(--color-accent), 1);
+}
+.xo-section--{{ section.id }} .pd-heading {
   font-family: var(--pd-font-heading);
   font-size: clamp(22px, 3vw, 34px);
   font-weight: 700;
@@ -382,14 +491,18 @@
   color: var(--pd-text);
   margin: 0 0 10px;
 }
-#pillar-dubai-{{ sid }} .pd-body-muted {
+.xo-section--{{ section.id }} .pd-heading--panel {
+  font-size: clamp(1.8rem, 2.5vw, 2.6rem);
+  letter-spacing: -0.02em;
+}
+.xo-section--{{ section.id }} .pd-body-muted {
   color: var(--pd-muted);
   line-height: 1.6;
   margin: 0 0 16px;
 }
 
-/* HERO */
-#pillar-dubai-{{ sid }} .pd-hero {
+/* Hero */
+.xo-section--{{ section.id }} .pd-hero {
   background: linear-gradient(
     135deg,
     color-mix(in srgb, rgba(var(--color-accent)) 10%, transparent) 0%,
@@ -398,13 +511,13 @@
   );
   background-size: cover;
   background-position: center;
-  border-radius: var(--pd-radius);
+  border-radius: var(--general-radius-3, 2rem);
   overflow: hidden;
-  min-height: 320px;
+  min-height: 380px;
   display: flex;
   align-items: flex-end;
 }
-#pillar-dubai-{{ sid }} .pd-hero-overlay {
+.xo-section--{{ section.id }} .pd-hero-overlay {
   width: 100%;
   padding: 36px 24px;
   background: color-mix(in srgb, rgba(var(--color-foreground)) 55%, transparent);
@@ -412,31 +525,42 @@
   backdrop-filter: blur(16px);
 }
 @media (min-width: 990px) {
-  #pillar-dubai-{{ sid }} .pd-hero { min-height: 400px; }
-  #pillar-dubai-{{ sid }} .pd-hero-overlay { padding: 48px 36px; }
+  .xo-section--{{ section.id }} .pd-hero { min-height: 480px; }
+  .xo-section--{{ section.id }} .pd-hero-overlay { padding: 48px 36px; }
 }
-#pillar-dubai-{{ sid }} .pd-hero-title {
+.xo-section--{{ section.id }} .pd-hero-title {
   font-family: var(--pd-font-heading);
-  font-size: clamp(28px, 5vw, 50px);
+  font-size: clamp(2.8rem, 5vw, 5rem);
   font-weight: 800;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.025em;
   line-height: 1.1;
   color: rgba(var(--color-background), 1);
   margin: 0 0 10px;
 }
-#pillar-dubai-{{ sid }} .pd-hero-sub {
+.xo-section--{{ section.id }} .pd-hero-sub {
   color: color-mix(in srgb, rgba(var(--color-background)) 88%, transparent);
   font-size: clamp(15px, 2vw, 18px);
   line-height: 1.6;
   margin: 0 0 20px;
   max-width: 640px;
 }
-#pillar-dubai-{{ sid }} .pd-hero-actions {
+.xo-section--{{ section.id }} .pd-hero-actions {
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
+  align-items: center;
 }
-#pillar-dubai-{{ sid }} .pd-hero-bullets {
+.xo-section--{{ section.id }} .pd-hero .xo-btn--secondary {
+  background: transparent;
+  color: rgba(var(--color-background), 1);
+  border: 1px solid color-mix(in srgb, rgba(var(--color-background)) 35%, transparent);
+  transition: background 0.3s var(--out-soft, ease), border-color 0.3s var(--out-soft, ease);
+}
+.xo-section--{{ section.id }} .pd-hero .xo-btn--secondary:hover {
+  background: color-mix(in srgb, rgba(var(--color-background)) 15%, transparent);
+  border-color: color-mix(in srgb, rgba(var(--color-background)) 50%, transparent);
+}
+.xo-section--{{ section.id }} .pd-hero-bullets {
   list-style: none;
   padding: 0;
   margin: 20px 0 0;
@@ -444,86 +568,110 @@
   flex-wrap: wrap;
   gap: 8px;
 }
-#pillar-dubai-{{ sid }} .pd-hero-bullets li {
+.xo-section--{{ section.id }} .pd-hero-bullets li {
   font-size: 13px;
   font-weight: 600;
   padding: 6px 12px;
-  border-radius: 10rem;
-  background: color-mix(in srgb, rgba(var(--color-background)) 18%, transparent);
+  border-radius: var(--button-radius, 10rem);
+  background: color-mix(in srgb, rgba(var(--color-background)) 12%, transparent);
   color: rgba(var(--color-background), 1);
-  border: 1px solid color-mix(in srgb, rgba(var(--color-background)) 35%, transparent);
+  border: 1px solid color-mix(in srgb, rgba(var(--color-background)) 20%, transparent);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
 }
 
-/* COMPLIANCE NOTICE */
-#pillar-dubai-{{ sid }} .pd-notice {
-  border-radius: 1.5rem;
-  border: 1px solid var(--pd-accent-border);
-  background: var(--pd-accent-soft);
+/* Compliance */
+.xo-section--{{ section.id }} .pd-notice {
+  border-radius: var(--general-radius-3, 2rem);
+  border: 1px solid color-mix(in srgb, rgba(var(--color-accent)) 22%, transparent);
+  background: color-mix(in srgb, rgba(var(--color-accent)) 6%, rgba(var(--color-background)));
   padding: 0;
 }
-#pillar-dubai-{{ sid }} .pd-notice-inner {
+.xo-section--{{ section.id }} .pd-notice-row {
+  display: flex;
+  gap: 1.2rem;
+  align-items: flex-start;
   padding: 18px 22px;
+}
+.xo-section--{{ section.id }} .pd-notice-icon {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.xo-section--{{ section.id }} .pd-notice-copy {
   font-size: 14px;
   line-height: 1.65;
   color: var(--pd-muted);
-  border-left: 4px solid var(--pd-accent);
-  border-radius: inherit;
+  min-width: 0;
 }
-#pillar-dubai-{{ sid }} .pd-notice-inner p { margin: 0; }
-#pillar-dubai-{{ sid }} .pd-notice-inner strong { color: var(--pd-text); }
+.xo-section--{{ section.id }} .pd-notice-copy p { margin: 0; }
+.xo-section--{{ section.id }} .pd-notice-copy strong { color: var(--pd-text); }
 
-/* WHY CARDS */
-#pillar-dubai-{{ sid }} .pd-why-grid {
+/* Why cards */
+.xo-section--{{ section.id }} xo-animate.pd-why-grid {
   display: grid;
   grid-template-columns: 1fr;
   gap: 16px;
   margin-top: 14px;
 }
 @media (min-width: 760px) {
-  #pillar-dubai-{{ sid }} .pd-why-grid { grid-template-columns: repeat(2, 1fr); }
+  .xo-section--{{ section.id }} xo-animate.pd-why-grid { grid-template-columns: repeat(2, 1fr); }
 }
 @media (min-width: 990px) {
-  #pillar-dubai-{{ sid }} .pd-why-grid { grid-template-columns: repeat(4, 1fr); }
+  .xo-section--{{ section.id }} xo-animate.pd-why-grid { grid-template-columns: repeat(4, 1fr); }
 }
-#pillar-dubai-{{ sid }} .pd-why-card {
+.xo-section--{{ section.id }} .pd-why-card {
   padding: 22px 18px;
-  border-radius: var(--pd-radius);
-  background: var(--pd-bg-alt);
+  border-radius: var(--general-radius-3, 2rem);
+  background: rgba(var(--color-background));
   border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 8%, transparent);
-  transition: var(--pd-transition);
+  transition: border-color 0.3s var(--out-soft, ease);
 }
-#pillar-dubai-{{ sid }} .pd-why-card:hover {
-  border-color: color-mix(in srgb, rgba(var(--color-accent)) 35%, transparent);
+.xo-section--{{ section.id }} .pd-why-card:hover {
+  border-color: color-mix(in srgb, rgba(var(--color-foreground)) 16%, transparent);
 }
-#pillar-dubai-{{ sid }} .pd-why-title {
+.xo-section--{{ section.id }} .pd-why-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.8rem;
+  height: 2.8rem;
+  border-radius: 50%;
+  font-size: calc(var(--font-body-scale, 1) * 1.3rem);
+  font-weight: 600;
+  border: 1.5px solid rgba(var(--color-accent));
+  color: rgba(var(--color-foreground));
+  background: color-mix(in srgb, rgba(var(--color-accent)) 10%, rgba(var(--color-background)));
+  margin-bottom: 12px;
+}
+.xo-section--{{ section.id }} .pd-why-title {
   font-family: var(--pd-font-heading);
   font-size: 1rem;
   font-weight: 700;
   margin: 0 0 8px;
   color: var(--pd-text);
 }
-#pillar-dubai-{{ sid }} .pd-why-desc {
+.xo-section--{{ section.id }} .pd-why-desc {
   margin: 0;
   font-size: 14px;
   color: var(--pd-muted);
   line-height: 1.6;
 }
 
-/* TABLE */
-#pillar-dubai-{{ sid }} .pd-table-wrap {
-  border-radius: var(--pd-radius);
+/* Table */
+.xo-section--{{ section.id }} .pd-table-wrap {
+  border-radius: var(--general-radius-3, 2rem);
   overflow: hidden;
   border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 8%, transparent);
   margin-top: 12px;
 }
-#pillar-dubai-{{ sid }} .pd-table {
+.xo-section--{{ section.id }} .pd-table {
   width: 100%;
   border-collapse: collapse;
 }
-#pillar-dubai-{{ sid }} .pd-table thead {
-  background: var(--pd-bg-alt);
+.xo-section--{{ section.id }} .pd-table thead {
+  background: color-mix(in srgb, rgba(var(--color-foreground)) 3%, rgba(var(--color-background)));
 }
-#pillar-dubai-{{ sid }} .pd-table th {
+.xo-section--{{ section.id }} .pd-table th {
   text-align: left;
   padding: 12px 16px;
   font-weight: 700;
@@ -531,141 +679,220 @@
   color: var(--pd-text);
   line-height: 1.4;
 }
-#pillar-dubai-{{ sid }} .pd-table td {
+.xo-section--{{ section.id }} .pd-table th.pd-table-highlight {
+  border-top: 3px solid rgba(var(--color-accent));
+  background: color-mix(in srgb, rgba(var(--color-accent)) 8%, rgba(var(--color-background)));
+}
+.xo-section--{{ section.id }} .pd-table td {
   padding: 14px 16px;
   font-size: 14px;
   line-height: 1.6;
   color: var(--pd-text);
   border-top: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 8%, transparent);
 }
-#pillar-dubai-{{ sid }} .pd-table tbody tr {
-  transition: var(--pd-transition);
+.xo-section--{{ section.id }} .pd-table tbody tr {
+  transition: background 0.3s var(--out-soft, ease);
 }
-#pillar-dubai-{{ sid }} .pd-table tbody tr:hover {
-  background: var(--pd-accent-soft);
+.xo-section--{{ section.id }} .pd-table tbody tr:hover {
+  background: color-mix(in srgb, rgba(var(--color-foreground)) 2.5%, rgba(var(--color-background)));
 }
-#pillar-dubai-{{ sid }} .pd-table-highlight {
-  background: var(--pd-accent-soft);
+.xo-section--{{ section.id }} .pd-table-highlight {
+  background: color-mix(in srgb, rgba(var(--color-accent)) 8%, rgba(var(--color-background)));
   font-weight: 600;
 }
+.xo-section--{{ section.id }} .pd-table-nx {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+.xo-section--{{ section.id }} .pd-table-check {
+  flex-shrink: 0;
+  display: inline-flex;
+  margin-top: 2px;
+}
+.xo-section--{{ section.id }} .pd-table-nx-text {
+  min-width: 0;
+}
 @media (max-width: 640px) {
-  #pillar-dubai-{{ sid }} .pd-table thead { display: none; }
-  #pillar-dubai-{{ sid }} .pd-table tbody tr {
+  .xo-section--{{ section.id }} .pd-table thead { display: none; }
+  .xo-section--{{ section.id }} .pd-table tbody tr {
     display: block;
     padding: 14px;
     border-top: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 8%, transparent);
   }
-  #pillar-dubai-{{ sid }} .pd-table tbody tr:first-child { border-top: none; }
-  #pillar-dubai-{{ sid }} .pd-table td {
+  .xo-section--{{ section.id }} .pd-table tbody tr:first-child { border-top: none; }
+  .xo-section--{{ section.id }} .pd-table td {
     display: block;
     padding: 3px 0;
     border-top: none;
   }
-  #pillar-dubai-{{ sid }} .pd-table td::before {
+  .xo-section--{{ section.id }} .pd-table td::before {
     content: attr(data-label) ": ";
     font-weight: 700;
     color: var(--pd-text);
   }
-  #pillar-dubai-{{ sid }} .pd-table-highlight {
+  .xo-section--{{ section.id }} .pd-table-highlight {
     background: transparent;
   }
 }
 
-/* RESPONSIBLE + GUIDES */
-#pillar-dubai-{{ sid }} .pd-responsible-intro {
+/* Guides */
+.xo-section--{{ section.id }} .pd-responsible-intro {
   font-size: clamp(15px, 2vw, 17px);
   line-height: 1.7;
   color: var(--pd-muted);
   max-width: 800px;
 }
-#pillar-dubai-{{ sid }} .pd-responsible-intro p { margin: 0 0 12px; }
-#pillar-dubai-{{ sid }} .pd-guide-links {
+.xo-section--{{ section.id }} .pd-responsible-intro p { margin: 0 0 12px; }
+.xo-section--{{ section.id }} .pd-guide-links {
   display: grid;
   grid-template-columns: 1fr;
   gap: 12px;
   margin-top: 20px;
 }
 @media (min-width: 740px) {
-  #pillar-dubai-{{ sid }} .pd-guide-links { grid-template-columns: repeat(3, 1fr); }
+  .xo-section--{{ section.id }} .pd-guide-links { grid-template-columns: repeat(3, 1fr); }
 }
-#pillar-dubai-{{ sid }} .pd-guide-card {
+.xo-section--{{ section.id }} .pd-guide-card {
   display: flex;
   align-items: center;
-  justify-content: center;
-  text-align: center;
+  justify-content: space-between;
+  gap: 12px;
+  text-align: left;
   min-height: 72px;
-  padding: 16px;
-  border-radius: var(--pd-radius);
+  padding: 16px 18px;
+  border-radius: var(--general-radius-3, 2rem);
   border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
-  background: var(--pd-bg-alt);
+  background: rgb(var(--color-background-2));
   color: var(--pd-text);
   font-weight: 600;
   font-size: 15px;
   text-decoration: none;
-  transition: var(--pd-transition);
+  transition: border-color 0.3s var(--out-soft, ease), background 0.3s var(--out-soft, ease);
 }
-#pillar-dubai-{{ sid }} .pd-guide-card:hover {
-  border-color: color-mix(in srgb, rgba(var(--color-accent)) 45%, transparent);
-  background: var(--pd-accent-soft);
+.xo-section--{{ section.id }} .pd-guide-card:hover {
+  border-color: color-mix(in srgb, rgba(var(--color-accent)) 35%, transparent);
+  background: color-mix(in srgb, rgba(var(--color-accent)) 6%, rgba(var(--color-background)));
+}
+.xo-section--{{ section.id }} .pd-guide-label {
+  flex: 1;
+  min-width: 0;
+}
+.xo-section--{{ section.id }} .pd-guide-arrow {
+  flex-shrink: 0;
+  display: inline-flex;
 }
 
-/* CATEGORY TILES */
-#pillar-dubai-{{ sid }} .pd-cat-grid {
+/* Category tiles */
+.xo-section--{{ section.id }} xo-animate.pd-cat-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 12px;
   margin-top: 16px;
 }
 @media (min-width: 740px) {
-  #pillar-dubai-{{ sid }} .pd-cat-grid { grid-template-columns: repeat(3, 1fr); }
+  .xo-section--{{ section.id }} xo-animate.pd-cat-grid { grid-template-columns: repeat(3, 1fr); }
 }
-#pillar-dubai-{{ sid }} .pd-cat-tile {
+.xo-section--{{ section.id }} .pd-cat-tile {
   display: flex;
   align-items: center;
-  justify-content: center;
-  text-align: center;
-  min-height: 56px;
-  padding: 14px 12px;
-  border-radius: var(--pd-radius);
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 64px;
+  padding: 14px 16px;
+  border-radius: var(--general-radius-3, 2rem);
   border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
-  background: var(--pd-bg);
+  background: rgba(var(--color-background));
   color: var(--pd-text);
   font-weight: 600;
-  font-size: 14px;
+  font-size: clamp(1.35rem, 2.4vw, 1.5rem);
   text-decoration: none;
-  transition: var(--pd-transition);
+  transition: border-color 0.3s var(--out-soft, ease), background 0.3s var(--out-soft, ease);
 }
-#pillar-dubai-{{ sid }} .pd-cat-tile:hover {
-  border-color: var(--pd-accent);
-  background: var(--pd-accent-soft);
+.xo-section--{{ section.id }} .pd-cat-title {
+  flex: 1;
+  min-width: 0;
+  line-height: 1.25;
+}
+.xo-section--{{ section.id }} .pd-cat-arrow {
+  flex-shrink: 0;
+  display: inline-flex;
+  opacity: 0;
+  transition: opacity 0.3s var(--out-soft, ease);
+}
+.xo-section--{{ section.id }} .pd-cat-tile:hover .pd-cat-arrow,
+.xo-section--{{ section.id }} .pd-cat-tile:focus-visible .pd-cat-arrow {
+  opacity: 1;
+}
+.xo-section--{{ section.id }} .pd-cat-tile:hover {
+  border-color: rgba(var(--color-accent));
+  background: color-mix(in srgb, rgba(var(--color-accent)) 6%, rgba(var(--color-background)));
 }
 
-/* PANELS */
-#pillar-dubai-{{ sid }} .pd-panel {
-  border-radius: var(--pd-radius);
-  padding: 28px 24px;
-  background: var(--pd-bg-alt);
-  border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 8%, transparent);
+/* Panels row */
+.xo-section--{{ section.id }} .pd-panels-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
 }
-#pillar-dubai-{{ sid }} .pd-panel-body {
+@media (min-width: 768px) {
+  .xo-section--{{ section.id }} .pd-panels-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+}
+.xo-section--{{ section.id }} .pd-panel {
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--general-radius-3, 2rem);
+  padding: 28px 24px;
+  background: color-mix(in srgb, rgba(var(--color-foreground)) 2.5%, rgba(var(--color-background)));
+  border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 8%, transparent);
+  min-height: 100%;
+}
+.xo-section--{{ section.id }} .pd-panel-kicker {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(var(--color-accent), 1);
+  margin-bottom: 8px;
+}
+.xo-section--{{ section.id }} .pd-panel-body {
   font-size: 15px;
   line-height: 1.65;
   color: var(--pd-muted);
-  margin-bottom: 18px;
+  flex: 1;
 }
-#pillar-dubai-{{ sid }} .pd-panel-body p { margin: 0 0 10px; }
-#pillar-dubai-{{ sid }} .pd-panel-body p:last-child { margin-bottom: 0; }
+.xo-section--{{ section.id }} .pd-panel-body p { margin: 0 0 10px; }
+.xo-section--{{ section.id }} .pd-panel-body p:last-child { margin-bottom: 0; }
+.xo-section--{{ section.id }} .pd-panel-foot {
+  margin-top: auto;
+  padding-top: 18px;
+}
 
 /* FAQ */
-#pillar-dubai-{{ sid }} .pd-faq {
-  border-radius: 1rem;
-  margin: 8px 0;
+.xo-section--{{ section.id }} xo-animate.pd-faq-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 14px;
+}
+.xo-section--{{ section.id }} .pd-faq {
+  border-radius: var(--general-radius-1, 1rem);
   border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 8%, transparent);
   overflow: hidden;
-  background: var(--pd-bg);
-  transition: var(--pd-transition);
+  background: rgba(var(--color-background));
+  transition: border-color 0.3s var(--out-soft, ease);
 }
-#pillar-dubai-{{ sid }} .pd-faq-q {
+.xo-section--{{ section.id }} .pd-faq:hover {
+  border-color: color-mix(in srgb, rgba(var(--color-foreground)) 16%, transparent);
+}
+.xo-section--{{ section.id }} .pd-faq[open] {
+  border-color: color-mix(in srgb, rgba(var(--color-accent)) 35%, transparent);
+}
+.xo-section--{{ section.id }} .pd-faq-q {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -679,78 +906,84 @@
   list-style: none;
   min-height: 44px;
 }
-#pillar-dubai-{{ sid }} .pd-faq-q::-webkit-details-marker { display: none; }
-#pillar-dubai-{{ sid }} .pd-faq-q::marker { content: ""; }
-
-#pillar-dubai-{{ sid }} .pd-faq-chevron {
+.xo-section--{{ section.id }} .pd-faq-q::-webkit-details-marker { display: none; }
+.xo-section--{{ section.id }} .pd-faq-q::marker { content: ""; }
+.xo-section--{{ section.id }} .pd-faq-q-text {
+  flex: 1;
+  min-width: 0;
+}
+.xo-section--{{ section.id }} .pd-faq-chev {
   flex-shrink: 0;
-  width: 20px;
-  height: 20px;
-  position: relative;
-  transition: transform 0.35s cubic-bezier(0.25, 0.74, 0.22, 0.99);
+  display: inline-flex;
+  color: color-mix(in srgb, rgba(var(--color-foreground)) 55%, transparent);
+  transition: transform 0.25s var(--out-soft, ease);
 }
-#pillar-dubai-{{ sid }} .pd-faq-chevron::before,
-#pillar-dubai-{{ sid }} .pd-faq-chevron::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  width: 10px;
-  height: 2px;
-  background: var(--pd-muted);
-  border-radius: 1px;
-  transition: transform 0.35s cubic-bezier(0.25, 0.74, 0.22, 0.99);
+.xo-section--{{ section.id }} .pd-faq[open] .pd-faq-chev {
+  transform: rotate(180deg);
 }
-#pillar-dubai-{{ sid }} .pd-faq-chevron::before {
-  left: 1px;
-  transform: translateY(-50%) rotate(45deg);
-}
-#pillar-dubai-{{ sid }} .pd-faq-chevron::after {
-  right: 1px;
-  transform: translateY(-50%) rotate(-45deg);
-}
-#pillar-dubai-{{ sid }} .pd-faq[open] .pd-faq-chevron::before {
-  transform: translateY(-50%) rotate(-45deg);
-}
-#pillar-dubai-{{ sid }} .pd-faq[open] .pd-faq-chevron::after {
-  transform: translateY(-50%) rotate(45deg);
-}
-#pillar-dubai-{{ sid }} .pd-faq-answer {
-  display: grid;
-  grid-template-rows: 0fr;
-  transition: grid-template-rows 0.35s cubic-bezier(0.25, 0.74, 0.22, 0.99);
-}
-#pillar-dubai-{{ sid }} .pd-faq[open] .pd-faq-answer {
-  grid-template-rows: 1fr;
-}
-#pillar-dubai-{{ sid }} .pd-faq-inner {
+.xo-section--{{ section.id }} .pd-faq-body {
   overflow: hidden;
 }
-#pillar-dubai-{{ sid }} .pd-faq-inner p {
+.xo-section--{{ section.id }} .pd-faq-inner p {
   padding: 0 18px 16px;
   margin: 0;
+  padding-top: 4px;
   color: var(--pd-muted);
   line-height: 1.6;
   font-size: 14px;
 }
-
-/* FINAL CTA */
-#pillar-dubai-{{ sid }} .pd-final-cta {
-  background: var(--pd-bg-alt);
-  border-radius: var(--pd-radius);
-  padding: 28px 24px;
-  border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 8%, transparent);
-  text-align: center;
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes pd-faq-slide-in {
+    from {
+      opacity: 0;
+      transform: translateY(-0.5rem);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .xo-section--{{ section.id }} .pd-faq[open] .pd-faq-inner {
+    animation: pd-faq-slide-in 0.22s var(--out-soft, ease) both;
+  }
 }
 
-#pillar-dubai-{{ sid }} :focus-visible {
+/* Final CTA */
+.xo-section--{{ section.id }} .pd-final-cta {
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, rgba(var(--color-accent)) 6%, rgba(var(--color-background))),
+    color-mix(in srgb, rgba(var(--color-accent)) 10%, rgba(var(--color-background)))
+  );
+  border-radius: var(--general-radius-3, 2rem);
+  padding: 28px 24px;
+  border: 1px solid color-mix(in srgb, rgba(var(--color-accent)) 25%, transparent);
+  text-align: center;
+}
+.xo-section--{{ section.id }} .pd-final-btn {
+  margin-inline: auto;
+  max-width: 32rem;
+}
+.xo-section--{{ section.id }} .pd-final-support {
+  margin: 16px 0 0;
+  font-size: 13px;
+  color: var(--pd-muted);
+}
+.xo-section--{{ section.id }} .pd-final-support-link {
+  color: rgba(var(--color-accent), 1);
+  font-weight: 600;
+  text-underline-offset: 2px;
+}
+
+.xo-section--{{ section.id }} :focus-visible {
   outline: 2px solid var(--pd-accent);
   outline-offset: 2px;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  #pillar-dubai-{{ sid }} *,
-  #pillar-dubai-{{ sid }} *::before,
-  #pillar-dubai-{{ sid }} *::after {
+  .xo-section--{{ section.id }} *,
+  .xo-section--{{ section.id }} *::before,
+  .xo-section--{{ section.id }} *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
