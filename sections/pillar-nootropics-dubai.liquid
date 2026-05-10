@@ -1,49 +1,64 @@
 {% comment %}
   =============================================
-  Section: Pillar — Buy Nootropics in Dubai
+  Section: Pillar — Buy Nootropics in Dubai (UAE trust-first landing)
   File: sections/pillar-nootropics-dubai.liquid
-  Purpose: Commercial landing page — competitive comparison, 4 product showcase, CRO / SEO / A11y
-  Theme: Futurer 2.x (OS 2.0) — cascades from global tokens
+  Purpose: Compliance-safe UAE buyer guide — shipping, quality, education CTAs
+  Theme: OS 2.0 — design tokens via CSS variables
   =============================================
 {% endcomment %}
 
 {%- assign s = section.settings -%}
 {%- assign sid = section.id -%}
-
-{%- comment -%} ── Product resolution (picker → handle → known fallback) ── {%- endcomment -%}
-{%- assign p1 = s.product_1 -%}
-{%- if p1 == blank and s.product_1_handle != blank -%}
-  {%- assign p1 = all_products[s.product_1_handle] -%}
-{%- endif -%}
-{%- if p1 == blank -%}{%- assign p1 = all_products['phenibut'] -%}{%- endif -%}
-
-{%- assign p2 = s.product_2 -%}
-{%- if p2 == blank and s.product_2_handle != blank -%}
-  {%- assign p2 = all_products[s.product_2_handle] -%}
-{%- endif -%}
-{%- if p2 == blank -%}{%- assign p2 = all_products['aniracetam'] -%}{%- endif -%}
-
-{%- assign p3 = s.product_3 -%}
-{%- if p3 == blank and s.product_3_handle != blank -%}
-  {%- assign p3 = all_products[s.product_3_handle] -%}
-{%- endif -%}
-{%- if p3 == blank -%}{%- assign p3 = all_products['noopept'] -%}{%- endif -%}
-
-{%- assign p4 = s.product_4 -%}
-{%- if p4 == blank and s.product_4_handle != blank -%}
-  {%- assign p4 = all_products[s.product_4_handle] -%}
-{%- endif -%}
-{%- if p4 == blank -%}{%- assign p4 = all_products['caffeine-l-theanine'] -%}{%- endif -%}
-
 {%- assign faq_blocks = section.blocks | where: 'type', 'faq' -%}
+
+{%- liquid
+  assign default_hero_title = 'Buy Nootropics Online in Dubai & the UAE'
+  assign default_hero_sub = 'A Dubai-based store for nootropics, supplements, and related products, with fast UAE delivery, clear product information, and quality documentation where available.'
+  assign article_headline = s.hero_title | default: default_hero_title
+  assign article_desc = s.hero_subtitle | default: default_hero_sub | strip_html | truncate: 160
+  assign collections_base = shop.url | append: routes.collections_url
+  if s.cat_1_link != blank
+    assign cat_url_1 = s.cat_1_link
+  else
+    assign cat_url_1 = collections_base | append: '/nootropics'
+  endif
+  if s.cat_2_link != blank
+    assign cat_url_2 = s.cat_2_link
+  else
+    assign cat_url_2 = collections_base | append: '/powder-nootropics'
+  endif
+  if s.cat_3_link != blank
+    assign cat_url_3 = s.cat_3_link
+  else
+    assign cat_url_3 = collections_base | append: '/mushroom-extracts'
+  endif
+  if s.cat_4_link != blank
+    assign cat_url_4 = s.cat_4_link
+  else
+    assign cat_url_4 = collections_base | append: '/racetams'
+  endif
+  if s.cat_5_link != blank
+    assign cat_url_5 = s.cat_5_link
+  else
+    assign cat_url_5 = collections_base | append: '/cholinergics'
+  endif
+  if s.cat_6_link != blank
+    assign cat_url_6 = s.cat_6_link
+  else
+    assign cat_url_6 = collections_base | append: '/stacks'
+  endif
+  assign guide_url_1 = s.guide_1_link | default: '/pages/beginners-guide-to-nootropics'
+  assign guide_url_2 = s.guide_2_link | default: '/pages/quality-and-trust-certificate-of-analysis'
+  assign guide_url_3 = s.guide_3_link | default: '/pages/quality-and-trust-storage-handling'
+-%}
 
 {%- comment -%} ── JSON-LD: Article ── {%- endcomment -%}
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "Article",
-  "headline": {{ s.hero_title | default: "Buy Nootropics in Dubai, UAE — Same-Day Delivery" | json }},
-  "description": {{ s.hero_subtitle | default: "Premium, lab-tested nootropics delivered to your Dubai door in as little as 4 hours." | strip_html | truncate: 160 | json }},
+  "headline": {{ article_headline | json }},
+  "description": {{ article_desc | json }},
   "author": { "@type": "Organization", "name": "Nootropix" },
   "publisher": {
     "@type": "Organization",
@@ -60,23 +75,25 @@
 }
 </script>
 
-{%- comment -%} ── JSON-LD: ItemList ── {%- endcomment -%}
+{%- comment -%} ── JSON-LD: ItemList (category tiles) ── {%- endcomment -%}
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "ItemList",
-  "name": "Top Selling Nootropics in Dubai",
-  "numberOfItems": 4,
+  "name": "Shop by category — UAE",
+  "numberOfItems": 6,
   "itemListElement": [
-    {%- if p1 != blank -%}{ "@type": "ListItem", "position": 1, "name": {{ p1.title | json }}, "url": {{ shop.url | append: p1.url | json }} }{%- endif -%}
-    {%- if p2 != blank -%},{ "@type": "ListItem", "position": 2, "name": {{ p2.title | json }}, "url": {{ shop.url | append: p2.url | json }} }{%- endif -%}
-    {%- if p3 != blank -%},{ "@type": "ListItem", "position": 3, "name": {{ p3.title | json }}, "url": {{ shop.url | append: p3.url | json }} }{%- endif -%}
-    {%- if p4 != blank -%},{ "@type": "ListItem", "position": 4, "name": {{ p4.title | json }}, "url": {{ shop.url | append: p4.url | json }} }{%- endif -%}
+    { "@type": "ListItem", "position": 1, "name": {{ s.cat_1_title | default: "Capsules" | json }}, "url": {{ cat_url_1 | json }} },
+    { "@type": "ListItem", "position": 2, "name": {{ s.cat_2_title | default: "Powders" | json }}, "url": {{ cat_url_2 | json }} },
+    { "@type": "ListItem", "position": 3, "name": {{ s.cat_3_title | default: "Natural & Mushroom Extracts" | json }}, "url": {{ cat_url_3 | json }} },
+    { "@type": "ListItem", "position": 4, "name": {{ s.cat_4_title | default: "Racetams" | json }}, "url": {{ cat_url_4 | json }} },
+    { "@type": "ListItem", "position": 5, "name": {{ s.cat_5_title | default: "Cholinergics" | json }}, "url": {{ cat_url_5 | json }} },
+    { "@type": "ListItem", "position": 6, "name": {{ s.cat_6_title | default: "Stacks & Bundles" | json }}, "url": {{ cat_url_6 | json }} }
   ]
 }
 </script>
 
-{%- comment -%} ── JSON-LD: FAQPage (dynamic from blocks) ── {%- endcomment -%}
+{%- comment -%} ── JSON-LD: FAQPage ── {%- endcomment -%}
 {% if faq_blocks.size > 0 %}
   <script type="application/ld+json">
   {
@@ -108,7 +125,7 @@
     "addressCountry": "AE"
   },
   "areaServed": ["Dubai", "Abu Dhabi", "Sharjah", "Ajman", "UAE"],
-  "description": "Premium nootropics store with same-day delivery in Dubai and next-day across the UAE."
+  "description": "Dubai-based store for nootropics and related products with UAE-focused shipping, product information, and quality documentation where available."
 }
 </script>
 
@@ -130,197 +147,162 @@
     {%- comment -%} ── HERO ── {%- endcomment -%}
     <header class="pd-hero"{% if s.hero_image != blank %} style="background-image:url({{ s.hero_image | image_url: width: 1600 }});"{% endif %}>
       <div class="pd-hero-overlay">
-        <h1 id="pd-title-{{ sid }}" class="pd-hero-title">{{ s.hero_title | default: "Buy Nootropics in Dubai, UAE — Same-Day Delivery" }}</h1>
-        <p class="pd-hero-sub">{{ s.hero_subtitle | default: "Premium, lab-tested nootropics delivered to your Dubai door in as little as 4 hours. Rest of UAE: 24 hours. International express dispatch same day." }}</p>
+        <h1 id="pd-title-{{ sid }}" class="pd-hero-title">{{ s.hero_title | default: default_hero_title }}</h1>
+        <p class="pd-hero-sub">{{ s.hero_subtitle | default: default_hero_sub }}</p>
         <div class="pd-hero-actions">
-          <a href="{{ s.hero_cta_link | default: routes.all_products_collection_url }}" class="btn btn--primary">{{ s.hero_cta_text | default: "Browse All" }}</a>
-          <a href="#pd-compare" class="btn btn--ghost">See Why Nootropix</a>
+          <a href="{{ s.hero_cta_link | default: routes.all_products_collection_url }}" class="btn btn--primary">{{ s.hero_cta_text | default: "Browse Nootropics" }}</a>
+          <a href="{{ s.hero_cta_2_link | default: '#pd-quality' }}" class="btn btn--ghost">{{ s.hero_cta_2_text | default: "View Quality & COA Info" }}</a>
         </div>
+        <ul class="pd-hero-bullets" role="list">
+          <li>{{ s.hero_bullet_1 | default: "Ships from Dubai" }}</li>
+          <li>{{ s.hero_bullet_2 | default: "UAE and international delivery options" }}</li>
+          <li>{{ s.hero_bullet_3 | default: "COAs or batch documentation where available" }}</li>
+          <li>{{ s.hero_bullet_4 | default: "Customer support before and after ordering" }}</li>
+        </ul>
       </div>
     </header>
 
-    {%- comment -%} ── INTRO ── {%- endcomment -%}
-    <div class="pd-intro" aria-label="Introduction">
-      <div class="pd-intro-text">{{ s.intro_text | default: "<p>Tired of waiting weeks for nootropics supplements to clear customs? <strong>Nootropix</strong> delivers premium, lab-tested nootropics to your Dubai door in as little as <strong>4 hours</strong>. Rest of UAE: 24 hours. International express dispatch same day.</p>" }}</div>
-    </div>
+    {%- comment -%} ── COMPLIANCE NOTICE ── {%- endcomment -%}
+    <aside class="pd-notice" role="note">
+      <div class="pd-notice-inner">
+        {% if s.compliance_notice != blank %}
+          {{ s.compliance_notice }}
+        {% else %}
+          <p><strong>Important:</strong> Product information on Nootropix is provided for general educational purposes only. Our products are not intended to diagnose, treat, cure, or prevent any disease, and we do not provide medical advice or personalized dosing guidance.</p>
+        {% endif %}
+      </div>
+    </aside>
 
-    {%- comment -%} ── COMPETITIVE COMPARISON TABLE ── {%- endcomment -%}
-    <section id="pd-compare" aria-label="Nootropix vs Others comparison">
-      <span class="pd-kicker">Head-to-Head</span>
-      <h2 class="pd-heading">Why Nootropix vs Others?</h2>
+    {%- comment -%} ── WHY UAE BUYERS ── {%- endcomment -%}
+    <section aria-labelledby="pd-why-heading-{{ sid }}">
+      <span class="pd-kicker">Trust</span>
+      <h2 id="pd-why-heading-{{ sid }}" class="pd-heading">Why UAE buyers choose Nootropix</h2>
+      <div class="pd-why-grid">
+        <article class="pd-why-card">
+          <h3 class="pd-why-title">{{ s.wc_1_title | default: "Fast UAE delivery" }}</h3>
+          <p class="pd-why-desc">{{ s.wc_1_desc | default: "Orders ship from Dubai, with fast courier options available across the UAE depending on location, order timing, and courier availability." }}</p>
+        </article>
+        <article class="pd-why-card">
+          <h3 class="pd-why-title">{{ s.wc_2_title | default: "Quality-first sourcing" }}</h3>
+          <p class="pd-why-desc">{{ s.wc_2_desc | default: "We prioritize reputable sourcing, clear product details, and quality documentation such as COAs where available." }}</p>
+        </article>
+        <article class="pd-why-card">
+          <h3 class="pd-why-title">{{ s.wc_3_title | default: "Heat-aware packing" }}</h3>
+          <p class="pd-why-desc">{{ s.wc_3_desc | default: "Orders are packed with UAE conditions in mind, and customers receive clear storage and handling guidance after delivery." }}</p>
+        </article>
+        <article class="pd-why-card">
+          <h3 class="pd-why-title">{{ s.wc_4_title | default: "Human support" }}</h3>
+          <p class="pd-why-desc">{{ s.wc_4_desc | default: "Have a question before ordering? Our support team can help with availability, shipping, documentation, and order issues." }}</p>
+        </article>
+      </div>
+    </section>
+
+    {%- comment -%} ── COMPARISON TABLE ── {%- endcomment -%}
+    <section id="pd-compare" aria-labelledby="pd-compare-heading-{{ sid }}">
+      <span class="pd-kicker">Compare</span>
+      <h2 id="pd-compare-heading-{{ sid }}" class="pd-heading">Why UAE buyers order from Nootropix</h2>
       <div class="pd-table-wrap">
-        <table class="pd-table" aria-label="Nootropix vs Others comparison">
+        <table class="pd-table" aria-label="Nootropix compared with typical overseas ordering">
           <thead>
             <tr>
-              <th scope="col">Feature</th>
+              <th scope="col">Buying factor</th>
               <th scope="col" class="pd-table-highlight">Nootropix</th>
-              <th scope="col">Others</th>
+              <th scope="col">Typical overseas ordering</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td data-label="Feature"><strong>Delivery Time</strong></td>
-              <td data-label="Nootropix" class="pd-table-highlight">{{ s.compare_nx_delivery | default: "4 h within Dubai" }}</td>
-              <td data-label="Others">{{ s.compare_other_delivery | default: "5–10 days Intl. post" }}</td>
+              <td data-label="Buying factor"><strong>UAE delivery</strong></td>
+              <td data-label="Nootropix" class="pd-table-highlight">{{ s.compare_nx_delivery | default: "Ships from Dubai" }}</td>
+              <td data-label="Typical overseas ordering">{{ s.compare_other_delivery | default: "Often delayed by customs/logistics" }}</td>
             </tr>
             <tr>
-              <td data-label="Feature"><strong>Customs Risk</strong></td>
-              <td data-label="Nootropix" class="pd-table-highlight">{{ s.compare_nx_customs | default: "0 % — local fulfillment" }}</td>
-              <td data-label="Others">{{ s.compare_other_customs | default: "20 % parcels held" }}</td>
+              <td data-label="Buying factor"><strong>Support</strong></td>
+              <td data-label="Nootropix" class="pd-table-highlight">{{ s.compare_nx_support | default: "Local support team" }}</td>
+              <td data-label="Typical overseas ordering">{{ s.compare_other_support | default: "Often slower or timezone-limited" }}</td>
             </tr>
             <tr>
-              <td data-label="Feature"><strong>Shipping Fees</strong></td>
-              <td data-label="Nootropix" class="pd-table-highlight">{{ s.compare_nx_shipping | default: "FREE" }}</td>
-              <td data-label="Others">{{ s.compare_other_shipping | default: "25–55 AED extra" }}</td>
+              <td data-label="Buying factor"><strong>Product info</strong></td>
+              <td data-label="Nootropix" class="pd-table-highlight">{{ s.compare_nx_info | default: "Clear PDPs and documentation where available" }}</td>
+              <td data-label="Typical overseas ordering">{{ s.compare_other_info | default: "Varies by supplier" }}</td>
             </tr>
             <tr>
-              <td data-label="Feature"><strong>Money-Back</strong></td>
-              <td data-label="Nootropix" class="pd-table-highlight">{{ s.compare_nx_refund | default: "Quick refunds" }}</td>
-              <td data-label="Others">{{ s.compare_other_refund | default: "30-day through ticket" }}</td>
+              <td data-label="Buying factor"><strong>Storage guidance</strong></td>
+              <td data-label="Nootropix" class="pd-table-highlight">{{ s.compare_nx_storage | default: "UAE-aware handling info" }}</td>
+              <td data-label="Typical overseas ordering">{{ s.compare_other_storage | default: "Often generic" }}</td>
             </tr>
             <tr>
-              <td data-label="Feature"><strong>Lab Testing</strong></td>
-              <td data-label="Nootropix" class="pd-table-highlight">{{ s.compare_nx_testing | default: "COA on every batch" }}</td>
-              <td data-label="Others">{{ s.compare_other_testing | default: "Varies by brand" }}</td>
+              <td data-label="Buying factor"><strong>Checkout</strong></td>
+              <td data-label="Nootropix" class="pd-table-highlight">{{ s.compare_nx_checkout | default: "UAE-friendly checkout" }}</td>
+              <td data-label="Typical overseas ordering">{{ s.compare_other_checkout | default: "Varies by region" }}</td>
             </tr>
           </tbody>
         </table>
       </div>
     </section>
 
-    {%- comment -%} ── TRUST ICONS ── {%- endcomment -%}
-    <section aria-label="Delivery promise">
-      <span class="pd-kicker">Delivery</span>
-      <h2 class="pd-heading">Everything You Need, Nothing You Don't</h2>
-      <div class="pd-trust-grid">
-        <div class="pd-trust-card">
-          {% if s.icon_1_image != blank %}
-            <div class="pd-trust-icon"><img src="{{ s.icon_1_image | image_url: width: 200 }}" alt="{{ s.icon_1_title | default: 'Dubai 4-Hour Delivery' }}" loading="lazy" width="100" height="100"></div>
-          {% else %}
-            <span class="pd-trust-emoji" aria-hidden="true">&#128666;</span>
-          {% endif %}
-          <span class="pd-trust-label">{{ s.icon_1_title | default: "Dubai — 4 Hours" }}</span>
-        </div>
-        <div class="pd-trust-card">
-          {% if s.icon_2_image != blank %}
-            <div class="pd-trust-icon"><img src="{{ s.icon_2_image | image_url: width: 200 }}" alt="{{ s.icon_2_title | default: 'UAE Next Day' }}" loading="lazy" width="100" height="100"></div>
-          {% else %}
-            <span class="pd-trust-emoji" aria-hidden="true">&#128230;</span>
-          {% endif %}
-          <span class="pd-trust-label">{{ s.icon_2_title | default: "UAE — Next Day" }}</span>
-        </div>
-        <div class="pd-trust-card">
-          {% if s.icon_3_image != blank %}
-            <div class="pd-trust-icon"><img src="{{ s.icon_3_image | image_url: width: 200 }}" alt="{{ s.icon_3_title | default: 'International DHL Express' }}" loading="lazy" width="100" height="100"></div>
-          {% else %}
-            <span class="pd-trust-emoji" aria-hidden="true">&#9992;&#65039;</span>
-          {% endif %}
-          <span class="pd-trust-label">{{ s.icon_3_title | default: "International — DHL Express" }}</span>
-        </div>
+    {%- comment -%} ── RESPONSIBLE CHOICE ── {%- endcomment -%}
+    <section aria-labelledby="pd-responsible-heading-{{ sid }}">
+      <span class="pd-kicker">Education</span>
+      <h2 id="pd-responsible-heading-{{ sid }}" class="pd-heading">How to choose a product responsibly</h2>
+      <div class="pd-responsible-intro">
+        {% if s.responsible_choice_text != blank %}
+          {{ s.responsible_choice_text }}
+        {% else %}
+          <p>Before ordering, review the product page, serving information, ingredient format, storage guidance, and any available quality documentation. Customers should choose products based on their own research and consult a qualified professional when appropriate.</p>
+        {% endif %}
+      </div>
+      <div class="pd-guide-links">
+        <a class="pd-guide-card" href="{{ guide_url_1 }}"><span class="pd-guide-card-title">{{ s.guide_1_text | default: "Beginner's Guide to Nootropics" }}</span></a>
+        <a class="pd-guide-card" href="{{ guide_url_2 }}"><span class="pd-guide-card-title">{{ s.guide_2_text | default: "How to Read a COA" }}</span></a>
+        <a class="pd-guide-card" href="{{ guide_url_3 }}"><span class="pd-guide-card-title">{{ s.guide_3_text | default: "Storage & Handling Guide" }}</span></a>
       </div>
     </section>
 
-    {%- comment -%} ── 4-PRODUCT SHOWCASE GRID ── {%- endcomment -%}
-    <section aria-label="Top selling nootropics">
-      <span class="pd-kicker">Best Sellers</span>
-      <h2 class="pd-heading">Top Selling Nootropics</h2>
-      <div class="pd-product-grid">
-
-        <article class="pd-product-card">
-          {% if p1 != blank and p1.featured_image %}
-            <div class="pd-product-img">
-              <img src="{{ p1.featured_image | image_url: width: 600 }}" alt="{{ p1.title }}" loading="lazy" width="600" height="600">
-            </div>
-          {% endif %}
-          <h3 class="pd-product-title">{{ p1.title | default: "Phenibut" }}</h3>
-          <p class="pd-product-desc">{{ s.product_1_desc | default: "GABA-B agonist for calm focus and social confidence." }}</p>
-          <div class="pd-product-footer">
-            {% if p1 != blank %}
-              <div class="pd-product-ctas">
-                <a class="btn btn--ghost" href="{{ p1.url }}">View Product</a>
-                <form method="post" action="{{ routes.cart_add_url }}">
-                  <input type="hidden" name="id" value="{{ p1.selected_or_first_available_variant.id }}">
-                  <button type="submit" class="btn btn--primary">Add to Cart</button>
-                </form>
-              </div>
-              <div class="pd-product-meta">From {{ p1.price | money }}</div>
-            {% endif %}
-          </div>
-        </article>
-
-        <article class="pd-product-card">
-          {% if p2 != blank and p2.featured_image %}
-            <div class="pd-product-img">
-              <img src="{{ p2.featured_image | image_url: width: 600 }}" alt="{{ p2.title }}" loading="lazy" width="600" height="600">
-            </div>
-          {% endif %}
-          <h3 class="pd-product-title">{{ p2.title | default: "Aniracetam" }}</h3>
-          <p class="pd-product-desc">{{ s.product_2_desc | default: "Anxiolytic racetam for creative flow and verbal fluency." }}</p>
-          <div class="pd-product-footer">
-            {% if p2 != blank %}
-              <div class="pd-product-ctas">
-                <a class="btn btn--ghost" href="{{ p2.url }}">View Product</a>
-                <form method="post" action="{{ routes.cart_add_url }}">
-                  <input type="hidden" name="id" value="{{ p2.selected_or_first_available_variant.id }}">
-                  <button type="submit" class="btn btn--primary">Add to Cart</button>
-                </form>
-              </div>
-              <div class="pd-product-meta">From {{ p2.price | money }}</div>
-            {% endif %}
-          </div>
-        </article>
-
-        <article class="pd-product-card">
-          {% if p3 != blank and p3.featured_image %}
-            <div class="pd-product-img">
-              <img src="{{ p3.featured_image | image_url: width: 600 }}" alt="{{ p3.title }}" loading="lazy" width="600" height="600">
-            </div>
-          {% endif %}
-          <h3 class="pd-product-title">{{ p3.title | default: "Noopept" }}</h3>
-          <p class="pd-product-desc">{{ s.product_3_desc | default: "Ultra-potent neuropeptide for memory and learning." }}</p>
-          <div class="pd-product-footer">
-            {% if p3 != blank %}
-              <div class="pd-product-ctas">
-                <a class="btn btn--ghost" href="{{ p3.url }}">View Product</a>
-                <form method="post" action="{{ routes.cart_add_url }}">
-                  <input type="hidden" name="id" value="{{ p3.selected_or_first_available_variant.id }}">
-                  <button type="submit" class="btn btn--primary">Add to Cart</button>
-                </form>
-              </div>
-              <div class="pd-product-meta">From {{ p3.price | money }}</div>
-            {% endif %}
-          </div>
-        </article>
-
-        <article class="pd-product-card">
-          {% if p4 != blank and p4.featured_image %}
-            <div class="pd-product-img">
-              <img src="{{ p4.featured_image | image_url: width: 600 }}" alt="{{ p4.title }}" loading="lazy" width="600" height="600">
-            </div>
-          {% endif %}
-          <h3 class="pd-product-title">{{ p4.title | default: "Caffeine + L-Theanine" }}</h3>
-          <p class="pd-product-desc">{{ s.product_4_desc | default: "Smooth, clean energy — focused alertness without jitters." }}</p>
-          <div class="pd-product-footer">
-            {% if p4 != blank %}
-              <div class="pd-product-ctas">
-                <a class="btn btn--ghost" href="{{ p4.url }}">View Product</a>
-                <form method="post" action="{{ routes.cart_add_url }}">
-                  <input type="hidden" name="id" value="{{ p4.selected_or_first_available_variant.id }}">
-                  <button type="submit" class="btn btn--primary">Add to Cart</button>
-                </form>
-              </div>
-              <div class="pd-product-meta">From {{ p4.price | money }}</div>
-            {% endif %}
-          </div>
-        </article>
-
-      </div>
+    {%- comment -%} ── CATEGORY TILES ── {%- endcomment -%}
+    <section aria-labelledby="pd-cat-heading-{{ sid }}">
+      <span class="pd-kicker">Shop</span>
+      <h2 id="pd-cat-heading-{{ sid }}" class="pd-heading">Browse by category</h2>
+      <nav class="pd-cat-grid" aria-label="Product categories">
+        <a class="pd-cat-tile" href="{{ cat_url_1 }}">{{ s.cat_1_title | default: "Capsules" }}</a>
+        <a class="pd-cat-tile" href="{{ cat_url_2 }}">{{ s.cat_2_title | default: "Powders" }}</a>
+        <a class="pd-cat-tile" href="{{ cat_url_3 }}">{{ s.cat_3_title | default: "Natural & Mushroom Extracts" }}</a>
+        <a class="pd-cat-tile" href="{{ cat_url_4 }}">{{ s.cat_4_title | default: "Racetams" }}</a>
+        <a class="pd-cat-tile" href="{{ cat_url_5 }}">{{ s.cat_5_title | default: "Cholinergics" }}</a>
+        <a class="pd-cat-tile" href="{{ cat_url_6 }}">{{ s.cat_6_title | default: "Stacks & Bundles" }}</a>
+      </nav>
     </section>
 
-    {%- comment -%} ── FAQ (animated disclosure) ── {%- endcomment -%}
-    <section aria-label="Frequently asked questions">
-      <span class="pd-kicker">Questions</span>
-      <h2 class="pd-heading">Dubai Nootropics FAQ</h2>
+    {%- comment -%} ── DELIVERY ── {%- endcomment -%}
+    <section class="pd-panel pd-delivery" aria-labelledby="pd-delivery-heading-{{ sid }}">
+      <h2 id="pd-delivery-heading-{{ sid }}" class="pd-heading">{{ s.delivery_heading | default: "Delivery in Dubai & across the UAE" }}</h2>
+      <div class="pd-panel-body">
+        {% if s.delivery_text != blank %}
+          {{ s.delivery_text }}
+        {% else %}
+          <p>Nootropix ships orders from Dubai. Delivery speed depends on your location, order timing, courier availability, and checkout option selected. Dubai orders may qualify for fast local delivery, while other UAE cities are typically served through same-day or next-day courier options where available.</p>
+        {% endif %}
+      </div>
+      <a class="btn btn--primary" href="{{ s.delivery_cta_link | default: routes.all_products_collection_url }}">{{ s.delivery_cta_text | default: "Check delivery options at checkout" }}</a>
+    </section>
+
+    {%- comment -%} ── QUALITY / COA ── {%- endcomment -%}
+    <section id="pd-quality" class="pd-panel pd-coa" aria-labelledby="pd-coa-heading-{{ sid }}">
+      <h2 id="pd-coa-heading-{{ sid }}" class="pd-heading">{{ s.coa_heading | default: "Quality documentation" }}</h2>
+      <div class="pd-panel-body">
+        {% if s.coa_text != blank %}
+          {{ s.coa_text }}
+        {% else %}
+          <p>Where available, Nootropix provides COAs or batch-related documentation to help customers review identity, purity, and quality information. Documentation availability may vary by product and batch.</p>
+        {% endif %}
+      </div>
+      <a class="btn btn--ghost" href="{{ s.coa_cta_link | default: '/pages/coa-library' }}">{{ s.coa_cta_text | default: "View COA Library" }}</a>
+    </section>
+
+    {%- comment -%} ── FAQ ── {%- endcomment -%}
+    <section aria-labelledby="pd-faq-heading-{{ sid }}">
+      <span class="pd-kicker">FAQ</span>
+      <h2 id="pd-faq-heading-{{ sid }}" class="pd-heading">Questions about ordering in the UAE</h2>
 
       {% if faq_blocks.size > 0 %}
         {% for block in faq_blocks %}
@@ -331,49 +313,35 @@
         {% endfor %}
       {% else %}
         <details class="pd-faq">
-          <summary class="pd-faq-q">How fast is delivery in Dubai?<span class="pd-faq-chevron" aria-hidden="true"></span></summary>
-          <div class="pd-faq-answer"><div class="pd-faq-inner"><p>Orders placed before 5 pm are delivered within 4 hours to Dubai city limits and same or next day to other UAE emirates via Quiqup.</p></div></div>
-        </details>
-        <details class="pd-faq">
-          <summary class="pd-faq-q">Are nootropics legal in the UAE?<span class="pd-faq-chevron" aria-hidden="true"></span></summary>
-          <div class="pd-faq-answer"><div class="pd-faq-inner"><p>Yes. Every product we sell is compliant with UAE supplement regulations. Because we ship locally, your order never passes through customs.</p></div></div>
+          <summary class="pd-faq-q">Do you deliver nootropics in Dubai?<span class="pd-faq-chevron" aria-hidden="true"></span></summary>
+          <div class="pd-faq-answer"><div class="pd-faq-inner"><p>Yes. Nootropix ships from Dubai and offers fast UAE delivery options depending on location, order timing, and courier availability.</p></div></div>
         </details>
       {% endif %}
     </section>
 
     {%- comment -%} ── FINAL CTA ── {%- endcomment -%}
-    <section class="pd-final-cta" aria-label="Get started">
-      <h2 class="pd-heading">Ready to upgrade your cognition?</h2>
-      <p class="pd-body-muted">Order now — same-day delivery in Dubai, next-day across the UAE.</p>
-      <a class="btn btn--primary" href="{{ s.cta_link | default: routes.all_products_collection_url }}">{{ s.cta_text | default: "Shop All Nootropics" }}</a>
+    <section class="pd-final-cta" aria-label="Browse products">
+      <h2 class="pd-heading">{{ s.final_heading | default: "Browse Nootropics" }}</h2>
+      <p class="pd-body-muted">{{ s.final_body | default: "Nootropix ships nootropics and related products from Dubai, with fast UAE delivery options and quality documentation where available." }}</p>
+      <a class="btn btn--primary" href="{{ s.cta_link | default: routes.all_products_collection_url }}">{{ s.cta_text | default: "Browse Nootropics" }}</a>
     </section>
 
   </div>
 </section>
 
 {%- style -%}
-/* ═══════════════════════════════════════════════════════
-   PILLAR — BUY NOOTROPICS DUBAI — Premium Design Tokens
-   ═══════════════════════════════════════════════════════ */
-
 #pillar-dubai-{{ sid }} {
   --section-max-width: {{ s.max_width | default: 1100 }}px;
   --pd-py: {{ s.padding_y | default: 56 }}px;
-  --pd-accent: var(--color-accent-primary, #FBBF24);
-  --pd-accent-hover: var(--color-accent-hover, #D97706);
-  --pd-accent-dark: var(--color-accent-dark, #92400e);
-  --pd-accent-glass: rgba(251, 191, 36, 0.08);
-  --pd-accent-glass-strong: rgba(251, 191, 36, 0.14);
-  --pd-text: var(--color-text-main, #111827);
-  --pd-muted: var(--color-text-muted, #4b5563);
-  --pd-bg: {{ s.background_color | default: '#ffffff' }};
-  --pd-bg-alt: var(--color-bg-secondary, #f9fafb);
-  --pd-radius: var(--radius-premium, 14px);
-  --pd-transition: var(--transition-premium, all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1));
-  --pd-shadow-rest: var(--shadow-sm, 0 2px 8px rgba(0, 0, 0, 0.04));
-  --pd-shadow-hover: var(--shadow-md, 0 12px 30px rgba(0, 0, 0, 0.06));
-  --pd-gold-glow: var(--shadow-gold-glow, 0 4px 14px rgba(251, 191, 36, 0.25));
-  --pd-gold-glow-hover: var(--shadow-gold-glow-hover, 0 8px 24px rgba(251, 191, 36, 0.35));
+  --pd-accent: rgba(var(--color-accent), 1);
+  --pd-accent-soft: color-mix(in srgb, rgba(var(--color-accent)) 14%, transparent);
+  --pd-accent-border: color-mix(in srgb, rgba(var(--color-accent)) 45%, transparent);
+  --pd-text: rgba(var(--color-foreground), 1);
+  --pd-muted: color-mix(in srgb, rgba(var(--color-foreground)) 65%, transparent);
+  --pd-bg: {{ s.background_color | default: 'rgb(var(--color-background))' }};
+  --pd-bg-alt: rgba(var(--color-background-2), 1);
+  --pd-radius: 2rem;
+  --pd-transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
   --pd-font: var(--font-body-family, sans-serif);
   --pd-font-heading: var(--font-heading-family, sans-serif);
 
@@ -388,7 +356,7 @@
 #pillar-dubai-{{ sid }} .pd-inner {
   max-width: var(--section-max-width);
   margin: 0 auto;
-  padding: var(--pd-py) var(--page-gutter);
+  padding: var(--pd-py) var(--page-gutter, 2.2rem);
   display: flex;
   flex-direction: column;
   gap: 40px;
@@ -397,14 +365,13 @@
   #pillar-dubai-{{ sid }} .pd-inner { gap: 56px; }
 }
 
-/* ── Shared typography ── */
 #pillar-dubai-{{ sid }} .pd-kicker {
   display: block;
   text-transform: uppercase;
   letter-spacing: 0.12em;
   font-weight: 700;
   font-size: 12px;
-  color: var(--pd-accent-dark);
+  color: color-mix(in srgb, rgba(var(--color-foreground)) 75%, rgba(var(--color-accent)));
   margin-bottom: 6px;
 }
 #pillar-dubai-{{ sid }} .pd-heading {
@@ -421,14 +388,17 @@
   margin: 0 0 16px;
 }
 
-/* ═══════════════════════════════════════════════════════
-   HERO
-   ═══════════════════════════════════════════════════════ */
+/* HERO */
 #pillar-dubai-{{ sid }} .pd-hero {
-  background: linear-gradient(135deg, rgba(251,191,36,0.08) 0%, rgba(251,191,36,0.18) 50%, rgba(251,191,36,0.08) 100%);
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, rgba(var(--color-accent)) 10%, transparent) 0%,
+    color-mix(in srgb, rgba(var(--color-accent)) 18%, transparent) 50%,
+    color-mix(in srgb, rgba(var(--color-accent)) 10%, transparent) 100%
+  );
   background-size: cover;
   background-position: center;
-  border-radius: 20px;
+  border-radius: var(--pd-radius);
   overflow: hidden;
   min-height: 320px;
   display: flex;
@@ -437,7 +407,7 @@
 #pillar-dubai-{{ sid }} .pd-hero-overlay {
   width: 100%;
   padding: 36px 24px;
-  background: rgba(0, 0, 0, 0.25);
+  background: color-mix(in srgb, rgba(var(--color-foreground)) 55%, transparent);
   -webkit-backdrop-filter: blur(16px);
   backdrop-filter: blur(16px);
 }
@@ -451,11 +421,11 @@
   font-weight: 800;
   letter-spacing: -0.02em;
   line-height: 1.1;
-  color: #fff;
+  color: rgba(var(--color-background), 1);
   margin: 0 0 10px;
 }
 #pillar-dubai-{{ sid }} .pd-hero-sub {
-  color: rgba(255, 255, 255, 0.85);
+  color: color-mix(in srgb, rgba(var(--color-background)) 88%, transparent);
   font-size: clamp(15px, 2vw, 18px);
   line-height: 1.6;
   margin: 0 0 20px;
@@ -466,25 +436,84 @@
   gap: 12px;
   flex-wrap: wrap;
 }
-/* ═══════════════════════════════════════════════════════
-   INTRO
-   ═══════════════════════════════════════════════════════ */
-#pillar-dubai-{{ sid }} .pd-intro-text {
-  font-size: clamp(16px, 2vw, 18px);
-  line-height: 1.7;
-  color: var(--pd-muted);
-  max-width: 800px;
+#pillar-dubai-{{ sid }} .pd-hero-bullets {
+  list-style: none;
+  padding: 0;
+  margin: 20px 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
-#pillar-dubai-{{ sid }} .pd-intro-text p { margin: 0 0 12px; }
-#pillar-dubai-{{ sid }} .pd-intro-text p:last-child { margin-bottom: 0; }
+#pillar-dubai-{{ sid }} .pd-hero-bullets li {
+  font-size: 13px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 10rem;
+  background: color-mix(in srgb, rgba(var(--color-background)) 18%, transparent);
+  color: rgba(var(--color-background), 1);
+  border: 1px solid color-mix(in srgb, rgba(var(--color-background)) 35%, transparent);
+}
 
-/* ═══════════════════════════════════════════════════════
-   COMPETITIVE COMPARISON TABLE
-   ═══════════════════════════════════════════════════════ */
+/* COMPLIANCE NOTICE */
+#pillar-dubai-{{ sid }} .pd-notice {
+  border-radius: 1.5rem;
+  border: 1px solid var(--pd-accent-border);
+  background: var(--pd-accent-soft);
+  padding: 0;
+}
+#pillar-dubai-{{ sid }} .pd-notice-inner {
+  padding: 18px 22px;
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--pd-muted);
+  border-left: 4px solid var(--pd-accent);
+  border-radius: inherit;
+}
+#pillar-dubai-{{ sid }} .pd-notice-inner p { margin: 0; }
+#pillar-dubai-{{ sid }} .pd-notice-inner strong { color: var(--pd-text); }
+
+/* WHY CARDS */
+#pillar-dubai-{{ sid }} .pd-why-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  margin-top: 14px;
+}
+@media (min-width: 760px) {
+  #pillar-dubai-{{ sid }} .pd-why-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (min-width: 990px) {
+  #pillar-dubai-{{ sid }} .pd-why-grid { grid-template-columns: repeat(4, 1fr); }
+}
+#pillar-dubai-{{ sid }} .pd-why-card {
+  padding: 22px 18px;
+  border-radius: var(--pd-radius);
+  background: var(--pd-bg-alt);
+  border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 8%, transparent);
+  transition: var(--pd-transition);
+}
+#pillar-dubai-{{ sid }} .pd-why-card:hover {
+  border-color: color-mix(in srgb, rgba(var(--color-accent)) 35%, transparent);
+}
+#pillar-dubai-{{ sid }} .pd-why-title {
+  font-family: var(--pd-font-heading);
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0 0 8px;
+  color: var(--pd-text);
+}
+#pillar-dubai-{{ sid }} .pd-why-desc {
+  margin: 0;
+  font-size: 14px;
+  color: var(--pd-muted);
+  line-height: 1.6;
+}
+
+/* TABLE */
 #pillar-dubai-{{ sid }} .pd-table-wrap {
   border-radius: var(--pd-radius);
   overflow: hidden;
-  box-shadow: var(--pd-shadow-rest);
+  border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 8%, transparent);
   margin-top: 12px;
 }
 #pillar-dubai-{{ sid }} .pd-table {
@@ -507,16 +536,16 @@
   font-size: 14px;
   line-height: 1.6;
   color: var(--pd-text);
-  border-top: 1px solid rgba(0, 0, 0, 0.04);
+  border-top: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 8%, transparent);
 }
 #pillar-dubai-{{ sid }} .pd-table tbody tr {
   transition: var(--pd-transition);
 }
 #pillar-dubai-{{ sid }} .pd-table tbody tr:hover {
-  background: var(--pd-accent-glass);
+  background: var(--pd-accent-soft);
 }
 #pillar-dubai-{{ sid }} .pd-table-highlight {
-  background: var(--pd-accent-glass);
+  background: var(--pd-accent-soft);
   font-weight: 600;
 }
 @media (max-width: 640px) {
@@ -524,7 +553,7 @@
   #pillar-dubai-{{ sid }} .pd-table tbody tr {
     display: block;
     padding: 14px;
-    border-top: 1px solid rgba(0, 0, 0, 0.04);
+    border-top: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 8%, transparent);
   }
   #pillar-dubai-{{ sid }} .pd-table tbody tr:first-child { border-top: none; }
   #pillar-dubai-{{ sid }} .pd-table td {
@@ -542,151 +571,99 @@
   }
 }
 
-/* ═══════════════════════════════════════════════════════
-   TRUST ICONS — Glass grid
-   ═══════════════════════════════════════════════════════ */
-#pillar-dubai-{{ sid }} .pd-trust-grid {
+/* RESPONSIBLE + GUIDES */
+#pillar-dubai-{{ sid }} .pd-responsible-intro {
+  font-size: clamp(15px, 2vw, 17px);
+  line-height: 1.7;
+  color: var(--pd-muted);
+  max-width: 800px;
+}
+#pillar-dubai-{{ sid }} .pd-responsible-intro p { margin: 0 0 12px; }
+#pillar-dubai-{{ sid }} .pd-guide-links {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 16px;
-  margin-top: 14px;
+  gap: 12px;
+  margin-top: 20px;
 }
-@media (min-width: 760px) {
-  #pillar-dubai-{{ sid }} .pd-trust-grid { grid-template-columns: repeat(3, 1fr); }
+@media (min-width: 740px) {
+  #pillar-dubai-{{ sid }} .pd-guide-links { grid-template-columns: repeat(3, 1fr); }
 }
-#pillar-dubai-{{ sid }} .pd-trust-card {
+#pillar-dubai-{{ sid }} .pd-guide-card {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 10px;
-  padding: 24px 16px;
-  border: none;
-  border-radius: var(--pd-radius);
-  background: var(--pd-accent-glass);
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
-  box-shadow: var(--pd-shadow-rest);
-  transition: var(--pd-transition);
+  justify-content: center;
   text-align: center;
-}
-#pillar-dubai-{{ sid }} .pd-trust-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--pd-shadow-hover);
-}
-#pillar-dubai-{{ sid }} .pd-trust-icon {
-  width: 80px;
-  height: 80px;
-  flex-shrink: 0;
-}
-#pillar-dubai-{{ sid }} .pd-trust-icon img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-#pillar-dubai-{{ sid }} .pd-trust-emoji {
-  font-size: 36px;
-  line-height: 1;
-}
-#pillar-dubai-{{ sid }} .pd-trust-label {
-  display: inline-block;
-  padding: 5px 12px;
-  border-radius: 8px;
-  background: var(--pd-accent);
-  color: var(--color-text-primary);
+  min-height: 72px;
+  padding: 16px;
+  border-radius: var(--pd-radius);
+  border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
+  background: var(--pd-bg-alt);
+  color: var(--pd-text);
   font-weight: 600;
-  font-size: 13px;
+  font-size: 15px;
+  text-decoration: none;
+  transition: var(--pd-transition);
+}
+#pillar-dubai-{{ sid }} .pd-guide-card:hover {
+  border-color: color-mix(in srgb, rgba(var(--color-accent)) 45%, transparent);
+  background: var(--pd-accent-soft);
 }
 
-/* ═══════════════════════════════════════════════════════
-   4-PRODUCT GRID — Sibling fade, image scale
-   ═══════════════════════════════════════════════════════ */
-#pillar-dubai-{{ sid }} .pd-product-grid {
+/* CATEGORY TILES */
+#pillar-dubai-{{ sid }} .pd-cat-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
+  gap: 12px;
   margin-top: 16px;
 }
-@media (min-width: 900px) {
-  #pillar-dubai-{{ sid }} .pd-product-grid { grid-template-columns: repeat(4, 1fr); }
+@media (min-width: 740px) {
+  #pillar-dubai-{{ sid }} .pd-cat-grid { grid-template-columns: repeat(3, 1fr); }
 }
-#pillar-dubai-{{ sid }} .pd-product-card {
+#pillar-dubai-{{ sid }} .pd-cat-tile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 56px;
+  padding: 14px 12px;
+  border-radius: var(--pd-radius);
+  border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
   background: var(--pd-bg);
-  border: none;
-  border-radius: var(--pd-radius);
-  padding: 18px;
-  box-shadow: var(--pd-shadow-rest);
-  display: flex;
-  flex-direction: column;
-  transition: var(--pd-transition);
-}
-#pillar-dubai-{{ sid }} .pd-product-grid:hover .pd-product-card {
-  opacity: 0.6;
-}
-#pillar-dubai-{{ sid }} .pd-product-grid .pd-product-card:hover {
-  opacity: 1;
-  transform: translateY(-4px);
-  box-shadow: var(--pd-shadow-hover);
-}
-#pillar-dubai-{{ sid }} .pd-product-img {
-  border-radius: var(--pd-radius);
-  overflow: hidden;
-  margin-bottom: 12px;
-}
-#pillar-dubai-{{ sid }} .pd-product-img img {
-  display: block;
-  width: 100%;
-  height: auto;
-  transition: var(--pd-transition);
-}
-#pillar-dubai-{{ sid }} .pd-product-card:hover .pd-product-img img {
-  transform: scale(1.03);
-}
-#pillar-dubai-{{ sid }} .pd-product-title {
-  font-family: var(--pd-font-heading);
-  font-size: 1rem;
-  font-weight: 700;
-  line-height: 1.3;
-  margin: 0 0 6px;
   color: var(--pd-text);
-}
-#pillar-dubai-{{ sid }} .pd-product-desc {
-  font-size: 13px;
-  color: var(--pd-muted);
-  line-height: 1.6;
-  margin: 0 0 12px;
-}
-#pillar-dubai-{{ sid }} .pd-product-footer {
-  margin-top: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-#pillar-dubai-{{ sid }} .pd-product-ctas {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-#pillar-dubai-{{ sid }} .pd-product-meta {
+  font-weight: 600;
   font-size: 14px;
-  font-weight: 700;
-  color: var(--pd-text);
+  text-decoration: none;
+  transition: var(--pd-transition);
+}
+#pillar-dubai-{{ sid }} .pd-cat-tile:hover {
+  border-color: var(--pd-accent);
+  background: var(--pd-accent-soft);
 }
 
-/* ═══════════════════════════════════════════════════════
-   FAQ — Animated disclosure, chevron rotation
-   ═══════════════════════════════════════════════════════ */
+/* PANELS */
+#pillar-dubai-{{ sid }} .pd-panel {
+  border-radius: var(--pd-radius);
+  padding: 28px 24px;
+  background: var(--pd-bg-alt);
+  border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 8%, transparent);
+}
+#pillar-dubai-{{ sid }} .pd-panel-body {
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--pd-muted);
+  margin-bottom: 18px;
+}
+#pillar-dubai-{{ sid }} .pd-panel-body p { margin: 0 0 10px; }
+#pillar-dubai-{{ sid }} .pd-panel-body p:last-child { margin-bottom: 0; }
+
+/* FAQ */
 #pillar-dubai-{{ sid }} .pd-faq {
-  border: none;
-  border-radius: 10px;
+  border-radius: 1rem;
   margin: 8px 0;
-  box-shadow: var(--pd-shadow-rest);
+  border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 8%, transparent);
   overflow: hidden;
   background: var(--pd-bg);
   transition: var(--pd-transition);
-}
-#pillar-dubai-{{ sid }} .pd-faq:hover {
-  box-shadow: var(--pd-shadow-hover);
 }
 #pillar-dubai-{{ sid }} .pd-faq-q {
   display: flex;
@@ -700,7 +677,7 @@
   color: var(--pd-text);
   cursor: pointer;
   list-style: none;
-  min-height: var(--touch-min, 44px);
+  min-height: 44px;
 }
 #pillar-dubai-{{ sid }} .pd-faq-q::-webkit-details-marker { display: none; }
 #pillar-dubai-{{ sid }} .pd-faq-q::marker { content: ""; }
@@ -710,7 +687,7 @@
   width: 20px;
   height: 20px;
   position: relative;
-  transition: transform 0.35s var(--ease-premium);
+  transition: transform 0.35s cubic-bezier(0.25, 0.74, 0.22, 0.99);
 }
 #pillar-dubai-{{ sid }} .pd-faq-chevron::before,
 #pillar-dubai-{{ sid }} .pd-faq-chevron::after {
@@ -721,7 +698,7 @@
   height: 2px;
   background: var(--pd-muted);
   border-radius: 1px;
-  transition: transform 0.35s var(--ease-premium);
+  transition: transform 0.35s cubic-bezier(0.25, 0.74, 0.22, 0.99);
 }
 #pillar-dubai-{{ sid }} .pd-faq-chevron::before {
   left: 1px;
@@ -740,7 +717,7 @@
 #pillar-dubai-{{ sid }} .pd-faq-answer {
   display: grid;
   grid-template-rows: 0fr;
-  transition: grid-template-rows 0.35s var(--ease-premium);
+  transition: grid-template-rows 0.35s cubic-bezier(0.25, 0.74, 0.22, 0.99);
 }
 #pillar-dubai-{{ sid }} .pd-faq[open] .pd-faq-answer {
   grid-template-rows: 1fr;
@@ -756,20 +733,15 @@
   font-size: 14px;
 }
 
-/* ═══════════════════════════════════════════════════════
-   FINAL CTA
-   ═══════════════════════════════════════════════════════ */
+/* FINAL CTA */
 #pillar-dubai-{{ sid }} .pd-final-cta {
   background: var(--pd-bg-alt);
   border-radius: var(--pd-radius);
   padding: 28px 24px;
-  box-shadow: var(--pd-shadow-rest);
+  border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 8%, transparent);
   text-align: center;
 }
 
-/* ═══════════════════════════════════════════════════════
-   ACCESSIBILITY — focus-visible + reduced motion
-   ═══════════════════════════════════════════════════════ */
 #pillar-dubai-{{ sid }} :focus-visible {
   outline: 2px solid var(--pd-accent);
   outline-offset: 2px;
@@ -795,62 +767,386 @@
       "type": "header",
       "content": "Hero"
     },
-    { "type": "text", "id": "hero_title", "label": "Hero title", "default": "Buy Nootropics in Dubai, UAE — Same-Day Delivery" },
-    { "type": "textarea", "id": "hero_subtitle", "label": "Hero subtitle", "default": "Premium, lab-tested nootropics delivered to your Dubai door in as little as 4 hours. Rest of UAE: 24 hours. International express dispatch same day." },
-    { "type": "image_picker", "id": "hero_image", "label": "Hero background image (optional)" },
-    { "type": "text", "id": "hero_cta_text", "label": "Hero CTA text", "default": "Browse All" },
-    { "type": "url", "id": "hero_cta_link", "label": "Hero CTA link" },
+    {
+      "type": "text",
+      "id": "hero_title",
+      "label": "Hero title",
+      "default": "Buy Nootropics Online in Dubai & the UAE"
+    },
+    {
+      "type": "textarea",
+      "id": "hero_subtitle",
+      "label": "Hero subtitle",
+      "default": "A Dubai-based store for nootropics, supplements, and related products, with fast UAE delivery, clear product information, and quality documentation where available."
+    },
+    {
+      "type": "image_picker",
+      "id": "hero_image",
+      "label": "Hero background image (optional)"
+    },
+    {
+      "type": "text",
+      "id": "hero_cta_text",
+      "label": "Primary CTA text",
+      "default": "Browse Nootropics"
+    },
+    {
+      "type": "url",
+      "id": "hero_cta_link",
+      "label": "Primary CTA link"
+    },
+    {
+      "type": "text",
+      "id": "hero_cta_2_text",
+      "label": "Secondary CTA text",
+      "default": "View Quality & COA Info"
+    },
+    {
+      "type": "url",
+      "id": "hero_cta_2_link",
+      "label": "Secondary CTA link",
+      "info": "Defaults to in-page Quality section if left blank."
+    },
+    {
+      "type": "text",
+      "id": "hero_bullet_1",
+      "label": "Trust bullet 1",
+      "default": "Ships from Dubai"
+    },
+    {
+      "type": "text",
+      "id": "hero_bullet_2",
+      "label": "Trust bullet 2",
+      "default": "UAE and international delivery options"
+    },
+    {
+      "type": "text",
+      "id": "hero_bullet_3",
+      "label": "Trust bullet 3",
+      "default": "COAs or batch documentation where available"
+    },
+    {
+      "type": "text",
+      "id": "hero_bullet_4",
+      "label": "Trust bullet 4",
+      "default": "Customer support before and after ordering"
+    },
     {
       "type": "header",
-      "content": "Intro"
+      "content": "Compliance notice"
     },
-    { "type": "richtext", "id": "intro_text", "label": "Intro paragraph", "default": "<p>Tired of waiting weeks for nootropics supplements to clear customs? <strong>Nootropix</strong> delivers premium, lab-tested nootropics to your Dubai door in as little as <strong>4 hours</strong>. Rest of UAE: 24 hours. International express dispatch same day.</p>" },
+    {
+      "type": "richtext",
+      "id": "compliance_notice",
+      "label": "Disclaimer (optional override)"
+    },
     {
       "type": "header",
-      "content": "Comparison Table"
+      "content": "Why UAE buyers choose Nootropix"
     },
-    { "type": "text", "id": "compare_nx_delivery", "label": "Nootropix — Delivery", "default": "4 h within Dubai" },
-    { "type": "text", "id": "compare_other_delivery", "label": "Others — Delivery", "default": "5–10 days Intl. post" },
-    { "type": "text", "id": "compare_nx_customs", "label": "Nootropix — Customs", "default": "0 % — local fulfillment" },
-    { "type": "text", "id": "compare_other_customs", "label": "Others — Customs", "default": "20 % parcels held" },
-    { "type": "text", "id": "compare_nx_shipping", "label": "Nootropix — Shipping Fees", "default": "FREE" },
-    { "type": "text", "id": "compare_other_shipping", "label": "Others — Shipping Fees", "default": "25–55 AED extra" },
-    { "type": "text", "id": "compare_nx_refund", "label": "Nootropix — Money-Back", "default": "Quick refunds" },
-    { "type": "text", "id": "compare_other_refund", "label": "Others — Money-Back", "default": "30-day through ticket" },
-    { "type": "text", "id": "compare_nx_testing", "label": "Nootropix — Lab Testing", "default": "COA on every batch" },
-    { "type": "text", "id": "compare_other_testing", "label": "Others — Lab Testing", "default": "Varies by brand" },
+    {
+      "type": "text",
+      "id": "wc_1_title",
+      "label": "Card 1 title",
+      "default": "Fast UAE delivery"
+    },
+    {
+      "type": "textarea",
+      "id": "wc_1_desc",
+      "label": "Card 1 description",
+      "default": "Orders ship from Dubai, with fast courier options available across the UAE depending on location, order timing, and courier availability."
+    },
+    {
+      "type": "text",
+      "id": "wc_2_title",
+      "label": "Card 2 title",
+      "default": "Quality-first sourcing"
+    },
+    {
+      "type": "textarea",
+      "id": "wc_2_desc",
+      "label": "Card 2 description",
+      "default": "We prioritize reputable sourcing, clear product details, and quality documentation such as COAs where available."
+    },
+    {
+      "type": "text",
+      "id": "wc_3_title",
+      "label": "Card 3 title",
+      "default": "Heat-aware packing"
+    },
+    {
+      "type": "textarea",
+      "id": "wc_3_desc",
+      "label": "Card 3 description",
+      "default": "Orders are packed with UAE conditions in mind, and customers receive clear storage and handling guidance after delivery."
+    },
+    {
+      "type": "text",
+      "id": "wc_4_title",
+      "label": "Card 4 title",
+      "default": "Human support"
+    },
+    {
+      "type": "textarea",
+      "id": "wc_4_desc",
+      "label": "Card 4 description",
+      "default": "Have a question before ordering? Our support team can help with availability, shipping, documentation, and order issues."
+    },
     {
       "type": "header",
-      "content": "Trust Icons"
+      "content": "Comparison table"
     },
-    { "type": "image_picker", "id": "icon_1_image", "label": "Icon 1 image" },
-    { "type": "text", "id": "icon_1_title", "label": "Icon 1 title", "default": "Dubai — 4 Hours" },
-    { "type": "image_picker", "id": "icon_2_image", "label": "Icon 2 image" },
-    { "type": "text", "id": "icon_2_title", "label": "Icon 2 title", "default": "UAE — Next Day" },
-    { "type": "image_picker", "id": "icon_3_image", "label": "Icon 3 image" },
-    { "type": "text", "id": "icon_3_title", "label": "Icon 3 title", "default": "International — DHL Express" },
+    {
+      "type": "text",
+      "id": "compare_nx_delivery",
+      "label": "Nootropix — UAE delivery",
+      "default": "Ships from Dubai"
+    },
+    {
+      "type": "text",
+      "id": "compare_other_delivery",
+      "label": "Overseas — UAE delivery",
+      "default": "Often delayed by customs/logistics"
+    },
+    {
+      "type": "text",
+      "id": "compare_nx_support",
+      "label": "Nootropix — Support",
+      "default": "Local support team"
+    },
+    {
+      "type": "text",
+      "id": "compare_other_support",
+      "label": "Overseas — Support",
+      "default": "Often slower or timezone-limited"
+    },
+    {
+      "type": "text",
+      "id": "compare_nx_info",
+      "label": "Nootropix — Product info",
+      "default": "Clear PDPs and documentation where available"
+    },
+    {
+      "type": "text",
+      "id": "compare_other_info",
+      "label": "Overseas — Product info",
+      "default": "Varies by supplier"
+    },
+    {
+      "type": "text",
+      "id": "compare_nx_storage",
+      "label": "Nootropix — Storage guidance",
+      "default": "UAE-aware handling info"
+    },
+    {
+      "type": "text",
+      "id": "compare_other_storage",
+      "label": "Overseas — Storage guidance",
+      "default": "Often generic"
+    },
+    {
+      "type": "text",
+      "id": "compare_nx_checkout",
+      "label": "Nootropix — Checkout",
+      "default": "UAE-friendly checkout"
+    },
+    {
+      "type": "text",
+      "id": "compare_other_checkout",
+      "label": "Overseas — Checkout",
+      "default": "Varies by region"
+    },
     {
       "type": "header",
-      "content": "Products"
+      "content": "Responsible choice & guides"
     },
-    { "type": "product", "id": "product_1", "label": "Product 1 (picker)" },
-    { "type": "text", "id": "product_1_handle", "label": "Product 1 backup handle", "default": "phenibut" },
-    { "type": "text", "id": "product_1_desc", "label": "Product 1 description", "default": "GABA-B agonist for calm focus and social confidence." },
-    { "type": "product", "id": "product_2", "label": "Product 2 (picker)" },
-    { "type": "text", "id": "product_2_handle", "label": "Product 2 backup handle", "default": "aniracetam" },
-    { "type": "text", "id": "product_2_desc", "label": "Product 2 description", "default": "Anxiolytic racetam for creative flow and verbal fluency." },
-    { "type": "product", "id": "product_3", "label": "Product 3 (picker)" },
-    { "type": "text", "id": "product_3_handle", "label": "Product 3 backup handle", "default": "noopept" },
-    { "type": "text", "id": "product_3_desc", "label": "Product 3 description", "default": "Ultra-potent neuropeptide for memory and learning." },
-    { "type": "product", "id": "product_4", "label": "Product 4 (picker)" },
-    { "type": "text", "id": "product_4_handle", "label": "Product 4 backup handle", "default": "caffeine-l-theanine" },
-    { "type": "text", "id": "product_4_desc", "label": "Product 4 description", "default": "Smooth, clean energy — focused alertness without jitters." },
+    {
+      "type": "richtext",
+      "id": "responsible_choice_text",
+      "label": "Intro text"
+    },
+    {
+      "type": "text",
+      "id": "guide_1_text",
+      "label": "Guide link 1 label",
+      "default": "Beginner's Guide to Nootropics"
+    },
+    {
+      "type": "url",
+      "id": "guide_1_link",
+      "label": "Guide link 1 URL"
+    },
+    {
+      "type": "text",
+      "id": "guide_2_text",
+      "label": "Guide link 2 label",
+      "default": "How to Read a COA"
+    },
+    {
+      "type": "url",
+      "id": "guide_2_link",
+      "label": "Guide link 2 URL"
+    },
+    {
+      "type": "text",
+      "id": "guide_3_text",
+      "label": "Guide link 3 label",
+      "default": "Storage & Handling Guide"
+    },
+    {
+      "type": "url",
+      "id": "guide_3_link",
+      "label": "Guide link 3 URL"
+    },
+    {
+      "type": "header",
+      "content": "Category tiles"
+    },
+    {
+      "type": "text",
+      "id": "cat_1_title",
+      "label": "Tile 1 title",
+      "default": "Capsules"
+    },
+    {
+      "type": "url",
+      "id": "cat_1_link",
+      "label": "Tile 1 link"
+    },
+    {
+      "type": "text",
+      "id": "cat_2_title",
+      "label": "Tile 2 title",
+      "default": "Powders"
+    },
+    {
+      "type": "url",
+      "id": "cat_2_link",
+      "label": "Tile 2 link"
+    },
+    {
+      "type": "text",
+      "id": "cat_3_title",
+      "label": "Tile 3 title",
+      "default": "Natural & Mushroom Extracts"
+    },
+    {
+      "type": "url",
+      "id": "cat_3_link",
+      "label": "Tile 3 link"
+    },
+    {
+      "type": "text",
+      "id": "cat_4_title",
+      "label": "Tile 4 title",
+      "default": "Racetams"
+    },
+    {
+      "type": "url",
+      "id": "cat_4_link",
+      "label": "Tile 4 link"
+    },
+    {
+      "type": "text",
+      "id": "cat_5_title",
+      "label": "Tile 5 title",
+      "default": "Cholinergics"
+    },
+    {
+      "type": "url",
+      "id": "cat_5_link",
+      "label": "Tile 5 link"
+    },
+    {
+      "type": "text",
+      "id": "cat_6_title",
+      "label": "Tile 6 title",
+      "default": "Stacks & Bundles"
+    },
+    {
+      "type": "url",
+      "id": "cat_6_link",
+      "label": "Tile 6 link"
+    },
+    {
+      "type": "header",
+      "content": "Delivery"
+    },
+    {
+      "type": "text",
+      "id": "delivery_heading",
+      "label": "Heading",
+      "default": "Delivery in Dubai & across the UAE"
+    },
+    {
+      "type": "richtext",
+      "id": "delivery_text",
+      "label": "Body"
+    },
+    {
+      "type": "text",
+      "id": "delivery_cta_text",
+      "label": "CTA text",
+      "default": "Check delivery options at checkout"
+    },
+    {
+      "type": "url",
+      "id": "delivery_cta_link",
+      "label": "CTA link"
+    },
+    {
+      "type": "header",
+      "content": "Quality / COA"
+    },
+    {
+      "type": "text",
+      "id": "coa_heading",
+      "label": "Heading",
+      "default": "Quality documentation"
+    },
+    {
+      "type": "richtext",
+      "id": "coa_text",
+      "label": "Body"
+    },
+    {
+      "type": "text",
+      "id": "coa_cta_text",
+      "label": "CTA text",
+      "default": "View COA Library"
+    },
+    {
+      "type": "url",
+      "id": "coa_cta_link",
+      "label": "CTA link"
+    },
     {
       "type": "header",
       "content": "Final CTA"
     },
-    { "type": "text", "id": "cta_text", "label": "CTA button text", "default": "Shop All Nootropics" },
-    { "type": "url", "id": "cta_link", "label": "CTA button link" },
+    {
+      "type": "text",
+      "id": "final_heading",
+      "label": "Heading",
+      "default": "Browse Nootropics"
+    },
+    {
+      "type": "textarea",
+      "id": "final_body",
+      "label": "Body text",
+      "default": "Nootropix ships nootropics and related products from Dubai, with fast UAE delivery options and quality documentation where available."
+    },
+    {
+      "type": "text",
+      "id": "cta_text",
+      "label": "Button text",
+      "default": "Browse Nootropics"
+    },
+    {
+      "type": "url",
+      "id": "cta_link",
+      "label": "Button link"
+    },
     {
       "type": "header",
       "content": "Layout"
@@ -896,14 +1192,27 @@
       "type": "faq",
       "name": "FAQ",
       "settings": [
-        { "type": "text", "id": "q", "label": "Question", "default": "How fast is delivery in Dubai?" },
-        { "type": "textarea", "id": "a", "label": "Answer", "default": "Orders placed before 5 pm are delivered within 4 hours to Dubai city limits." }
+        {
+          "type": "text",
+          "id": "q",
+          "label": "Question",
+          "default": "Do you deliver nootropics in Dubai?"
+        },
+        {
+          "type": "textarea",
+          "id": "a",
+          "label": "Answer",
+          "default": "Yes. Nootropix ships from Dubai and offers fast UAE delivery options depending on location, order timing, and courier availability."
+        }
       ]
     }
   ],
   "max_blocks": 12,
   "presets": [
-    { "name": "Pillar — Nootropics Dubai", "category": "Nootropix" }
+    {
+      "name": "Pillar — Nootropics Dubai",
+      "category": "Nootropix"
+    }
   ]
 }
 {% endschema %}
