@@ -16,8 +16,6 @@
   assign rating_val = rating_mf.value | default: rating_mf | plus: 0
   assign rating_cnt = p.metafields.reviews.rating_count | plus: 0
 
-  assign return_url = shop.secure_url | append: '/pages/shipping-and-returns'
-  assign return_id = return_url | append: '#return-policy'
 
   assign bc_collection = collection
   if bc_collection == blank and p.collections.size > 0
@@ -72,8 +70,19 @@
       "description": {{ desc | json }},
       "url": {{ canonical_url | json }},
       "sku": {{ p.selected_or_first_available_variant.sku | json }},
-      {%- if p.selected_or_first_available_variant.barcode != blank -%}
-        "mpn": {{ p.selected_or_first_available_variant.barcode | json }},
+      {%- assign bc = p.selected_or_first_available_variant.barcode | strip -%}
+      {%- if bc != blank -%}
+        {%- if bc.size == 8 -%}
+        "gtin8": {{ bc | json }},
+        {%- elsif bc.size == 12 -%}
+        "gtin12": {{ bc | json }},
+        {%- elsif bc.size == 13 -%}
+        "gtin13": {{ bc | json }},
+        {%- elsif bc.size == 14 -%}
+        "gtin14": {{ bc | json }},
+        {%- else -%}
+        "mpn": {{ bc | json }},
+        {%- endif -%}
       {%- endif -%}
       "image": [
         {%- for img in p.images -%}
@@ -95,13 +104,36 @@
           "shippingDestination": {
             "@type": "DefinedRegion",
             "addressCountry": "AE"
+          },
+          "shippingRate": {
+            "@type": "MonetaryAmount",
+            "value": "0",
+            "currency": "AED"
+          },
+          "deliveryTime": {
+            "@type": "ShippingDeliveryTime",
+            "handlingTime": {
+              "@type": "QuantitativeValue",
+              "minValue": 0,
+              "maxValue": 0,
+              "unitCode": "DAY"
+            },
+            "transitTime": {
+              "@type": "QuantitativeValue",
+              "minValue": 0,
+              "maxValue": 1,
+              "unitCode": "DAY"
+            }
           }
         },
         "hasMerchantReturnPolicy": {
           "@type": "MerchantReturnPolicy",
-          "@id": {{ return_id | json }},
-          "merchantReturnLink": {{ return_url | json }},
-          "applicableCountry": "AE"
+          "applicableCountry": "AE",
+          "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
+          "merchantReturnDays": 30,
+          "returnMethod": "https://schema.org/ReturnByMail",
+          "returnFees": "https://schema.org/FreeReturn",
+          "merchantReturnLink": "https://nootropix.shop/pages/shipping-and-returns"
         },
         "seller": {
           "@type": "Organization",
