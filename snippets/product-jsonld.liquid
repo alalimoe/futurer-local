@@ -7,7 +7,16 @@
 
 {%- liquid
   assign p = product
-  assign desc = p.description | strip_html | strip | truncate: 5000
+  assign desc = p.metafields.pdp.first_paragraph | default: '' | strip_html | strip
+  if desc == blank
+    assign desc = p.metafields.pdp.headline | default: '' | strip_html | strip
+  endif
+  if desc == blank
+    assign desc = p.metafields.npx.subtitle | default: '' | strip_html | strip
+  endif
+  if desc == blank
+    assign desc = p.description | strip_html | strip | truncate: 5000
+  endif
   if desc == blank
     assign desc = p.title
   endif
