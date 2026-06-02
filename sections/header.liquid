@@ -13,33 +13,6 @@
 {% endcase %}
 {{ 'section-header-drawer.css' | asset_url | stylesheet_tag }}
 
-{%- if section.settings.quiz_cta_text != blank -%}
-<style>
-  .xo-header__quiz-cta {
-    display: inline-flex;
-    align-items: center;
-    white-space: nowrap;
-    padding: 7px 16px;
-    margin-left: 12px;
-    font-size: 0.8125rem;
-    font-weight: 700;
-    letter-spacing: 0.03em;
-    color: #1e1e1e;
-    background: #fbbf24;
-    border-radius: var(--buttons-radius, 6px);
-    text-decoration: none;
-    transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
-    box-shadow: 0 2px 6px rgba(251, 191, 36, 0.28);
-    flex-shrink: 0;
-  }
-  .xo-header__quiz-cta:hover {
-    background: #f59e0b;
-    box-shadow: 0 3px 10px rgba(251, 191, 36, 0.4);
-    transform: translateY(-1px);
-  }
-</style>
-{%- endif -%}
-
 {% liquid
   assign header_style = section.settings.header_style
   assign menu_type = section.settings.menu_type
@@ -67,11 +40,6 @@
   <div class='xo-header__desktop{% if menu_type == 'drawer' %} xo-header__desktop--only{% endif %}'>
     {% if menu_type == 'default' %}
       {% render 'menu-horizontal', menu: menu, event_type: event_type, blocks: blocks %}
-      {%- if section.settings.quiz_cta_text != blank -%}
-        <a href="{{ section.settings.quiz_cta_url | default: '/pages/quiz' }}" class="xo-header__quiz-cta">
-          {{- section.settings.quiz_cta_text -}}
-        </a>
-      {%- endif -%}
     {% else %}
       {% render 'menu-hamburger', menu: menu, secondary_menu: secondary_menu, menu_type: menu_type, header_style: header_style %}
     {% endif %}
@@ -508,22 +476,6 @@
       "type": "color_scheme",
       "id": "color_scheme",
       "label": "t:sections.all.colors.label"
-    },
-    {
-      "type": "header",
-      "content": "Quiz CTA"
-    },
-    {
-      "type": "text",
-      "id": "quiz_cta_text",
-      "label": "Quiz CTA label",
-      "default": "Find My Stack →",
-      "info": "Leave blank to hide the quiz link in the nav."
-    },
-    {
-      "type": "url",
-      "id": "quiz_cta_url",
-      "label": "Quiz CTA link"
     }
   ],
   "blocks": [
