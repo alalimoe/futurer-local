@@ -1,6 +1,9 @@
 {%- liquid
   assign dg_id = section.id
   assign dg_coll = section.settings.collection
+  if dg_coll == blank
+    assign dg_coll = collections.all
+  endif
 
   assign dg_manual = false
   assign dg_handles = ''
@@ -631,8 +634,8 @@
   "settings": [
     { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "default" },
     { "type": "header", "content": "Data Source" },
-    { "type": "paragraph", "content": "Add 'Product' blocks below to choose exactly which products appear, in order. If no Product blocks are added, the section falls back to looping the collection chosen here." },
-    { "type": "collection", "id": "collection", "label": "Fallback collection", "info": "Used only when no Product blocks are added. Products in this collection render as dosing cards if they have a custom.dose or custom.timing metafield. Set custom.dose, custom.timing, custom.with_food, custom.cycling, and custom.dosing_notes on each product." },
+    { "type": "paragraph", "content": "By default (no Product blocks and no collection selected) this lists ALL products that have dosing metafields. Pick a collection to scope the list, or add Product blocks to pin an exact set and order." },
+    { "type": "collection", "id": "collection", "label": "Product source (optional)", "info": "Leave blank to include all products (any with a custom.dose or custom.timing metafield appears, up to 50). Or choose a collection to scope it. Ignored when Product blocks are added. Populate custom.dose, custom.timing, custom.with_food, custom.cycling, and custom.dosing_notes on each product." },
     { "type": "header", "content": "Hero" },
     { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Reference Guide" },
     { "type": "text", "id": "heading", "label": "Page heading (H1)", "default": "Dosing Guide" },
