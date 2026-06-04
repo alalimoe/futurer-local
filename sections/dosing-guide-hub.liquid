@@ -13,7 +13,7 @@
   if dg_handles.size > 0
     assign dg_manual = true
   else
-    assign dg_handles = dg_coll.products | map: 'handle'
+    assign dg_handles = dg_coll.products | sort_natural: 'title' | map: 'handle'
   endif
   assign dg_products = dg_handles
 -%}
@@ -117,37 +117,61 @@
     color: color-mix(in srgb, rgba(var(--color-foreground)) 65%, transparent);
   }
 
-  /* ── Zone 2: Jump-to nav (CSS only) ── */
-  .xo-section--{{ dg_id }} .dg-jump {
+  /* ── Zone 2: Product search ── */
+  .xo-section--{{ dg_id }} .dg-search-zone { margin-bottom: clamp(28px, 4vw, 40px); }
+  .xo-section--{{ dg_id }} .dg-search {
+    position: sticky; top: 72px; z-index: 5;
     background: rgba(var(--color-background-2));
     border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 7%, transparent);
     border-radius: var(--general-radius-1, 1rem);
-    padding: 20px 22px;
+    padding: 16px 18px;
   }
-  .xo-section--{{ dg_id }} .dg-jump__label {
+  .xo-section--{{ dg_id }} .dg-search__label {
+    display: block;
     font-size: 0.68rem; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase;
     color: color-mix(in srgb, rgba(var(--color-foreground)) 55%, transparent);
-    margin: 0 0 14px;
+    margin: 0 0 10px;
   }
-  .xo-section--{{ dg_id }} .dg-jump__list {
-    display: flex; flex-wrap: wrap; gap: 8px; list-style: none; padding: 0; margin: 0;
-  }
-  .xo-section--{{ dg_id }} .dg-jump__link {
-    display: inline-flex; align-items: center;
-    padding: 7px 14px; min-height: 32px;
-    border-radius: var(--button-radius, 10rem);
-    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 12%, transparent);
+  .xo-section--{{ dg_id }} .dg-search__field {
+    display: flex; align-items: center; gap: 10px;
     background: rgba(var(--color-background));
-    font-size: 0.82rem; font-weight: 500;
-    text-decoration: none; color: inherit;
-    transition: border-color 0.2s var(--out-soft, ease), background 0.2s var(--out-soft, ease);
+    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 14%, transparent);
+    border-radius: var(--button-radius, 10rem);
+    padding: 0 14px;
+    transition: border-color 0.2s var(--out-soft, ease);
   }
-  .xo-section--{{ dg_id }} .dg-jump__link:hover {
-    border-color: rgba(var(--color-accent));
-    background: color-mix(in srgb, rgba(var(--color-accent)) 8%, transparent);
+  .xo-section--{{ dg_id }} .dg-search__field:focus-within { border-color: rgba(var(--color-accent)); }
+  .xo-section--{{ dg_id }} .dg-search__icon {
+    width: 17px; height: 17px; flex-shrink: 0;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 45%, transparent);
   }
-  .xo-section--{{ dg_id }} .dg-jump__link:focus-visible {
-    outline: 2px solid rgba(var(--color-accent)); outline-offset: 2px;
+  .xo-section--{{ dg_id }} .dg-search__input {
+    flex: 1; min-width: 0;
+    border: none; background: transparent; outline: none;
+    padding: 12px 0;
+    font-size: 0.95rem; color: rgba(var(--color-foreground)); font-family: inherit;
+  }
+  .xo-section--{{ dg_id }} .dg-search__input::-webkit-search-cancel-button { display: none; }
+  .xo-section--{{ dg_id }} .dg-search__clear {
+    flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center;
+    width: 24px; height: 24px; padding: 0;
+    border: none; border-radius: 50%; cursor: pointer;
+    background: color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
+    color: rgba(var(--color-foreground));
+  }
+  .xo-section--{{ dg_id }} .dg-search__clear svg { width: 13px; height: 13px; }
+  .xo-section--{{ dg_id }} .dg-search__clear:hover { background: color-mix(in srgb, rgba(var(--color-foreground)) 18%, transparent); }
+  .xo-section--{{ dg_id }} .dg-search__clear:focus-visible { outline: 2px solid rgba(var(--color-accent)); outline-offset: 2px; }
+  .xo-section--{{ dg_id }} .dg-search__count {
+    margin: 10px 2px 0; font-size: 0.78rem;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 55%, transparent);
+  }
+  .xo-section--{{ dg_id }} .dg-noresults {
+    background: rgba(var(--color-background-2));
+    border: 1px dashed color-mix(in srgb, rgba(var(--color-foreground)) 18%, transparent);
+    border-radius: var(--general-radius-1, 1rem);
+    padding: 28px; text-align: center; font-size: 0.9rem;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 60%, transparent);
   }
 
   /* ── Zone 3: Per-product cards ── */
@@ -265,7 +289,7 @@
 
   /* ── Reduced motion ── */
   @media (prefers-reduced-motion: reduce) {
-    .xo-section--{{ dg_id }} .dg-jump__link,
+    .xo-section--{{ dg_id }} .dg-search__field,
     .xo-section--{{ dg_id }} .dg-product { transition: none; }
   }
 {%- endstyle -%}
@@ -356,25 +380,27 @@
         </div>
       </div>
 
-      {%- comment -%} ═══ ZONE 2: JUMP-TO NAVIGATION ═══ {%- endcomment -%}
+      {%- comment -%} ═══ ZONE 2: PRODUCT SEARCH ═══ {%- endcomment -%}
       {%- if dg_products.size > 0 -%}
-        <div class="dg-zone">
-          <nav class="dg-jump" aria-label="{{ section.settings.jump_label | escape }}">
-            <p class="dg-jump__label">{{ section.settings.jump_label }}</p>
-            <ul class="dg-jump__list">
-              {%- for dg_handle in dg_products -%}
-                {%- assign product = all_products[dg_handle] -%}
-                {%- if product == empty -%}{%- continue -%}{%- endif -%}
-                {%- assign has_dose = product.metafields.custom.dose -%}
-                {%- assign has_timing = product.metafields.custom.timing -%}
-                {%- if dg_manual or has_dose != blank or has_timing != blank -%}
-                  <li>
-                    <a class="dg-jump__link" href="#dose-{{ product.handle }}">{{ product.title }}</a>
-                  </li>
-                {%- endif -%}
-              {%- endfor -%}
-            </ul>
-          </nav>
+        <div class="dg-zone dg-search-zone">
+          <div class="dg-search" data-dg-search-root>
+            <label class="dg-search__label" for="dg-search-{{ dg_id }}">{{ section.settings.jump_label }}</label>
+            <div class="dg-search__field">
+              <svg class="dg-search__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input
+                type="search"
+                id="dg-search-{{ dg_id }}"
+                class="dg-search__input"
+                placeholder="{{ section.settings.search_placeholder | escape }}"
+                autocomplete="off"
+                aria-controls="dosing-by-product"
+                data-dg-search-input>
+              <button type="button" class="dg-search__clear" data-dg-search-clear hidden aria-label="Clear search">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+            <p class="dg-search__count" aria-live="polite" data-dg-search-count></p>
+          </div>
         </div>
       {%- endif -%}
 
@@ -397,7 +423,8 @@
               {%- endif -%}
 
               {%- if dg_manual or mf_dose != blank or mf_timing != blank -%}
-                <article class="dg-product" id="dose-{{ product.handle }}">
+                {%- capture dg_kw -%}{{ product.title }} {{ product.metafields.custom.primary_use }} {{ product.metafields.custom.benefit }}{%- endcapture -%}
+                <article class="dg-product" id="dose-{{ product.handle }}" data-dg-item data-dg-name="{{ dg_kw | strip | downcase | escape }}">
                   <div class="dg-product__head">
                     <h2 class="dg-product__h2">{{ product.title }}</h2>
                     <a class="dg-product__link" href="{{ product.url }}">
@@ -452,6 +479,7 @@
               {%- endif -%}
             {%- endfor -%}
           </div>
+          <p class="dg-noresults" data-dg-noresults hidden>No products match your search. Try a different term or clear the search.</p>
         {%- else -%}
           <p class="dg-empty">No collection selected yet. Choose a collection in the theme editor to populate per-product dosing entries.</p>
         {%- endif -%}
@@ -547,6 +575,54 @@
 }
 </script>
 
+<script>
+(function () {
+  var root = document.getElementById('shopify-section-{{ section.id }}');
+  if (!root) { return; }
+  var input = root.querySelector('[data-dg-search-input]');
+  var clear = root.querySelector('[data-dg-search-clear]');
+  var count = root.querySelector('[data-dg-search-count]');
+  var noResults = root.querySelector('[data-dg-noresults]');
+  var items = Array.prototype.slice.call(root.querySelectorAll('[data-dg-item]'));
+  if (!input || items.length === 0) { return; }
+
+  var total = items.length;
+  function label(n) { return n + (n === 1 ? ' product' : ' products'); }
+
+  function apply() {
+    var q = input.value.trim().toLowerCase();
+    var shown = 0;
+    for (var i = 0; i < items.length; i++) {
+      var hay = items[i].getAttribute('data-dg-name') || '';
+      var match = q === '' || hay.indexOf(q) !== -1;
+      items[i].hidden = !match;
+      if (match) { shown++; }
+    }
+    if (clear) { clear.hidden = q.length === 0; }
+    if (noResults) { noResults.hidden = shown !== 0; }
+    if (count) { count.textContent = q === '' ? label(total) : label(shown) + ' found'; }
+  }
+
+  input.addEventListener('input', apply);
+  if (clear) {
+    clear.addEventListener('click', function () { input.value = ''; apply(); input.focus(); });
+  }
+  input.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') { input.value = ''; apply(); }
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== '/' || document.activeElement === input) { return; }
+    var tag = (document.activeElement && document.activeElement.tagName) || '';
+    if (tag !== 'INPUT' && tag !== 'TEXTAREA' && tag !== 'SELECT') {
+      e.preventDefault();
+      input.focus();
+    }
+  });
+
+  apply();
+})();
+</script>
+
 {% schema %}
 {
   "name": "Dosing Guide Hub",
@@ -583,8 +659,9 @@
     { "type": "textarea", "id": "principle_3_body", "label": "Principle 3 detail", "default": "Unless the label says otherwise, take with a meal. Many compounds are fat-soluble and absorb far better with dietary fat." },
     { "type": "text", "id": "principle_4", "label": "Principle 4 title", "default": "Give it the full first month" },
     { "type": "textarea", "id": "principle_4_body", "label": "Principle 4 detail", "default": "Many compounds build over weeks. Judge the result after a consistent month, not after the first few doses." },
-    { "type": "header", "content": "Zone 2 — Jump-to Navigation" },
-    { "type": "text", "id": "jump_label", "label": "Jump nav label", "default": "Jump to a product" },
+    { "type": "header", "content": "Zone 2 — Product Search" },
+    { "type": "text", "id": "jump_label", "label": "Search section label", "default": "Find your product" },
+    { "type": "text", "id": "search_placeholder", "label": "Search placeholder", "default": "Search products by name…" },
     { "type": "header", "content": "Structured Data" },
     { "type": "checkbox", "id": "emit_faq_schema", "label": "Emit FAQ schema for products", "default": true, "info": "Adds FAQPage structured data (one Q&A per product) for rich-result eligibility." },
     {
