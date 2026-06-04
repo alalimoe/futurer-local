@@ -1,7 +1,21 @@
 {%- liquid
   assign dg_id = section.id
   assign dg_coll = section.settings.collection
-  assign dg_products = dg_coll.products
+
+  assign dg_manual = false
+  assign dg_handles = ''
+  for block in section.blocks
+    if block.type == 'product' and block.settings.product != blank
+      assign dg_handles = dg_handles | append: block.settings.product.handle | append: ','
+    endif
+  endfor
+  assign dg_handles = dg_handles | split: ','
+  if dg_handles.size > 0
+    assign dg_manual = true
+  else
+    assign dg_handles = dg_coll.products | map: 'handle'
+  endif
+  assign dg_products = dg_handles
 -%}
 
 {%- style -%}
@@ -208,6 +222,19 @@
     color: color-mix(in srgb, rgba(var(--color-foreground)) 65%, transparent);
   }
 
+  /* ── Per-card empty note ── */
+  .xo-section--{{ dg_id }} .dg-empty-note {
+    margin: 0; font-size: 0.85rem; line-height: 1.6;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 55%, transparent);
+    border-top: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 6%, transparent);
+    padding-top: 12px;
+  }
+  .xo-section--{{ dg_id }} .dg-empty-note code {
+    font-size: 0.8em;
+    padding: 1px 5px; border-radius: 4px;
+    background: color-mix(in srgb, rgba(var(--color-foreground)) 8%, transparent);
+  }
+
   /* ── Empty state ── */
   .xo-section--{{ dg_id }} .dg-empty {
     background: rgba(var(--color-background-2));
@@ -335,10 +362,12 @@
           <nav class="dg-jump" aria-label="{{ section.settings.jump_label | escape }}">
             <p class="dg-jump__label">{{ section.settings.jump_label }}</p>
             <ul class="dg-jump__list">
-              {%- for product in dg_products -%}
+              {%- for dg_handle in dg_products -%}
+                {%- assign product = all_products[dg_handle] -%}
+                {%- if product == empty -%}{%- continue -%}{%- endif -%}
                 {%- assign has_dose = product.metafields.custom.dose -%}
                 {%- assign has_timing = product.metafields.custom.timing -%}
-                {%- if has_dose != blank or has_timing != blank -%}
+                {%- if dg_manual or has_dose != blank or has_timing != blank -%}
                   <li>
                     <a class="dg-jump__link" href="#dose-{{ product.handle }}">{{ product.title }}</a>
                   </li>
@@ -353,14 +382,21 @@
       <div class="dg-zone" id="dosing-by-product">
         {%- if dg_products.size > 0 -%}
           <div class="dg-products">
-            {%- for product in dg_products -%}
+            {%- for dg_handle in dg_products -%}
+              {%- assign product = all_products[dg_handle] -%}
+              {%- if product == empty -%}{%- continue -%}{%- endif -%}
               {%- assign mf_dose = product.metafields.custom.dose -%}
               {%- assign mf_timing = product.metafields.custom.timing -%}
               {%- assign mf_food = product.metafields.custom.with_food -%}
               {%- assign mf_cycling = product.metafields.custom.cycling -%}
               {%- assign mf_notes = product.metafields.custom.dosing_notes -%}
 
-              {%- if mf_dose != blank or mf_timing != blank -%}
+              {%- assign dg_has_specs = false -%}
+              {%- if mf_dose != blank or mf_timing != blank or mf_food != blank or mf_cycling != blank or mf_notes != blank -%}
+                {%- assign dg_has_specs = true -%}
+              {%- endif -%}
+
+              {%- if dg_manual or mf_dose != blank or mf_timing != blank -%}
                 <article class="dg-product" id="dose-{{ product.handle }}">
                   <div class="dg-product__head">
                     <h2 class="dg-product__h2">{{ product.title }}</h2>
@@ -370,44 +406,48 @@
                     </a>
                   </div>
 
-                  <dl class="dg-specs">
-                    {%- if mf_dose != blank -%}
-                      <div class="dg-spec">
-                        <dt class="dg-spec__label">Dose</dt>
-                        <dd class="dg-spec__value">{{ mf_dose }}</dd>
-                      </div>
-                    {%- endif -%}
-                    {%- if mf_timing != blank -%}
-                      <div class="dg-spec">
-                        <dt class="dg-spec__label">Timing</dt>
-                        <dd class="dg-spec__value">{{ mf_timing }}</dd>
-                      </div>
-                    {%- endif -%}
-                    {%- if mf_food != blank -%}
-                      <div class="dg-spec">
-                        <dt class="dg-spec__label">Food</dt>
-                        <dd class="dg-spec__value">
-                          {%- if mf_food.value == true -%}
-                            <span class="dg-badge">Take with food</span>
-                          {%- else -%}
-                            <span class="dg-badge dg-badge--muted">Empty stomach OK</span>
-                          {%- endif -%}
-                        </dd>
-                      </div>
-                    {%- endif -%}
-                    {%- if mf_cycling != blank -%}
-                      <div class="dg-spec">
-                        <dt class="dg-spec__label">Cycling</dt>
-                        <dd class="dg-spec__value">{{ mf_cycling }}</dd>
-                      </div>
-                    {%- endif -%}
-                    {%- if mf_notes != blank -%}
-                      <div class="dg-spec">
-                        <dt class="dg-spec__label">Notes</dt>
-                        <dd class="dg-spec__value">{{ mf_notes }}</dd>
-                      </div>
-                    {%- endif -%}
-                  </dl>
+                  {%- if dg_has_specs -%}
+                    <dl class="dg-specs">
+                      {%- if mf_dose != blank -%}
+                        <div class="dg-spec">
+                          <dt class="dg-spec__label">Dose</dt>
+                          <dd class="dg-spec__value">{{ mf_dose }}</dd>
+                        </div>
+                      {%- endif -%}
+                      {%- if mf_timing != blank -%}
+                        <div class="dg-spec">
+                          <dt class="dg-spec__label">Timing</dt>
+                          <dd class="dg-spec__value">{{ mf_timing }}</dd>
+                        </div>
+                      {%- endif -%}
+                      {%- if mf_food != blank -%}
+                        <div class="dg-spec">
+                          <dt class="dg-spec__label">Food</dt>
+                          <dd class="dg-spec__value">
+                            {%- if mf_food.value == true -%}
+                              <span class="dg-badge">Take with food</span>
+                            {%- else -%}
+                              <span class="dg-badge dg-badge--muted">Empty stomach OK</span>
+                            {%- endif -%}
+                          </dd>
+                        </div>
+                      {%- endif -%}
+                      {%- if mf_cycling != blank -%}
+                        <div class="dg-spec">
+                          <dt class="dg-spec__label">Cycling</dt>
+                          <dd class="dg-spec__value">{{ mf_cycling }}</dd>
+                        </div>
+                      {%- endif -%}
+                      {%- if mf_notes != blank -%}
+                        <div class="dg-spec">
+                          <dt class="dg-spec__label">Notes</dt>
+                          <dd class="dg-spec__value">{{ mf_notes }}</dd>
+                        </div>
+                      {%- endif -%}
+                    </dl>
+                  {%- else -%}
+                    <p class="dg-empty-note">Dosing details coming soon. Add this product's <code>custom.dose</code> and <code>custom.timing</code> metafields to populate this card.</p>
+                  {%- endif -%}
                 </article>
               {%- endif -%}
             {%- endfor -%}
@@ -453,10 +493,12 @@
         "name": {{ section.settings.heading | json }},
         "itemListElement": [
           {%- assign li_pos = 0 -%}
-          {%- for product in dg_products -%}
+          {%- for dg_handle in dg_products -%}
+            {%- assign product = all_products[dg_handle] -%}
+            {%- if product == empty -%}{%- continue -%}{%- endif -%}
             {%- assign mf_dose = product.metafields.custom.dose -%}
             {%- assign mf_timing = product.metafields.custom.timing -%}
-            {%- if mf_dose != blank or mf_timing != blank -%}
+            {%- if dg_manual or mf_dose != blank or mf_timing != blank -%}
               {%- assign li_pos = li_pos | plus: 1 -%}
               {%- if li_pos > 1 -%},{%- endif -%}
               {
@@ -474,7 +516,9 @@
           "@type": "FAQPage",
           "mainEntity": [
             {%- assign faq_pos = 0 -%}
-            {%- for product in dg_products -%}
+            {%- for dg_handle in dg_products -%}
+              {%- assign product = all_products[dg_handle] -%}
+              {%- if product == empty -%}{%- continue -%}{%- endif -%}
               {%- assign mf_dose = product.metafields.custom.dose -%}
               {%- assign mf_timing = product.metafields.custom.timing -%}
               {%- assign mf_cycling = product.metafields.custom.cycling -%}
@@ -511,7 +555,8 @@
   "settings": [
     { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "default" },
     { "type": "header", "content": "Data Source" },
-    { "type": "collection", "id": "collection", "label": "Dosing collection", "info": "Products in this collection render as dosing cards. Set custom.dose, custom.timing, custom.with_food, custom.cycling, and custom.dosing_notes metafields on each product. Products without a dose or timing metafield are skipped." },
+    { "type": "paragraph", "content": "Add 'Product' blocks below to choose exactly which products appear, in order. If no Product blocks are added, the section falls back to looping the collection chosen here." },
+    { "type": "collection", "id": "collection", "label": "Fallback collection", "info": "Used only when no Product blocks are added. Products in this collection render as dosing cards if they have a custom.dose or custom.timing metafield. Set custom.dose, custom.timing, custom.with_food, custom.cycling, and custom.dosing_notes on each product." },
     { "type": "header", "content": "Hero" },
     { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Reference Guide" },
     { "type": "text", "id": "heading", "label": "Page heading (H1)", "default": "Dosing Guide" },
@@ -557,6 +602,15 @@
     },
     { "type": "range", "id": "padding_top", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding top", "default": 0 },
     { "type": "range", "id": "padding_bottom", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding bottom", "default": 48 }
+  ],
+  "blocks": [
+    {
+      "type": "product",
+      "name": "Product",
+      "settings": [
+        { "type": "product", "id": "product", "label": "Product", "info": "Shown as a dosing card in this order. Card content is pulled from the product's custom.dose, custom.timing, custom.with_food, custom.cycling, and custom.dosing_notes metafields." }
+      ]
+    }
   ],
   "presets": [
     { "name": "Dosing Guide Hub" }
