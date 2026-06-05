@@ -1,0 +1,474 @@
+/* ============================================================
+   Nootropic Stack Finder Quiz
+   Design language: matches Nootropix email flow —
+   light gray field · white cards · amber dot accent · dark pill CTA
+   ============================================================ */
+
+/* ---------- Section shell ---------- */
+.nq-section {
+  background: #f0f0f0;
+  padding-top: var(--pt_dt, 72px);
+  padding-bottom: var(--pb_dt, 96px);
+}
+
+@media (max-width: 749px) {
+  .nq-section {
+    padding-top: var(--pt_mb, 48px);
+    padding-bottom: var(--pb_mb, 64px);
+  }
+}
+
+.nq-wrapper {
+  max-width: var(--page-width, 1600px);
+  margin: 0 auto;
+  padding: 0 var(--container-gap, 24px);
+}
+
+/* Centred narrow column — email-width feel */
+.nq-inner {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* ---------- Quiz page header ---------- */
+.nq-header {
+  margin-bottom: 36px;
+}
+
+.nq-header__eyebrow {
+  display: block;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #fbbf24;
+  margin-bottom: 10px;
+}
+
+.nq-header__title {
+  font-size: clamp(1.75rem, 5vw, 2.5rem);
+  font-weight: 800;
+  color: #111;
+  margin: 0 0 10px;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+.nq-header__subtitle {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #555;
+  margin: 0;
+}
+
+/* ---------- Progress bar ---------- */
+.nq-progress-wrap {
+  height: 3px;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 100px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+
+.nq-progress__bar {
+  height: 100%;
+  width: 0%;
+  background: #fbbf24;
+  border-radius: 100px;
+  transition: width 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: width;
+}
+
+.nq-progress__label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #999;
+  margin: 0 0 32px;
+  min-height: 1em;
+}
+
+/* ---------- Steps ---------- */
+.nq-step {
+  display: none;
+}
+
+.nq-step--active {
+  display: block;
+  animation: nqFadeIn 0.2s ease forwards;
+}
+
+/* Step header — eyebrow + question + subtext */
+.nq-step__header {
+  margin-bottom: 20px;
+}
+
+.nq-step__eyebrow {
+  display: block;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #fbbf24;
+  margin-bottom: 8px;
+}
+
+.nq-step__question {
+  font-size: clamp(1.25rem, 3.5vw, 1.625rem);
+  font-weight: 800;
+  color: #111;
+  margin: 0 0 6px;
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+}
+
+.nq-step__sub {
+  font-size: 0.9375rem;
+  color: #666;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* ---------- Options — vertical stack of white cards ---------- */
+.nq-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 28px;
+}
+
+/* Shake when user advances without selecting */
+@keyframes nqShake {
+  0%, 100% { transform: translateX(0); }
+  20%       { transform: translateX(-5px); }
+  40%       { transform: translateX(5px); }
+  60%       { transform: translateX(-3px); }
+  80%       { transform: translateX(3px); }
+}
+.nq-options--shake { animation: nqShake 0.4s ease; }
+
+/* ---------- Option card ---------- */
+.nq-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  width: 100%;
+  padding: 18px 20px;
+  background: #fff;
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  position: relative;
+  /* Left-edge accent bar — hidden by default */
+  box-shadow: inset 3px 0 0 transparent, 0 1px 3px rgba(0,0,0,0.06);
+  transition: box-shadow 0.15s ease, transform 0.1s ease;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.nq-option:hover,
+.nq-option:focus-visible {
+  box-shadow: inset 3px 0 0 #fbbf24, 0 3px 10px rgba(0,0,0,0.09);
+  outline: none;
+}
+
+.nq-option:active {
+  transform: scale(0.99);
+}
+
+.nq-option.is-selected {
+  box-shadow: inset 3px 0 0 #fbbf24, 0 4px 14px rgba(0,0,0,0.1);
+  background: #fff;
+}
+
+.nq-option.is-selected .nq-option__dot {
+  background: #fbbf24;
+}
+
+/* Amber dot — email bullet style */
+.nq-option__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #e0e0e0;
+  flex-shrink: 0;
+  margin-top: 5px;
+  transition: background 0.15s ease;
+}
+
+.nq-option__text {
+  flex: 1;
+}
+
+.nq-option__label {
+  display: block;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: #111;
+  line-height: 1.3;
+}
+
+.nq-option__desc {
+  display: block;
+  font-size: 0.8125rem;
+  color: #777;
+  margin-top: 3px;
+  line-height: 1.45;
+}
+
+/* ---------- Navigation ---------- */
+.nq-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Back — plain text link */
+.nq-back-btn {
+  visibility: hidden;
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #999;
+  cursor: pointer;
+  letter-spacing: 0.01em;
+  transition: color 0.15s ease;
+}
+.nq-back-btn:hover { color: #333; }
+
+/* Next / primary CTA — dark pill matching email "Add to Stack →" */
+#nqNextBtn {
+  background: #1a1a1a;
+  color: #fff;
+  border: none;
+  border-radius: 100px;
+  padding: 14px 36px;
+  font-family: inherit;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease;
+  margin-left: auto;
+}
+#nqNextBtn:hover  { background: #000; }
+#nqNextBtn:active { transform: scale(0.98); }
+
+/* ---------- Results panel ---------- */
+.nq-results { display: none; }
+
+.nq-results--visible {
+  display: block;
+  animation: nqFadeIn 0.3s ease forwards;
+}
+
+.nq-results__loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 64px 20px;
+  color: #888;
+  font-size: 0.9375rem;
+}
+
+.nq-spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid rgba(251, 191, 36, 0.2);
+  border-top-color: #fbbf24;
+  border-radius: 50%;
+  animation: nqSpin 0.75s linear infinite;
+}
+
+/* Results header card — white, amber dot, bold name */
+.nq-results__header {
+  background: #fff;
+  border-radius: 14px;
+  padding: 28px 28px 24px;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+
+.nq-results__dot {
+  display: block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #fbbf24;
+  margin-bottom: 14px;
+}
+
+.nq-results__badge {
+  display: block;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #fbbf24;
+  margin-bottom: 8px;
+}
+
+.nq-results__title {
+  font-size: clamp(1.375rem, 3.5vw, 1.875rem);
+  font-weight: 800;
+  color: #111;
+  margin: 0 0 10px;
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+}
+
+.nq-results__description {
+  font-size: 0.9375rem;
+  color: #555;
+  line-height: 1.65;
+  margin: 0;
+}
+.nq-results__description p { margin: 0; }
+
+/* ---------- Product cards — white cards stacked, email card style ---------- */
+.nq-results__grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.nq-product-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: stretch;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  transition: box-shadow 0.2s ease, transform 0.15s ease;
+}
+
+.nq-product-card:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  transform: translateY(-1px);
+}
+
+.nq-product-card__image {
+  width: 90px;
+  flex-shrink: 0;
+  background: #f5f5f5;
+  overflow: hidden;
+}
+
+.nq-product-card__image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.3s ease;
+}
+.nq-product-card:hover .nq-product-card__image img {
+  transform: scale(1.05);
+}
+
+.nq-product-card__body {
+  flex: 1;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.nq-product-card__meta { flex: 1; }
+
+.nq-product-card__title {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: #111;
+  margin: 0 0 4px;
+  line-height: 1.3;
+}
+
+.nq-product-card__price {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #555;
+  margin: 0;
+}
+
+/* ATC button — dark pill */
+.nq-product-card__form { display: flex; }
+
+.nq-product-card__atc {
+  background: #1a1a1a;
+  color: #fff;
+  border: none;
+  border-radius: 100px;
+  padding: 9px 22px;
+  font-family: inherit;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.01em;
+  transition: background 0.15s ease, transform 0.1s ease;
+  white-space: nowrap;
+}
+.nq-product-card__atc:hover  { background: #000; }
+.nq-product-card__atc:active { transform: scale(0.98); }
+.nq-product-card__atc:disabled { opacity: 0.5; cursor: default; }
+
+.nq-product-card__sold-out {
+  font-size: 0.8125rem;
+  color: #bbb;
+  font-style: italic;
+  margin: 0;
+  align-self: flex-end;
+}
+
+@media (max-width: 440px) {
+  .nq-product-card__image { width: 70px; }
+  .nq-product-card__body  { padding: 14px 16px; }
+}
+
+/* ---------- Results actions ---------- */
+.nq-results__actions {
+  text-align: center;
+  padding-top: 8px;
+}
+
+.nq-retake-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #999;
+  cursor: pointer;
+  letter-spacing: 0.01em;
+  transition: color 0.15s ease;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.nq-retake-btn:hover { color: #333; }
+
+.nq-results__empty {
+  text-align: center;
+  color: #bbb;
+  font-size: 0.9375rem;
+  padding: 40px 0 32px;
+}
+
+/* ---------- Animations ---------- */
+@keyframes nqFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes nqSpin {
+  to { transform: rotate(360deg); }
+}

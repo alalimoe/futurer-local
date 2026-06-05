@@ -1,0 +1,525 @@
+{% comment %}
+  Nootropic Stack Finder Quiz
+  Template:  templates/page.quiz.json
+  Assets:    assets/nootropic-quiz.css, assets/nootropic-quiz.js
+  Schema:    5 "result" blocks — merchant manages product handles + stack descriptions
+             from the Theme Customizer with no code changes required.
+{% endcomment %}
+
+{{ 'nootropic-quiz.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'nootropic-quiz.js' | asset_url }}" defer></script>
+
+<section id="nqQuiz" {% render 'section-attr' %} class="nq-section">
+  <div class="nq-wrapper">
+    <div class="nq-inner">
+
+      {%- comment -%} ── Quiz header ── {%- endcomment -%}
+      <div class="nq-header">
+        <span class="nq-header__eyebrow">Find Your Stack</span>
+        <h1 class="nq-header__title">{{ section.settings.quiz_title }}</h1>
+        {%- if section.settings.quiz_subtitle != blank -%}
+          <p class="nq-header__subtitle">{{ section.settings.quiz_subtitle }}</p>
+        {%- endif -%}
+      </div>
+
+      {%- comment -%} ── Progress bar ── {%- endcomment -%}
+      <div class="nq-progress-wrap" role="progressbar" aria-valuemin="0" aria-valuemax="5" aria-valuenow="0">
+        <div class="nq-progress__bar" id="nqProgressBar"></div>
+      </div>
+      <p class="nq-progress__label" id="nqProgressLabel" aria-live="polite">Step 1 of 5</p>
+
+      {%- comment -%} ════════════════════════════════════════
+        Step 1 — Primary Goal
+        JS key values must match SCORING[0] keys in nootropic-quiz.js:
+        focus | mood | energy | memory | sleep
+      ════════════════════════════════════════ {%- endcomment -%}
+      <div class="nq-step" data-step="0">
+        <div class="nq-step__header">
+          <span class="nq-step__eyebrow">Step 1 of 5 · Your Goal</span>
+          <h2 class="nq-step__question">What's your primary goal?</h2>
+          <p class="nq-step__sub">Pick the outcome that matters most to you right now.</p>
+        </div>
+        <div class="nq-options" role="group" aria-label="Primary goal">
+
+          <button type="button" class="nq-option" data-value="focus" tabindex="0">
+            <span class="nq-option__dot" aria-hidden="true"></span>
+            <span class="nq-option__text">
+              <span class="nq-option__label">Focus &amp; Cognition</span>
+              <span class="nq-option__desc">Deep work, mental clarity, sustained concentration</span>
+            </span>
+          </button>
+
+          <button type="button" class="nq-option" data-value="mood" tabindex="0">
+            <span class="nq-option__dot" aria-hidden="true"></span>
+            <span class="nq-option__text">
+              <span class="nq-option__label">Mood &amp; Anxiety Relief</span>
+              <span class="nq-option__desc">Calm, stress resilience, emotional baseline</span>
+            </span>
+          </button>
+
+          <button type="button" class="nq-option" data-value="energy" tabindex="0">
+            <span class="nq-option__dot" aria-hidden="true"></span>
+            <span class="nq-option__text">
+              <span class="nq-option__label">Energy &amp; Motivation</span>
+              <span class="nq-option__desc">Drive, clean energy, get-up-and-go</span>
+            </span>
+          </button>
+
+          <button type="button" class="nq-option" data-value="memory" tabindex="0">
+            <span class="nq-option__dot" aria-hidden="true"></span>
+            <span class="nq-option__text">
+              <span class="nq-option__label">Memory &amp; Learning</span>
+              <span class="nq-option__desc">Retention, recall, study performance</span>
+            </span>
+          </button>
+
+          <button type="button" class="nq-option" data-value="sleep" tabindex="0">
+            <span class="nq-option__dot" aria-hidden="true"></span>
+            <span class="nq-option__text">
+              <span class="nq-option__label">Sleep &amp; Recovery</span>
+              <span class="nq-option__desc">Quality rest, faster wind-down, restoration</span>
+            </span>
+          </button>
+
+        </div>
+        <div class="nq-nav">
+          <button type="button" class="nq-back-btn" id="nqBackBtn" aria-label="Go back">← Back</button>
+          <button type="button" id="nqNextBtn">Continue →</button>
+        </div>
+      </div>
+
+      {%- comment -%} ════════════════════════════════════════
+        Step 2 — Experience Level
+        JS keys: beginner | some | intermediate | advanced
+      ════════════════════════════════════════ {%- endcomment -%}
+      <div class="nq-step" data-step="1">
+        <div class="nq-step__header">
+          <span class="nq-step__eyebrow">Step 2 of 5 · Your Experience</span>
+          <h2 class="nq-step__question">How familiar are you with nootropics?</h2>
+          <p class="nq-step__sub">Honest answers get you the most appropriate stack.</p>
+        </div>
+        <div class="nq-options" role="group" aria-label="Experience level">
+
+          <button type="button" class="nq-option" data-value="beginner" tabindex="0">
+            <span class="nq-option__dot" aria-hidden="true"></span>
+            <span class="nq-option__text">
+              <span class="nq-option__label">Complete beginner</span>
+              <span class="nq-option__desc">Haven't tried nootropics before</span>
+            </span>
+          </button>
+
+          <button type="button" class="nq-option" data-value="some" tabindex="0">
+            <span class="nq-option__dot" aria-hidden="true"></span>
+            <span class="nq-option__text">
+              <span class="nq-option__label">Some experience</span>
+              <span class="nq-option__desc">Tried caffeine, L-theanine, or similar basics</span>
+            </span>
+          </button>
+
+          <button type="button" class="nq-option" data-value="intermediate" tabindex="0">
+            <span class="nq-option__dot" aria-hidden="true"></span>
+            <span class="nq-option__text">
+              <span class="nq-option__label">Intermediate</span>
+              <span class="nq-option__desc">Tried racetams or adaptogens</span>
+            </span>
+          </button>
+
+          <button type="button" class="nq-option" data-value="advanced" tabindex="0">
+            <span class="nq-option__dot" aria-hidden="true"></span>
+            <span class="nq-option__text">
+              <span class="nq-option__label">Advanced</span>
+              <span class="nq-option__desc">Comfortable building and cycling multi-compound stacks</span>
+            </span>
+          </button>
+
+        </div>
+        <div class="nq-nav">
+          <button type="button" class="nq-back-btn" aria-label="Go back">← Back</button>
+          <button type="button" id="nqNextBtn">Continue →</button>
+        </div>
+      </div>
+
+      {%- comment -%} ════════════════════════════════════════
+        Step 3 — Lifestyle / Context
+        JS keys: student | professional | athletic | wellness
+      ════════════════════════════════════════ {%- endcomment -%}
+      <div class="nq-step" data-step="2">
+        <div class="nq-step__header">
+          <span class="nq-step__eyebrow">Step 3 of 5 · Your Context</span>
+          <h2 class="nq-step__question">What best describes your situation?</h2>
+          <p class="nq-step__sub">This helps us match compounds to real-world demands.</p>
+        </div>
+        <div class="nq-options" role="group" aria-label="Lifestyle context">
+
+          <button type="button" class="nq-option" data-value="student" tabindex="0">
+            <span class="nq-option__dot" aria-hidden="true"></span>
+            <span class="nq-option__text">
+              <span class="nq-option__label">Student / Studying</span>
+              <span class="nq-option__desc">Exams, reading, long study sessions, retention</span>
+            </span>
+          </button>
+
+          <button type="button" class="nq-option" data-value="professional" tabindex="0">
+            <span class="nq-option__dot" aria-hidden="true"></span>
+            <span class="nq-option__text">
+              <span class="nq-option__label">Professional / Work</span>
+              <span class="nq-option__desc">Deadlines, decisions, deep work, output</span>
+            </span>
+          </button>
+
+          <button type="button" class="nq-option" data-value="athletic" tabindex="0">
+            <span class="nq-option__dot" aria-hidden="true"></span>
+            <span class="nq-option__text">
+              <span class="nq-option__label">Athletic Performance</span>
+              <span class="nq-option__desc">Training, recovery, mind-muscle focus</span>
+            </span>
+          </button>
+
+          <button type="button" class="nq-option" data-value="wellness" tabindex="0">
+            <span class="nq-option__dot" aria-hidden="true"></span>
+            <span class="nq-option__text">
+              <span class="nq-option__label">General Wellness</span>
+              <span class="nq-option__desc">Long-term cognitive health and resilience</span>
+            </span>
+          </button>
+
+        </div>
+        <div class="nq-nav">
+          <button type="button" class="nq-back-btn" aria-label="Go back">← Back</button>
+          <button type="button" id="nqNextBtn">Continue →</button>
+        </div>
+      </div>
+
+      {%- comment -%} ════════════════════════════════════════
+        Step 4 — Sensitivities / Preferences
+        JS keys: stimulant-sensitive | natural | synthetics | dependency
+      ════════════════════════════════════════ {%- endcomment -%}
+      <div class="nq-step" data-step="3">
+        <div class="nq-step__header">
+          <span class="nq-step__eyebrow">Step 4 of 5 · Your Preferences</span>
+          <h2 class="nq-step__question">Any sensitivities or preferences?</h2>
+          <p class="nq-step__sub">We'll filter out anything that doesn't fit your profile.</p>
+        </div>
+        <div class="nq-options" role="group" aria-label="Sensitivities and preferences">
+
+          <button type="button" class="nq-option" data-value="stimulant-sensitive" tabindex="0">
+            <span class="nq-option__dot" aria-hidden="true"></span>
+            <span class="nq-option__text">
+              <span class="nq-option__label">Stimulant-sensitive</span>
+              <span class="nq-option__desc">No jitteriness, racing heart, or sleep disruption</span>
+            </span>
+          </button>
+
+          <button type="button" class="nq-option" data-value="natural" tabindex="0">
+            <span class="nq-option__dot" aria-hidden="true"></span>
+            <span class="nq-option__text">
+              <span class="nq-option__label">Prefer natural / herbal</span>
+              <span class="nq-option__desc">Plant-based, adaptogenic, and well-studied options</span>
+            </span>
+          </button>
+
+          <button type="button" class="nq-option" data-value="synthetics" tabindex="0">
+            <span class="nq-option__dot" aria-hidden="true"></span>
+            <span class="nq-option__text">
+              <span class="nq-option__label">Open to synthetics</span>
+              <span class="nq-option__desc">Research-backed synthetic compounds are fine</span>
+            </span>
+          </button>
+
+          <button type="button" class="nq-option" data-value="dependency" tabindex="0">
+            <span class="nq-option__dot" aria-hidden="true"></span>
+            <span class="nq-option__text">
+              <span class="nq-option__label">Concerned about dependency</span>
+              <span class="nq-option__desc">Low tolerance-build risk is a priority</span>
+            </span>
+          </button>
+
+        </div>
+        <div class="nq-nav">
+          <button type="button" class="nq-back-btn" aria-label="Go back">← Back</button>
+          <button type="button" id="nqNextBtn">Continue →</button>
+        </div>
+      </div>
+
+      {%- comment -%} ════════════════════════════════════════
+        Step 5 — Budget / Stack Size
+        JS keys: simple | moderate | full
+      ════════════════════════════════════════ {%- endcomment -%}
+      <div class="nq-step" data-step="4">
+        <div class="nq-step__header">
+          <span class="nq-step__eyebrow">Step 5 of 5 · Your Stack Size</span>
+          <h2 class="nq-step__question">How many compounds do you want to start with?</h2>
+          <p class="nq-step__sub">Simpler stacks are easier to track and adjust. You can always layer more later.</p>
+        </div>
+        <div class="nq-options" role="group" aria-label="Stack size preference">
+
+          <button type="button" class="nq-option" data-value="simple" tabindex="0">
+            <span class="nq-option__dot" aria-hidden="true"></span>
+            <span class="nq-option__text">
+              <span class="nq-option__label">Start simple — 1 to 2 compounds</span>
+              <span class="nq-option__desc">Low commitment. Easy to track what's working.</span>
+            </span>
+          </button>
+
+          <button type="button" class="nq-option" data-value="moderate" tabindex="0">
+            <span class="nq-option__dot" aria-hidden="true"></span>
+            <span class="nq-option__text">
+              <span class="nq-option__label">Moderate stack — 3 to 4 compounds</span>
+              <span class="nq-option__desc">Good balance of depth and manageability.</span>
+            </span>
+          </button>
+
+          <button type="button" class="nq-option" data-value="full" tabindex="0">
+            <span class="nq-option__dot" aria-hidden="true"></span>
+            <span class="nq-option__text">
+              <span class="nq-option__label">Full stack — 5 or more</span>
+              <span class="nq-option__desc">Maximise synergy. Best for experienced users.</span>
+            </span>
+          </button>
+
+        </div>
+        <div class="nq-nav">
+          <button type="button" class="nq-back-btn" aria-label="Go back">← Back</button>
+          <button type="button" id="nqNextBtn">Build My Stack →</button>
+        </div>
+      </div>
+
+      {%- comment -%} ── Results panel (populated by JS) ── {%- endcomment -%}
+      <div class="nq-results" id="nqResultsPanel" aria-live="polite"></div>
+
+      {%- comment -%}
+        Results data: merchant-controlled product handles and stack descriptions
+        injected as a JSON blob. JS reads this to render product cards.
+        Each block contributes one result entry.
+      {%- endcomment -%}
+      <script type="application/json" id="nq-results-data">
+      [
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'result' -%}
+            {%- unless forloop.first -%},{%- endunless -%}
+            {
+              "key": {{ block.settings.result_key | json }},
+              "stackName": {{ block.settings.stack_name | json }},
+              "description": {{ block.settings.stack_description | json }},
+              "handles": [
+                {%- assign h_count = 0 -%}
+                {%- if block.settings.product_handle_1 != blank -%}
+                  {%- if h_count > 0 -%},{%- endif -%}
+                  {{ block.settings.product_handle_1 | json }}
+                  {%- assign h_count = h_count | plus: 1 -%}
+                {%- endif -%}
+                {%- if block.settings.product_handle_2 != blank -%}
+                  {%- if h_count > 0 -%},{%- endif -%}
+                  {{ block.settings.product_handle_2 | json }}
+                  {%- assign h_count = h_count | plus: 1 -%}
+                {%- endif -%}
+                {%- if block.settings.product_handle_3 != blank -%}
+                  {%- if h_count > 0 -%},{%- endif -%}
+                  {{ block.settings.product_handle_3 | json }}
+                  {%- assign h_count = h_count | plus: 1 -%}
+                {%- endif -%}
+                {%- if block.settings.product_handle_4 != blank -%}
+                  {%- if h_count > 0 -%},{%- endif -%}
+                  {{ block.settings.product_handle_4 | json }}
+                {%- endif -%}
+              ]
+            }
+          {%- endif -%}
+        {%- endfor -%}
+      ]
+      </script>
+
+    </div><!-- /.nq-inner -->
+  </div><!-- /.nq-wrapper -->
+</section>
+
+{% schema %}
+{
+  "name": "Nootropic Quiz",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "quiz_title",
+      "label": "Quiz title",
+      "default": "Find Your Nootropic Stack"
+    },
+    {
+      "type": "text",
+      "id": "quiz_subtitle",
+      "label": "Quiz subtitle",
+      "default": "Answer 5 quick questions and we'll build a personalised stack for your goals, experience level, and preferences."
+    },
+    {
+      "type": "header",
+      "content": "Section spacing"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color"
+    },
+    {
+      "type": "color_background",
+      "id": "background_gradient",
+      "label": "Background gradient"
+    },
+    {
+      "type": "number",
+      "id": "padding_top_desktop",
+      "label": "Padding top (desktop)",
+      "default": 60
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_desktop",
+      "label": "Padding bottom (desktop)",
+      "default": 80
+    },
+    {
+      "type": "number",
+      "id": "padding_top_mobile",
+      "label": "Padding top (mobile)",
+      "default": 40
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_mobile",
+      "label": "Padding bottom (mobile)",
+      "default": 60
+    }
+  ],
+  "blocks": [
+    {
+      "type": "result",
+      "name": "Result: stack",
+      "settings": [
+        {
+          "type": "header",
+          "content": "Result identity"
+        },
+        {
+          "type": "text",
+          "id": "result_key",
+          "label": "Result key (must match JS scorer key)",
+          "info": "One of: beginners-focus | calm-clarity | advanced-cognitive | mood-motivation | deep-sleep",
+          "default": "beginners-focus"
+        },
+        {
+          "type": "text",
+          "id": "stack_name",
+          "label": "Stack name",
+          "default": "The Beginner's Focus Stack"
+        },
+        {
+          "type": "richtext",
+          "id": "stack_description",
+          "label": "Short description",
+          "default": "<p>A gentle, well-tolerated stack that builds clean focus without overstimulation — ideal for first-timers.</p>"
+        },
+        {
+          "type": "header",
+          "content": "Product handles"
+        },
+        {
+          "type": "text",
+          "id": "product_handle_1",
+          "label": "Product handle 1",
+          "placeholder": "lions-mane-capsules",
+          "info": "Copy from your Shopify product URL: /products/{handle}"
+        },
+        {
+          "type": "text",
+          "id": "product_handle_2",
+          "label": "Product handle 2",
+          "placeholder": "l-theanine"
+        },
+        {
+          "type": "text",
+          "id": "product_handle_3",
+          "label": "Product handle 3 (optional)",
+          "placeholder": "alpha-gpc"
+        },
+        {
+          "type": "text",
+          "id": "product_handle_4",
+          "label": "Product handle 4 (optional)",
+          "placeholder": "optional-handle"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Nootropic Quiz",
+      "blocks": [
+        {
+          "type": "result",
+          "settings": {
+            "result_key": "beginners-focus",
+            "stack_name": "The Beginner's Focus Stack",
+            "stack_description": "<p>Clean, gentle focus for first-timers. Lion's Mane supports neuroplasticity; L-Theanine smooths caffeine's edge for calm, sustained attention.</p>",
+            "product_handle_1": "lions-mane-capsules",
+            "product_handle_2": "l-theanine",
+            "product_handle_3": "",
+            "product_handle_4": ""
+          }
+        },
+        {
+          "type": "result",
+          "settings": {
+            "result_key": "calm-clarity",
+            "stack_name": "The Calm Clarity Stack",
+            "stack_description": "<p>Stress-resilient focus without stimulants. Ashwagandha KSM-66 tames cortisol, L-Theanine sharpens attention, and Bacopa builds memory over weeks.</p>",
+            "product_handle_1": "ashwagandha-ksm-66",
+            "product_handle_2": "l-theanine",
+            "product_handle_3": "bacopa-monnieri",
+            "product_handle_4": ""
+          }
+        },
+        {
+          "type": "result",
+          "settings": {
+            "result_key": "advanced-cognitive",
+            "stack_name": "The Advanced Cognitive Stack",
+            "stack_description": "<p>For experienced users ready to push further. Aniracetam boosts creative thinking and memory consolidation; Alpha-GPC provides the choline backbone; Lion's Mane rounds it out for long-term neuroprotection.</p>",
+            "product_handle_1": "aniracetam",
+            "product_handle_2": "alpha-gpc",
+            "product_handle_3": "lions-mane-capsules",
+            "product_handle_4": ""
+          }
+        },
+        {
+          "type": "result",
+          "settings": {
+            "result_key": "mood-motivation",
+            "stack_name": "The Mood & Motivation Stack",
+            "stack_description": "<p>Elevates drive and emotional baseline. Sulbutiamine enhances dopaminergic tone for motivation; Ashwagandha buffers stress for a steady, positive mood.</p>",
+            "product_handle_1": "sulbutiamine",
+            "product_handle_2": "ashwagandha-ksm-66",
+            "product_handle_3": "",
+            "product_handle_4": ""
+          }
+        },
+        {
+          "type": "result",
+          "settings": {
+            "result_key": "deep-sleep",
+            "stack_name": "The Deep Sleep Stack",
+            "stack_description": "<p>Wind down faster and wake up recovered. Magnesium Glycinate promotes muscle relaxation and GABA activity; L-Theanine quiets a busy mind without morning grogginess.</p>",
+            "product_handle_1": "magnesium-glycinate",
+            "product_handle_2": "l-theanine",
+            "product_handle_3": "",
+            "product_handle_4": ""
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
