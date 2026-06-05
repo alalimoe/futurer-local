@@ -51,7 +51,7 @@
 
       <div class="np-nl__inner">
         <div class="np-nl__content">
-          {%- if s.eyebrow != blank -%}
+          {%- if s.show_eyebrow and s.eyebrow != blank -%}
             <span class="np-nl__eyebrow">
               {%- if s.eyebrow_icon != blank -%}
                 <span class="np-nl__eyebrow-icon">{% render 'icon', name: s.eyebrow_icon, size: '1.6rem' %}</span>
@@ -60,9 +60,11 @@
             </span>
           {%- endif -%}
 
-          <h2 class="np-nl__title" id="{{ title_id }}">{{ s.heading }}</h2>
+          {%- if s.show_heading and s.heading != blank -%}
+            <h2 class="np-nl__title" id="{{ title_id }}">{{ s.heading }}</h2>
+          {%- endif -%}
 
-          {%- if s.subheading != blank -%}
+          {%- if s.show_subheading and s.subheading != blank -%}
             <div class="np-nl__subtitle">{{ s.subheading }}</div>
           {%- endif -%}
 
@@ -90,7 +92,7 @@
               </button>
             </div>
 
-            {%- if s.fine_print != blank -%}
+            {%- if s.show_fineprint and s.fine_print != blank -%}
               <div class="np-nl__fineprint">{{ s.fine_print }}</div>
             {%- endif -%}
 
@@ -112,7 +114,7 @@
           {%- for block in section.blocks -%}
             {%- if block.type == 'benefit' -%}{%- assign benefit_count = benefit_count | plus: 1 -%}{%- endif -%}
           {%- endfor -%}
-          {%- if benefit_count > 0 -%}
+          {%- if s.show_benefits and benefit_count > 0 -%}
             <ul class="np-nl__benefits" role="list">
               {%- for block in section.blocks -%}
                 {%- if block.type == 'benefit' -%}
@@ -130,7 +132,7 @@
         {%- for block in section.blocks -%}
           {%- if block.type == 'proof' -%}{%- assign proof_count = proof_count | plus: 1 -%}{%- endif -%}
         {%- endfor -%}
-        {%- if proof_count > 0 -%}
+        {%- if s.show_proof and proof_count > 0 -%}
           <ul class="np-nl__proof" role="list">
             {%- for block in section.blocks -%}
               {%- if block.type == 'proof' -%}
@@ -204,6 +206,13 @@
       "info": "Stored on the Klaviyo consent record.",
       "default": "Newsletter landing page"
     },
+    { "type": "header", "content": "Visible elements" },
+    { "type": "checkbox", "id": "show_eyebrow", "label": "Show eyebrow", "default": true },
+    { "type": "checkbox", "id": "show_heading", "label": "Show heading", "default": true },
+    { "type": "checkbox", "id": "show_subheading", "label": "Show subheading", "default": true },
+    { "type": "checkbox", "id": "show_fineprint", "label": "Show fine print", "default": true },
+    { "type": "checkbox", "id": "show_benefits", "label": "Show benefits list", "default": true },
+    { "type": "checkbox", "id": "show_proof", "label": "Show proof stats", "default": true },
     { "type": "header", "content": "Content" },
     { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Nootropix Newsletter" },
     { "type": "text", "id": "eyebrow_icon", "label": "Eyebrow icon name", "info": "Theme icon name, e.g. mail, discount, star.", "default": "mail" },
