@@ -85,8 +85,19 @@
   function setProgress(completedSteps) {
     var bar   = qs('#nqProgressBar');
     var label = qs('#nqProgressLabel');
+    var track = qs('.nq-progress-wrap');
     if (bar)   bar.style.width   = ((completedSteps / 5) * 100).toFixed(1) + '%';
     if (label) label.textContent = completedSteps > 0 ? 'Step ' + completedSteps + ' of 5' : 'Let\'s get started';
+    if (track) track.setAttribute('aria-valuenow', String(completedSteps));
+  }
+
+  // --- Config ---
+  var QUESTION_KEYS = ['goal', 'experience', 'context', 'preference', 'stack_size'];
+
+  function getConfig() {
+    var el = qs('#nq-config');
+    if (!el) return {};
+    try { return JSON.parse(el.textContent) || {}; } catch (e) { return {}; }
   }
 
   function showStep(index) {
@@ -183,6 +194,177 @@
       .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   }
 
+  // --- Lead capture (Klaviyo) ---
+  var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  var KLAVIYO_BASE = 'https://a.klaviyo.com';
+  var KLAVIYO_REVISION = '2026-01-15';
+
+  function klaviyoHeaders() {
+    return {
+      'Content-Type': 'application/vnd.api+json',
+      'Accept': 'application/vnd.api+json',
+      'revision': KLAVIYO_REVISION
+    };
+  }
+
+  // Build human-readable answer properties from the recorded answers
+  function buildEventProperties(result) {
+    var props = {};
+    QUESTION_KEYS.forEach(function (key, i) {
+      if (answers[i]) props[key] = answers[i];
+    });
+    props.recommended_stack = result.stackName || '';
+    props.recommended_handles = (result.handles || []).filter(Boolean);
+    props.result_key = result.key || '';
+    return props;
+  }
+
+  function subscribeToList(cfg, email) {
+    if (!cfg.listId) return Promise.resolve();
+    var payload = {
+      data: {
+        type: 'subscription',
+        attributes: {
+          custom_source: cfg.source || 'Nootropic quiz',
+          profile: { data: { type: 'profile', attributes: { email: email } } }
+        },
+        relationships: { list: { data: { type: 'list', id: cfg.listId } } }
+      }
+    };
+    return fetch(KLAVIYO_BASE + '/client/subscriptions?company_id=' + encodeURIComponent(cfg.publicKey), {
+      method: 'POST', headers: klaviyoHeaders(), body: JSON.stringify(payload)
+    });
+  }
+
+  function trackQuizEvent(cfg, email, properties) {
+    var payload = {
+      data: {
+        type: 'event',
+        attributes: {
+          properties: properties,
+          metric: { data: { type: 'metric', attributes: { name: cfg.eventName || 'Completed Nootropic Quiz' } } },
+          profile: { data: { type: 'profile', attributes: { email: email } } }
+        }
+      }
+    };
+    return fetch(KLAVIYO_BASE + '/client/events?company_id=' + encodeURIComponent(cfg.publicKey), {
+      method: 'POST', headers: klaviyoHeaders(), body: JSON.stringify(payload)
+    });
+  }
+
+  function upsertProfile(cfg, email, result) {
+    var props = {
+      'Quiz Goal': answers[0] || '',
+      'Quiz Experience': answers[1] || '',
+      'Quiz Context': answers[2] || '',
+      'Quiz Preference': answers[3] || '',
+      'Quiz Stack Size': answers[4] || '',
+      'Recommended Stack': result.stackName || '',
+      'Quiz Completed At': new Date().toISOString()
+    };
+    var payload = {
+      data: { type: 'profile', attributes: { email: email, properties: props } }
+    };
+    return fetch(KLAVIYO_BASE + '/client/profiles?company_id=' + encodeURIComponent(cfg.publicKey), {
+      method: 'POST', headers: klaviyoHeaders(), body: JSON.stringify(payload)
+    });
+  }
+
+  function submitCapture(cfg, email, result) {
+    try {
+      if (window.klaviyo && typeof window.klaviyo.push === 'function') {
+        window.klaviyo.push(['identify', { '$email': email }]);
+      }
+    } catch (e) { /* noop */ }
+
+    var properties = buildEventProperties(result);
+    return Promise.all([
+      subscribeToList(cfg, email),
+      trackQuizEvent(cfg, email, properties),
+      upsertProfile(cfg, email, result)
+    ]);
+  }
+
+  function captureCardHtml(cap) {
+    return (
+      '<div class="nq-capture" data-nq-capture>' +
+        '<div class="nq-capture__text">' +
+          '<span class="nq-capture__dot" aria-hidden="true"></span>' +
+          '<h3 class="nq-capture__title">' + esc(cap.title || 'Email me my stack') + '</h3>' +
+          (cap.subtitle ? '<p class="nq-capture__sub">' + esc(cap.subtitle) + '</p>' : '') +
+        '</div>' +
+        '<form class="nq-capture__form" data-nq-capture-form novalidate>' +
+          '<label class="nq-capture__label" for="nqEmail">Email address</label>' +
+          '<div class="nq-capture__row">' +
+            '<input class="nq-capture__input" id="nqEmail" name="email" type="email" inputmode="email" ' +
+              'autocomplete="email" placeholder="' + esc(cap.placeholder || 'you@email.com') + '" ' +
+              'aria-describedby="nqCaptureStatus" required>' +
+            '<button class="nq-capture__btn" type="submit" data-nq-capture-submit>' +
+              '<span class="nq-capture__btn-label">' + esc(cap.button || 'Send my stack') + '</span>' +
+              '<span class="nq-capture__btn-spinner" aria-hidden="true"></span>' +
+            '</button>' +
+          '</div>' +
+          (cap.fineprint ? '<div class="nq-capture__fineprint">' + cap.fineprint + '</div>' : '') +
+          '<p class="nq-capture__status" id="nqCaptureStatus" role="status" aria-live="polite" data-nq-status></p>' +
+        '</form>' +
+      '</div>'
+    );
+  }
+
+  function wireCapture(panel, cfg, cap, result) {
+    var card = panel.querySelector('[data-nq-capture]');
+    if (!card) return;
+    var form   = card.querySelector('[data-nq-capture-form]');
+    var input  = card.querySelector('.nq-capture__input');
+    var btn    = card.querySelector('[data-nq-capture-submit]');
+    var status = card.querySelector('[data-nq-status]');
+
+    function setStatus(msg, state) {
+      if (!status) return;
+      status.textContent = msg || '';
+      if (state) status.setAttribute('data-state', state); else status.removeAttribute('data-state');
+    }
+    function setLoading(on) {
+      if (!btn) return;
+      if (on) { btn.setAttribute('aria-busy', 'true'); btn.disabled = true; }
+      else    { btn.removeAttribute('aria-busy'); btn.disabled = false; }
+    }
+    function showDone() {
+      card.innerHTML =
+        '<div class="nq-capture__success">' +
+          '<span class="nq-capture__success-icon" aria-hidden="true">\u2713</span>' +
+          '<h3 class="nq-capture__title">' + esc(cap.successTitle || 'Sent! Check your inbox.') + '</h3>' +
+          (cap.successMessage ? '<div class="nq-capture__sub">' + cap.successMessage + '</div>' : '') +
+        '</div>';
+    }
+
+    if (input) {
+      input.addEventListener('input', function () {
+        if (input.getAttribute('aria-invalid') === 'true') {
+          input.removeAttribute('aria-invalid'); setStatus('', null);
+        }
+      });
+    }
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var email = (input && input.value ? input.value : '').trim();
+      if (!EMAIL_RE.test(email)) {
+        if (input) { input.setAttribute('aria-invalid', 'true'); input.focus(); }
+        setStatus('Please enter a valid email address.', 'error');
+        return;
+      }
+      if (input) input.removeAttribute('aria-invalid');
+      if (!cfg.publicKey) { setStatus('Capture is temporarily unavailable.', 'error'); return; }
+
+      setStatus('', null);
+      setLoading(true);
+      submitCapture(cfg, email, result)
+        .then(function () { showDone(); })
+        .catch(function () { setLoading(false); setStatus('Something went wrong. Please try again.', 'error'); });
+    });
+  }
+
   // --- Results ---
   function showResults() {
     var winnerKey   = pickWinnerKey();
@@ -211,6 +393,10 @@
 
     var handles = (result.handles || []).filter(Boolean);
 
+    var cfg = getConfig();
+    var cap = cfg.capture || {};
+    var captureHtml = (cap.enabled === false) ? '' : captureCardHtml(cap);
+
     Promise.all(handles.map(fetchProduct)).then(function (products) {
       var valid    = products.filter(Boolean);
       var cardsHtml = valid.map(buildProductCard).join('');
@@ -225,9 +411,12 @@
         (cardsHtml
           ? '<div class="nq-results__grid">' + cardsHtml + '</div>'
           : '<p class="nq-results__empty">Products coming soon \u2014 swap in handles via the theme customizer.</p>') +
+        captureHtml +
         '<div class="nq-results__actions">' +
           '<button type="button" class="nq-retake-btn">Retake the quiz</button>' +
         '</div>';
+
+      if (captureHtml) wireCapture(panel, cfg, cap, result);
 
       // Add-to-cart via AJAX
       qsa('.nq-product-card__form', panel).forEach(function (form) {
