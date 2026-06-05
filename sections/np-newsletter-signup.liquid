@@ -61,7 +61,7 @@
           {%- endif -%}
 
           {%- if s.show_heading and s.heading != blank -%}
-            <h2 class="np-nl__title" id="{{ title_id }}">{{ s.heading }}</h2>
+            <h2 class="np-nl__title {{ s.heading_size }}" id="{{ title_id }}">{{ s.heading }}</h2>
           {%- endif -%}
 
           {%- if s.show_subheading and s.subheading != blank -%}
@@ -86,10 +86,12 @@
                 aria-describedby="{{ status_id }}"
                 required
               >
-              <button class="np-nl__btn" type="submit" data-np-submit>
-                <span class="np-nl__btn-label">{{ s.button_label }}</span>
-                <span class="np-nl__btn-spinner" aria-hidden="true"></span>
-              </button>
+              {% render 'button',
+                text: s.button_label,
+                type: 'submit',
+                style: 'primary',
+                attrs: 'data-np-submit'
+              %}
             </div>
 
             {%- if s.show_fineprint and s.fine_print != blank -%}
@@ -106,7 +108,11 @@
               <div class="np-nl__success-text">{{ s.success_message }}</div>
             {%- endif -%}
             {%- if s.success_cta_label != blank and s.success_cta_link != blank -%}
-              <a class="np-nl__success-cta" href="{{ s.success_cta_link }}">{{ s.success_cta_label }}</a>
+              {% render 'button',
+                text: s.success_cta_label,
+                link: s.success_cta_link,
+                style: 'primary'
+              %}
             {%- endif -%}
           </div>
 
@@ -217,6 +223,19 @@
     { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Nootropix Newsletter" },
     { "type": "text", "id": "eyebrow_icon", "label": "Eyebrow icon name", "info": "Theme icon name, e.g. mail, discount, star.", "default": "mail" },
     { "type": "text", "id": "heading", "label": "Heading", "default": "Get 10% off your first order" },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Heading size",
+      "options": [
+        { "value": "h1", "label": "H1" },
+        { "value": "h2", "label": "H2" },
+        { "value": "h3", "label": "H3" },
+        { "value": "h4", "label": "H4" },
+        { "value": "h5", "label": "H5" }
+      ],
+      "default": "h3"
+    },
     {
       "type": "richtext",
       "id": "subheading",
