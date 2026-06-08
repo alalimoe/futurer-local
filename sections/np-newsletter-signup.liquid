@@ -1,19 +1,17 @@
 {% comment %}
   NP • Newsletter Signup
-  Custom-designed Klaviyo signup form that posts to the Klaviyo Client
-  Subscriptions API client-side (no Klaviyo form editor). The Klaviyo onsite
-  script is loaded site-wide, so consent + profile tracking stay intact.
+  Premium section frame (eyebrow, heading, benefits, proof) wrapping a native
+  Klaviyo embedded form. Klaviyo's onsite script is loaded site-wide via the
+  app embed, so the form auto-hydrates. Capture + welcome/coupon flow are
+  handled in Klaviyo's form + flow editor.
   Layouts: "hero" (full landing page) and "band" (compact, e.g. homepage).
 {% endcomment %}
 
 {{ 'np-newsletter-signup.css' | asset_url | stylesheet_tag }}
-<script src="{{ 'np-newsletter-signup.js' | asset_url }}" defer></script>
 
 {%- liquid
   assign s = section.settings
   assign title_id = 'np-nl-title-' | append: section.id
-  assign email_id = 'np-nl-email-' | append: section.id
-  assign status_id = 'np-nl-status-' | append: section.id
   assign has_image = false
   if s.background_image != blank
     assign has_image = true
@@ -23,16 +21,9 @@
 <section
   {% render 'section-attr' %}
   aria-labelledby="{{ title_id }}"
-  data-np-newsletter-section
 >
   <xo-container>
-    <div
-      class="np-nl np-nl--{{ s.layout }}{% if has_image %} np-nl--has-image{% endif %}"
-      data-np-newsletter
-      data-public-key="{{ s.public_api_key | escape }}"
-      data-list-id="{{ s.list_id | escape }}"
-      data-source="{{ s.custom_source | escape }}"
-    >
+    <div class="np-nl np-nl--{{ s.layout }}{% if has_image %} np-nl--has-image{% endif %}">
       {%- if has_image -%}
         <div class="np-nl__bg" aria-hidden="true">
           <img
@@ -68,53 +59,11 @@
             <div class="np-nl__subtitle">{{ s.subheading }}</div>
           {%- endif -%}
 
-          <form
-            class="np-nl__form"
-            data-np-form
-            novalidate
-          >
-            <div class="np-nl__field">
-              <label class="np-nl__label" for="{{ email_id }}">{{ s.email_label }}</label>
-              <input
-                class="np-nl__input"
-                type="email"
-                id="{{ email_id }}"
-                name="email"
-                inputmode="email"
-                autocomplete="email"
-                placeholder="{{ s.email_placeholder }}"
-                aria-describedby="{{ status_id }}"
-                required
-              >
-              {% render 'button',
-                text: s.button_label,
-                type: 'submit',
-                style: 'primary',
-                attrs: 'data-np-submit'
-              %}
-            </div>
-
-            {%- if s.show_fineprint and s.fine_print != blank -%}
-              <div class="np-nl__fineprint">{{ s.fine_print }}</div>
-            {%- endif -%}
-
-            <p class="np-nl__status" id="{{ status_id }}" role="status" aria-live="polite" data-np-status></p>
-          </form>
-
-          <div class="np-nl__success" data-np-success hidden tabindex="-1">
-            <span class="np-nl__success-icon" aria-hidden="true">{% render 'icon', name: 'check', size: '2.4rem' %}</span>
-            <h3 class="np-nl__success-title">{{ s.success_heading }}</h3>
-            {%- if s.success_message != blank -%}
-              <div class="np-nl__success-text">{{ s.success_message }}</div>
-            {%- endif -%}
-            {%- if s.success_cta_label != blank and s.success_cta_link != blank -%}
-              {% render 'button',
-                text: s.success_cta_label,
-                link: s.success_cta_link,
-                style: 'primary'
-              %}
-            {%- endif -%}
-          </div>
+          {%- if s.klaviyo_form_id != blank -%}
+            <div class="np-nl__embed klaviyo-form-{{ s.klaviyo_form_id }}"></div>
+          {%- elsif request.design_mode -%}
+            <p class="np-nl__embed-missing">Add your Klaviyo embed form ID in the section settings.</p>
+          {%- endif -%}
 
           {%- assign benefit_count = 0 -%}
           {%- for block in section.blocks -%}
@@ -190,33 +139,18 @@
       ],
       "default": "hero"
     },
-    { "type": "header", "content": "Klaviyo" },
+    { "type": "header", "content": "Klaviyo embed form" },
     {
       "type": "text",
-      "id": "public_api_key",
-      "label": "Klaviyo Public API Key (Site ID)",
-      "info": "6-character company_id used for the client subscription API.",
-      "default": "Y8iBzf"
-    },
-    {
-      "type": "text",
-      "id": "list_id",
-      "label": "Klaviyo List ID",
-      "info": "Profiles are subscribed to this list (triggers your welcome flow).",
-      "default": "YzxUyY"
-    },
-    {
-      "type": "text",
-      "id": "custom_source",
-      "label": "Consent source label",
-      "info": "Stored on the Klaviyo consent record.",
-      "default": "Newsletter landing page"
+      "id": "klaviyo_form_id",
+      "label": "Klaviyo embed form ID",
+      "info": "The ID in <div class=\"klaviyo-form-XXXX\">. Build and style the form (and its welcome/coupon flow) in Klaviyo.",
+      "default": "RdVLYF"
     },
     { "type": "header", "content": "Visible elements" },
     { "type": "checkbox", "id": "show_eyebrow", "label": "Show eyebrow", "default": true },
     { "type": "checkbox", "id": "show_heading", "label": "Show heading", "default": true },
     { "type": "checkbox", "id": "show_subheading", "label": "Show subheading", "default": true },
-    { "type": "checkbox", "id": "show_fineprint", "label": "Show fine print", "default": true },
     { "type": "checkbox", "id": "show_benefits", "label": "Show benefits list", "default": true },
     { "type": "checkbox", "id": "show_proof", "label": "Show proof stats", "default": true },
     { "type": "header", "content": "Content" },
@@ -242,26 +176,6 @@
       "label": "Subheading",
       "default": "<p>Join the list for science-backed stacking tips, restock alerts, and first access to every flash sale.</p>"
     },
-    { "type": "header", "content": "Form" },
-    { "type": "text", "id": "email_label", "label": "Email field label (screen readers)", "default": "Email address" },
-    { "type": "text", "id": "email_placeholder", "label": "Email placeholder", "default": "you@email.com" },
-    { "type": "text", "id": "button_label", "label": "Button label", "default": "Get my 10% off" },
-    {
-      "type": "richtext",
-      "id": "fine_print",
-      "label": "Fine print / consent",
-      "default": "<p>By subscribing you agree to receive marketing emails. Unsubscribe anytime.</p>"
-    },
-    { "type": "header", "content": "Success state" },
-    { "type": "text", "id": "success_heading", "label": "Success heading", "default": "You're in. Check your inbox." },
-    {
-      "type": "richtext",
-      "id": "success_message",
-      "label": "Success message",
-      "default": "<p>We've sent your 10% off code. Add us to your contacts so you never miss a drop.</p>"
-    },
-    { "type": "text", "id": "success_cta_label", "label": "Success button label", "default": "Start shopping" },
-    { "type": "url", "id": "success_cta_link", "label": "Success button link" },
     { "type": "header", "content": "Background (hero)" },
     { "type": "image_picker", "id": "background_image", "label": "Background image" },
     { "type": "range", "id": "overlay_opacity", "min": 0, "max": 100, "step": 5, "unit": "%", "label": "Background scrim opacity", "default": 70 },
