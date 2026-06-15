@@ -5,20 +5,40 @@
     assign dg_coll = collections.all
   endif
 
+  # Manual mode = at least one Product block is configured.
   assign dg_manual = false
-  assign dg_handles = ''
   for block in section.blocks
     if block.type == 'product' and block.settings.product != blank
-      assign dg_handles = dg_handles | append: block.settings.product.handle | append: ','
+      assign dg_manual = true
+      break
     endif
   endfor
-  assign dg_handles = dg_handles | split: ','
-  if dg_handles.size > 0
-    assign dg_manual = true
+
+  # Iterate real product objects (no all_products re-lookup, which caps at 20 per page).
+  if dg_manual
+    assign dg_source = section.blocks
   else
-    assign dg_handles = dg_coll.products | sort_natural: 'title' | map: 'handle'
+    assign dg_source = dg_coll.products | sort_natural: 'title'
   endif
-  assign dg_products = dg_handles
+
+  # Count cards that will actually render, so the search zone and empty state stay in sync.
+  assign dg_render_count = 0
+  for dg_entry in dg_source
+    if dg_manual
+      if dg_entry.type != 'product' or dg_entry.settings.product == blank
+        continue
+      endif
+      assign dg_p = dg_entry.settings.product
+    else
+      assign dg_p = dg_entry
+    endif
+    if dg_p == blank
+      continue
+    endif
+    if dg_manual or dg_p.metafields.custom.dose != blank or dg_p.metafields.custom.timing != blank
+      assign dg_render_count = dg_render_count | plus: 1
+    endif
+  endfor
 -%}
 
 {%- style -%}
@@ -215,6 +235,13 @@
   }
   .xo-section--{{ dg_id }} .dg-product__link svg { width: 13px; height: 13px; }
 
+  .xo-section--{{ dg_id }} .dg-product__q {
+    font-family: var(--font-heading-family, sans-serif);
+    font-size: 0.9rem; font-weight: 600; line-height: 1.4;
+    margin: 0 0 12px;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 70%, transparent);
+  }
+
   .xo-section--{{ dg_id }} .dg-specs {
     display: grid; grid-template-columns: 1fr; gap: 0; margin: 0;
     border-top: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 6%, transparent);
@@ -335,7 +362,7 @@
           </div>
         {%- endif -%}
 
-        {%- if section.settings.author != blank or section.settings.date_published != blank or section.settings.read_time != blank -%}
+        {%- if section.settings.author != blank or section.settings.date_published != blank or section.settings.read_time != blank or section.settings.date_modified != blank -%}
           <div class="dg-hero__meta">
             {%- if section.settings.author != blank -%}
               <span class="dg-hero__meta-item">
@@ -354,6 +381,12 @@
                 <svg class="dg-hero__meta-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                 {{ section.settings.read_time }}
               </span>
+            {%- endif -%}
+            {%- if section.settings.date_modified != blank -%}
+              <time class="dg-hero__meta-item" datetime="{{ section.settings.date_modified }}">
+                <svg class="dg-hero__meta-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 11-2.64-6.36"/><polyline points="21 3 21 9 15 9"/></svg>
+                Updated {{ section.settings.date_modified | date: "%B %d, %Y" }}
+              </time>
             {%- endif -%}
           </div>
         {%- endif -%}
@@ -384,7 +417,7 @@
       </div>
 
       {%- comment -%} ═══ ZONE 2: PRODUCT SEARCH ═══ {%- endcomment -%}
-      {%- if dg_products.size > 0 -%}
+      {%- if dg_render_count > 0 -%}
         <div class="dg-zone dg-search-zone">
           <div class="dg-search" data-dg-search-root>
             <label class="dg-search__label" for="dg-search-{{ dg_id }}">{{ section.settings.jump_label }}</label>
@@ -409,11 +442,16 @@
 
       {%- comment -%} ═══ ZONE 3: PER-PRODUCT ENTRIES (H2 each) ═══ {%- endcomment -%}
       <div class="dg-zone" id="dosing-by-product">
-        {%- if dg_products.size > 0 -%}
+        {%- if dg_render_count > 0 -%}
           <div class="dg-products">
-            {%- for dg_handle in dg_products -%}
-              {%- assign product = all_products[dg_handle] -%}
-              {%- if product == empty -%}{%- continue -%}{%- endif -%}
+            {%- for dg_entry in dg_source -%}
+              {%- if dg_manual -%}
+                {%- if dg_entry.type != 'product' or dg_entry.settings.product == blank -%}{%- continue -%}{%- endif -%}
+                {%- assign product = dg_entry.settings.product -%}
+              {%- else -%}
+                {%- assign product = dg_entry -%}
+              {%- endif -%}
+              {%- if product == blank -%}{%- continue -%}{%- endif -%}
               {%- assign mf_dose = product.metafields.custom.dose -%}
               {%- assign mf_timing = product.metafields.custom.timing -%}
               {%- assign mf_food = product.metafields.custom.with_food -%}
@@ -430,13 +468,14 @@
                 <article class="dg-product" id="dose-{{ product.handle }}" data-dg-item data-dg-name="{{ dg_kw | strip | downcase | escape }}">
                   <div class="dg-product__head">
                     <h2 class="dg-product__h2">{{ product.title }}</h2>
-                    <a class="dg-product__link" href="{{ product.url }}">
+                    <a class="dg-product__link" href="{{ product.url }}" aria-label="View {{ product.title | escape }}">
                       View product
                       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
                     </a>
                   </div>
 
                   {%- if dg_has_specs -%}
+                    <p class="dg-product__q">How do I dose {{ product.title }}?</p>
                     <dl class="dg-specs">
                       {%- if mf_dose != blank -%}
                         <div class="dg-spec">
@@ -476,7 +515,7 @@
                       {%- endif -%}
                     </dl>
                   {%- else -%}
-                    <p class="dg-empty-note">Dosing details coming soon. Add this product's <code>custom.dose</code> and <code>custom.timing</code> metafields to populate this card.</p>
+                    <p class="dg-empty-note">Dosing details for this product are coming soon — check back shortly.</p>
                   {%- endif -%}
                 </article>
               {%- endif -%}
@@ -484,7 +523,7 @@
           </div>
           <p class="dg-noresults" data-dg-noresults hidden>No products match your search. Try a different term or clear the search.</p>
         {%- else -%}
-          <p class="dg-empty">No collection selected yet. Choose a collection in the theme editor to populate per-product dosing entries.</p>
+          <p class="dg-empty">Per-product dosing entries are being prepared. In the meantime, follow the universal principles above, or reach out and we'll point you to the right protocol.</p>
         {%- endif -%}
       </div>
 
@@ -516,17 +555,26 @@
       {%- if section.settings.date_published != blank -%}
         "datePublished": {{ section.settings.date_published | json }},
       {%- endif -%}
+      {%- assign dg_modified = section.settings.date_modified | default: section.settings.date_published -%}
+      {%- if dg_modified != blank -%}
+        "dateModified": {{ dg_modified | json }},
+      {%- endif -%}
       "mainEntityOfPage": {{ request.origin | append: request.path | json }}
     }
-    {%- if dg_products.size > 0 -%}
+    {%- if dg_render_count > 0 -%}
       ,{
         "@type": "ItemList",
         "name": {{ section.settings.heading | json }},
         "itemListElement": [
           {%- assign li_pos = 0 -%}
-          {%- for dg_handle in dg_products -%}
-            {%- assign product = all_products[dg_handle] -%}
-            {%- if product == empty -%}{%- continue -%}{%- endif -%}
+          {%- for dg_entry in dg_source -%}
+            {%- if dg_manual -%}
+              {%- if dg_entry.type != 'product' or dg_entry.settings.product == blank -%}{%- continue -%}{%- endif -%}
+              {%- assign product = dg_entry.settings.product -%}
+            {%- else -%}
+              {%- assign product = dg_entry -%}
+            {%- endif -%}
+            {%- if product == blank -%}{%- continue -%}{%- endif -%}
             {%- assign mf_dose = product.metafields.custom.dose -%}
             {%- assign mf_timing = product.metafields.custom.timing -%}
             {%- if dg_manual or mf_dose != blank or mf_timing != blank -%}
@@ -547,11 +595,17 @@
           "@type": "FAQPage",
           "mainEntity": [
             {%- assign faq_pos = 0 -%}
-            {%- for dg_handle in dg_products -%}
-              {%- assign product = all_products[dg_handle] -%}
-              {%- if product == empty -%}{%- continue -%}{%- endif -%}
+            {%- for dg_entry in dg_source -%}
+              {%- if dg_manual -%}
+                {%- if dg_entry.type != 'product' or dg_entry.settings.product == blank -%}{%- continue -%}{%- endif -%}
+                {%- assign product = dg_entry.settings.product -%}
+              {%- else -%}
+                {%- assign product = dg_entry -%}
+              {%- endif -%}
+              {%- if product == blank -%}{%- continue -%}{%- endif -%}
               {%- assign mf_dose = product.metafields.custom.dose -%}
               {%- assign mf_timing = product.metafields.custom.timing -%}
+              {%- assign mf_food = product.metafields.custom.with_food -%}
               {%- assign mf_cycling = product.metafields.custom.cycling -%}
               {%- assign mf_notes = product.metafields.custom.dosing_notes -%}
               {%- if mf_dose != blank or mf_timing != blank -%}
@@ -560,6 +614,7 @@
                 {%- capture faq_answer -%}
                   {%- if mf_dose != blank -%}Dose: {{ mf_dose }}. {% endif -%}
                   {%- if mf_timing != blank -%}Timing: {{ mf_timing }}. {% endif -%}
+                  {%- if mf_food != blank -%}Food: {% if mf_food.value == true %}take with food.{% else %}empty stomach OK.{% endif %} {% endif -%}
                   {%- if mf_cycling != blank -%}Cycling: {{ mf_cycling }}. {% endif -%}
                   {%- if mf_notes != blank -%}{{ mf_notes }}{% endif -%}
                 {%- endcapture -%}
@@ -647,6 +702,7 @@
     },
     { "type": "text", "id": "author", "label": "Author", "default": "Nootropix Research" },
     { "type": "text", "id": "date_published", "label": "Published date (YYYY-MM-DD)", "default": "2026-01-01" },
+    { "type": "text", "id": "date_modified", "label": "Last updated date (YYYY-MM-DD)", "info": "Shown in the byline and emitted as dateModified in structured data. Bump this whenever you revise the guide so the “Updated Regularly” badge stays truthful.", "default": "2026-01-01" },
     { "type": "text", "id": "read_time", "label": "Read time", "default": "6 min read" },
     { "type": "header", "content": "Trust Badges" },
     { "type": "text", "id": "badge_1_text", "label": "Badge 1", "default": "Evidence-Based Dosing" },
