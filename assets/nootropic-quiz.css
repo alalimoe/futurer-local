@@ -1,141 +1,201 @@
 /* ============================================================
    Nootropic Stack Finder Quiz
-   Design language: matches Nootropix email flow —
-   light gray field · white cards · amber dot accent · dark pill CTA
+   Restyled to match the Nootropix theme design system:
+   theme color tokens · Inter type scale · pill button tokens ·
+   theme radius tokens · flat surfaces (no shadows) · 768px breakpoint
+   JS contract preserved — class/id/data-attr names unchanged.
    ============================================================ */
 
-/* ---------- Section shell ---------- */
-.nq-section {
-  background: #f0f0f0;
-  padding-top: var(--pt_dt, 72px);
-  padding-bottom: var(--pb_dt, 96px);
+/* ---------- Local design tokens (scoped to the quiz) ---------- */
+#nqQuiz {
+  /* Surfaces & lines derived from the active color scheme. The section uses
+     the default/page background; cards sit on a faint tint and rely on
+     token borders for definition against white/transparent backgrounds. */
+  --nq-surface: rgba(var(--color-background));
+  --nq-field: color-mix(in srgb, rgba(var(--color-foreground)) 4%, transparent);
+  --nq-border: color-mix(in srgb, rgba(var(--color-foreground)) 12%, transparent);
+  --nq-border-strong: color-mix(in srgb, rgba(var(--color-foreground)) 22%, transparent);
+  --nq-muted: rgba(var(--color-foreground-3));
+  --nq-faint: color-mix(in srgb, rgba(var(--color-foreground)) 45%, transparent);
+  /* Motion */
+  --nq-ease: var(--out-soft, cubic-bezier(0, 0, .3, 1));
+  --nq-spring: var(--spring, cubic-bezier(.27, .79, .45, 1.24));
+  --nq-fast: 0.2s ease;
 }
 
-@media (max-width: 749px) {
-  .nq-section {
-    padding-top: var(--pt_mb, 48px);
-    padding-bottom: var(--pb_mb, 64px);
+/* ---------- Layout wrapper (mirrors xo-container) ---------- */
+.nq-wrapper {
+  max-width: var(--page-width, 160rem);
+  margin: 0 auto;
+  padding-inline: calc(var(--page-gap-mobile, 2.2) * 1rem);
+}
+
+@media (min-width: 768px) {
+  .nq-wrapper {
+    padding-inline: calc(var(--page-gap, 2.4) * 1rem);
   }
 }
 
-.nq-wrapper {
-  max-width: var(--page-width, 1600px);
+/* Centred narrow column */
+.nq-inner {
+  max-width: 64rem;
   margin: 0 auto;
-  padding: 0 var(--container-gap, 24px);
+  position: relative;
 }
 
-/* Centred narrow column — email-width feel */
-.nq-inner {
-  max-width: 600px;
-  margin: 0 auto;
+/* ---------- Email gate ---------- */
+/* The quiz body (progress + steps) stays hidden until a valid email is
+   submitted; JS adds .nq--unlocked to #nqQuiz to reveal it. */
+.nq-quiz-body { display: none; }
+.nq-gate { display: block; }
+#nqQuiz.nq--unlocked .nq-gate { display: none; }
+#nqQuiz.nq--unlocked .nq-quiz-body { display: block; }
+.nq-gate .nq-capture { margin: 0; }
+
+.nq-capture__confirm-email {
+  margin-top: 0.6rem;
+  font-weight: var(--font-body-weight-bold, 700);
+  color: rgba(var(--color-foreground));
 }
 
 /* ---------- Quiz page header ---------- */
 .nq-header {
-  margin-bottom: 36px;
+  margin-bottom: 3.2rem;
 }
 
 .nq-header__eyebrow {
   display: block;
-  font-size: 0.6875rem;
-  font-weight: 700;
+  font-size: 1.2rem;
+  font-weight: var(--font-body-weight-bold, 700);
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #fbbf24;
-  margin-bottom: 10px;
+  color: rgba(var(--color-accent));
+  margin-bottom: 1rem;
 }
 
 .nq-header__title {
-  font-size: clamp(1.75rem, 5vw, 2.5rem);
-  font-weight: 800;
-  color: #111;
-  margin: 0 0 10px;
+  font-family: var(--font-heading-family);
+  font-weight: var(--font-heading-weight, 600);
+  font-size: clamp(3.2rem, 5vw, 4.8rem);
+  color: rgba(var(--color-foreground));
+  margin: 0 0 1rem;
   line-height: 1.15;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
 }
 
 .nq-header__subtitle {
-  font-size: 1rem;
+  font-size: var(--font-body-desktop-size, 1.6rem);
   line-height: 1.6;
-  color: #555;
+  color: var(--nq-muted);
   margin: 0;
 }
 
 /* ---------- Progress bar ---------- */
 .nq-progress-wrap {
-  height: 3px;
-  background: rgba(0, 0, 0, 0.1);
-  border-radius: 100px;
+  height: 0.4rem;
+  background: var(--nq-border);
+  border-radius: 10rem;
   overflow: hidden;
-  margin-bottom: 6px;
+  margin-bottom: 0.8rem;
 }
 
 .nq-progress__bar {
   height: 100%;
   width: 0%;
-  background: #fbbf24;
-  border-radius: 100px;
-  transition: width 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+  background: rgba(var(--color-accent));
+  border-radius: 10rem;
+  transition: width 0.45s var(--out-cubic, cubic-bezier(.215, .61, .355, 1));
   will-change: width;
 }
 
 .nq-progress__label {
-  font-size: 0.75rem;
+  font-size: 1.2rem;
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #999;
-  margin: 0 0 32px;
+  color: var(--nq-faint);
+  margin: 0 0 3.2rem;
   min-height: 1em;
 }
 
 /* ---------- Steps ---------- */
+/* Positioning context so an outgoing step can overlap during the cross-fade */
+.nq-steps {
+  position: relative;
+}
+
 .nq-step {
   display: none;
 }
 
 .nq-step--active {
   display: block;
-  animation: nqFadeIn 0.2s ease forwards;
+}
+
+/* Outgoing step held on top of the incoming one for the duration of the swap */
+.nq-step--exit {
+  display: block;
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Default / initial enter */
+  .nq-step--active {
+    animation: nqStepInNext 0.2s var(--nq-spring) both;
+  }
+  /* Direction-aware enter */
+  .nq-step--active.nq-step--from-prev {
+    animation-name: nqStepInPrev;
+  }
+  /* Direction-aware exit */
+  .nq-step--exit {
+    animation: nqStepOutNext 0.2s var(--nq-ease) both;
+  }
+  .nq-step--exit.nq-step--exit-prev {
+    animation-name: nqStepOutPrev;
+  }
 }
 
 /* Step header — eyebrow + question + subtext */
 .nq-step__header {
-  margin-bottom: 20px;
+  margin-bottom: 2rem;
 }
 
 .nq-step__eyebrow {
   display: block;
-  font-size: 0.6875rem;
-  font-weight: 700;
+  font-size: 1.2rem;
+  font-weight: var(--font-body-weight-bold, 700);
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #fbbf24;
-  margin-bottom: 8px;
+  color: rgba(var(--color-accent));
+  margin-bottom: 0.8rem;
 }
 
 .nq-step__question {
-  font-size: clamp(1.25rem, 3.5vw, 1.625rem);
-  font-weight: 800;
-  color: #111;
-  margin: 0 0 6px;
-  line-height: 1.2;
-  letter-spacing: -0.015em;
+  font-family: var(--font-heading-family);
+  font-weight: var(--font-heading-weight, 600);
+  font-size: clamp(2.2rem, 3.5vw, 3rem);
+  color: rgba(var(--color-foreground));
+  margin: 0 0 0.6rem;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
 }
 
 .nq-step__sub {
-  font-size: 0.9375rem;
-  color: #666;
+  font-size: var(--font-body-mobile-size, 1.5rem);
+  color: var(--nq-muted);
   margin: 0;
   line-height: 1.5;
 }
 
-/* ---------- Options — vertical stack of white cards ---------- */
+/* ---------- Options — vertical stack of surface cards ---------- */
 .nq-options {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  margin-bottom: 28px;
+  gap: 1rem;
+  margin-bottom: 2.8rem;
 }
 
 /* Shake when user advances without selecting */
@@ -148,31 +208,39 @@
 }
 .nq-options--shake { animation: nqShake 0.4s ease; }
 
+@media (prefers-reduced-motion: reduce) {
+  .nq-options--shake { animation: none; }
+}
+
 /* ---------- Option card ---------- */
 .nq-option {
   display: flex;
   align-items: flex-start;
-  gap: 14px;
+  gap: 1.4rem;
   width: 100%;
-  padding: 18px 20px;
-  background: #fff;
-  border: none;
-  border-radius: 14px;
+  padding: 1.8rem 2rem;
+  background: var(--nq-field);
+  border: 1px solid var(--nq-border);
+  border-radius: var(--general-radius-3, 2rem);
   cursor: pointer;
   text-align: left;
   font-family: inherit;
   position: relative;
-  /* Left-edge accent bar — hidden by default */
-  box-shadow: inset 3px 0 0 transparent, 0 1px 3px rgba(0,0,0,0.06);
-  transition: box-shadow 0.15s ease, transform 0.1s ease;
+  transition: border-color var(--nq-fast), background var(--nq-fast), transform 0.1s ease;
   -webkit-user-select: none;
   user-select: none;
 }
 
 .nq-option:hover,
 .nq-option:focus-visible {
-  box-shadow: inset 3px 0 0 #fbbf24, 0 3px 10px rgba(0,0,0,0.09);
+  border-color: var(--nq-border-strong);
+  background: color-mix(in srgb, rgba(var(--color-foreground)) 6%, transparent);
   outline: none;
+}
+
+.nq-option:focus-visible {
+  outline: 0.2rem solid rgba(var(--color-accent));
+  outline-offset: 0.2rem;
 }
 
 .nq-option:active {
@@ -180,23 +248,26 @@
 }
 
 .nq-option.is-selected {
-  box-shadow: inset 3px 0 0 #fbbf24, 0 4px 14px rgba(0,0,0,0.1);
-  background: #fff;
+  border-color: rgba(var(--color-accent));
+  background: color-mix(in srgb, rgba(var(--color-accent)) 10%, var(--nq-surface));
 }
 
 .nq-option.is-selected .nq-option__dot {
-  background: #fbbf24;
+  background: rgba(var(--color-accent));
+  border-color: rgba(var(--color-accent));
 }
 
-/* Amber dot — email bullet style */
+/* Accent dot — bullet style */
 .nq-option__dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: #e0e0e0;
+  width: 1.2rem;
+  height: 1.2rem;
+  border-radius: var(--circle-radius, 50%);
+  background: transparent;
+  border: 0.2rem solid var(--nq-border-strong);
+  box-sizing: border-box;
   flex-shrink: 0;
-  margin-top: 5px;
-  transition: background 0.15s ease;
+  margin-top: 0.4rem;
+  transition: background var(--nq-fast), border-color var(--nq-fast);
 }
 
 .nq-option__text {
@@ -205,17 +276,17 @@
 
 .nq-option__label {
   display: block;
-  font-size: 0.9375rem;
-  font-weight: 700;
-  color: #111;
+  font-size: 1.6rem;
+  font-weight: var(--font-body-weight-bold, 700);
+  color: rgba(var(--color-foreground));
   line-height: 1.3;
 }
 
 .nq-option__desc {
   display: block;
-  font-size: 0.8125rem;
-  color: #777;
-  margin-top: 3px;
+  font-size: 1.4rem;
+  color: var(--nq-muted);
+  margin-top: 0.3rem;
   line-height: 1.45;
 }
 
@@ -224,6 +295,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 1.6rem;
 }
 
 /* Back — plain text link */
@@ -231,135 +303,239 @@
   visibility: hidden;
   background: none;
   border: none;
-  padding: 0;
+  padding: 0.8rem 0.4rem;
   font-family: inherit;
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   font-weight: 600;
-  color: #999;
+  color: var(--nq-faint);
   cursor: pointer;
   letter-spacing: 0.01em;
-  transition: color 0.15s ease;
+  transition: color var(--nq-fast);
 }
-.nq-back-btn:hover { color: #333; }
+.nq-back-btn:hover { color: rgba(var(--color-foreground)); }
+.nq-back-btn:focus-visible {
+  outline: 0.2rem solid rgba(var(--color-accent));
+  outline-offset: 0.2rem;
+  border-radius: var(--general-radius-4, 0.6rem);
+}
 
-/* Next / primary CTA — dark pill matching email "Add to Stack →" */
+/* Next / primary CTA — dark pill using theme dark-button tokens */
 #nqNextBtn {
-  background: #1a1a1a;
-  color: #fff;
+  background: rgba(var(--color-dark-button));
+  color: rgba(var(--color-dark-button-text));
   border: none;
-  border-radius: 100px;
-  padding: 14px 36px;
+  border-radius: 10rem;
+  padding: 1.4rem 3.6rem;
   font-family: inherit;
-  font-size: 0.9375rem;
-  font-weight: 700;
+  font-size: 1.5rem;
+  font-weight: var(--font-body-weight-bold, 700);
   letter-spacing: 0.01em;
   cursor: pointer;
-  transition: background 0.15s ease, transform 0.1s ease;
+  transition: background var(--nq-fast), transform 0.1s ease;
   margin-left: auto;
 }
-#nqNextBtn:hover  { background: #000; }
+#nqNextBtn:hover {
+  background: color-mix(in srgb, rgba(var(--color-dark-button)) 88%, rgba(var(--color-foreground)));
+}
 #nqNextBtn:active { transform: scale(0.98); }
+#nqNextBtn:focus-visible {
+  outline: 0.2rem solid rgba(var(--color-accent));
+  outline-offset: 0.2rem;
+}
 
 /* ---------- Results panel ---------- */
-.nq-results { display: none; }
+.nq-results { display: none; position: relative; }
 
 .nq-results--visible {
   display: block;
-  animation: nqFadeIn 0.3s ease forwards;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .nq-results--visible {
+    animation: nqFadeIn 0.4s var(--nq-ease) forwards;
+  }
 }
 
 .nq-results__loading {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-  padding: 64px 20px;
-  color: #888;
-  font-size: 0.9375rem;
+  display: block;
 }
 
+/* Rotating contextual copy line */
+.nq-results__loading-copy {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin: 1.6rem 0 0;
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--nq-muted);
+  letter-spacing: 0.01em;
+  min-height: 1.4em;
+}
+.nq-results__loading-copy::before {
+  content: "";
+  width: 0.8rem;
+  height: 0.8rem;
+  flex-shrink: 0;
+  border-radius: var(--circle-radius, 50%);
+  background: rgba(var(--color-accent));
+}
+@media (prefers-reduced-motion: no-preference) {
+  .nq-results__loading-copy { animation: nqFadeIn 0.3s var(--nq-ease); }
+  .nq-results__loading-copy::before { animation: nqPulse 1.1s var(--nq-ease) infinite; }
+}
+
+/* Legacy inline spinner (kept for the capture button family / fallbacks) */
 .nq-spinner {
-  width: 36px;
-  height: 36px;
-  border: 3px solid rgba(251, 191, 36, 0.2);
-  border-top-color: #fbbf24;
-  border-radius: 50%;
+  width: 3.6rem;
+  height: 3.6rem;
+  border: 0.3rem solid color-mix(in srgb, rgba(var(--color-accent)) 25%, transparent);
+  border-top-color: rgba(var(--color-accent));
+  border-radius: var(--circle-radius, 50%);
   animation: nqSpin 0.75s linear infinite;
 }
 
-/* Results header card — white, amber dot, bold name */
+/* ---------- Skeleton loading cards ---------- */
+.nq-skeleton-card {
+  display: flex;
+  align-items: stretch;
+  background: var(--nq-surface);
+  border: 1px solid var(--nq-border);
+  border-radius: var(--product-card-radius, 2.8rem);
+  overflow: hidden;
+}
+
+.nq-skeleton-card__image {
+  width: 9rem;
+  flex-shrink: 0;
+}
+
+.nq-skeleton-card__body {
+  flex: 1;
+  padding: 1.8rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.nq-skeleton-card__lines {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.nq-skeleton {
+  position: relative;
+  overflow: hidden;
+  background: color-mix(in srgb, rgba(var(--color-foreground)) 8%, transparent);
+  border-radius: var(--general-radius-4, 0.6rem);
+}
+
+.nq-skeleton--line { height: 1.4rem; }
+.nq-skeleton--title { width: 70%; height: 1.6rem; }
+.nq-skeleton--price { width: 35%; }
+.nq-skeleton--btn {
+  width: 12rem;
+  height: 3.4rem;
+  align-self: flex-start;
+  border-radius: 10rem;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .nq-skeleton::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(
+      90deg,
+      transparent,
+      color-mix(in srgb, rgba(var(--color-foreground)) 6%, transparent),
+      transparent
+    );
+    animation: nqShimmer 1.3s var(--nq-ease) infinite;
+  }
+}
+
+@media (max-width: 767px) {
+  .nq-skeleton-card__image { width: 7rem; }
+  .nq-skeleton-card__body  { padding: 1.4rem 1.6rem; }
+}
+
+/* Results header card */
 .nq-results__header {
-  background: #fff;
-  border-radius: 14px;
-  padding: 28px 28px 24px;
-  margin-bottom: 12px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  background: var(--nq-field);
+  border: 1px solid var(--nq-border);
+  border-radius: var(--general-radius-3, 2rem);
+  padding: 2.8rem 2.8rem 2.4rem;
+  margin-bottom: 1.2rem;
 }
 
 .nq-results__dot {
   display: block;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: #fbbf24;
-  margin-bottom: 14px;
+  width: 1rem;
+  height: 1rem;
+  border-radius: var(--circle-radius, 50%);
+  background: rgba(var(--color-accent));
+  margin-bottom: 1.4rem;
 }
 
 .nq-results__badge {
   display: block;
-  font-size: 0.6875rem;
-  font-weight: 700;
+  font-size: 1.2rem;
+  font-weight: var(--font-body-weight-bold, 700);
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #fbbf24;
-  margin-bottom: 8px;
+  color: rgba(var(--color-accent));
+  margin-bottom: 0.8rem;
 }
 
 .nq-results__title {
-  font-size: clamp(1.375rem, 3.5vw, 1.875rem);
-  font-weight: 800;
-  color: #111;
-  margin: 0 0 10px;
+  font-family: var(--font-heading-family);
+  font-weight: var(--font-heading-weight, 600);
+  font-size: clamp(2.4rem, 3.5vw, 3.2rem);
+  color: rgba(var(--color-foreground));
+  margin: 0 0 1rem;
   line-height: 1.2;
-  letter-spacing: -0.015em;
+  letter-spacing: -0.02em;
 }
 
 .nq-results__description {
-  font-size: 0.9375rem;
-  color: #555;
+  font-size: 1.5rem;
+  color: var(--nq-muted);
   line-height: 1.65;
   margin: 0;
 }
 .nq-results__description p { margin: 0; }
 
-/* ---------- Product cards — white cards stacked, email card style ---------- */
+/* ---------- Product cards ---------- */
 .nq-results__grid {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  margin-bottom: 12px;
+  gap: 1rem;
+  margin-bottom: 1.2rem;
 }
 
 .nq-product-card {
-  background: #fff;
-  border-radius: 14px;
+  background: var(--nq-surface);
+  border: 1px solid var(--nq-border);
+  border-radius: var(--product-card-radius, 2.8rem);
   padding: 0;
   overflow: hidden;
   display: flex;
   align-items: stretch;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-  transition: box-shadow 0.2s ease, transform 0.15s ease;
+  transition: border-color var(--nq-fast), transform 0.15s ease;
 }
 
 .nq-product-card:hover {
-  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
-  transform: translateY(-1px);
+  border-color: var(--nq-border-strong);
 }
 
 .nq-product-card__image {
-  width: 90px;
+  width: 9rem;
   flex-shrink: 0;
-  background: #f5f5f5;
+  background: var(--nq-field);
   overflow: hidden;
 }
 
@@ -374,98 +550,163 @@
   transform: scale(1.05);
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .nq-product-card__image img { transition: none; }
+  .nq-product-card:hover .nq-product-card__image img { transform: none; }
+}
+
 .nq-product-card__body {
   flex: 1;
-  padding: 18px 20px;
+  padding: 1.8rem 2rem;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 10px;
+  gap: 1rem;
 }
 
 .nq-product-card__meta { flex: 1; }
 
 .nq-product-card__title {
-  font-size: 0.9375rem;
-  font-weight: 700;
-  color: #111;
-  margin: 0 0 4px;
+  font-size: 1.6rem;
+  font-weight: var(--font-body-weight-bold, 700);
+  color: rgba(var(--color-foreground));
+  margin: 0 0 0.4rem;
   line-height: 1.3;
 }
 
 .nq-product-card__price {
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   font-weight: 600;
-  color: #555;
+  color: var(--nq-muted);
   margin: 0;
 }
 
-/* ATC button — dark pill */
+/* Token-styled "In stock" badge */
+.nq-product-card__stock {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 0.6rem;
+  font-size: 1.1rem;
+  font-weight: var(--font-body-weight-bold, 700);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(var(--color-success));
+}
+.nq-product-card__stock::before {
+  content: "";
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: var(--circle-radius, 50%);
+  background: rgba(var(--color-success));
+}
+
+/* Per-item ATC — quiet/secondary now that "Add all to stack" is the primary CTA */
 .nq-product-card__form { display: flex; }
 
 .nq-product-card__atc {
-  background: #1a1a1a;
-  color: #fff;
-  border: none;
-  border-radius: 100px;
-  padding: 9px 22px;
+  background: transparent;
+  color: rgba(var(--color-foreground));
+  border: 1px solid var(--nq-border-strong);
+  border-radius: 10rem;
+  padding: 0.6rem 1.6rem;
   font-family: inherit;
-  font-size: 0.8125rem;
-  font-weight: 700;
+  font-size: 1.2rem;
+  font-weight: 600;
   cursor: pointer;
   letter-spacing: 0.01em;
-  transition: background 0.15s ease, transform 0.1s ease;
+  transition: background var(--nq-fast), border-color var(--nq-fast), transform 0.1s ease;
   white-space: nowrap;
 }
-.nq-product-card__atc:hover  { background: #000; }
+.nq-product-card__atc:hover {
+  background: color-mix(in srgb, rgba(var(--color-foreground)) 6%, transparent);
+  border-color: rgba(var(--color-foreground));
+}
 .nq-product-card__atc:active { transform: scale(0.98); }
 .nq-product-card__atc:disabled { opacity: 0.5; cursor: default; }
+.nq-product-card__atc:focus-visible {
+  outline: 0.2rem solid rgba(var(--color-accent));
+  outline-offset: 0.2rem;
+}
+
+/* Primary "Add all to stack" CTA — full-width dark pill */
+.nq-add-all-btn {
+  display: block;
+  width: 100%;
+  margin: 0 0 1.2rem;
+  background: rgba(var(--color-dark-button));
+  color: rgba(var(--color-dark-button-text));
+  border: none;
+  border-radius: 10rem;
+  padding: 1.5rem 3.2rem;
+  font-family: inherit;
+  font-size: 1.5rem;
+  font-weight: var(--font-body-weight-bold, 700);
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition: background var(--nq-fast), transform 0.1s ease;
+}
+.nq-add-all-btn:hover {
+  background: color-mix(in srgb, rgba(var(--color-dark-button)) 88%, rgba(var(--color-foreground)));
+}
+.nq-add-all-btn:active { transform: scale(0.99); }
+.nq-add-all-btn.is-loading,
+.nq-add-all-btn:disabled { opacity: 0.7; cursor: progress; }
+.nq-add-all-btn:focus-visible {
+  outline: 0.2rem solid rgba(var(--color-accent));
+  outline-offset: 0.2rem;
+}
 
 .nq-product-card__sold-out {
-  font-size: 0.8125rem;
-  color: #bbb;
+  font-size: 1.3rem;
+  color: var(--nq-faint);
   font-style: italic;
   margin: 0;
   align-self: flex-end;
 }
 
-@media (max-width: 440px) {
-  .nq-product-card__image { width: 70px; }
-  .nq-product-card__body  { padding: 14px 16px; }
+@media (max-width: 767px) {
+  .nq-product-card__image { width: 7rem; }
+  .nq-product-card__body  { padding: 1.4rem 1.6rem; }
 }
 
 /* ---------- Results actions ---------- */
 .nq-results__actions {
   text-align: center;
-  padding-top: 8px;
+  padding-top: 0.8rem;
 }
 
 .nq-retake-btn {
   background: none;
   border: none;
-  padding: 0;
+  padding: 0.8rem 1.2rem;
   font-family: inherit;
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   font-weight: 600;
-  color: #999;
+  color: var(--nq-faint);
   cursor: pointer;
   letter-spacing: 0.01em;
-  transition: color 0.15s ease;
+  transition: color var(--nq-fast);
   text-decoration: underline;
-  text-underline-offset: 3px;
+  text-underline-offset: 0.3rem;
 }
-.nq-retake-btn:hover { color: #333; }
+.nq-retake-btn:hover { color: rgba(var(--color-foreground)); }
+.nq-retake-btn:focus-visible {
+  outline: 0.2rem solid rgba(var(--color-accent));
+  outline-offset: 0.2rem;
+  border-radius: var(--general-radius-4, 0.6rem);
+}
 
 .nq-results__empty {
   text-align: center;
-  color: #bbb;
-  font-size: 0.9375rem;
-  padding: 40px 0 32px;
+  color: var(--nq-faint);
+  font-size: 1.5rem;
+  padding: 4rem 0 3.2rem;
 }
 
 /* ---------- Animations ---------- */
 @keyframes nqFadeIn {
-  from { opacity: 0; transform: translateY(8px); }
+  from { opacity: 0; transform: translateY(0.8rem); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
@@ -473,38 +714,108 @@
   to { transform: rotate(360deg); }
 }
 
-/* ---------- Lead capture card ---------- */
-.nq-capture {
-  background: #fff;
-  border: 1px solid #ececec;
-  border-radius: 16px;
-  padding: 22px;
-  margin: 4px 0 14px;
+@keyframes nqShimmer {
+  to { transform: translateX(100%); }
 }
 
-.nq-capture__text { margin-bottom: 14px; }
+@keyframes nqPulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.35; }
+}
+
+/* Step transitions — forward (next) slides in from the right, out to the left;
+   backward (prev) mirrors the direction. */
+@keyframes nqStepInNext {
+  from { opacity: 0; transform: translateX(1.6rem); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes nqStepInPrev {
+  from { opacity: 0; transform: translateX(-1.6rem); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes nqStepOutNext {
+  from { opacity: 1; transform: translateX(0); }
+  to   { opacity: 0; transform: translateX(-1.6rem); }
+}
+@keyframes nqStepOutPrev {
+  from { opacity: 1; transform: translateX(0); }
+  to   { opacity: 0; transform: translateX(1.6rem); }
+}
+
+/* ---------- Confetti (one-shot celebratory burst) ---------- */
+.nq-confetti {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 0;
+  pointer-events: none;
+  overflow: visible;
+  z-index: 5;
+}
+
+.nq-confetti__piece {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 0.8rem;
+  height: 0.8rem;
+  background: var(--nq-cf-c, rgba(var(--color-accent)));
+  border-radius: var(--nq-cf-radius, 1px);
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .nq-confetti__piece {
+    animation: nqConfetti var(--nq-cf-dur, 1.4s) var(--out-cubic, cubic-bezier(.215, .61, .355, 1)) var(--nq-cf-delay, 0s) forwards;
+  }
+}
+
+@keyframes nqConfetti {
+  0% {
+    opacity: 1;
+    transform: translate3d(-50%, 0, 0) rotate(0deg) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(calc(-50% + var(--nq-cf-x, 0px)), var(--nq-cf-y, 200px), 0) rotate(var(--nq-cf-r, 360deg)) scale(0.85);
+  }
+}
+
+/* ---------- Lead capture card ---------- */
+.nq-capture {
+  background: var(--nq-field);
+  border: 1px solid var(--nq-border);
+  border-radius: var(--general-radius-3, 2rem);
+  padding: 2.2rem;
+  margin: 0.4rem 0 1.4rem;
+}
+
+.nq-capture__text { margin-bottom: 1.4rem; }
 
 .nq-capture__dot {
   display: block;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: #fbbf24;
-  margin-bottom: 12px;
+  width: 1rem;
+  height: 1rem;
+  border-radius: var(--circle-radius, 50%);
+  background: rgba(var(--color-accent));
+  margin-bottom: 1.2rem;
 }
 
 .nq-capture__title {
-  font-size: 1.0625rem;
-  font-weight: 800;
-  color: #111;
-  margin: 0 0 4px;
+  font-family: var(--font-heading-family);
+  font-weight: var(--font-heading-weight, 600);
+  font-size: 1.8rem;
+  color: rgba(var(--color-foreground));
+  margin: 0 0 0.4rem;
   line-height: 1.25;
   letter-spacing: -0.01em;
 }
 
 .nq-capture__sub {
-  font-size: 0.875rem;
-  color: #555;
+  font-size: 1.4rem;
+  color: var(--nq-muted);
   line-height: 1.55;
   margin: 0;
 }
@@ -522,16 +833,16 @@
 
 .nq-capture__row {
   display: flex;
-  gap: 8px;
-  background: #f0f0f0;
-  border: 1px solid #e2e2e2;
-  border-radius: 12px;
-  padding: 6px;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  gap: 0.8rem;
+  background: var(--nq-surface);
+  border: 1px solid var(--nq-border);
+  border-radius: var(--general-radius-2, 1.5rem);
+  padding: 0.6rem;
+  transition: border-color var(--nq-fast), box-shadow var(--nq-fast);
 }
 .nq-capture__row:focus-within {
-  border-color: #fbbf24;
-  box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.3);
+  border-color: rgba(var(--color-accent));
+  box-shadow: 0 0 0 0.3rem color-mix(in srgb, rgba(var(--color-accent)) 30%, transparent);
 }
 
 .nq-capture__input {
@@ -540,31 +851,37 @@
   border: 0;
   background: transparent;
   font-family: inherit;
-  font-size: 0.9375rem;
-  color: #111;
-  padding: 0 12px;
+  font-size: 1.5rem;
+  color: rgba(var(--color-foreground));
+  padding: 0 1.2rem;
 }
 .nq-capture__input:focus { outline: none; }
-.nq-capture__input::placeholder { color: #999; }
-.nq-capture__input[aria-invalid="true"] { color: #da1e28; }
+.nq-capture__input::placeholder { color: var(--nq-faint); }
+.nq-capture__input[aria-invalid="true"] { color: rgba(var(--color-error)); }
 
 .nq-capture__btn {
   position: relative;
   flex: 0 0 auto;
-  background: #1a1a1a;
-  color: #fff;
+  background: rgba(var(--color-dark-button));
+  color: rgba(var(--color-dark-button-text));
   border: none;
-  border-radius: 100px;
-  padding: 11px 22px;
+  border-radius: 10rem;
+  padding: 1.1rem 2.2rem;
   font-family: inherit;
-  font-size: 0.8125rem;
-  font-weight: 700;
+  font-size: 1.3rem;
+  font-weight: var(--font-body-weight-bold, 700);
   cursor: pointer;
   letter-spacing: 0.01em;
   white-space: nowrap;
-  transition: background 0.15s ease, opacity 0.15s ease;
+  transition: background var(--nq-fast), opacity var(--nq-fast);
 }
-.nq-capture__btn:hover { background: #000; }
+.nq-capture__btn:hover {
+  background: color-mix(in srgb, rgba(var(--color-dark-button)) 88%, rgba(var(--color-foreground)));
+}
+.nq-capture__btn:focus-visible {
+  outline: 0.2rem solid rgba(var(--color-accent));
+  outline-offset: 0.2rem;
+}
 .nq-capture__btn[aria-busy="true"] { opacity: 0.7; cursor: progress; }
 .nq-capture__btn[aria-busy="true"] .nq-capture__btn-label { visibility: hidden; }
 .nq-capture__btn[aria-busy="true"] .nq-capture__btn-spinner { display: block; }
@@ -574,59 +891,60 @@
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 16px;
-  height: 16px;
-  margin: -8px 0 0 -8px;
-  border: 2px solid rgba(255, 255, 255, 0.4);
-  border-top-color: #fff;
-  border-radius: 50%;
+  width: 1.6rem;
+  height: 1.6rem;
+  margin: -0.8rem 0 0 -0.8rem;
+  border: 0.2rem solid color-mix(in srgb, rgba(var(--color-dark-button-text)) 40%, transparent);
+  border-top-color: rgba(var(--color-dark-button-text));
+  border-radius: var(--circle-radius, 50%);
   animation: nqSpin 0.7s linear infinite;
 }
 
 .nq-capture__fineprint {
-  font-size: 0.75rem;
-  color: #999;
+  font-size: 1.2rem;
+  color: var(--nq-faint);
   line-height: 1.5;
-  margin: 10px 0 0;
+  margin: 1rem 0 0;
 }
 .nq-capture__fineprint p { margin: 0; }
-.nq-capture__fineprint a { color: inherit; text-underline-offset: 2px; }
+.nq-capture__fineprint a { color: inherit; text-underline-offset: 0.2rem; }
 
 .nq-capture__status {
-  font-size: 0.8125rem;
+  font-size: 1.3rem;
   line-height: 1.4;
-  margin: 8px 0 0;
+  margin: 0.8rem 0 0;
   min-height: 1.2em;
 }
-.nq-capture__status[data-state="error"] { color: #da1e28; }
+.nq-capture__status[data-state="error"] { color: rgba(var(--color-error)); }
 .nq-capture__status:empty { margin: 0; min-height: 0; }
 
 .nq-capture__success {
   text-align: left;
-  animation: nqFadeIn 0.3s ease;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .nq-capture__success { animation: nqFadeIn 0.3s var(--nq-ease); }
 }
 .nq-capture__success-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: rgba(16, 167, 31, 0.14);
-  color: #10a71f;
-  font-size: 1.25rem;
+  width: 4rem;
+  height: 4rem;
+  border-radius: var(--circle-radius, 50%);
+  background: color-mix(in srgb, rgba(var(--color-success)) 14%, transparent);
+  color: rgba(var(--color-success));
+  font-size: 2rem;
   font-weight: 700;
-  margin-bottom: 10px;
+  margin-bottom: 1rem;
 }
 
-@media (max-width: 440px) {
+@media (max-width: 767px) {
   .nq-capture__row { flex-direction: column; }
-  .nq-capture__input { padding: 10px 12px; }
-  .nq-capture__btn { width: 100%; padding: 13px 22px; }
+  .nq-capture__input { padding: 1rem 1.2rem; }
+  .nq-capture__btn { width: 100%; padding: 1.3rem 2.2rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .nq-capture__btn-spinner { animation-duration: 1.4s; }
   .nq-capture__row, .nq-capture__btn { transition: none; }
-  .nq-capture__success { animation: none; }
 }

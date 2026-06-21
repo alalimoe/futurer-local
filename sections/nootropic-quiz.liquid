@@ -9,7 +9,7 @@
 {{ 'nootropic-quiz.css' | asset_url | stylesheet_tag }}
 <script src="{{ 'nootropic-quiz.js' | asset_url }}" defer></script>
 
-<section id="nqQuiz" {% render 'section-attr' %} class="nq-section">
+<section id="nqQuiz" {% render 'section-attr' %}>
   <div class="nq-wrapper">
     <div class="nq-inner">
 
@@ -22,12 +22,43 @@
         {%- endif -%}
       </div>
 
+      {%- comment -%} ── Email gate — must pass before the quiz steps ── {%- endcomment -%}
+      <div class="nq-gate" data-nq-gate>
+        <div class="nq-capture nq-gate__card">
+          <div class="nq-capture__text">
+            <span class="nq-capture__dot" aria-hidden="true"></span>
+            <h2 class="nq-capture__title">{{ section.settings.gate_title }}</h2>
+            {%- if section.settings.gate_subtitle != blank -%}
+              <p class="nq-capture__sub">{{ section.settings.gate_subtitle }}</p>
+            {%- endif -%}
+          </div>
+          <form class="nq-capture__form" data-nq-gate-form novalidate>
+            <label class="nq-capture__label" for="nqGateEmail">Email address</label>
+            <div class="nq-capture__row">
+              <input class="nq-capture__input" id="nqGateEmail" name="email" type="email" inputmode="email"
+                autocomplete="email" placeholder="{{ section.settings.capture_placeholder | default: 'you@email.com' }}"
+                aria-describedby="nqGateStatus" required>
+              <button class="nq-capture__btn" type="submit" data-nq-gate-submit>
+                <span class="nq-capture__btn-label">{{ section.settings.gate_button }} →</span>
+                <span class="nq-capture__btn-spinner" aria-hidden="true"></span>
+              </button>
+            </div>
+            {%- if section.settings.capture_fineprint != blank -%}
+              <div class="nq-capture__fineprint">{{ section.settings.capture_fineprint }}</div>
+            {%- endif -%}
+            <p class="nq-capture__status" id="nqGateStatus" role="status" aria-live="polite" data-nq-gate-status></p>
+          </form>
+        </div>
+      </div>
+
+      <div class="nq-quiz-body" data-nq-quiz-body>
       {%- comment -%} ── Progress bar ── {%- endcomment -%}
       <div class="nq-progress-wrap" role="progressbar" aria-valuemin="0" aria-valuemax="5" aria-valuenow="0">
         <div class="nq-progress__bar" id="nqProgressBar"></div>
       </div>
       <p class="nq-progress__label" id="nqProgressLabel" aria-live="polite">Step 1 of 5</p>
 
+      <div class="nq-steps">
       {%- comment -%} ════════════════════════════════════════
         Step 1 — Primary Goal
         JS key values must match SCORING[0] keys in nootropic-quiz.js:
@@ -283,6 +314,8 @@
           <button type="button" id="nqNextBtn">Build My Stack →</button>
         </div>
       </div>
+      </div><!-- /.nq-steps -->
+      </div><!-- /.nq-quiz-body -->
 
       {%- comment -%} ── Results panel (populated by JS) ── {%- endcomment -%}
       <div class="nq-results" id="nqResultsPanel" aria-live="polite"></div>
@@ -322,6 +355,18 @@
                   {%- if h_count > 0 -%},{%- endif -%}
                   {{ block.settings.product_handle_4 | json }}
                 {%- endif -%}
+              ],
+              "backupHandles": [
+                {%- assign b_count = 0 -%}
+                {%- if block.settings.product_handle_5 != blank -%}
+                  {%- if b_count > 0 -%},{%- endif -%}
+                  {{ block.settings.product_handle_5 | json }}
+                  {%- assign b_count = b_count | plus: 1 -%}
+                {%- endif -%}
+                {%- if block.settings.product_handle_6 != blank -%}
+                  {%- if b_count > 0 -%},{%- endif -%}
+                  {{ block.settings.product_handle_6 | json }}
+                {%- endif -%}
               ]
             }
           {%- endif -%}
@@ -347,7 +392,8 @@
           "fineprint": {{ section.settings.capture_fineprint | json }},
           "successTitle": {{ section.settings.capture_success_title | json }},
           "successMessage": {{ section.settings.capture_success_message | json }}
-        }
+        },
+        "minInStock": {{ section.settings.min_in_stock | json }}
       }
       </script>
 
@@ -371,6 +417,28 @@
       "id": "quiz_subtitle",
       "label": "Quiz subtitle",
       "default": "Answer 5 quick questions and we'll build a personalised stack for your goals, experience level, and preferences."
+    },
+    {
+      "type": "header",
+      "content": "Email gate"
+    },
+    {
+      "type": "text",
+      "id": "gate_title",
+      "label": "Gate heading",
+      "default": "Enter your email to start"
+    },
+    {
+      "type": "text",
+      "id": "gate_subtitle",
+      "label": "Gate subtext",
+      "default": "We'll build your personalised stack and email your results plus a one-time 10% off code."
+    },
+    {
+      "type": "text",
+      "id": "gate_button",
+      "label": "Gate button label",
+      "default": "Start the quiz"
     },
     {
       "type": "header",
@@ -450,6 +518,17 @@
       "id": "capture_success_message",
       "label": "Capture success message",
       "default": "<p>Your stack and 10% off code are on the way.</p>"
+    },
+    {
+      "type": "header",
+      "content": "Recommendation logic"
+    },
+    {
+      "type": "number",
+      "id": "min_in_stock",
+      "label": "Minimum in-stock products per stack",
+      "info": "A recommended stack is only skipped if it has fewer than this many in-stock products. Default 1 (skip only fully sold-out stacks).",
+      "default": 1
     },
     {
       "type": "header",
@@ -551,6 +630,26 @@
           "id": "product_handle_4",
           "label": "Product handle 4 (optional)",
           "placeholder": "optional-handle"
+        },
+        {
+          "type": "header",
+          "content": "Backup product handles"
+        },
+        {
+          "type": "paragraph",
+          "content": "Used to top up the stack when a primary product is sold out (so the results never look thin). Displayed cards are capped at 4."
+        },
+        {
+          "type": "text",
+          "id": "product_handle_5",
+          "label": "Backup handle 1 (optional)",
+          "placeholder": "backup-handle"
+        },
+        {
+          "type": "text",
+          "id": "product_handle_6",
+          "label": "Backup handle 2 (optional)",
+          "placeholder": "backup-handle"
         }
       ]
     }
