@@ -1,87 +1,31 @@
-// Nootropic Stack Finder Quiz — state machine, scoring engine, AJAX results renderer
+// Nootropic Stack Finder Quiz — state machine, results renderer, Klaviyo + cart wiring.
+// Recommendation logic lives in assets/quiz-engine.js (window.NootropixQuizEngine).
 (function () {
   'use strict';
-
-  // --- Scoring matrix ---
-  // Maps each step's option value → tag score increments.
-  // These keys must match data-value attributes on .nq-option elements in the section.
-  const SCORING = [
-    // Step 0 — Primary Goal
-    {
-      focus:   { focus: 3, memory: 1 },
-      mood:    { anxiety: 3, mood: 2 },
-      energy:  { energy: 3, mood: 1 },
-      memory:  { memory: 3, focus: 1 },
-      sleep:   { 'sleep-support': 4 }
-    },
-    // Step 1 — Experience Level
-    {
-      beginner:     { 'beginner-safe': 3 },
-      some:         { 'beginner-safe': 1, adaptogen: 1 },
-      intermediate: { adaptogen: 2, cholinergic: 1 },
-      advanced:     { racetam: 2, cholinergic: 2 }
-    },
-    // Step 2 — Lifestyle
-    {
-      student:      { memory: 1, focus: 1 },
-      professional: { focus: 1, energy: 1 },
-      athletic:     { energy: 1, adaptogen: 1 },
-      wellness:     { adaptogen: 1 }
-    },
-    // Step 3 — Sensitivities
-    {
-      'stimulant-sensitive': { anxiety: 2, adaptogen: 1, 'beginner-safe': 1 },
-      natural:               { adaptogen: 2, 'beginner-safe': 1 },
-      synthetics:            { racetam: 2, cholinergic: 1 },
-      dependency:            { 'beginner-safe': 2, adaptogen: 1 }
-    },
-    // Step 4 — Stack Size
-    {
-      simple:   { 'beginner-safe': 2 },
-      moderate: { adaptogen: 1, cholinergic: 1 },
-      full:     { racetam: 1, cholinergic: 2 }
-    }
-  ];
-
-  // Result scorers: each function computes how well the accumulated scores match a given result key
-  const RESULT_SCORERS = {
-    'beginners-focus':    s => (s.focus           || 0) + (s['beginner-safe'] || 0),
-    'calm-clarity':       s => (s.anxiety         || 0) + (s.adaptogen        || 0),
-    'advanced-cognitive': s => (s.racetam         || 0) + (s.cholinergic      || 0),
-    'mood-motivation':    s => (s.mood            || 0) + (s.energy           || 0),
-    'deep-sleep':         s => (s['sleep-support'] || 0)
-  };
 
   // --- State ---
   let currentStep = 0;
   const answers = {};
-  const scores  = {};
   // Email captured at the gate before the quiz steps are revealed.
   var gatedEmail = '';
 
-  function addScores(tagMap) {
-    Object.keys(tagMap).forEach(function (tag) {
-      scores[tag] = (scores[tag] || 0) + tagMap[tag];
-    });
-  }
-
-  function removeScores(tagMap) {
-    Object.keys(tagMap).forEach(function (tag) {
-      scores[tag] = Math.max(0, (scores[tag] || 0) - tagMap[tag]);
-    });
-  }
-
-  // All result keys, best score first. Ties keep their declared order (the
-  // RESULT_SCORERS insertion order) so existing tie outcomes don't change.
-  function rankResultKeys() {
-    return Object.keys(RESULT_SCORERS)
-      .map(function (key, i) {
-        return { key: key, score: RESULT_SCORERS[key](scores), order: i };
-      })
-      .sort(function (a, b) {
-        return (b.score - a.score) || (a.order - b.order);
-      })
-      .map(function (entry) { return entry.key; });
+  // Map the recorded UI answers (answers[0..4], using the section's data-value
+  // strings) to the normalized values the engine expects. Klaviyo keeps the raw
+  // UI values via buildEventProperties — only the engine call is normalized.
+  function answersForEngine() {
+    var PREF_MAP = {
+      'stimulant-sensitive': 'stimfree',
+      synthetics: 'synthetic',
+      dependency: 'nondependency'
+    };
+    var SIZE_MAP = { moderate: 'medium' };
+    return {
+      goal:       answers[0],
+      experience: answers[1],
+      context:    answers[2],
+      preference: PREF_MAP[answers[3]] || answers[3],
+      size:       SIZE_MAP[answers[4]] || answers[4]
+    };
   }
 
   // --- DOM helpers ---
@@ -182,7 +126,6 @@
 
     var value = selected.dataset.value;
     answers[currentStep] = value;
-    addScores(SCORING[currentStep][value] || {});
 
     if (currentStep < 4) {
       currentStep++;
@@ -195,10 +138,6 @@
   function goBack() {
     if (currentStep === 0) return;
     currentStep--;
-    var prevAnswer = answers[currentStep];
-    if (prevAnswer && SCORING[currentStep] && SCORING[currentStep][prevAnswer]) {
-      removeScores(SCORING[currentStep][prevAnswer]);
-    }
     delete answers[currentStep];
     showStep(currentStep, 'back');
   }
@@ -353,7 +292,8 @@
       if (answers[i]) props[key] = answers[i];
     });
     props.recommended_stack = result.stackName || '';
-    props.recommended_handles = (result.handles || []).filter(Boolean);
+    props.recommended_handles = (result.handles || []).filter(Boolean).map(normalizeHandle);
+    props.recommended_names = (result.names || []).filter(Boolean);
     props.result_key = result.key || '';
     return props;
   }
@@ -652,8 +592,24 @@
     var resultsData = [];
     try { resultsData = JSON.parse(dataEl ? dataEl.textContent : '[]'); } catch (e) { /* noop */ }
 
-    var ranked = rankResultKeys();
-    var cache  = new Map();
+    var engine = (window.NootropixQuizEngine && window.NootropixQuizEngine.recommendStack)
+      ? window.NootropixQuizEngine.recommendStack(answersForEngine())
+      : null;
+    // The engine returns a single sized stack. Normalize it to a one-element
+    // candidate list (and tolerate a future multi-candidate shape).
+    var candidates = (engine && engine.candidates) || [];
+    if (!candidates.length && engine && engine.recommended_handles) {
+      candidates = [{
+        result_key:          engine.result_key,
+        recommended_stack:   engine.recommended_stack,
+        recommended_handles: engine.recommended_handles,
+        recommended_names:   engine.recommended_names
+      }];
+    }
+    if (!candidates.length && window.console && console.warn) {
+      console.warn('[nootropic-quiz] Quiz engine returned no recommendation.', engine);
+    }
+    var cache = new Map();
 
     clearStepExit();
     qsa('.nq-step').forEach(function (el) { el.classList.remove('nq-step--active'); });
@@ -700,36 +656,51 @@
     // Merchant-controlled minimum; fall back to 1 if unset/invalid.
     var MIN_IN_STOCK = parseInt(cfg.minInStock, 10);
     if (!(MIN_IN_STOCK >= 1)) { MIN_IN_STOCK = 1; }
-    var DISPLAY_CAP = 4;
+    // Show every product the engine recommends (a "full" stack returns 5);
+    // topUp() still clamps the count to each stack's actual handle list.
+    var DISPLAY_CAP = 5;
 
-    // Resolve a result block by key, warning on merchant key typos.
-    function findResult(key) {
-      var match = resultsData.filter(function (r) { return r.key === key; })[0];
-      if (!match) {
-        if (window.console && console.warn) {
-          console.warn('[nootropic-quiz] No result block matches key "' + key + '".');
-        }
-        return null;
-      }
-      return match;
+    // Look up the merchant-managed Theme Customizer block for a result key.
+    // The engine owns handles + headline; the block only supplies the optional
+    // rich-text description and any backup handles.
+    function blockFor(key) {
+      return resultsData.filter(function (r) { return r.key === key; })[0] || {};
     }
 
+    // Merge an engine candidate with its Theme Customizer block into the result
+    // object the renderer and Klaviyo expect.
+    function mergedResult(cand) {
+      var block = blockFor(cand.result_key);
+      return {
+        key:           cand.result_key,
+        stackName:     cand.recommended_stack || block.stackName || 'Your Stack',
+        description:   block.description || '',
+        handles:       (cand.recommended_handles || []).filter(Boolean),
+        backupHandles: (block.backupHandles || []).filter(Boolean),
+        names:         cand.recommended_names || []
+      };
+    }
+
+    var rankedResults = candidates.map(mergedResult);
+
     // Fetch a candidate stack's handles (cached) and split by availability.
-    function resolveCandidate(key) {
-      var result  = findResult(key) || {};
-      var handles = (result.handles || []).filter(Boolean);
+    function resolveCandidate(res) {
+      var handles = (res.handles || []).filter(Boolean);
       return Promise.all(handles.map(function (h) { return fetchCached(h, cache); }))
         .then(function (products) {
           var fetched = products.filter(Boolean);
-          return { key: key, result: result, fetched: fetched, inStock: fetched.filter(isInStock) };
+          return { key: res.key, result: res, fetched: fetched, inStock: fetched.filter(isInStock) };
         });
     }
 
     // Walk the ranked stacks lazily; accept the first with enough in-stock
     // products. If none qualify, fall back to the top-ranked stack.
     function evaluate(i) {
-      if (i >= ranked.length) { return resolveCandidate(ranked[0]); }
-      return resolveCandidate(ranked[i]).then(function (cand) {
+      if (!rankedResults.length) {
+        return Promise.resolve({ key: '', result: { handles: [], backupHandles: [] }, fetched: [], inStock: [] });
+      }
+      if (i >= rankedResults.length) { return resolveCandidate(rankedResults[0]); }
+      return resolveCandidate(rankedResults[i]).then(function (cand) {
         if (cand.inStock.length >= MIN_IN_STOCK) { return cand; }
         return evaluate(i + 1);
       });
@@ -906,7 +877,6 @@
   function resetQuiz() {
     currentStep = 0;
     Object.keys(answers).forEach(function (k) { delete answers[k]; });
-    Object.keys(scores).forEach(function  (k) { delete scores[k]; });
     qsa('.nq-option').forEach(function (el) { el.classList.remove('is-selected'); });
     var panel = qs('#nqResultsPanel');
     if (panel) { panel.classList.remove('nq-results--visible'); panel.innerHTML = ''; }
