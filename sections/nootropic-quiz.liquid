@@ -1,12 +1,14 @@
 {% comment %}
   Nootropic Stack Finder Quiz
   Template:  templates/page.quiz.json
-  Assets:    assets/nootropic-quiz.css, assets/nootropic-quiz.js
-  Schema:    5 "result" blocks — merchant manages product handles + stack descriptions
-             from the Theme Customizer with no code changes required.
+  Assets:    assets/nootropic-quiz.css, assets/quiz-engine.js, assets/nootropic-quiz.js
+  Schema:    5 "result" blocks — merchant manages stack descriptions (and optional
+             backup handles) from the Theme Customizer. The recommended products
+             and headline come from assets/quiz-engine.js.
 {% endcomment %}
 
 {{ 'nootropic-quiz.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'quiz-engine.js' | asset_url }}" defer></script>
 <script src="{{ 'nootropic-quiz.js' | asset_url }}" defer></script>
 
 <section id="nqQuiz" {% render 'section-attr' %}>
@@ -61,7 +63,7 @@
       <div class="nq-steps">
       {%- comment -%} ════════════════════════════════════════
         Step 1 — Primary Goal
-        JS key values must match SCORING[0] keys in nootropic-quiz.js:
+        data-value must match the goal keys in assets/quiz-engine.js:
         focus | mood | energy | memory | sleep
       ════════════════════════════════════════ {%- endcomment -%}
       <div class="nq-step" data-step="0">
