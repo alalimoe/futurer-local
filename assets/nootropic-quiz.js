@@ -42,8 +42,6 @@
   }
 
   // --- Config ---
-  var QUESTION_KEYS = ['goal', 'experience', 'context', 'preference', 'stack_size'];
-
   function getConfig() {
     var el = qs('#nq-config');
     if (!el) return {};
@@ -285,17 +283,67 @@
     };
   }
 
-  // Build human-readable answer properties from the recorded answers
+  // Absolute storefront URL for a product handle (email templates need a full
+  // link, not a bare handle). Honors a localized routes root if present.
+  function productUrl(handle) {
+    var root = (window.Shopify && window.Shopify.routes && window.Shopify.routes.root) || '/';
+    if (root.charAt(root.length - 1) !== '/') root += '/';
+    return window.location.origin + root + 'products/' + normalizeHandle(handle);
+  }
+
+  // Human-readable labels for the normalized engine axes (used in emails/copy).
+  var LABELS = {
+    goal:       { focus: 'Focus', mood: 'Mood', energy: 'Energy', memory: 'Memory', sleep: 'Sleep' },
+    experience: { beginner: 'Beginner', some: 'Some experience', intermediate: 'Intermediate', advanced: 'Advanced' },
+    context:    { student: 'Student', professional: 'Professional', athletic: 'Athletic', wellness: 'General wellness' },
+    preference: { stimfree: 'Stimulant-free', natural: 'Natural', synthetic: 'Synthetic', nondependency: 'Non-dependency' },
+    size:       { simple: 'Simple (1 product)', medium: 'Core (3 products)', full: 'Complete (5 products)' }
+  };
+
+  // Single source of truth for the data sent to Klaviyo. Uses the normalized
+  // engine axes (so values match the engine, e.g. "synthetic"/"medium") and
+  // builds email-ready product links + an items array for product blocks.
+  function quizData(result) {
+    var a       = answersForEngine();
+    var handles = (result.handles || []).filter(Boolean).map(normalizeHandle);
+    var names   = (result.names || []).filter(Boolean);
+    var urls    = handles.map(productUrl);
+    return {
+      axes: a,
+      handles: handles,
+      names: names,
+      urls: urls,
+      items: handles.map(function (h, i) {
+        return { handle: h, name: names[i] || '', url: urls[i] || '' };
+      }),
+      stackName: result.stackName || '',
+      resultKey: result.key || ''
+    };
+  }
+
+  // Completion event properties: normalized values + friendly labels + product
+  // links + an items array Klaviyo flows can loop over to render product blocks.
   function buildEventProperties(result) {
-    var props = {};
-    QUESTION_KEYS.forEach(function (key, i) {
-      if (answers[i]) props[key] = answers[i];
-    });
-    props.recommended_stack = result.stackName || '';
-    props.recommended_handles = (result.handles || []).filter(Boolean).map(normalizeHandle);
-    props.recommended_names = (result.names || []).filter(Boolean);
-    props.result_key = result.key || '';
-    return props;
+    var d = quizData(result), a = d.axes;
+    return {
+      goal: a.goal,
+      experience: a.experience,
+      context: a.context,
+      preference: a.preference,
+      size: a.size,
+      goal_label: LABELS.goal[a.goal] || '',
+      experience_label: LABELS.experience[a.experience] || '',
+      context_label: LABELS.context[a.context] || '',
+      preference_label: LABELS.preference[a.preference] || '',
+      size_label: LABELS.size[a.size] || '',
+      recommended_stack: d.stackName,
+      result_key: d.resultKey,
+      stack_size_count: d.handles.length,
+      recommended_names: d.names,
+      recommended_handles: d.handles,
+      recommended_urls: d.urls,
+      items: d.items
+    };
   }
 
   function subscribeToList(cfg, email) {
@@ -315,13 +363,16 @@
     });
   }
 
-  function trackQuizEvent(cfg, email, properties) {
+  // metricName defaults to the configured completion metric; pass an override
+  // (e.g. "Started Nootropic Quiz") for other funnel steps.
+  function trackQuizEvent(cfg, email, properties, metricName) {
+    var name = metricName || cfg.eventName || 'Completed Nootropic Quiz';
     var payload = {
       data: {
         type: 'event',
         attributes: {
           properties: properties,
-          metric: { data: { type: 'metric', attributes: { name: cfg.eventName || 'Completed Nootropic Quiz' } } },
+          metric: { data: { type: 'metric', attributes: { name: name } } },
           profile: { data: { type: 'profile', attributes: { email: email } } }
         }
       }
@@ -331,21 +382,38 @@
     });
   }
 
-  function upsertProfile(cfg, email, result) {
-    var props = {
-      'Quiz Goal': answers[0] || '',
-      'Quiz Experience': answers[1] || '',
-      'Quiz Context': answers[2] || '',
-      'Quiz Preference': answers[3] || '',
-      'Quiz Stack Size': answers[4] || '',
-      'Recommended Stack': result.stackName || '',
-      'Quiz Completed At': new Date().toISOString()
-    };
+  // Fired at the gate so an abandonment flow has something to trigger on.
+  function trackStartEvent(cfg, email) {
+    return trackQuizEvent(cfg, email, { source: cfg.source || 'Nootropic quiz' }, 'Started Nootropic Quiz');
+  }
+
+  function postProfile(cfg, email, props) {
     var payload = {
       data: { type: 'profile', attributes: { email: email, properties: props } }
     };
     return fetch(KLAVIYO_BASE + '/client/profiles?company_id=' + encodeURIComponent(cfg.publicKey), {
       method: 'POST', headers: klaviyoHeaders(), body: JSON.stringify(payload)
+    });
+  }
+
+  // Completion profile: normalized answers + the actual recommended products
+  // (names, handles, absolute URLs) + completion timestamps. Only called once
+  // the quiz is finished, so the timestamps are meaningful.
+  function upsertProfile(cfg, email, result) {
+    var d = quizData(result), a = d.axes, now = new Date().toISOString();
+    return postProfile(cfg, email, {
+      'Quiz Goal': a.goal || '',
+      'Quiz Experience': a.experience || '',
+      'Quiz Context': a.context || '',
+      'Quiz Preference': a.preference || '',
+      'Quiz Stack Size': a.size || '',
+      'Recommended Stack': d.stackName,
+      'Result Key': d.resultKey,
+      'Recommended Products': d.names.join(', '),
+      'Recommended Handles': d.handles,
+      'Recommended Product URLs': d.urls,
+      'Quiz Completed At': now,
+      'Last Quiz Taken At': now
     });
   }
 
@@ -364,8 +432,10 @@
     ]);
   }
 
-  // Gate submit: best-effort identify + subscribe + seed profile. Fire-and-forget
-  // — a Klaviyo failure (or missing publicKey) must never block the user.
+  // Gate submit: best-effort identify + subscribe + a "started" event/profile
+  // seed. Fire-and-forget — a Klaviyo failure (or missing publicKey) must never
+  // block the user. Does NOT write completion data (answers/products/Completed
+  // At), so abandoners are distinguishable from completers.
   function seedGateProfile(klaviyo, email) {
     try {
       if (window.klaviyo && typeof window.klaviyo.push === 'function') {
@@ -373,8 +443,15 @@
       }
     } catch (e) { /* noop */ }
     if (!klaviyo || !klaviyo.publicKey) return;
+    var now = new Date().toISOString();
     try { subscribeToList(klaviyo, email).catch(function () {}); } catch (e) { /* noop */ }
-    try { upsertProfile(klaviyo, email, {}).catch(function () {}); } catch (e) { /* noop */ }
+    try { trackStartEvent(klaviyo, email).catch(function () {}); } catch (e) { /* noop */ }
+    try {
+      postProfile(klaviyo, email, {
+        'Quiz Started At': now,
+        'Quiz Source': klaviyo.source || 'Nootropic quiz'
+      }).catch(function () {});
+    } catch (e) { /* noop */ }
   }
 
   // Quiz completion: fire the metric event + profile update for the gated email
