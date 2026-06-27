@@ -304,18 +304,35 @@
   // engine axes (so values match the engine, e.g. "synthetic"/"medium") and
   // builds email-ready product links + an items array for product blocks.
   function quizData(result) {
-    var a       = answersForEngine();
-    var handles = (result.handles || []).filter(Boolean).map(normalizeHandle);
-    var names   = (result.names || []).filter(Boolean);
-    var urls    = handles.map(productUrl);
+    var a = answersForEngine();
+    var handles, names, urls, items;
+
+    // Prefer the fully-resolved products (with live image + price) attached at
+    // render time; fall back to engine handles/names if they aren't available.
+    var products = (result.products && result.products.length) ? result.products : null;
+    if (products) {
+      handles = products.map(function (p) { return p.handle; });
+      names   = products.map(function (p) { return p.name; });
+      urls    = products.map(function (p) { return p.url; });
+      items   = products.map(function (p) {
+        return { handle: p.handle, name: p.name, url: p.url, image: p.image || '', price: p.price || '' };
+      });
+    } else {
+      handles = (result.handles || []).filter(Boolean).map(normalizeHandle);
+      names   = (result.names || []).filter(Boolean);
+      urls    = handles.map(productUrl);
+      items   = handles.map(function (h, i) {
+        return { handle: h, name: names[i] || '', url: urls[i] || '', image: '', price: '' };
+      });
+    }
+
     return {
       axes: a,
       handles: handles,
       names: names,
       urls: urls,
-      items: handles.map(function (h, i) {
-        return { handle: h, name: names[i] || '', url: urls[i] || '' };
-      }),
+      images: items.map(function (it) { return it.image; }).filter(Boolean),
+      items: items,
       stackName: result.stackName || '',
       resultKey: result.key || ''
     };
@@ -412,6 +429,7 @@
       'Recommended Products': d.names.join(', '),
       'Recommended Handles': d.handles,
       'Recommended Product URLs': d.urls,
+      'Recommended Product Images': d.images,
       'Quiz Completed At': now,
       'Last Quiz Taken At': now
     });
@@ -833,6 +851,21 @@
       var result    = out.result;
       var valid     = out.display;
       var cardsHtml = valid.map(buildProductCard).join('');
+
+      // Attach the resolved, in-stock products (with live image + price) so the
+      // Klaviyo event/profile carry real product data for email rendering.
+      result.products = valid.map(function (p) {
+        var v   = firstAvailableVariant(p) || {};
+        var img = p.featured_image || '';
+        if (img.indexOf('//') === 0) { img = 'https:' + img; }
+        return {
+          handle: normalizeHandle(p.handle),
+          name:   p.title || '',
+          url:    productUrl(p.handle),
+          image:  img,
+          price:  (typeof v.price === 'number') ? formatMoney(v.price) : ''
+        };
+      });
 
       // Variant ids for every in-stock displayed product → the "Add all" CTA.
       var addAllItems = valid
