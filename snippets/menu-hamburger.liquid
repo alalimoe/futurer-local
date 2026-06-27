@@ -86,9 +86,19 @@
                 id="mobile-drawer-search"
                 type="search"
                 name="q"
-                placeholder="{{ 'general.search.search' | t }}"
+                placeholder="{{ 'general.search.placeholder' | t }}"
               >
             </form>
+          </div>
+          <!-- quiz cta -->
+          <div class="xo-menu-hamburger__link xo-menu-hamburger__link--cta">
+            {% render 'button',
+              style: 'primary',
+              size: 'md',
+              block: true,
+              link: pages.quiz.url | default: '/pages/quiz',
+              text: 'general.quiz.cta_long' | t
+            %}
           </div>
           <!-- nav links -->
           {% for link in menu.links %}
@@ -264,11 +274,19 @@
             {% endfor %}
           {% endif %}
           <!-- login -->
-          <div class="xo-menu-hamburger__link xo-menu-hamburger__link--login">
-            {%- if shop.customer_accounts_enabled -%}
-              <a href="{%- if customer -%}{{ routes.account_url }}{%- else -%}{{ routes.account_login_url }}{%- endif -%}">{{ 'customer.log_in' | t }}</a>
-            {%- endif -%}
-          </div>
+          {%- if shop.customer_accounts_enabled -%}
+            <a
+              class="xo-menu-hamburger__link xo-menu-hamburger__link--first xo-menu-hamburger__link--login"
+              href="{%- if customer -%}{{ routes.account_url }}{%- else -%}{{ routes.account_login_url }}{%- endif -%}"
+            >
+              <span class="xo-menu-hamburger__login-icon">
+                {% render 'icon', name: 'user', size: '2.1rem' %}
+              </span>
+              <span class="xo-menu-hamburger__label">
+                {%- if customer -%}{{ 'customer.account_fallback' | t }}{%- else -%}{{ 'customer.log_in' | t }}{%- endif -%}
+              </span>
+            </a>
+          {%- endif -%}
           {% if section.settings.show_currency_selector == 'show' %}
             <div class="xo-menu-hamburger__currency-select">
               {% render 'currency-select', selector_position: 'footer' %}
