@@ -4,38 +4,86 @@
   Accepts:
   - class: {String} Font size heading of the collapse (required)
   - heading: {String} Heading of the collapse (required)
-  - content: {String} Content of the collapse (required)
-  - name: {String} Name of the collapse (required)
+  - subheading: {String} Subheading below the heading (optional)
+  - block: {Array} Section blocks (required)
+  - accordion_style: {String} 'legacy' or 'native' (optional, default legacy)
+  - section_id: {String} Section ID for scoped styles (optional)
+  - show_view_all_link: {Boolean} Show footer link (optional)
+  - view_all_label: {String} Footer link label (optional)
+  - view_all_url: {String} Footer link URL (optional)
 
   Usage:
   {% render 'collapse-content-box-1',
     class: class,
     heading: heading,
-    content: content,
-    name: name,
+    block: block,
   %}
 {% endcomment %}
 
-<div class="collapse-content-box-1">
-  {% if heading %}
-    <xo-animate xo-cascade>
-      <h3 class="collapse-content-box-1__heading {{ class }}">{{ heading }}</h3>
-    </xo-animate>
-  {% endif %}
-  <xo-collapse-provider>
-    <div class="collapse-content-box-1__content">
+{% liquid
+  assign accordion_style = accordion_style | default: 'legacy'
+  assign heading_plain = heading | strip_html
+%}
+
+<div class="collapse-content-box-1{% if accordion_style == 'native' %} collapse-content-box-1--native{% endif %}">
+  {% if accordion_style == 'native' %}
+    {% if heading_plain != blank or subheading != blank %}
+      {% render 'section-heading',
+        heading: heading_plain,
+        description: subheading,
+        heading_tag: 'h2'
+      %}
+    {% endif %}
+
+    <div class="cc-faq__list">
       {% for item in block %}
         {% liquid
-          assign title = item.settings.title
+          assign title = item.settings.title | strip_html
           assign content = item.settings.content
-          assign name = 'heading-' | append: forloop.index
         %}
-        <xo-animate xo-cascade>
-          <div class="collapse-content-box-1__item {% if settings.enable_border_radius %}collapse-content-box-1__item--radius{% endif %}">
-            {% render 'collapse', title: title, content: content, name: name, show_icon_arrow: false %}
-          </div>
-        </xo-animate>
+        <article {{ item.shopify_attributes }}>
+          <details class="cc-faq__card">
+            <summary class="cc-faq__summary">
+              <h3 class="cc-faq__question">{{ title | escape }}</h3>
+            </summary>
+            <div class="cc-faq__answer rte">
+              {{ content }}
+            </div>
+          </details>
+        </article>
       {% endfor %}
     </div>
-  </xo-collapse-provider>
+
+    {% if show_view_all_link and view_all_label != blank and view_all_url != blank %}
+      <div class="cc-faq__view-all">
+        {% render 'button',
+          text: view_all_label,
+          link: view_all_url,
+          style: 'link'
+        %}
+      </div>
+    {% endif %}
+  {% else %}
+    {% if heading %}
+      <xo-animate xo-cascade>
+        <h3 class="collapse-content-box-1__heading {{ class }}">{{ heading }}</h3>
+      </xo-animate>
+    {% endif %}
+    <xo-collapse-provider>
+      <div class="collapse-content-box-1__content">
+        {% for item in block %}
+          {% liquid
+            assign title = item.settings.title
+            assign content = item.settings.content
+            assign name = 'heading-' | append: forloop.index
+          %}
+          <xo-animate xo-cascade>
+            <div class="collapse-content-box-1__item {% if settings.enable_border_radius %}collapse-content-box-1__item--radius{% endif %}">
+              {% render 'collapse', title: title, content: content, name: name, show_icon_arrow: false %}
+            </div>
+          </xo-animate>
+        {% endfor %}
+      </div>
+    </xo-collapse-provider>
+  {% endif %}
 </div>
