@@ -74,24 +74,6 @@
     align-items: start;
   }
 
-  .np-back-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: color-mix(in srgb, rgba(var(--color-foreground)) 55%, transparent);
-    text-decoration: none;
-    margin-bottom: 2rem;
-    transition: color 0.3s ease;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-
-  .np-back-link:hover { color: rgba(var(--color-foreground)); }
-  .np-back-link svg { width: 16px; height: 16px; transition: transform 0.3s ease; }
-  .np-back-link:hover svg { transform: translateX(-4px); }
-
   .xo-section--{{ section.id }} .np-hero {
     margin: 0 0 3.5rem 0;
     border-radius: var(--general-radius-1, 1rem);
@@ -358,13 +340,6 @@
 
       <article class="np-content" itemscope itemtype="https://schema.org/BlogPosting">
 
-        <a href="{{ blog.url }}" class="np-back-link">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-          </svg>
-          Back to {{ blog.title }}
-        </a>
-
         <header class="np-header">
           <h1 class="np-title" itemprop="headline">{{ article.title | escape }}</h1>
 
@@ -456,6 +431,33 @@
     }
   },
   "description": {{ article.excerpt_or_content | strip_html | truncatewords: 30 | json }}
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "{{ shop.url }}"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": {{ blog.title | json }},
+      "item": "{{ shop.url }}{{ blog.url }}"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": {{ article.title | json }},
+      "item": "{{ shop.url }}{{ article.url }}"
+    }
+  ]
 }
 </script>
 

@@ -3,7 +3,9 @@
     generate a premium, visual "Products Mentioned in This Article" carousel that displays the products from the metafield blog.mentioned 
 {% enddoc %}
 {% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+{% assign mentioned_products = article.metafields.blog.mentioned.value %}
 
+{% if mentioned_products != blank and mentioned_products.size > 0 %}
 {%- style -%}
   .ai-mentioned-products-{{ ai_gen_id }} {
     display: block;
@@ -258,9 +260,6 @@
       </div>
     {% endif %}
 
-    {% assign mentioned_products = article.metafields.blog.mentioned.value %}
-
-    {% if mentioned_products != blank and mentioned_products.size > 0 %}
       <div class="ai-mentioned-products__carousel-wrapper-{{ ai_gen_id }}">
         <button
           class="ai-mentioned-products__nav-{{ ai_gen_id }} ai-mentioned-products__nav--prev-{{ ai_gen_id }}"
@@ -341,16 +340,6 @@
           </svg>
         </button>
       </div>
-    {% else %}
-      <div class="ai-mentioned-products__empty-{{ ai_gen_id }}">
-        <div class="ai-mentioned-products__empty-icon-{{ ai_gen_id }}">
-          {{ 'product-1' | placeholder_svg_tag }}
-        </div>
-        <p class="ai-mentioned-products__empty-text-{{ ai_gen_id }}">
-          Add products to the "blog.mentioned" metafield to display them here
-        </p>
-      </div>
-    {% endif %}
   </div>
 </mentioned-products-carousel-{{ ai_gen_id }}>
 
@@ -419,6 +408,11 @@
     customElements.define('mentioned-products-carousel-{{ ai_gen_id }}', MentionedProductsCarousel{{ ai_gen_id }});
   })();
 </script>
+{% elsif request.design_mode %}
+  <div class="ai-mentioned-products-{{ ai_gen_id }}" {{ block.shopify_attributes }} style="padding: 40px var(--page-gutter); text-align: center; color: color-mix(in srgb, rgba(var(--color-foreground)) 55%, transparent);">
+    <p>Products mentioned — assign products to the <code>blog.mentioned</code> metafield to preview this carousel.</p>
+  </div>
+{% endif %}
 
 {% schema %}
 {
