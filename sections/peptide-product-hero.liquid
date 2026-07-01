@@ -126,6 +126,18 @@
   if bc_collection == nil and product.collections.size > 0
     assign bc_collection = product.collections.first
   endif
+
+  assign show_qc = false
+  if hplc_img or ms_img
+    assign show_qc = true
+  elsif section.settings.show_coa_link and coa_url
+    assign show_qc = true
+  endif
+
+  assign purity_anchor = section.settings.purity_anchor | default: '#pep-coa-band'
+  if show_qc
+    assign purity_anchor = '#coa'
+  endif
 -%}
 
 {{ 'product-info-media-carousel.css' | asset_url | stylesheet_tag }}
@@ -149,6 +161,45 @@
   .xo-section--{{ section.id }} .pp__breadcrumbs a:hover {
     color: rgba(var(--color-foreground));
   }
+  .xo-section--{{ section.id }} .pp__jump {
+    display: flex;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+    margin: 1.2rem 0 0;
+  }
+  .xo-section--{{ section.id }} .pp__jump-link {
+    padding: 0.6rem 1.2rem;
+    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 12%, transparent);
+    border-radius: var(--button-radius);
+    background: rgba(var(--color-background));
+    color: rgba(var(--color-foreground));
+    font-size: calc(var(--font-body-scale, 1) * 1.3rem);
+    font-weight: 500;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: border-color 0.3s var(--out-soft, ease);
+  }
+  .xo-section--{{ section.id }} .pp__jump-link:hover {
+    border-color: color-mix(in srgb, rgba(var(--color-accent)) 50%, transparent);
+  }
+  .xo-section--{{ section.id }} .pp__jump-link:focus-visible {
+    outline: 2px solid rgba(var(--color-accent));
+    outline-offset: 2px;
+  }
+  @media screen and (max-width: 749px) {
+    .xo-section--{{ section.id }} .pp__jump {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .xo-section--{{ section.id }} .pp__jump-link {
+      transition: none;
+    }
+  }
+
   .xo-section--{{ section.id }} .pp__breadcrumbs a:focus-visible {
     outline: 2px solid rgba(var(--color-accent));
     outline-offset: 2px;
@@ -157,7 +208,7 @@
 
   .xo-section--{{ section.id }} .xo-product-variant .xo-field-radio__label,
   .xo-section--{{ section.id }} .xo-product-variant__inner-name .xo-product-variant__value-selected {
-    text-transform: lowercase;
+    text-transform: none;
   }
 
   .xo-section--{{ section.id }} .pp__ref {
@@ -396,6 +447,74 @@
       transition: none;
     }
   }
+
+  .xo-section--{{ section.id }} .pp__sticky-atc {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 40;
+    display: none;
+    padding: 1rem 1.6rem calc(1rem + env(safe-area-inset-bottom));
+    background: rgba(var(--color-background));
+    border-top: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
+    box-shadow: 0 -2px 12px color-mix(in srgb, rgba(var(--color-foreground)) 8%, transparent);
+    transform: translateY(110%);
+    transition: transform 0.28s ease;
+  }
+  .xo-section--{{ section.id }} .pp__sticky-atc.pp__sticky-atc--visible {
+    transform: translateY(0);
+  }
+  .xo-section--{{ section.id }} .pp__sticky-atc.pp__sticky-atc--no-anim {
+    transition: none;
+  }
+  .xo-section--{{ section.id }} .pp__sticky-atc-inner {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    max-width: 60rem;
+    margin: 0 auto;
+  }
+  .xo-section--{{ section.id }} .pp__sticky-atc-info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+  .xo-section--{{ section.id }} .pp__sticky-atc-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .xo-section--{{ section.id }} .pp__sticky-atc-action {
+    flex: 0 0 auto;
+    min-width: 17rem;
+  }
+  .xo-section--{{ section.id }} .pp__sticky-atc-form {
+    display: flex;
+    align-items: stretch;
+    gap: 0.8rem;
+  }
+  .xo-section--{{ section.id }} .pp__sticky-atc-form .xo-quantity {
+    flex: 0 0 auto;
+  }
+  .xo-section--{{ section.id }} .pp__sticky-atc-form xo-product-will-change {
+    flex: 1 1 auto;
+    min-width: 10rem;
+  }
+  @media screen and (max-width: 749px) {
+    .xo-section--{{ section.id }} .pp__sticky-atc {
+      display: block;
+    }
+    .xo-section--{{ section.id }} .pp-hero__col--content {
+      order: 1;
+    }
+    .xo-section--{{ section.id }} .pp-hero__col--media {
+      order: 2;
+    }
+  }
 {%- endstyle -%}
 
 <section {% render 'section-attr' %}>
@@ -421,8 +540,17 @@
         </nav>
       {% endif %}
 
+      {% if section.settings.show_section_nav %}
+        <nav class="pp__jump" aria-label="Section navigation">
+          <a href="#peptide-research" class="pp__jump-link">Overview</a>
+          <a href="#pep-coa-band" class="pp__jump-link">COA</a>
+          <a href="#peptide-faq" class="pp__jump-link">FAQ</a>
+          <a href="#judgeme_product_reviews" class="pp__jump-link">Reviews</a>
+        </nav>
+      {% endif %}
+
       <xo-grid>
-        <div style="--xs: 12; --md: 12; --lg: {{ media_column }}">
+        <div class="pp-hero__col pp-hero__col--media" style="--xs: 12; --md: 12; --lg: {{ media_column }}">
           <xo-product-will-change xo-unique-id="product-info-media-carousel-{{ section.id }}">
             {% render 'product-info-media-carousel',
               enable_image_zoom: section.settings.enable_image_zoom,
@@ -431,17 +559,31 @@
           </xo-product-will-change>
         </div>
 
-        <div style="--xs: 12; --md: 12; --lg: {{ content_column }}">
+        <div class="pp-hero__col pp-hero__col--content" style="--xs: 12; --md: 12; --lg: {{ content_column }}">
           <div class="pp__info">
 
-            <div class="pp__ref" title="Internal reference code">
-              <span class="pp__ref-chip">REF</span>
-              <span>{{ ref_code }}</span>
-            </div>
+            {% if selected_variant.sku != blank or product.sku != blank %}
+              <div class="pp__ref" title="Internal reference code">
+                <span class="pp__ref-chip">REF</span>
+                <span>{{ ref_code }}</span>
+              </div>
+            {% endif %}
 
             <xo-animate xo-cascade>
               <h1 class="pp__title">{{ title_common }}</h1>
             </xo-animate>
+
+            {% if section.blocks.size > 0 %}
+              <div class="pp__app-blocks">
+                {% for block in section.blocks %}
+                  {% if block.type == '@app' %}
+                    <div {{ block.shopify_attributes }}>
+                      {% render block %}
+                    </div>
+                  {% endif %}
+                {% endfor %}
+              </div>
+            {% endif %}
 
             {% if pdp_headline_mf %}
               <p class="pp__subtitle">{{ pdp_headline_mf }}</p>
@@ -462,7 +604,7 @@
             {% endif %}
 
             {% if section.settings.show_chips %}
-              <ul class="pp__chips">
+              {%- capture chips_html -%}
                 {%- assign chips_out = false -%}
                 {% if benefits_mf and benefits_mf.value and benefits_mf.value.size > 0 %}
                   {% for b in benefits_mf.value %}
@@ -478,7 +620,11 @@
                   {% if benefit2 %}<li>{{ benefit2 }}</li>{% endif %}
                   {% if benefit3 %}<li>{{ benefit3 }}</li>{% endif %}
                 {% endif %}
-              </ul>
+              {%- endcapture -%}
+              {%- assign chips_trim = chips_html | strip -%}
+              {% if chips_trim != blank %}
+                <ul class="pp__chips">{{ chips_html }}</ul>
+              {% endif %}
             {% endif %}
 
             {% unless product.has_only_default_variant %}
@@ -495,6 +641,7 @@
 
             <div class="pp__payments">
               {% render 'tabby-installments' %}
+              {% render 'tamara' %}
             </div>
 
             {% if section.settings.show_price_per_mg %}
@@ -507,11 +654,23 @@
                 <xo-product-will-change xo-unique-id="product-per-mg-{{ section.id }}">
                   <div class="pp__per-mg">
                     {%- assign per_mg_cents = selected_variant.price | times: 1.0 | divided_by: denom -%}
-                    ≈ {{ per_mg_cents | round | money }} / mg
+                    ≈ {{ per_mg_cents | money }} / mg
                   </div>
                 </xo-product-will-change>
               {% endif %}
             {% endif %}
+
+            <div class="pp__meta-chips">
+              <a href="{{ purity_anchor }}" class="pp__chip pp__chip--purity">
+                {% if purity_pct %}{{ purity_pct }}% HPLC{% else %}PURITY{% endif %}
+              </a>
+              <span class="pp__chip">HPLC tested</span>
+              <span class="pp__chip">RUO</span>
+            </div>
+
+            <div class="pp__disclaimer">
+              {{ pdp_disclaimer_mf | default: 'For laboratory research use only (RUO). Not for human or veterinary use.' }}
+            </div>
 
             <div class="pp__buy-form">
               {% render 'quantity', size: 'md', variant: selected_variant, product: product, is_cart: false %}
@@ -536,10 +695,6 @@
             {% if section.settings.show_buy_now %}
               {% render 'buy-button', show_dynamic_checkout: true %}
             {% endif %}
-
-            <div class="pp__payments">
-              {% render 'tamara' %}
-            </div>
 
             {% if section.settings.enable_microcopy %}
               <ul class="pp__microcopy">
@@ -597,21 +752,9 @@
                   </span>
                 </div>
               {% endif %}
-
-              <div class="pp__meta-chips">
-                <a href="#coa" class="pp__chip pp__chip--purity">
-                  {% if purity_pct %}{{ purity_pct }}% HPLC{% else %}PURITY{% endif %}
-                </a>
-                <span class="pp__chip">HPLC tested</span>
-                <span class="pp__chip">RUO</span>
-              </div>
-
-              <div class="pp__disclaimer">
-                {{ pdp_disclaimer_mf | default: 'For laboratory research use only (RUO). Not for human or veterinary use.' }}
-              </div>
             </div>
 
-            {% if section.settings.show_coa_link and coa_url or hplc_img or ms_img %}
+            {% if show_qc %}
               <div class="pp__qc" id="coa">
                 {% if section.settings.show_coa_link and coa_url %}
                   {% render 'button',
@@ -653,9 +796,75 @@
       </xo-grid>
     </xo-container>
 
+    {% if section.settings.enable_sticky_atc %}
+      <div class="pp__sticky-atc" data-pp-sticky>
+        <div class="pp__sticky-atc-inner">
+          <div class="pp__sticky-atc-info">
+            <span class="pp__sticky-atc-title">
+              {%- if product.has_only_default_variant -%}
+                {{ title_common }}
+              {%- else -%}
+                {{ selected_variant.title }}
+              {%- endif -%}
+            </span>
+            <xo-product-will-change xo-unique-id="product-price-sticky-{{ section.id }}" xo-morph-selector="[xo-price]">
+              {% render 'price', product: product, use_variant: true %}
+            </xo-product-will-change>
+          </div>
+          <div class="pp__sticky-atc-action">
+            {% form 'product', product, xo-buy-ignore: 'true' %}
+              <div class="pp__sticky-atc-form">
+                {% render 'quantity', size: 'sm', variant: selected_variant, product: product, is_cart: false %}
+                <xo-product-will-change xo-unique-id="product-add-button-sticky-{{ section.id }}">
+                  <xo-cart-add
+                    {% unless selected_variant.available %}xo-disabled{% endunless %}
+                    {% if settings.cart_type == 'page' %}xo-cart-redirection{% endif %}
+                  >
+                    {% if selected_variant.available %}
+                      {% render 'button', style: 'primary', text: atc_label, size: 'sm', block: true, text_unavailable: sold_out_text %}
+                    {% else %}
+                      {% render 'button', style: 'primary', text: sold_out_text, size: 'sm', block: true, text_unavailable: sold_out_text %}
+                    {% endif %}
+                  </xo-cart-add>
+                </xo-product-will-change>
+              </div>
+            {% endform %}
+          </div>
+        </div>
+      </div>
+    {% endif %}
+
     {% render 'product-data', product: product %}
   </xo-product>
 </section>
+
+{% render 'product-jsonld' %}
+
+{% if section.settings.enable_sticky_atc %}
+  <script>
+    (function () {
+      var section = document.getElementById('shopify-section-{{ section.id }}');
+      if (!section) { return; }
+      var sticky = section.querySelector('[data-pp-sticky]');
+      var anchor = section.querySelector('.pp__buy-form');
+      if (!sticky || !anchor) { return; }
+      if (!('IntersectionObserver' in window)) { return; }
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        sticky.classList.add('pp__sticky-atc--no-anim');
+      }
+      var observer = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            sticky.classList.remove('pp__sticky-atc--visible');
+          } else {
+            sticky.classList.add('pp__sticky-atc--visible');
+          }
+        });
+      }, { threshold: 0 });
+      observer.observe(anchor);
+    })();
+  </script>
+{% endif %}
 
 {% schema %}
 {
@@ -692,6 +901,12 @@
     },
     {
       "type": "checkbox",
+      "id": "show_section_nav",
+      "label": "Show section jump nav (Overview / COA / FAQ / Reviews)",
+      "default": true
+    },
+    {
+      "type": "checkbox",
       "id": "show_chips",
       "label": "Show benefit chips",
       "default": true
@@ -709,6 +924,12 @@
       "default": false
     },
     {
+      "type": "checkbox",
+      "id": "enable_sticky_atc",
+      "label": "Enable mobile sticky Add to Cart bar",
+      "default": true
+    },
+    {
       "type": "text",
       "id": "atc_label",
       "label": "Add to cart label",
@@ -724,7 +945,7 @@
       "type": "textarea",
       "id": "microcopy_fallback",
       "label": "Microcopy fallback (one per line)",
-      "default": "Independent COA available for this batch.\nZero-substitution policy: if a batch doesn't pass spec, we don't sell it."
+      "default": "Ships in 24h with temperature-controlled logistics\nIndependent COA available for every batch\nSecure checkout"
     },
     {
       "type": "checkbox",
@@ -737,6 +958,13 @@
       "id": "coa_label",
       "label": "COA link label",
       "default": "View COA"
+    },
+    {
+      "type": "text",
+      "id": "purity_anchor",
+      "label": "Purity chip anchor target",
+      "info": "Where the purity chip scrolls when in-hero QC images are not shown (e.g. #pep-coa-band).",
+      "default": "#pep-coa-band"
     },
     {
       "type": "range",
