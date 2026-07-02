@@ -943,7 +943,9 @@
 
       // Stack total so the CTA reads "Add all 3 to stack · AED 285.00".
       var addAllTotal = addAllItems.reduce(function (sum, it) { return sum + (it.price || 0); }, 0);
-      var addAllLabel = 'Add all ' + addAllItems.length + ' to stack \u00b7 ' + formatMoney(addAllTotal);
+      var addAllLabel = addAllItems.length === 1
+        ? 'Add to stack \u00b7 ' + formatMoney(addAllTotal)
+        : 'Add all ' + addAllItems.length + ' to stack \u00b7 ' + formatMoney(addAllTotal);
 
       var addAllHtml = addAllItems.length
         ? '<button type="button" class="nq-add-all-btn" data-nq-add-all>' +
