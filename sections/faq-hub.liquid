@@ -10,7 +10,7 @@
   }
 
   .xo-section--{{ section.id }} .fh__title {
-    font-size: clamp(1.5rem, 3vw, 2rem);
+    font-size: clamp(2.2rem, 3vw, 2.8rem);
     font-weight: 600;
     letter-spacing: -0.025em;
     line-height: 1.2;
@@ -24,7 +24,7 @@
     min-height: 44px;
     border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 12%, transparent);
     border-radius: var(--general-radius-1, 1rem);
-    font-size: clamp(0.85rem, 1.3vw, 0.9375rem);
+    font-size: 1.5rem;
     background: rgba(var(--color-background));
     color: rgba(var(--color-foreground));
     transition: border-color 0.3s var(--out-soft, ease);
@@ -54,7 +54,7 @@
     box-sizing: border-box;
     background: rgba(var(--color-background));
     cursor: pointer;
-    font-size: clamp(0.8rem, 1.2vw, 0.875rem);
+    font-size: 1.4rem;
     display: inline-flex;
     align-items: center;
     color: rgba(var(--color-foreground));
@@ -79,13 +79,13 @@
   .xo-section--{{ section.id }} .fh__list {
     margin-top: 12px;
     display: grid;
-    gap: 10px;
+    gap: 12px;
   }
 
   .xo-section--{{ section.id }} .fh__item {
     border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 8%, transparent);
     border-radius: var(--general-radius-1, 1rem);
-    padding: 0 16px;
+    padding: 0 20px;
     transition: border-color 0.3s var(--out-soft, ease);
   }
 
@@ -98,9 +98,9 @@
     display: grid;
     grid-template-columns: 1fr auto;
     gap: 4px;
-    padding: 14px 0;
+    padding: 16px 0;
     cursor: pointer;
-    min-height: 44px;
+    min-height: 48px;
     align-items: center;
   }
 
@@ -130,27 +130,28 @@
   }
 
   .xo-section--{{ section.id }} .fh__cat {
-    font-size: clamp(0.65rem, 1vw, 0.75rem);
+    font-size: 1.1rem;
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    color: color-mix(in srgb, rgba(var(--color-foreground)) 55%, transparent);
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 60%, transparent);
     grid-column: 1;
   }
 
   .xo-section--{{ section.id }} .fh__question {
     font-weight: 600;
-    font-size: clamp(0.875rem, 1.3vw, 1rem);
+    font-size: clamp(1.5rem, 1.4vw, 1.7rem);
     letter-spacing: -0.01em;
     color: rgba(var(--color-foreground));
     grid-column: 1;
   }
 
   .xo-section--{{ section.id }} .fh__a {
-    padding-bottom: 16px;
-    line-height: 1.6;
+    padding-bottom: 18px;
+    line-height: 1.65;
     color: rgba(var(--color-foreground));
     opacity: 0.85;
-    font-size: clamp(0.85rem, 1.2vw, 0.9375rem);
+    font-size: 1.5rem;
+    max-width: 72ch;
   }
 
   .xo-section--{{ section.id }} .fh__a a {
@@ -165,7 +166,7 @@
 
   .xo-section--{{ section.id }} .fh__sources {
     margin-top: 12px;
-    font-size: 0.8125rem;
+    font-size: 1.2rem;
     opacity: 0.7;
   }
 
@@ -178,13 +179,13 @@
   }
 
   .xo-section--{{ section.id }} .fh__count {
-    font-size: clamp(0.75rem, 1.1vw, 0.8125rem);
-    color: color-mix(in srgb, rgba(var(--color-foreground)) 55%, transparent);
+    font-size: 1.3rem;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 60%, transparent);
     margin: 0;
   }
 
   .xo-section--{{ section.id }} .fh__expand-btn {
-    font-size: clamp(0.75rem, 1.1vw, 0.8125rem);
+    font-size: 1.3rem;
     color: rgba(var(--color-accent));
     background: none;
     border: none;
@@ -210,8 +211,8 @@
   .xo-section--{{ section.id }} .fh__empty {
     text-align: center;
     padding: 40px 20px;
-    color: color-mix(in srgb, rgba(var(--color-foreground)) 55%, transparent);
-    font-size: clamp(0.85rem, 1.3vw, 0.9375rem);
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 60%, transparent);
+    font-size: 1.5rem;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -227,7 +228,7 @@
 <section {% render 'section-attr' %} data-faq-group="{{ section.settings.group_label | escape }}">
   <xo-container>
     <div class="fh__header">
-      <h1 class="fh__title">{{ section.settings.heading }}</h1>
+      <h2 class="fh__title">{{ section.settings.heading }}</h2>
 
       {% unless section.settings.hide_local_controls %}
         <input type="search" class="fh__search" data-faq-search placeholder="{{ section.settings.search_placeholder }}" aria-label="Search FAQs">
@@ -308,13 +309,9 @@
   ]
   {%- endcapture -%}
   <script type="application/ld+json">
-  {"@context":"https://schema.org","@type":"FAQPage","@id":"{{ request.origin }}{{ request.path }}#faq","mainEntity":{{ faq_json | strip }}}
+  {"@context":"https://schema.org","@type":"FAQPage","@id":"{{ request.origin }}{{ request.path }}#faq-{{ section.id }}","mainEntity":{{ faq_json | strip }}}
   </script>
 {%- endif -%}
-
-<script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"{{ request.origin }}{{ routes.root_url }}"},{"@type":"ListItem","position":2,"name":"{{ page.title | escape }}","item":"{{ request.origin }}{{ request.path }}"}]}
-</script>
 
 <script>
   (function(){
@@ -390,6 +387,14 @@
     var allBtn = section.querySelector('[data-faq-local-chip="*"]');
     if (allBtn) allBtn.classList.add('fh__chip--active');
     updateCount(total);
+
+    document.addEventListener('faq:global-filter', function() {
+      var visible = 0;
+      items.forEach(function(el) {
+        if (el.style.display !== 'none') visible++;
+      });
+      updateCount(visible);
+    });
 
     var hash = window.location.hash;
     if (hash && hash.startsWith('#faq-')) {

@@ -11,8 +11,8 @@
   }
 
   .xo-section--{{ section.id }} .ft__title {
-    margin: 0 0 10px;
-    font-size: clamp(1.1rem, 2vw, 1.35rem);
+    margin: 0 0 12px;
+    font-size: clamp(1.8rem, 2vw, 2.2rem);
     font-weight: 600;
     letter-spacing: -0.02em;
     color: rgba(var(--color-foreground));
@@ -32,7 +32,7 @@
     min-height: 44px;
     box-sizing: border-box;
     cursor: pointer;
-    font-size: clamp(0.8rem, 1.2vw, 0.875rem);
+    font-size: 1.4rem;
     display: inline-flex;
     align-items: center;
     color: rgba(var(--color-foreground));
@@ -60,9 +60,9 @@
 
   .xo-section--{{ section.id }} .ft__label {
     display: block;
-    margin-bottom: 6px;
-    font-size: clamp(0.8rem, 1.2vw, 0.875rem);
-    color: color-mix(in srgb, rgba(var(--color-foreground)) 55%, transparent);
+    margin-bottom: 8px;
+    font-size: 1.4rem;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 65%, transparent);
   }
 
   .xo-section--{{ section.id }} .ft__row {
@@ -77,9 +77,9 @@
     border-radius: var(--general-radius-1, 1rem);
     padding: 10px 14px;
     width: 100%;
-    min-height: 44px;
+    min-height: 48px;
     box-sizing: border-box;
-    font-size: clamp(0.85rem, 1.3vw, 0.9375rem);
+    font-size: 1.5rem;
     background: rgba(var(--color-background));
     color: rgba(var(--color-foreground));
     transition: border-color 0.3s var(--out-soft, ease);
@@ -102,11 +102,11 @@
   .xo-section--{{ section.id }} .ft__btn {
     border: none;
     border-radius: var(--general-radius-1, 1rem);
-    padding: 10px 16px;
-    min-height: 44px;
+    padding: 10px 18px;
+    min-height: 48px;
     background: rgba(var(--color-foreground));
     color: rgba(var(--color-background));
-    font-size: clamp(0.8rem, 1.2vw, 0.875rem);
+    font-size: 1.4rem;
     font-weight: 600;
     cursor: pointer;
     white-space: nowrap;
@@ -123,9 +123,19 @@
   }
 
   .xo-section--{{ section.id }} .ft__hint {
-    font-size: clamp(0.65rem, 1vw, 0.75rem);
-    color: color-mix(in srgb, rgba(var(--color-foreground)) 55%, transparent);
-    margin-top: 8px;
+    font-size: 1.3rem;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 60%, transparent);
+    margin-top: 10px;
+  }
+
+  @media (max-width: 740px) {
+    .xo-section--{{ section.id }} .ft__row {
+      grid-template-columns: 1fr;
+    }
+
+    .xo-section--{{ section.id }} .ft__btn {
+      width: 100%;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -139,7 +149,7 @@
 
 <section {% render 'section-attr' %}>
   <xo-container>
-    <div class="ft__wrap">
+    <div class="ft__wrap" id="track">
       <h2 class="ft__title">{{ section.settings.heading }}</h2>
 
       <div class="ft__tabs" role="tablist" aria-label="Tracking type">
@@ -150,16 +160,16 @@
       <div class="ft__panel ft__panel--active" data-panel="local" role="tabpanel">
         <label for="ftLocalRef-{{ section.id }}" class="ft__label">Enter your Quiqup reference or order number</label>
         <div class="ft__row">
-          <input id="ftLocalRef-{{ section.id }}" type="text" class="ft__input" placeholder="{{ section.settings.local_placeholder }}">
+          <input id="ftLocalRef-{{ section.id }}" type="text" class="ft__input" placeholder="{{ section.settings.local_placeholder }}" enterkeyhint="go">
           <button class="ft__btn" data-track="local">Track with Quiqup</button>
         </div>
-        <p class="ft__hint">We'll open Quiqup's tracking page in a new tab. If asked, paste your reference number to see live status.</p>
+        <p class="ft__hint" data-hint="local" aria-live="polite">We'll open Quiqup's tracking page in a new tab. If asked, paste your reference number to see live status.</p>
       </div>
 
       <div class="ft__panel" data-panel="intl" role="tabpanel" hidden>
         <label for="ftIntlRef-{{ section.id }}" class="ft__label">Enter your DHL waybill / tracking number</label>
         <div class="ft__row">
-          <input id="ftIntlRef-{{ section.id }}" type="text" class="ft__input" placeholder="{{ section.settings.intl_placeholder }}">
+          <input id="ftIntlRef-{{ section.id }}" type="text" class="ft__input" placeholder="{{ section.settings.intl_placeholder }}" enterkeyhint="go">
           <button class="ft__btn" data-track="intl">Track with DHL</button>
         </div>
         <p class="ft__hint">You'll be taken to DHL's tracking page with your number applied.</p>
@@ -175,33 +185,71 @@
 
     var tabs = section.querySelectorAll('.ft__tab');
     var panels = section.querySelectorAll('.ft__panel');
+    var localInput = section.querySelector('[id^="ftLocalRef"]');
+    var intlInput = section.querySelector('[id^="ftIntlRef"]');
+    var localHint = section.querySelector('[data-hint="local"]');
+    var localHintDefault = localHint ? localHint.textContent : '';
+
+    function selectTab(key){
+      tabs.forEach(function(x){
+        var active = x.getAttribute('data-tab') === key;
+        x.classList.toggle('ft__tab--active', active);
+        x.setAttribute('aria-selected', active);
+      });
+      panels.forEach(function(p){
+        var active = p.getAttribute('data-panel') === key;
+        p.toggleAttribute('hidden', !active);
+      });
+    }
 
     tabs.forEach(function(t){
       t.addEventListener('click', function(){
-        var key = t.getAttribute('data-tab');
-        tabs.forEach(function(x){
-          var active = x.getAttribute('data-tab') === key;
-          x.classList.toggle('ft__tab--active', active);
-          x.setAttribute('aria-selected', active);
-        });
-        panels.forEach(function(p){
-          var active = p.getAttribute('data-panel') === key;
-          p.toggleAttribute('hidden', !active);
-        });
+        selectTab(t.getAttribute('data-tab'));
       });
     });
 
-    section.querySelector('[data-track="local"]')?.addEventListener('click', function(){
-      var ref = section.querySelector('[id^="ftLocalRef"]').value.trim();
-      if (ref) { navigator.clipboard?.writeText(ref).catch(function(){}); }
+    function trackLocal(){
+      var ref = localInput ? localInput.value.trim() : '';
+      if (ref && navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(ref).then(function(){
+          if (localHint) localHint.textContent = 'Copied "' + ref + '" — paste it in the reference box on the Quiqup page that just opened.';
+        }).catch(function(){});
+      }
       window.open('https://track-parcel.quiqup.com/', '_blank', 'noopener');
-    });
+    }
 
-    section.querySelector('[data-track="intl"]')?.addEventListener('click', function(){
-      var id = section.querySelector('[id^="ftIntlRef"]').value.trim();
+    function trackIntl(){
+      var id = intlInput ? intlInput.value.trim() : '';
       if (!id) return;
       window.open('https://www.dhl.com/global-en/home/tracking/tracking-express.html?submit=1&tracking-id=' + encodeURIComponent(id), '_blank', 'noopener');
+    }
+
+    section.querySelector('[data-track="local"]')?.addEventListener('click', trackLocal);
+    section.querySelector('[data-track="intl"]')?.addEventListener('click', trackIntl);
+
+    localInput?.addEventListener('keydown', function(e){
+      if (e.key === 'Enter') { e.preventDefault(); trackLocal(); }
     });
+    localInput?.addEventListener('input', function(){
+      if (localHint && localHint.textContent !== localHintDefault) localHint.textContent = localHintDefault;
+    });
+    intlInput?.addEventListener('keydown', function(e){
+      if (e.key === 'Enter') { e.preventDefault(); trackIntl(); }
+    });
+
+    var params = new URLSearchParams(window.location.search);
+    var prefill = params.get('ref') || params.get('order') || params.get('track');
+    if (prefill) {
+      prefill = prefill.trim();
+      var isDhl = /^\d{10}$/.test(prefill.replace(/\s/g, ''));
+      if (isDhl && intlInput) {
+        selectTab('intl');
+        intlInput.value = prefill;
+      } else if (localInput) {
+        selectTab('local');
+        localInput.value = prefill;
+      }
+    }
   })();
 </script>
 
@@ -211,7 +259,7 @@
   "settings": [
     { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "default" },
     { "type": "text", "id": "heading", "label": "Heading", "default": "Track your delivery" },
-    { "type": "text", "id": "local_placeholder", "label": "Local placeholder", "default": "e.g., QUIQUP-REF-1234" },
+    { "type": "text", "id": "local_placeholder", "label": "Local placeholder", "default": "e.g., your order number #9051" },
     { "type": "text", "id": "intl_placeholder", "label": "International placeholder", "default": "e.g., DHL 10-digit waybill" },
     { "type": "range", "id": "padding_top", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding top", "default": 8 },
     { "type": "range", "id": "padding_bottom", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding bottom", "default": 16 }
