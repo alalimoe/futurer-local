@@ -5,7 +5,7 @@
   }
 
   .xo-section--{{ section.id }} .fc__title {
-    font-size: clamp(1.2rem, 2.2vw, 1.5rem);
+    font-size: clamp(2rem, 2.2vw, 2.4rem);
     font-weight: 600;
     letter-spacing: -0.02em;
     line-height: 1.2;
@@ -14,9 +14,9 @@
   }
 
   .xo-section--{{ section.id }} .fc__lead {
-    color: color-mix(in srgb, rgba(var(--color-foreground)) 55%, transparent);
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 65%, transparent);
     margin-top: 6px;
-    font-size: clamp(0.85rem, 1.2vw, 0.9375rem);
+    font-size: 1.5rem;
   }
 
   .xo-section--{{ section.id }} .fc__row {
@@ -26,7 +26,7 @@
   }
 
   .xo-section--{{ section.id }} .fc__row label {
-    font-size: clamp(0.8rem, 1.1vw, 0.875rem);
+    font-size: 1.4rem;
     font-weight: 600;
     color: rgba(var(--color-foreground));
   }
@@ -36,9 +36,9 @@
     border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 12%, transparent);
     border-radius: var(--general-radius-1, 1rem);
     padding: 10px 14px;
-    min-height: 44px;
+    min-height: 48px;
     box-sizing: border-box;
-    font-size: clamp(0.85rem, 1.3vw, 0.9375rem);
+    font-size: 1.5rem;
     background: rgba(var(--color-background));
     color: rgba(var(--color-foreground));
     transition: border-color 0.3s var(--out-soft, ease);
@@ -64,11 +64,11 @@
   .xo-section--{{ section.id }} .fc__btn {
     border: none;
     border-radius: var(--button-radius);
-    padding: 12px 20px;
-    min-height: 44px;
+    padding: 12px 24px;
+    min-height: 48px;
     background: rgba(var(--color-foreground));
     color: rgba(var(--color-background));
-    font-size: clamp(0.85rem, 1.2vw, 0.9375rem);
+    font-size: 1.4rem;
     font-weight: 600;
     cursor: pointer;
     transition: opacity 0.3s var(--out-soft, ease);
@@ -87,14 +87,14 @@
     color: rgba(var(--color-success, 16, 167, 31));
     margin-top: 12px;
     font-weight: 500;
-    font-size: clamp(0.85rem, 1.2vw, 0.9375rem);
+    font-size: 1.5rem;
   }
 
   .xo-section--{{ section.id }} .fc__error {
     color: rgba(var(--color-error, 218, 30, 40));
     margin-top: 12px;
     font-weight: 500;
-    font-size: clamp(0.85rem, 1.2vw, 0.9375rem);
+    font-size: 1.5rem;
   }
 
   .xo-section--{{ section.id }} .fc__embed iframe {
@@ -103,6 +103,51 @@
     height: 660px;
     border: 0;
     border-radius: var(--general-radius-3, 2rem);
+  }
+
+  .xo-section--{{ section.id }} .fc__channels {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin: 14px 0 18px;
+  }
+
+  .xo-section--{{ section.id }} .fc__channel {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 10px 18px;
+    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 12%, transparent);
+    border-radius: var(--button-radius, 10rem);
+    background: rgba(var(--color-background));
+    color: rgba(var(--color-foreground));
+    font-size: 1.4rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: border-color 0.3s var(--out-soft, ease);
+  }
+
+  .xo-section--{{ section.id }} .fc__channel:hover {
+    border-color: rgba(var(--color-accent));
+  }
+
+  .xo-section--{{ section.id }} .fc__channel:focus-visible {
+    outline: 2px solid rgba(var(--color-accent));
+    outline-offset: 2px;
+  }
+
+  .xo-section--{{ section.id }} .fc__channel--primary {
+    background: rgba(var(--color-accent));
+    border-color: rgba(var(--color-accent));
+  }
+
+  .xo-section--{{ section.id }} .fc__response {
+    font-size: 1.3rem;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 62%, transparent);
+    margin: 0;
+    flex-basis: 100%;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -117,7 +162,29 @@
 <section {% render 'section-attr' %}>
   <xo-container>
     <h2 class="fc__title">{{ section.settings.heading }}</h2>
-    <p class="fc__lead">{{ section.settings.subheading }}</p>
+    {% if section.settings.subheading != blank %}
+      <p class="fc__lead">{{ section.settings.subheading }}</p>
+    {% endif %}
+
+    {% if section.settings.support_email != blank or section.settings.whatsapp_number != blank %}
+      <div class="fc__channels">
+        {% if section.settings.support_email != blank %}
+          <a class="fc__channel fc__channel--primary" href="mailto:{{ section.settings.support_email }}?subject=Order%20help">
+            {% render 'icon', name: 'mail', size: '1.8rem', color: 'currentColor' %}
+            Email {{ section.settings.support_email }}
+          </a>
+        {% endif %}
+        {% if section.settings.whatsapp_number != blank %}
+          {% assign wa_msg = section.settings.whatsapp_msg | default: 'Hi Nootropix! I need help with my order.' | url_encode %}
+          <a class="fc__channel" rel="noopener" target="_blank" href="https://wa.me/{{ section.settings.whatsapp_number | remove: ' ' | remove: '+' }}?text={{ wa_msg }}">
+            WhatsApp us
+          </a>
+        {% endif %}
+        {% if section.settings.response_note != blank %}
+          <p class="fc__response">{{ section.settings.response_note }}</p>
+        {% endif %}
+      </div>
+    {% endif %}
 
     {% if section.settings.use_embed and section.settings.helpdesk_embed != blank %}
       <div class="fc__embed">
@@ -162,6 +229,10 @@
     { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "default" },
     { "type": "text", "id": "heading", "label": "Heading", "default": "Still need help?" },
     { "type": "text", "id": "subheading", "label": "Subheading", "default": "Message us and we'll jump on it." },
+    { "type": "text", "id": "support_email", "label": "Support email (shown as direct CTA)", "default": "support@nootropix.shop" },
+    { "type": "text", "id": "whatsapp_number", "label": "WhatsApp number (digits only, blank to hide)", "info": "Only add once a WhatsApp Business auto-reply or helpdesk channel is set up." },
+    { "type": "text", "id": "whatsapp_msg", "label": "WhatsApp prefilled message", "default": "Hi Nootropix! I need help with my order." },
+    { "type": "text", "id": "response_note", "label": "Response-time note", "default": "We reply within a few hours, 9am–10pm GST, 7 days a week." },
     { "type": "checkbox", "id": "use_embed", "label": "Use embed form", "default": false },
     { "type": "html", "id": "helpdesk_embed", "label": "Embed code (iframe/script)", "default": "<!-- paste HelpDesk iframe here, then toggle 'Use embed form' on -->" },
     { "type": "range", "id": "padding_top", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding top", "default": 24 },
