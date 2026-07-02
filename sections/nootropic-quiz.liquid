@@ -15,7 +15,7 @@
   <div class="nq-wrapper">
     <div class="nq-inner">
 
-      {%- comment -%} ── Quiz header ── {%- endcomment -%}
+      {%- comment -%} ── Quiz header (always visible) ── {%- endcomment -%}
       <div class="nq-header">
         <span class="nq-header__eyebrow">Find Your Stack</span>
         <h1 class="nq-header__title">{{ section.settings.quiz_title }}</h1>
@@ -24,39 +24,82 @@
         {%- endif -%}
       </div>
 
-      {%- comment -%} ── Email gate — must pass before the quiz steps ── {%- endcomment -%}
+      {%- comment -%} ── Gate hero: benefits + email capture ── {%- endcomment -%}
       <div class="nq-gate" data-nq-gate>
-        <div class="nq-capture nq-gate__card">
-          <div class="nq-capture__text">
-            <span class="nq-capture__dot" aria-hidden="true"></span>
-            <h2 class="nq-capture__title">{{ section.settings.gate_title }}</h2>
-            {%- if section.settings.gate_subtitle != blank -%}
-              <p class="nq-capture__sub">{{ section.settings.gate_subtitle }}</p>
-            {%- endif -%}
+        <div class="nq-hero">
+          <div class="nq-hero__copy">
+            <ul class="nq-hero__benefits">
+              {%- if section.settings.benefit_1 != blank -%}
+                <li class="nq-hero__benefit">
+                  <span class="nq-hero__check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+                  <span>{{ section.settings.benefit_1 }}</span>
+                </li>
+              {%- endif -%}
+              {%- if section.settings.benefit_2 != blank -%}
+                <li class="nq-hero__benefit">
+                  <span class="nq-hero__check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+                  <span>{{ section.settings.benefit_2 }}</span>
+                </li>
+              {%- endif -%}
+              {%- if section.settings.benefit_3 != blank -%}
+                <li class="nq-hero__benefit">
+                  <span class="nq-hero__check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+                  <span>{{ section.settings.benefit_3 }}</span>
+                </li>
+              {%- endif -%}
+            </ul>
           </div>
-          <form class="nq-capture__form" data-nq-gate-form novalidate>
-            <label class="nq-capture__label" for="nqGateEmail">Email address</label>
-            <div class="nq-capture__row">
-              <input class="nq-capture__input" id="nqGateEmail" name="email" type="email" inputmode="email"
-                autocomplete="email" placeholder="{{ section.settings.capture_placeholder | default: 'you@email.com' }}"
-                aria-describedby="nqGateStatus" required>
-              <button class="nq-capture__btn" type="submit" data-nq-gate-submit>
-                <span class="nq-capture__btn-label">{{ section.settings.gate_button }} →</span>
-                <span class="nq-capture__btn-spinner" aria-hidden="true"></span>
-              </button>
+
+          <div class="nq-hero__card">
+            <div class="nq-capture nq-gate__card">
+              <div class="nq-capture__text">
+                <span class="nq-capture__dot" aria-hidden="true"></span>
+                <h2 class="nq-capture__title">{{ section.settings.gate_title }}</h2>
+                {%- if section.settings.gate_subtitle != blank -%}
+                  <p class="nq-capture__sub">{{ section.settings.gate_subtitle }}</p>
+                {%- endif -%}
+              </div>
+              <form class="nq-capture__form" data-nq-gate-form novalidate>
+                <label class="nq-capture__label" for="nqGateEmail">Email address</label>
+                <div class="nq-capture__row">
+                  <input class="nq-capture__input" id="nqGateEmail" name="email" type="email" inputmode="email"
+                    autocomplete="email" placeholder="{{ section.settings.capture_placeholder | default: 'you@email.com' }}"
+                    aria-describedby="nqGateStatus" required>
+                  <button class="nq-capture__btn" type="submit" data-nq-gate-submit>
+                    <span class="nq-capture__btn-label">{{ section.settings.gate_button }} →</span>
+                    <span class="nq-capture__btn-spinner" aria-hidden="true"></span>
+                  </button>
+                </div>
+                {%- if section.settings.capture_fineprint != blank -%}
+                  <div class="nq-capture__fineprint">{{ section.settings.capture_fineprint }}</div>
+                {%- endif -%}
+                <p class="nq-capture__status" id="nqGateStatus" role="status" aria-live="polite" data-nq-gate-status></p>
+              </form>
             </div>
-            {%- if section.settings.capture_fineprint != blank -%}
-              <div class="nq-capture__fineprint">{{ section.settings.capture_fineprint }}</div>
-            {%- endif -%}
-            <p class="nq-capture__status" id="nqGateStatus" role="status" aria-live="polite" data-nq-gate-status></p>
-          </form>
+            <div class="nq-gate__preview" aria-hidden="true">
+              <span></span><span></span><span></span><span></span><span></span>
+            </div>
+          </div>
         </div>
+
+        {%- if section.settings.trust_text != blank -%}
+          {%- assign trust_items = section.settings.trust_text | split: '·' -%}
+          <p class="nq-trust">
+            {%- for item in trust_items -%}
+              <span class="nq-trust__item">{{ item | strip }}</span>
+            {%- endfor -%}
+          </p>
+        {%- endif -%}
       </div>
 
       <div class="nq-quiz-body" data-nq-quiz-body>
-      {%- comment -%} ── Progress bar ── {%- endcomment -%}
-      <div class="nq-progress-wrap" role="progressbar" aria-valuemin="0" aria-valuemax="5" aria-valuenow="0">
-        <div class="nq-progress__bar" id="nqProgressBar"></div>
+      {%- comment -%} ── Segmented progress (5 steps) ── {%- endcomment -%}
+      <div class="nq-progress-wrap" id="nqProgressBar" role="progressbar" aria-valuemin="0" aria-valuemax="5" aria-valuenow="0">
+        <span class="nq-progress__seg"></span>
+        <span class="nq-progress__seg"></span>
+        <span class="nq-progress__seg"></span>
+        <span class="nq-progress__seg"></span>
+        <span class="nq-progress__seg"></span>
       </div>
       <p class="nq-progress__label" id="nqProgressLabel" aria-live="polite">Step 1 of 5</p>
 
@@ -72,42 +115,42 @@
           <h2 class="nq-step__question">What's your primary goal?</h2>
           <p class="nq-step__sub">Pick the outcome that matters most to you right now.</p>
         </div>
-        <div class="nq-options" role="group" aria-label="Primary goal">
+        <div class="nq-options nq-options--grid" role="group" aria-label="Primary goal">
 
-          <button type="button" class="nq-option" data-value="focus" tabindex="0">
-            <span class="nq-option__dot" aria-hidden="true"></span>
+          <button type="button" class="nq-option nq-option--icon" data-value="focus" tabindex="0">
+            <span class="nq-option__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="0.8" fill="currentColor"/></svg></span>
             <span class="nq-option__text">
               <span class="nq-option__label">Focus &amp; Cognition</span>
               <span class="nq-option__desc">Deep work, mental clarity, sustained concentration</span>
             </span>
           </button>
 
-          <button type="button" class="nq-option" data-value="mood" tabindex="0">
-            <span class="nq-option__dot" aria-hidden="true"></span>
+          <button type="button" class="nq-option nq-option--icon" data-value="mood" tabindex="0">
+            <span class="nq-option__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21.2l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></span>
             <span class="nq-option__text">
               <span class="nq-option__label">Mood &amp; Anxiety Relief</span>
               <span class="nq-option__desc">Calm, stress resilience, emotional baseline</span>
             </span>
           </button>
 
-          <button type="button" class="nq-option" data-value="energy" tabindex="0">
-            <span class="nq-option__dot" aria-hidden="true"></span>
+          <button type="button" class="nq-option nq-option--icon" data-value="energy" tabindex="0">
+            <span class="nq-option__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></span>
             <span class="nq-option__text">
               <span class="nq-option__label">Energy &amp; Motivation</span>
               <span class="nq-option__desc">Drive, clean energy, get-up-and-go</span>
             </span>
           </button>
 
-          <button type="button" class="nq-option" data-value="memory" tabindex="0">
-            <span class="nq-option__dot" aria-hidden="true"></span>
+          <button type="button" class="nq-option nq-option--icon" data-value="memory" tabindex="0">
+            <span class="nq-option__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.4 1 2.3h6c0-.9.4-1.8 1-2.3A7 7 0 0 0 12 2z"/><path d="M9 20h6"/><path d="M10 22h4"/></svg></span>
             <span class="nq-option__text">
               <span class="nq-option__label">Memory &amp; Learning</span>
               <span class="nq-option__desc">Retention, recall, study performance</span>
             </span>
           </button>
 
-          <button type="button" class="nq-option" data-value="sleep" tabindex="0">
-            <span class="nq-option__dot" aria-hidden="true"></span>
+          <button type="button" class="nq-option nq-option--icon nq-option--span" data-value="sleep" tabindex="0">
+            <span class="nq-option__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></span>
             <span class="nq-option__text">
               <span class="nq-option__label">Sleep &amp; Recovery</span>
               <span class="nq-option__desc">Quality rest, faster wind-down, restoration</span>
@@ -117,7 +160,6 @@
         </div>
         <div class="nq-nav">
           <button type="button" class="nq-back-btn" id="nqBackBtn" aria-label="Go back">← Back</button>
-          <button type="button" id="nqNextBtn">Continue →</button>
         </div>
       </div>
 
@@ -168,7 +210,6 @@
         </div>
         <div class="nq-nav">
           <button type="button" class="nq-back-btn" aria-label="Go back">← Back</button>
-          <button type="button" id="nqNextBtn">Continue →</button>
         </div>
       </div>
 
@@ -219,7 +260,6 @@
         </div>
         <div class="nq-nav">
           <button type="button" class="nq-back-btn" aria-label="Go back">← Back</button>
-          <button type="button" id="nqNextBtn">Continue →</button>
         </div>
       </div>
 
@@ -270,7 +310,6 @@
         </div>
         <div class="nq-nav">
           <button type="button" class="nq-back-btn" aria-label="Go back">← Back</button>
-          <button type="button" id="nqNextBtn">Continue →</button>
         </div>
       </div>
 
@@ -289,7 +328,7 @@
           <button type="button" class="nq-option" data-value="simple" tabindex="0">
             <span class="nq-option__dot" aria-hidden="true"></span>
             <span class="nq-option__text">
-              <span class="nq-option__label">Start simple — 1 to 2 compounds</span>
+              <span class="nq-option__label">Start simple: 1 to 2 compounds</span>
               <span class="nq-option__desc">Low commitment. Easy to track what's working.</span>
             </span>
           </button>
@@ -297,7 +336,7 @@
           <button type="button" class="nq-option" data-value="moderate" tabindex="0">
             <span class="nq-option__dot" aria-hidden="true"></span>
             <span class="nq-option__text">
-              <span class="nq-option__label">Moderate stack — 3 to 4 compounds</span>
+              <span class="nq-option__label">Moderate stack: 3 to 4 compounds</span>
               <span class="nq-option__desc">Good balance of depth and manageability.</span>
             </span>
           </button>
@@ -305,7 +344,7 @@
           <button type="button" class="nq-option" data-value="full" tabindex="0">
             <span class="nq-option__dot" aria-hidden="true"></span>
             <span class="nq-option__text">
-              <span class="nq-option__label">Full stack — 5 or more</span>
+              <span class="nq-option__label">Full stack: 5 or more</span>
               <span class="nq-option__desc">Maximise synergy. Best for experienced users.</span>
             </span>
           </button>
@@ -428,19 +467,48 @@
       "type": "text",
       "id": "gate_title",
       "label": "Gate heading",
-      "default": "Enter your email to start"
+      "default": "Find your stack in 60 seconds"
     },
     {
       "type": "text",
       "id": "gate_subtitle",
       "label": "Gate subtext",
-      "default": "We'll build your personalised stack and email your results plus a one-time 15% off code."
+      "default": "Enter your email to start. We'll send your stack plus a one-time 15% off code."
     },
     {
       "type": "text",
       "id": "gate_button",
       "label": "Gate button label",
       "default": "Start the quiz"
+    },
+    {
+      "type": "header",
+      "content": "Hero benefits"
+    },
+    {
+      "type": "text",
+      "id": "benefit_1",
+      "label": "Benefit 1",
+      "default": "5 questions, under 60 seconds"
+    },
+    {
+      "type": "text",
+      "id": "benefit_2",
+      "label": "Benefit 2",
+      "default": "Matched from our COA-verified catalog"
+    },
+    {
+      "type": "text",
+      "id": "benefit_3",
+      "label": "Benefit 3",
+      "default": "15% off code emailed with your stack"
+    },
+    {
+      "type": "text",
+      "id": "trust_text",
+      "label": "Trust strip",
+      "info": "Separate items with a middle dot (·).",
+      "default": "Third-party tested · Rated 4.8 on Google · Same-day dispatch from Dubai"
     },
     {
       "type": "header",
@@ -602,7 +670,7 @@
           "type": "richtext",
           "id": "stack_description",
           "label": "Short description",
-          "default": "<p>A gentle, well-tolerated stack that builds clean focus without overstimulation — ideal for first-timers.</p>"
+          "default": "<p>A gentle, well-tolerated stack that builds clean focus without overstimulation, ideal for first-timers.</p>"
         },
         {
           "type": "header",

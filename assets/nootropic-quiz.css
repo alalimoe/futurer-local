@@ -43,7 +43,7 @@
   position: relative;
 }
 
-/* ---------- Email gate ---------- */
+/* ---------- Email gate (hero layout) ---------- */
 /* The quiz body (progress + steps) stays hidden until a valid email is
    submitted; JS adds .nq--unlocked to #nqQuiz to reveal it. */
 .nq-quiz-body { display: none; }
@@ -51,6 +51,108 @@
 #nqQuiz.nq--unlocked .nq-gate { display: none; }
 #nqQuiz.nq--unlocked .nq-quiz-body { display: block; }
 .nq-gate .nq-capture { margin: 0; }
+
+/* Wider column while the gate hero is showing; steps stay narrow. */
+#nqQuiz:not(.nq--unlocked) .nq-inner { max-width: 84rem; }
+
+.nq-hero {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2.8rem;
+  align-items: center;
+}
+
+@media (min-width: 768px) {
+  .nq-hero {
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 4rem;
+  }
+}
+
+.nq-hero__benefits {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.nq-hero__benefit {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+  font-size: 1.5rem;
+  line-height: 1.45;
+  color: rgba(var(--color-foreground));
+  font-weight: 600;
+}
+
+.nq-hero__check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.2rem;
+  height: 2.2rem;
+  flex-shrink: 0;
+  border-radius: var(--circle-radius, 50%);
+  background: color-mix(in srgb, rgba(var(--color-accent)) 18%, transparent);
+  color: color-mix(in srgb, rgba(var(--color-accent)) 60%, rgba(var(--color-foreground)));
+}
+
+.nq-hero__check svg {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
+/* Gold-tinted gate card (matches the homepage quiz CTA treatment) */
+.nq-capture.nq-gate__card {
+  background: color-mix(in srgb, rgba(var(--color-accent)) 6%, rgba(var(--color-background)));
+  border-color: color-mix(in srgb, rgba(var(--color-accent)) 30%, transparent);
+  padding: 2.6rem;
+}
+
+/* Faint 5-segment progress preview under the gate card */
+.nq-gate__preview {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: 1.4rem;
+  padding-inline: 0.4rem;
+}
+
+.nq-gate__preview span {
+  flex: 1;
+  height: 0.5rem;
+  border-radius: 10rem;
+  background: var(--nq-border);
+}
+
+/* Trust strip */
+.nq-trust {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.8rem 0;
+  margin: 3.2rem 0 0;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--nq-muted);
+  letter-spacing: 0.01em;
+}
+
+.nq-trust__item {
+  display: inline-flex;
+  align-items: center;
+}
+
+.nq-trust__item + .nq-trust__item::before {
+  content: "";
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: var(--circle-radius, 50%);
+  background: color-mix(in srgb, rgba(var(--color-foreground)) 30%, transparent);
+  margin: 0 1.2rem;
+}
 
 .nq-capture__confirm-email {
   margin-top: 0.6rem;
@@ -90,22 +192,33 @@
   margin: 0;
 }
 
-/* ---------- Progress bar ---------- */
+/* ---------- Segmented progress (5 steps) ---------- */
 .nq-progress-wrap {
-  height: 0.4rem;
-  background: var(--nq-border);
-  border-radius: 10rem;
-  overflow: hidden;
-  margin-bottom: 0.8rem;
+  display: flex;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
 }
 
-.nq-progress__bar {
-  height: 100%;
-  width: 0%;
-  background: rgba(var(--color-accent));
+.nq-progress__seg {
+  flex: 1;
+  height: 0.5rem;
   border-radius: 10rem;
-  transition: width 0.45s var(--out-cubic, cubic-bezier(.215, .61, .355, 1));
-  will-change: width;
+  background: var(--nq-border);
+  transition: background 0.3s var(--nq-ease);
+}
+
+.nq-progress__seg.is-done {
+  background: rgba(var(--color-accent));
+}
+
+.nq-progress__seg.is-current {
+  background: rgba(var(--color-accent));
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .nq-progress__seg.is-current {
+    animation: nqPulse 1.6s var(--nq-ease) infinite;
+  }
 }
 
 .nq-progress__label {
@@ -198,6 +311,17 @@
   margin-bottom: 2.8rem;
 }
 
+/* Step 1 — two-column icon grid on desktop */
+@media (min-width: 768px) {
+  .nq-options--grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  .nq-options--grid .nq-option--span {
+    grid-column: 1 / -1;
+  }
+}
+
 /* Shake when user advances without selecting */
 @keyframes nqShake {
   0%, 100% { transform: translateX(0); }
@@ -257,17 +381,77 @@
   border-color: rgba(var(--color-accent));
 }
 
-/* Accent dot — bullet style */
+/* Brief confirmed pulse before auto-advance so the transition feels causal */
+@media (prefers-reduced-motion: no-preference) {
+  .nq-option.is-confirmed {
+    animation: nqConfirm 0.3s var(--nq-spring);
+  }
+}
+
+@keyframes nqConfirm {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.015); }
+  100% { transform: scale(1); }
+}
+
+/* Accent dot — bullet style, fills with a checkmark when selected */
 .nq-option__dot {
-  width: 1.2rem;
-  height: 1.2rem;
+  position: relative;
+  width: 1.6rem;
+  height: 1.6rem;
   border-radius: var(--circle-radius, 50%);
   background: transparent;
   border: 0.2rem solid var(--nq-border-strong);
   box-sizing: border-box;
   flex-shrink: 0;
-  margin-top: 0.4rem;
+  margin-top: 0.3rem;
   transition: background var(--nq-fast), border-color var(--nq-fast);
+}
+
+.nq-option__dot::after {
+  content: "";
+  position: absolute;
+  top: 0.25rem;
+  left: 0.2rem;
+  width: 0.7rem;
+  height: 0.4rem;
+  border-left: 0.2rem solid rgba(var(--color-background));
+  border-bottom: 0.2rem solid rgba(var(--color-background));
+  transform: rotate(-45deg) scale(0);
+  transform-origin: center;
+  transition: transform 0.25s var(--nq-spring);
+}
+
+.nq-option.is-selected .nq-option__dot::after {
+  transform: rotate(-45deg) scale(1);
+}
+
+/* Step-1 goal icons */
+.nq-option__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.6rem;
+  height: 3.6rem;
+  flex-shrink: 0;
+  border-radius: var(--circle-radius, 50%);
+  background: color-mix(in srgb, rgba(var(--color-foreground)) 5%, transparent);
+  color: var(--nq-muted);
+  transition: background var(--nq-fast), color var(--nq-fast);
+}
+
+.nq-option__icon svg {
+  width: 2rem;
+  height: 2rem;
+}
+
+.nq-option.is-selected .nq-option__icon {
+  background: color-mix(in srgb, rgba(var(--color-accent)) 22%, transparent);
+  color: color-mix(in srgb, rgba(var(--color-accent)) 55%, rgba(var(--color-foreground)));
+}
+
+.nq-option--icon {
+  align-items: center;
 }
 
 .nq-option__text {
@@ -463,10 +647,32 @@
   .nq-skeleton-card__body  { padding: 1.4rem 1.6rem; }
 }
 
-/* Results header card */
-.nq-results__header {
-  background: var(--nq-field);
+/* Answer summary chips */
+.nq-results__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin: 0 0 1.6rem;
+}
+
+.nq-results__chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 1.4rem;
   border: 1px solid var(--nq-border);
+  border-radius: 10rem;
+  font-size: 1.2rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--nq-muted);
+  background: var(--nq-field);
+  white-space: nowrap;
+}
+
+/* Results header card — gold-tinted celebration moment */
+.nq-results__header {
+  background: color-mix(in srgb, rgba(var(--color-accent)) 6%, rgba(var(--color-background)));
+  border: 1px solid color-mix(in srgb, rgba(var(--color-accent)) 30%, transparent);
   border-radius: var(--general-radius-3, 2rem);
   padding: 2.8rem 2.8rem 2.4rem;
   margin-bottom: 1.2rem;
@@ -533,10 +739,29 @@
 }
 
 .nq-product-card__image {
+  position: relative;
   width: 9rem;
   flex-shrink: 0;
   background: var(--nq-field);
   overflow: hidden;
+}
+
+/* Curated-stack index badge on the image corner */
+.nq-product-card__index {
+  position: absolute;
+  top: 0.6rem;
+  left: 0.6rem;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: var(--circle-radius, 50%);
+  background: rgba(var(--color-accent));
+  color: rgba(var(--color-foreground));
+  font-size: 1.1rem;
+  font-weight: var(--font-body-weight-bold, 700);
 }
 
 .nq-product-card__image img {

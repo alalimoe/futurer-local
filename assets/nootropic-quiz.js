@@ -32,13 +32,18 @@
   function qs(sel)  { return document.querySelector(sel); }
   function qsa(sel) { return Array.prototype.slice.call(document.querySelectorAll(sel)); }
 
-  function setProgress(completedSteps) {
-    var bar   = qs('#nqProgressBar');
+  // Segmented progress: segments before the current step are done, the
+  // current one pulses, the rest stay faint.
+  function setProgress(currentStepNum) {
+    var segs  = qsa('.nq-progress__seg');
     var label = qs('#nqProgressLabel');
     var track = qs('.nq-progress-wrap');
-    if (bar)   bar.style.width   = ((completedSteps / 5) * 100).toFixed(1) + '%';
-    if (label) label.textContent = completedSteps > 0 ? 'Step ' + completedSteps + ' of 5' : 'Let\'s get started';
-    if (track) track.setAttribute('aria-valuenow', String(completedSteps));
+    segs.forEach(function (seg, i) {
+      seg.classList.toggle('is-done', i < currentStepNum - 1);
+      seg.classList.toggle('is-current', i === currentStepNum - 1);
+    });
+    if (label) label.textContent = currentStepNum > 0 ? 'Step ' + currentStepNum + ' of 5' : 'Let\'s get started';
+    if (track) track.setAttribute('aria-valuenow', String(currentStepNum));
   }
 
   // --- Config ---
@@ -135,9 +140,40 @@
 
   function goBack() {
     if (currentStep === 0) return;
+    cancelAutoAdvance();
     currentStep--;
     delete answers[currentStep];
     showStep(currentStep, 'back');
+  }
+
+  // --- Auto-advance (steps 0-3; the last step keeps its explicit CTA) ---
+  var AUTO_ADVANCE_DELAY = 350;
+  var advanceTimer = null;
+
+  function cancelAutoAdvance() {
+    if (advanceTimer) { clearTimeout(advanceTimer); advanceTimer = null; }
+  }
+
+  // Select an option; on steps 0-3 a fresh click schedules the advance after
+  // a short confirmation beat. Re-clicking another option resets the timer.
+  function selectOption(option) {
+    var stepEl = option.closest('.nq-step');
+    if (!stepEl) return;
+    qsa('.nq-option', stepEl).forEach(function (el) {
+      el.classList.remove('is-selected');
+      el.classList.remove('is-confirmed');
+    });
+    option.classList.add('is-selected');
+
+    var stepIndex = qsa('.nq-step').indexOf(stepEl);
+    if (stepIndex > -1 && stepIndex === currentStep && stepIndex < 4) {
+      option.classList.add('is-confirmed');
+      cancelAutoAdvance();
+      advanceTimer = setTimeout(function () {
+        advanceTimer = null;
+        goNext();
+      }, AUTO_ADVANCE_DELAY);
+    }
   }
 
   // --- Product fetching ---
@@ -191,15 +227,18 @@
     return variants.filter(function (v) { return v.available; })[0] || variants[0];
   }
 
-  function buildProductCard(product) {
+  function buildProductCard(product, index) {
     var variant = firstAvailableVariant(product);
     if (!variant) return '';
     var img       = product.featured_image || '';
     var price     = formatMoney(variant.price);
     var available = !!variant.available;
+    var badge     = (typeof index === 'number')
+      ? '<span class="nq-product-card__index" aria-hidden="true">' + (index + 1) + '</span>'
+      : '';
     return (
       '<div class="nq-product-card">' +
-        (img ? '<div class="nq-product-card__image"><img src="' + img + '" alt="' + esc(product.title) + '" loading="lazy" width="200" height="200"></div>' : '') +
+        (img ? '<div class="nq-product-card__image">' + badge + '<img src="' + img + '" alt="' + esc(product.title) + '" loading="lazy" width="200" height="200"></div>' : '') +
         '<div class="nq-product-card__body">' +
           '<div class="nq-product-card__meta">' +
             '<h3 class="nq-product-card__title">' + esc(product.title) + '</h3>' +
@@ -580,6 +619,27 @@
     });
   }
 
+  // Answer summary chips shown above the results header. Uses the friendly
+  // LABELS map, with a chip-specific size label (counts would read oddly).
+  var CHIP_SIZE_LABELS = { simple: 'Simple stack', medium: 'Core stack', full: 'Full stack' };
+
+  function answerChipsHtml() {
+    var a = answersForEngine();
+    var parts = [
+      LABELS.goal[a.goal],
+      LABELS.experience[a.experience],
+      LABELS.context[a.context],
+      LABELS.preference[a.preference],
+      CHIP_SIZE_LABELS[a.size]
+    ].filter(Boolean);
+    if (!parts.length) return '';
+    return (
+      '<div class="nq-results__chips" aria-label="Your answers">' +
+        parts.map(function (p) { return '<span class="nq-results__chip">' + esc(p) + '</span>'; }).join('') +
+      '</div>'
+    );
+  }
+
   // --- Results loading state ---
   // Friendly labels for the raw answer values recorded against each step.
   var GOAL_LABELS = {
@@ -706,11 +766,16 @@
     }
     var cache = new Map();
 
+    cancelAutoAdvance();
     clearStepExit();
     qsa('.nq-step').forEach(function (el) { el.classList.remove('nq-step--active'); });
 
-    var bar = qs('#nqProgressBar');
-    if (bar) bar.style.width = '100%';
+    qsa('.nq-progress__seg').forEach(function (seg) {
+      seg.classList.add('is-done');
+      seg.classList.remove('is-current');
+    });
+    var track = qs('.nq-progress-wrap');
+    if (track) track.setAttribute('aria-valuenow', '5');
     var label = qs('#nqProgressLabel');
     if (label) label.textContent = 'Complete';
 
@@ -872,17 +937,22 @@
         .filter(isInStock)
         .map(function (p) {
           var v = firstAvailableVariant(p);
-          return v && v.available ? { id: v.id } : null;
+          return v && v.available ? { id: v.id, price: v.price || 0 } : null;
         })
         .filter(Boolean);
 
+      // Stack total so the CTA reads "Add all 3 to stack · AED 285.00".
+      var addAllTotal = addAllItems.reduce(function (sum, it) { return sum + (it.price || 0); }, 0);
+      var addAllLabel = 'Add all ' + addAllItems.length + ' to stack \u00b7 ' + formatMoney(addAllTotal);
+
       var addAllHtml = addAllItems.length
         ? '<button type="button" class="nq-add-all-btn" data-nq-add-all>' +
-            'Add all to stack \u2192' +
+            esc(addAllLabel) +
           '</button>'
         : '';
 
       panel.innerHTML =
+        answerChipsHtml() +
         '<div class="nq-results__header">' +
           '<span class="nq-results__dot" aria-hidden="true"></span>' +
           '<span class="nq-results__badge">Your recommended stack</span>' +
@@ -891,7 +961,7 @@
         '</div>' +
         (cardsHtml
           ? '<div class="nq-results__grid">' + cardsHtml + '</div>'
-          : '<p class="nq-results__empty">Products coming soon \u2014 swap in handles via the theme customizer.</p>') +
+          : '<p class="nq-results__empty">Products coming soon. Swap in handles via the theme customizer.</p>') +
         addAllHtml +
         captureHtml +
         '<div class="nq-results__actions">' +
@@ -985,9 +1055,13 @@
   }
 
   function resetQuiz() {
+    cancelAutoAdvance();
     currentStep = 0;
     Object.keys(answers).forEach(function (k) { delete answers[k]; });
-    qsa('.nq-option').forEach(function (el) { el.classList.remove('is-selected'); });
+    qsa('.nq-option').forEach(function (el) {
+      el.classList.remove('is-selected');
+      el.classList.remove('is-confirmed');
+    });
     var panel = qs('#nqResultsPanel');
     if (panel) { panel.classList.remove('nq-results--visible'); panel.innerHTML = ''; }
     showStep(0);
@@ -1056,14 +1130,11 @@
     var quiz = qs('#nqQuiz');
     if (!quiz) return;
 
-    // Option selection
+    // Option selection (click)
     quiz.addEventListener('click', function (e) {
       var option = e.target.closest('.nq-option');
       if (!option) return;
-      var stepEl = option.closest('.nq-step');
-      if (!stepEl) return;
-      qsa('.nq-option', stepEl).forEach(function (el) { el.classList.remove('is-selected'); });
-      option.classList.add('is-selected');
+      selectOption(option);
     });
 
     // Keyboard support on options
@@ -1072,9 +1143,7 @@
       var option = e.target.closest('.nq-option');
       if (!option) return;
       e.preventDefault();
-      var stepEl = option.closest('.nq-step');
-      if (stepEl) qsa('.nq-option', stepEl).forEach(function (el) { el.classList.remove('is-selected'); });
-      option.classList.add('is-selected');
+      selectOption(option);
     });
 
     // Navigation buttons
