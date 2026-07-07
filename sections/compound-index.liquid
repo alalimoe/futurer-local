@@ -1,0 +1,366 @@
+{% comment %}
+  Compound Index — dynamic A–Z browse of every product in a chosen collection.
+  Groups products by first letter with a sticky alphabet bar. HTML/CSS only.
+{% endcomment %}
+
+{%- liquid
+  assign ci_collection = section.settings.collection | default: collections.all
+  assign ci_alphabet = 'A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z' | split: ','
+-%}
+
+{%- paginate ci_collection.products by 250 -%}
+{%- liquid
+  assign ci_products = ci_collection.products | sort_natural: 'title'
+
+  assign ci_letters = ''
+  for product in ci_products
+    assign ci_fl = product.title | slice: 0 | upcase
+    unless ci_alphabet contains ci_fl
+      assign ci_fl = '#'
+    endunless
+    unless ci_letters contains ci_fl
+      assign ci_letters = ci_letters | append: ci_fl
+    endunless
+  endfor
+
+  assign ci_hash = '#' | split: ','
+  assign ci_groups = ci_hash | concat: ci_alphabet
+-%}
+
+<section {% render 'section-attr' %}>
+  <xo-container>
+    <div class="ci-wrapper" id="ci-{{ section.id }}">
+      <header class="ci-hero">
+        {% if section.settings.heading != blank %}
+          <h1 class="ci-title">{{ section.settings.heading }}</h1>
+        {% endif %}
+        {% if section.settings.subtitle != blank %}
+          <p class="ci-subtitle">{{ section.settings.subtitle }}</p>
+        {% endif %}
+        <span class="ci-count">{{ ci_products.size }} compound{% if ci_products.size != 1 %}s{% endif %}</span>
+      </header>
+
+      <nav class="ci-alpha-bar" aria-label="Alphabet navigation">
+        <div class="ci-alpha-inner">
+          {%- for letter in ci_groups -%}
+            {%- if ci_letters contains letter -%}
+              <a href="#ci-letter-{{ letter | url_encode }}" class="ci-alpha-link">{{ letter }}</a>
+            {%- else -%}
+              <span class="ci-alpha-link ci-alpha-link--disabled" aria-disabled="true">{{ letter }}</span>
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+      </nav>
+
+      <div class="ci-groups">
+        {%- for letter in ci_groups -%}
+          {%- if ci_letters contains letter -%}
+            <div class="ci-letter-group">
+              <h2 class="ci-letter-heading" id="ci-letter-{{ letter | url_encode }}">{{ letter }}</h2>
+              <ul class="ci-list" role="list">
+                {%- for product in ci_products -%}
+                  {%- liquid
+                    assign ci_fl = product.title | slice: 0 | upcase
+                    unless ci_alphabet contains ci_fl
+                      assign ci_fl = '#'
+                    endunless
+                  -%}
+                  {%- if ci_fl == letter -%}
+                    <li class="ci-item">
+                      <a href="{{ product.url }}" class="ci-item-link">
+                        {%- if product.featured_image -%}
+                          <img
+                            src="{{ product.featured_image | image_url: width: 96 }}"
+                            srcset="{{ product.featured_image | image_url: width: 96 }} 96w, {{ product.featured_image | image_url: width: 192 }} 192w"
+                            sizes="48px"
+                            alt="{{ product.featured_image.alt | default: product.title | escape }}"
+                            width="48"
+                            height="48"
+                            loading="lazy"
+                            decoding="async"
+                            class="ci-item-img"
+                          >
+                        {%- else -%}
+                          <span class="ci-item-img ci-item-img--placeholder" aria-hidden="true">{{ letter }}</span>
+                        {%- endif -%}
+                        <span class="ci-item-body">
+                          <span class="ci-item-title">{{ product.title }}</span>
+                          {%- if section.settings.show_goals -%}
+                            {%- assign ci_goals = product.metafields.custom.cognitive_goals.value -%}
+                            {%- if ci_goals -%}
+                              <span class="ci-item-goals">
+                                {%- for goal in ci_goals -%}
+                                  <span class="ci-goal-tag">{{ goal | replace: '-', ' ' | capitalize }}</span>
+                                {%- endfor -%}
+                              </span>
+                            {%- endif -%}
+                          {%- endif -%}
+                        </span>
+                        <span class="ci-item-price">
+                          {%- unless product.available %}<span class="ci-item-soldout">Sold out</span>{% endunless -%}
+                          {{ product.price | money }}
+                        </span>
+                      </a>
+                    </li>
+                  {%- endif -%}
+                {%- endfor -%}
+              </ul>
+            </div>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+
+      {% if section.settings.disclaimer != blank %}
+        <footer class="ci-disclaimer">
+          <p>{{ section.settings.disclaimer }}</p>
+        </footer>
+      {% endif %}
+    </div>
+  </xo-container>
+</section>
+{%- endpaginate -%}
+
+{% stylesheet %}
+@media (prefers-reduced-motion: no-preference) {
+  .section-compound-index {
+    scroll-behavior: smooth;
+  }
+}
+
+.ci-wrapper {
+  padding-block: 4rem 6rem;
+}
+
+.ci-hero {
+  text-align: center;
+  margin-bottom: 3.2rem;
+}
+
+.ci-title {
+  margin: 0 0 1.2rem;
+}
+
+.ci-subtitle {
+  max-width: 64rem;
+  margin: 0 auto 1.6rem;
+  color: color-mix(in srgb, rgba(var(--color-foreground)) 75%, transparent);
+}
+
+.ci-count {
+  display: inline-block;
+  padding: 0.6rem 1.6rem;
+  border-radius: 1.6rem;
+  font-size: 1.3rem;
+  font-weight: 500;
+  background: rgba(var(--color-background-2));
+  color: rgba(var(--color-foreground));
+}
+
+.ci-alpha-bar {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: rgba(var(--color-background));
+  border-block: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 12%, transparent);
+  margin-bottom: 3.2rem;
+}
+
+.ci-alpha-inner {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.2rem;
+  padding: 1rem 0;
+}
+
+.ci-alpha-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 3.2rem;
+  min-height: 3.2rem;
+  border-radius: 50%;
+  font-size: 1.4rem;
+  font-weight: 600;
+  text-decoration: none;
+  color: rgba(var(--color-foreground));
+  transition: background-color 0.2s ease;
+}
+
+.ci-alpha-link:hover {
+  background: rgba(var(--color-accent));
+}
+
+.ci-alpha-link--disabled {
+  color: color-mix(in srgb, rgba(var(--color-foreground)) 30%, transparent);
+  pointer-events: none;
+}
+
+.ci-letter-group {
+  margin-bottom: 3.2rem;
+}
+
+.ci-letter-heading {
+  scroll-margin-top: 6rem;
+  margin: 0 0 1.6rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 2px solid rgba(var(--color-accent));
+  font-size: 2.4rem;
+}
+
+.ci-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.2rem;
+}
+
+@media screen and (min-width: 768px) {
+  .ci-list {
+    grid-template-columns: 1fr 1fr;
+    gap: 1.6rem 2.4rem;
+  }
+}
+
+.ci-item-link {
+  display: flex;
+  align-items: center;
+  gap: 1.6rem;
+  padding: 1.2rem 1.6rem;
+  border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 12%, transparent);
+  border-radius: 1.5rem;
+  text-decoration: none;
+  color: rgba(var(--color-foreground));
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.ci-item-link:hover {
+  border-color: rgba(var(--color-accent));
+  background: color-mix(in srgb, rgba(var(--color-accent)) 8%, transparent);
+}
+
+.ci-item-img {
+  flex: 0 0 auto;
+  width: 4.8rem;
+  height: 4.8rem;
+  object-fit: cover;
+  border-radius: 1rem;
+  background: rgba(var(--color-background-2));
+}
+
+.ci-item-img--placeholder {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  color: color-mix(in srgb, rgba(var(--color-foreground)) 40%, transparent);
+}
+
+.ci-item-body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.ci-item-title {
+  display: block;
+  font-weight: 600;
+  font-size: 1.5rem;
+}
+
+.ci-item-goals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.4rem;
+}
+
+.ci-goal-tag {
+  padding: 0.2rem 0.8rem;
+  border-radius: 0.5rem;
+  font-size: 1.1rem;
+  font-weight: 500;
+  background: rgba(var(--color-background-2));
+  color: color-mix(in srgb, rgba(var(--color-foreground)) 75%, transparent);
+}
+
+.ci-item-price {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.2rem;
+  font-weight: 600;
+  font-size: 1.4rem;
+}
+
+.ci-item-soldout {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: rgba(var(--color-error));
+}
+
+.ci-disclaimer {
+  margin-top: 4rem;
+  padding: 1.6rem 2rem;
+  border-radius: 1.5rem;
+  background: rgba(var(--color-background-2));
+}
+
+.ci-disclaimer p {
+  margin: 0;
+  font-size: 1.3rem;
+  color: color-mix(in srgb, rgba(var(--color-foreground)) 75%, transparent);
+}
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Compound Index (A-Z)",
+  "tag": "section",
+  "class": "section-compound-index",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Browse by Compound"
+    },
+    {
+      "type": "textarea",
+      "id": "subtitle",
+      "label": "Subtitle",
+      "default": "Every compound we carry, A to Z. Know what you're looking for? Jump straight to it."
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Source collection",
+      "info": "Products to list. Defaults to all products when empty."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_goals",
+      "label": "Show cognitive goal tags",
+      "default": true
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme"
+    },
+    {
+      "type": "text",
+      "id": "disclaimer",
+      "label": "Disclaimer Text",
+      "default": "This index is for educational purposes only and is not medical advice. Always consult a qualified healthcare professional before beginning any new supplement protocol."
+    }
+  ],
+  "presets": [
+    {
+      "name": "Compound Index (A-Z)"
+    }
+  ]
+}
+{% endschema %}

@@ -377,3 +377,67 @@ cholines, naturals, peptides. Run `npm run landing` to (re)generate all.
 - **Non-destructive to phenibut**: the generator never edits `phenibut-*`
   section files or the live phenibut template.
 - **Compliance-gated**: nothing is written if the lint fails.
+
+## Outcome taxonomy (cognitive goals)
+
+Source of truth for the outcome-first navigation:
+
+- `data/goals.json` — the 6 canonical outcomes (slug, label, collection
+  handle, compliance-safe description).
+- `data/{nootropics,peptides}/*.json` — each file carries
+  `"cognitiveGoals": [<slugs>]` plus `"goalProductHandles": [<store product
+  handles>]` (compounds usually ship as capsules + powder, so one data file
+  can map to several products). Files without `cognitiveGoals` (BPC-157,
+  GHK-Cu, TB-500) are skipped.
+
+Sync everything with:
+
+```bash
+npm run goals:dry    # review proposed assignments, no API calls
+npm run goals:sync   # definition + product metafields + smart collections
+```
+
+The sync script (`sync-cognitive-goals.mjs`) idempotently:
+
+1. Ensures the product metafield definition `custom.cognitive_goals`
+   (`list.single_line_text_field`, enabled as a collection condition).
+2. Sets `custom.cognitive_goals` on every mapped product via `metafieldsSet`.
+3. Creates/updates one smart collection per goal (`goal-<slug>`) with the rule
+   `custom.cognitive_goals EQUALS <slug>` — new compounds auto-file into the
+   right collections on the next sync.
+
+Auth: uses `SHOPIFY_STORE` + `SHOPIFY_ADMIN_TOKEN` from `.env` by default.
+If no token is available, set `SHOPIFY_CLI_STORE=<store>.myshopify.com` to
+route all GraphQL through `shopify store execute` (run
+`shopify store auth --store <store>.myshopify.com --scopes read_products,write_products`
+once first).
+
+**Adding a compound:** add `cognitiveGoals` + `goalProductHandles` to its data
+file, then `npm run goals:sync`. No collection edits needed.
+
+## Navigation switch checklist (manual, admin)
+
+Do this only after verifying the six `goal-*` collections are populated
+(Admin → Products → Collections). Update the `main-menu` linklist at
+Admin → Online Store → Navigation → **Main menu**:
+
+1. Add six links (top level or under a "Shop by Goal" parent):
+   - Focus & Deep Work → `/collections/goal-focus-deep-work`
+   - Memory & Learning → `/collections/goal-memory-learning`
+   - Mood & Stress → `/collections/goal-mood-stress`
+   - Energy & Wakefulness → `/collections/goal-energy-wakefulness`
+   - Sleep & Recovery → `/collections/goal-sleep-recovery`
+   - Neuroprotection & Longevity → `/collections/goal-neuroprotection-longevity`
+2. Create the A–Z page: Admin → Online Store → Pages → Add page, title
+   "Browse by Compound", theme template `page.compound-index`. Add a
+   "Browse by Compound" link to the menu pointing at it.
+3. Keep existing Peptides / Guides / Wholesale links; demote or remove the
+   old compound-category links (Nootropics, Racetams, GABAergic,
+   Powder Nootropics, Bundles) as desired — the collections themselves are
+   untouched and still resolve.
+4. Optional mega menu: add a `mega-menu-1` section to
+   `sections/header-group.json` with `index_nav` set to the outcome item's
+   0-based position in the menu.
+
+Rollback: restore the previous `main-menu` items. Theme templates and goal
+collections can stay — they are additive.
