@@ -1,12 +1,240 @@
 {% comment %}
-  Compound Index — dynamic A–Z browse of every product in a chosen collection.
-  Groups products by first letter with a sticky alphabet bar. HTML/CSS only.
+  Compound Index — dynamic A–Z directory of every product in a chosen collection.
+  Text-only rows grouped by first letter with a sticky alphabet bar. HTML/CSS only.
 {% endcomment %}
 
 {%- liquid
   assign ci_collection = section.settings.collection | default: collections.all
   assign ci_alphabet = 'A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z' | split: ','
 -%}
+
+{%- style -%}
+@media (prefers-reduced-motion: no-preference) {
+  html:has(.xo-section--{{ section.id }}) {
+    scroll-behavior: smooth;
+  }
+}
+
+.xo-section--{{ section.id }} .ci-wrapper {
+  padding-block: 3.2rem 6rem;
+}
+
+.xo-section--{{ section.id }} .ci-hero {
+  text-align: center;
+  margin-bottom: 2.4rem;
+}
+
+.xo-section--{{ section.id }} .ci-title {
+  margin: 0 0 1.2rem;
+}
+
+.xo-section--{{ section.id }} .ci-subtitle {
+  max-width: 64rem;
+  margin: 0 auto 1.6rem;
+  color: color-mix(in srgb, rgba(var(--color-foreground)) 75%, transparent);
+}
+
+.xo-section--{{ section.id }} .ci-count {
+  display: inline-block;
+  padding: 0.6rem 1.6rem;
+  border-radius: 1.6rem;
+  font-size: 1.3rem;
+  font-weight: 500;
+  background: rgba(var(--color-background-2));
+  color: rgba(var(--color-foreground));
+}
+
+.xo-section--{{ section.id }} .ci-alpha-bar {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: rgba(var(--color-background));
+  border-block: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 12%, transparent);
+  margin-bottom: 3.2rem;
+}
+
+.xo-section--{{ section.id }} .ci-alpha-inner {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  gap: 0.2rem;
+  padding: 1rem 0.4rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.xo-section--{{ section.id }} .ci-alpha-inner::-webkit-scrollbar {
+  display: none;
+}
+
+@media screen and (min-width: 768px) {
+  .xo-section--{{ section.id }} .ci-alpha-inner {
+    justify-content: center;
+    overflow-x: visible;
+  }
+}
+
+.xo-section--{{ section.id }} .ci-alpha-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  min-width: 3.2rem;
+  min-height: 3.2rem;
+  border-radius: 50%;
+  font-size: 1.4rem;
+  font-weight: 600;
+  text-decoration: none;
+  color: rgba(var(--color-foreground));
+  transition: background-color 0.2s ease;
+}
+
+.xo-section--{{ section.id }} .ci-alpha-link:hover {
+  background: rgba(var(--color-accent));
+}
+
+.xo-section--{{ section.id }} .ci-alpha-link:focus-visible {
+  outline: 2px solid rgba(var(--color-accent));
+  outline-offset: 2px;
+}
+
+.xo-section--{{ section.id }} .ci-alpha-link--disabled {
+  color: color-mix(in srgb, rgba(var(--color-foreground)) 30%, transparent);
+  pointer-events: none;
+}
+
+.xo-section--{{ section.id }} .ci-letter-group {
+  margin-bottom: 2.8rem;
+}
+
+.xo-section--{{ section.id }} .ci-letter-heading {
+  scroll-margin-top: 96px;
+  margin: 0 0 1.2rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 2px solid rgba(var(--color-accent));
+  font-size: 2rem;
+}
+
+@media (max-width: 768px) {
+  .xo-section--{{ section.id }} .ci-letter-heading {
+    scroll-margin-top: 80px;
+  }
+}
+
+.xo-section--{{ section.id }} .ci-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  column-gap: 4rem;
+  row-gap: 0;
+}
+
+@media screen and (min-width: 768px) {
+  .xo-section--{{ section.id }} .ci-list {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media screen and (min-width: 1140px) {
+  .xo-section--{{ section.id }} .ci-list {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
+
+.xo-section--{{ section.id }} .ci-item-link {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1.6rem;
+  padding: 1rem 0.8rem;
+  border-bottom: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 8%, transparent);
+  border-radius: 0.6rem;
+  text-decoration: none;
+  color: rgba(var(--color-foreground));
+  transition: background-color 0.2s ease;
+}
+
+.xo-section--{{ section.id }} .ci-item-link:hover {
+  background: color-mix(in srgb, rgba(var(--color-accent)) 10%, transparent);
+}
+
+.xo-section--{{ section.id }} .ci-item-link:focus-visible {
+  outline: 2px solid rgba(var(--color-accent));
+  outline-offset: -2px;
+}
+
+.xo-section--{{ section.id }} .ci-item-body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.xo-section--{{ section.id }} .ci-item-title {
+  display: block;
+  font-weight: 500;
+  font-size: 1.5rem;
+  line-height: 1.4;
+}
+
+.xo-section--{{ section.id }} .ci-item-goals {
+  display: none;
+}
+
+@media screen and (min-width: 768px) {
+  .xo-section--{{ section.id }} .ci-item-goals {
+    display: block;
+    margin-top: 0.2rem;
+    font-size: 1.2rem;
+    line-height: 1.4;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 55%, transparent);
+  }
+}
+
+.xo-section--{{ section.id }} .ci-item-price {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: baseline;
+  gap: 0.8rem;
+  font-weight: 500;
+  font-size: 1.35rem;
+  color: color-mix(in srgb, rgba(var(--color-foreground)) 70%, transparent);
+  white-space: nowrap;
+}
+
+.xo-section--{{ section.id }} .ci-item-soldout {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: rgba(var(--color-error));
+}
+
+.xo-section--{{ section.id }} .ci-top-link {
+  display: inline-block;
+  margin-top: 0.8rem;
+  font-size: 1.2rem;
+  font-weight: 500;
+  text-decoration: none;
+  color: color-mix(in srgb, rgba(var(--color-foreground)) 55%, transparent);
+}
+
+.xo-section--{{ section.id }} .ci-top-link:hover {
+  color: rgba(var(--color-foreground));
+}
+
+.xo-section--{{ section.id }} .ci-disclaimer {
+  margin-top: 4rem;
+  padding: 1.6rem 2rem;
+  border-radius: 1.5rem;
+  background: rgba(var(--color-background-2));
+}
+
+.xo-section--{{ section.id }} .ci-disclaimer p {
+  margin: 0;
+  font-size: 1.3rem;
+  color: color-mix(in srgb, rgba(var(--color-foreground)) 75%, transparent);
+}
+{%- endstyle -%}
 
 {%- paginate ci_collection.products by 250 -%}
 {%- liquid
@@ -29,7 +257,7 @@
 
 <section {% render 'section-attr' %}>
   <xo-container>
-    <div class="ci-wrapper" id="ci-{{ section.id }}">
+    <div class="ci-wrapper" id="ci-top-{{ section.id }}">
       <header class="ci-hero">
         {% if section.settings.heading != blank %}
           <h1 class="ci-title">{{ section.settings.heading }}</h1>
@@ -68,21 +296,6 @@
                   {%- if ci_fl == letter -%}
                     <li class="ci-item">
                       <a href="{{ product.url }}" class="ci-item-link">
-                        {%- if product.featured_image -%}
-                          <img
-                            src="{{ product.featured_image | image_url: width: 96 }}"
-                            srcset="{{ product.featured_image | image_url: width: 96 }} 96w, {{ product.featured_image | image_url: width: 192 }} 192w"
-                            sizes="48px"
-                            alt="{{ product.featured_image.alt | default: product.title | escape }}"
-                            width="48"
-                            height="48"
-                            loading="lazy"
-                            decoding="async"
-                            class="ci-item-img"
-                          >
-                        {%- else -%}
-                          <span class="ci-item-img ci-item-img--placeholder" aria-hidden="true">{{ letter }}</span>
-                        {%- endif -%}
                         <span class="ci-item-body">
                           <span class="ci-item-title">{{ product.title }}</span>
                           {%- if section.settings.show_goals -%}
@@ -90,7 +303,8 @@
                             {%- if ci_goals -%}
                               <span class="ci-item-goals">
                                 {%- for goal in ci_goals -%}
-                                  <span class="ci-goal-tag">{{ goal | replace: '-', ' ' | capitalize }}</span>
+                                  {{- goal | replace: '-', ' ' | capitalize -}}
+                                  {%- unless forloop.last %} &middot; {% endunless -%}
                                 {%- endfor -%}
                               </span>
                             {%- endif -%}
@@ -105,6 +319,7 @@
                   {%- endif -%}
                 {%- endfor -%}
               </ul>
+              <a class="ci-top-link" href="#ci-top-{{ section.id }}">Back to top ↑</a>
             </div>
           {%- endif -%}
         {%- endfor -%}
@@ -119,201 +334,6 @@
   </xo-container>
 </section>
 {%- endpaginate -%}
-
-{% stylesheet %}
-@media (prefers-reduced-motion: no-preference) {
-  .section-compound-index {
-    scroll-behavior: smooth;
-  }
-}
-
-.ci-wrapper {
-  padding-block: 4rem 6rem;
-}
-
-.ci-hero {
-  text-align: center;
-  margin-bottom: 3.2rem;
-}
-
-.ci-title {
-  margin: 0 0 1.2rem;
-}
-
-.ci-subtitle {
-  max-width: 64rem;
-  margin: 0 auto 1.6rem;
-  color: color-mix(in srgb, rgba(var(--color-foreground)) 75%, transparent);
-}
-
-.ci-count {
-  display: inline-block;
-  padding: 0.6rem 1.6rem;
-  border-radius: 1.6rem;
-  font-size: 1.3rem;
-  font-weight: 500;
-  background: rgba(var(--color-background-2));
-  color: rgba(var(--color-foreground));
-}
-
-.ci-alpha-bar {
-  position: sticky;
-  top: 0;
-  z-index: 2;
-  background: rgba(var(--color-background));
-  border-block: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 12%, transparent);
-  margin-bottom: 3.2rem;
-}
-
-.ci-alpha-inner {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 0.2rem;
-  padding: 1rem 0;
-}
-
-.ci-alpha-link {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 3.2rem;
-  min-height: 3.2rem;
-  border-radius: 50%;
-  font-size: 1.4rem;
-  font-weight: 600;
-  text-decoration: none;
-  color: rgba(var(--color-foreground));
-  transition: background-color 0.2s ease;
-}
-
-.ci-alpha-link:hover {
-  background: rgba(var(--color-accent));
-}
-
-.ci-alpha-link--disabled {
-  color: color-mix(in srgb, rgba(var(--color-foreground)) 30%, transparent);
-  pointer-events: none;
-}
-
-.ci-letter-group {
-  margin-bottom: 3.2rem;
-}
-
-.ci-letter-heading {
-  scroll-margin-top: 6rem;
-  margin: 0 0 1.6rem;
-  padding-bottom: 0.8rem;
-  border-bottom: 2px solid rgba(var(--color-accent));
-  font-size: 2.4rem;
-}
-
-.ci-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.2rem;
-}
-
-@media screen and (min-width: 768px) {
-  .ci-list {
-    grid-template-columns: 1fr 1fr;
-    gap: 1.6rem 2.4rem;
-  }
-}
-
-.ci-item-link {
-  display: flex;
-  align-items: center;
-  gap: 1.6rem;
-  padding: 1.2rem 1.6rem;
-  border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 12%, transparent);
-  border-radius: 1.5rem;
-  text-decoration: none;
-  color: rgba(var(--color-foreground));
-  transition: border-color 0.2s ease, background-color 0.2s ease;
-}
-
-.ci-item-link:hover {
-  border-color: rgba(var(--color-accent));
-  background: color-mix(in srgb, rgba(var(--color-accent)) 8%, transparent);
-}
-
-.ci-item-img {
-  flex: 0 0 auto;
-  width: 4.8rem;
-  height: 4.8rem;
-  object-fit: cover;
-  border-radius: 1rem;
-  background: rgba(var(--color-background-2));
-}
-
-.ci-item-img--placeholder {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 600;
-  color: color-mix(in srgb, rgba(var(--color-foreground)) 40%, transparent);
-}
-
-.ci-item-body {
-  flex: 1 1 auto;
-  min-width: 0;
-}
-
-.ci-item-title {
-  display: block;
-  font-weight: 600;
-  font-size: 1.5rem;
-}
-
-.ci-item-goals {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-  margin-top: 0.4rem;
-}
-
-.ci-goal-tag {
-  padding: 0.2rem 0.8rem;
-  border-radius: 0.5rem;
-  font-size: 1.1rem;
-  font-weight: 500;
-  background: rgba(var(--color-background-2));
-  color: color-mix(in srgb, rgba(var(--color-foreground)) 75%, transparent);
-}
-
-.ci-item-price {
-  flex: 0 0 auto;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0.2rem;
-  font-weight: 600;
-  font-size: 1.4rem;
-}
-
-.ci-item-soldout {
-  font-size: 1.1rem;
-  font-weight: 500;
-  color: rgba(var(--color-error));
-}
-
-.ci-disclaimer {
-  margin-top: 4rem;
-  padding: 1.6rem 2rem;
-  border-radius: 1.5rem;
-  background: rgba(var(--color-background-2));
-}
-
-.ci-disclaimer p {
-  margin: 0;
-  font-size: 1.3rem;
-  color: color-mix(in srgb, rgba(var(--color-foreground)) 75%, transparent);
-}
-{% endstylesheet %}
 
 {% schema %}
 {

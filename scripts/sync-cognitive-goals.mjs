@@ -6,13 +6,16 @@
  *   - data/goals.json                    -> the 6 canonical outcomes
  *   - data/{nootropics,peptides}/*.json  -> per-product "cognitiveGoals" slugs
  *
- * Idempotently performs three steps:
+ * Idempotently performs four steps:
  *   1. Ensure the product metafield definition custom.cognitive_goals
  *      (list.single_line_text_field, useAsCollectionCondition: true) exists.
  *   2. Set each product's custom.cognitive_goals metafield via metafieldsSet.
  *   3. Ensure one smart collection per goal, with a rule
  *      PRODUCT_METAFIELD_DEFINITION EQUALS <slug> pointing at the definition,
  *      so products auto-file into outcome collections.
+ *   4. Publish each goal collection to the Online Store sales channel via
+ *      publishablePublish (API-created collections are unpublished by default
+ *      and 404 on the storefront otherwise).
  *
  * Products whose JSON has no "cognitiveGoals" field are skipped (e.g.
  * non-cognitive peptides like BPC-157). Existing collections with the same
@@ -32,7 +35,12 @@
  *   node sync-cognitive-goals.mjs --product=noopept
  *   node sync-cognitive-goals.mjs --all
  *
- * Requires write_products scope on SHOPIFY_ADMIN_TOKEN (see .env.example).
+ * Requires write_products, read_publications, and write_publications scopes
+ * on SHOPIFY_ADMIN_TOKEN (or the Shopify CLI session when SHOPIFY_CLI_STORE
+ * is set — re-auth with:
+ *   shopify store auth --store <store>.myshopify.com \
+ *     --scopes read_products,write_products,read_publications,write_publications
+ * ).
  */
 
 import { readFile, readdir } from "node:fs/promises";
@@ -404,6 +412,58 @@ async function ensureCollection(goal, definitionId) {
     `${existing ? "updated" : "created"} collection ${result.collection.handle} ` +
       `-> ${result.collection.id}`,
   );
+  return result.collection.id;
+}
+
+// ---------- step 4: publish to Online Store ----------
+
+const QUERY_PUBLICATIONS = /* GraphQL */ `
+  query OnlineStorePublications {
+    publications(first: 20) {
+      nodes {
+        id
+        name
+      }
+    }
+  }
+`;
+
+const MUTATION_PUBLISH = /* GraphQL */ `
+  mutation PublishGoalCollection($id: ID!, $input: [PublicationInput!]!) {
+    publishablePublish(id: $id, input: $input) {
+      userErrors {
+        field
+        message
+      }
+    }
+  }
+`;
+
+async function getOnlineStorePublicationId() {
+  const data = await adminGraphQL(QUERY_PUBLICATIONS, {});
+  const pub = data.publications.nodes.find((p) => p.name === "Online Store");
+  if (!pub) {
+    throw new Error(
+      `Online Store publication not found. Available: ` +
+        data.publications.nodes.map((p) => p.name).join(", "),
+    );
+  }
+  return pub.id;
+}
+
+async function publishCollection(collectionId, handle, publicationId) {
+  const data = await adminGraphQL(MUTATION_PUBLISH, {
+    id: collectionId,
+    input: [{ publicationId }],
+  });
+  const result = data.publishablePublish;
+  if (result.userErrors && result.userErrors.length) {
+    throw new Error(
+      `publishablePublish userErrors for ${handle}:\n` +
+        JSON.stringify(result.userErrors, null, 2),
+    );
+  }
+  logStep("[ok]", `published ${handle} to Online Store`);
 }
 
 // ---------- main ----------
@@ -450,6 +510,7 @@ async function ensureCollection(goal, definitionId) {
           "[dry]",
           `${g.collectionHandle}  "${g.label}"  rule: ${NAMESPACE}.${KEY} EQUALS ${g.slug}`,
         );
+        logStep("[dry]", `${g.collectionHandle}  publish -> Online Store`);
       }
     }
     console.log("\nDone (dry run).");
@@ -481,9 +542,11 @@ async function ensureCollection(goal, definitionId) {
 
   if (flags.all) {
     logSection("Smart collections");
+    const publicationId = await getOnlineStorePublicationId();
     for (const g of goals) {
       try {
-        await ensureCollection(g, definitionId);
+        const collectionId = await ensureCollection(g, definitionId);
+        await publishCollection(collectionId, g.collectionHandle, publicationId);
       } catch (err) {
         console.error(`  [error] ${g.collectionHandle}: ${err.message}`);
         process.exitCode = 1;
