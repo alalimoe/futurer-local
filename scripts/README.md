@@ -50,21 +50,27 @@ scripts/
 │   │   ├── acetyl-l-carnitine.json
 │   │   ├── … (28 files total)
 │   │   └── tongkat-ali.json
+│   ├── landing/                Source of truth — one JSON per landing page
+│   │   ├── fladrafinil.json
+│   │   └── noopept.json
 │   └── matrixify/              Generated CSVs (gitignored output)
 │       ├── claims-peptides.csv     25 peptide claims
 │       ├── claims-nootropics.csv   56 nootropic claims
-│       └── claims.csv              all 81 claims (combined)
+│       ├── claims.csv              all 81 claims (combined)
+│       └── landing-pages.csv       Matrixify Pages import for landing pages
 ├── lib/
 │   ├── shopify-admin.mjs       Admin GraphQL client
 │   ├── rich-text.mjs           Builds Shopify rich-text JSON for the API path
 │   ├── rich-text-html.mjs      Builds equivalent HTML for the Matrixify path
+│   ├── landing-compliance.mjs  Claim/disclaimer lint for landing content
 │   └── csv.mjs                 Tiny CSV writer
-├── generate-matrixify-csv.mjs  CSV generator
-├── import-evidence-claims.mjs  Admin API runner
-├── clean-claim-notes.mjs       Strip duplicate plain-text PubMed before inline links
-├── .env.example                (admin API path) required env vars
-├── package.json                Convenience npm scripts
-└── README.md                   This file
+├── generate-matrixify-csv.mjs   CSV generator (evidence claims)
+├── generate-landing-template.mjs Landing-page template + Pages CSV generator
+├── import-evidence-claims.mjs   Admin API runner
+├── clean-claim-notes.mjs        Strip duplicate plain-text PubMed before inline links
+├── .env.example                 (admin API path) required env vars
+├── package.json                 Convenience npm scripts
+└── README.md                    This file
 ```
 
 `scripts/.env` and `scripts/node_modules/` are git-ignored at the repo root.
@@ -279,3 +285,95 @@ exist (the script never deletes); delete it manually if you want it gone.
   always a manual admin action.
 - **No snapshot or product writes**: scripts only touch `evidence_claim`
   records; you control snapshot composition manually.
+
+---
+
+# Compound landing pages
+
+Systematizes the proven `/pages/phenibut-for-sale` SEO playbook into a
+repeatable generator. One content JSON per compound in `data/landing/` becomes
+a Shopify page template that **reuses the existing, content-agnostic
+`phenibut-*` sections** (plus `sticky-cta` and `nx-related-guides`). The
+sections are never renamed or forked — the live phenibut page keeps depending
+on them; each generated template overrides every setting with the compound's
+content.
+
+Pilot pages: `fladrafinil`, `noopept`.
+
+## What the generator produces
+
+`generate-landing-template.mjs` reads `data/landing/*.json` and writes:
+
+| Output | Purpose |
+|---|---|
+| `../templates/page.<templateSuffix>.json` | One page template per compound, reusing `phenibut-*` sections |
+| `data/matrixify/landing-pages.csv` | Matrixify **Pages** import (`MERGE`) that creates the pages and assigns the template |
+
+A **hard compliance lint** (`lib/landing-compliance.mjs`) runs first. If any
+content file makes an overt disease claim (treat/cure/prevent/diagnose,
+"clinically proven", "FDA approved", …) or is missing a required disclaimer
+(`safety.disclaimer`, `whatIs.noteText`, a "not medical advice" statement),
+generation **aborts and writes nothing**. Sentences that negate the claim
+(e.g. the standard "not intended to diagnose, treat, cure, or prevent any
+disease" disclaimer) are allowed through. This makes every generated page
+policy-safe by construction — important given Google Ads has flagged claim
+language before.
+
+Reviews are only rendered when a content file supplies a real `reviews` array.
+Compounds with none simply omit the reviews section, which avoids fabricated
+`AggregateRating` JSON-LD (a Google penalty risk).
+
+## Add a new landing page (repeatable workflow)
+
+1. **Write the content file** `data/landing/<compound>.json`. Copy
+   `fladrafinil.json` as the template. Draft copy from the compound's
+   `data/nootropics/<handle>.json` claims (PubMed-cited) and its live PDP.
+   Required keys: `compound`, `pageHandle`, `templateSuffix`, `seo`,
+   `shopAnchor`, `hero`, `tldr`, `whatIs`, `goalChips`, `benefits`, `works`,
+   `safety`, `compare`, `evidence`, `products.handles` (real product handles,
+   max 6), `faq`, `cta`, `relatedGuides`. `reviews` is optional.
+   - `goalChips[].benefit` **must exactly match** a `benefits.items[].title`
+     (the chip anchor is derived from it via `handleize`).
+
+2. **Generate + lint**:
+
+   ```bash
+   cd scripts
+   node generate-landing-template.mjs --compound=<compound>   # one page
+   node generate-landing-template.mjs --all                   # every page
+   # or:  npm run landing            (all)
+   #      npm run landing:one -- --compound=<compound>
+   ```
+
+3. **Validate** the generated template with `validate_theme` (Shopify MCP), per
+   the workspace rules, then **push the theme**:
+
+   ```bash
+   shopify theme push --only templates/page.<templateSuffix>.json
+   ```
+
+4. **Create the page** in Shopify. Either:
+   - **Matrixify**: Apps → Matrixify → Import → `data/matrixify/landing-pages.csv`
+     → **Dry Run** → review → **Import**. Creates `/pages/<pageHandle>` with the
+     template assigned and SEO title/description set. Re-imports `MERGE` in place.
+   - **Manual (fine for 1–2 pages)**: Admin → Online Store → Pages → Add page,
+     set the handle to `<pageHandle>`, choose theme template
+     `page.<templateSuffix>`, and set the SEO title/description from the CSV.
+
+5. **Wire internal links**: add a card to the Guides Hub
+   (`templates/page.guides.json`) and any relevant guide/collection pages, and
+   request indexing in Google Search Console.
+
+## Batch rollout
+
+After the pilot pages validate their rankings, add remaining compounds by
+**writing data files only** — no code changes. Candidate batches: racetams,
+cholines, naturals, peptides. Run `npm run landing` to (re)generate all.
+
+## Safety guarantees (landing pages)
+
+- **Idempotent**: templates overwrite in place; the Pages CSV uses
+  `Command=MERGE` keyed on page handle.
+- **Non-destructive to phenibut**: the generator never edits `phenibut-*`
+  section files or the live phenibut template.
+- **Compliance-gated**: nothing is written if the lint fails.
