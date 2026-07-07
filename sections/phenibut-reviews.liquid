@@ -4,35 +4,33 @@
 {% endcomment %}
 
 {%- comment -%} ── JSON-LD: AggregateRating + Reviews ── {%- endcomment -%}
-{% if section.blocks.size > 0 %}
+{%- assign review_blocks = section.blocks | where: 'type', 'review' -%}
+{% if review_blocks.size > 0 %}
   {%- assign total_rating = 0 -%}
-  {%- for block in section.blocks -%}
-    {%- if block.type == 'review' -%}
-      {%- assign total_rating = total_rating | plus: block.settings.rating -%}
-    {%- endif -%}
+  {%- for block in review_blocks -%}
+    {%- assign total_rating = total_rating | plus: block.settings.rating -%}
   {%- endfor -%}
-  {%- assign avg_rating = total_rating | times: 1.0 | divided_by: section.blocks.size -%}
+  {%- assign avg_rating = total_rating | times: 1.0 | divided_by: review_blocks.size -%}
+  {%- assign jsonld_product_name = section.settings.product_name | default: page.title -%}
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "Product",
-  "name": "Phenibut",
+  "name": {{ jsonld_product_name | json }},
   "aggregateRating": {
     "@type": "AggregateRating",
     "ratingValue": "{{ avg_rating | round: 1 }}",
-    "reviewCount": "{{ section.blocks.size }}",
+    "reviewCount": "{{ review_blocks.size }}",
     "bestRating": "5"
   },
   "review": [
-    {%- for block in section.blocks -%}
-      {%- if block.type == 'review' -%}
-        {
-          "@type": "Review",
-          "reviewRating": { "@type": "Rating", "ratingValue": "{{ block.settings.rating }}", "bestRating": "5" },
-          "author": { "@type": "Person", "name": {{ block.settings.author | json }} },
-          "reviewBody": {{ block.settings.text | json }}
-        }{%- unless forloop.last -%},{%- endunless -%}
-      {%- endif -%}
+    {%- for block in review_blocks -%}
+      {
+        "@type": "Review",
+        "reviewRating": { "@type": "Rating", "ratingValue": "{{ block.settings.rating }}", "bestRating": "5" },
+        "author": { "@type": "Person", "name": {{ block.settings.author | json }} },
+        "reviewBody": {{ block.settings.text | json }}
+      }{%- unless forloop.last -%},{%- endunless -%}
     {%- endfor -%}
   ]
 }
@@ -40,6 +38,8 @@
 {% endif %}
 
 {%- style -%}
+.xo-section--{{ section.id }} { scroll-margin-top: 96px; }
+@media (max-width: 768px) { .xo-section--{{ section.id }} { scroll-margin-top: 80px; } }
   .xo-section--{{ section.id }} {
     padding-top: {{ section.settings.padding_top }}px;
     padding-bottom: {{ section.settings.padding_bottom }}px;
@@ -134,7 +134,7 @@
   }
 {%- endstyle -%}
 
-<section {% render 'section-attr' %} aria-labelledby="phb-reviews-title-{{ section.id }}">
+<section {% if section.settings.anchor_id != blank %}id="{{ section.settings.anchor_id }}" {% endif %}{% render 'section-attr' %} aria-labelledby="phb-reviews-title-{{ section.id }}">
   <xo-container>
     <h2 id="phb-reviews-title-{{ section.id }}" class="phb-reviews__title">{{ section.settings.heading | escape }}</h2>
     {% if section.settings.intro != blank %}
@@ -170,6 +170,7 @@
   "settings": [
     { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "default" },
     { "type": "text", "id": "anchor_id", "label": "Anchor ID", "default": "reviews" },
+    { "type": "text", "id": "product_name", "label": "Product name (structured data)", "default": "Phenibut", "info": "Used in the Product/AggregateRating JSON-LD. Set per compound." },
     { "type": "text", "id": "heading", "label": "Heading", "default": "Customer Stories" },
     { "type": "richtext", "id": "intro", "label": "Intro", "default": "<p>Real experiences from Dubai and beyond—fast delivery, consistent quality.</p>" },
     { "type": "header", "content": "Spacing" },
