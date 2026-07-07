@@ -4,12 +4,14 @@
 {% endcomment %}
 
 {%- style -%}
+.xo-section--{{ section.id }} xo-animate { display: block; }
 .xo-section--{{ section.id }} { scroll-margin-top: 96px; }
 @media (max-width: 768px) { .xo-section--{{ section.id }} { scroll-margin-top: 80px; } }
   .xo-section--{{ section.id }} {
     padding-top: {{ section.settings.padding_top }}px;
     padding-bottom: {{ section.settings.padding_bottom }}px;
-    background: linear-gradient(180deg, {{ section.settings.gradient_from }} 0%, {{ section.settings.gradient_to }} 100%);
+    /* Gradient flipped relative to the hero (to → from) to bookend the page */
+    background: linear-gradient(180deg, {{ section.settings.gradient_to }} 0%, {{ section.settings.gradient_from }} 100%);
     color: rgba(var(--color-background));
     position: relative;
     overflow: clip;
@@ -21,64 +23,43 @@
   }
 
   .xo-section--{{ section.id }} .phb-cta__title {
-    font-size: clamp(22px, 4.2vw, 36px);
-    line-height: 1.2;
-    margin: 0 0 8px;
+    font-size: clamp(2.8rem, 5vw, 5.6rem);
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin: 0 0 0.8rem;
     font-weight: 600;
     color: rgba(var(--color-background));
+    text-wrap: balance;
   }
 
   .xo-section--{{ section.id }} .phb-cta__sub {
-    font-size: clamp(16px, 2.2vw, 18px);
-    opacity: 0.95;
-    margin-bottom: 12px;
+    font-size: clamp(1.6rem, 2.2vw, 1.8rem);
+    color: color-mix(in srgb, rgba(var(--color-background)) 90%, transparent);
+    margin-bottom: 1.2rem;
   }
 
   .xo-section--{{ section.id }} .phb-cta__buttons {
     display: flex;
-    gap: 10px;
+    gap: 1.2rem;
     justify-content: center;
     flex-wrap: wrap;
   }
 
-  .xo-section--{{ section.id }} .phb-cta__btn {
+  .xo-section--{{ section.id }} .phb-cta__urgency {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
-    padding: 12px 18px;
-    min-height: 44px;
-    border-radius: var(--button-radius, 10rem);
+    gap: 0.6rem;
+    margin: 1.6rem 0 0;
+    font-size: 1.4rem;
     font-weight: 600;
-    text-decoration: none;
-    border: 2px solid rgba(var(--color-background));
-    transition: opacity 0.3s var(--out-soft, ease);
-  }
-
-  .xo-section--{{ section.id }} .phb-cta__btn:hover {
-    opacity: 0.85;
-  }
-
-  .xo-section--{{ section.id }} .phb-cta__btn:focus-visible {
-    outline: 2px solid rgba(var(--color-accent));
-    outline-offset: 2px;
-  }
-
-  .xo-section--{{ section.id }} .phb-cta__btn--primary {
-    background: rgba(var(--color-background));
-    color: rgba(var(--color-foreground));
-    border-color: rgba(var(--color-background));
-  }
-
-  .xo-section--{{ section.id }} .phb-cta__btn--ghost {
-    background: transparent;
-    color: rgba(var(--color-background));
+    color: rgba(var(--color-accent));
   }
 
   .xo-section--{{ section.id }} .phb-cta__packshot {
     position: absolute;
-    right: max(16px, 6%);
-    bottom: 8px;
-    width: clamp(160px, 26vw, 340px);
+    right: max(1.6rem, 6%);
+    bottom: 0.8rem;
+    width: clamp(16rem, 26vw, 34rem);
     height: auto;
     pointer-events: none;
     opacity: 0.95;
@@ -87,8 +68,8 @@
   @media (max-width: 768px) {
     .xo-section--{{ section.id }} .phb-cta__packshot {
       display: {% if section.settings.packshot_hide_mobile %}none{% else %}block{% endif %};
-      right: 12px;
-      width: clamp(140px, 44vw, 260px);
+      right: 1.2rem;
+      width: clamp(14rem, 44vw, 26rem);
       opacity: 0.9;
     }
   }
@@ -105,7 +86,7 @@
 
 <section {% if section.settings.anchor_id != blank %}id="{{ section.settings.anchor_id }}" {% endif %}{% render 'section-attr' %} aria-labelledby="phb-cta-title-{{ section.id }}">
   <xo-container>
-    <div class="phb-cta__container">
+    <xo-animate xo-type="fade-up" class="phb-cta__container">
       <h2 id="phb-cta-title-{{ section.id }}" class="phb-cta__title">{{ section.settings.heading | escape }}</h2>
       {% if section.settings.subhead != blank %}
         <div class="phb-cta__sub">{{ section.settings.subhead }}</div>
@@ -113,12 +94,19 @@
 
       <div class="phb-cta__buttons">
         {% if section.settings.primary_label != blank and section.settings.primary_href != blank %}
-          <a class="phb-cta__btn phb-cta__btn--primary" href="{{ section.settings.primary_href | escape }}">{{ section.settings.primary_label | escape }}</a>
+          {% render 'button', style: 'primary', text: section.settings.primary_label, link: section.settings.primary_href %}
         {% endif %}
         {% if section.settings.secondary_label != blank and section.settings.secondary_href != blank %}
-          <a class="phb-cta__btn phb-cta__btn--ghost" href="{{ section.settings.secondary_href | escape }}">{{ section.settings.secondary_label | escape }}</a>
+          {% render 'button', style: 'light', text: section.settings.secondary_label, link: section.settings.secondary_href %}
         {% endif %}
       </div>
+
+      {% if section.settings.urgency_text != blank %}
+        <p class="phb-cta__urgency">
+          {% render 'icon', name: 'shipping-fast', size: '1.6rem' %}
+          {{ section.settings.urgency_text | escape }}
+        </p>
+      {% endif %}
 
       {% if section.settings.packshot_image != blank %}
         <img
@@ -133,7 +121,7 @@
           loading="lazy" decoding="async"
         >
       {% endif %}
-    </div>
+    </xo-animate>
   </xo-container>
 </section>
 
@@ -151,6 +139,7 @@
     { "type": "text", "id": "primary_href", "label": "Primary CTA href", "default": "#shop-phenibut" },
     { "type": "text", "id": "secondary_label", "label": "Secondary CTA label", "default": "Compare Forms" },
     { "type": "text", "id": "secondary_href", "label": "Secondary CTA href", "default": "#forms" },
+    { "type": "text", "id": "urgency_text", "label": "Trust/urgency subline", "default": "Ships today from Dubai — order by 6pm" },
     { "type": "color", "id": "gradient_from", "label": "Gradient from", "default": "#0A2342" },
     { "type": "color", "id": "gradient_to", "label": "Gradient to", "default": "#CFE7E7" },
     { "type": "image_picker", "id": "packshot_image", "label": "Decorative packshot image" },

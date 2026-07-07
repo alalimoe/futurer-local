@@ -4,6 +4,7 @@
 {% endcomment %}
 
 {%- style -%}
+.xo-section--{{ section.id }} xo-animate { display: block; }
 .xo-section--{{ section.id }} { scroll-margin-top: 96px; }
 @media (max-width: 768px) { .xo-section--{{ section.id }} { scroll-margin-top: 80px; } }
   .xo-section--{{ section.id }} {
@@ -11,24 +12,40 @@
     padding-bottom: {{ section.settings.padding_bottom }}px;
   }
 
+  .xo-section--{{ section.id }} .phb-faq__inner {
+    display: block;
+    max-width: 76rem;
+  }
+
+  .xo-section--{{ section.id }} .phb-kicker {
+    display: block;
+    margin: 0 0 1rem;
+    color: rgba(var(--color-accent));
+    font-size: 1.3rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
   .xo-section--{{ section.id }} .phb-faq__title {
-    font-size: clamp(22px, 4.2vw, 36px);
+    font-size: clamp(2.8rem, 4vw, 4.8rem);
     line-height: 1.2;
+    letter-spacing: -0.02em;
     color: rgba(var(--color-foreground));
-    margin: 0 0 8px;
+    margin: 0 0 1.6rem;
     font-weight: 600;
   }
 
   .xo-section--{{ section.id }} .phb-faq__list {
     display: grid;
-    gap: 10px;
+    gap: 1rem;
   }
 
   .xo-section--{{ section.id }} .phb-faq__item {
     background: rgba(var(--color-background));
     border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
     border-radius: var(--general-radius-1, 1rem);
-    padding: 12px 14px;
+    padding: 1.4rem 1.6rem;
     transition: border-color 0.3s var(--out-soft, ease);
   }
 
@@ -58,15 +75,17 @@
   .xo-section--{{ section.id }} .phb-faq__a {
     color: color-mix(in srgb, rgba(var(--color-foreground)) 75%, transparent);
     line-height: 1.6;
-    margin-top: 8px;
+    margin-top: 0.8rem;
   }
 
   .xo-section--{{ section.id }} .phb-faq__chev {
+    display: inline-flex;
+    transform: rotate(180deg);
     transition: transform 0.3s var(--out-soft, ease);
   }
 
   .xo-section--{{ section.id }} .phb-faq__item[open] .phb-faq__chev {
-    transform: rotate(180deg);
+    transform: rotate(0deg);
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -81,6 +100,10 @@
 
 <section {% if section.settings.anchor_id != blank %}id="{{ section.settings.anchor_id }}" {% endif %}{% render 'section-attr' %} aria-labelledby="phb-faq-title-{{ section.id }}">
   <xo-container>
+    <xo-animate xo-type="fade-up" class="phb-faq__inner">
+    {% if section.settings.kicker != blank %}
+      <span class="phb-kicker">{{ section.settings.kicker | escape }}</span>
+    {% endif %}
     <h2 id="phb-faq-title-{{ section.id }}" class="phb-faq__title">{{ section.settings.heading | escape }}</h2>
 
     <div class="phb-faq__list">
@@ -89,13 +112,14 @@
           <details class="phb-faq__item" {{ block.shopify_attributes }}{% if block.settings.open_by_default %} open{% endif %}>
             <summary class="phb-faq__q">
               <span>{{ block.settings.question | escape }}</span>
-              <span class="phb-faq__chev" aria-hidden="true">▾</span>
+              <span class="phb-faq__chev" aria-hidden="true">{% render 'icon', name: 'chevron-up', size: '1.4rem' %}</span>
             </summary>
             <div class="phb-faq__a" dir="auto">{{ block.settings.answer }}</div>
           </details>
         {% endif %}
       {% endfor %}
     </div>
+    </xo-animate>
 
     {%- assign qa_blocks = section.blocks | where: 'type', 'qa' -%}
     {% if qa_blocks.size > 0 %}
@@ -129,6 +153,7 @@
   "settings": [
     { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "default" },
     { "type": "text", "id": "anchor_id", "label": "Anchor ID", "default": "faq" },
+    { "type": "text", "id": "kicker", "label": "Kicker (eyebrow label)" },
     { "type": "text", "id": "heading", "label": "Heading", "default": "Frequently Asked Questions" },
     { "type": "header", "content": "Spacing" },
     { "type": "range", "id": "padding_top", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding top", "default": 40 },

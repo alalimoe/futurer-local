@@ -4,6 +4,7 @@
 {% endcomment %}
 
 {%- style -%}
+.xo-section--{{ section.id }} xo-animate { display: block; }
 .xo-section--{{ section.id }} { scroll-margin-top: 96px; }
 @media (max-width: 768px) { .xo-section--{{ section.id }} { scroll-margin-top: 80px; } }
   .xo-section--{{ section.id }} {
@@ -11,9 +12,25 @@
     padding-bottom: {{ section.settings.padding_bottom }}px;
   }
 
+  .xo-section--{{ section.id }} .phb-evidence__inner {
+    display: block;
+    max-width: 76rem;
+  }
+
+  .xo-section--{{ section.id }} .phb-kicker {
+    display: block;
+    margin: 0 0 1rem;
+    color: rgba(var(--color-accent));
+    font-size: 1.3rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
   .xo-section--{{ section.id }} .phb-evidence__title {
-    font-size: clamp(22px, 4.2vw, 36px);
+    font-size: clamp(2.8rem, 4vw, 4.8rem);
     line-height: 1.2;
+    letter-spacing: -0.02em;
     margin: 0;
     color: rgba(var(--color-foreground));
     font-weight: 600;
@@ -22,14 +39,14 @@
   .xo-section--{{ section.id }} .phb-evidence__tldr {
     color: rgba(var(--color-foreground));
     line-height: 1.7;
-    margin-top: 14px;
+    margin-top: 1.4rem;
   }
 
   .xo-section--{{ section.id }} .phb-evidence__chips {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
-    margin: 18px 0 0;
+    gap: 1rem;
+    margin: 1.8rem 0 0;
     list-style: none;
     padding: 0;
   }
@@ -37,16 +54,18 @@
   .xo-section--{{ section.id }} .phb-evidence__chip {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 8px 10px;
+    gap: 0.8rem;
+    padding: 0.8rem 1.2rem;
     border-radius: var(--button-radius, 10rem);
     background: rgba(var(--color-background-2));
     color: rgba(var(--color-foreground));
     text-decoration: none;
     font-weight: 600;
-    font-size: 14px;
+    font-size: 1.4rem;
     transition: opacity 0.3s var(--out-soft, ease);
   }
+
+  .xo-section--{{ section.id }} .phb-evidence__chip svg { flex: none; }
 
   .xo-section--{{ section.id }} .phb-evidence__chip:hover {
     opacity: 0.85;
@@ -58,9 +77,9 @@
   }
 
   .xo-section--{{ section.id }} .phb-evidence__note {
-    font-size: 13px;
-    color: color-mix(in srgb, rgba(var(--color-foreground)) 60%, transparent);
-    margin-top: 4px;
+    font-size: 1.3rem;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 75%, transparent);
+    margin-top: 0.4rem;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -75,33 +94,39 @@
 
 <section {% if section.settings.anchor_id != blank %}id="{{ section.settings.anchor_id }}" {% endif %}{% render 'section-attr' %} aria-labelledby="phb-evidence-title-{{ section.id }}">
   <xo-container>
-    <h2 id="phb-evidence-title-{{ section.id }}" class="phb-evidence__title">{{ section.settings.heading | escape }}</h2>
-
-    <div class="phb-evidence__tldr">
-      {% if section.settings.phrasing_mode == 'simple' %}
-        {{ section.settings.simple_copy }}
-      {% else %}
-        {{ section.settings.scientific_copy }}
+    <xo-animate xo-type="fade-up" class="phb-evidence__inner">
+      {% if section.settings.kicker != blank %}
+        <span class="phb-kicker">{{ section.settings.kicker | escape }}</span>
       {% endif %}
-    </div>
+      <h2 id="phb-evidence-title-{{ section.id }}" class="phb-evidence__title">{{ section.settings.heading | escape }}</h2>
 
-    {% if section.blocks.size > 0 %}
-      <ul class="phb-evidence__chips" role="list">
-        {% for block in section.blocks %}
-          {% if block.type == 'ref' %}
-            <li {{ block.shopify_attributes }}>
-              <a class="phb-evidence__chip" href="{{ block.settings.href | escape }}" target="_blank" rel="noopener noreferrer">
-                {{ block.settings.label | escape }}
-              </a>
-            </li>
-          {% endif %}
-        {% endfor %}
-      </ul>
-    {% endif %}
+      <div class="phb-evidence__tldr">
+        {% if section.settings.phrasing_mode == 'simple' %}
+          {{ section.settings.simple_copy }}
+        {% else %}
+          {{ section.settings.scientific_copy }}
+        {% endif %}
+      </div>
 
-    {% if section.settings.note != blank %}
-      <p class="phb-evidence__note">{{ section.settings.note }}</p>
-    {% endif %}
+      {% if section.blocks.size > 0 %}
+        <ul class="phb-evidence__chips" role="list">
+          {% for block in section.blocks %}
+            {% if block.type == 'ref' %}
+              <li {{ block.shopify_attributes }}>
+                <a class="phb-evidence__chip" href="{{ block.settings.href | escape }}" target="_blank" rel="noopener noreferrer">
+                  {% render 'icon', name: 'linked', size: '1.4rem' %}
+                  {{ block.settings.label | escape }}
+                </a>
+              </li>
+            {% endif %}
+          {% endfor %}
+        </ul>
+      {% endif %}
+
+      {% if section.settings.note != blank %}
+        <p class="phb-evidence__note">{{ section.settings.note }}</p>
+      {% endif %}
+    </xo-animate>
   </xo-container>
 </section>
 
@@ -113,6 +138,7 @@
   "settings": [
     { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "default" },
     { "type": "text", "id": "anchor_id", "label": "Anchor ID", "default": "evidence" },
+    { "type": "text", "id": "kicker", "label": "Kicker (eyebrow label)" },
     { "type": "text", "id": "heading", "label": "Heading", "default": "Evidence Snapshot" },
     { "type": "radio", "id": "phrasing_mode", "label": "Phrasing", "default": "simple", "options": [ { "value": "simple", "label": "Simple" }, { "value": "scientific", "label": "Scientific" } ] },
     { "type": "richtext", "id": "simple_copy", "label": "Simple copy", "default": "<p>Small human studies and user reports suggest calming effects and improved sleep when used occasionally and responsibly.</p>" },

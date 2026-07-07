@@ -123,11 +123,6 @@ function buildTemplate(data) {
     order.push(id);
   };
 
-  add('spacing_top', {
-    type: 'spacing',
-    settings: { spacing_dt: 100, spacing_mb: 100 },
-  });
-
   add('hero', buildHero(data, shopAnchor));
 
   add('sticky_cta', {
@@ -178,9 +173,14 @@ function buildHero(data, shopAnchor) {
 
   const blocks = {};
   const block_order = [];
-  (h.trustItems || []).forEach((text, i) => {
+  const defaultTrustIcons = ['clock', 'verified', 'shipping-fast'];
+  (h.trustItems || []).forEach((item, i) => {
     const id = `trust_${i + 1}`;
-    blocks[id] = { type: 'trust_item', settings: { text } };
+    const text = typeof item === 'string' ? item : item.text;
+    const icon =
+      (typeof item === 'object' && item.icon) ||
+      defaultTrustIcons[i % defaultTrustIcons.length];
+    blocks[id] = { type: 'trust_item', settings: { text, icon } };
     block_order.push(id);
   });
 
@@ -235,8 +235,6 @@ function buildTldr(data) {
     block_order,
     settings: {
       heading: t.heading || 'Key Takeaways (TL;DR)',
-      bg_color: '#fafafb',
-      accent_color: '#FBBF24',
     },
   };
 }
@@ -248,6 +246,7 @@ function buildWhatIs(data) {
     name: `What is ${data.compound}`,
     settings: {
       anchor_id: `what-is-${handleize(data.compound)}`,
+      kicker: w.kicker || 'The basics',
       heading: w.heading || `What is ${data.compound}?`,
       definition: w.definition,
       show_basics: true,
@@ -306,7 +305,7 @@ function buildBenefits(data) {
       type: 'benefit',
       settings: {
         use_image_icon: false,
-        emoji_icon: item.emoji || '',
+        icon: item.icon || 'success',
         title: item.title,
         blurb: item.blurb,
         open_by_default: false,
@@ -324,6 +323,7 @@ function buildBenefits(data) {
     name: 'Benefits & Uses',
     settings: {
       anchor_id: `${handleize(data.compound)}-benefits-uses`,
+      kicker: b.kicker || 'Benefits & uses',
       heading: b.heading || `${data.compound} Benefits & Uses`,
       intro: b.intro || '',
       max_width: 1200,
@@ -364,6 +364,7 @@ function buildWorks(data) {
     name: 'How It Works',
     settings: {
       anchor_id: 'how-it-works',
+      kicker: w.kicker || 'Mechanism',
       heading: w.heading || `How ${data.compound} Works`,
       subhead: w.subhead || '',
       diagram_alt: `Diagram of how ${data.compound} works`,
@@ -404,6 +405,7 @@ function buildSafety(data) {
     name: 'Use Safely',
     settings: {
       anchor_id: 'safety',
+      kicker: s.kicker || 'Use responsibly',
       heading: s.heading || `How to Use ${data.compound} Safely`,
       intro: s.intro || '',
       max_width: 1200,
@@ -425,6 +427,7 @@ function buildCompare(data) {
     blocks[id] = {
       type: 'alt_row',
       settings: {
+        highlight: Boolean(row.highlight),
         name: row.name,
         mechanism: row.mechanism,
         best_for: row.bestFor,
@@ -441,8 +444,11 @@ function buildCompare(data) {
     name: 'Compare',
     settings: {
       anchor_id: 'alternatives',
+      kicker: c.kicker || 'Compare',
       heading: c.heading || `${data.compound} vs Alternatives`,
       intro: c.intro || '',
+      cta_label: `Shop ${data.compound}`,
+      cta_href: `#${data.shopAnchor || 'shop-now'}`,
       padding_top: 64,
       padding_bottom: 64,
     },
@@ -456,6 +462,7 @@ function buildEvidence(data) {
     name: 'Evidence',
     settings: {
       anchor_id: 'evidence',
+      kicker: e.kicker || 'Evidence',
       heading: e.heading || 'Evidence Snapshot',
       phrasing_mode: 'simple',
       simple_copy: e.simpleCopy,
@@ -475,7 +482,7 @@ function buildProducts(data, shopAnchor) {
     const id = `product_${i + 1}`;
     blocks[id] = {
       type: 'product_card',
-      settings: { product: handle, cta_label: 'View product' },
+      settings: { product: handle },
     };
     block_order.push(id);
   });
@@ -486,6 +493,7 @@ function buildProducts(data, shopAnchor) {
     name: 'Products',
     settings: {
       anchor_id: shopAnchor,
+      kicker: p.kicker || 'Shop',
       heading: p.heading || `Our ${data.compound} Products`,
       intro: p.intro || '',
       padding_top: 64,
@@ -521,6 +529,7 @@ function buildReviews(data) {
     settings: {
       anchor_id: 'reviews',
       product_name: data.compound,
+      kicker: 'Customer reviews',
       heading: 'Customer Stories',
       intro: '',
       padding_top: 64,
@@ -552,6 +561,7 @@ function buildFaq(data) {
     name: 'FAQ',
     settings: {
       anchor_id: 'faq',
+      kicker: f.kicker || 'FAQ',
       heading: f.heading || 'Frequently Asked Questions',
       padding_top: 64,
       padding_bottom: 64,
@@ -573,6 +583,7 @@ function buildCta(data, shopAnchor) {
       primary_href: `#${shopAnchor}`,
       secondary_label: 'Compare Forms',
       secondary_href: '#forms',
+      urgency_text: c.urgencyText || 'Ships today from Dubai — order by 6pm',
       gradient_from: theme.gradientFrom || '#0a2342',
       gradient_to: theme.gradientTo || '#cfe7e7',
       padding_top: 72,
