@@ -35,8 +35,9 @@
   assign coa_lab = product.metafields.pep.coa_lab | default: ''
   assign coa_version = product.metafields.pep.coa_version | default: '1.0.0'
   assign coa_status = product.metafields.pep.coa_status | default: 'current'
-  assign purity = product.metafields.pep.purity_percent
+  assign purity = product.metafields.pep.purity_percent.value | default: product.metafields.pep.purity_percent
   assign verified_on_mf = product.metafields.pdp.coa_verified_on
+  assign coa_note = product.metafields.pdp.coa_note.value | default: product.metafields.pdp.coa_note
 
   assign archive = nil
   if product.metafields.pep.coa_archive and product.metafields.pep.coa_archive.value
@@ -251,6 +252,14 @@
     font-size: calc(var(--font-body-scale, 1) * 1.2rem);
   }
 
+  .xo-section--{{ section.id }} .pcb__raw-note {
+    margin: -0.8rem 0 1.4rem;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 62%, transparent);
+    font-size: calc(var(--font-body-scale, 1) * 1.35rem);
+    line-height: 1.5;
+    max-width: 78rem;
+  }
+
   .xo-section--{{ section.id }} .pcb__card {
     border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 8%, transparent);
     border-radius: var(--general-radius-3);
@@ -384,6 +393,10 @@
       {% endif %}
     </div>
 
+    {% if coa_note != blank %}
+      <p class="pcb__raw-note">{{ coa_note | escape }}</p>
+    {% endif %}
+
     <div class="pcb__card">
       <div class="pcb__grid">
         <div class="pcb__col">
@@ -462,8 +475,9 @@
     </div>
 
     {% if purity %}
+      {%- assign purity_number = purity | plus: 0 -%}
       <p class="pcb__verified" style="margin-top: 1rem;">
-        Purity: ≥{{ purity }}% (HPLC-verified)
+        Purity: {% if purity_number >= 100 %}{{ purity }}%{% else %}≥{{ purity }}%{% endif %} (HPLC-verified)
       </p>
     {% endif %}
   </xo-container>
