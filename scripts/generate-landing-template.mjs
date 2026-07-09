@@ -190,6 +190,7 @@ function buildHero(data, shopAnchor) {
     blocks,
     block_order,
     settings: {
+      brand_label: h.brandLabel || data.compound,
       heading: h.heading,
       subheading: h.subheading,
       read_time: h.readTime || '8 min read',
@@ -206,7 +207,7 @@ function buildHero(data, shopAnchor) {
       gradient_to: theme.gradientTo || '#e5f4f4',
       max_width: 1200,
       center_on_mobile: true,
-      mobile_padding_top: 120,
+      mobile_padding_top: 80,
       mobile_padding_bottom: 56,
       mobile_extra_offset: 8,
       show_starline: hasReviews,
@@ -234,6 +235,7 @@ function buildTldr(data) {
     blocks,
     block_order,
     settings: {
+      color_scheme: 'background-2',
       heading: t.heading || 'Key Takeaways (TL;DR)',
     },
   };
@@ -241,15 +243,25 @@ function buildTldr(data) {
 
 function buildWhatIs(data) {
   const w = data.whatIs;
+  const blocks = {};
+  const block_order = [];
+  (w.basics || []).forEach((text, i) => {
+    const id = `bullet_${i + 1}`;
+    blocks[id] = { type: 'bullet', settings: { text } };
+    block_order.push(id);
+  });
   return {
     type: 'phenibut-what-is',
     name: `What is ${data.compound}`,
+    blocks,
+    block_order,
     settings: {
+      color_scheme: 'background-1',
       anchor_id: `what-is-${handleize(data.compound)}`,
       kicker: w.kicker || 'The basics',
       heading: w.heading || `What is ${data.compound}?`,
       definition: w.definition,
-      show_basics: true,
+      show_basics: block_order.length > 0,
       scientific_body: w.scientificBody,
       scientific_collapsed: true,
       molecule_alt: `${data.compound} molecule diagram`,
@@ -285,6 +297,7 @@ function buildGoalChips(data) {
     block_order,
     name: 'Goal Chips',
     settings: {
+      color_scheme: 'background-1',
       show_heading: false,
       heading: 'Find your goal',
       max_width: 1200,
@@ -322,6 +335,7 @@ function buildBenefits(data) {
     block_order,
     name: 'Benefits & Uses',
     settings: {
+      color_scheme: 'background-1',
       anchor_id: `${handleize(data.compound)}-benefits-uses`,
       kicker: b.kicker || 'Benefits & uses',
       heading: b.heading || `${data.compound} Benefits & Uses`,
@@ -330,8 +344,9 @@ function buildBenefits(data) {
       padding_top: 88,
       padding_bottom: 88,
       gap: 20,
-      columns_desktop: cols,
+      columns_desktop: Math.max(2, cols),
       columns_tablet: 2,
+      columns_mobile: '2',
       center_on_mobile: false,
       show_note: Boolean(b.noteText),
       note_text: b.noteText || '',
@@ -363,6 +378,7 @@ function buildWorks(data) {
     block_order,
     name: 'How It Works',
     settings: {
+      color_scheme: 'background-2',
       anchor_id: 'how-it-works',
       kicker: w.kicker || 'Mechanism',
       heading: w.heading || `How ${data.compound} Works`,
@@ -404,6 +420,7 @@ function buildSafety(data) {
     block_order,
     name: 'Use Safely',
     settings: {
+      color_scheme: 'background-1',
       anchor_id: 'safety',
       kicker: s.kicker || 'Use responsibly',
       heading: s.heading || `How to Use ${data.compound} Safely`,
@@ -443,12 +460,13 @@ function buildCompare(data) {
     block_order,
     name: 'Compare',
     settings: {
+      color_scheme: 'background-1',
       anchor_id: 'alternatives',
       kicker: c.kicker || 'Compare',
       heading: c.heading || `${data.compound} vs Alternatives`,
       intro: c.intro || '',
-      cta_label: `Shop ${data.compound}`,
-      cta_href: `#${data.shopAnchor || 'shop-now'}`,
+      cta_label: c.ctaLabel || `Shop ${data.compound}`,
+      cta_href: c.ctaHref || `#${data.shopAnchor || 'shop-now'}`,
       padding_top: 64,
       padding_bottom: 64,
     },
@@ -457,10 +475,26 @@ function buildCompare(data) {
 
 function buildEvidence(data) {
   const e = data.evidence;
+  const blocks = {};
+  const block_order = [];
+  (e.refs || []).forEach((ref, i) => {
+    const id = `ref_${i + 1}`;
+    blocks[id] = {
+      type: 'ref',
+      settings: {
+        label: ref.label,
+        href: ref.href,
+      },
+    };
+    block_order.push(id);
+  });
   return {
     type: 'phenibut-evidence',
     name: 'Evidence',
+    blocks,
+    block_order,
     settings: {
+      color_scheme: 'background-2',
       anchor_id: 'evidence',
       kicker: e.kicker || 'Evidence',
       heading: e.heading || 'Evidence Snapshot',
@@ -478,7 +512,8 @@ function buildProducts(data, shopAnchor) {
   const p = data.products;
   const blocks = {};
   const block_order = [];
-  (p.handles || []).slice(0, 6).forEach((handle, i) => {
+  const handles = (p.handles || []).slice(0, 6);
+  handles.forEach((handle, i) => {
     const id = `product_${i + 1}`;
     blocks[id] = {
       type: 'product_card',
@@ -486,20 +521,24 @@ function buildProducts(data, shopAnchor) {
     };
     block_order.push(id);
   });
+  // Schema requires columns_desktop >= 2; single-SKU centering is handled in Liquid.
+  const columnsDesktop = Math.max(2, p.columnsDesktop || (handles.length === 1 ? 2 : 3));
+  const columnsTablet = Math.max(1, p.columnsTablet || (handles.length === 1 ? 1 : 2));
   return {
     type: 'phenibut-products',
     blocks,
     block_order,
     name: 'Products',
     settings: {
+      color_scheme: 'background-1',
       anchor_id: shopAnchor,
       kicker: p.kicker || 'Shop',
       heading: p.heading || `Our ${data.compound} Products`,
       intro: p.intro || '',
       padding_top: 64,
       padding_bottom: 64,
-      columns_desktop: p.columnsDesktop || 3,
-      columns_tablet: p.columnsTablet || 2,
+      columns_desktop: columnsDesktop,
+      columns_tablet: columnsTablet,
     },
   };
 }
@@ -527,11 +566,13 @@ function buildReviews(data) {
     block_order,
     name: 'Reviews (Curated)',
     settings: {
+      color_scheme: 'background-2',
       anchor_id: 'reviews',
       product_name: data.compound,
       kicker: 'Customer reviews',
       heading: 'Customer Stories',
       intro: '',
+      columns_desktop: 3,
       padding_top: 64,
       padding_bottom: 64,
     },
@@ -560,6 +601,7 @@ function buildFaq(data) {
     block_order,
     name: 'FAQ',
     settings: {
+      color_scheme: 'background-2',
       anchor_id: 'faq',
       kicker: f.kicker || 'FAQ',
       heading: f.heading || 'Frequently Asked Questions',
