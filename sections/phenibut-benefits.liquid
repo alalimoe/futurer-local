@@ -15,7 +15,7 @@
   contain-intrinsic-size: 1px 800px;
   font-family: var(--font-body-family);
 }
-.xo-section--{{ section.id }} .phb-benefits__container { max-width: {{ section.settings.max_width }}px; margin: 0 auto; padding: 0 1.6rem; }
+.xo-section--{{ section.id }} .phb-benefits__container { max-width: {{ section.settings.max_width }}px; margin: 0 auto; padding: 0 var(--page-gap); }
 .xo-section--{{ section.id }} .phb-kicker {
   display: block; margin: 0 0 1rem;
   color: rgba(var(--color-accent));
@@ -29,7 +29,7 @@
 }
 .xo-section--{{ section.id }} .phb-benefits__intro {
   color: rgba(var(--color-foreground)); font-size: clamp(1.6rem, 2.2vw, 1.8rem);
-  line-height: 1.6; max-width: 72ch; margin-bottom: 2.4rem;
+  line-height: 1.6; max-width: 72rem; margin-bottom: 2.4rem;
 }
 .xo-section--{{ section.id }} .phb-benefits__grid {
   display: grid; gap: {{ section.settings.gap }}px;
@@ -52,25 +52,21 @@
   font-size: 1.8rem; font-weight: 600; margin: 0; color: rgba(var(--color-foreground));
 }
 .xo-section--{{ section.id }} .phb-benefit__blurb { font-size: 1.6rem; color: rgba(var(--color-foreground)); margin: 0; line-height: 1.5; }
-.xo-section--{{ section.id }} .phb-benefit__details { margin-top: 0.2rem; }
-.xo-section--{{ section.id }} .phb-benefit__summary {
-  display: flex; align-items: center; justify-content: space-between;
-  cursor: pointer; user-select: none; padding: 0.8rem 0;
-  font-weight: 600; color: rgba(var(--color-foreground)); list-style: none;
+.xo-section--{{ section.id }} .phb-benefit__collapse { margin-top: 0.2rem; }
+.xo-section--{{ section.id }} .phb-benefit__collapse .xo-collapse__trigger {
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  padding: 0.8rem 0; font-weight: 600; color: rgba(var(--color-foreground));
+  cursor: pointer; user-select: none;
 }
-.xo-section--{{ section.id }} .phb-benefit__summary::-webkit-details-marker { display: none; }
-.xo-section--{{ section.id }} .phb-benefit__summary:focus-visible {
+.xo-section--{{ section.id }} .phb-benefit__collapse .xo-collapse__trigger:focus-visible {
   outline: 2px solid rgba(var(--color-accent)); outline-offset: 2px;
 }
-.xo-section--{{ section.id }} .phb-benefit__chev {
-  display: inline-flex; transform: rotate(180deg);
-  transition: transform 0.3s var(--out-soft, ease);
+.xo-section--{{ section.id }} .phb-benefit__collapse .xo-collapse__content {
+  color: rgba(var(--color-foreground)); font-size: 1.5rem; line-height: 1.6; padding-bottom: 0.4rem;
 }
-.xo-section--{{ section.id }} .phb-benefit__details[open] .phb-benefit__chev { transform: rotate(0deg); }
-.xo-section--{{ section.id }} .phb-benefit__more { color: rgba(var(--color-foreground)); font-size: 1.5rem; line-height: 1.6; }
-.xo-section--{{ section.id }} .phb-benefit__more p { margin: 0 0 1rem; }
-.xo-section--{{ section.id }} .phb-benefit__more ul { padding-left: 1.8rem; margin: 0.6rem 0 1rem; }
-.xo-section--{{ section.id }} .phb-benefit__more li { list-style: disc; }
+.xo-section--{{ section.id }} .phb-benefit__collapse .xo-collapse__content p { margin: 0 0 1rem; }
+.xo-section--{{ section.id }} .phb-benefit__collapse .xo-collapse__content ul { padding-left: 1.8rem; margin: 0.6rem 0 1rem; }
+.xo-section--{{ section.id }} .phb-benefit__collapse .xo-collapse__content li { list-style: disc; }
 .xo-section--{{ section.id }} .phb-benefits__note {
   margin-top: 1.2rem; font-size: 1.3rem; color: color-mix(in srgb, rgba(var(--color-foreground)) 75%, transparent);
 }
@@ -80,7 +76,9 @@
   }
 }
 @media (max-width: 768px) {
-  .xo-section--{{ section.id }} .phb-benefits__grid { grid-template-columns: 1fr; }
+  .xo-section--{{ section.id }} .phb-benefits__grid {
+    grid-template-columns: repeat({{ section.settings.columns_mobile }}, minmax(0, 1fr));
+  }
   .xo-section--{{ section.id }} .phb-benefits__title {
     text-align: {% if section.settings.center_on_mobile %}center{% else %}left{% endif %};
   }
@@ -88,6 +86,7 @@
     text-align: {% if section.settings.center_on_mobile %}center{% else %}left{% endif %};
     margin-left: auto; margin-right: auto;
   }
+  .xo-section--{{ section.id }} .phb-benefit { padding: 1.6rem; }
 }
 @media (prefers-reduced-motion: reduce) {
   .xo-section--{{ section.id }} *,
@@ -116,37 +115,43 @@
         </header>
       </xo-animate>
 
-      <xo-animate xo-type="fade-up" xo-cascade class="phb-benefits__grid">
-        {% for block in section.blocks %}
-          {% if block.type == 'benefit' %}
-            <article id="benefit-{{ block.settings.title | handleize }}" class="phb-benefit" {{ block.shopify_attributes }} aria-labelledby="phb-benefit-title-{{ block.id }}">
-              <div class="phb-benefit__icon" aria-hidden="true">
-                {% if block.settings.use_image_icon and block.settings.icon_image != blank %}
-                  <img class="phb-benefit__icon-img"
-                    src="{{ block.settings.icon_image | image_url: width: 120 }}"
-                    srcset="{{ block.settings.icon_image | image_url: width: 80 }} 80w, {{ block.settings.icon_image | image_url: width: 120 }} 120w"
-                    sizes="48px" width="26" height="26" alt="" role="presentation" loading="lazy" decoding="async">
-                {% else %}
-                  {% render 'icon', name: block.settings.icon, size: '2.4rem' %}
+      <xo-collapse-provider>
+        <xo-animate xo-type="fade-up" xo-cascade class="phb-benefits__grid">
+          {% for block in section.blocks %}
+            {% if block.type == 'benefit' %}
+              {%- capture benefit_details -%}{{ block.settings.details }}{%- endcapture -%}
+              <article id="benefit-{{ block.settings.title | handleize }}" class="phb-benefit" {{ block.shopify_attributes }} aria-labelledby="phb-benefit-title-{{ block.id }}">
+                <div class="phb-benefit__icon" aria-hidden="true">
+                  {% if block.settings.use_image_icon and block.settings.icon_image != blank %}
+                    <img class="phb-benefit__icon-img"
+                      src="{{ block.settings.icon_image | image_url: width: 120 }}"
+                      srcset="{{ block.settings.icon_image | image_url: width: 80 }} 80w, {{ block.settings.icon_image | image_url: width: 120 }} 120w"
+                      sizes="48px" width="26" height="26" alt="" role="presentation" loading="lazy" decoding="async">
+                  {% else %}
+                    {% render 'icon', name: block.settings.icon, size: '2.4rem' %}
+                  {% endif %}
+                </div>
+
+                <h3 id="phb-benefit-title-{{ block.id }}" class="phb-benefit__h3">{{ block.settings.title | escape }}</h3>
+                {% if block.settings.blurb != blank %}
+                  <p class="phb-benefit__blurb">{{ block.settings.blurb | escape }}</p>
                 {% endif %}
-              </div>
 
-              <h3 id="phb-benefit-title-{{ block.id }}" class="phb-benefit__h3">{{ block.settings.title | escape }}</h3>
-              {% if block.settings.blurb != blank %}
-                <p class="phb-benefit__blurb">{{ block.settings.blurb | escape }}</p>
-              {% endif %}
-
-              <details class="phb-benefit__details" {% if block.settings.open_by_default %}open{% endif %}>
-                <summary class="phb-benefit__summary">
-                  <span>{{ block.settings.toggle_label | escape }}</span>
-                  <span class="phb-benefit__chev" aria-hidden="true">{% render 'icon', name: 'chevron-up', size: '1.4rem' %}</span>
-                </summary>
-                <div class="phb-benefit__more">{{ block.settings.details }}</div>
-              </details>
-            </article>
-          {% endif %}
-        {% endfor %}
-      </xo-animate>
+                {% if block.settings.details != blank %}
+                  <div class="phb-benefit__collapse">
+                    {% render 'collapse',
+                      title: block.settings.toggle_label,
+                      content: benefit_details,
+                      name: block.id,
+                      style: block.settings.open_by_default
+                    %}
+                  </div>
+                {% endif %}
+              </article>
+            {% endif %}
+          {% endfor %}
+        </xo-animate>
+      </xo-collapse-provider>
 
       {% if section.settings.show_note and section.settings.note_text != blank %}
         <p class="phb-benefits__note">{{ section.settings.note_text }}</p>
@@ -170,6 +175,16 @@
     { "type": "range", "id": "gap", "label": "Card gap (px)", "min": 12, "max": 40, "step": 2, "default": 20 },
     { "type": "range", "id": "columns_desktop", "label": "Columns on desktop", "min": 2, "max": 4, "step": 1, "default": 4 },
     { "type": "range", "id": "columns_tablet", "label": "Columns on tablet", "min": 1, "max": 3, "step": 1, "default": 2 },
+    {
+      "type": "select",
+      "id": "columns_mobile",
+      "label": "Columns on mobile",
+      "default": "2",
+      "options": [
+        { "value": "1", "label": "1" },
+        { "value": "2", "label": "2" }
+      ]
+    },
     { "type": "checkbox", "id": "center_on_mobile", "label": "Center text on mobile", "default": false },
     { "type": "checkbox", "id": "show_note", "label": "Show disclaimer note", "default": true },
     { "type": "textarea", "id": "note_text", "label": "Disclaimer note text", "default": "This content is educational, not medical advice. Use Phenibut occasionally. Do not combine with alcohol or sedatives." },
