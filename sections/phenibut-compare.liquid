@@ -56,17 +56,18 @@
   }
 
   .xo-section--{{ section.id }} .phb-compare__intro {
-    color: color-mix(in srgb, rgba(var(--color-foreground)) 75%, transparent);
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 80%, transparent);
     line-height: 1.6;
-    max-width: 76rem;
+    max-width: 72rem;
   }
 
   .xo-section--{{ section.id }} .phb-compare__table-wrap {
     border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
-    border-radius: var(--general-radius-1, 1rem);
-    overflow-x: auto;
+    border-radius: var(--general-radius-2, 1.5rem);
+    overflow: hidden;
     max-width: 110rem;
     margin-top: 1.6rem;
+    background: rgba(var(--color-background));
   }
 
   .xo-section--{{ section.id }} .phb-compare__table {
@@ -81,18 +82,22 @@
 
   .xo-section--{{ section.id }} .phb-compare__table th {
     text-align: left;
-    padding: 1rem 1.2rem;
+    padding: 1.4rem 1.6rem;
     font-weight: 600;
     color: rgba(var(--color-foreground));
-    font-size: 1.4rem;
+    font-size: 1.3rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    border-bottom: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
   }
 
   .xo-section--{{ section.id }} .phb-compare__table td {
-    padding: 1.2rem;
+    padding: 1.4rem 1.6rem;
     color: rgba(var(--color-foreground));
     font-size: 1.5rem;
     line-height: 1.6;
-    border-top: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
+    border-top: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 8%, transparent);
+    vertical-align: top;
   }
 
   .xo-section--{{ section.id }} .phb-compare__table td p {
@@ -105,20 +110,7 @@
   }
 
   .xo-section--{{ section.id }} .phb-compare__cta {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.6rem;
-    margin-top: 1.6rem;
-    font-weight: 600;
-    color: rgba(var(--color-foreground));
-    text-decoration: none;
-    border-bottom: 2px solid rgba(var(--color-accent));
-    padding-bottom: 0.2rem;
-    transition: border-color 0.2s var(--out-soft, ease);
-  }
-
-  .xo-section--{{ section.id }} .phb-compare__cta:hover {
-    border-color: rgba(var(--color-foreground));
+    margin-top: 2rem;
   }
 
   .xo-section--{{ section.id }} :focus-visible {
@@ -127,34 +119,58 @@
   }
 
   @media (max-width: 768px) {
+    .xo-section--{{ section.id }} .phb-compare__table-wrap {
+      border: none;
+      background: transparent;
+      overflow: visible;
+    }
+
     .xo-section--{{ section.id }} .phb-compare__table {
       min-width: 0;
+      display: block;
     }
 
     .xo-section--{{ section.id }} .phb-compare__table thead {
       display: none;
     }
 
-    .xo-section--{{ section.id }} .phb-compare__table tr {
-      display: block;
-      padding: 12px;
-      border-top: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
+    .xo-section--{{ section.id }} .phb-compare__table tbody {
+      display: grid;
+      gap: 1.2rem;
     }
 
-    .xo-section--{{ section.id }} .phb-compare__table tbody tr:first-child {
-      border-top: none;
+    .xo-section--{{ section.id }} .phb-compare__table tr {
+      display: grid;
+      gap: 0.8rem;
+      padding: 1.6rem;
+      background: rgba(var(--color-background));
+      border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
+      border-radius: var(--general-radius-2, 1.5rem);
+      box-shadow: none;
+    }
+
+    .xo-section--{{ section.id }} .phb-compare__row--highlight {
+      border-color: color-mix(in srgb, rgba(var(--color-accent)) 45%, transparent);
+      box-shadow: inset 3px 0 0 rgba(var(--color-accent));
     }
 
     .xo-section--{{ section.id }} .phb-compare__table td {
-      display: block;
-      padding: 4px 0;
+      display: grid;
+      grid-template-columns: minmax(9rem, 34%) 1fr;
+      gap: 0.8rem;
+      align-items: start;
+      padding: 0;
       border-top: none;
+      font-size: 1.4rem;
     }
 
     .xo-section--{{ section.id }} .phb-compare__table td::before {
-      content: attr(data-label) ": ";
+      content: attr(data-label);
       font-weight: 600;
-      color: rgba(var(--color-foreground));
+      font-size: 1.2rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: color-mix(in srgb, rgba(var(--color-foreground)) 65%, transparent);
     }
   }
 
@@ -207,10 +223,9 @@
     </div>
 
     {% if section.settings.cta_label != blank and section.settings.cta_href != blank %}
-      <a class="phb-compare__cta" href="{{ section.settings.cta_href | escape }}">
-        {{ section.settings.cta_label | escape }}
-        {% render 'icon', name: 'arrow-right', size: '1.4rem' %}
-      </a>
+      <div class="phb-compare__cta">
+        {% render 'button', style: 'primary', text: section.settings.cta_label, link: section.settings.cta_href, icon: 'arrow-right', icon_size: '1.4rem' %}
+      </div>
     {% endif %}
     </xo-animate>
   </xo-container>

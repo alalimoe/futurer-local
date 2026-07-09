@@ -16,8 +16,13 @@
 .xo-section--{{ section.id }} .phb-what-is__container {
   max-width: {{ section.settings.max_width }}px; margin: 0 auto;
   padding: 0 var(--page-gap);
-  display: grid; grid-template-columns: 1.15fr 0.85fr;
+  display: grid;
+  grid-template-columns: {% if section.settings.molecule_image != blank %}1.15fr 0.85fr{% else %}1fr{% endif %};
   gap: 4rem; align-items: start;
+}
+.xo-section--{{ section.id }} .phb-what-is__split--single {
+  grid-template-columns: 1fr;
+  max-width: 68rem;
 }
 .xo-section--{{ section.id }} .phb-kicker {
   display: block; margin: 0 0 1rem;
@@ -32,10 +37,14 @@
 }
 .xo-section--{{ section.id }} .phb-what-is__definition {
   color: rgba(var(--color-foreground)); font-size: clamp(1.6rem, 2.2vw, 1.8rem);
-  line-height: 1.6; margin-bottom: 1.4rem;
+  line-height: 1.6; margin-bottom: 1.4rem; max-width: 72rem;
 }
 .xo-section--{{ section.id }} .phb-what-is__split {
   display: grid; grid-template-columns: 1fr 1fr; gap: 2.8rem;
+}
+.xo-section--{{ section.id }} .phb-what-is__split--single {
+  grid-template-columns: 1fr;
+  max-width: 68rem;
 }
 .xo-section--{{ section.id }} .phb-wi-card {
   background: rgba(var(--color-background)); border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
@@ -115,15 +124,18 @@
           <div class="phb-what-is__definition">{{ section.settings.definition }}</div>
         {% endif %}
 
-        <div class="phb-what-is__split">
-          {% if section.settings.show_basics %}
+        {%- assign basics_blocks = section.blocks | where: 'type', 'bullet' -%}
+        {%- assign show_basics_card = false -%}
+        {%- if section.settings.show_basics and basics_blocks.size > 0 -%}
+          {%- assign show_basics_card = true -%}
+        {%- endif -%}
+        <div class="phb-what-is__split{% unless show_basics_card %} phb-what-is__split--single{% endunless %}">
+          {% if show_basics_card %}
             <article class="phb-wi-card" aria-labelledby="phb-basics-title-{{ section.id }}">
               <h3 id="phb-basics-title-{{ section.id }}" class="phb-wi-card__title">The Basics</h3>
               <ul class="phb-wi-card__list">
-                {% for block in section.blocks %}
-                  {% if block.type == 'bullet' %}
-                    <li class="phb-wi-card__li" {{ block.shopify_attributes }}>{{ block.settings.text | escape }}</li>
-                  {% endif %}
+                {% for block in basics_blocks %}
+                  <li class="phb-wi-card__li" {{ block.shopify_attributes }}>{{ block.settings.text | escape }}</li>
                 {% endfor %}
               </ul>
             </article>

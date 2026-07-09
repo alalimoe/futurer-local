@@ -69,6 +69,11 @@
     --xo-grid-row-gap: var(--grid-desktop-vertical-spacing, 24px);
   }
 
+  .xo-section--{{ section.id }} .phb-products__grid--single {
+    max-width: 42rem;
+    margin-inline: auto;
+  }
+
   @media (max-width: 768px) {
     .xo-section--{{ section.id }} xo-grid {
       --xo-grid-col-gap: var(--grid-mobile-horizontal-spacing, 12px);
@@ -76,6 +81,20 @@
     }
   }
 {%- endstyle -%}
+
+{%- assign product_card_blocks = section.blocks | where: 'type', 'product_card' -%}
+{%- assign visible_product_count = 0 -%}
+{%- for block in product_card_blocks -%}
+  {%- if block.settings.product != blank -%}
+    {%- assign visible_product_count = visible_product_count | plus: 1 -%}
+  {%- endif -%}
+{%- endfor -%}
+{%- assign products_lg = section.settings.columns_desktop -%}
+{%- assign products_md = section.settings.columns_tablet -%}
+{%- if visible_product_count == 1 -%}
+  {%- assign products_lg = 1 -%}
+  {%- assign products_md = 1 -%}
+{%- endif -%}
 
 <section {% if section.settings.anchor_id != blank %}id="{{ section.settings.anchor_id }}" {% endif %}{% render 'section-attr' %} aria-labelledby="phb-products-title-{{ section.id }}">
   <xo-container>
@@ -89,7 +108,7 @@
       {% endif %}
     </xo-animate>
 
-    <xo-grid style="--lg: {{ section.settings.columns_desktop }}; --md: {{ section.settings.columns_tablet }}; --xs: 1;">
+    <xo-grid class="{% if visible_product_count == 1 %}phb-products__grid--single{% endif %}" style="--lg: {{ products_lg }}; --md: {{ products_md }}; --xs: 1;">
       {% for block in section.blocks %}
         {% if block.type == 'product_card' and block.settings.product != blank %}
           {% assign prod = all_products[block.settings.product] %}
