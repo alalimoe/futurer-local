@@ -44,12 +44,17 @@
   --phb-grad-to: {{ section.settings.gradient_to }};
   --phb-max: {{ section.settings.max_width }}px;
   --phb-sticky-offset: 0px;
-  min-height: calc(100svh - var(--phb-sticky-offset));
   position: relative;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   justify-content: center;
+}
+.xo-section--{{ section.id }} .phb-hero--fullscreen.phb-hero--with-image {
+  min-height: calc(100svh - var(--phb-sticky-offset));
+}
+.xo-section--{{ section.id }} .phb-hero--fullscreen.phb-hero--text-only {
+  min-height: 0;
 }
 .xo-section--{{ section.id }} .phb-hero__bg {
   position: absolute; inset: 0; z-index: 0;
@@ -73,7 +78,7 @@
 .xo-section--{{ section.id }} .phb-hero__container {
   position: relative; z-index: 1;
   max-width: var(--phb-max); margin: 0 auto;
-  padding: clamp(4rem, 7vh, 8.8rem) var(--page-gap);
+  padding: clamp(5.6rem, 9vh, 9.6rem) var(--page-gap);
   display: grid; align-items: center; gap: 2.8rem;
   grid-template-columns: 1fr;
   color: rgba(var(--color-background));
@@ -81,9 +86,32 @@
 }
 .xo-section--{{ section.id }} .phb-hero__container--with-image {
   grid-template-columns: 1fr minmax(28rem, 44rem);
+  text-align: left;
+}
+.xo-section--{{ section.id }} .phb-hero__container--text-only {
+  justify-items: center;
+  text-align: center;
 }
 .xo-section--{{ section.id }} .phb-hero__left {
   max-width: 72rem;
+  width: 100%;
+}
+.xo-section--{{ section.id }} .phb-hero__container--text-only .phb-hero__left {
+  max-width: 68rem;
+  margin-inline: auto;
+}
+.xo-section--{{ section.id }} .phb-hero__container--text-only .phb-hero__breadcrumb,
+.xo-section--{{ section.id }} .phb-hero__container--text-only .phb-hero__ctas,
+.xo-section--{{ section.id }} .phb-hero__container--text-only .phb-hero__trust,
+.xo-section--{{ section.id }} .phb-hero__container--text-only .phb-hero__starline {
+  justify-content: center;
+}
+.xo-section--{{ section.id }} .phb-hero__container--text-only .phb-hero__subhead {
+  margin-inline: auto;
+}
+.xo-section--{{ section.id }} .phb-hero__container--text-only .phb-hero__quote-card {
+  margin-inline: auto;
+  text-align: left;
 }
 .xo-section--{{ section.id }} .phb-hero__brand {
   display: block;
@@ -207,14 +235,14 @@
 
 <section {% render 'section-attr' %} aria-labelledby="phb-hero-title-{{ section.id }}">
   <xo-container>
-    <div class="phb-hero--fullscreen">
+    {%- assign hero_has_image = false -%}
+    {%- if section.settings.right_image != blank -%}
+      {%- assign hero_has_image = true -%}
+    {%- endif -%}
+    <div class="phb-hero--fullscreen{% if hero_has_image %} phb-hero--with-image{% else %} phb-hero--text-only{% endif %}">
       <div class="phb-hero__bg" aria-hidden="true"></div>
 
-      {%- assign hero_has_image = false -%}
-      {%- if section.settings.right_image != blank -%}
-        {%- assign hero_has_image = true -%}
-      {%- endif -%}
-      <div class="phb-hero__container{% if hero_has_image %} phb-hero__container--with-image{% endif %}">
+      <div class="phb-hero__container{% if hero_has_image %} phb-hero__container--with-image{% else %} phb-hero__container--text-only{% endif %}">
         <xo-animate xo-type="fade-up" class="phb-hero__left">
           {% if section.settings.show_breadcrumb %}
             <nav class="phb-hero__breadcrumb" aria-label="Breadcrumb">
