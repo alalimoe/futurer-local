@@ -40,13 +40,16 @@
   }
 
   function formatTime(ms, withSeconds) {
-    if (ms <= 0) return withSeconds ? '0h 0m 0s' : '0h 0m';
+    if (ms <= 0) return withSeconds ? '0m 0s' : '0m';
     var totalSec = Math.floor(ms / 1000);
     var h = Math.floor(totalSec / 3600);
     var m = Math.floor((totalSec % 3600) / 60);
     var s = totalSec % 60;
-    if (withSeconds) return h + 'h ' + m + 'm ' + s + 's';
-    return h + 'h ' + m + 'm';
+    var parts = [];
+    if (h > 0) parts.push(h + 'h');
+    parts.push(m + 'm');
+    if (withSeconds) parts.push(s + 's');
+    return parts.join('\u00A0');
   }
 
   function prefersReducedMotion() {
@@ -84,13 +87,33 @@
     label.setAttribute('data-ready', 'true');
   }
 
+  function getTopTemplates(root) {
+    var script = root.closest('.shopify-section') && root.closest('.shopify-section').querySelector('[data-ships-today-templates]');
+    if (!script) {
+      return {
+        defaultTemplate: root.getAttribute('data-template') || 'Ships today if you checkout in the next __TIME__.',
+        urgentTemplate: root.getAttribute('data-template-urgent') || 'Last call for today\'s dispatch: __TIME__.'
+      };
+    }
+    try {
+      var parsed = JSON.parse(script.textContent);
+      return {
+        defaultTemplate: parsed.default || 'Ships today if you checkout in the next __TIME__.',
+        urgentTemplate: parsed.urgent || 'Last call for today\'s dispatch: __TIME__.'
+      };
+    } catch (e) {
+      return {
+        defaultTemplate: 'Ships today if you checkout in the next __TIME__.',
+        urgentTemplate: 'Last call for today\'s dispatch: __TIME__.'
+      };
+    }
+  }
+
   function tickRoot(root) {
     var tz = root.getAttribute('data-tz') || DEFAULT_TZ;
     var cutoff = parseInt(root.getAttribute('data-cutoff-hour') || String(DEFAULT_CUTOFF), 10);
     var hideWeekday = parseInt(root.getAttribute('data-hide-weekday') || String(DEFAULT_HIDE_WEEKDAY), 10);
     var context = root.getAttribute('data-context') || 'product';
-    var templateDefault = root.getAttribute('data-template') || 'Order in __TIME__ for ships today';
-    var templateUrgent = root.getAttribute('data-template-urgent') || templateDefault;
     var bar = root.querySelector('[data-ships-today-bar]');
     var stock = root.querySelector('[data-ships-today-stock]');
 
@@ -98,11 +121,11 @@
     var remaining = remainingMs(parts, cutoff);
     var showBar = parts.weekday !== hideWeekday && remaining > 0;
     var isUrgent = remaining > 0 && remaining < 3600000;
-    var template = context === 'top' && isUrgent ? templateUrgent : templateDefault;
-
-    ensureLabel(root, template);
 
     if (context === 'top') {
+      var topTemplates = getTopTemplates(root);
+      var template = isUrgent ? topTemplates.urgentTemplate : topTemplates.defaultTemplate;
+      ensureLabel(root, template);
       setVisible(root, showBar);
       if (!showBar) {
         root.classList.remove('is-urgent');
@@ -116,6 +139,9 @@
       if (topTimer) topTimer.textContent = formatTime(remaining, false);
       return;
     }
+
+    var templateDefault = root.getAttribute('data-template') || 'Order in __TIME__ for ships today';
+    ensureLabel(root, templateDefault);
 
     setVisible(bar, showBar);
     if (stock) setVisible(stock, !showBar);
