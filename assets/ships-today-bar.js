@@ -45,15 +45,15 @@
 
   function formatTime(ms, withSeconds) {
     if (ms <= 0) {
-      return withSeconds ? '0\u00A0minutes 0\u00A0seconds' : '0\u00A0minutes';
+      return withSeconds
+        ? '0\u00A0hours 0\u00A0minutes 0\u00A0seconds'
+        : '0\u00A0hours 0\u00A0minutes';
     }
     var totalSec = Math.floor(ms / 1000);
     var h = Math.floor(totalSec / 3600);
     var m = Math.floor((totalSec % 3600) / 60);
     var s = totalSec % 60;
-    var parts = [];
-    if (h > 0) parts.push(pluralize(h, 'hour', 'hours'));
-    parts.push(pluralize(m, 'minute', 'minutes'));
+    var parts = [pluralize(h, 'hour', 'hours'), pluralize(m, 'minute', 'minutes')];
     if (withSeconds) parts.push(pluralize(s, 'second', 'seconds'));
     return parts.join(' ');
   }
