@@ -1,0 +1,77 @@
+{{ 'ships-today-bar.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'ships-today-bar.js' | asset_url }}" defer></script>
+
+{% liquid
+  assign checkout_template = 'general.ships_today.checkout_within' | t
+%}
+
+<section {% render 'section-attr' %}>
+  <div
+    class="xo-ships-today xo-ships-today--top"
+    data-ships-today
+    data-context="top"
+    data-tz="Asia/Dubai"
+    data-cutoff-hour="18"
+    data-hide-weekday="0"
+    data-template="{{ checkout_template | escape }}"
+    hidden
+  >
+    <p class="xo-ships-today__bar xo-ships-today__bar--top" data-ships-today-bar role="status" aria-live="polite">
+      <span data-ships-today-label></span>
+    </p>
+    <div class="xo-ships-today-progress__track" aria-hidden="true">
+      <div class="xo-ships-today-progress__fill"></div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Ships today progress",
+  "enabled_on": {
+    "groups": ["header"]
+  },
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "background-1"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color"
+    },
+    {
+      "type": "color_background",
+      "id": "background_gradient",
+      "label": "Background gradient"
+    },
+    {
+      "type": "number",
+      "id": "padding_top_desktop",
+      "label": "Padding top desktop",
+      "default": 0
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_desktop",
+      "label": "Padding bottom desktop",
+      "default": 0
+    },
+    {
+      "type": "number",
+      "id": "padding_top_mobile",
+      "label": "Padding top mobile",
+      "default": 0
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_mobile",
+      "label": "Padding bottom mobile",
+      "default": 0
+    }
+  ]
+}
+{% endschema %}
