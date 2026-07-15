@@ -39,17 +39,23 @@
     return (cutSecs - nowSecs) * 1000;
   }
 
+  function pluralize(count, singular, plural) {
+    return count + '\u00A0' + (count === 1 ? singular : plural);
+  }
+
   function formatTime(ms, withSeconds) {
-    if (ms <= 0) return withSeconds ? '0m 0s' : '0m';
+    if (ms <= 0) {
+      return withSeconds ? '0\u00A0minutes 0\u00A0seconds' : '0\u00A0minutes';
+    }
     var totalSec = Math.floor(ms / 1000);
     var h = Math.floor(totalSec / 3600);
     var m = Math.floor((totalSec % 3600) / 60);
     var s = totalSec % 60;
     var parts = [];
-    if (h > 0) parts.push(h + 'h');
-    parts.push(m + 'm');
-    if (withSeconds) parts.push(s + 's');
-    return parts.join('\u00A0');
+    if (h > 0) parts.push(pluralize(h, 'hour', 'hours'));
+    parts.push(pluralize(m, 'minute', 'minutes'));
+    if (withSeconds) parts.push(pluralize(s, 'second', 'seconds'));
+    return parts.join(' ');
   }
 
   function prefersReducedMotion() {
@@ -91,20 +97,20 @@
     var script = root.closest('.shopify-section') && root.closest('.shopify-section').querySelector('[data-ships-today-templates]');
     if (!script) {
       return {
-        defaultTemplate: root.getAttribute('data-template') || 'Ships today if you checkout in the next __TIME__.',
-        urgentTemplate: root.getAttribute('data-template-urgent') || 'Last call for today\'s dispatch: __TIME__.'
+        defaultTemplate: root.getAttribute('data-template') || 'Ships today if you checkout in the next __TIME__',
+        urgentTemplate: root.getAttribute('data-template-urgent') || 'Last call for today\'s dispatch: __TIME__'
       };
     }
     try {
       var parsed = JSON.parse(script.textContent);
       return {
-        defaultTemplate: parsed.default || 'Ships today if you checkout in the next __TIME__.',
-        urgentTemplate: parsed.urgent || 'Last call for today\'s dispatch: __TIME__.'
+        defaultTemplate: parsed.default || 'Ships today if you checkout in the next __TIME__',
+        urgentTemplate: parsed.urgent || 'Last call for today\'s dispatch: __TIME__'
       };
     } catch (e) {
       return {
-        defaultTemplate: 'Ships today if you checkout in the next __TIME__.',
-        urgentTemplate: 'Last call for today\'s dispatch: __TIME__.'
+        defaultTemplate: 'Ships today if you checkout in the next __TIME__',
+        urgentTemplate: 'Last call for today\'s dispatch: __TIME__'
       };
     }
   }
