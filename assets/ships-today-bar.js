@@ -99,12 +99,16 @@
 
     if (context === 'top') {
       setVisible(root, showBar);
-      if (!showBar) return;
+      if (!showBar) {
+        root.classList.remove('is-urgent');
+        return;
+      }
       var windowMs = cutoff * 3600 * 1000;
       var pct = Math.max(0, Math.min(100, (remaining / windowMs) * 100));
       root.style.setProperty('--ships-progress', pct + '%');
+      root.classList.toggle('is-urgent', remaining < 3600000);
       var topTimer = root.querySelector('[data-ships-today-timer]');
-      if (topTimer) topTimer.textContent = formatTime(remaining, false);
+      if (topTimer) topTimer.textContent = formatTime(remaining, true);
       return;
     }
 

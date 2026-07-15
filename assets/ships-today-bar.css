@@ -57,6 +57,9 @@
 
 .xo-ships-today--top {
   width: 100%;
+  background: rgba(var(--color-background));
+  border-bottom: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 8%, transparent);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .xo-ships-today--top[hidden] {
@@ -67,15 +70,17 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0;
+  flex-wrap: wrap;
+  gap: 0.6rem;
   margin: 0;
-  padding: 0.6rem var(--page-gap-mobile, 2.2rem);
+  padding: 0.7rem var(--page-gap-mobile, 2.2rem) 0.55rem;
   border-radius: 0;
   background: transparent;
   text-align: center;
   font-size: calc(var(--font-body-scale) * 1.2rem);
   font-weight: 500;
-  line-height: 1.3;
+  line-height: 1.35;
+  color: color-mix(in srgb, rgba(var(--color-foreground)) 78%, transparent);
 }
 
 @media (min-width: 768px) {
@@ -86,22 +91,125 @@
   }
 }
 
+.xo-ships-today__live {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: rgba(var(--color-accent));
+  flex-shrink: 0;
+}
+
+.xo-ships-today--top .xo-ships-today__timer {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.55rem;
+  margin: 0 0.15rem;
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, rgba(var(--color-accent)) 18%, transparent);
+  color: rgba(var(--color-foreground));
+  font-size: 0.95em;
+  letter-spacing: 0.01em;
+}
+
+.xo-ships-today--top.is-urgent .xo-ships-today__timer {
+  background: color-mix(in srgb, rgba(var(--color-accent)) 32%, transparent);
+}
+
 .xo-ships-today-progress__track {
+  position: relative;
   width: 100%;
-  height: 0.3rem;
-  background: color-mix(in srgb, rgba(var(--color-foreground)) 12%, transparent);
+  height: 0.35rem;
+  background: color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
   overflow: hidden;
 }
 
 .xo-ships-today-progress__fill {
+  position: relative;
   height: 100%;
   width: var(--ships-progress, 0%);
-  background: rgba(var(--color-accent));
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, rgba(var(--color-accent)) 75%, transparent),
+    rgba(var(--color-accent))
+  );
+}
+
+.xo-ships-today-progress__tip {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 0.8rem;
+  height: 100%;
+  background: color-mix(in srgb, rgba(var(--color-background)) 55%, transparent);
+  pointer-events: none;
+}
+
+[dir='rtl'] .xo-ships-today-progress__tip {
+  right: auto;
+  left: 0;
+}
+
+.xo-ships-today-progress-sticky[xo-is-sticky] .xo-ships-today--top {
+  background: color-mix(in srgb, rgba(var(--color-background)) 92%, transparent);
+  border-bottom-color: color-mix(in srgb, rgba(var(--color-foreground)) 12%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.xo-ships-today-progress-sticky[xo-is-sticky] .xo-ships-today__bar--top {
+  padding-top: 0.55rem;
+  padding-bottom: 0.4rem;
 }
 
 @media (prefers-reduced-motion: no-preference) {
   .xo-ships-today-progress__fill {
     transition: width 0.5s var(--out-soft, cubic-bezier(0, 0, 0.3, 1));
   }
+
+  .xo-ships-today__live {
+    animation: xo-ships-today-pulse 1.6s var(--out-soft, ease) infinite;
+  }
+
+  .xo-ships-today--top.is-urgent .xo-ships-today__live {
+    animation-duration: 0.9s;
+  }
+
+  .xo-ships-today-progress__tip {
+    animation: xo-ships-today-shimmer 1.8s var(--out-soft, ease) infinite;
+  }
+
+  .xo-ships-today--top .xo-ships-today__timer {
+    transition: background-color 0.3s ease, transform 0.2s ease;
+  }
 }
+
+@keyframes xo-ships-today-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.45;
+    transform: scale(0.85);
+  }
+}
+
+@keyframes xo-ships-today-shimmer {
+  0%,
+  100% {
+    opacity: 0.15;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .xo-ships-today__live,
+  .xo-ships-today-progress__tip {
+    animation: none;
+  }
+}
+
 
