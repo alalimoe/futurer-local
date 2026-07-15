@@ -1,0 +1,51 @@
+{% doc %}
+  Subtle ships-today urgency bar. Visible Mon–Sat before 6pm Asia/Dubai; hidden after cutoff and all day Sunday.
+
+  @param {string} [context] - 'product' (default) or 'cart'
+  @param {boolean} [show_stock_fallback] - Show In Stock when bar is hidden (product only)
+
+  @example
+  {% render 'ships-today-bar', context: 'product', show_stock_fallback: true %}
+  {% render 'ships-today-bar', context: 'cart' %}
+{% enddoc %}
+
+{% liquid
+  assign bar_context = context | default: 'product'
+  assign show_fallback = false
+  if bar_context == 'product'
+    assign show_fallback = true
+  endif
+  if show_stock_fallback == false
+    assign show_fallback = false
+  endif
+  assign order_in_template = 'general.ships_today.order_in' | t
+%}
+
+{{ 'ships-today-bar.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'ships-today-bar.js' | asset_url }}" defer></script>
+
+<div
+  class="xo-ships-today xo-ships-today--{{ bar_context }}"
+  data-ships-today
+  data-context="{{ bar_context }}"
+  data-tz="Asia/Dubai"
+  data-cutoff-hour="18"
+  data-hide-weekday="0"
+  data-template="{{ order_in_template | escape }}"
+>
+  {%- if show_fallback -%}
+    <p class="xo-ships-today__stock" data-ships-today-stock>
+      <span class="xo-ships-today__stock-dot" aria-hidden="true"></span>
+      {{ 'products.product.stock_in_stock' | t }}
+    </p>
+  {%- endif -%}
+  <p
+    class="xo-ships-today__bar"
+    data-ships-today-bar
+    hidden
+    role="status"
+    aria-live="polite"
+  >
+    <span data-ships-today-label></span>
+  </p>
+</div>
