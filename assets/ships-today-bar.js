@@ -93,24 +93,33 @@
     label.setAttribute('data-ready', 'true');
   }
 
+  function decodeHtmlEntities(str) {
+    if (!str || str.indexOf('&') === -1) return str;
+    var textarea = document.createElement('textarea');
+    textarea.innerHTML = str;
+    return textarea.value;
+  }
+
   function getTopTemplates(root) {
+    var fallbackDefault = 'Ships today if you checkout in the next __TIME__';
+    var fallbackUrgent = 'Last call for today’s dispatch: __TIME__';
     var script = root.closest('.shopify-section') && root.closest('.shopify-section').querySelector('[data-ships-today-templates]');
     if (!script) {
       return {
-        defaultTemplate: root.getAttribute('data-template') || 'Ships today if you checkout in the next __TIME__',
-        urgentTemplate: root.getAttribute('data-template-urgent') || 'Last call for today\'s dispatch: __TIME__'
+        defaultTemplate: decodeHtmlEntities(root.getAttribute('data-template') || fallbackDefault),
+        urgentTemplate: decodeHtmlEntities(root.getAttribute('data-template-urgent') || fallbackUrgent)
       };
     }
     try {
       var parsed = JSON.parse(script.textContent);
       return {
-        defaultTemplate: parsed.default || 'Ships today if you checkout in the next __TIME__',
-        urgentTemplate: parsed.urgent || 'Last call for today\'s dispatch: __TIME__'
+        defaultTemplate: decodeHtmlEntities(parsed.default || fallbackDefault),
+        urgentTemplate: decodeHtmlEntities(parsed.urgent || fallbackUrgent)
       };
     } catch (e) {
       return {
-        defaultTemplate: 'Ships today if you checkout in the next __TIME__',
-        urgentTemplate: 'Last call for today\'s dispatch: __TIME__'
+        defaultTemplate: fallbackDefault,
+        urgentTemplate: fallbackUrgent
       };
     }
   }
