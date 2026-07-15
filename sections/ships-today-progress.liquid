@@ -1,34 +1,45 @@
-{{ 'ships-today-bar.css' | asset_url | stylesheet_tag }}
-<script src="{{ 'ships-today-bar.js' | asset_url }}" defer></script>
-
 {% liquid
-  assign checkout_template = 'general.ships_today.checkout_within' | t
+  assign show_ships_progress = false
+  if request.page_type == 'index' or request.page_type == 'collection' or request.page_type == 'product' or request.page_type == 'cart'
+    assign show_ships_progress = true
+  endif
 %}
 
-<section {% render 'section-attr' %}>
-  <xo-sticky xo-direction="down" class="xo-ships-today-progress-sticky">
-    <div
-      class="xo-ships-today xo-ships-today--top"
-      data-ships-today
-      data-context="top"
-      data-tz="Asia/Dubai"
-      data-cutoff-hour="18"
-      data-hide-weekday="0"
-      data-template="{{ checkout_template | escape }}"
-      hidden
-    >
-      <p class="xo-ships-today__bar xo-ships-today__bar--top" data-ships-today-bar role="status" aria-live="polite">
-        <span class="xo-ships-today__live" aria-hidden="true"></span>
-        <span data-ships-today-label></span>
-      </p>
-      <div class="xo-ships-today-progress__track" aria-hidden="true">
-        <div class="xo-ships-today-progress__fill">
-          <span class="xo-ships-today-progress__tip"></span>
+{% if show_ships_progress %}
+  {{ 'ships-today-bar.css' | asset_url | stylesheet_tag }}
+  <script src="{{ 'ships-today-bar.js' | asset_url }}" defer></script>
+
+  {% liquid
+    assign checkout_template = 'general.ships_today.checkout_within' | t
+    assign last_call_template = 'general.ships_today.last_call' | t
+  %}
+
+  <section {% render 'section-attr' %}>
+    <xo-sticky xo-direction="down" class="xo-ships-today-progress-sticky">
+      <div
+        class="xo-ships-today xo-ships-today--top"
+        data-ships-today
+        data-context="top"
+        data-tz="Asia/Dubai"
+        data-cutoff-hour="18"
+        data-hide-weekday="0"
+        data-template="{{ checkout_template | escape }}"
+        data-template-urgent="{{ last_call_template | escape }}"
+        hidden
+      >
+        <p class="xo-ships-today__bar xo-ships-today__bar--top" data-ships-today-bar role="status" aria-live="polite">
+          <span class="xo-ships-today__live" aria-hidden="true"></span>
+          <span data-ships-today-label></span>
+        </p>
+        <div class="xo-ships-today-progress__track" aria-hidden="true">
+          <div class="xo-ships-today-progress__fill">
+            <span class="xo-ships-today-progress__tip"></span>
+          </div>
         </div>
       </div>
-    </div>
-  </xo-sticky>
-</section>
+    </xo-sticky>
+  </section>
+{% endif %}
 
 {% schema %}
 {

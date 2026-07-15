@@ -66,7 +66,8 @@
 
   function ensureLabel(root, template) {
     var label = root.querySelector('[data-ships-today-label]');
-    if (!label || label.getAttribute('data-ready') === 'true') return;
+    if (!label) return;
+    if (label.getAttribute('data-ready') === 'true' && label.getAttribute('data-template') === template) return;
     label.textContent = '';
     var idx = template.indexOf('__TIME__');
     if (idx === -1) {
@@ -79,6 +80,7 @@
       label.appendChild(span);
       label.appendChild(document.createTextNode(template.slice(idx + 8)));
     }
+    label.setAttribute('data-template', template);
     label.setAttribute('data-ready', 'true');
   }
 
@@ -87,15 +89,18 @@
     var cutoff = parseInt(root.getAttribute('data-cutoff-hour') || String(DEFAULT_CUTOFF), 10);
     var hideWeekday = parseInt(root.getAttribute('data-hide-weekday') || String(DEFAULT_HIDE_WEEKDAY), 10);
     var context = root.getAttribute('data-context') || 'product';
-    var template = root.getAttribute('data-template') || 'Order in __TIME__ for ships today';
+    var templateDefault = root.getAttribute('data-template') || 'Order in __TIME__ for ships today';
+    var templateUrgent = root.getAttribute('data-template-urgent') || templateDefault;
     var bar = root.querySelector('[data-ships-today-bar]');
     var stock = root.querySelector('[data-ships-today-stock]');
-
-    ensureLabel(root, template);
 
     var parts = dubaiParts(new Date(), tz);
     var remaining = remainingMs(parts, cutoff);
     var showBar = parts.weekday !== hideWeekday && remaining > 0;
+    var isUrgent = remaining > 0 && remaining < 3600000;
+    var template = context === 'top' && isUrgent ? templateUrgent : templateDefault;
+
+    ensureLabel(root, template);
 
     if (context === 'top') {
       setVisible(root, showBar);
@@ -106,9 +111,9 @@
       var windowMs = cutoff * 3600 * 1000;
       var pct = Math.max(0, Math.min(100, (remaining / windowMs) * 100));
       root.style.setProperty('--ships-progress', pct + '%');
-      root.classList.toggle('is-urgent', remaining < 3600000);
+      root.classList.toggle('is-urgent', isUrgent);
       var topTimer = root.querySelector('[data-ships-today-timer]');
-      if (topTimer) topTimer.textContent = formatTime(remaining, true);
+      if (topTimer) topTimer.textContent = formatTime(remaining, false);
       return;
     }
 
