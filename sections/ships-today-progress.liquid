@@ -10,10 +10,10 @@
   <script src="{{ 'ships-today-bar.js' | asset_url }}" defer></script>
 
   {% comment %}
-    Critical strip fixes are inlined: the ships-today-bar.css CDN checksum has been
-    sticking to a stale build. These rules must ship with the HTML.
+    Critical strip fixes are inlined: ships-today-bar.css CDN has been serving a
+    stale checksum. Use a raw style tag (header-group {% style %} was not emitting).
   {% endcomment %}
-  {% style %}
+  <style id="ships-today-strip-fix">
     .shopify-section.section-ships-today-progress:has([data-ships-today][hidden]) {
       display: none !important;
     }
@@ -40,7 +40,7 @@
     body:has(#xo-main-content > .shopify-section.section-hero-molecule) .shopify-section.section-ships-today-progress .xo-ships-today-progress__tip {
       background: rgba(8, 8, 11, 0.55);
     }
-  {% endstyle %}
+  </style>
 
   {% liquid
     assign checkout_template = 'general.ships_today.checkout_within' | t
