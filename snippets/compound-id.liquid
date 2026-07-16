@@ -56,8 +56,12 @@
 
     {%- if formula_raw != blank -%}
       <div class="compound-id__formula">
-        {%- assign formula_chars = formula_raw | split: '' -%}
-        {%- for ch in formula_chars -%}
+        {%- assign formula_len = formula_raw.size -%}
+        {%- for i in (0..120) -%}
+          {%- if i >= formula_len -%}
+            {%- break -%}
+          {%- endif -%}
+          {%- assign ch = formula_raw | slice: i, 1 -%}
           {%- if ch == '0' or ch == '1' or ch == '2' or ch == '3' or ch == '4' or ch == '5' or ch == '6' or ch == '7' or ch == '8' or ch == '9' -%}
             <sub>{{ ch }}</sub>
           {%- else -%}
