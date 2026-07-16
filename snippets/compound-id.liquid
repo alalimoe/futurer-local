@@ -1,0 +1,70 @@
+{% doc %}
+  Renders the 3-line compound identifier stack from product metafields.
+  Returns nothing when iupac_name and formula are both blank (safe partial rollout).
+
+  @param {product} [product] - Product to read metafields from (defaults to closest product)
+  @param {string} [surface] - "light" (default) or "dark"
+  @param {boolean} [compact] - Hide the title line (for cards / COA rows under an existing name)
+  @param {boolean} [card] - Desktop-hover card surface (hidden until parent card hover)
+
+  @example
+  {% render 'compound-id', product: product, surface: 'light' %}
+{% enddoc %}
+
+{%- liquid
+  assign compound_product = product
+  if compound_product == blank
+    assign compound_product = closest.product
+  endif
+
+  assign iupac_name = compound_product.metafields.custom.iupac_name.value
+  assign formula_raw = compound_product.metafields.custom.formula.value
+  assign label_type = compound_product.metafields.custom.compound_label_type.value | default: 'iupac'
+  assign line2 = iupac_name
+-%}
+
+{%- if iupac_name != blank or formula_raw != blank -%}
+  {{ 'compound-id.css' | asset_url | stylesheet_tag }}
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;600&display=swap" rel="stylesheet">
+
+  {%- capture compound_classes -%}
+    compound-id
+    {%- if surface == 'dark' %} compound-id--on-dark{% endif -%}
+    {%- if compact %} compound-id--compact{% endif -%}
+    {%- if card %} compound-id--card{% endif -%}
+  {%- endcapture -%}
+
+  <div class="{{ compound_classes | strip }}">
+    {%- unless compact -%}
+      <div class="compound-id__name">{{ compound_product.title | escape }}</div>
+    {%- endunless -%}
+
+    {%- if line2 != blank -%}
+      <div class="compound-id__line2">
+        {%- if label_type == 'botanical' -%}
+          {%- assign botanical_parts = line2 | split: ' · ' -%}
+          {%- if botanical_parts.size > 1 -%}
+            <em>{{ botanical_parts.first | escape }}</em> · {{ botanical_parts.last | escape }}
+          {%- else -%}
+            <em>{{ line2 | escape }}</em>
+          {%- endif -%}
+        {%- else -%}
+          {{ line2 | escape }}
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    {%- if formula_raw != blank -%}
+      <div class="compound-id__formula">
+        {%- assign formula_chars = formula_raw | split: '' -%}
+        {%- for ch in formula_chars -%}
+          {%- if ch == '0' or ch == '1' or ch == '2' or ch == '3' or ch == '4' or ch == '5' or ch == '6' or ch == '7' or ch == '8' or ch == '9' -%}
+            <sub>{{ ch }}</sub>
+          {%- else -%}
+            {{- ch | escape -}}
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+  </div>
+{%- endif -%}
