@@ -1,0 +1,339 @@
+{% comment %}
+  Hero: Raymarched Molecule (WebGL2)
+  - Text column left, molecule projected right (never overlaps; scrim as backstop)
+  - Static CSS fallback paints instantly (LCP-safe); WebGL boots after load+idle and fades in
+  - Ghost bottle photography under the canvas (transparent WebGL misses)
+  - Auto-static on: no WebGL2, saveData, <=2GB devices, animation toggled off
+  - prefers-reduced-motion: single still frame, no autospin
+  Requires: assets/hero-molecule.js
+{% endcomment %}
+
+{%- if section.settings.use_lexend -%}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+{%- endif -%}
+
+{%- liquid
+  assign h = '100vh'
+  if section.settings.height == 'tall'
+    assign h = '80vh'
+  elsif section.settings.height == 'medium'
+    assign h = '64vh'
+  endif
+  assign spin = section.settings.spin_speed | times: 0.0005
+  assign bottle_opacity = section.settings.bottle_opacity | default: 12 | divided_by: 100.0
+  assign show_bottle = false
+  if section.settings.show_bottle
+    if section.settings.bottle_image != blank or section.settings.bottle_image_mobile != blank
+      assign show_bottle = true
+    endif
+  endif
+-%}
+
+<section
+  class="hero-molecule"
+  id="HeroMol-{{ section.id }}"
+  data-hero-molecule
+  data-offx="{{ section.settings.desktop_offset | divided_by: 100.0 }}"
+  data-offy="-0.02"
+  data-dist="{{ section.settings.desktop_distance }}"
+  data-moffx="0"
+  data-moffy="-0.30"
+  data-mdist="{{ section.settings.mobile_distance }}"
+  data-spin="{{ spin }}"
+  data-animate="{{ section.settings.animate }}"
+>
+  <div class="hm-fallback" aria-hidden="true"></div>
+
+  {%- if show_bottle -%}
+    <div class="hm-bottle" aria-hidden="true">
+      {%- if section.settings.bottle_image != blank and section.settings.bottle_image_mobile != blank -%}
+        <picture>
+          <source
+            media="(max-width: 760px)"
+            srcset="{{ section.settings.bottle_image_mobile | image_url: width: 600 }} 600w, {{ section.settings.bottle_image_mobile | image_url: width: 900 }} 900w, {{ section.settings.bottle_image_mobile | image_url: width: 1200 }} 1200w"
+            sizes="100vw"
+          >
+          <img
+            src="{{ section.settings.bottle_image | image_url: width: 1400 }}"
+            srcset="{{ section.settings.bottle_image | image_url: width: 900 }} 900w, {{ section.settings.bottle_image | image_url: width: 1200 }} 1200w, {{ section.settings.bottle_image | image_url: width: 1600 }} 1600w"
+            sizes="100vw"
+            alt=""
+            width="{{ section.settings.bottle_image.width }}"
+            height="{{ section.settings.bottle_image.height }}"
+            loading="eager"
+            decoding="async"
+            fetchpriority="low"
+          >
+        </picture>
+      {%- elsif section.settings.bottle_image != blank -%}
+        <img
+          src="{{ section.settings.bottle_image | image_url: width: 1400 }}"
+          srcset="{{ section.settings.bottle_image | image_url: width: 900 }} 900w, {{ section.settings.bottle_image | image_url: width: 1200 }} 1200w, {{ section.settings.bottle_image | image_url: width: 1600 }} 1600w"
+          sizes="100vw"
+          alt=""
+          width="{{ section.settings.bottle_image.width }}"
+          height="{{ section.settings.bottle_image.height }}"
+          loading="eager"
+          decoding="async"
+          fetchpriority="low"
+        >
+      {%- else -%}
+        <img
+          src="{{ section.settings.bottle_image_mobile | image_url: width: 900 }}"
+          srcset="{{ section.settings.bottle_image_mobile | image_url: width: 600 }} 600w, {{ section.settings.bottle_image_mobile | image_url: width: 900 }} 900w, {{ section.settings.bottle_image_mobile | image_url: width: 1200 }} 1200w"
+          sizes="100vw"
+          alt=""
+          width="{{ section.settings.bottle_image_mobile.width }}"
+          height="{{ section.settings.bottle_image_mobile.height }}"
+          loading="eager"
+          decoding="async"
+          fetchpriority="low"
+        >
+      {%- endif -%}
+    </div>
+  {%- endif -%}
+
+  <canvas class="hm-canvas" aria-hidden="true"></canvas>
+
+  <div class="hm-overlay">
+    {%- if section.settings.heading != blank -%}
+      <h1 class="hm-h1">{{ section.settings.heading | escape }}</h1>
+    {%- endif -%}
+    {%- if section.settings.subheading != blank -%}
+      <p class="hm-sub">{{ section.settings.subheading | escape }}</p>
+    {%- endif -%}
+
+    {%- if section.blocks.size > 0 -%}
+      <div class="hm-chips">
+        {%- for block in section.blocks -%}
+          <span {{ block.shopify_attributes }}>{{ block.settings.label | escape }}</span>
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+
+    {%- if section.settings.cta1_label != blank or section.settings.cta2_label != blank -%}
+      <div class="hm-ctas">
+        {%- if section.settings.cta1_label != blank -%}
+          <a class="hm-cta" href="{{ section.settings.cta1_url | default: '#' }}">{{ section.settings.cta1_label | escape }}</a>
+        {%- endif -%}
+        {%- if section.settings.cta2_label != blank -%}
+          <a class="hm-cta hm-ghost" href="{{ section.settings.cta2_url | default: '#' }}">{{ section.settings.cta2_label | escape }}</a>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+  </div>
+
+  {%- if section.settings.show_card -%}
+    <div class="hm-molcard" aria-hidden="true">
+      <div class="hm-name">{{ section.settings.card_name | escape }}</div>
+      <div class="hm-iupac">{{ section.settings.card_iupac | escape }}</div>
+      <div class="hm-formula">{{ section.settings.card_formula }}</div>
+    </div>
+  {%- endif -%}
+</section>
+
+{% style %}
+  #HeroMol-{{ section.id }}{
+    --hm-gold:#FFD007; --hm-gold-deep:#C79500;
+    --hm-ink:#08080B; --hm-text:#F5F4EF; --hm-muted:#8F8B82;
+    --hm-bottle-opacity: {{ bottle_opacity }};
+    position:relative; height:{{ h }}; height:100svh; min-height:560px; overflow:hidden;
+    background:radial-gradient(120% 90% at 60% 25%, #0e0e14 0%, #08080b 60%);
+    color:var(--hm-text);
+    {% if section.settings.use_lexend %}font-family:'Lexend',sans-serif;{% endif %}
+  }
+  {% if section.settings.height != 'full' %}
+  #HeroMol-{{ section.id }}{ height:{{ h }}; }
+  {% endif %}
+  #HeroMol-{{ section.id }} *{ margin:0; padding:0; box-sizing:border-box; {% if section.settings.use_lexend %}font-family:'Lexend',sans-serif;{% endif %} }
+
+  #HeroMol-{{ section.id }} .hm-canvas{
+    position:absolute; inset:0; width:100%; height:100%; display:block; cursor:grab;
+    opacity:0; transition:opacity .9s ease; z-index:2;
+  }
+  #HeroMol-{{ section.id }} .hm-canvas.on{ opacity:1; }
+  #HeroMol-{{ section.id }} .hm-canvas:active{ cursor:grabbing; }
+  #HeroMol-{{ section.id }} .hm-fallback{
+    position:absolute; inset:0; display:block; z-index:0;
+    /* Slightly stronger indigo/white radial to replace deleted WebGL env softbox bloom */
+    background:
+      radial-gradient(42% 50% at 66% 46%, rgba(90,110,255,.34), rgba(90,110,255,.07) 58%, transparent 78%),
+      radial-gradient(16% 20% at 70% 42%, rgba(220,230,255,.42), transparent 70%),
+      radial-gradient(120% 90% at 60% 25%, #0e0e14, #08080b 60%);
+  }
+  #HeroMol-{{ section.id }} .hm-bottle{
+    position:absolute; inset:0; z-index:1; pointer-events:none;
+    opacity:var(--hm-bottle-opacity); overflow:hidden;
+  }
+  #HeroMol-{{ section.id }} .hm-bottle picture,
+  #HeroMol-{{ section.id }} .hm-bottle img{
+    position:absolute; inset:0; width:100%; height:100%;
+    object-fit:cover; object-position:66% 46%;
+    display:block;
+  }
+  #HeroMol-{{ section.id }}.static .hm-canvas{ display:none; }
+
+  /* text owns the left column; molecule is projected right of it and never crosses over */
+  #HeroMol-{{ section.id }} .hm-overlay{
+    position:absolute; inset:0; z-index:3; pointer-events:none;
+    display:flex; flex-direction:column; justify-content:center;
+    padding-left:clamp(24px,6vw,96px);
+    max-width:min(46%, 620px);
+  }
+  #HeroMol-{{ section.id }} .hm-overlay::before{
+    content:""; position:absolute; inset:0; z-index:-1;
+    background:linear-gradient(90deg, rgba(8,8,11,.92) 55%, rgba(8,8,11,0) 100%);
+  }
+  #HeroMol-{{ section.id }} .hm-h1{
+    font-weight:600; font-size:clamp(30px,3.6vw,52px); line-height:1.08;
+    letter-spacing:-.015em; color:var(--hm-text);
+  }
+  #HeroMol-{{ section.id }} .hm-sub{
+    margin-top:16px; color:rgba(255,255,255,.92);
+    font-size:clamp(14px,1.4vw,16px); font-weight:300; max-width:40ch;
+  }
+  #HeroMol-{{ section.id }} .hm-chips{
+    margin-top:18px; display:flex; gap:8px 10px; flex-wrap:wrap;
+    font-size:11px; letter-spacing:.08em;
+  }
+  #HeroMol-{{ section.id }} .hm-chips span{
+    background:rgba(255,255,255,.86);
+    -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px);
+    border:1px solid rgba(255,255,255,.55); border-radius:99px;
+    padding:6px 13px; white-space:nowrap; color:#141414; font-weight:500;
+  }
+  #HeroMol-{{ section.id }} .hm-ctas{ margin-top:28px; display:flex; gap:12px; flex-wrap:wrap; }
+  #HeroMol-{{ section.id }} .hm-cta{
+    pointer-events:auto; background:var(--hm-gold); color:#141414; font-weight:600;
+    font-size:15px; padding:14px 30px; border-radius:6px; text-decoration:none;
+    transition:transform .15s, box-shadow .15s; display:inline-block;
+  }
+  #HeroMol-{{ section.id }} .hm-cta:hover{ transform:translateY(-1px); box-shadow:0 8px 28px rgba(255,208,7,.32); color:#141414; }
+  #HeroMol-{{ section.id }} .hm-cta:focus-visible{ outline:2px solid var(--hm-gold); outline-offset:3px; }
+  #HeroMol-{{ section.id }} .hm-ghost{ background:transparent; color:var(--hm-text); border:1px solid #33313a; }
+  #HeroMol-{{ section.id }} .hm-ghost:hover{ border-color:var(--hm-gold-deep); box-shadow:none; color:var(--hm-text); }
+
+  #HeroMol-{{ section.id }} .hm-molcard{
+    position:absolute; right:clamp(20px,4vw,56px); bottom:clamp(20px,4vh,44px);
+    z-index:3; text-align:right; pointer-events:none;
+  }
+  #HeroMol-{{ section.id }} .hm-name{ color:var(--hm-text); font-weight:600; font-size:14px; letter-spacing:.04em; }
+  #HeroMol-{{ section.id }} .hm-iupac{ color:var(--hm-muted); font-size:11px; letter-spacing:.06em; margin-top:3px; }
+  #HeroMol-{{ section.id }} .hm-formula{ color:var(--hm-gold-deep); font-size:11px; letter-spacing:.14em; margin-top:2px; }
+
+  @media (max-width:760px){
+    #HeroMol-{{ section.id }} .hm-overlay{
+      max-width:100%; justify-content:flex-start;
+      padding:clamp(72px,12vh,110px) 24px 0 24px;
+    }
+    #HeroMol-{{ section.id }} .hm-overlay::before{
+      background:linear-gradient(180deg, rgba(8,8,11,.92) 58%, rgba(8,8,11,0) 100%);
+    }
+    #HeroMol-{{ section.id }} .hm-h1{ font-size:clamp(28px,7.6vw,38px); }
+    #HeroMol-{{ section.id }} .hm-chips{ display:none; }
+    #HeroMol-{{ section.id }} .hm-bottle img,
+    #HeroMol-{{ section.id }} .hm-bottle picture img{
+      object-position:50% 72%;
+    }
+    #HeroMol-{{ section.id }} .hm-fallback{
+      background:
+        radial-gradient(48% 42% at 50% 72%, rgba(90,110,255,.34), rgba(90,110,255,.07) 58%, transparent 78%),
+        radial-gradient(18% 16% at 50% 68%, rgba(220,230,255,.42), transparent 70%),
+        radial-gradient(120% 90% at 50% 40%, #0e0e14, #08080b 60%);
+    }
+  }
+  @media (max-width:640px){
+    #HeroMol-{{ section.id }} .hm-molcard{ left:24px; right:auto; text-align:left; bottom:96px; }
+  }
+{% endstyle %}
+
+<script src="{{ 'hero-molecule.js' | asset_url }}" defer></script>
+
+{% schema %}
+{
+  "name": "Hero: Molecule (WebGL)",
+  "tag": "section",
+  "class": "section-hero-molecule",
+  "settings": [
+    { "type": "header", "content": "Content" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Nootropics & Peptides, COA Verified" },
+    { "type": "textarea", "id": "subheading", "label": "Subheading", "default": "Third-party tested. COA on new batches. Same-day dispatch from Dubai, Express Worldwide." },
+    { "type": "text", "id": "cta1_label", "label": "Primary button label", "default": "Shop Nootropics" },
+    { "type": "url", "id": "cta1_url", "label": "Primary button link" },
+    { "type": "text", "id": "cta2_label", "label": "Secondary button label", "default": "Shop Peptides" },
+    { "type": "url", "id": "cta2_url", "label": "Secondary button link" },
+
+    { "type": "header", "content": "Ghost bottle" },
+    { "type": "checkbox", "id": "show_bottle", "label": "Show ghost bottle behind molecule", "default": true },
+    { "type": "image_picker", "id": "bottle_image", "label": "Bottle image (desktop)" },
+    { "type": "image_picker", "id": "bottle_image_mobile", "label": "Bottle image (mobile)" },
+    {
+      "type": "range", "id": "bottle_opacity", "label": "Bottle opacity",
+      "min": 4, "max": 24, "step": 1, "unit": "%", "default": 11,
+      "info": "Very low opacity continuity layer behind the molecule"
+    },
+
+    { "type": "header", "content": "Molecule identifier card" },
+    { "type": "checkbox", "id": "show_card", "label": "Show identifier card", "default": true },
+    { "type": "text", "id": "card_name", "label": "Compound name", "default": "Phenibut" },
+    { "type": "text", "id": "card_iupac", "label": "IUPAC name", "default": "4-amino-3-phenylbutanoic acid" },
+    { "type": "text", "id": "card_formula", "label": "Formula (HTML allowed)", "default": "C&#8321;&#8320; H&#8321;&#8323; N O&#8322;" },
+
+    { "type": "header", "content": "Layout" },
+    {
+      "type": "select", "id": "height", "label": "Section height",
+      "options": [
+        { "value": "full", "label": "Full screen" },
+        { "value": "tall", "label": "Tall (80vh)" },
+        { "value": "medium", "label": "Medium (64vh)" }
+      ],
+      "default": "full"
+    },
+    {
+      "type": "range", "id": "desktop_offset", "label": "Molecule position (desktop, % right of center)",
+      "min": 20, "max": 60, "step": 2, "default": 44
+    },
+
+    { "type": "header", "content": "Animation" },
+    { "type": "checkbox", "id": "animate", "label": "Enable WebGL animation", "info": "Off = static gradient fallback only", "default": true },
+    {
+      "type": "range", "id": "spin_speed", "label": "Auto-rotation speed",
+      "min": 0, "max": 10, "step": 1, "default": 3
+    },
+    {
+      "type": "range", "id": "desktop_distance", "label": "Camera distance (desktop)",
+      "min": 8, "max": 14, "step": 0.2, "default": 10.4,
+      "info": "Further = smaller molecule, more margin from text"
+    },
+    {
+      "type": "range", "id": "mobile_distance", "label": "Camera distance (mobile)",
+      "min": 10, "max": 16, "step": 0.5, "default": 13
+    },
+
+    { "type": "header", "content": "Typography" },
+    { "type": "checkbox", "id": "use_lexend", "label": "Load Lexend font", "info": "Uncheck to inherit the theme font", "default": true }
+  ],
+  "blocks": [
+    {
+      "type": "chip",
+      "name": "Trust chip",
+      "limit": 4,
+      "settings": [
+        { "type": "text", "id": "label", "label": "Label", "default": "Third-Party Tested" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Hero: Molecule (WebGL)",
+      "blocks": [
+        { "type": "chip", "settings": { "label": "Third-Party Tested" } },
+        { "type": "chip", "settings": { "label": "Same-Day Dispatch" } },
+        { "type": "chip", "settings": { "label": "cGMP Manufactured" } }
+      ]
+    }
+  ]
+}
+{% endschema %}
