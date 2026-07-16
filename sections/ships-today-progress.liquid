@@ -9,6 +9,39 @@
   {{ 'ships-today-bar.css' | asset_url | stylesheet_tag }}
   <script src="{{ 'ships-today-bar.js' | asset_url }}" defer></script>
 
+  {% comment %}
+    Critical strip fixes are inlined: the ships-today-bar.css CDN checksum has been
+    sticking to a stale build. These rules must ship with the HTML.
+  {% endcomment %}
+  {% style %}
+    .shopify-section.section-ships-today-progress:has([data-ships-today][hidden]) {
+      display: none !important;
+    }
+    .shopify-section.section-ships-today-progress .xo-ships-today-progress-sticky {
+      display: block;
+    }
+    body:has(#xo-main-content > .shopify-section.section-hero-molecule) .shopify-section.section-ships-today-progress .xo-section,
+    body:has(#xo-main-content > .shopify-section.section-hero-molecule) .shopify-section.section-ships-today-progress .xo-ships-today--top,
+    body:has(#xo-main-content > .shopify-section.section-hero-molecule) .shopify-section.section-ships-today-progress .xo-ships-today-progress-sticky[xo-is-sticky] .xo-ships-today--top {
+      background: #08080b !important;
+      background-color: #08080b !important;
+      border-bottom-color: rgba(245, 244, 239, 0.08);
+    }
+    body:has(#xo-main-content > .shopify-section.section-hero-molecule) .shopify-section.section-ships-today-progress .xo-ships-today__bar--top {
+      color: rgba(245, 244, 239, 0.78);
+    }
+    body:has(#xo-main-content > .shopify-section.section-hero-molecule) .shopify-section.section-ships-today-progress .xo-ships-today--top .xo-ships-today__timer {
+      color: rgba(245, 244, 239, 0.95);
+      background: color-mix(in srgb, rgba(var(--color-accent)) 28%, transparent);
+    }
+    body:has(#xo-main-content > .shopify-section.section-hero-molecule) .shopify-section.section-ships-today-progress .xo-ships-today-progress__track {
+      background: rgba(245, 244, 239, 0.12);
+    }
+    body:has(#xo-main-content > .shopify-section.section-hero-molecule) .shopify-section.section-ships-today-progress .xo-ships-today-progress__tip {
+      background: rgba(8, 8, 11, 0.55);
+    }
+  {% endstyle %}
+
   {% liquid
     assign checkout_template = 'general.ships_today.checkout_within' | t
     assign last_call_template = 'general.ships_today.last_call' | t | replace: '&#39;', "'" | replace: '&amp;#39;', "'"
