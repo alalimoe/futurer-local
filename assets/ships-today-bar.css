@@ -6,6 +6,30 @@
   display: none;
 }
 
+/* When the bar is hidden, collapse the whole section.
+   Root cause of the white gap under the announcement bar: this section sits
+   between announcement and header, uses color-background-1 (white), and the
+   empty xo-sticky wrapper can still leave a visible white strip. */
+.shopify-section.section-ships-today-progress:has([data-ships-today][hidden]) {
+  display: none !important;
+}
+
+.xo-ships-today-progress-sticky {
+  display: block;
+}
+
+/* Molecule homepage: ships-today sits between announcement and hero — keep it dark, not white */
+.shopify-section.section-ships-today-progress:has(~ #xo-main-content > .shopify-section.section-hero-molecule:first-child) .xo-ships-today--top {
+  background: #08080b;
+  border-bottom-color: rgba(245, 244, 239, 0.08);
+}
+.shopify-section.section-ships-today-progress:has(~ #xo-main-content > .shopify-section.section-hero-molecule:first-child) .xo-ships-today__bar--top {
+  color: rgba(245, 244, 239, 0.78);
+}
+.shopify-section.section-ships-today-progress:has(~ #xo-main-content > .shopify-section.section-hero-molecule:first-child) .xo-ships-today-progress__track {
+  background: rgba(245, 244, 239, 0.1);
+}
+
 
 .xo-ships-today__stock {
   display: inline-flex;
@@ -185,6 +209,32 @@
 
   .xo-ships-today--top .xo-ships-today__timer {
     transition: background-color 0.3s ease, transform 0.2s ease;
+  }
+
+  .xo-ships-today--top .xo-ships-today__timer.is-tick {
+    animation: xo-ships-today-tick 0.3s var(--out-soft, ease);
+  }
+
+  .xo-ships-today--top.is-urgent-entered .xo-ships-today__timer {
+    animation: xo-ships-today-tighten 0.4s var(--spring, cubic-bezier(0.34, 1.56, 0.64, 1));
+  }
+}
+
+@keyframes xo-ships-today-tick {
+  50% {
+    transform: scale(1.06);
+  }
+}
+
+@keyframes xo-ships-today-tighten {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.08);
+  }
+  100% {
+    transform: scale(1);
   }
 }
 

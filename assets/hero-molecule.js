@@ -14,15 +14,27 @@
   const canvas = root.querySelector('.hm-canvas');
   if(!canvas) return;
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const isIOS = /iP(hone|od|ad)/.test(navigator.userAgent) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
-  const gl = canvas.getContext('webgl2', {alpha:true, antialias:false, depth:false, stencil:false, powerPreference:'high-performance', premultipliedAlpha:true});
+  // iOS: 'default' is more stable than high-performance; alpha kept for bottle underlay
+  const gl = canvas.getContext('webgl2', {
+    alpha: true,
+    antialias: false,
+    depth: false,
+    stencil: false,
+    powerPreference: isIOS ? 'default' : 'high-performance',
+    premultipliedAlpha: true
+  });
   if(!gl){ hero.classList.add('static'); return; }
 
   // ---- quality tier
+  // Mobile noise root cause: SCALE 0.62 + DPR 1 upscales a tiny buffer; film-grain dither
+  // then looks like TV static. Use near-1x logical size with retina DPR, and skip dither.
   const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) || Math.min(screen.width,screen.height) < 520;
   const TIER = isMobile
-    ? { MARCH:70,  SHADOW:16, REF:8,  AO:4, SCALE:0.62, DPR:1.0 }
-    : { MARCH:110, SHADOW:26, REF:20, AO:5, SCALE:1.0,  DPR:Math.min(devicePixelRatio,1.6) };
+    ? { MARCH:80,  SHADOW:18, REF:10, AO:4, SCALE:0.92, DPR:Math.min(devicePixelRatio || 1, 2), DITHER:false }
+    : { MARCH:110, SHADOW:26, REF:20, AO:5, SCALE:1.0,  DPR:Math.min(devicePixelRatio || 1, 1.6), DITHER:true };
 
   // ================= shaders =================
   const VS = `#version 300 es
@@ -211,11 +223,11 @@
     vec3 n=calcN(pos);
     vec3 col=shade(pos,n,rd);
 
-    // tone map + vignette + dither
+    // tone map + vignette (+ desktop-only dither; mobile dither upscales into visible noise)
     col = 1.0 - exp(-col*1.25);
     col = pow(col, vec3(0.92));
-    col *= 1.0 - dot(uv,uv)*0.24;   // uv is already offset-relative, so the vignette hugs the molecule
-    col += (fract(sin(dot(gl_FragCoord.xy,vec2(12.9898,78.233)))*43758.5453)-0.5)/255.0;
+    col *= 1.0 - dot(uv,uv)*0.24;
+    ${TIER.DITHER ? 'col += (fract(sin(dot(gl_FragCoord.xy,vec2(12.9898,78.233)))*43758.5453)-0.5)/255.0;' : ''}
     O = vec4(col,1.0);
   }`;
 
@@ -283,12 +295,14 @@
   }
 
   // ================= render loop =================
+  // Mobile/iOS often runs rAF at 30fps (Low Power); bump spin so motion stays readable.
+  const spinStep = isMobile ? cfg.spin * 1.75 : cfg.spin;
   let running=false, autospin=0;
   function draw(){
     if(!running && !reduced) return;
     resize();
     if(!reduced){
-      autospin += cfg.spin;
+      autospin += spinStep;
       yaw   += (tgtYaw + autospin + scrollSpin - yaw)*0.06;
       pitch += (tgtPitch - pitch)*0.06;
     } else {
@@ -311,10 +325,13 @@
       gl.clear(gl.COLOR_BUFFER_BIT); gl.uniform2f(uRes,W,H); gl.uniform2f(uRot,yaw,pitch); const o=offset(); gl.uniform2f(uOff,o[0],o[1]); gl.uniform1f(uDist,o[2]); gl.drawArrays(gl.TRIANGLES,0,3); };
     canvas.addEventListener('pointermove', redraw);
   } else {
+    // Kick immediately so iOS doesn't sit on a single idle frame before IO fires
+    running = true;
+    requestAnimationFrame(draw);
     new IntersectionObserver(es=>{
       const vis = es[0].isIntersecting && !document.hidden;
       if(vis && !running){ running=true; requestAnimationFrame(draw); }
-      else running=vis;
+      else if(!vis) running=false;
     }).observe(hero);
     document.addEventListener('visibilitychange', ()=>{
       if(!document.hidden && !running){ running=true; requestAnimationFrame(draw); }
@@ -344,7 +361,16 @@
 
     function boot(){ engine(root, cfg); }
     function launch(){
-      ('requestIdleCallback' in window) ? requestIdleCallback(boot, {timeout:1200}) : setTimeout(boot, 250);
+      // iOS Safari idle callbacks are unreliable; prefer a short timeout so WebGL starts promptly
+      var ios = /iP(hone|od|ad)/.test(navigator.userAgent) ||
+        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      if (ios) {
+        setTimeout(boot, 120);
+      } else if ('requestIdleCallback' in window) {
+        requestIdleCallback(boot, {timeout:1200});
+      } else {
+        setTimeout(boot, 250);
+      }
     }
     (document.readyState === 'complete') ? launch() : addEventListener('load', launch, {once:true});
   }
