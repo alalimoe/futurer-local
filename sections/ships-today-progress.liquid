@@ -8,39 +8,11 @@
 {% if show_ships_progress %}
   {{ 'ships-today-bar.css' | asset_url | stylesheet_tag }}
   <script src="{{ 'ships-today-bar.js' | asset_url }}" defer></script>
-
   {% comment %}
-    Critical strip fixes are inlined: ships-today-bar.css CDN has been serving a
-    stale checksum. Use a raw style tag (header-group {% style %} was not emitting).
+    Strip collapse + molecule dark paint also live in section-header-style-1.css
+    (ships-today-bar.css CDN checksum has been stuck stale; header-group style tags
+    were not emitting). JS toggles .is-ships-today-collapsed on the shopify-section.
   {% endcomment %}
-  <style id="ships-today-strip-fix">
-    .shopify-section.section-ships-today-progress:has([data-ships-today][hidden]) {
-      display: none !important;
-    }
-    .shopify-section.section-ships-today-progress .xo-ships-today-progress-sticky {
-      display: block;
-    }
-    body:has(#xo-main-content > .shopify-section.section-hero-molecule) .shopify-section.section-ships-today-progress .xo-section,
-    body:has(#xo-main-content > .shopify-section.section-hero-molecule) .shopify-section.section-ships-today-progress .xo-ships-today--top,
-    body:has(#xo-main-content > .shopify-section.section-hero-molecule) .shopify-section.section-ships-today-progress .xo-ships-today-progress-sticky[xo-is-sticky] .xo-ships-today--top {
-      background: #08080b !important;
-      background-color: #08080b !important;
-      border-bottom-color: rgba(245, 244, 239, 0.08);
-    }
-    body:has(#xo-main-content > .shopify-section.section-hero-molecule) .shopify-section.section-ships-today-progress .xo-ships-today__bar--top {
-      color: rgba(245, 244, 239, 0.78);
-    }
-    body:has(#xo-main-content > .shopify-section.section-hero-molecule) .shopify-section.section-ships-today-progress .xo-ships-today--top .xo-ships-today__timer {
-      color: rgba(245, 244, 239, 0.95);
-      background: color-mix(in srgb, rgba(var(--color-accent)) 28%, transparent);
-    }
-    body:has(#xo-main-content > .shopify-section.section-hero-molecule) .shopify-section.section-ships-today-progress .xo-ships-today-progress__track {
-      background: rgba(245, 244, 239, 0.12);
-    }
-    body:has(#xo-main-content > .shopify-section.section-hero-molecule) .shopify-section.section-ships-today-progress .xo-ships-today-progress__tip {
-      background: rgba(8, 8, 11, 0.55);
-    }
-  </style>
 
   {% liquid
     assign checkout_template = 'general.ships_today.checkout_within' | t

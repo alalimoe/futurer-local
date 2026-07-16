@@ -64,12 +64,15 @@
 
   function setVisible(el, visible) {
     if (!el) return;
+    var section = el.closest('.shopify-section');
     if (visible) {
       el.classList.add('is-visible');
       el.removeAttribute('hidden');
+      if (section) section.classList.remove('is-ships-today-collapsed');
     } else {
       el.classList.remove('is-visible');
       el.setAttribute('hidden', '');
+      if (section) section.classList.add('is-ships-today-collapsed');
     }
   }
 
