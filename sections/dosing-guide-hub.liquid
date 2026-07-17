@@ -32,6 +32,34 @@
     margin: 0 auto;
   }
 
+  /* Breadcrumbs */
+  .xo-section--{{ dg_id }} .rg-breadcrumbs {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 8px;
+    margin-bottom: clamp(16px, 3vw, 24px);
+    font-size: calc(var(--font-body-scale, 1) * 1.3rem);
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 55%, transparent);
+  }
+  .xo-section--{{ dg_id }} .rg-breadcrumbs__link {
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 65%, transparent);
+    text-decoration: none;
+  }
+  .xo-section--{{ dg_id }} .rg-breadcrumbs__link:hover {
+    color: rgba(var(--color-foreground));
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .xo-section--{{ dg_id }} .rg-breadcrumbs__current {
+    color: rgba(var(--color-foreground));
+    font-weight: 600;
+  }
+  .xo-section--{{ dg_id }} .rg-breadcrumbs__sep {
+    opacity: 0.45;
+    user-select: none;
+  }
+
   /* ── Hero ── */
   .xo-section--{{ dg_id }} .dg-hero {
     padding: clamp(40px, 7vw, 80px) 0 clamp(24px, 4vw, 40px);
@@ -290,6 +318,62 @@
   .xo-section--{{ dg_id }} .dg-disclaimer__body p { margin: 0 0 6px; }
   .xo-section--{{ dg_id }} .dg-disclaimer__body p:last-child { margin-bottom: 0; }
 
+  /* FAQ */
+  .xo-section--{{ dg_id }} .dg-faq-zone {
+    margin: clamp(40px, 6vw, 64px) 0 0;
+  }
+  .xo-section--{{ dg_id }} .dg-faq-zone__h2 {
+    font-family: var(--font-heading-family, sans-serif);
+    font-size: clamp(1.4rem, 2.6vw, 1.9rem);
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    line-height: 1.15;
+    margin: 0 0 20px;
+    scroll-margin-top: 84px;
+  }
+  .xo-section--{{ dg_id }} .dg-faq {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .xo-section--{{ dg_id }} .dg-faq__item {
+    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 8%, transparent);
+    border-radius: var(--general-radius-1, 1rem);
+    overflow: hidden;
+    background: rgba(var(--color-background));
+  }
+  .xo-section--{{ dg_id }} .dg-faq__summary {
+    padding: 16px 20px;
+    cursor: pointer;
+    list-style: none;
+    font-family: var(--font-heading-family, sans-serif);
+    font-size: calc(var(--font-body-scale, 1) * 1.5rem);
+    font-weight: 600;
+    line-height: 1.4;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 44px;
+  }
+  .xo-section--{{ dg_id }} .dg-faq__summary::-webkit-details-marker { display: none; }
+  .xo-section--{{ dg_id }} .dg-faq__summary::after {
+    content: '+';
+    font-size: 1.2rem;
+    font-weight: 400;
+    flex-shrink: 0;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 45%, transparent);
+  }
+  .xo-section--{{ dg_id }} .dg-faq__item[open] .dg-faq__summary::after { content: '−'; }
+  .xo-section--{{ dg_id }} .dg-faq__answer {
+    padding: 0 20px 18px;
+    font-size: calc(var(--font-body-scale, 1) * 1.45rem);
+    line-height: 1.7;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) calc(var(--font-body-color-opacity, 0.75) * 100%), transparent);
+  }
+  .xo-section--{{ dg_id }} .dg-faq__answer p { margin: 0 0 10px; }
+  .xo-section--{{ dg_id }} .dg-faq__answer p:last-child { margin-bottom: 0; }
+
   /* ── Reduced motion ── */
   @media (prefers-reduced-motion: reduce) {
     .xo-section--{{ dg_id }} .dg-search__field,
@@ -300,6 +384,12 @@
 <section {% render 'section-attr' %}>
   <xo-container>
     <div class="dg__wrap">
+
+      {% render 'reference-guide-breadcrumbs',
+        parent_label: section.settings.breadcrumb_parent_label,
+        parent_url: section.settings.breadcrumb_parent_url,
+        current_label: section.settings.heading
+      %}
 
       {%- comment -%} ═══ HERO (single H1) ═══ {%- endcomment -%}
       <header class="dg-hero">
@@ -488,6 +578,24 @@
         {%- endif -%}
       </div>
 
+      {%- comment -%} ═══ FAQ ═══ {%- endcomment -%}
+      {%- assign dg_faq_blocks = section.blocks | where: 'type', 'faq' -%}
+      {%- if dg_faq_blocks.size > 0 -%}
+        <div class="dg-faq-zone" id="faq">
+          <h2 class="dg-faq-zone__h2">{{ section.settings.faq_heading }}</h2>
+          <div class="dg-faq">
+            {%- for block in dg_faq_blocks -%}
+              {%- if block.settings.question != blank -%}
+                <details class="dg-faq__item" {{ block.shopify_attributes }}>
+                  <summary class="dg-faq__summary">{{ block.settings.question }}</summary>
+                  <div class="dg-faq__answer rte">{{ block.settings.answer }}</div>
+                </details>
+              {%- endif -%}
+            {%- endfor -%}
+          </div>
+        </div>
+      {%- endif -%}
+
       {%- comment -%} ═══ DISCLAIMER ═══ {%- endcomment -%}
       {%- if section.settings.disclaimer != blank -%}
         <aside class="dg-disclaimer" role="note" aria-label="Medical disclaimer">
@@ -502,81 +610,35 @@
   </xo-container>
 </section>
 
-{%- comment -%} ═══ JSON-LD: Article + ItemList (+ optional FAQPage) ═══ {%- endcomment -%}
-<script type="application/ld+json">
+{%- capture dg_item_list_markup -%}
+{%- if dg_products.size > 0 -%}
 {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "Article",
-      "headline": {{ section.settings.heading | json }},
-      "description": {{ section.settings.seo_description | default: section.settings.heading | json }},
-      "author": { "@type": "Organization", "name": {{ section.settings.author | default: shop.name | json }} },
-      "publisher": { "@type": "Organization", "name": {{ shop.name | json }} },
-      {%- if section.settings.date_published != blank -%}
-        "datePublished": {{ section.settings.date_published | json }},
-      {%- endif -%}
-      "mainEntityOfPage": {{ request.origin | append: request.path | json }}
-    }
-    {%- if dg_products.size > 0 -%}
-      ,{
-        "@type": "ItemList",
-        "name": {{ section.settings.heading | json }},
-        "itemListElement": [
-          {%- assign li_pos = 0 -%}
-          {%- for dg_handle in dg_products -%}
-            {%- assign product = all_products[dg_handle] -%}
-            {%- if product == empty -%}{%- continue -%}{%- endif -%}
-            {%- assign mf_dose = product.metafields.custom.dose -%}
-            {%- assign mf_timing = product.metafields.custom.timing -%}
-            {%- if dg_manual or mf_dose != blank or mf_timing != blank -%}
-              {%- assign li_pos = li_pos | plus: 1 -%}
-              {%- if li_pos > 1 -%},{%- endif -%}
-              {
-                "@type": "ListItem",
-                "position": {{ li_pos }},
-                "name": {{ product.title | json }},
-                "url": {{ request.origin | append: request.path | append: "#dose-" | append: product.handle | json }}
-              }
-            {%- endif -%}
-          {%- endfor -%}
-        ]
-      }
-      {%- if section.settings.emit_faq_schema -%}
-        ,{
-          "@type": "FAQPage",
-          "mainEntity": [
-            {%- assign faq_pos = 0 -%}
-            {%- for dg_handle in dg_products -%}
-              {%- assign product = all_products[dg_handle] -%}
-              {%- if product == empty -%}{%- continue -%}{%- endif -%}
-              {%- assign mf_dose = product.metafields.custom.dose -%}
-              {%- assign mf_timing = product.metafields.custom.timing -%}
-              {%- assign mf_cycling = product.metafields.custom.cycling -%}
-              {%- assign mf_notes = product.metafields.custom.dosing_notes -%}
-              {%- if mf_dose != blank or mf_timing != blank -%}
-                {%- assign faq_pos = faq_pos | plus: 1 -%}
-                {%- if faq_pos > 1 -%},{%- endif -%}
-                {%- capture faq_answer -%}
-                  {%- if mf_dose != blank -%}Dose: {{ mf_dose }}. {% endif -%}
-                  {%- if mf_timing != blank -%}Timing: {{ mf_timing }}. {% endif -%}
-                  {%- if mf_cycling != blank -%}Cycling: {{ mf_cycling }}. {% endif -%}
-                  {%- if mf_notes != blank -%}{{ mf_notes }}{% endif -%}
-                {%- endcapture -%}
-                {
-                  "@type": "Question",
-                  "name": {{ "How do I dose " | append: product.title | append: "?" | json }},
-                  "acceptedAnswer": { "@type": "Answer", "text": {{ faq_answer | strip | json }} }
-                }
-              {%- endif -%}
-            {%- endfor -%}
-          ]
+  "@type": "ItemList",
+  "name": {{ section.settings.heading | json }},
+  "itemListElement": [
+    {%- assign li_pos = 0 -%}
+    {%- for dg_handle in dg_products -%}
+      {%- assign product = all_products[dg_handle] -%}
+      {%- if product == empty -%}{%- continue -%}{%- endif -%}
+      {%- assign mf_dose = product.metafields.custom.dose -%}
+      {%- assign mf_timing = product.metafields.custom.timing -%}
+      {%- if dg_manual or mf_dose != blank or mf_timing != blank -%}
+        {%- assign li_pos = li_pos | plus: 1 -%}
+        {%- if li_pos > 1 -%},{%- endif -%}
+        {
+          "@type": "ListItem",
+          "position": {{ li_pos }},
+          "name": {{ product.title | json }},
+          "url": {{ canonical_url | append: '#dose-' | append: product.handle | json }}
         }
       {%- endif -%}
-    {%- endif -%}
+    {%- endfor -%}
   ]
 }
-</script>
+{%- endif -%}
+{%- endcapture -%}
+
+{% render 'reference-guide-jsonld', section: section, item_list_markup: dg_item_list_markup %}
 
 <script>
 (function () {
@@ -665,8 +727,14 @@
     { "type": "header", "content": "Zone 2 — Product Search" },
     { "type": "text", "id": "jump_label", "label": "Search section label", "default": "Find your product" },
     { "type": "text", "id": "search_placeholder", "label": "Search placeholder", "default": "Search products by name…" },
+    { "type": "header", "content": "Zone 3 — FAQ" },
+    { "type": "text", "id": "faq_heading", "label": "FAQ section heading (H2)", "default": "Frequently asked questions" },
     { "type": "header", "content": "Structured Data" },
-    { "type": "checkbox", "id": "emit_faq_schema", "label": "Emit FAQ schema for products", "default": true, "info": "Adds FAQPage structured data (one Q&A per product) for rich-result eligibility." },
+    { "type": "checkbox", "id": "emit_breadcrumb_schema", "label": "Emit breadcrumb schema", "default": true },
+    { "type": "checkbox", "id": "emit_faq_schema", "label": "Emit FAQ schema (visible FAQ blocks only)", "default": true, "info": "FAQ markup must match the accordion Q&As below — not per-product dosing cards." },
+    { "type": "text", "id": "breadcrumb_parent_label", "label": "Breadcrumb parent label", "default": "Guides" },
+    { "type": "text", "id": "breadcrumb_parent_url", "label": "Breadcrumb parent URL", "default": "/pages/guides" },
+    { "type": "image_picker", "id": "og_image", "label": "Article image (optional)", "info": "Used in Article JSON-LD when set." },
     {
       "type": "textarea",
       "id": "seo_description",
@@ -684,6 +752,14 @@
     { "type": "range", "id": "padding_bottom", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding bottom", "default": 48 }
   ],
   "blocks": [
+    {
+      "type": "faq",
+      "name": "FAQ",
+      "settings": [
+        { "type": "text", "id": "question", "label": "Question" },
+        { "type": "richtext", "id": "answer", "label": "Answer" }
+      ]
+    },
     {
       "type": "product",
       "name": "Product",

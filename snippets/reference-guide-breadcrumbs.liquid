@@ -1,0 +1,25 @@
+{% doc %}
+  Visible breadcrumb trail for reference guide pages.
+  @param {string} parent_label - Middle crumb label (e.g. Guides)
+  @param {string} parent_url - Middle crumb URL path or full URL
+  @param {string} current_label - Current page label
+  @example
+  {% render 'reference-guide-breadcrumbs', parent_label: 'Guides', parent_url: '/pages/guides', current_label: section.settings.heading %}
+{% enddoc %}
+
+{%- liquid
+  assign rg_bc_parent = parent_url | default: '/pages/guides'
+  if rg_bc_parent contains '://'
+    assign rg_bc_parent_href = rg_bc_parent
+  else
+    assign rg_bc_parent_href = rg_bc_parent
+  endif
+-%}
+
+<nav class="rg-breadcrumbs" aria-label="Breadcrumb">
+  <a class="rg-breadcrumbs__link" href="{{ routes.root_url }}">Home</a>
+  <span class="rg-breadcrumbs__sep" aria-hidden="true">/</span>
+  <a class="rg-breadcrumbs__link" href="{{ rg_bc_parent_href }}">{{ parent_label | default: 'Guides' }}</a>
+  <span class="rg-breadcrumbs__sep" aria-hidden="true">/</span>
+  <span class="rg-breadcrumbs__current" aria-current="page">{{ current_label }}</span>
+</nav>

@@ -19,6 +19,34 @@
     max-width: min(1140px, 100%);
     margin: 0 auto;
   }
+
+  /* Breadcrumbs */
+  .xo-section--{{ cg_id }} .rg-breadcrumbs {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 8px;
+    margin-bottom: clamp(16px, 3vw, 24px);
+    font-size: calc(var(--font-body-scale, 1) * 1.3rem);
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 55%, transparent);
+  }
+  .xo-section--{{ cg_id }} .rg-breadcrumbs__link {
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 65%, transparent);
+    text-decoration: none;
+  }
+  .xo-section--{{ cg_id }} .rg-breadcrumbs__link:hover {
+    color: rgba(var(--color-foreground));
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .xo-section--{{ cg_id }} .rg-breadcrumbs__current {
+    color: rgba(var(--color-foreground));
+    font-weight: 600;
+  }
+  .xo-section--{{ cg_id }} .rg-breadcrumbs__sep {
+    opacity: 0.45;
+    user-select: none;
+  }
   .xo-section--{{ cg_id }} .cg-layout {
     display: grid;
     grid-template-columns: 260px minmax(0, 1fr);
@@ -584,6 +612,12 @@
   <xo-container>
     <div class="cg__wrap">
 
+      {% render 'reference-guide-breadcrumbs',
+        parent_label: section.settings.breadcrumb_parent_label,
+        parent_url: section.settings.breadcrumb_parent_url,
+        current_label: section.settings.heading
+      %}
+
       {%- if section.settings.safety_text != blank -%}
         <div class="cg-safety rte">{{ section.settings.safety_text }}</div>
       {%- endif -%}
@@ -917,31 +951,7 @@
   </xo-container>
 </section>
 
-{%- if section.settings.emit_faq_schema -%}
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "mainEntity": [
-    {%- assign faq_pos = 0 -%}
-    {%- for block in section.blocks -%}
-      {%- if block.type == 'faq' and block.settings.question != blank -%}
-        {%- assign faq_pos = faq_pos | plus: 1 -%}
-        {%- if faq_pos > 1 -%},{%- endif -%}
-        {
-          "@type": "Question",
-          "name": {{ block.settings.question | json }},
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": {{ block.settings.answer | strip_html | json }}
-          }
-        }
-      {%- endif -%}
-    {%- endfor -%}
-  ]
-}
-</script>
-{%- endif -%}
+{% render 'reference-guide-jsonld', section: section %}
 
 {% schema %}
 {
@@ -1082,7 +1092,11 @@
       "default": "<p>For per-compound dose ranges, see our <a href=\"/pages/dosing-guide\">Dosing Guide</a>.</p>"
     },
     { "type": "header", "content": "Structured data" },
-    { "type": "checkbox", "id": "emit_faq_schema", "label": "Emit FAQ schema", "default": true },
+    { "type": "checkbox", "id": "emit_breadcrumb_schema", "label": "Emit breadcrumb schema", "default": true },
+    { "type": "checkbox", "id": "emit_faq_schema", "label": "Emit FAQ schema (visible FAQ blocks only)", "default": true },
+    { "type": "text", "id": "breadcrumb_parent_label", "label": "Breadcrumb parent label", "default": "Guides" },
+    { "type": "text", "id": "breadcrumb_parent_url", "label": "Breadcrumb parent URL", "default": "/pages/guides" },
+    { "type": "image_picker", "id": "og_image", "label": "Article image (optional)", "info": "Used in Article JSON-LD when set." },
     {
       "type": "textarea",
       "id": "seo_description",

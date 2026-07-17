@@ -1,0 +1,149 @@
+{% doc %}
+  Unified @graph JSON-LD for reference guide pages (Dosing Guide, Cycling Guide).
+  @param {object} section - Section with settings and faq blocks
+  @param {string} [item_list_markup] - Pre-built ItemList JSON object(s) for dosing product anchors
+  @example
+  {% render 'reference-guide-jsonld', section: section, item_list_markup: item_list_markup %}
+{% enddoc %}
+
+{%- liquid
+  assign rg_headline = section.settings.heading | default: page.title
+  assign rg_description = section.settings.seo_description | default: section.settings.subtitle | strip_html | strip
+  if rg_description == blank
+    assign rg_description = rg_headline
+  endif
+  assign rg_author = section.settings.author | default: shop.name
+  assign rg_date_published = section.settings.date_published
+  assign rg_date_modified = page.updated_at | date: '%Y-%m-%d'
+  assign rg_page_url = canonical_url
+  assign rg_page_id = rg_page_url | append: '#webpage'
+  assign rg_article_id = rg_page_url | append: '#article'
+  assign rg_faq_id = rg_page_url | append: '#faq'
+  assign rg_bc_id = rg_page_url | append: '#breadcrumb'
+  assign rg_logo_url = shop.url | append: '/cdn/shop/files/nootropix-logo.png'
+
+  assign rg_parent_label = section.settings.breadcrumb_parent_label | default: 'Guides'
+  assign rg_parent_url = section.settings.breadcrumb_parent_url | default: '/pages/guides'
+  if rg_parent_url contains '://'
+    assign rg_parent_full = rg_parent_url
+  else
+    assign rg_parent_full = shop.url | append: rg_parent_url
+  endif
+
+  assign rg_emit_faq = section.settings.emit_faq_schema
+  assign rg_emit_bc = section.settings.emit_breadcrumb_schema
+  assign rg_faq_blocks = section.blocks | where: 'type', 'faq'
+
+  assign rg_faq_count = 0
+  for block in rg_faq_blocks
+    if block.settings.question != blank and block.settings.answer != blank
+      assign rg_faq_count = rg_faq_count | plus: 1
+    endif
+  endfor
+-%}
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebPage",
+      "@id": {{ rg_page_id | json }},
+      "url": {{ rg_page_url | json }},
+      "name": {{ rg_headline | json }},
+      "description": {{ rg_description | json }},
+      "isPartOf": {
+        "@type": "WebSite",
+        "name": {{ shop.name | json }},
+        "url": {{ shop.url | json }}
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": {{ shop.name | json }},
+        "url": {{ shop.url | json }}
+      }
+    },
+    {
+      "@type": "Article",
+      "@id": {{ rg_article_id | json }},
+      "headline": {{ rg_headline | json }},
+      "description": {{ rg_description | json }},
+      "author": {
+        "@type": "Organization",
+        "name": {{ rg_author | json }}
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": {{ shop.name | json }},
+        "url": {{ shop.url | json }},
+        "logo": {
+          "@type": "ImageObject",
+          "url": {{ rg_logo_url | json }}
+        }
+      }
+      {%- if rg_date_published != blank -%}
+        ,"datePublished": {{ rg_date_published | json }}
+      {%- endif -%}
+      {%- if rg_date_modified != blank -%}
+        ,"dateModified": {{ rg_date_modified | json }}
+      {%- endif -%}
+      {%- if section.settings.og_image != blank -%}
+        ,"image": {{ section.settings.og_image | image_url: width: 1200 | prepend: 'https:' | json }}
+      {%- endif -%}
+      ,"mainEntityOfPage": { "@id": {{ rg_page_id | json }} }
+    }
+    {%- if rg_emit_bc != false -%}
+      ,{
+        "@type": "BreadcrumbList",
+        "@id": {{ rg_bc_id | json }},
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": {{ shop.url | json }}
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": {{ rg_parent_label | json }},
+            "item": {{ rg_parent_full | json }}
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": {{ rg_headline | json }},
+            "item": {{ rg_page_url | json }}
+          }
+        ]
+      }
+    {%- endif -%}
+    {%- if item_list_markup != blank -%}
+      ,{{ item_list_markup }}
+    {%- endif -%}
+    {%- if rg_emit_faq and rg_faq_count > 0 -%}
+      ,{
+        "@type": "FAQPage",
+        "@id": {{ rg_faq_id | json }},
+        "mainEntity": [
+          {%- assign rg_faq_pos = 0 -%}
+          {%- for block in rg_faq_blocks -%}
+            {%- if block.settings.question != blank and block.settings.answer != blank -%}
+              {%- assign rg_faq_pos = rg_faq_pos | plus: 1 -%}
+              {%- if rg_faq_pos > 1 -%},{%- endif -%}
+              {
+                "@type": "Question",
+                "name": {{ block.settings.question | json }},
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": {{ block.settings.answer | strip_html | strip | json }}
+                }
+              }
+            {%- endif -%}
+          {%- endfor -%}
+        ]
+      }
+    {%- endif -%}
+  ]
+}
+</script>
