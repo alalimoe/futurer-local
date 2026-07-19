@@ -35,9 +35,24 @@
   {% endif %}
 {% endfor %}
 
+{% liquid
+  assign show_weekend_promo = false
+  if section.settings.enable_weekend_promo
+    if request.page_type == 'index' or request.page_type == 'collection' or request.page_type == 'product' or request.page_type == 'cart'
+      assign show_weekend_promo = true
+    endif
+  endif
+%}
+
 <div class='xo-announcement-bar' id='xo-announcement-bar'>
   <section {% render 'section-attr' %}>
     <xo-animate xo-cascade xo-type='fade-down' class='xo-announcement-bar__body'>
+      {% if show_weekend_promo %}
+        {% liquid
+          assign promo_message = 'general.weekend_promo.message' | t: percent: section.settings.weekend_discount_percent, code: section.settings.weekend_promo_code
+        %}
+        {% render 'announcement-weekend-promo', template: promo_message %}
+      {% endif %}
       {% if announcement_bar_style != 'marquee' %}
         <xo-container class='xo-announcement-bar__container'>
       {% endif %}
@@ -264,6 +279,28 @@
       "id": "marquee_stop",
       "label": "t:sections.announcement_bar.settings.marquee_stop.label",
       "default": false
+    },
+    {
+      "type": "header",
+      "content": "Weekend promo"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_weekend_promo",
+      "label": "Enable weekend promo banner",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "weekend_promo_code",
+      "label": "Promo code",
+      "default": "WEEKEND15"
+    },
+    {
+      "type": "text",
+      "id": "weekend_discount_percent",
+      "label": "Discount percent",
+      "default": "15"
     },
     {
       "type": "header",

@@ -43,19 +43,35 @@
     return count + '\u00A0' + (count === 1 ? singular : plural);
   }
 
-  function formatTime(ms, withSeconds) {
+  function formatTime(ms, withSeconds, includeDays) {
     if (ms <= 0) {
       return withSeconds
         ? '0\u00A0hours 0\u00A0minutes 0\u00A0seconds'
         : '0\u00A0hours 0\u00A0minutes';
     }
     var totalSec = Math.floor(ms / 1000);
-    var h = Math.floor(totalSec / 3600);
+    var d = Math.floor(totalSec / 86400);
+    var h = Math.floor((totalSec % 86400) / 3600);
     var m = Math.floor((totalSec % 3600) / 60);
     var s = totalSec % 60;
-    var parts = [pluralize(h, 'hour', 'hours'), pluralize(m, 'minute', 'minutes')];
+    var parts;
+    if (includeDays && d > 0) {
+      parts = [pluralize(d, 'day', 'days'), pluralize(h, 'hour', 'hours')];
+    } else {
+      parts = [pluralize(h, 'hour', 'hours'), pluralize(m, 'minute', 'minutes')];
+    }
     if (withSeconds) parts.push(pluralize(s, 'second', 'seconds'));
     return parts.join(' ');
+  }
+
+  function remainingToSundayEndMs(parts) {
+    if (parts.weekday !== 6 && parts.weekday !== 0) return -1;
+    var nowSecs = parts.hour * 3600 + parts.minute * 60 + parts.second;
+    var sundayEndSecs = 23 * 3600 + 59 * 60 + 59;
+    if (parts.weekday === 6) {
+      return (172800 - nowSecs) * 1000;
+    }
+    return (sundayEndSecs - nowSecs) * 1000;
   }
 
   function prefersReducedMotion() {
@@ -73,6 +89,20 @@
       el.classList.remove('is-visible');
       el.setAttribute('hidden', '');
       if (section) section.classList.add('is-ships-today-collapsed');
+    }
+  }
+
+  function setPromoVisible(el, visible) {
+    if (!el) return;
+    var announcementBar = document.getElementById('xo-announcement-bar');
+    if (visible) {
+      el.classList.add('is-visible');
+      el.removeAttribute('hidden');
+      if (announcementBar) announcementBar.classList.add('is-weekend-promo-active');
+    } else {
+      el.classList.remove('is-visible');
+      el.setAttribute('hidden', '');
+      if (announcementBar) announcementBar.classList.remove('is-weekend-promo-active');
     }
   }
 
@@ -170,20 +200,42 @@
     if (timer) timer.textContent = formatTime(remaining, context === 'cart');
   }
 
+  function tickWeekendPromo(root) {
+    var tz = root.getAttribute('data-tz') || DEFAULT_TZ;
+    var template = decodeHtmlEntities(
+      root.getAttribute('data-template') || 'Weekend only: 15% off with code WEEKEND15 — ends in __TIME__'
+    );
+    var parts = dubaiParts(new Date(), tz);
+    var remaining = remainingToSundayEndMs(parts);
+    var showPromo = remaining > 0;
+
+    ensureLabel(root, template);
+    setPromoVisible(root, showPromo);
+
+    if (!showPromo) return;
+
+    var timer = root.querySelector('[data-ships-today-timer]');
+    if (timer) timer.textContent = formatTime(remaining, false, true);
+  }
+
   function init() {
     var roots = document.querySelectorAll('[data-ships-today]');
-    if (!roots.length) return;
+    var promoRoots = document.querySelectorAll('[data-weekend-promo]');
+    if (!roots.length && !promoRoots.length) return;
 
-    for (var i = 0; i < roots.length; i++) {
-      tickRoot(roots[i]);
+    function tickAll() {
+      for (var i = 0; i < roots.length; i++) {
+        tickRoot(roots[i]);
+      }
+      for (var k = 0; k < promoRoots.length; k++) {
+        tickWeekendPromo(promoRoots[k]);
+      }
     }
 
+    tickAll();
+
     var interval = prefersReducedMotion() ? 60000 : 1000;
-    setInterval(function () {
-      for (var j = 0; j < roots.length; j++) {
-        tickRoot(roots[j]);
-      }
-    }, interval);
+    setInterval(tickAll, interval);
   }
 
   if (document.readyState === 'loading') {
