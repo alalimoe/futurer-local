@@ -27,6 +27,10 @@ const BANNED_PATTERNS = [
   { re: /\bfda[\s-]?approved\b/i, label: 'unsupported: "FDA approved"' },
   { re: /\bmiracle\b/i, label: 'hype: "miracle"' },
   { re: /\bguaranteed\b/i, label: 'hype: "guaranteed"' },
+  { re: /\binstant results?\b/i, label: 'hype: "instant results"' },
+  { re: /\bno side effects?\b/i, label: 'unsupported: "no side effects"' },
+  { re: /\brisk[\s-]?free\b/i, label: 'unsupported: "risk-free"' },
+  { re: /\b100%\s+safe\b/i, label: 'unsupported: "100% safe"' },
 ];
 
 // Sentences containing any of these markers are negated / disclaimer context
@@ -71,14 +75,8 @@ function splitSentences(text) {
   return text.split(/(?<=[.!?])\s+/);
 }
 
-/**
- * @param {object} data - parsed landing content JSON
- * @returns {string[]} array of human-readable error messages (empty = pass)
- */
-export function lintLandingContent(data) {
+export function lintClaimsContent(data) {
   const errors = [];
-
-  // ---- Check 1: banned affirmative claim language ----
   const strings = [];
   collectStrings(data, '', strings);
 
@@ -97,7 +95,18 @@ export function lintLandingContent(data) {
     }
   }
 
-  // ---- Check 2: required disclaimers ----
+  return errors;
+}
+
+/**
+ * @param {object} data - parsed landing content JSON
+ * @returns {string[]} array of human-readable error messages (empty = pass)
+ */
+export function lintLandingContent(data) {
+  const errors = lintClaimsContent(data);
+  const strings = [];
+  collectStrings(data, '', strings);
+
   const allText = strings
     .map((s) => s.text)
     .join(' ')
