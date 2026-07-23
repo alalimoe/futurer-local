@@ -115,11 +115,18 @@
     "name": {{ section.settings.heading | json }},
     "itemListElement": [
       {%- for block in category_blocks -%}
+        {%- capture category_schema_url -%}
+          {%- if block.settings.collection != blank -%}
+            {{- request.origin -}}{{- block.settings.collection.url -}}
+          {%- else -%}
+            {{- block.settings.link -}}
+          {%- endif -%}
+        {%- endcapture -%}
         {
           "@type": "ListItem",
           "position": {{ forloop.index }},
           "name": {{ block.settings.title | json }},
-          "url": {{ block.settings.collection.url | default: block.settings.link | json }}
+          "url": {{ category_schema_url | strip | json }}
         }{%- unless forloop.last -%},{%- endunless -%}
       {%- endfor -%}
     ]
