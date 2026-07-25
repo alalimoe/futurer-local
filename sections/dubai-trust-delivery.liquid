@@ -1,0 +1,225 @@
+{%- style -%}
+  .xo-section--{{ section.id }} .dubai-delivery__header {
+    max-width: 76rem;
+    margin: 0 auto 4rem;
+    text-align: center;
+  }
+
+  .xo-section--{{ section.id }} .dubai-delivery__title {
+    margin: 0 0 1.2rem;
+    font-size: clamp(3.2rem, 5vw, 6.6rem);
+    line-height: 1.15;
+    letter-spacing: -0.035em;
+  }
+
+  .xo-section--{{ section.id }} .dubai-delivery__intro {
+    margin: 0;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 82%, transparent);
+    font-size: 1.6rem;
+    line-height: 1.7;
+  }
+
+  .xo-section--{{ section.id }} .dubai-delivery__cards {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--grid-desktop-horizontal-spacing);
+    margin-bottom: clamp(4rem, 6vw, 7.2rem);
+  }
+
+  .xo-section--{{ section.id }} .dubai-delivery__card {
+    padding: 2.8rem;
+    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 18%, transparent);
+    border-radius: 2rem;
+    background: rgba(var(--color-background));
+  }
+
+  .xo-section--{{ section.id }} .dubai-delivery__card-value {
+    display: block;
+    margin-bottom: 1rem;
+    color: rgba(var(--color-foreground));
+    font-size: clamp(2.8rem, 4vw, 4.8rem);
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: -0.03em;
+  }
+
+  .xo-section--{{ section.id }} .dubai-delivery__card-title {
+    margin: 0 0 0.8rem;
+    font-size: 1.8rem;
+  }
+
+  .xo-section--{{ section.id }} .dubai-delivery__card-text {
+    margin: 0;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 78%, transparent);
+    font-size: 1.4rem;
+    line-height: 1.65;
+  }
+
+  .xo-section--{{ section.id }} .dubai-delivery__trust {
+    display: grid;
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+    gap: clamp(3.2rem, 6vw, 8rem);
+    padding: clamp(2.8rem, 5vw, 5.6rem);
+    border-radius: 2.8rem;
+    background: rgba(var(--color-background-2));
+  }
+
+  .xo-section--{{ section.id }} .dubai-delivery__trust-title {
+    margin: 0 0 1.2rem;
+    font-size: clamp(2.8rem, 4vw, 4.8rem);
+    line-height: 1.2;
+    letter-spacing: -0.03em;
+  }
+
+  .xo-section--{{ section.id }} .dubai-delivery__trust-copy {
+    margin: 0;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 82%, transparent);
+    font-size: 1.5rem;
+    line-height: 1.7;
+  }
+
+  .xo-section--{{ section.id }} .dubai-delivery__links {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    align-content: start;
+  }
+
+  .xo-section--{{ section.id }} .dubai-delivery__link {
+    display: inline-flex;
+    min-height: 4.8rem;
+    align-items: center;
+    padding: 1.2rem 1.6rem;
+    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 20%, transparent);
+    border-radius: 10rem;
+    color: rgba(var(--color-foreground));
+    font-size: 1.4rem;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .xo-section--{{ section.id }} .dubai-delivery__link:hover {
+    border-color: rgba(var(--color-accent));
+  }
+
+  .xo-section--{{ section.id }} .dubai-delivery__link:focus-visible {
+    outline: 2px solid rgba(var(--color-accent));
+    outline-offset: 3px;
+  }
+
+  @media (max-width: 767px) {
+    .xo-section--{{ section.id }} .dubai-delivery__cards,
+    .xo-section--{{ section.id }} .dubai-delivery__trust {
+      grid-template-columns: 1fr;
+    }
+
+    .xo-section--{{ section.id }} .dubai-delivery__cards {
+      gap: var(--grid-mobile-vertical-spacing);
+    }
+
+    .xo-section--{{ section.id }} .dubai-delivery__links {
+      grid-template-columns: 1fr;
+    }
+  }
+{%- endstyle -%}
+
+<section id="dubai-delivery" {% render 'section-attr', section: section %} aria-labelledby="dubai-delivery-title-{{ section.id }}">
+  <xo-container>
+    <header class="dubai-delivery__header">
+      <h2 id="dubai-delivery-title-{{ section.id }}" class="dubai-delivery__title">{{ section.settings.heading }}</h2>
+      <div class="dubai-delivery__intro">{{ section.settings.intro }}</div>
+    </header>
+    <div class="dubai-delivery__cards">
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'delivery_fact' -%}
+          <article class="dubai-delivery__card" {{ block.shopify_attributes }}>
+            <span class="dubai-delivery__card-value">{{ block.settings.value }}</span>
+            <h3 class="dubai-delivery__card-title">{{ block.settings.title }}</h3>
+            <p class="dubai-delivery__card-text">{{ block.settings.text }}</p>
+          </article>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+    <div class="dubai-delivery__trust">
+      <div>
+        <h2 class="dubai-delivery__trust-title">{{ section.settings.trust_heading }}</h2>
+        <div class="dubai-delivery__trust-copy">{{ section.settings.trust_copy }}</div>
+      </div>
+      <nav class="dubai-delivery__links" aria-label="{{ section.settings.links_label }}">
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'trust_link' and block.settings.url != blank -%}
+            <a class="dubai-delivery__link" href="{{ block.settings.url }}" {{ block.shopify_attributes }}>{{ block.settings.label }}</a>
+          {%- endif -%}
+        {%- endfor -%}
+        {%- if shop.shipping_policy.url != blank -%}
+          <a class="dubai-delivery__link" href="{{ shop.shipping_policy.url }}">{{ section.settings.shipping_policy_label }}</a>
+        {%- endif -%}
+        {%- if shop.refund_policy.url != blank -%}
+          <a class="dubai-delivery__link" href="{{ shop.refund_policy.url }}">{{ section.settings.refund_policy_label }}</a>
+        {%- endif -%}
+        {%- if shop.privacy_policy.url != blank -%}
+          <a class="dubai-delivery__link" href="{{ shop.privacy_policy.url }}">{{ section.settings.privacy_policy_label }}</a>
+        {%- endif -%}
+        {%- if shop.terms_of_service.url != blank -%}
+          <a class="dubai-delivery__link" href="{{ shop.terms_of_service.url }}">{{ section.settings.terms_label }}</a>
+        {%- endif -%}
+      </nav>
+    </div>
+  </xo-container>
+</section>
+
+{% schema %}
+{
+  "name": "Dubai trust and delivery",
+  "tag": "section",
+  "class": "section-dubai-trust-delivery",
+  "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "default" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Delivery in Dubai and across the UAE" },
+    { "type": "richtext", "id": "intro", "label": "Introduction", "default": "<p>All local UAE deliveries are free, whether you receive 4-hour delivery in Dubai or next-day delivery across the Emirates. Orders ship from our Dubai warehouse.</p>" },
+    { "type": "text", "id": "trust_heading", "label": "Trust heading", "default": "Know who you are buying from" },
+    { "type": "richtext", "id": "trust_copy", "label": "Trust copy", "default": "<p>Nootropix is a Dubai-based online retailer serving customers across the UAE. Review our business information, support channels, order policies, and product details before purchasing.</p>" },
+    { "type": "text", "id": "links_label", "label": "Links accessibility label", "default": "Store information and policies" },
+    { "type": "text", "id": "shipping_policy_label", "label": "Shipping policy label", "default": "Shipping policy" },
+    { "type": "text", "id": "refund_policy_label", "label": "Refund policy label", "default": "Refund policy" },
+    { "type": "text", "id": "privacy_policy_label", "label": "Privacy policy label", "default": "Privacy policy" },
+    { "type": "text", "id": "terms_label", "label": "Terms label", "default": "Terms of service" },
+    { "type": "range", "id": "padding_top", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding top", "default": 80 },
+    { "type": "range", "id": "padding_bottom", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding bottom", "default": 80 }
+  ],
+  "blocks": [
+    {
+      "type": "delivery_fact",
+      "name": "Delivery fact",
+      "settings": [
+        { "type": "text", "id": "value", "label": "Value" },
+        { "type": "text", "id": "title", "label": "Title" },
+        { "type": "textarea", "id": "text", "label": "Text" }
+      ]
+    },
+    {
+      "type": "trust_link",
+      "name": "Trust link",
+      "settings": [
+        { "type": "text", "id": "label", "label": "Label" },
+        { "type": "url", "id": "url", "label": "Link" }
+      ]
+    },
+    { "type": "@app" }
+  ],
+  "presets": [
+    {
+      "name": "Dubai trust and delivery",
+      "blocks": [
+        { "type": "delivery_fact", "settings": { "value": "4 hours", "title": "Dubai delivery", "text": "Free local delivery within Dubai, often within 4 hours depending on order timing and location." } },
+        { "type": "delivery_fact", "settings": { "value": "Next day", "title": "Other Emirates", "text": "Free next-day delivery across the UAE in most cases. Timing can vary by emirate and order timing." } },
+        { "type": "delivery_fact", "settings": { "value": "Free", "title": "All UAE delivery", "text": "Local delivery is free across the UAE, whether 4-hour or next-day." } },
+        { "type": "trust_link", "settings": { "label": "About Nootropix", "url": "/pages/about" } },
+        { "type": "trust_link", "settings": { "label": "Contact support", "url": "/pages/contact" } },
+        { "type": "trust_link", "settings": { "label": "Help and FAQ", "url": "/pages/help-faq" } },
+        { "type": "trust_link", "settings": { "label": "Track an order", "url": "/pages/track-order" } }
+      ]
+    }
+  ]
+}
+{% endschema %}
