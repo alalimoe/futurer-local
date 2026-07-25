@@ -1,0 +1,348 @@
+{% comment %}
+  NX Flagship hero — series-branded commerce hero with media, buy box, sticky ATC.
+{% endcomment %}
+
+{{ 'nx-flagship.css' | asset_url | stylesheet_tag }}
+{{ 'product-info-media-carousel.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'nx-flagship.js' | asset_url }}" defer></script>
+
+{%- liquid
+  assign selected_variant = product.selected_or_first_available_variant
+  assign variant_images = product.images | where: 'attached_to_variant?', true | map: 'src'
+  assign media_column = section.settings.media_column | plus: 0
+  assign content_column = 12 | minus: media_column
+
+  assign subtitle_mf = product.metafields.npx.subtitle
+  assign benefit1 = product.metafields.pdp.benefit_1
+  assign benefit2 = product.metafields.pdp.benefit_2
+  assign benefit3 = product.metafields.pdp.benefit_3
+  assign pdp_headline_mf = product.metafields.pdp.headline
+
+  assign ship_promise_mf = product.metafields.pdp.shipping_promise
+  assign return_promise_mf = product.metafields.pdp.return_promise
+
+  assign atc_label = section.settings.atc_label | default: 'Add to Cart'
+  assign sold_out_text = 'products.product.sold_out' | t
+
+  assign bc_collection = nil
+  assign pc_handle = product.metafields.pdp.primary_collection
+  if pc_handle and collections[pc_handle]
+    assign bc_collection = collections[pc_handle]
+  endif
+  if bc_collection == nil and product.collections.size > 0
+    assign bc_collection = product.collections.first
+  endif
+
+  assign display_title = section.settings.product_name | default: 'Baseline'
+  assign series_label = section.settings.series_label | default: 'NX Series · 01'
+  assign tagline = section.settings.tagline | default: 'Daily Cognitive & Cellular Energy'
+-%}
+
+{%- style -%}
+  .xo-section--{{ section.id }} .nxf-hero__info {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+  }
+  .xo-section--{{ section.id }} .nxf-hero__breadcrumbs {
+    font-size: calc(var(--font-body-scale, 1) * 1.3rem);
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 55%, transparent);
+  }
+  .xo-section--{{ section.id }} .nxf-hero__breadcrumbs a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .xo-section--{{ section.id }} .nxf-hero__breadcrumbs a:hover {
+    color: rgba(var(--color-foreground));
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .xo-section--{{ section.id }} .nxf-hero__title {
+    font-family: var(--font-heading-family, sans-serif);
+    font-weight: 600;
+    font-size: clamp(3rem, 4.5vw, 4.4rem);
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    margin: 0;
+    color: rgba(var(--color-foreground));
+  }
+  .xo-section--{{ section.id }} .nxf-hero__tagline {
+    font-size: calc(var(--font-body-scale, 1) * 1.6rem);
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 65%, transparent);
+    margin: 0;
+    line-height: 1.5;
+  }
+  .xo-section--{{ section.id }} .nxf-hero__buy-form {
+    display: flex;
+    align-items: stretch;
+    gap: 1rem;
+  }
+  .xo-section--{{ section.id }} .nxf-hero__buy-atc {
+    flex: 1;
+    min-width: 0;
+  }
+  .xo-section--{{ section.id }} .nxf-hero__microcopy {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    font-size: calc(var(--font-body-scale, 1) * 1.3rem);
+    line-height: 1.6;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 55%, transparent);
+  }
+  .xo-section--{{ section.id }} .nxf-hero__sticky-atc {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 40;
+    display: none;
+    padding: 1rem 1.6rem calc(1rem + env(safe-area-inset-bottom));
+    background: rgba(var(--color-background));
+    border-top: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
+    transform: translateY(110%);
+    transition: transform 0.28s ease;
+  }
+  .xo-section--{{ section.id }} .nxf-hero__sticky-atc.is-visible {
+    transform: translateY(0);
+  }
+  .xo-section--{{ section.id }} .nxf-hero__sticky-inner {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    max-width: 60rem;
+    margin: 0 auto;
+  }
+  .xo-section--{{ section.id }} .nxf-hero__sticky-info {
+    flex: 1;
+    min-width: 0;
+  }
+  .xo-section--{{ section.id }} .nxf-hero__sticky-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  @media screen and (max-width: 767px) {
+    .xo-section--{{ section.id }} .nxf-hero__sticky-atc {
+      display: block;
+    }
+    .xo-section--{{ section.id }} .nxf-hero__col--content {
+      order: 1;
+    }
+    .xo-section--{{ section.id }} .nxf-hero__col--media {
+      order: 2;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .xo-section--{{ section.id }} .nxf-hero__sticky-atc {
+      transition: none;
+    }
+  }
+{%- endstyle -%}
+
+<section {% render 'section-attr' %} data-nx-flagship-hero>
+  <xo-product
+    xo-selected-or-first-available-variant-id="{{ selected_variant.id }}"
+    xo-product-information
+    xo-product-id="{{ product.id }}"
+    xo-section-id="{{ section.id }}"
+    class="nx-flagship nxf-hero"
+  >
+    <xo-container>
+      <div class="nx-flagship__wrap">
+        {% if section.settings.show_breadcrumbs %}
+          <nav class="nxf-hero__breadcrumbs" aria-label="Breadcrumb">
+            <a href="{{ routes.root_url }}">Home</a>
+            <span aria-hidden="true"> / </span>
+            {% if bc_collection %}
+              <a href="{{ bc_collection.url }}">{{ bc_collection.title }}</a>
+            {% else %}
+              <a href="{{ routes.all_products_collection_url }}">Shop</a>
+            {% endif %}
+            <span aria-hidden="true"> / </span>
+            <span aria-current="page">{{ product.title | default: display_title }}</span>
+          </nav>
+        {% endif %}
+
+        {% if section.settings.show_section_nav %}
+          <nav class="nx-flagship__nav" data-nx-flagship-nav aria-label="Section navigation">
+            <a href="#nx-formula" class="nx-flagship__nav-link">Formula</a>
+            <a href="#nx-pathways" class="nx-flagship__nav-link">Pathways</a>
+            <a href="#ingredients" class="nx-flagship__nav-link">Ingredients</a>
+            <a href="#routine" class="nx-flagship__nav-link">Routine</a>
+            <a href="#quality" class="nx-flagship__nav-link">Quality</a>
+            <a href="#nx-faq" class="nx-flagship__nav-link">FAQ</a>
+          </nav>
+        {% endif %}
+
+        <xo-grid style="margin-top: 2rem;">
+          <div class="nxf-hero__col nxf-hero__col--media" style="--xs: 12; --md: 12; --lg: {{ media_column }}">
+            <xo-product-will-change xo-unique-id="nxf-media-{{ section.id }}">
+              {% render 'product-info-media-carousel',
+                enable_image_zoom: section.settings.enable_image_zoom,
+                variant_images: variant_images
+              %}
+            </xo-product-will-change>
+          </div>
+
+          <div class="nxf-hero__col nxf-hero__col--content" style="--xs: 12; --md: 12; --lg: {{ content_column }}">
+            <div class="nxf-hero__info">
+              <span class="nx-flagship__series-badge">{{ series_label }}</span>
+
+              <xo-animate xo-cascade>
+                <h1 class="nxf-hero__title">{{ display_title }}</h1>
+                <p class="nxf-hero__tagline">
+                  {% if pdp_headline_mf != blank %}
+                    {{ pdp_headline_mf }}
+                  {% elsif subtitle_mf != blank %}
+                    {{ subtitle_mf | metafield_tag }}
+                  {% else %}
+                    {{ tagline }} — {{ section.settings.hero_subtitle | default: 'six synergistic actives in one morning routine.' }}
+                  {% endif %}
+                </p>
+              </xo-animate>
+
+              {% for block in section.blocks %}
+                {% if block.type == '@app' %}
+                  <div {{ block.shopify_attributes }}>{% render block %}</div>
+                {% endif %}
+              {% endfor %}
+
+              {% if section.settings.show_chips %}
+                <ul class="nx-flagship__chips">
+                  {% if benefit1 != blank %}<li class="nx-flagship__chip">{{ benefit1 }}</li>{% endif %}
+                  {% if benefit2 != blank %}<li class="nx-flagship__chip">{{ benefit2 }}</li>{% endif %}
+                  {% if benefit3 != blank %}<li class="nx-flagship__chip">{{ benefit3 }}</li>{% endif %}
+                  {% if benefit1 == blank and benefit2 == blank and benefit3 == blank %}
+                    {% for block in section.blocks %}
+                      {% if block.type == 'chip' and block.settings.label != blank %}
+                        <li class="nx-flagship__chip" {{ block.shopify_attributes }}>{{ block.settings.label }}</li>
+                      {% endif %}
+                    {% endfor %}
+                  {% endif %}
+                </ul>
+              {% endif %}
+
+              <xo-product-will-change xo-unique-id="nxf-price-{{ section.id }}" xo-morph-selector="[xo-price]">
+                {% render 'price', product: product, use_variant: true, larger: true %}
+              </xo-product-will-change>
+
+              {% render 'bnpl-box' %}
+
+              <div class="nxf-hero__buy-form">
+                {% render 'quantity', size: 'md', variant: selected_variant, product: product, is_cart: false %}
+                <div class="nxf-hero__buy-atc">
+                  {% form 'product', product, xo-buy-ignore: 'true' %}
+                    <xo-product-will-change xo-unique-id="nxf-atc-{{ section.id }}">
+                      <xo-cart-add
+                        data-nx-flagship-main-atc
+                        {% unless selected_variant.available %}xo-disabled{% endunless %}
+                        {% if settings.cart_type == 'page' %}xo-cart-redirection{% endif %}
+                      >
+                        {% if selected_variant.available %}
+                          {% render 'button', style: 'primary', text: atc_label, size: 'md', block: true, text_unavailable: sold_out_text %}
+                        {% else %}
+                          {% render 'button', style: 'primary', text: sold_out_text, size: 'md', block: true, text_unavailable: sold_out_text %}
+                        {% endif %}
+                      </xo-cart-add>
+                    </xo-product-will-change>
+                  {% endform %}
+                </div>
+              </div>
+
+              {% if section.settings.enable_microcopy %}
+                <ul class="nxf-hero__microcopy">
+                  {% if ship_promise_mf != blank %}<li>{{ ship_promise_mf }}</li>{% endif %}
+                  {% if return_promise_mf != blank %}<li>{{ return_promise_mf }}</li>{% endif %}
+                  {% if section.settings.microcopy_fallback != blank %}
+                    {%- assign lines = section.settings.microcopy_fallback | newline_to_br | split: '<br />' -%}
+                    {% for line in lines %}
+                      {%- assign t = line | strip_html | strip -%}
+                      {% if t != blank %}<li>{{ t }}</li>{% endif %}
+                    {% endfor %}
+                  {% endif %}
+                </ul>
+              {% endif %}
+            </div>
+          </div>
+        </xo-grid>
+      </div>
+    </xo-container>
+
+    {% if section.settings.enable_sticky_atc %}
+      <div class="nxf-hero__sticky-atc" data-nx-flagship-sticky aria-hidden="true">
+        <div class="nxf-hero__sticky-inner">
+          <div class="nxf-hero__sticky-info">
+            <span class="nxf-hero__sticky-title">{{ display_title }}</span>
+            <xo-product-will-change xo-unique-id="nxf-sticky-price-{{ section.id }}" xo-morph-selector="[xo-price]">
+              {% render 'price', product: product, use_variant: true %}
+            </xo-product-will-change>
+          </div>
+          <xo-cart-add
+            data-nx-sticky-atc
+            {% unless selected_variant.available %}xo-disabled{% endunless %}
+            {% if settings.cart_type == 'page' %}xo-cart-redirection{% endif %}
+          >
+            {% if selected_variant.available %}
+              {% render 'button', style: 'primary', text: atc_label, size: 'md', text_unavailable: sold_out_text %}
+            {% else %}
+              {% render 'button', style: 'primary', text: sold_out_text, size: 'md', text_unavailable: sold_out_text %}
+            {% endif %}
+          </xo-cart-add>
+        </div>
+      </div>
+    {% endif %}
+
+    {% render 'product-data', product: product %}
+  </xo-product>
+</section>
+
+{% schema %}
+{
+  "name": "NX Flagship — Hero",
+  "tag": "section",
+  "class": "nx-flagship-hero",
+  "settings": [
+    { "type": "text", "id": "series_label", "label": "Series badge", "default": "NX Series · 01" },
+    { "type": "text", "id": "product_name", "label": "Product name (display)", "default": "Baseline" },
+    { "type": "text", "id": "tagline", "label": "Tagline", "default": "Daily Cognitive & Cellular Energy" },
+    { "type": "text", "id": "hero_subtitle", "label": "Hero subtitle fallback", "default": "six synergistic actives in one morning routine." },
+    { "type": "checkbox", "id": "show_breadcrumbs", "label": "Show breadcrumbs", "default": true },
+    { "type": "checkbox", "id": "show_section_nav", "label": "Show section navigation", "default": true },
+    { "type": "checkbox", "id": "show_chips", "label": "Show benefit chips", "default": true },
+    { "type": "checkbox", "id": "enable_image_zoom", "label": "Enable image zoom", "default": true },
+    { "type": "checkbox", "id": "enable_sticky_atc", "label": "Enable sticky add to cart (mobile)", "default": true },
+    { "type": "text", "id": "atc_label", "label": "Add to cart label", "default": "Add to Cart" },
+    { "type": "checkbox", "id": "enable_microcopy", "label": "Show microcopy", "default": true },
+    { "type": "textarea", "id": "microcopy_fallback", "label": "Microcopy (one per line)", "default": "30-day supply · 2 capsules daily\nThird-party tested · cGMP manufactured\nSame-day dispatch from Dubai" },
+    { "type": "range", "id": "media_column", "min": 5, "max": 8, "step": 1, "label": "Media column width (of 12)", "default": 7 },
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme" },
+    { "type": "number", "id": "padding_top_desktop", "label": "Padding top desktop", "default": 24 },
+    { "type": "number", "id": "padding_bottom_desktop", "label": "Padding bottom desktop", "default": 24 },
+    { "type": "number", "id": "padding_top_mobile", "label": "Padding top mobile", "default": 16 },
+    { "type": "number", "id": "padding_bottom_mobile", "label": "Padding bottom mobile", "default": 16 }
+  ],
+  "blocks": [
+    { "type": "@app" },
+    {
+      "type": "chip",
+      "name": "Benefit chip",
+      "settings": [
+        { "type": "text", "id": "label", "label": "Label", "default": "Focus & Clarity" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "NX Flagship — Hero",
+      "blocks": [
+        { "type": "chip", "settings": { "label": "Focus & Clarity" } },
+        { "type": "chip", "settings": { "label": "Steady Energy" } },
+        { "type": "chip", "settings": { "label": "Stress Resilience" } },
+        { "type": "chip", "settings": { "label": "Cellular Support" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

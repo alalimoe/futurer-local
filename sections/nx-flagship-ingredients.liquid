@@ -1,0 +1,77 @@
+{% comment %} NX Flagship ingredients — accordion deep-dive per active. {% endcomment %}
+
+{{ 'nx-flagship.css' | asset_url | stylesheet_tag }}
+
+<section {% render 'section-attr' %} id="ingredients" class="nx-flagship nx-flagship__anchor nx-flagship__section">
+  <xo-container>
+    <div class="nx-flagship__wrap">
+      <p class="nx-flagship__eyebrow">{{ section.settings.eyebrow | default: 'Full Formula' }}</p>
+      <h2 class="nx-flagship__h2">{{ section.settings.heading | default: 'Six actives. Purposefully dosed.' }}</h2>
+      <p class="nx-flagship__lead">{{ section.settings.lead }}</p>
+
+      <div style="display:grid;gap:1rem;margin-top:2rem;">
+        {% for block in section.blocks %}
+          {% if block.type == 'ingredient' %}
+            <details class="nx-flagship__card nx-flagship__ingredient" {{ block.shopify_attributes }}>
+              <summary>
+                <span>{{ block.settings.name }}{% if block.settings.dose != blank %} <span class="nx-flagship__dose" style="margin:0 0 0 0.8rem;">{{ block.settings.dose }}</span>{% endif %}</span>
+              </summary>
+              <div class="nx-flagship__ingredient-body">
+                {% if block.settings.role != blank %}
+                  <p><strong>{{ block.settings.role }}</strong></p>
+                {% endif %}
+                {{ block.settings.mechanism }}
+                {% if block.settings.product != blank %}
+                  <p><a href="{{ block.settings.product.url }}">Learn more about {{ block.settings.name }} →</a></p>
+                {% endif %}
+              </div>
+            </details>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+  </xo-container>
+</section>
+
+{% schema %}
+{
+  "name": "NX Flagship — Ingredients",
+  "tag": "section",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Full Formula" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Six actives. Purposefully dosed." },
+    { "type": "textarea", "id": "lead", "label": "Lead text", "default": "Every ingredient in Baseline was selected for a specific role in the cognitive and cellular energy pathways." },
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme" },
+    { "type": "number", "id": "padding_top_desktop", "label": "Padding top desktop", "default": 48 },
+    { "type": "number", "id": "padding_bottom_desktop", "label": "Padding bottom desktop", "default": 48 },
+    { "type": "number", "id": "padding_top_mobile", "label": "Padding top mobile", "default": 32 },
+    { "type": "number", "id": "padding_bottom_mobile", "label": "Padding bottom mobile", "default": 32 }
+  ],
+  "blocks": [
+    {
+      "type": "ingredient",
+      "name": "Ingredient",
+      "settings": [
+        { "type": "text", "id": "name", "label": "Name", "default": "Citicoline" },
+        { "type": "text", "id": "dose", "label": "Dose per serving", "default": "250 mg" },
+        { "type": "text", "id": "role", "label": "One-line role", "default": "Choline donor & phospholipid precursor" },
+        { "type": "richtext", "id": "mechanism", "label": "Mechanism", "default": "<p>Citicoline supports acetylcholine synthesis and neuronal membrane repair — a foundational choline source for daily cognitive support.</p>" },
+        { "type": "product", "id": "product", "label": "Link to ingredient product (optional)" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "NX Flagship — Ingredients",
+      "blocks": [
+        { "type": "ingredient", "settings": { "name": "ALCAR", "dose": "500 mg", "role": "Mitochondrial fatty acid transport", "mechanism": "<p>Acetyl-L-Carnitine shuttles fatty acids into mitochondria, supporting ATP production and neuronal energy metabolism.</p>" } },
+        { "type": "ingredient", "settings": { "name": "Citicoline", "dose": "250 mg", "role": "Choline donor & phospholipid precursor", "mechanism": "<p>Citicoline supports acetylcholine synthesis and neuronal membrane repair — a foundational choline source for daily cognitive support.</p>" } },
+        { "type": "ingredient", "settings": { "name": "NMN", "dose": "250 mg", "role": "NAD+ precursor", "mechanism": "<p>NMN is a direct precursor to NAD+, a coenzyme essential for cellular energy, DNA repair, and metabolic health.</p>" } },
+        { "type": "ingredient", "settings": { "name": "Rhodiola Rosea", "dose": "200 mg", "role": "Adaptogen for stress resilience", "mechanism": "<p>Rhodiola helps modulate the stress response, supporting mental stamina and reducing fatigue under pressure.</p>" } },
+        { "type": "ingredient", "settings": { "name": "CoQ10", "dose": "100 mg", "role": "Mitochondrial electron carrier", "mechanism": "<p>Coenzyme Q10 is a critical component of the mitochondrial electron transport chain, essential for cellular ATP generation.</p>" } },
+        { "type": "ingredient", "settings": { "name": "L-Theanine", "dose": "200 mg", "role": "Calm focus modulator", "mechanism": "<p>L-Theanine promotes alpha brain wave activity, supporting relaxed alertness and smoothing the edges of stimulant intake.</p>" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

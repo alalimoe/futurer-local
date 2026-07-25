@@ -1,0 +1,129 @@
+{% comment %} NX Flagship spotlight — homepage launch banner. {% endcomment %}
+
+{{ 'nx-flagship.css' | asset_url | stylesheet_tag }}
+
+{%- style -%}
+  .xo-section--{{ section.id }} .nxf-spotlight {
+    background: color-mix(in srgb, rgba(var(--color-accent)) 6%, rgba(var(--color-background)));
+    border-block: 1px solid color-mix(in srgb, rgba(var(--color-accent)) 20%, transparent);
+  }
+  .xo-section--{{ section.id }} .nxf-spotlight__grid {
+    display: grid;
+    gap: clamp(2rem, 4vw, 3.2rem);
+    align-items: center;
+    padding-block: clamp(2.4rem, 5vw, 4rem);
+  }
+  @media (min-width: 768px) {
+    .xo-section--{{ section.id }} .nxf-spotlight__grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .xo-section--{{ section.id }} .nxf-spotlight__badge {
+    display: inline-block;
+    margin-bottom: 1rem;
+    padding: 0.4rem 1rem;
+    border-radius: var(--button-radius, 10rem);
+    background: rgba(var(--color-accent));
+    color: rgba(var(--color-foreground));
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+  .xo-section--{{ section.id }} .nxf-spotlight__title {
+    font-family: var(--font-heading-family, sans-serif);
+    font-size: clamp(2.4rem, 4vw, 3.6rem);
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    margin: 0 0 1rem;
+    color: rgba(var(--color-foreground));
+  }
+  .xo-section--{{ section.id }} .nxf-spotlight__sub {
+    font-size: 1.5rem;
+    line-height: 1.6;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 65%, transparent);
+    margin: 0 0 1.6rem;
+    max-width: 48ch;
+  }
+  .xo-section--{{ section.id }} .nxf-spotlight__btns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .xo-section--{{ section.id }} .nxf-spotlight__img-wrap {
+    position: relative;
+    border-radius: var(--general-radius-3, 2rem);
+    overflow: hidden;
+    border: 2px solid color-mix(in srgb, rgba(var(--color-accent)) 35%, transparent);
+    background: rgba(var(--color-background));
+  }
+  .xo-section--{{ section.id }} .nxf-spotlight__img-wrap img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+{%- endstyle -%}
+
+<section {% render 'section-attr' %} class="nxf-spotlight nx-flagship">
+  <xo-container>
+    <div class="nx-flagship__wrap">
+      <xo-animate xo-cascade>
+        <div class="nxf-spotlight__grid">
+          <div>
+            {% if section.settings.badge != blank %}
+              <span class="nxf-spotlight__badge">{{ section.settings.badge }}</span>
+            {% endif %}
+            <p class="nx-flagship__eyebrow">{{ section.settings.eyebrow | default: 'Introducing the NX Series' }}</p>
+            <h2 class="nxf-spotlight__title">{{ section.settings.heading | default: 'Baseline — Your Daily Cognitive Foundation' }}</h2>
+            <p class="nxf-spotlight__sub">{{ section.settings.subheading }}</p>
+            <div class="nxf-spotlight__btns">
+              {% if section.settings.primary_label != blank %}
+                {% render 'button', style: 'primary', text: section.settings.primary_label, link: section.settings.primary_url, size: 'md' %}
+              {% endif %}
+              {% if section.settings.secondary_label != blank %}
+                {% render 'button', style: 'secondary', text: section.settings.secondary_label, link: section.settings.secondary_url, size: 'md' %}
+              {% endif %}
+            </div>
+          </div>
+          <div class="nxf-spotlight__img-wrap">
+            {% if section.settings.image != blank %}
+              {{ section.settings.image | image_url: width: 800 | image_tag:
+                loading: 'lazy',
+                alt: section.settings.image_alt | default: 'NX01 Baseline supplement bottle',
+                widths: '400,600,800',
+                sizes: '(min-width: 768px) 400px, 100vw'
+              }}
+            {% else %}
+              {{ 'product-1' | placeholder_svg_tag: 'placeholder-svg' }}
+            {% endif %}
+          </div>
+        </div>
+      </xo-animate>
+    </div>
+  </xo-container>
+</section>
+
+{% schema %}
+{
+  "name": "NX Flagship — Spotlight",
+  "tag": "section",
+  "settings": [
+    { "type": "text", "id": "badge", "label": "Badge", "default": "New · Flagship Stack" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Introducing the NX Series" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Baseline — Your Daily Cognitive Foundation" },
+    { "type": "textarea", "id": "subheading", "label": "Subheading", "default": "Six synergistic actives — ALCAR, Citicoline, NMN, Rhodiola, CoQ10, and L-Theanine — in one morning routine. No more juggling bottles." },
+    { "type": "text", "id": "primary_label", "label": "Primary CTA label", "default": "Shop Baseline" },
+    { "type": "url", "id": "primary_url", "label": "Primary CTA URL" },
+    { "type": "text", "id": "secondary_label", "label": "Secondary CTA label", "default": "See the Formula" },
+    { "type": "url", "id": "secondary_url", "label": "Secondary CTA URL" },
+    { "type": "image_picker", "id": "image", "label": "Product image" },
+    { "type": "text", "id": "image_alt", "label": "Image alt text", "default": "NX01 Baseline supplement bottle" },
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme" },
+    { "type": "number", "id": "padding_top_desktop", "label": "Padding top desktop", "default": 0 },
+    { "type": "number", "id": "padding_bottom_desktop", "label": "Padding bottom desktop", "default": 0 },
+    { "type": "number", "id": "padding_top_mobile", "label": "Padding top mobile", "default": 0 },
+    { "type": "number", "id": "padding_bottom_mobile", "label": "Padding bottom mobile", "default": 0 }
+  ],
+  "presets": [{ "name": "NX Flagship — Spotlight" }]
+}
+{% endschema %}

@@ -42,12 +42,28 @@
       assign show_weekend_promo = true
     endif
   endif
+
+  assign show_nx01_promo = false
+  if section.settings.enable_nx01_launch_promo
+    if request.page_type == 'index' or request.page_type == 'collection' or request.page_type == 'product' or request.page_type == 'cart'
+      assign show_nx01_promo = true
+    endif
+  endif
 %}
 
 <div class='xo-announcement-bar' id='xo-announcement-bar'>
   <section {% render 'section-attr' %}>
     <xo-animate xo-cascade xo-type='fade-down' class='xo-announcement-bar__body'>
-      {% if show_weekend_promo %}
+      {% if show_nx01_promo %}
+        {% liquid
+          assign nx01_message = section.settings.nx01_promo_message
+          if nx01_message == blank
+            assign nx01_message = 'general.nx01_promo.message' | t
+          endif
+          assign nx01_url = section.settings.nx01_promo_url | default: '/products/nx01-baseline'
+        %}
+        {% render 'announcement-nx01-promo', message: nx01_message, url: nx01_url %}
+      {% elsif show_weekend_promo %}
         {% liquid
           assign promo_message = 'general.weekend_promo.message' | t: percent: section.settings.weekend_discount_percent, code: section.settings.weekend_promo_code
         %}
@@ -279,6 +295,28 @@
       "id": "marquee_stop",
       "label": "t:sections.announcement_bar.settings.marquee_stop.label",
       "default": false
+    },
+    {
+      "type": "header",
+      "content": "NX01 launch promo"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_nx01_launch_promo",
+      "label": "Enable NX01 Baseline launch promo",
+      "default": false,
+      "info": "Takes priority over weekend promo when enabled."
+    },
+    {
+      "type": "text",
+      "id": "nx01_promo_message",
+      "label": "NX01 promo message",
+      "default": "Introducing NX01: Baseline — Our first flagship daily stack. Shop now →"
+    },
+    {
+      "type": "url",
+      "id": "nx01_promo_url",
+      "label": "NX01 promo link"
     },
     {
       "type": "header",

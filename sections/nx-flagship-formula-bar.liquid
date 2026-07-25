@@ -1,0 +1,52 @@
+{% comment %} NX Flagship formula bar — quick-scan stats strip. {% endcomment %}
+
+{{ 'nx-flagship.css' | asset_url | stylesheet_tag }}
+
+<section {% render 'section-attr' %} id="nx-formula" class="nx-flagship nx-flagship__anchor nx-flagship__section">
+  <div class="nx-flagship__stat-bar">
+  {% for block in section.blocks %}
+    {% if block.type == 'stat' %}
+      <div class="nx-flagship__stat" {{ block.shopify_attributes }}>
+        <span class="nx-flagship__stat-value">{{ block.settings.value }}</span>
+        <span class="nx-flagship__stat-label">{{ block.settings.label }}</span>
+      </div>
+    {% endif %}
+  {% endfor %}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "NX Flagship — Formula Bar",
+  "tag": "section",
+  "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme" },
+    { "type": "number", "id": "padding_top_desktop", "label": "Padding top desktop", "default": 0 },
+    { "type": "number", "id": "padding_bottom_desktop", "label": "Padding bottom desktop", "default": 0 },
+    { "type": "number", "id": "padding_top_mobile", "label": "Padding top mobile", "default": 0 },
+    { "type": "number", "id": "padding_bottom_mobile", "label": "Padding bottom mobile", "default": 0 }
+  ],
+  "blocks": [
+    {
+      "type": "stat",
+      "name": "Stat",
+      "settings": [
+        { "type": "text", "id": "value", "label": "Value", "default": "6" },
+        { "type": "text", "id": "label", "label": "Label", "default": "Active Ingredients" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "NX Flagship — Formula Bar",
+      "blocks": [
+        { "type": "stat", "settings": { "value": "6", "label": "Active Ingredients" } },
+        { "type": "stat", "settings": { "value": "2", "label": "Capsules / Day" } },
+        { "type": "stat", "settings": { "value": "30", "label": "Day Supply" } },
+        { "type": "stat", "settings": { "value": "cGMP", "label": "Manufactured" } },
+        { "type": "stat", "settings": { "value": "3rd Party", "label": "Tested" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,77 @@
+{% comment %} NX Flagship why-stack — value vs buying separately. {% endcomment %}
+
+{{ 'nx-flagship.css' | asset_url | stylesheet_tag }}
+
+<section {% render 'section-attr' %} id="why-baseline" class="nx-flagship nx-flagship__anchor nx-flagship__section">
+  <xo-container>
+    <div class="nx-flagship__wrap">
+      <p class="nx-flagship__eyebrow">{{ section.settings.eyebrow | default: 'Why Baseline' }}</p>
+      <h2 class="nx-flagship__h2">{{ section.settings.heading | default: 'One bottle beats six.' }}</h2>
+      <p class="nx-flagship__lead">{{ section.settings.lead }}</p>
+
+      <div class="nx-flagship__card" style="margin-top:2rem;overflow-x:auto;">
+        <table class="nx-flagship__compare">
+          <thead>
+            <tr>
+              <th scope="col"></th>
+              <th scope="col" class="is-highlight">{{ section.settings.baseline_label | default: 'Baseline' }}</th>
+              <th scope="col">{{ section.settings.separate_label | default: 'Buy Separately' }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for block in section.blocks %}
+              {% if block.type == 'row' %}
+                <tr {{ block.shopify_attributes }}>
+                  <th scope="row">{{ block.settings.feature }}</th>
+                  <td class="is-highlight">{{ block.settings.baseline_value }}</td>
+                  <td>{{ block.settings.separate_value }}</td>
+                </tr>
+              {% endif %}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </xo-container>
+</section>
+
+{% schema %}
+{
+  "name": "NX Flagship — Why Stack",
+  "tag": "section",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Why Baseline" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "One bottle beats six." },
+    { "type": "textarea", "id": "lead", "label": "Lead text", "default": "Stop buying six bottles. Baseline pre-balances doses designed to work together — saving you money, counter space, and decision fatigue." },
+    { "type": "text", "id": "baseline_label", "label": "Baseline column label", "default": "Baseline" },
+    { "type": "text", "id": "separate_label", "label": "Separate column label", "default": "Buy Separately" },
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme" },
+    { "type": "number", "id": "padding_top_desktop", "label": "Padding top desktop", "default": 48 },
+    { "type": "number", "id": "padding_bottom_desktop", "label": "Padding bottom desktop", "default": 48 },
+    { "type": "number", "id": "padding_top_mobile", "label": "Padding top mobile", "default": 32 },
+    { "type": "number", "id": "padding_bottom_mobile", "label": "Padding bottom mobile", "default": 32 }
+  ],
+  "blocks": [
+    {
+      "type": "row",
+      "name": "Comparison row",
+      "settings": [
+        { "type": "text", "id": "feature", "label": "Feature", "default": "Daily routine" },
+        { "type": "text", "id": "baseline_value", "label": "Baseline value", "default": "2 capsules, once daily" },
+        { "type": "text", "id": "separate_value", "label": "Separate value", "default": "6 bottles, 6 doses to track" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "NX Flagship — Why Stack",
+      "blocks": [
+        { "type": "row", "settings": { "feature": "Daily routine", "baseline_value": "2 capsules, once daily", "separate_value": "6 bottles, 6 doses to track" } },
+        { "type": "row", "settings": { "feature": "Synergistic dosing", "baseline_value": "Pre-balanced ratios", "separate_value": "Guesswork & overlap risk" } },
+        { "type": "row", "settings": { "feature": "Counter space", "baseline_value": "1 bottle", "separate_value": "6+ bottles" } },
+        { "type": "row", "settings": { "feature": "Monthly cost", "baseline_value": "One price", "separate_value": "Typically 2–3× more" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

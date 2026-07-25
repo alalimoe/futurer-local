@@ -1,0 +1,86 @@
+{% comment %} NX Flagship JSON-LD — Product + BreadcrumbList for flagship PDP. {% endcomment %}
+
+{%- liquid
+  assign p = product
+  assign desc = p.metafields.pdp.headline | default: '' | strip_html | strip
+  if desc == blank
+    assign desc = p.metafields.npx.subtitle | default: '' | strip_html | strip
+  endif
+  if desc == blank
+    assign desc = p.description | strip_html | strip | truncate: 5000
+  endif
+  if desc == blank
+    assign desc = 'NX01 Baseline — Daily Cognitive & Cellular Energy with ALCAR, Citicoline, NMN, Rhodiola, CoQ10, and L-Theanine.'
+  endif
+
+  assign bc_collection = collection
+  if bc_collection == blank and p.collections.size > 0
+    assign bc_collection = p.collections.first
+  endif
+
+  assign rating_mf = p.metafields.reviews.rating
+  assign rating_val = rating_mf.value | default: rating_mf | plus: 0
+  assign rating_cnt = p.metafields.reviews.rating_count | plus: 0
+-%}
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Product",
+      "name": {{ p.title | default: 'NX01: Baseline' | json }},
+      "description": {{ desc | json }},
+      "brand": { "@type": "Brand", "name": {{ p.vendor | default: shop.name | json }} },
+      "category": "Dietary Supplements",
+      "url": {{ canonical_url | json }},
+      "sku": {{ p.selected_or_first_available_variant.sku | default: 'NX01-BASELINE' | json }},
+      "image": [
+        {%- if p.featured_image -%}
+          {{ p.featured_image | image_url: width: 1200 | prepend: 'https:' | json }}
+        {%- endif -%}
+      ],
+      "additionalProperty": [
+        { "@type": "PropertyValue", "name": "Series", "value": "NX01" },
+        { "@type": "PropertyValue", "name": "Form", "value": "Capsules" },
+        { "@type": "PropertyValue", "name": "Supply", "value": "30-day" },
+        { "@type": "PropertyValue", "name": "Active Ingredients", "value": "ALCAR, Citicoline, NMN, Rhodiola, CoQ10, L-Theanine" }
+      ],
+      "offers": {
+        "@type": "Offer",
+        "priceCurrency": {{ cart.currency.iso_code | json }},
+        "price": {{ p.selected_or_first_available_variant.price | money_without_currency | remove: ',' | json }},
+        "availability": "https://schema.org/{% if p.available %}InStock{% else %}OutOfStock{% endif %}",
+        "url": {{ canonical_url | json }}
+      }
+      {%- if rating_val > 0 and rating_cnt > 0 -%}
+      ,"aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": {{ rating_val | json }},
+        "reviewCount": {{ rating_cnt | json }}
+      }
+      {%- endif -%}
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Home", "item": {{ request.origin | json }} }
+        {%- if bc_collection -%}
+        ,{ "@type": "ListItem", "position": 2, "name": {{ bc_collection.title | json }}, "item": {{ request.origin | append: bc_collection.url | json }} }
+        ,{ "@type": "ListItem", "position": 3, "name": {{ p.title | default: 'Baseline' | json }}, "item": {{ canonical_url | json }} }
+        {%- else -%}
+        ,{ "@type": "ListItem", "position": 2, "name": {{ p.title | default: 'Baseline' | json }}, "item": {{ canonical_url | json }} }
+        {%- endif -%}
+      ]
+    }
+  ]
+}
+</script>
+
+{% schema %}
+{
+  "name": "NX Flagship — JSON-LD",
+  "settings": [],
+  "presets": [{ "name": "NX Flagship — JSON-LD" }]
+}
+{% endschema %}
