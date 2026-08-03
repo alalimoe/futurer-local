@@ -1,0 +1,51 @@
+{% doc %}
+  Global PDP shipping and delivery-failure policy microcopy.
+  Same copy for all visitors — no geo branching.
+
+  @param {string} [class_prefix] - BEM prefix: xo-product-info-content (default) or pp
+  @param {string} [policy_url] - Policy page path (default: /pages/shipping-and-returns)
+  @param {boolean} [show_delivery_summary] - Render policy-delivery-summary below (default: true)
+  @param {boolean} [show_returns_summary] - Render policy-returns-summary below (default: true)
+
+  @example
+  {% render 'shipping-policy-microcopy' %}
+  {% render 'shipping-policy-microcopy', class_prefix: 'pp' %}
+{% enddoc %}
+
+{% liquid
+  assign block_prefix = class_prefix | default: 'xo-product-info-content'
+  assign returns_policy_url = policy_url | default: '/pages/shipping-and-returns'
+  assign show_delivery = true
+  assign show_returns = true
+  if show_delivery_summary == false
+    assign show_delivery = false
+  endif
+  if show_returns_summary == false
+    assign show_returns = false
+  endif
+  assign delivery_summary_class = block_prefix | append: '__delivery-summary policy-canonical policy-delivery-summary'
+  assign returns_summary_class = block_prefix | append: '__returns-summary policy-canonical policy-returns-summary'
+%}
+
+<div class="{{ block_prefix }}__shipping-policy">
+  <p class="{{ block_prefix }}__shipping-policy-primary">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <circle cx="12" cy="12" r="10"/>
+      <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+    </svg>
+    {{ 'products.product.delivery_shipping_primary' | t }}
+  </p>
+  <p class="{{ block_prefix }}__shipping-policy-disclaimer">
+    {{ 'products.product.delivery_shipping_disclaimer_html' | t: link: returns_policy_url }}
+  </p>
+  {%- if show_delivery or show_returns -%}
+    <div class="{{ block_prefix }}__shipping-policy-extras">
+      {%- if show_delivery -%}
+        {% render 'policy-delivery-summary', show_trust_stat: true, class: delivery_summary_class %}
+      {%- endif -%}
+      {%- if show_returns -%}
+        {% render 'policy-returns-summary', class: returns_summary_class, policy_url: returns_policy_url %}
+      {%- endif -%}
+    </div>
+  {%- endif -%}
+</div>

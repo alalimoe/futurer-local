@@ -62,6 +62,18 @@ Phone: +971 52 598 8940
 
 ---
 
+## Delivery failure policy
+
+| Scenario | Handling |
+|---|---|
+| Our fault (mispack, label error, courier error on our instructions) | **Full refund** |
+| Local delivery failure (UAE RTO after re-attempts) | **Reship or full refund** (customer choice) |
+| International customs seizure/hold | **No refund** — buyer assumes import risk |
+| Courtesy store credit (intl customs, first occurrence per customer) | Discretionary one-time store credit — **not guaranteed**, not a standing right |
+| Customer-caused (wrong address entered, refused delivery) | No automatic refund |
+
+---
+
 ## Trust metrics
 
 Based on Quiqup fulfillment data (last 30 days):
