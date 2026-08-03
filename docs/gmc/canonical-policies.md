@@ -82,6 +82,10 @@ Always pair stats with `date_range_label`: "Based on last 30 days".
 
 See [`admin/refund-policy.md`](admin/refund-policy.md) and [`admin/shipping-and-returns-page.md`](admin/shipping-and-returns-page.md) for paste-ready Shopify Admin text.
 
+**Automation:** `scripts/gmc-admin-sync.mjs` — see [`phase-3-admin-status.md`](phase-3-admin-status.md).
+
+**Support SOP:** [`support-sop-delivery-failures.md`](support-sop-delivery-failures.md)
+
 ## Content audit
 
 See [`phase-1-content-audit.md`](phase-1-content-audit.md) for all customer-facing surfaces that need updating (no changes made yet).
