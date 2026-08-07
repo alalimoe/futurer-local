@@ -4,17 +4,24 @@
 
   @param {string} [class_prefix] - BEM prefix: xo-product-info-content (default) or pp
   @param {string} [policy_url] - Policy page path (default: /pages/shipping-and-returns)
-  @param {boolean} [show_delivery_summary] - Render policy-delivery-summary below (default: true)
-  @param {boolean} [show_returns_summary] - Render policy-returns-summary below (default: true)
+  @param {string} [collapse_name] - Unique xo-name for collapse (default: shipping-policy-details)
+  @param {boolean} [show_details] - Render collapsed details block (default: true)
+  @param {boolean} [show_delivery_summary] - Render policy-delivery-summary inside collapse (default: true)
+  @param {boolean} [show_returns_summary] - Render policy-returns-summary inside collapse (default: true)
 
   @example
   {% render 'shipping-policy-microcopy' %}
-  {% render 'shipping-policy-microcopy', class_prefix: 'pp' %}
+  {% render 'shipping-policy-microcopy', class_prefix: 'pp', collapse_name: 'shipping-policy-123' %}
 {% enddoc %}
 
 {% liquid
   assign block_prefix = class_prefix | default: 'xo-product-info-content'
   assign returns_policy_url = policy_url | default: '/pages/shipping-and-returns'
+  assign collapse_id = collapse_name | default: 'shipping-policy-details'
+  assign show_details_block = true
+  if show_details == false
+    assign show_details_block = false
+  endif
   assign show_delivery = true
   assign show_returns = true
   if show_delivery_summary == false
@@ -25,27 +32,55 @@
   endif
   assign delivery_summary_class = block_prefix | append: '__delivery-summary policy-canonical policy-delivery-summary'
   assign returns_summary_class = block_prefix | append: '__returns-summary policy-canonical policy-returns-summary'
+  assign details_title = 'products.product.delivery_shipping_details_title' | t
 %}
 
 <div class="{{ block_prefix }}__shipping-policy">
-  <p class="{{ block_prefix }}__shipping-policy-primary">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-      <circle cx="12" cy="12" r="10"/>
-      <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
-    </svg>
-    {{ 'products.product.delivery_shipping_primary' | t }}
+  <p class="{{ block_prefix }}__shipping-policy-headline">
+    {{ 'products.product.delivery_shipping_headline' | t }}
   </p>
-  <p class="{{ block_prefix }}__shipping-policy-disclaimer">
-    {{ 'products.product.delivery_shipping_disclaimer_html' | t: link: returns_policy_url }}
+
+  <div class="{{ block_prefix }}__shipping-policy-chips" role="list">
+    <span class="{{ block_prefix }}__shipping-policy-chip" role="listitem">
+      <svg class="{{ block_prefix }}__shipping-policy-chip-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      {{ 'products.product.delivery_shipping_chip_dubai' | t }}
+    </span>
+    <span class="{{ block_prefix }}__shipping-policy-chip" role="listitem">
+      <svg class="{{ block_prefix }}__shipping-policy-chip-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      {{ 'products.product.delivery_shipping_chip_uae' | t }}
+    </span>
+    <span class="{{ block_prefix }}__shipping-policy-chip" role="listitem">
+      <svg class="{{ block_prefix }}__shipping-policy-chip-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      {{ 'products.product.delivery_shipping_chip_returns' | t }}
+    </span>
+  </div>
+
+  <p class="{{ block_prefix }}__shipping-policy-link">
+    <a href="{{ returns_policy_url }}">{{ 'policies.canonical.policy_link' | t }}</a>
   </p>
-  {%- if show_delivery or show_returns -%}
-    <div class="{{ block_prefix }}__shipping-policy-extras">
+
+  {%- if show_details_block -%}
+    {%- if show_delivery or show_returns -%}
+    {% capture collapse_content %}
+      <p class="{{ block_prefix }}__shipping-policy-disclaimer">
+        {{ 'products.product.delivery_shipping_disclaimer_html' | t: link: returns_policy_url }}
+      </p>
       {%- if show_delivery -%}
         {% render 'policy-delivery-summary', show_trust_stat: true, class: delivery_summary_class %}
       {%- endif -%}
       {%- if show_returns -%}
-        {% render 'policy-returns-summary', class: returns_summary_class, policy_url: returns_policy_url %}
+        {% render 'policy-returns-summary', class: returns_summary_class, policy_url: returns_policy_url, show_link: false %}
       {%- endif -%}
+    {% endcapture %}
+    <div class="{{ block_prefix }}__shipping-policy-details">
+      {% render 'collapse', title: details_title, content: collapse_content, name: collapse_id %}
     </div>
+    {%- endif -%}
   {%- endif -%}
 </div>
