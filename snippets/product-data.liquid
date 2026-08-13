@@ -17,11 +17,17 @@
         "variants": [
           {%- assign json_first = true -%}
           {%- for variant in product.variants -%}
-            {%- capture hide_v %}{% render 'variant-hidden-on-storefront', product: product, variant: variant %}{% endcapture -%}
-            {%- if hide_v == '1' %}{% continue %}{% endif -%}
-            {%- unless json_first -%},{%- endunless -%}
-            {{ variant | json }}
-            {%- assign json_first = false -%}
+            {%- assign skip_variant = false -%}
+            {%- if product.handle == 'phenylpiracetam-hydrazide-150mg-capsules' -%}
+              {%- if variant.id == 46515999441092 -%}
+                {%- assign skip_variant = true -%}
+              {%- endif -%}
+            {%- endif -%}
+            {%- unless skip_variant -%}
+              {%- unless json_first -%},{%- endunless -%}
+              {{ variant | json }}
+              {%- assign json_first = false -%}
+            {%- endunless -%}
           {%- endfor -%}
         ],
         "media": {{ product.media | json }},
@@ -31,3 +37,12 @@
     </script>
   </template>
 </xo-product-data>
+{% if product.handle == 'phenylpiracetam-hydrazide-150mg-capsules' %}
+  <style>
+    .xo-field-radio[aria-label="100ct"],
+    .xo-field-radio:has([xo-variant-id="46515999441092"]),
+    .xo-field-select-custom__check:has([xo-variant-id="46515999441092"]) {
+      display: none !important;
+    }
+  </style>
+{% endif %}
