@@ -23,6 +23,12 @@
       <div class="xo-product-variant__inner">
         {% liquid
           for value in option.values
+            capture hide_v
+              render 'variant-hidden-on-storefront', product: product, value: value
+            endcapture
+            if hide_v == '1'
+              continue
+            endif
             render 'field-select-custom-option', label: value, option: option, name: option.name, value: value, checked: value.selected, option_value_id: value.id, variant_id: value.variant.id, use_with: 'product-variant'
           endfor
         %}
@@ -46,6 +52,8 @@
       </div>
       <div class="xo-product-variant__inner-value">
         {% for value in option.values %}
+          {% capture hide_v %}{% render 'variant-hidden-on-storefront', product: product, value: value %}{% endcapture %}
+          {% if hide_v == '1' %}{% continue %}{% endif %}
           {% render 'field-color',
             style: style,
             option: option,
@@ -67,6 +75,8 @@
       </div>
       <div class="xo-product-variant__inner-value">
         {% for value in option.values %}
+          {% capture hide_v %}{% render 'variant-hidden-on-storefront', product: product, value: value %}{% endcapture %}
+          {% if hide_v == '1' %}{% continue %}{% endif %}
           {% render 'field-color',
             style: style,
             option: option,
@@ -88,6 +98,8 @@
       </div>
       <div class="xo-product-variant__inner-value">
         {% for value in option.values %}
+          {% capture hide_v %}{% render 'variant-hidden-on-storefront', product: product, value: value %}{% endcapture %}
+          {% if hide_v == '1' %}{% continue %}{% endif %}
           {% render 'field-radio', style: style, option: option, name: option.name, value: value, label: value, checked: value.selected, use_with: 'product-variant' %}
         {% endfor %}
       </div>

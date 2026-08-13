@@ -31,6 +31,8 @@
 {%- if option != blank -%}
   <div class="xo-product-variant-link">
     {%- for value in option.values -%}
+      {%- capture hide_v %}{% render 'variant-hidden-on-storefront', product: product, value: value %}{% endcapture -%}
+      {%- if hide_v == '1' %}{% continue %}{% endif -%}
       {%- liquid
         assign product_href = product.url | append: '?variant=' | append: value.variant.id
         assign combined_listing_count = product.options_with_values | map: 'values' | map: 'product_url' | compact | size

@@ -14,7 +14,16 @@
       {
         "id": {{ product.id }},
         "handle": {{ product.handle | json }},
-        "variants": {{ product.variants | json }},
+        "variants": [
+          {%- assign json_first = true -%}
+          {%- for variant in product.variants -%}
+            {%- capture hide_v %}{% render 'variant-hidden-on-storefront', product: product, variant: variant %}{% endcapture -%}
+            {%- if hide_v == '1' %}{% continue %}{% endif -%}
+            {%- unless json_first -%},{%- endunless -%}
+            {{ variant | json }}
+            {%- assign json_first = false -%}
+          {%- endfor -%}
+        ],
         "media": {{ product.media | json }},
         "options": {{ product.options | json }},
         "available": {{ product.available }},
