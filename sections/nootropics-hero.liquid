@@ -286,7 +286,16 @@ document.addEventListener('DOMContentLoaded', function(){
   var stockEl= root.querySelector('[data-low-stock]');
   var servings = {{ product.metafields.supp.servings_per_container | default: 0 | json }};
   var lowThr   = {{ product.metafields.inv.low_stock_threshold | default: 8 | json }};
-  var variants = {{ product.variants | json }};
+  var variants = [
+    {%- assign json_first = true -%}
+    {%- for variant in product.variants -%}
+      {%- capture hide_v %}{% render 'variant-hidden-on-storefront', product: product, variant: variant %}{% endcapture -%}
+      {%- if hide_v == '1' %}{% continue %}{% endif -%}
+      {%- unless json_first -%},{%- endunless -%}
+      {{ variant | json }}
+      {%- assign json_first = false -%}
+    {%- endfor -%}
+  ];
   var moneyFormat = {{ shop.money_format | json }};
 
   function fmt(cents){ try{return Shopify.formatMoney(cents, moneyFormat);}catch(e){return (cents/100).toFixed(2);} }

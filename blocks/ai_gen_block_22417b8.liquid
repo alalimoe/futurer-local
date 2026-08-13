@@ -424,15 +424,19 @@
                 {% if block.settings.sort_variants %}
                   {% assign sorted_values = option.values | sort_natural %}
                 {% endif %}
+                {% assign option_first = true %}
                 {% for value in sorted_values %}
+                  {% capture hide_v %}{% render 'variant-hidden-on-storefront', product: product, value: value %}{% endcapture %}
+                  {% if hide_v == '1' %}{% continue %}{% endif %}
                   <button
                     type="button"
-                    class="ai-variant-option-{{ ai_gen_id }} {% if forloop.first %}selected{% endif %}"
+                    class="ai-variant-option-{{ ai_gen_id }} {% if option_first %}selected{% endif %}"
                     data-value="{{ value | escape }}"
                     data-option-position="{{ option.position }}"
                   >
                     {{ value }}
                   </button>
+                  {% assign option_first = false %}
                 {% endfor %}
               </div>
             </div>
