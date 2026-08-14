@@ -60,10 +60,14 @@
           assign crumb_2_name = bc_parent.title
           assign crumb_2_path = bc_parent.url
           assign crumb_2_url = request.origin | append: bc_parent.url
+          if bc_parent.handle == 'all'
+            assign crumb_2_path = crumb_2_path | append: '?filter.v.availability=1'
+            assign crumb_2_url = crumb_2_url | append: '?filter.v.availability=1'
+          endif
         else
           assign crumb_2_name = 'general.shop_all' | t
-          assign crumb_2_path = routes.all_products_collection_url
-          assign crumb_2_url = request.origin | append: routes.all_products_collection_url
+          assign crumb_2_path = routes.all_products_collection_url | append: '?filter.v.availability=1'
+          assign crumb_2_url = request.origin | append: routes.all_products_collection_url | append: '?filter.v.availability=1'
         endif
         assign current_name = product.title
       endif
