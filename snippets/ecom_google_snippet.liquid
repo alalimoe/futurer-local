@@ -92,13 +92,8 @@
     {%- endif -%}
     "itemCondition": "https://schema.org/NewCondition",
     "offers": [
-      {%- assign offer_first = true -%}
       {%- for variant in product.variants -%}
-        {%- capture hide_v %}{% render 'variant-hidden-on-storefront', product: product, variant: variant %}{% endcapture -%}
-        {%- if hide_v == '1' %}{% continue %}{% endif -%}
         {%- assign bc = variant.barcode | strip | replace: ' ', '' | replace: '-', '' -%}
-        {%- unless offer_first -%},{%- endunless -%}
-        {%- assign offer_first = false -%}
         {
           "@type": "Offer",
           "price": "{{ variant.price | money_without_currency | replace: ",", "" }}",
@@ -128,6 +123,7 @@
             {%- endif -%}
           {%- endif -%}
         }
+        {%- if forloop.index < product.variants.size -%},{%- endif -%}
       {%- endfor -%}
     ]
 
