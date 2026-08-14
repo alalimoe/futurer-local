@@ -25,32 +25,6 @@
   assign rating_val = rating_mf.value | default: rating_mf | plus: 0
   assign rating_cnt = p.metafields.reviews.rating_count | plus: 0
 
-  assign jsonld_min = p.price_min
-  assign jsonld_max = p.price_max
-  assign jsonld_count = p.variants.size
-  assign jsonld_min_set = false
-  for variant in p.variants
-    capture hide_v
-      render 'variant-hidden-on-storefront', product: p, variant: variant
-    endcapture
-    if hide_v == '1'
-      continue
-    endif
-    if jsonld_min_set == false
-      assign jsonld_min = variant.price
-      assign jsonld_max = variant.price
-      assign jsonld_count = 1
-      assign jsonld_min_set = true
-    else
-      assign jsonld_count = jsonld_count | plus: 1
-      if variant.price < jsonld_min
-        assign jsonld_min = variant.price
-      endif
-      if variant.price > jsonld_max
-        assign jsonld_max = variant.price
-      endif
-    endif
-  endfor
 
   assign bc_collection = collection
   if bc_collection == blank and p.collections.size > 0
@@ -128,9 +102,9 @@
       "offers": {
         "@type": "AggregateOffer",
         "priceCurrency": {{ cart.currency.iso_code | json }},
-        "lowPrice": {{ jsonld_min | money_without_currency | remove: ',' | json }},
-        "highPrice": {{ jsonld_max | money_without_currency | remove: ',' | json }},
-        "offerCount": {{ jsonld_count }},
+        "lowPrice": {{ p.price_min | money_without_currency | remove: ',' | json }},
+        "highPrice": {{ p.price_max | money_without_currency | remove: ',' | json }},
+        "offerCount": {{ p.variants.size }},
         "availability": "https://schema.org/{% if p.available %}InStock{% else %}OutOfStock{% endif %}",
         "url": {{ canonical_url | json }},
         "priceValidUntil": {{ 'now' | date: '%s' | plus: 2592000 | date: '%Y-%m-%d' | json }},
