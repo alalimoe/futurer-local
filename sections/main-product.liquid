@@ -12,6 +12,7 @@
 {{ 'share-product.css' | asset_url | stylesheet_tag }}
 {{ 'sticky-cart.css' | asset_url | stylesheet_tag }}
 {{ 'sticky-variant-modal.css' | asset_url | stylesheet_tag }}
+{{ 'pdp-ui.css' | asset_url | stylesheet_tag }}
 {{ 'line-item-property.css' | asset_url | stylesheet_tag }}
 {{ 'volume-discount.css' | asset_url | stylesheet_tag }}
 {{ 'countdown-timer.css' | asset_url | stylesheet_tag }}
@@ -79,6 +80,9 @@
               style="--sm: 12; --md: 12; --lg: {{ content_column }}"
             {% endif %}
           >
+            {% if section.settings.show_breadcrumbs %}
+              {% render 'breadcrumbs' %}
+            {% endif %}
             {% render 'product-info-content', product_media_style: product_media_style, columns_mobile: columns_mobile %}
           </div>
         </xo-grid>
@@ -98,7 +102,7 @@
       {%- endif -%}
       {% render 'product-data', product: product %}
     </xo-product>
-    {% render 'product-jsonld' %}
+    {% render 'product-jsonld', emit_breadcrumb: false %}
   </div>
 </div>
 
@@ -141,6 +145,12 @@
       "id": "enable_sticky_cart",
       "default": true,
       "label": "t:sections.main_product.settings.enable_sticky_cart.label"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_breadcrumbs",
+      "default": true,
+      "label": "Show breadcrumbs"
     },
     {
       "type": "select",
