@@ -28,27 +28,28 @@
 .main-product .xo-product-info-content__variant :is(.xo-field-radio--radio,.xo-field-radio--boxed) :is(label,.xo-field__label),
 .xo-sticky-variant-modal :is(.xo-field-radio--radio,.xo-field-radio--boxed) :is(label,.xo-field__label){
   display:inline-flex; align-items:center; justify-content:center;
-  min-height:48px; min-width:88px; padding:10px 16px;
-  border:none;
-  border-radius:12px; background:var(--color-surface-secondary); color:var(--nx-text);
-  font-weight:600; line-height:1; cursor:pointer;
-  transition: background-color .35s var(--ease-premium),
-              color .35s var(--ease-premium),
-              box-shadow .35s var(--ease-premium);
+  min-height:4.4rem; min-width:8.8rem; padding:0.8rem 1.4rem;
+  border:0.1rem solid transparent;
+  border-radius:0.8rem;
+  background:rgba(var(--color-background-2));
+  color:rgba(var(--color-foreground));
+  font-weight:500; line-height:1; cursor:pointer;
+  box-shadow:none;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 /* hover/focus */
 .main-product .xo-product-info-content__variant :is(.xo-field-radio--radio,.xo-field-radio--boxed) :is(label,.xo-field__label):hover,
 .xo-sticky-variant-modal :is(.xo-field-radio--radio,.xo-field-radio--boxed) :is(label,.xo-field__label):hover{
-  background:var(--color-border-default);
+  background: color-mix(in srgb, rgba(var(--color-foreground)) 8%, rgba(var(--color-background-2)) 92%);
 }
 .main-product .xo-product-info-content__variant :is(.xo-field-radio--radio,.xo-field-radio--boxed) :is(label,.xo-field__label):focus-visible,
 .xo-sticky-variant-modal :is(.xo-field-radio--radio,.xo-field-radio--boxed) :is(label,.xo-field__label):focus-visible{
   outline:none;
-  box-shadow: 0 0 0 3px var(--nx-accent-bg);
+  box-shadow: 0 0 0 0.2rem color-mix(in srgb, rgba(var(--color-button)) 28%, transparent);
 }
 
-/* selected (covers :has, state classes, and input+label) */
+/* selected */
 .main-product .xo-product-info-content__variant :is(.xo-field-radio--radio,.xo-field-radio--boxed):has(input:checked) :is(label,.xo-field__label),
 .xo-sticky-variant-modal :is(.xo-field-radio--radio,.xo-field-radio--boxed):has(input:checked) :is(label,.xo-field__label),
 .main-product .xo-product-info-content__variant .is-selected :is(label,.xo-field__label),
@@ -57,19 +58,10 @@
 .xo-sticky-variant-modal [aria-pressed=true],
 .main-product .xo-product-info-content__variant input[type=radio]:checked + label,
 .xo-sticky-variant-modal input[type=radio]:checked + label{
-  background:var(--color-ui-charcoal); color:var(--color-text-inverse);
-  box-shadow: 0 6px 20px rgba(28,28,30,0.18);
-}
-
-/* Structural settle on selection (scale down then back) */
-@keyframes ntx-pill-settle {
-  0%   { transform: scale(0.95); }
-  60%  { transform: scale(1.02); }
-  100% { transform: scale(1); }
-}
-.main-product .xo-product-info-content__variant :is(.xo-field-radio--radio,.xo-field-radio--boxed):has(input:checked) :is(label,.xo-field__label),
-.main-product .xo-product-info-content__variant input[type=radio]:checked + label {
-  animation: ntx-pill-settle 0.3s var(--ease-premium);
+  background:rgba(var(--color-background-2));
+  color:rgba(var(--color-foreground));
+  border-color: color-mix(in srgb, rgba(var(--color-foreground)) 40%, transparent);
+  box-shadow:none;
 }
 
 /* disabled */
@@ -80,102 +72,246 @@
 .product-form .product-form__input{ margin-bottom:18px; }
 .product-form :is(.product-option__name, .product-form__input > legend){ font-weight:700; margin-bottom:8px; }
 
+/* Shared purchase-control height — match Buy now (Shopify unbranded ~58px desktop) */
+.main-product .xo-product-info-content__buy-form,
+.xo-sticky-cart,
+.xo-sticky-variant-modal {
+  --pdp-cta-height: 4.8rem;
+}
+@media (min-width: 768px) {
+  .main-product .xo-product-info-content__buy-form,
+  .xo-sticky-cart,
+  .xo-sticky-variant-modal {
+    --pdp-cta-height: 5.84rem;
+  }
+}
+
 /* QUANTITY (PDP + STICKY + VARIANT MODAL) */
 :is(.main-product .xo-product-info-content__quantity, .xo-sticky-cart, .sticky-cart, .xo-sticky-variant-modal) .xo-quantity{
   display:inline-flex; align-items:center; justify-content:center;
-  border:none; border-radius:12px;
-  padding:6px 10px; min-height:48px; background:var(--color-surface-secondary);
+  border:none; border-radius:0.8rem;
+  padding:0.4rem 0.8rem;
+  height: var(--pdp-cta-height);
+  min-height: var(--pdp-cta-height);
+  box-sizing: border-box;
+  background:rgba(var(--color-background-2));
   box-shadow: none;
-  transition: background-color .35s var(--ease-premium),
-              box-shadow .35s var(--ease-premium);
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
 }
 :is(.main-product .xo-product-info-content__quantity, .xo-sticky-cart, .sticky-cart, .xo-sticky-variant-modal) .xo-quantity:hover{
-  background:var(--color-surface-secondary);
-  box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+  background:rgba(var(--color-background-2));
 }
 :is(.main-product .xo-product-info-content__quantity, .xo-sticky-cart, .sticky-cart, .xo-sticky-variant-modal) .xo-quantity:focus-within{
-  background:var(--color-surface-secondary);
-  box-shadow: 0 0 0 3px var(--nx-accent-bg);
+  background:rgba(var(--color-background-2));
+  box-shadow: 0 0 0 0.2rem color-mix(in srgb, rgba(var(--color-button)) 28%, transparent);
 }
 :is(.main-product .xo-product-info-content__quantity, .xo-sticky-cart, .sticky-cart, .xo-sticky-variant-modal) .xo-quantity__button{
-  width:44px; height:44px; border:0; background:transparent; cursor:pointer;
-  color:var(--color-text-primary);
+  width:4.4rem; height:4.4rem; border:0; background:transparent; cursor:pointer;
+  color:rgba(var(--color-foreground));
 }
 :is(.main-product .xo-product-info-content__quantity, .xo-sticky-cart, .sticky-cart, .xo-sticky-variant-modal) .xo-quantity__button svg{
   color:inherit;
 }
 :is(.main-product .xo-product-info-content__quantity, .xo-sticky-cart, .sticky-cart, .xo-sticky-variant-modal) .xo-quantity__number{
-  width:2.8ch; text-align:center; border:0; background:transparent; font-weight:700; font-size:18px; color:var(--color-text-primary);
+  width:2.8ch; text-align:center; border:0; background:transparent; font-weight:500; font-size:1.5rem; color:rgba(var(--color-foreground));
 }
 
-/* CTAs — ADD TO CART (PDP + STICKY + VARIANT MODAL) */
+/* Shared purchase-control type */
 :is(
-  .main-product .xo-product-info-content__add .xo-btn.xo-btn--md.xo-btn--block,
-  .xo-sticky-cart .xo-btn,
-  .sticky-cart .xo-btn,
-  .xo-sticky-variant-modal__button-add .xo-btn
+  .main-product .xo-product-info-content__add .xo-btn,
+  .xo-sticky-cart__button-add .xo-btn,
+  .xo-sticky-variant-modal__button-add .xo-btn,
+  .xo-sticky-cart__action-group--mobile .xo-btn,
+  .xo-sticky-cart__action-group.xo-hidden--mobile .xo-sticky-cart__product-variant .xo-btn,
+  .main-product .shopify-payment-button__button--unbranded
 ){
-  min-height:48px; padding:0 18px; border-radius:12px;
-  background:var(--btn-primary-bg, var(--color-accent-primary)); color:var(--btn-primary-text, var(--color-text-primary));
-  font-weight:700; font-size:15px;
+  padding:0 1.6rem;
+  border-radius:0.8rem;
+  font-weight:500;
+  font-size:1.4rem;
+  letter-spacing:0;
+  line-height:1;
+  box-shadow:none;
+  box-sizing: border-box;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+:is(
+  .main-product .xo-product-info-content__add .xo-btn,
+  .xo-sticky-cart__button-add .xo-btn,
+  .xo-sticky-variant-modal__button-add .xo-btn,
+  .xo-sticky-cart__action-group--mobile .xo-btn,
+  .xo-sticky-cart__action-group.xo-hidden--mobile .xo-sticky-cart__product-variant .xo-btn
+){
+  height: var(--pdp-cta-height);
+  min-height: var(--pdp-cta-height);
+}
+:is(
+  .main-product .xo-product-info-content__add .xo-btn,
+  .xo-sticky-cart__button-add .xo-btn,
+  .xo-sticky-variant-modal__button-add .xo-btn,
+  .xo-sticky-cart__action-group--mobile .xo-btn,
+  .xo-sticky-cart__action-group.xo-hidden--mobile .xo-sticky-cart__product-variant .xo-btn
+) .xo-btn__content {
+  padding-block: 0;
+  height: 100%;
+}
+
+/* CTAs — ADD TO CART (gold primary) */
+:is(
+  .main-product .xo-product-info-content__add .xo-btn,
+  .xo-sticky-cart__button-add .xo-btn,
+  .xo-sticky-variant-modal__button-add .xo-btn,
+  .xo-sticky-cart__action-group--mobile .xo-btn
+){
+  background:rgba(var(--color-button));
+  color:rgba(var(--color-button-text));
   border:none;
-  box-shadow: var(--shadow-gold-glow);
-  transition: all 0.35s var(--ease-premium);
+  box-shadow:none;
 }
 :is(
-  .main-product .xo-product-info-content__add .xo-btn.xo-btn--md.xo-btn--block,
-  .xo-sticky-cart .xo-btn,
-  .sticky-cart .xo-btn,
-  .xo-sticky-variant-modal__button-add .xo-btn
+  .main-product .xo-product-info-content__add .xo-btn,
+  .xo-sticky-cart__button-add .xo-btn,
+  .xo-sticky-variant-modal__button-add .xo-btn,
+  .xo-sticky-cart__action-group--mobile .xo-btn
 ):hover {
-  transform: translateY(-2px);
-  filter: brightness(1.04);
-  box-shadow: var(--shadow-gold-glow-hover);
+  background: color-mix(in srgb, rgba(var(--color-button)) 88%, rgba(var(--color-background)) 12%);
+  color:rgba(var(--color-button-text));
 }
 :is(
-  .main-product .xo-product-info-content__add .xo-btn.xo-btn--md.xo-btn--block,
-  .xo-sticky-cart .xo-btn,
-  .sticky-cart .xo-btn,
-  .xo-sticky-variant-modal__button-add .xo-btn
+  .main-product .xo-product-info-content__add .xo-btn,
+  .xo-sticky-cart__button-add .xo-btn,
+  .xo-sticky-variant-modal__button-add .xo-btn,
+  .xo-sticky-cart__action-group--mobile .xo-btn
 ):active {
-  transform: scale(0.97);
-  filter: brightness(0.98);
-  box-shadow: 0 4px 12px rgba(251,191,36,0.14);
+  background: color-mix(in srgb, rgba(var(--color-button)) 94%, rgba(var(--color-foreground)) 6%);
 }
 
-/* CTAs — BUY NOW (PDP + STICKY + VARIANT MODAL) — universal secondary tokens */
+/* CTAs — BUY NOW + CHOOSE OPTIONS (outline secondary) */
 :is(
-  .main-product .shopify-payment-button__button--unbranded,
-  .xo-sticky-cart .shopify-payment-button__button--unbranded,
-  .sticky-cart .shopify-payment-button__button--unbranded,
-  .xo-sticky-variant-modal .shopify-payment-button__button--unbranded
+  .main-product .shopify-payment-button__button.shopify-payment-button__button--unbranded,
+  .xo-sticky-cart .shopify-payment-button__button.shopify-payment-button__button--unbranded,
+  .sticky-cart .shopify-payment-button__button.shopify-payment-button__button--unbranded,
+  .xo-sticky-variant-modal .shopify-payment-button__button.shopify-payment-button__button--unbranded,
+  .xo-sticky-cart__action-group.xo-hidden--mobile .xo-sticky-cart__product-variant .xo-btn
 ){
-  min-height:48px; padding:0 18px; border-radius:12px;
-  background:var(--btn-secondary-bg, transparent);
-  color:var(--btn-secondary-text, var(--color-text-primary));
-  font-weight:700; font-size:15px;
-  border:2px solid var(--btn-secondary-border, var(--color-ui-charcoal));
-  box-shadow:var(--shadow-sm);
-  transition: all 0.35s var(--ease-premium);
+  background:rgba(var(--color-background)) !important;
+  color:rgba(var(--color-foreground)) !important;
+  border:0.1rem solid color-mix(in srgb, rgba(var(--color-foreground)) 22%, transparent) !important;
+  border-radius:0.8rem !important;
+  box-shadow:none;
 }
 :is(
-  .main-product .shopify-payment-button__button--unbranded,
-  .xo-sticky-cart .shopify-payment-button__button--unbranded,
-  .sticky-cart .shopify-payment-button__button--unbranded,
-  .xo-sticky-variant-modal .shopify-payment-button__button--unbranded
+  .main-product .shopify-payment-button__button.shopify-payment-button__button--unbranded,
+  .xo-sticky-cart .shopify-payment-button__button.shopify-payment-button__button--unbranded,
+  .sticky-cart .shopify-payment-button__button.shopify-payment-button__button--unbranded,
+  .xo-sticky-variant-modal .shopify-payment-button__button.shopify-payment-button__button--unbranded,
+  .xo-sticky-cart__action-group.xo-hidden--mobile .xo-sticky-cart__product-variant .xo-btn
 ):hover {
-  background:var(--color-ui-charcoal);
-  color:var(--color-text-inverse);
-  transform:translateY(-1px);
-  box-shadow:var(--shadow-md);
+  background: color-mix(in srgb, rgba(var(--color-foreground)) 4%, rgba(var(--color-background)) 96%) !important;
+  color:rgba(var(--color-foreground)) !important;
+  border-color: color-mix(in srgb, rgba(var(--color-foreground)) 40%, transparent) !important;
 }
 :is(
-  .main-product .shopify-payment-button__button--unbranded,
-  .xo-sticky-cart .shopify-payment-button__button--unbranded,
-  .sticky-cart .shopify-payment-button__button--unbranded,
-  .xo-sticky-variant-modal .shopify-payment-button__button--unbranded
+  .main-product .shopify-payment-button__button.shopify-payment-button__button--unbranded,
+  .xo-sticky-cart .shopify-payment-button__button.shopify-payment-button__button--unbranded,
+  .sticky-cart .shopify-payment-button__button.shopify-payment-button__button--unbranded,
+  .xo-sticky-variant-modal .shopify-payment-button__button.shopify-payment-button__button--unbranded,
+  .xo-sticky-cart__action-group.xo-hidden--mobile .xo-sticky-cart__product-variant .xo-btn
 ):active {
-  transform:translateY(0) scale(0.98);
+  background: color-mix(in srgb, rgba(var(--color-foreground)) 7%, rgba(var(--color-background)) 93%) !important;
+}
+
+.main-product .shopify-payment-button__buy-desciption {
+  display: none !important;
+}
+
+/* Ships today — caption, not chip (PDP only; cart/header keep the bar) */
+.main-product .xo-ships-today__bar {
+  background: none;
+  border-radius: 0;
+  padding: 0;
+  margin: 0.8rem 0 0.4rem;
+  font-size: 1.3rem;
+  font-weight: 400;
+  line-height: 1.4;
+  color: rgba(var(--color-foreground-3));
+}
+.main-product .xo-ships-today__timer {
+  color: inherit;
+  font-weight: 400;
+}
+.main-product .xo-ships-today__stock {
+  font-weight: 500;
+}
+
+/* Quiet hero type under the title */
+.main-product .compound-id--compact {
+  margin: 0.4rem 0 0;
+}
+.main-product .compound-id--compact .compound-id__line2,
+.main-product .compound-id--compact .compound-id__formula {
+  font-size: 1.2rem;
+  font-weight: 400;
+  line-height: 1.4;
+}
+.main-product .compound-id--compact .compound-id__line2 {
+  color: rgba(var(--color-foreground-3));
+}
+.main-product .compound-id--compact .compound-id__formula {
+  color: rgba(var(--color-accent));
+}
+
+.main-product shopify-payment-terms,
+.main-product .shopify-payment-terms {
+  display: block;
+  margin: 0.8rem 0 0;
+  text-align: center;
+  font-size: 1.3rem;
+  font-weight: 400;
+  line-height: 1.4;
+  color: color-mix(in srgb, rgba(var(--color-foreground-3)) 100%, transparent);
+}
+.main-product shopify-payment-terms *,
+.main-product .shopify-payment-terms * {
+  font-size: inherit !important;
+  font-weight: 400 !important;
+  line-height: inherit !important;
+  color: inherit !important;
+}
+
+/* Sticky desktop action cluster */
+.xo-sticky-cart__action-group.xo-hidden--mobile {
+  display:flex;
+  align-items:stretch;
+  justify-content:flex-end;
+  gap:0.6rem;
+  width:100%;
+}
+.xo-sticky-cart__action-group.xo-hidden--mobile > xo-animate {
+  display:flex;
+  align-items:stretch;
+}
+.xo-sticky-cart__action-options {
+  flex:0 0 auto;
+}
+@media (max-width: 991px) {
+  .xo-sticky-cart__action-options {
+    display: none;
+  }
+}
+.xo-sticky-cart__action-options .xo-btn {
+  width:auto;
+  white-space:nowrap;
+}
+.xo-sticky-cart__action-quantity {
+  flex:0 0 13rem;
+  width:13rem;
+}
+.xo-sticky-cart__action-cart {
+  flex:1 1 auto;
+  min-width:16rem;
+  max-width:22rem;
 }
 
 /* mobile pill width */
@@ -335,13 +471,24 @@
     transition: none;
   }
   :is(.main-product .xo-product-info-content__variant, .xo-sticky-variant-modal) :is(.xo-field-radio--radio,.xo-field-radio--boxed) :is(label,.xo-field__label),
-  :is(.main-product .xo-product-info-content__quantity, .xo-sticky-cart, .sticky-cart, .xo-sticky-variant-modal) .xo-quantity {
+  :is(.main-product .xo-product-info-content__quantity, .xo-sticky-cart, .sticky-cart, .xo-sticky-variant-modal) .xo-quantity,
+  :is(
+    .main-product .xo-product-info-content__add .xo-btn,
+    .xo-sticky-cart__button-add .xo-btn,
+    .xo-sticky-variant-modal__button-add .xo-btn,
+    .xo-sticky-cart__action-group--mobile .xo-btn,
+    .xo-sticky-cart__action-group.xo-hidden--mobile .xo-sticky-cart__product-variant .xo-btn,
+    .main-product .shopify-payment-button__button--unbranded
+  ) {
     transition: none !important;
   }
   .main-product .xo-product-info-content__variant :is(.xo-field-radio--radio,.xo-field-radio--boxed):has(input:checked) :is(label,.xo-field__label),
   .main-product .xo-product-info-content__variant input[type=radio]:checked + label {
     animation: none !important;
     transform: none !important;
+  }
+  .shopify-payment-button__button--unbranded:empty {
+    animation: none;
   }
 }
 
@@ -356,11 +503,11 @@ xo-cart-add[xo-loading] {
 
 /* ── Dynamic checkout skeleton shimmer ── */
 .shopify-payment-button__button--unbranded:empty {
-  background: linear-gradient(90deg, var(--color-border-subtle) 25%, var(--color-border-default) 50%, var(--color-border-subtle) 75%);
+  background: linear-gradient(90deg, color-mix(in srgb, rgba(var(--color-foreground)) 8%, transparent) 25%, color-mix(in srgb, rgba(var(--color-foreground)) 14%, transparent) 50%, color-mix(in srgb, rgba(var(--color-foreground)) 8%, transparent) 75%);
   background-size: 200% 100%;
   animation: skeleton-shimmer 1.5s ease-in-out infinite;
-  border-radius: var(--nx-radius, 14px);
-  min-height: 4.8rem;
+  border-radius: 0.8rem;
+  min-height: 4.4rem;
 }
 @keyframes skeleton-shimmer {
   0% { background-position: 200% 0; }
