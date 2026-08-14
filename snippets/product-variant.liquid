@@ -6,10 +6,16 @@
   - option: {Object} The product variant option to render.
   - select_custom_popover_name_suffix: {String} Suffix for popover name (optional)
   Usage:
-  {% render 'product-variant', option: option %}
+  {% render 'product-variant', option: option, product: product %}
 {% endcomment %}
 
-{% assign placement = placement | default: 'bottom-left' %}
+{% liquid
+  assign placement = placement | default: 'bottom-left'
+  assign hide_pph_100 = false
+  if product.handle == 'phenylpiracetam-hydrazide-150mg-capsules'
+    assign hide_pph_100 = true
+  endif
+%}
 
 <div class="xo-product-variant">
   {% if style == 'select' %}
@@ -23,13 +29,16 @@
       <div class="xo-product-variant__inner">
         {% liquid
           for value in option.values
-            capture hide_v
-              render 'variant-hidden-on-storefront', product: product, value: value
-            endcapture
-            if hide_v == '1'
-              continue
+            assign value_label = value.name | default: value | append: '' | downcase | strip
+            assign skip_value = false
+            if hide_pph_100
+              if value_label == '100ct'
+                assign skip_value = true
+              endif
             endif
-            render 'field-select-custom-option', label: value, option: option, name: option.name, value: value, checked: value.selected, option_value_id: value.id, variant_id: value.variant.id, use_with: 'product-variant'
+            unless skip_value
+              render 'field-select-custom-option', label: value, option: option, name: option.name, value: value, checked: value.selected, option_value_id: value.id, variant_id: value.variant.id, use_with: 'product-variant'
+            endunless
           endfor
         %}
       </div>
@@ -52,18 +61,25 @@
       </div>
       <div class="xo-product-variant__inner-value">
         {% for value in option.values %}
-          {% capture hide_v %}{% render 'variant-hidden-on-storefront', product: product, value: value %}{% endcapture %}
-          {% if hide_v == '1' %}{% continue %}{% endif %}
-          {% render 'field-color',
-            style: style,
-            option: option,
-            name: option.name,
-            value: value,
-            label: value,
-            image: value.swatch.image,
-            use_image: true,
-            use_with: 'product-variant'
-          %}
+          {% assign value_label = value.name | default: value | append: '' | downcase | strip %}
+          {% assign skip_value = false %}
+          {% if hide_pph_100 %}
+            {% if value_label == '100ct' %}
+              {% assign skip_value = true %}
+            {% endif %}
+          {% endif %}
+          {% unless skip_value %}
+            {% render 'field-color',
+              style: style,
+              option: option,
+              name: option.name,
+              value: value,
+              label: value,
+              image: value.swatch.image,
+              use_image: true,
+              use_with: 'product-variant'
+            %}
+          {% endunless %}
         {% endfor %}
       </div>
     </div>
@@ -75,22 +91,56 @@
       </div>
       <div class="xo-product-variant__inner-value">
         {% for value in option.values %}
-          {% capture hide_v %}{% render 'variant-hidden-on-storefront', product: product, value: value %}{% endcapture %}
-          {% if hide_v == '1' %}{% continue %}{% endif %}
-          {% render 'field-color',
-            style: style,
-            option: option,
-            name: option.name,
-            value: value,
-            label: value,
-            image: value.variant.featured_image,
-            use_image: true,
-            use_with: 'product-variant'
-          %}
+          {% assign value_label = value.name | default: value | append: '' | downcase | strip %}
+          {% assign skip_value = false %}
+          {% if hide_pph_100 %}
+            {% if value_label == '100ct' %}
+              {% assign skip_value = true %}
+            {% endif %}
+          {% endif %}
+          {% unless skip_value %}
+            {% render 'field-color',
+              style: style,
+              option: option,
+              name: option.name,
+              value: value,
+              label: value,
+              image: value.variant.featured_image,
+              use_image: true,
+              use_with: 'product-variant'
+            %}
+          {% endunless %}
         {% endfor %}
       </div>
     </div>
   {% else %}
+    {% liquid
+      assign show_pill_price = false
+      assign baseline_unit = 0
+      if product.options.size == 1
+        assign show_pill_price = true
+        for value in option.values
+          assign value_label = value.name | default: value | append: '' | downcase | strip
+          assign skip_value = false
+          if hide_pph_100
+            if value_label == '100ct'
+              assign skip_value = true
+            endif
+          endif
+          unless skip_value
+            if value.variant.available and value.variant.price != blank
+              assign count = value_label | replace: 'ct', '' | replace: ' ', '' | plus: 0
+              if count > 0
+                assign unit = value.variant.price | times: 1.0 | divided_by: count
+                if baseline_unit == 0 or unit > baseline_unit
+                  assign baseline_unit = unit
+                endif
+              endif
+            endif
+          endunless
+        endfor
+      endif
+    %}
     <div class="xo-product-variant__inner">
       <div class="xo-product-variant__inner-name">
         <span>{{ option.name }}</span>
@@ -98,9 +148,32 @@
       </div>
       <div class="xo-product-variant__inner-value">
         {% for value in option.values %}
-          {% capture hide_v %}{% render 'variant-hidden-on-storefront', product: product, value: value %}{% endcapture %}
-          {% if hide_v == '1' %}{% continue %}{% endif %}
-          {% render 'field-radio', style: style, option: option, name: option.name, value: value, label: value, checked: value.selected, use_with: 'product-variant' %}
+          {% liquid
+            assign value_label = value.name | default: value | append: '' | downcase | strip
+            assign skip_value = false
+            if hide_pph_100
+              if value_label == '100ct'
+                assign skip_value = true
+              endif
+            endif
+            assign pill_price = ''
+            assign save_label = ''
+            if show_pill_price and value.variant.price != blank
+              assign pill_price = value.variant.price | money
+              assign count = value_label | replace: 'ct', '' | replace: ' ', '' | plus: 0
+              if count > 0 and baseline_unit > 0 and value.variant.available
+                assign unit = value.variant.price | times: 1.0 | divided_by: count
+                assign diff = baseline_unit | minus: unit
+                assign pct = diff | times: 100.0 | divided_by: baseline_unit | round
+                if pct >= 5
+                  assign save_label = 'products.product.save_percent' | t: percent: pct
+                endif
+              endif
+            endif
+          %}
+          {% unless skip_value %}
+            {% render 'field-radio', style: style, option: option, name: option.name, value: value, label: value, checked: value.selected, use_with: 'product-variant', price: pill_price, save_label: save_label %}
+          {% endunless %}
         {% endfor %}
       </div>
     </div>
