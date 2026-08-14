@@ -46,16 +46,18 @@
                     {% liquid
                       assign lazyload = true
                       assign carousel_visible = ''
+                      assign image_priority = 'auto'
                       if forloop.index0 == 0
                         assign lazyload = false
                         assign carousel_visible = 'xo-visible xo-active'
+                        assign image_priority = 'high'
                       endif
                     %}
                     {% if featured_media == file %}
                       <xo-carousel-slide {{ carousel_visible }}>
                         <xo-gallery-item xo-src='{{ featured_media.src | image_url: width: 1200 }}'>
                           <div class='xo-product-info-media-carousel__image{% if settings.enable_border_radius %} xo-product-info-media-carousel__image--radius{% endif %}'>
-                            {% render 'image', image: file, image_lazyload: lazyload, image_widths: '375, 550, 750, 900' %}
+                            {% render 'image', image: file, lazyload: lazyload, fetchpriority: image_priority, image_widths: '375, 550, 750, 900' %}
                           </div>
                         </xo-gallery-item>
                       </xo-carousel-slide>
@@ -65,9 +67,11 @@
                     {% liquid
                       assign lazyload = true
                       assign carousel_visible = ''
+                      assign image_priority = 'auto'
                       if forloop.index0 == 0
                         assign lazyload = false
                         assign carousel_visible = 'xo-visible xo-active'
+                        assign image_priority = 'high'
                       endif
                     %}
                     {% unless featured_media == file %}
@@ -78,7 +82,7 @@
                         <xo-gallery-item xo-src='{{ file.src | image_url: width: 1200 }}'>
                           <div style='height: 100%;'>
                             <div class='xo-product-info-media-carousel__image{% if settings.enable_border_radius %} xo-product-info-media-carousel__image--radius{% endif %}'>
-                              {% render 'image', image: file, image_lazyload: lazyload, image_widths: '375, 550, 750, 900' %}
+                              {% render 'image', image: file, lazyload: lazyload, fetchpriority: image_priority, image_widths: '375, 550, 750, 900' %}
                             </div>
                           </div>
                         </xo-gallery-item>
@@ -92,7 +96,7 @@
                         <xo-carousel-slide>
                           <xo-gallery-item xo-src='{{ featured_media.src | image_url: width: 1200 }}'>
                             <div class='xo-product-info-media-carousel__image{% if settings.enable_border_radius %} xo-product-info-media-carousel__image--radius{% endif %}'>
-                              {% render 'media', type: 'image', media: featured_media, image_lazyload: false, image_widths: '375, 550, 750, 900' %}
+                              {% render 'media', type: 'image', media: featured_media, image_lazyload: false, fetchpriority: 'high', image_widths: '375, 550, 750, 900' %}
                             </div>
                           </xo-gallery-item>
                         </xo-carousel-slide>
@@ -105,9 +109,7 @@
                                   <button
                                     class='xo-product-model__poster'
                                     type='button'
-                                    aria-label='Button 3D'
-                                    role='button'
-                                    tabindex='0'
+                                    aria-label='{{ 'products.product.media.play_model' | t }}'
                                   >
                                     <span class='xo-product-model__poster-button'>
                                       {% render 'icon', name: '3d-model', icon_size: '20' %}
@@ -172,7 +174,7 @@
                             <xo-gallery-item xo-src='{{ media.src | image_url: width: 1200 }}'>
                               <div style='height: 100%;'>
                                 <div class='xo-product-info-media-carousel__image{% if settings.enable_border_radius %} xo-product-info-media-carousel__image--radius{% endif %}'>
-                                  {% render 'media', type: 'image', media: media, image_lazyload: lazyload, image_widths: '375, 550, 750, 900' %}
+                                  {% render 'media', type: 'image', media: media, image_lazyload: lazyload, fetchpriority: 'auto', image_widths: '375, 550, 750, 900' %}
                                 </div>
                               </div>
                             </xo-gallery-item>
@@ -186,9 +188,7 @@
                                     <button
                                       class='xo-product-model__poster'
                                       type='button'
-                                      aria-label='Button 3D'
-                                      role='button'
-                                      tabindex='0'
+                                      aria-label='{{ 'products.product.media.play_model' | t }}'
                                     >
                                       <span class='xo-product-model__poster-button'>
                                         {% render 'icon', name: '3d-model', icon_size: '20' %}
@@ -263,9 +263,15 @@
                   {% if show_image_variants_grouping %}
                     {% for file in new_grouping.file_grouping.value %}
                       {% if featured_media == file %}
-                        <xo-carousel-slide class='xo-product-info-media-carousel__thumb-slide'>
+                        <xo-carousel-slide
+                          class='xo-product-info-media-carousel__thumb-slide'
+                          role='button'
+                          tabindex='0'
+                          aria-label="{{ 'products.product.media.load_image' | t: index: 1 }}"
+                          aria-current='true'
+                        >
                           <div class='xo-product-info-media-carousel__thumb-image{% if settings.enable_border_radius %} xo-product-info-media-carousel__thumb-image--radius{% endif %}'>
-                            {% render 'image', image: file %}
+                            {% render 'image', image: file, lazyload: true, fetchpriority: 'auto' %}
                           </div>
                         </xo-carousel-slide>
                       {% endif %}
@@ -275,9 +281,15 @@
                         {% continue %}
                       {% endif %}
                       {% unless featured_media == file %}
-                        <xo-carousel-slide class='xo-product-info-media-carousel__thumb-slide' data-index='{{ forloop.index }}'>
+                        <xo-carousel-slide
+                          class='xo-product-info-media-carousel__thumb-slide'
+                          data-index='{{ forloop.index }}'
+                          role='button'
+                          tabindex='0'
+                          aria-label="{{ 'products.product.media.load_image' | t: index: forloop.index }}"
+                        >
                           <div class='xo-product-info-media-carousel__thumb-image{% if settings.enable_border_radius %} xo-product-info-media-carousel__thumb-image--radius{% endif %}'>
-                            {% render 'image', image: file %}
+                            {% render 'image', image: file, lazyload: true, fetchpriority: 'auto' %}
                           </div>
                         </xo-carousel-slide>
                       {% endunless %}
@@ -286,19 +298,37 @@
                     {%- if featured_media != null -%}
                       {% case featured_media.media_type %}
                         {%- when 'image' -%}
-                          <xo-carousel-slide class='xo-product-info-media-carousel__thumb-slide'>
+                          <xo-carousel-slide
+                            class='xo-product-info-media-carousel__thumb-slide'
+                            role='button'
+                            tabindex='0'
+                            aria-label="{{ 'products.product.media.load_image' | t: index: 1 }}"
+                            aria-current='true'
+                          >
                             <div class='xo-product-info-media-carousel__thumb-image{% if settings.enable_border_radius %} xo-product-info-media-carousel__thumb-image--radius{% endif %}'>
-                              {% render 'media', type: 'image', media: featured_media %}
+                              {% render 'media', type: 'image', media: featured_media, image_lazyload: true, fetchpriority: 'auto' %}
                             </div>
                           </xo-carousel-slide>
                         {%- when 'modal' -%}
-                          <xo-carousel-slide class='xo-product-info-media-carousel__thumb-slide'>
+                          <xo-carousel-slide
+                            class='xo-product-info-media-carousel__thumb-slide'
+                            role='button'
+                            tabindex='0'
+                            aria-label="{{ 'products.product.media.load_model' | t: index: 1 }}"
+                            aria-current='true'
+                          >
                             <div class='xo-product-info-media-carousel__thumb-image{% if settings.enable_border_radius %} xo-product-info-media-carousel__thumb-image--radius{% endif %}'>
                               {% render 'media', type: 'modal', media: featured_media %}
                             </div>
                           </xo-carousel-slide>
                         {%- else -%}
-                          <xo-carousel-slide class='xo-product-info-media-carousel__thumb-slide'>
+                          <xo-carousel-slide
+                            class='xo-product-info-media-carousel__thumb-slide'
+                            role='button'
+                            tabindex='0'
+                            aria-label="{{ 'products.product.media.load_video' | t: index: 1 }}"
+                            aria-current='true'
+                          >
                             <div class='xo-product-info-media-carousel__thumb-image{% if settings.enable_border_radius %} xo-product-info-media-carousel__thumb-image--radius{% endif %}'>
                               {% render 'media', type: featured_media.media_type, media: featured_media, enable_video_looping: true, controls: true, muted: true, autoplay: false %}
                             </div>
@@ -312,19 +342,35 @@
                       {% unless media.id == featured_media.id %}
                         {% case media.media_type %}
                           {%- when 'image' -%}
-                            <xo-carousel-slide class='xo-product-info-media-carousel__thumb-slide' data-index='{{ forloop.index }}'>
+                            <xo-carousel-slide
+                              class='xo-product-info-media-carousel__thumb-slide'
+                              data-index='{{ forloop.index }}'
+                              role='button'
+                              tabindex='0'
+                              aria-label="{{ 'products.product.media.load_image' | t: index: forloop.index }}"
+                            >
                               <div class='xo-product-info-media-carousel__thumb-image{% if settings.enable_border_radius %} xo-product-info-media-carousel__thumb-image--radius{% endif %}'>
-                                {% render 'media', type: 'image', media: media.preview_image %}
+                                {% render 'media', type: 'image', media: media.preview_image, image_lazyload: true, fetchpriority: 'auto' %}
                               </div>
                             </xo-carousel-slide>
                           {%- when 'modal' -%}
-                            <xo-carousel-slide class='xo-product-info-media-carousel__thumb-slide'>
+                            <xo-carousel-slide
+                              class='xo-product-info-media-carousel__thumb-slide'
+                              role='button'
+                              tabindex='0'
+                              aria-label="{{ 'products.product.media.load_model' | t: index: forloop.index }}"
+                            >
                               <div class='xo-product-info-media-carousel__thumb-image{% if settings.enable_border_radius %} xo-product-info-media-carousel__thumb-image--radius{% endif %}'>
                                 {% render 'media', type: 'modal', media: media %}
                               </div>
                             </xo-carousel-slide>
                           {%- else -%}
-                            <xo-carousel-slide class='xo-product-info-media-carousel__thumb-slide'>
+                            <xo-carousel-slide
+                              class='xo-product-info-media-carousel__thumb-slide'
+                              role='button'
+                              tabindex='0'
+                              aria-label="{{ 'products.product.media.load_video' | t: index: forloop.index }}"
+                            >
                               <div class='xo-product-info-media-carousel__thumb-image{% if settings.enable_border_radius %} xo-product-info-media-carousel__thumb-image--radius{% endif %}'>
                                 {% render 'media', type: media.media_type, media: media, enable_video_looping: true, controls: true, muted: true, autoplay: false %}
                               </div>

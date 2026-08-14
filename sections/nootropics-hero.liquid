@@ -424,6 +424,9 @@ document.addEventListener('DOMContentLoaded', function(){
                 style="--sm: 12; --md: 12; --lg: {{ content_column }}"
               {% endif %}
             >
+              {% if section.settings.show_breadcrumbs %}
+                {% render 'breadcrumbs' %}
+              {% endif %}
               {% render 'product-info-content', product_media_style: product_media_style, columns_mobile: columns_mobile %}
               {%- comment -%} Nootropics Quick Facts + Compliance {%- endcomment -%}
 {%- liquid
@@ -489,7 +492,7 @@ document.addEventListener('DOMContentLoaded', function(){
       {%- comment -%}
       Keep the theme's product JSON-LD to avoid SEO regressions.
       {%- endcomment -%}
-      {% render 'product-jsonld' %}
+      {% render 'product-jsonld', emit_breadcrumb: false %}
       {% # theme-check-disable UnknownFilter %}
       {%- liquid
   assign benefit  = product.metafields.supp.primary_benefit
@@ -566,6 +569,7 @@ document.addEventListener('DOMContentLoaded', function(){
     { "type": "checkbox", "id": "hide_variants", "default": false, "label": "Hide variants" },
     { "type": "checkbox", "id": "show_image_variants_grouping", "default": false, "label": "Group media by variant" },
     { "type": "checkbox", "id": "enable_sticky_cart", "default": true, "label": "Enable sticky cart" },
+    { "type": "checkbox", "id": "show_breadcrumbs", "default": true, "label": "Show breadcrumbs" },
 
     { "type": "select", "id": "gallery_type", "label": "Gallery type", "options": [
       { "value": "carousel", "label": "Carousel" },

@@ -28,6 +28,7 @@
   assign jsonld_min = p.price_min
   assign jsonld_max = p.price_max
   assign jsonld_count = p.variants.size
+  assign emit_breadcrumb = emit_breadcrumb | default: true, allow_false: true
   assign jsonld_min_set = false
   for variant in p.variants
     capture hide_v
@@ -197,8 +198,9 @@
       {%- if props_stripped != blank -%}
         ,"additionalProperty": [{{ props_stripped }}]
       {%- endif -%}
-    },
-    {
+    }
+    {%- if emit_breadcrumb -%}
+    ,{
       "@type": "BreadcrumbList",
       "itemListElement": [
         {
@@ -217,19 +219,18 @@
           ,{
             "@type": "ListItem",
             "position": 3,
-            "name": {{ p.title | json }},
-            "item": {{ canonical_url | json }}
+            "name": {{ p.title | json }}
           }
         {%- else -%}
           ,{
             "@type": "ListItem",
             "position": 2,
-            "name": {{ p.title | json }},
-            "item": {{ canonical_url | json }}
+            "name": {{ p.title | json }}
           }
         {%- endif -%}
       ]
     }
+    {%- endif -%}
   ]
 }
 </script>

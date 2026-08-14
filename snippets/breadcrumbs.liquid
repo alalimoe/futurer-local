@@ -1,0 +1,167 @@
+{% doc %}
+  Caption-style breadcrumb trail with matching BreadcrumbList JSON-LD.
+
+  @param {boolean} [show_nav] - Render the visible trail. Default true.
+  @param {boolean} [emit_schema] - Emit BreadcrumbList JSON-LD. Default true.
+  @param {string} [align] - left, center, or right.
+  @param {string} [class] - Optional extra class on the nav.
+
+  @example
+  {% render 'breadcrumbs', align: 'left' %}
+{% enddoc %}
+
+{{ 'breadcrumbs.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign show_nav = show_nav | default: true, allow_false: true
+  assign emit_schema = emit_schema | default: true, allow_false: true
+  if show_nav == false
+    assign emit_schema = false
+  endif
+
+  assign t = template.name
+  assign home_name = 'general.home' | t
+  assign home_url = request.origin | append: routes.root_url
+  assign crumb_2_name = ''
+  assign crumb_2_path = ''
+  assign crumb_2_url = ''
+  assign current_name = page_title
+  assign bc_parent = nil
+
+  case t
+    when 'product'
+      if product != blank
+        assign pc_raw = product.metafields.pdp.primary_collection.value
+        if pc_raw == blank
+          assign pc_raw = product.metafields.pdp.primary_collection
+        endif
+        if pc_raw != blank
+          if pc_raw.url != blank
+            assign bc_parent = pc_raw
+          else
+            assign pc_handle = pc_raw | strip
+            if collections[pc_handle].handle != blank
+              assign bc_parent = collections[pc_handle]
+            endif
+          endif
+        endif
+        if bc_parent == blank and collection.handle != blank
+          assign bc_parent = collection
+        endif
+        if bc_parent == blank
+          assign ptype = product.type | downcase | strip
+          if ptype contains 'peptide' and collections['peptides'].handle != blank
+            assign bc_parent = collections['peptides']
+          elsif ptype contains 'nootropic' and collections['nootropics'].handle != blank
+            assign bc_parent = collections['nootropics']
+          endif
+        endif
+        if bc_parent != blank and bc_parent.handle != blank
+          assign crumb_2_name = bc_parent.title
+          assign crumb_2_path = bc_parent.url
+          assign crumb_2_url = request.origin | append: bc_parent.url
+        else
+          assign crumb_2_name = 'general.shop_all' | t
+          assign crumb_2_path = routes.all_products_collection_url
+          assign crumb_2_url = request.origin | append: routes.all_products_collection_url
+        endif
+        assign current_name = product.title
+      endif
+    when 'collection'
+      if collection.handle != blank
+        if current_tags != blank
+          assign crumb_2_name = collection.title
+          assign crumb_2_path = collection.url
+          assign crumb_2_url = request.origin | append: collection.url
+          assign current_name = current_tags | join: ' + '
+        else
+          assign current_name = collection.title
+        endif
+      endif
+    when 'article'
+      if blog != blank
+        assign crumb_2_name = blog.title
+        assign crumb_2_path = blog.url
+        assign crumb_2_url = request.origin | append: blog.url
+      endif
+      if article != blank
+        assign current_name = article.title
+      endif
+    when 'blog'
+      if blog != blank
+        if current_tags != blank
+          assign crumb_2_name = blog.title
+          assign crumb_2_path = blog.url
+          assign crumb_2_url = request.origin | append: blog.url
+          assign current_name = current_tags | join: ' + '
+        else
+          assign current_name = blog.title
+        endif
+      endif
+    when 'page'
+      if page != blank
+        assign current_name = page.title
+      endif
+  endcase
+
+  assign bc_align = align | default: 'left'
+-%}
+
+{%- if show_nav -%}
+  <nav
+    class="nx-breadcrumbs nx-breadcrumbs--{{ bc_align }}{% if class != blank %} {{ class }}{% endif %}"
+    aria-label="{{ 'general.breadcrumbs.aria_label' | t }}"
+  >
+    <ol class="nx-breadcrumbs__list">
+      <li class="nx-breadcrumbs__item">
+        <a class="nx-breadcrumbs__link" href="{{ routes.root_url }}">{{ home_name }}</a>
+        <span class="nx-breadcrumbs__sep" aria-hidden="true">/</span>
+      </li>
+      {%- if crumb_2_name != blank -%}
+        <li class="nx-breadcrumbs__item">
+          <a class="nx-breadcrumbs__link" href="{{ crumb_2_path }}">{{ crumb_2_name }}</a>
+          <span class="nx-breadcrumbs__sep" aria-hidden="true">/</span>
+        </li>
+      {%- endif -%}
+      <li class="nx-breadcrumbs__item">
+        <span class="nx-breadcrumbs__current" aria-current="page">{{ current_name }}</span>
+      </li>
+    </ol>
+  </nav>
+{%- endif -%}
+
+{%- if emit_schema -%}
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": {{ home_name | json }},
+          "item": {{ home_url | json }}
+        }
+        {%- if crumb_2_name != blank -%}
+          ,{
+            "@type": "ListItem",
+            "position": 2,
+            "name": {{ crumb_2_name | json }},
+            "item": {{ crumb_2_url | json }}
+          }
+          ,{
+            "@type": "ListItem",
+            "position": 3,
+            "name": {{ current_name | json }}
+          }
+        {%- else -%}
+          ,{
+            "@type": "ListItem",
+            "position": 2,
+            "name": {{ current_name | json }}
+          }
+        {%- endif -%}
+      ]
+    }
+  </script>
+{%- endif -%}

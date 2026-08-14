@@ -35,13 +35,21 @@
     assign loading = 'eager'
   endif
   assign fetch_priority = 'auto'
-  assign is_header_and_template = false
-  if section.location == 'template' or section.location == 'header'
-    assign is_header_and_template = true
-  endif
-  if section.index == 1 and is_header_and_template
-    assign loading = 'eager'
-    assign fetch_priority = 'high'
+  if fetchpriority != blank
+    assign fetch_priority = fetchpriority
+    if fetchpriority == 'high'
+      assign loading = 'eager'
+      assign lazyload = false
+    endif
+  else
+    assign is_header_and_template = false
+    if section.location == 'template' or section.location == 'header'
+      assign is_header_and_template = true
+    endif
+    if section.index == 1 and is_header_and_template
+      assign loading = 'eager'
+      assign fetch_priority = 'high'
+    endif
   endif
   if loading == 'eager'
     assign final_widths = '100'
