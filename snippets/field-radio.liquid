@@ -14,6 +14,8 @@
   - use_image: {Boolean} If the image should be used (optional)
   - image: {Image} Image of the radio button (optional)
   - use_with: {String} Use with (optional)
+  - price: {String} Optional formatted price shown under the label
+  - save_label: {String} Optional save hint shown under the price
 
   Usage:
   {% render 'field-radio', style: style, name: option.name, value: value, label: value, checked: value.selected, use_with: 'product-variant' %}
@@ -29,6 +31,17 @@
   if settings.enable_border_radius
     assign container_class = container_class | append: ' xo-field-radio--radius'
   endif
+  if price != blank
+    assign container_class = container_class | append: ' xo-field-radio--priced'
+  endif
+  assign radio_aria = value.name
+  assign price_plain = price | strip_html
+  if price_plain != blank
+    assign radio_aria = radio_aria | append: ', ' | append: price_plain
+  endif
+  if save_label != blank
+    assign radio_aria = radio_aria | append: ', ' | append: save_label
+  endif
 %}
 
 <label
@@ -36,14 +49,14 @@
   style="{{ container_style }}"
   data-button="true"
   tabindex="0"
-  aria-label="{{ value.name | escape }}"
+  aria-label="{{ radio_aria | escape }}"
 >
   <input
     class="xo-field-radio__input"
     type="radio"
     name="{{ option.name | escape }}"
     value="{{ value | escape }}"
-    aria-label="{{ value.name | escape }}"
+    aria-label="{{ radio_aria | escape }}"
     xo-label="{{ value.name | escape }}"
     xo-option-value-id="{{ value.id }}"
     xo-variant-id="{{ value.variant.id }}"
@@ -67,7 +80,15 @@
   {% endif %}
   {% if value.name != null %}
     <span class="xo-field-radio__label">
-      <span>{{ value.name | escape }}</span>
+      <span class="xo-field-radio__name">{{ value.name | escape }}</span>
+      {% if price != blank %}
+        <span class="xo-field-radio__meta">
+          <span class="xo-field-radio__price">{{ price }}</span>
+          {% if save_label != blank %}
+            <span class="xo-field-radio__save">{{ save_label | escape }}</span>
+          {% endif %}
+        </span>
+      {% endif %}
       {% if count_value %}
         <xo-filters-count xo-unique-id="{{ count_id }}">({{ count_value }})</xo-filters-count>
       {% endif %}

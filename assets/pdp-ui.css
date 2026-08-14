@@ -19,54 +19,96 @@
    Controls: Variants / Qty / CTAs
 ========================= */
 
-/* VARIANT PILLS (PDP + VARIANT MODAL) */
-/* hide native radios but keep a11y */
+/* VARIANT PILLS (PDP + VARIANT MODAL)
+   Visible chip is .xo-field-radio__label inside <label.xo-field-radio--boxed>.
+   Theme gold lives on input:checked ~ .xo-field-radio__label — override that. */
 .main-product .xo-product-info-content__variant :is(.xo-field-radio--radio,.xo-field-radio--boxed) input[type=radio],
 .xo-sticky-variant-modal :is(.xo-field-radio--radio,.xo-field-radio--boxed) input[type=radio]{ position:absolute; opacity:0; pointer-events:none; }
 
-/* visible pill (label or .xo-field__label) */
-.main-product .xo-product-info-content__variant :is(.xo-field-radio--radio,.xo-field-radio--boxed) :is(label,.xo-field__label),
-.xo-sticky-variant-modal :is(.xo-field-radio--radio,.xo-field-radio--boxed) :is(label,.xo-field__label){
-  display:inline-flex; align-items:center; justify-content:center;
-  min-height:4.4rem; min-width:8.8rem; padding:0.8rem 1.4rem;
-  border:0.1rem solid transparent;
-  border-radius:0.8rem;
-  background:rgba(var(--color-background-2));
-  color:rgba(var(--color-foreground));
-  font-weight:500; line-height:1; cursor:pointer;
-  box-shadow:none;
+.main-product .xo-product-info-content__variant .xo-field-radio--boxed,
+.xo-sticky-variant-modal .xo-field-radio--boxed {
+  display: inline-flex;
+  padding: 0;
+  cursor: pointer;
+}
+
+.main-product .xo-product-info-content__variant .xo-field-radio--boxed .xo-field-radio__label,
+.xo-sticky-variant-modal .xo-field-radio--boxed .xo-field-radio__label {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0.2rem;
+  min-height: 4.4rem;
+  min-width: 8.8rem;
+  padding: 0.8rem 1.2rem;
+  border: 0.1rem solid color-mix(in srgb, rgba(var(--color-foreground)) 12%, transparent);
+  border-radius: 0.8rem;
+  background: rgba(var(--color-background-2));
+  color: rgba(var(--color-foreground));
+  font-weight: 500;
+  font-size: 1.4rem;
+  line-height: 1.2;
+  text-align: start;
+  text-transform: none;
+  box-shadow: none;
   transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
-/* hover/focus */
-.main-product .xo-product-info-content__variant :is(.xo-field-radio--radio,.xo-field-radio--boxed) :is(label,.xo-field__label):hover,
-.xo-sticky-variant-modal :is(.xo-field-radio--radio,.xo-field-radio--boxed) :is(label,.xo-field__label):hover{
+.main-product .xo-product-info-content__variant .xo-field-radio--boxed:has(.xo-field-radio__meta) .xo-field-radio__label,
+.xo-sticky-variant-modal .xo-field-radio--boxed:has(.xo-field-radio__meta) .xo-field-radio__label {
+  min-height: 6.4rem;
+}
+
+.main-product .xo-product-info-content__variant .xo-field-radio--boxed:hover .xo-field-radio__label,
+.xo-sticky-variant-modal .xo-field-radio--boxed:hover .xo-field-radio__label {
   background: color-mix(in srgb, rgba(var(--color-foreground)) 8%, rgba(var(--color-background-2)) 92%);
 }
-.main-product .xo-product-info-content__variant :is(.xo-field-radio--radio,.xo-field-radio--boxed) :is(label,.xo-field__label):focus-visible,
-.xo-sticky-variant-modal :is(.xo-field-radio--radio,.xo-field-radio--boxed) :is(label,.xo-field__label):focus-visible{
-  outline:none;
-  box-shadow: 0 0 0 0.2rem color-mix(in srgb, rgba(var(--color-button)) 28%, transparent);
+
+.main-product .xo-product-info-content__variant .xo-field-radio--boxed:focus-visible,
+.xo-sticky-variant-modal .xo-field-radio--boxed:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 0.2rem rgba(var(--color-accent));
 }
 
-/* selected */
-.main-product .xo-product-info-content__variant :is(.xo-field-radio--radio,.xo-field-radio--boxed):has(input:checked) :is(label,.xo-field__label),
-.xo-sticky-variant-modal :is(.xo-field-radio--radio,.xo-field-radio--boxed):has(input:checked) :is(label,.xo-field__label),
-.main-product .xo-product-info-content__variant .is-selected :is(label,.xo-field__label),
-.xo-sticky-variant-modal .is-selected :is(label,.xo-field__label),
-.main-product .xo-product-info-content__variant [aria-pressed=true],
-.xo-sticky-variant-modal [aria-pressed=true],
-.main-product .xo-product-info-content__variant input[type=radio]:checked + label,
-.xo-sticky-variant-modal input[type=radio]:checked + label{
-  background:rgba(var(--color-background-2));
-  color:rgba(var(--color-foreground));
+.main-product .xo-product-info-content__variant .xo-field-radio--boxed .xo-field-radio__input:checked ~ .xo-field-radio__label,
+.main-product .xo-product-info-content__variant .xo-field-radio--boxed .xo-field-radio__input[checked] ~ .xo-field-radio__label,
+.xo-sticky-variant-modal .xo-field-radio--boxed .xo-field-radio__input:checked ~ .xo-field-radio__label,
+.xo-sticky-variant-modal .xo-field-radio--boxed .xo-field-radio__input[checked] ~ .xo-field-radio__label {
+  background: rgba(var(--color-background-2));
+  color: rgba(var(--color-foreground));
   border-color: color-mix(in srgb, rgba(var(--color-foreground)) 40%, transparent);
-  box-shadow:none;
+  box-shadow: none;
 }
 
-/* disabled */
-.main-product .xo-product-info-content__variant input[disabled] + label,
-.xo-sticky-variant-modal input[disabled] + label{ opacity:.45; cursor:not-allowed; pointer-events:none; }
+.main-product .xo-product-info-content__variant .xo-field-radio__meta,
+.xo-sticky-variant-modal .xo-field-radio__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.1rem;
+}
+
+.main-product .xo-product-info-content__variant .xo-field-radio__price,
+.xo-sticky-variant-modal .xo-field-radio__price {
+  font-size: 1.2rem;
+  font-weight: 400;
+  color: rgba(var(--color-foreground-3));
+}
+
+.main-product .xo-product-info-content__variant .xo-field-radio__save,
+.xo-sticky-variant-modal .xo-field-radio__save {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: rgba(var(--color-success));
+}
+
+.main-product .xo-product-info-content__variant .xo-field-radio--boxed .xo-field-radio__input[xo-disabled] ~ .xo-field-radio__label,
+.main-product .xo-product-info-content__variant .xo-field-radio--boxed .xo-field-radio__input[xo-unavailable] ~ .xo-field-radio__label,
+.xo-sticky-variant-modal .xo-field-radio--boxed .xo-field-radio__input[xo-disabled] ~ .xo-field-radio__label,
+.xo-sticky-variant-modal .xo-field-radio--boxed .xo-field-radio__input[xo-unavailable] ~ .xo-field-radio__label {
+  opacity: 0.45;
+}
 
 /* headings + spacing like mock */
 .product-form .product-form__input{ margin-bottom:18px; }
@@ -316,7 +358,8 @@
 
 /* mobile pill width */
 @media (max-width:480px){
-  .main-product .xo-product-info-content__variant :is(.xo-field-radio--radio,.xo-field-radio--boxed) :is(label,.xo-field__label){
+  .main-product .xo-product-info-content__variant .xo-field-radio--boxed .xo-field-radio__label,
+  .xo-sticky-variant-modal .xo-field-radio--boxed .xo-field-radio__label {
     min-width:84px;
   }
 }
@@ -470,7 +513,7 @@
     transform: none;
     transition: none;
   }
-  :is(.main-product .xo-product-info-content__variant, .xo-sticky-variant-modal) :is(.xo-field-radio--radio,.xo-field-radio--boxed) :is(label,.xo-field__label),
+  :is(.main-product .xo-product-info-content__variant, .xo-sticky-variant-modal) .xo-field-radio--boxed .xo-field-radio__label,
   :is(.main-product .xo-product-info-content__quantity, .xo-sticky-cart, .sticky-cart, .xo-sticky-variant-modal) .xo-quantity,
   :is(
     .main-product .xo-product-info-content__add .xo-btn,
@@ -482,8 +525,8 @@
   ) {
     transition: none !important;
   }
-  .main-product .xo-product-info-content__variant :is(.xo-field-radio--radio,.xo-field-radio--boxed):has(input:checked) :is(label,.xo-field__label),
-  .main-product .xo-product-info-content__variant input[type=radio]:checked + label {
+  .main-product .xo-product-info-content__variant .xo-field-radio--boxed .xo-field-radio__input:checked ~ .xo-field-radio__label,
+  .main-product .xo-product-info-content__variant .xo-field-radio--boxed .xo-field-radio__input[checked] ~ .xo-field-radio__label {
     animation: none !important;
     transform: none !important;
   }

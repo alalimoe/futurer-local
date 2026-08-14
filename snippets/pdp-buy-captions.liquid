@@ -1,0 +1,35 @@
+{% doc %}
+  Caption cluster under Add to cart: ships-today status, delivery ETA, and refund.
+
+  @example
+  {% render 'pdp-buy-captions' %}
+{% enddoc %}
+
+{%- liquid
+  assign country_code = localization.country.iso_code | upcase
+  if country_code == 'AE'
+    assign eta_label = 'products.product.delivery_eta_ae' | t
+  else
+    assign eta_label = 'products.product.delivery_eta_intl' | t
+  endif
+  assign shipping_url = pages['shipping-and-returns'].url
+  if shipping_url == blank
+    assign shipping_url = routes.root_url | append: 'pages/shipping-and-returns'
+  endif
+-%}
+
+<div class="pdp-buy-captions">
+  {%- if product.selected_or_first_available_variant.available -%}
+    {% render 'ships-today-bar', context: 'product', show_stock_fallback: true %}
+  {%- endif -%}
+  <p class="pdp-buy-captions__row">
+    <a class="pdp-buy-captions__eta" href="{{ shipping_url }}">{{ eta_label }}</a>
+    <span class="pdp-buy-captions__sep" aria-hidden="true">·</span>
+    <span class="pdp-buy-captions__refund">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+      </svg>
+      {{ 'products.product.delivery_refund_guarantee' | t }}
+    </span>
+  </p>
+</div>
