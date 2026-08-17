@@ -1,0 +1,50 @@
+{% doc %}
+  Canonical delivery and shipping cost summary.
+  Single source of truth — render via {% render 'policy-delivery-summary' %} in later phases.
+
+  @param {string} [class] - Optional wrapper class
+  @param {boolean} [show_trust_stat] - Show on-time attempt stat with date range (default: false)
+  @param {boolean} [show_ksa] - Include KSA timing line (default: true)
+  @param {boolean} [show_international] - Include international shipping line (default: true)
+
+  @example
+  {% render 'policy-delivery-summary' %}
+  {% render 'policy-delivery-summary', show_trust_stat: true %}
+{% enddoc %}
+
+{% liquid
+  assign wrapper_class = class | default: 'policy-canonical policy-delivery-summary'
+  assign show_ksa_line = true
+  if show_ksa == false
+    assign show_ksa_line = false
+  endif
+  assign show_intl_line = true
+  if show_international == false
+    assign show_intl_line = false
+  endif
+  assign show_stat = false
+  if show_trust_stat == true
+    assign show_stat = true
+  endif
+%}
+
+{{ 'policy-canonical.css' | asset_url | stylesheet_tag }}
+
+<ul class="{{ wrapper_class }}" role="list">
+  <li class="policy-delivery-summary__item">{{ 'policies.canonical.dubai_express' | t }}</li>
+  <li class="policy-delivery-summary__item">{{ 'policies.canonical.uae_next_day' | t }}</li>
+  {%- if show_ksa_line -%}
+    <li class="policy-delivery-summary__item">{{ 'policies.canonical.gcc' | t }}</li>
+  {%- endif -%}
+  {%- if show_intl_line -%}
+    <li class="policy-delivery-summary__item">{{ 'policies.canonical.international' | t }}</li>
+  {%- endif -%}
+  <li class="policy-delivery-summary__item">{{ 'policies.canonical.uae_shipping_free' | t }}</li>
+</ul>
+
+{%- if show_stat -%}
+  <p class="policy-canonical policy-canonical__stat">
+    {{ 'policies.canonical.on_time_attempt' | t }}
+    <span class="policy-canonical__date-range">({{ 'policies.canonical.date_range_label' | t }})</span>
+  </p>
+{%- endif -%}

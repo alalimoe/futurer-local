@@ -154,7 +154,7 @@
 
       <div class="ft__tabs" role="tablist" aria-label="Tracking type">
         <button class="ft__tab ft__tab--active" data-tab="local" role="tab" aria-selected="true">Dubai / UAE (Quiqup)</button>
-        <button class="ft__tab" data-tab="intl" role="tab" aria-selected="false">International (DHL)</button>
+        <button class="ft__tab" data-tab="intl" role="tab" aria-selected="false">International (Aramex)</button>
       </div>
 
       <div class="ft__panel ft__panel--active" data-panel="local" role="tabpanel">
@@ -167,12 +167,12 @@
       </div>
 
       <div class="ft__panel" data-panel="intl" role="tabpanel" hidden>
-        <label for="ftIntlRef-{{ section.id }}" class="ft__label">Enter your DHL waybill / tracking number</label>
+        <label for="ftIntlRef-{{ section.id }}" class="ft__label">Enter your Aramex waybill / tracking number</label>
         <div class="ft__row">
           <input id="ftIntlRef-{{ section.id }}" type="text" class="ft__input" placeholder="{{ section.settings.intl_placeholder }}" enterkeyhint="go">
-          <button class="ft__btn" data-track="intl">Track with DHL</button>
+          <button class="ft__btn" data-track="intl">Track with Aramex</button>
         </div>
-        <p class="ft__hint">You'll be taken to DHL's tracking page with your number applied.</p>
+        <p class="ft__hint">You'll be taken to Aramex's tracking page with your number applied.</p>
       </div>
     </div>
   </xo-container>
@@ -221,7 +221,7 @@
     function trackIntl(){
       var id = intlInput ? intlInput.value.trim() : '';
       if (!id) return;
-      window.open('https://www.dhl.com/global-en/home/tracking/tracking-express.html?submit=1&tracking-id=' + encodeURIComponent(id), '_blank', 'noopener');
+      window.open('https://www.aramex.com/track/results?ShipmentNumber=' + encodeURIComponent(id), '_blank', 'noopener');
     }
 
     section.querySelector('[data-track="local"]')?.addEventListener('click', trackLocal);
@@ -241,8 +241,8 @@
     var prefill = params.get('ref') || params.get('order') || params.get('track');
     if (prefill) {
       prefill = prefill.trim();
-      var isDhl = /^\d{10}$/.test(prefill.replace(/\s/g, ''));
-      if (isDhl && intlInput) {
+      var isIntl = /^\d{10,12}$/.test(prefill.replace(/\s/g, ''));
+      if (isIntl && intlInput) {
         selectTab('intl');
         intlInput.value = prefill;
       } else if (localInput) {
@@ -260,7 +260,7 @@
     { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "default" },
     { "type": "text", "id": "heading", "label": "Heading", "default": "Track your delivery" },
     { "type": "text", "id": "local_placeholder", "label": "Local placeholder", "default": "e.g., your order number #9051" },
-    { "type": "text", "id": "intl_placeholder", "label": "International placeholder", "default": "e.g., DHL 10-digit waybill" },
+    { "type": "text", "id": "intl_placeholder", "label": "International placeholder", "default": "e.g., Aramex waybill" },
     { "type": "range", "id": "padding_top", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding top", "default": 8 },
     { "type": "range", "id": "padding_bottom", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding bottom", "default": 16 }
   ],

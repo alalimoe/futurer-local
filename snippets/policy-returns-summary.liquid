@@ -1,0 +1,32 @@
+{% doc %}
+  Canonical 30-day return and refund policy summary.
+  Single source of truth — render via {% render 'policy-returns-summary' %} in later phases.
+
+  @param {string} [class] - Optional wrapper class (default: policy-canonical policy-returns-summary)
+  @param {boolean} [show_link] - Show link to full policy page (default: true)
+  @param {string} [policy_url] - Policy page URL (default: /pages/shipping-and-returns)
+
+  @example
+  {% render 'policy-returns-summary' %}
+  {% render 'policy-returns-summary', show_link: false %}
+{% enddoc %}
+
+{% liquid
+  assign wrapper_class = class | default: 'policy-canonical policy-returns-summary'
+  assign show_policy_link = true
+  if show_link == false
+    assign show_policy_link = false
+  endif
+  assign returns_policy_url = policy_url | default: '/pages/shipping-and-returns'
+%}
+
+{{ 'policy-canonical.css' | asset_url | stylesheet_tag }}
+
+<p class="{{ wrapper_class }}">
+  {{ 'policies.canonical.returns_summary' | t }}
+  {%- if show_policy_link -%}
+    <a href="{{ returns_policy_url }}" class="policy-canonical__link">
+      {{- 'policies.canonical.policy_link' | t -}}
+    </a>
+  {%- endif -%}
+</p>
