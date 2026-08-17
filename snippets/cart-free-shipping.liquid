@@ -1,41 +1,42 @@
-{% comment %}
+{% doc %}
   Renders a message about free shipping in the cart.
+  UAE orders show free delivery. International orders show destination-based thresholds.
 
-  Usage:
+  @example
   {% render 'cart-free-shipping' %}
-{% endcomment %}
+{% enddoc %}
 
 {{ 'cart-free-shipping.css' | asset_url | stylesheet_tag }}
 
 {% liquid
-  assign total_amount = cart.total_price | divided_by: 100.0
+  assign country_code = localization.country.iso_code | upcase
+  assign shipping_url = shop.shipping_policy.url
+  if shipping_url == blank
+    assign shipping_url = pages['shipping-and-returns'].url
+  endif
+  if shipping_url == blank
+    assign shipping_url = routes.root_url | append: 'pages/shipping-and-returns'
+  endif
 %}
 
 {% if settings.show_cart_free_shipping %}
-  <xo-cart-free-shipping-custom
-    xo-free-shipping-notice="{{ 'general.cart.free_shipping_notice_2' | t }}"
-    xo-free-shipping-progress="{{ 'general.cart.free_shipping_progress' | t }}"
-  >
+  {%- if country_code == 'AE' -%}
     <div class="xo-cart-free-shipping">
-      <xo-cart-will-change
-        class="xo-cart-free-shipping-checking-inner xo-visually-hidden"
-        xo-unique-id="xo-cart-free-shipping-checking-inner"
-        xo-total-price="{{ cart.total_price }}"
-      >
-        {{- cart.total_price -}}
-      </xo-cart-will-change>
-      <xo-cart-will-change xo-unique-id="xo-cart-free-shipping-checking" class="xo-cart-free-shipping__checking">
-        {%- if cart != empty -%}{{- total_amount -}}{%- endif -%}
-      </xo-cart-will-change>
-      <xo-cart-will-change xo-unique-id="xo-cart-free-shipping-text" class="xo-cart-free-shipping__text">
-        {{ 'general.cart.free_shipping_notice' | t }}
-      </xo-cart-will-change>
-      <div class="xo-cart-free-shipping__progress{% if settings.enable_border_radius %} xo-cart-free-shipping__progress--radius{% endif %}">
-        {{ total_amount }}
+      <div class="xo-cart-free-shipping__text">
+        {{ 'general.cart.uae_delivery_free' | t }}
       </div>
       <div class="xo-cart-mini-footer__separator-pd pb-0">
         <div class="xo-cart-mini-footer__separator"></div>
       </div>
     </div>
-  </xo-cart-free-shipping-custom>
+  {%- else -%}
+    <div class="xo-cart-free-shipping">
+      <div class="xo-cart-free-shipping__text">
+        {{ 'general.cart.international_shipping_notice_html' | t: link: shipping_url }}
+      </div>
+      <div class="xo-cart-mini-footer__separator-pd pb-0">
+        <div class="xo-cart-mini-footer__separator"></div>
+      </div>
+    </div>
+  {%- endif -%}
 {% endif %}
