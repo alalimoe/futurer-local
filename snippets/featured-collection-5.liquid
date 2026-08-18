@@ -54,13 +54,13 @@
       {% if layout == 'grid' %}
         <xo-grid
           class="featured-collection-5__grid"
-          style="{%- if product_list.size == 0 -%}--lg: 1;{%- else -%} --lg: {{ column_desktop }};{%- endif -%} --md: {{  column_mobile }}; --xs: {{ column_mobile }};"
+          style="--lg: {{ column_desktop }}; --md: {{ column_desktop | minus: 1 }}; --xs: {{ column_mobile }};"
         >
           {%- if product_list.size == 0 -%}
             {%- assign title = 'sections.featured_collection.empty' | t -%}
             {% render 'collection-empty', title: title %}
           {%- else -%}
-            {% for product in product_list limit: product_display %}
+            {% for product in product_list %}
               {% render 'product-card',
                 product: product,
                 show_image: settings.product_card_show_image,
@@ -120,7 +120,8 @@
                     media_aspect_ratio: section.settings.product_card_aspect_ratio,
                     color_scheme: section.settings.card_color_scheme,
                     placeholder_image: placeholder_image,
-                    animate_enabled: true
+                    animate_enabled: true,
+                    scroll_forced: true
                   %}
                 </xo-carousel-slide>
               {% endfor %}
@@ -136,7 +137,7 @@
         <xo-animate xo-cascade>
           <xo-grid
             class="featured-collection-5__grid"
-            style="{%- if product_list.size == 0 -%}--lg: 1;{%- else -%} --lg: {{ column_desktop }};{%- endif -%} --md: {{  column_mobile }}; --xs: {{ column_mobile }};"
+            style="--lg: {{ column_desktop }}; --md: {{ column_desktop | minus: 1 }}; --xs: {{ column_mobile }};"
           >
             {% for i in (1..4) %}
               {% render 'product-card',
@@ -199,7 +200,8 @@
                     media_aspect_ratio: section.settings.product_card_aspect_ratio,
                     color_scheme: section.settings.card_color_scheme,
                     placeholder_image: placeholder_image,
-                    animate_enabled: true
+                    animate_enabled: true,
+                    scroll_forced: true
                   %}
                 </xo-carousel-slide>
               {% endfor %}
@@ -222,6 +224,10 @@
       show_heading: false,
       color_schema_collection: color_schema_collection,
       show_button: true,
+      button_text: button.button_2_text,
+      button_link: button.button_2_link,
+      button_style: button.button_2_style,
+      button_size: button.button_2_size,
       animate_enabled: false
     %}
   </div>

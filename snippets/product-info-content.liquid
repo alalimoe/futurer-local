@@ -8,10 +8,27 @@
   {% render 'product-info-content' %}
 {% endcomment %}
 
-{% assign timer_data = product.metafields.theme.countdown.value %}
+{% liquid
+  assign timer_data = product.metafields.theme.countdown.value
+
+  assign variant = product.selected_or_first_available_variant
+  assign is_preorder = false
+  if variant.inventory_quantity <= 0 and variant.inventory_policy == 'continue'
+    assign is_preorder = true
+  endif
+
+  if is_preorder
+    assign button_text = 'products.product.pre_order_text' | t
+  elsif variant.available
+    assign button_text = 'products.product.add_to_cart' | t
+  else
+    assign button_text = 'products.product.sold_out' | t
+  endif
+  assign button_text_unavailable = 'products.product.unavailable' | t
+%}
 
 <div class="xo-product-info-content {% if product_media_style == 'style-2' %}xo-product-info-content--sticky{% endif %}">
-  <xo-collapse-provider>
+  <xo-collapse-provider xo-scroll xo-scroll-offset="100">
     {% for block in section.blocks %}
       {% case block.type %}
           <!-- app -->
@@ -72,7 +89,9 @@
               <xo-product-variants>
                 <div class="xo-product-info-content__variant {{ style_variant }} {{ hidden_variant }} {% if product.has_only_default_variant == false %}xo-product-info-content__variant--pd{% endif %}">
                   {%- for option in product.options_with_values -%}
-                    {% if option.name == settings.product_card_color_option_name %}
+                    {% assign color_option_names = settings.product_card_color_option_name | downcase | split: ',' %}
+                    {% assign option_name = option.name | downcase %}
+                    {% if color_option_names contains option_name %}
                       {% render 'product-variant', option: option, style: block.settings.variant_color_style, product: product %}
                     {% else %}
                       {% render 'product-variant', option: option, style: block.settings.variant_style, product: product %}
@@ -82,6 +101,11 @@
               </xo-product-variants>
             </xo-animate>
           {% endunless %}
+
+          {% if is_preorder %}
+            <!-- pre-order note -->
+            {% render 'pre-order-note', product: product %}
+          {% endif %}
 
           <!-- buy button -->
         {% when 'buy_button' %}
@@ -98,22 +122,14 @@
                     <xo-product-will-change class="shopify-payment-button__add" xo-unique-id="product-add-button-{{ section.id }}">
                       <xo-cart-add
                         class="xo-product-info-content__add"
-                        {% if product.selected_or_first_available_variant.available == false %}
+                        {% if variant.available == false and is_preorder == false %}
                           xo-disabled
                         {% endif %}
                         {% if settings.cart_type == 'page' %}
                           xo-cart-redirection
                         {% endif %}
                       >
-                        {% if product.selected_or_first_available_variant.available %}
-                          {% assign button_text = 'products.product.add_to_cart' | t %}
-                          {% assign button_text_unavailable = 'products.product.unavailable' | t %}
-                          {% render 'button', style: 'secondary', text: button_text, size: 'md', block: true, text_unavailable: button_text_unavailable %}
-                        {%- else -%}
-                          {% assign button_text = 'products.product.sold_out' | t %}
-                          {% assign button_text_unavailable = 'products.product.unavailable' | t %}
-                          {% render 'button', style: 'secondary', text: button_text, size: 'md', block: true, text_unavailable: button_text_unavailable %}
-                        {% endif %}
+                        {% render 'button', style: 'secondary', text: button_text, size: 'md', block: true, text_unavailable: button_text_unavailable %}
                       </xo-cart-add>
                     </xo-product-will-change>
                   {% endform %}
@@ -179,7 +195,7 @@
         {% when 'pickup' %}
           {% assign pick_up_availabilities = product.selected_or_first_available_variant.store_availabilities | where: 'pick_up_enabled', true %}
           <div
-            class="xo-product-info-content__pickup{% if product.selected_or_first_available_variant.available == false %} xo-product-info-content__pickup--hidden{% endif %}"
+            class="xo-product-info-content__pickup{% if variant.available == false and is_preorder == false %} xo-product-info-content__pickup--hidden{% endif %}"
             {{ block.shopify_attributes }}
           >
             <xo-animate xo-cascade>

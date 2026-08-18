@@ -1,0 +1,561 @@
+{{ 'section-specification-showcase.css' | asset_url | stylesheet_tag }}
+
+{% liquid
+  assign image = section.settings.image
+  assign overlay_opacity = section.settings.overlay_opacity | default: 20
+  assign overlay = overlay_opacity | divided_by: 100.0
+  assign heading = section.settings.heading
+  assign heading_class = section.settings.font_size_heading | default: 'h1'
+  assign point_size = section.settings.point_size
+
+  assign aspect_ratio = section.settings.aspect_ratio
+  if aspect_ratio == 'custom'
+    assign aspect_ratio = section.settings.aspect_ratio_width | append: '/' | append: section.settings.aspect_ratio_height
+  endif
+%}
+
+<section {% render 'section-attr' %}>
+  <div class="specification-showcase" xo-popover-boundary>
+    <xo-container class="specification-showcase__container">
+      <div class="specification-showcase__media" style="--overlay: {{ overlay }}">
+        <xo-animate xo-cascade class="specification-showcase__frame">
+          {% render 'image',
+            image: image,
+            aspect_ratio: aspect_ratio,
+            class: 'specification-showcase__media-el'
+          %}
+          <div class="specification-showcase__overlay" aria-hidden="true"></div>
+
+          {% for block in section.blocks %}
+            {% liquid
+              assign color = block.settings.hotspot_color | default: '#ffffff'
+              assign icon = block.settings.icon
+              assign title = block.settings.title
+              assign description = block.settings.description
+              assign placement = block.settings.placement | default: 'right-center'
+            %}
+            <div
+              class="specification-showcase__hotspot"
+              style="--top_dt: {{ block.settings.top_dt }}; --left_dt: {{ block.settings.left_dt }}; --top_mb: {{ block.settings.top_mb }}; --left_mb: {{ block.settings.left_mb }}"
+              {{ block.shopify_attributes }}
+            >
+              <div class="shop-look-2">
+                <xo-popover-trigger
+                  class="shop-look-2__trigger"
+                  xo-name="spec-{{ block.id }}"
+                  style="--color: {{ color }}"
+                  tabindex="0"
+                  role="button"
+                  aria-label="{{ title | default: 'Specification' | escape }}"
+                >
+                  <div class="shop-look-2__container" style="--size: {{ point_size }}rem; --color: {{ color }}">
+                    <div class="shop-look-2__point shop-look-2__point--1"></div>
+                    <div class="shop-look-2__point shop-look-2__point--2"></div>
+                    <div class="shop-look-2__point shop-look-2__point--3"></div>
+                  </div>
+                </xo-popover-trigger>
+
+                <xo-popover
+                  class="specification-showcase__popover"
+                  xo-name="spec-{{ block.id }}"
+                  xo-portal
+                  xo-placement="{{ placement }}"
+                >
+                  <div class="specification-showcase__card">
+                    {% if icon != blank %}
+                      <div class="specification-showcase__card-icon">
+                        {% render 'image', image: icon, aspect_ratio: '1', class: 'specification-showcase__card-icon-el' %}
+                      </div>
+                    {% endif %}
+                    <div class="specification-showcase__card-body">
+                      {% if title != blank %}
+                        <p class="specification-showcase__card-title">{{ title }}</p>
+                      {% endif %}
+                      {% if description != blank %}
+                        <p class="specification-showcase__card-desc">{{ description }}</p>
+                      {% endif %}
+                    </div>
+                  </div>
+                </xo-popover>
+              </div>
+            </div>
+          {% endfor %}
+        </xo-animate>
+      </div>
+
+      <div class="specification-showcase__content">
+        {% if heading != blank %}
+          <xo-animate xo-cascade>
+            <h2 class="specification-showcase__heading {{ heading_class }}">{{ heading }}</h2>
+          </xo-animate>
+        {% endif %}
+        {% if section.settings.button_text != blank %}
+          <xo-animate xo-cascade class="specification-showcase__actions">
+            {% render 'button',
+              text: section.settings.button_text,
+              link: section.settings.button_link,
+              style: section.settings.button_style,
+              size: section.settings.button_size
+            %}
+          </xo-animate>
+        {% endif %}
+      </div>
+    </xo-container>
+  </div>
+</section>
+
+{% schema %}
+{
+  "tag": "section",
+  "name": "t:sections.specification_showcase.name",
+  "class": "section-specification-showcase",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Image"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Product image"
+    },
+    {
+      "type": "select",
+      "id": "aspect_ratio",
+      "label": "Image aspect ratio",
+      "default": "3/4",
+      "options": [
+        {
+          "value": "auto",
+          "label": "Auto"
+        },
+        {
+          "value": "2/3",
+          "label": "2:3"
+        },
+        {
+          "value": "3/4",
+          "label": "3:4"
+        },
+        {
+          "value": "3/2",
+          "label": "3:2"
+        },
+        {
+          "value": "1",
+          "label": "1:1"
+        },
+        {
+          "value": "4/3",
+          "label": "4:3"
+        },
+        {
+          "value": "16/9",
+          "label": "16:9"
+        },
+        {
+          "value": "21/9",
+          "label": "21:9"
+        },
+        {
+          "value": "custom",
+          "label": "Custom"
+        }
+      ]
+    },
+    {
+      "type": "number",
+      "id": "aspect_ratio_width",
+      "label": "Width",
+      "default": 400,
+      "visible_if": "{{ section.settings.aspect_ratio == 'custom' }}"
+    },
+    {
+      "type": "number",
+      "id": "aspect_ratio_height",
+      "label": "Height",
+      "default": 300,
+      "visible_if": "{{ section.settings.aspect_ratio == 'custom' }}"
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "label": "Overlay opacity",
+      "default": 20
+    },
+    {
+      "type": "header",
+      "content": "Text"
+    },
+    {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Heading",
+      "default": "The Plasmas XTE Case protection"
+    },
+    {
+      "type": "select",
+      "id": "font_size_heading",
+      "label": "Font size heading",
+      "default": "h1",
+      "options": [
+        {
+          "value": "display-1",
+          "label": "Display 1"
+        },
+        {
+          "value": "display-2",
+          "label": "Display 2"
+        },
+        {
+          "value": "h1",
+          "label": "Extra extra large"
+        },
+        {
+          "value": "h2",
+          "label": "Extra large"
+        },
+        {
+          "value": "h3",
+          "label": "Large"
+        },
+        {
+          "value": "h4",
+          "label": "Medium"
+        },
+        {
+          "value": "h5",
+          "label": "Small"
+        },
+        {
+          "value": "h6",
+          "label": "Extra small"
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Button"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button text",
+      "default": "Shop Now"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link",
+      "default": "/collections/all"
+    },
+    {
+      "type": "select",
+      "id": "button_style",
+      "label": "Button style",
+      "options": [
+        {
+          "value": "primary",
+          "label": "Primary"
+        },
+        {
+          "value": "secondary",
+          "label": "Secondary"
+        },
+        {
+          "value": "link",
+          "label": "Link"
+        }
+      ],
+      "default": "secondary"
+    },
+    {
+      "type": "select",
+      "id": "button_size",
+      "label": "Button size",
+      "options": [
+        {
+          "value": "xs",
+          "label": "Extra small"
+        },
+        {
+          "value": "sm",
+          "label": "Small"
+        },
+        {
+          "value": "md",
+          "label": "Medium"
+        },
+        {
+          "value": "lg",
+          "label": "Large"
+        }
+      ],
+      "default": "md"
+    },
+    {
+      "type": "header",
+      "content": "Hotspots"
+    },
+    {
+      "type": "range",
+      "id": "point_size",
+      "min": 0,
+      "max": 5,
+      "step": 0.1,
+      "unit": "rem",
+      "label": "Hotspot size",
+      "default": 2.4
+    },
+    {
+      "type": "header",
+      "content": "General settings"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Section color scheme"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color"
+    },
+    {
+      "type": "color_background",
+      "id": "background_gradient",
+      "label": "Background gradient"
+    },
+    {
+      "type": "number",
+      "id": "padding_top_desktop",
+      "label": "Padding top desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_desktop",
+      "label": "Padding bottom desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_top_mobile",
+      "label": "Padding top mobile",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_mobile",
+      "label": "Padding bottom mobile",
+      "default": 50
+    }
+  ],
+  "blocks": [
+    {
+      "name": "Hotspot",
+      "type": "hotspot",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "icon",
+          "label": "Icon"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Heading",
+          "default": "Using Magsafe compatible"
+        },
+        {
+          "type": "textarea",
+          "id": "description",
+          "label": "Description",
+          "default": "As this case is designed to be thin, we recommend handling it with care."
+        },
+        {
+          "type": "header",
+          "content": "Position"
+        },
+        {
+          "type": "range",
+          "id": "top_dt",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "%",
+          "label": "Top (desktop)",
+          "default": 40
+        },
+        {
+          "type": "range",
+          "id": "left_dt",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "%",
+          "label": "Left (desktop)",
+          "default": 50
+        },
+        {
+          "type": "range",
+          "id": "top_mb",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "%",
+          "label": "Top (mobile)",
+          "default": 40
+        },
+        {
+          "type": "range",
+          "id": "left_mb",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "%",
+          "label": "Left (mobile)",
+          "default": 50
+        },
+        {
+          "type": "header",
+          "content": "Appearance"
+        },
+        {
+          "type": "select",
+          "id": "placement",
+          "label": "Card placement",
+          "options": [
+            {
+              "value": "top-left",
+              "label": "Top left"
+            },
+            {
+              "value": "top-center",
+              "label": "Top center"
+            },
+            {
+              "value": "top-right",
+              "label": "Top right"
+            },
+            {
+              "value": "bottom-left",
+              "label": "Bottom left"
+            },
+            {
+              "value": "bottom-center",
+              "label": "Bottom center"
+            },
+            {
+              "value": "bottom-right",
+              "label": "Bottom right"
+            },
+            {
+              "value": "left-top",
+              "label": "Left top"
+            },
+            {
+              "value": "left-center",
+              "label": "Left center"
+            },
+            {
+              "value": "left-bottom",
+              "label": "Left bottom"
+            },
+            {
+              "value": "right-top",
+              "label": "Right top"
+            },
+            {
+              "value": "right-center",
+              "label": "Right center"
+            },
+            {
+              "value": "right-bottom",
+              "label": "Right bottom"
+            }
+          ],
+          "default": "right-center"
+        },
+        {
+          "type": "color",
+          "id": "hotspot_color",
+          "label": "Hotspot color",
+          "default": "#ffffff"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.specification_showcase.presets.name",
+      "category": "Products",
+      "settings": {
+        "aspect_ratio": "3/4",
+        "overlay_opacity": 20,
+        "heading": "The Plasmas XTE Case protection",
+        "font_size_heading": "h1",
+        "button_text": "Shop Now",
+        "button_link": "/collections/all",
+        "button_style": "secondary",
+        "button_size": "md",
+        "point_size": 2.4,
+        "color_scheme": "inverse",
+        "background_color": "#191919",
+        "background_gradient": "linear-gradient(180deg, #191919 0%, #0F61FF 100%)",
+        "padding_top_desktop": 80,
+        "padding_bottom_desktop": 80,
+        "padding_top_mobile": 56,
+        "padding_bottom_mobile": 56
+      },
+      "blocks": [
+        {
+          "type": "hotspot",
+          "settings": {
+            "title": "Using Magsafe compatible",
+            "top_dt": 24,
+            "left_dt": 46,
+            "top_mb": 24,
+            "left_mb": 46,
+            "placement": "right-center"
+          }
+        },
+        {
+          "type": "hotspot",
+          "settings": {
+            "title": "Precision cutouts",
+            "top_dt": 38,
+            "left_dt": 52,
+            "top_mb": 38,
+            "left_mb": 52,
+            "placement": "right-center"
+          }
+        },
+        {
+          "type": "hotspot",
+          "settings": {
+            "title": "Shockproof edges",
+            "top_dt": 42,
+            "left_dt": 12,
+            "top_mb": 42,
+            "left_mb": 12,
+            "placement": "left-center"
+          }
+        }
+      ]
+    }
+  ],
+  "disabled_on": {
+    "groups": [
+      "header",
+      "footer",
+      "custom.overlay",
+      "custom.popups"
+    ]
+  }
+}
+{% endschema %}

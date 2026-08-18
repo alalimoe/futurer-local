@@ -12,6 +12,12 @@
 {% endcomment %}
 
 {% liquid
+  assign variant = product.selected_or_first_available_variant
+  assign is_preorder = false
+  if variant.inventory_quantity <= 0 and variant.inventory_policy == 'continue'
+    assign is_preorder = true
+  endif
+
   assign is_tooltip = is_tooltip | default: true, allow_false: true
   assign is_select_options = is_select_options | default: true, allow_false: true
   assign is_bundle = is_bundle | default: false
@@ -21,6 +27,11 @@
   capture add_cart_text
     render 'add-to-cart-text', product: product, is_select_options: is_select_options, is_bundle: is_bundle
   endcapture
+
+  assign container_class = 'xo-add-to-cart d:inline-block'
+  if class != blank
+    assign container_class = container_class | append: ' ' | append: class
+  endif
 %}
 
 {% capture button_content %}
@@ -62,19 +73,22 @@
     %}
     <xo-product-quick-view-trigger
       xo-modal-name="quick-view"
-      class="xo-add-to-cart w-full"
+      class="{{ container_class }}"
       xo-product-url="{{ product_url }}"
       tabindex="0"
       role="button"
       aria-label="{{ quick_view_text }}"
+      {% if variant.available == false and is_preorder == false %}
+        xo-disabled
+      {% endif %}
     >
       {{ content }}
     </xo-product-quick-view-trigger>
   {% else %}
     {% if is_bundle %}
       <xo-bundle-add
-        class="xo-add-to-cart w-full"
-        {% if product.selected_or_first_available_variant.available == false %}
+        class="{{ container_class }}"
+        {% if variant.available == false and is_preorder == false %}
           xo-disabled
         {% endif %}
       >
@@ -82,8 +96,8 @@
       </xo-bundle-add>
     {% else %}
       <xo-cart-add
-        class="xo-add-to-cart"
-        {% if product.selected_or_first_available_variant.available == false %}
+        class="{{ container_class }}"
+        {% if variant.available == false and is_preorder == false %}
           xo-disabled
         {% endif %}
       >
@@ -92,7 +106,7 @@
     {% endif %}
     <div
       class="xo-add-to-cart xo-add-to-cart--unavailable"
-      {% if product.selected_or_first_available_variant.available == false %}
+      {% if variant.available == false and is_preorder == false %}
         xo-disabled
       {% endif %}
       xo-unavailable-text="{{ 'products.product.unavailable' | t }}"

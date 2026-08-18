@@ -44,94 +44,66 @@
   if animate_enabled
     assign tag_name = 'xo-animate'
   endif
+
+  assign tag_bg_name = 'xo-parallax'
+  if parallax_disabled
+    assign tag_bg_name = 'div'
+  endif
 -%}
 
 {% if image_collection == blank %}
   {% capture style_desktop %}
-    style="--url-desktop: url('{{ image_desktop | image_url }}'); --aspect-ratio-desktop: {{ media_aspect_ratio_desktop }}"
+    style="--url-desktop: url('{{ image_desktop | image_url: width: 100 }}'); --aspect-ratio-desktop: {{ media_aspect_ratio_desktop }}; --url-mobile: url('{{ image_mobile | image_url: width: 100 }}'); --aspect-ratio-mobile: {{ media_aspect_ratio_mobile }}"
   {% endcapture %}
 {% else %}
   {% if image_desktop != blank %}
     {% capture style_desktop %}
-      style="--url-desktop: url('{{ image_desktop | image_url }}'); --aspect-ratio-desktop: {{ media_aspect_ratio_desktop }}"
+      style="--url-desktop: url('{{ image_desktop | image_url: width: 100 }}'); --aspect-ratio-desktop: {{ media_aspect_ratio_desktop }}; --url-mobile: url('{{ image_mobile | image_url: width: 100 }}'); --aspect-ratio-mobile: {{ media_aspect_ratio_mobile }}"
     {% endcapture %}
   {%- else -%}
     {% capture style_desktop %}
-      style="--url-desktop: url('{{ image_collection | image_url }}'); --aspect-ratio-desktop: {{ media_aspect_ratio_desktop }}"
+      style="--url-desktop: url('{{ image_collection | image_url: width: 100 }}'); --aspect-ratio-desktop: {{ media_aspect_ratio_desktop }}; --url-mobile: url('{{ image_collection | image_url: width: 100 }}'); --aspect-ratio-mobile: {{ media_aspect_ratio_mobile }}"
     {% endcapture %}
   {% endif %}
 {% endif %}
 
-{% if image_collection == blank %}
-  {% capture style_mobile %}
-    style="--url-mobile: url('{{ image_mobile | image_url }}'); --aspect-ratio-mobile: {{ media_aspect_ratio_mobile }}"
-  {% endcapture %}
-{% else %}
-  {% if image_mobile != blank %}
-    {% capture style_mobile %}
-      style="--url-mobile: url('{{ image_mobile | image_url }}'); --aspect-ratio-mobile: {{ media_aspect_ratio_mobile }}"
-    {% endcapture %}
-  {%- else -%}
-    {% capture style_mobile %}
-    style="--url-mobile: url('{{ image_collection | image_url }}'); --aspect-ratio-mobile: {{ media_aspect_ratio_mobile }}"
-  {% endcapture %}
-  {% endif %}
-{% endif %}
-
-<{{ tag_name }} xo-cascade class='collection-image-1{% if color_schema_collection %} color-{{ color_schema_collection }}{% endif %}'>
-  <div class='collection-image-1__bg'>
+<{{ tag_name }}
+  xo-cascade
+  class="collection-image-1{% if color_schema_collection %} color-{{ color_schema_collection }}{% endif %} {% if settings.enable_border_radius %}collection-image-1--radius{% endif %}"
+>
+  <div class="collection-image-1__bg">
     {% if collection == blank and image_desktop == blank %}
-      <div class='collection-image-1__item'>
-        <div class='collection-image-1__image collection-image-1__image--desktop{% if settings.enable_border_radius %} collection-image-1__image--radius{% endif %}'>
+      <div class="collection-image-1__item">
+        <div class="collection-image-1__image collection-image-1__image--desktop">
           {{ 'hero-apparel-1' | placeholder_svg_tag: 'placeholder-svg' }}
         </div>
       </div>
     {%- else -%}
-      <xo-parallax class='collection-image-1__item' {{ style_desktop }}>
+      <{{ tag_bg_name }} class="collection-image-1__item" {{ style_desktop }} xo-lerp-ease="0.4">
         <xo-parallax-scroll
-          class='collection-image-1__image xo-background-lazyload collection-image-1__image--desktop{% if settings.enable_border_radius %} collection-image-1__image--radius{% endif %}'
+          class="collection-image-1__image xo-background-lazyload collection-image-1__image--desktop"
           xo-keyframes="
             {
               '0%': { backgroundPositionY: '200px' },
               '100%': { backgroundPositionY: '-200px' },
             }
           "
-        >
-        </xo-parallax-scroll>
-      </xo-parallax>
-    {% endif %}
-    {% if collection == blank and image_mobile == blank %}
-      <div class='collection-image-1__item'>
-        <div class='collection-image-1__image collection-image-1__image--mobile{% if settings.enable_border_radius %} collection-image-1__image--radius{% endif %}'>
-          {{ 'hero-apparel-1' | placeholder_svg_tag: 'placeholder-svg' }}
-        </div>
-      </div>
-    {%- else -%}
-      <xo-parallax class='collection-image-1__item' {{ style_mobile }}>
-        <xo-parallax-scroll
-          class='collection-image-1__image xo-background-lazyload collection-image-1__image--mobile{% if settings.enable_border_radius %} collection-image-1__image--radius{% endif %}'
-          xo-keyframes="
-            {
-            '0%': { backgroundPositionY: '100px' },
-            '100%': { backgroundPositionY: '-100px' },
-            }
-          "
           xo-breakpoints="
             {
               768: {
-                '33.3%': { backgroundPositionY: '20px' },
-                '100%': { backgroundPositionY: '-20px' },
+                '33%': { backgroundPositionY: '50px' },
+                '100%': { backgroundPositionY: '-50px' },
               }
             }
           "
         >
         </xo-parallax-scroll>
-      </xo-parallax>
+      </{{ tag_bg_name }}>
     {% endif %}
   </div>
   {% if show_heading %}
-    <div class='collection-image-1__text'>
-      <h5 class='collection-image-1__heading {{ class }}'>{{ heading | default: collection_name }}</h5>
+    <div class="collection-image-1__text">
+      <h5 class="collection-image-1__heading {{ class }}">{{ heading | default: collection_name }}</h5>
     </div>
   {% endif %}
   {% if show_button %}
@@ -142,7 +114,7 @@
       assign button_style = button_style | default: 'primary'
       assign button_size = button_size | default: 'sm'
     %}
-    <xo-magnetic xo-duration='500' xo-radius='150' class='collection-image-1__button'>
+    <xo-magnetic xo-duration="500" xo-radius="150" class="collection-image-1__button">
       <xo-magnetic-content>
         {% render 'button', text: button_text, link: button_link, style: button_style, size: button_size %}
       </xo-magnetic-content>

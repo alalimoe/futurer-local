@@ -33,7 +33,7 @@
   xo-src="{{ final_video }}"
 >
   {% if context.settings.video != blank %}
-    <xo-video-cover-button class="xo-video-2__button" tabindex="0" role="button" aria-label="Controls">
+    <xo-video-cover-button class="xo-video-2__button" tabindex="0" role="button" aria-label="{{ 'accessibility.controls' | t }}">
       <div class="xo-video-2__button-play">
         {% render 'icon', name: 'play', size: '2rem' %}
       </div>
@@ -42,4 +42,15 @@
       </div>
     </xo-video-cover-button>
   {% endif %}
+  <div class="xo-video-2__image-poster">
+    {% if context.settings.video == blank and context.settings.video_url == blank %}
+      {% render 'image', placeholder: 'hero-apparel-3' %}
+    {% else %}
+      {% if context.settings.video != blank %}
+        {% render 'image', image: context.settings.video.preview_image %}
+      {% elsif context.settings.video_url != blank %}
+        {% render 'image', image: context.settings.cover_image, placeholder: 'hero-apparel-3' %}
+      {% endif %}
+    {% endif %}
+  </div>
 </xo-video-cover>

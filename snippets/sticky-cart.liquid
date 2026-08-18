@@ -12,6 +12,21 @@
   assign variant_color_style = variants_block.settings.variant_color_style
   assign variant_style = variants_block.settings.variant_style
   assign featured_media = product.selected_or_first_available_variant.featured_media
+
+  assign variant = product.selected_or_first_available_variant
+  assign is_preorder = false
+  if variant.inventory_quantity <= 0 and variant.inventory_policy == 'continue'
+    assign is_preorder = true
+  endif
+
+  if is_preorder
+    assign button_text = 'products.product.pre_order_text' | t
+  elsif variant.available
+    assign button_text = 'products.product.add_to_cart' | t
+  else
+    assign button_text = 'products.product.sold_out' | t
+  endif
+  assign button_text_unavailable = 'products.product.unavailable' | t
 %}
 
 <xo-sticky class="xo-sticky-cart" xo-name="sticky-hidden" xo-direction="down" xo-placement="bottom">
@@ -74,24 +89,16 @@
             <xo-product-will-change xo-unique-id="sticky-product-add-cart-{{ section.id }}">
               <xo-cart-add
                 class="xo-sticky-cart__button-add"
-                {% if product.selected_or_first_available_variant.available == false %}
+                {% if variant.available == false and is_preorder == false %}
                   xo-disabled
                 {% endif %}
                 {% if settings.cart_type == 'page' %}
                   xo-cart-redirection
                 {% endif %}
               >
-                {%- if product.selected_or_first_available_variant.available == false -%}
-                  {%- assign button_sold_out = 'products.product.sold_out' | t -%}
-                  <div class="xo-sticky-cart__button-text xo-sticky-cart__button-text--sold-out">
-                    {% render 'button', text: button_sold_out, style: 'primary', loading_type: 'loader-3', size: 'lg', block: true %}
-                  </div>
-                {%- else -%}
-                  {%- assign button_add_cart = 'products.product.add_to_cart' | t -%}
-                  <div class="xo-sticky-cart__button-text">
-                    {% render 'button', text: button_add_cart, style: 'primary', loading_type: 'loader-3', size: 'lg', block: true %}
-                  </div>
-                {%- endif -%}
+                <div class="xo-sticky-cart__button-text">
+                  {% render 'button', text: button_text, style: 'primary', loading_type: 'loader-3', size: 'lg', block: true %}
+                </div>
               </xo-cart-add>
             </xo-product-will-change>
           </xo-animate>
@@ -111,24 +118,16 @@
               <xo-product-will-change xo-unique-id="sticky-product-add-cart-{{ section.id }}">
                 <xo-cart-add
                   class="xo-sticky-cart__button-add"
-                  {% if product.selected_or_first_available_variant.available == false %}
+                  {% if variant.available == false and is_preorder == false %}
                     xo-disabled
                   {% endif %}
                   {% if settings.cart_type == 'page' %}
                     xo-cart-redirection
                   {% endif %}
                 >
-                  {%- if product.selected_or_first_available_variant.available == false -%}
-                    {%- assign button_sold_out = 'products.product.sold_out' | t -%}
-                    <div class="xo-sticky-cart__button-text xo-sticky-cart__button-text--sold-out">
-                      {% render 'button', text: button_sold_out, style: 'primary', loading_type: 'loader-3', size: 'md', block: true %}
-                    </div>
-                  {%- else -%}
-                    {%- assign button_add_cart = 'products.product.add_to_cart' | t -%}
-                    <div class="xo-sticky-cart__button-text">
-                      {% render 'button', text: button_add_cart, style: 'primary', loading_type: 'loader-3', size: 'md', block: true %}
-                    </div>
-                  {%- endif -%}
+                  <div class="xo-sticky-cart__button-text">
+                    {% render 'button', text: button_text, style: 'primary', loading_type: 'loader-3', size: 'md', block: true %}
+                  </div>
                 </xo-cart-add>
               </xo-product-will-change>
             </xo-animate>

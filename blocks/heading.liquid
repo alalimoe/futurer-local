@@ -1,8 +1,16 @@
-{% render 'section-heading', title: block.settings.title, title_tag: block.settings.title_tag, description: block.settings.description, align: block.settings.alignment %}
+{% render 'section-heading',
+  heading: block.settings.title,
+  heading_tag: block.settings.title_tag,
+  description: block.settings.description,
+  align: block.settings.alignment,
+  font_size_desktop: block.settings.desktop_font_size,
+  font_size_mobile: block.settings.mobile_font_size
+%}
 
 
 {% schema %}
 {
+  "tag": null,
   "name": "t:blocks.heading.name",
   "settings": [
     {
@@ -53,6 +61,46 @@
       "type": "text_alignment",
       "id": "alignment",
       "label": "t:blocks.heading.settings.alignment.label"
+    },
+    {
+      "type": "select",
+      "id": "device",
+      "label": "Device",
+      "options": [
+        {
+          "value": "desktop",
+          "label": "Desktop"
+        },
+        {
+          "value": "mobile",
+          "label": "Mobile"
+        }
+      ],
+      "default": "desktop"
+    },
+    {
+      "type": "range",
+      "id": "desktop_font_size",
+      "label": "t:blocks.heading.settings.font_size.label",
+      "info": "t:blocks.heading.settings.font_size.info",
+      "default": 0,
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "visible_if": "{{ block.settings.device == 'desktop' }}"
+    },
+    {
+      "type": "range",
+      "id": "mobile_font_size",
+      "label": "t:blocks.heading.settings.font_size.label",
+      "info": "t:blocks.heading.settings.font_size.info",
+      "default": 0,
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "unit": "px",
+      "visible_if": "{{ block.settings.device == 'mobile' }}"
     }
   ],
   "presets": [

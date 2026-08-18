@@ -1,0 +1,525 @@
+{{ 'section-product-compare.css' | asset_url | stylesheet_tag }}
+
+{% liquid
+  assign show_colors = section.settings.show_colors | default: true, allow_false: true
+  assign color_label = section.settings.color_label
+  assign button_label = section.settings.button_label | default: 'View detail'
+%}
+
+<section {% render 'section-attr' %}>
+  <div class="product-compare">
+    <xo-container class="product-compare__container">
+      {% if section.settings.text_heading != blank %}
+        <div class="product-compare__head">
+          {% render 'text', context: section %}
+        </div>
+      {% endif %}
+
+      {%- liquid
+        assign columns = section.blocks.size | at_most: 3
+      -%}
+      <xo-carousel
+        class="product-compare__grid"
+        xo-per-view="{{ columns }}"
+        xo-gap="28"
+        xo-overflow="visible"
+        xo-speed="400"
+        xo-breakpoints="
+          {
+            768: { perView: 1, gap: 12 }
+          }
+        "
+      >
+        <xo-carousel-inner class="product-compare__viewport">
+        <xo-carousel-list class="product-compare__list">
+        {% for block in section.blocks %}
+          {% liquid
+            assign product = block.settings.product
+            assign button_link = block.settings.button_link | default: product.url
+
+            assign color_option = null
+            if show_colors and product != blank
+              for option in product.options_with_values
+                assign option_name = option.name | downcase
+                if option_name contains 'color' or option_name contains 'colour'
+                  assign color_option = option
+                  break
+                endif
+              endfor
+            endif
+          %}
+          <xo-carousel-slide class="product-compare__col" {{ block.shopify_attributes }}>
+            <xo-animate xo-cascade class="product-compare__card">
+              {% render 'product-card',
+                product: product,
+                show_image: true,
+                show_price: true,
+                show_vendor: false,
+                show_rating: false,
+                show_badge: false,
+                show_quick_add: false,
+                show_quick_view: false,
+                animate_enabled: false,
+                placeholder_image: 'product-apparel-1'
+              %}
+            </xo-animate>
+
+            <div class="product-compare__specs">
+              {% if block.settings.compatibility != blank %}
+                <p class="product-compare__compat">{{ block.settings.compatibility }}</p>
+              {% endif %}
+
+              {% if color_option != blank %}
+                <span class="product-compare__divider" aria-hidden="true"></span>
+                <div class="product-compare__row product-compare__row--colors">
+                  {% if color_label != blank %}
+                    <p class="product-compare__row-label">{{ color_label }}</p>
+                  {% endif %}
+                  <div class="product-compare__swatches">
+                    {% render 'product-variant-link', product: product, option: color_option %}
+                  </div>
+                </div>
+              {% endif %}
+
+              {% if block.settings.material_text != blank or block.settings.material_icon != blank %}
+                <span class="product-compare__divider" aria-hidden="true"></span>
+                <div class="product-compare__row product-compare__row--material">
+                  {% if block.settings.material_icon != blank %}
+                    <div class="product-compare__icon product-compare__icon--material">
+                      {% render 'image', image: block.settings.material_icon, class: 'product-compare__icon-el' %}
+                    </div>
+                  {% endif %}
+                  {% if block.settings.material_text != blank %}
+                    <p class="product-compare__row-text">{{ block.settings.material_text }}</p>
+                  {% endif %}
+                </div>
+              {% endif %}
+
+              {% if block.settings.features != blank or block.settings.feature_icon != blank %}
+                <span class="product-compare__divider" aria-hidden="true"></span>
+                <div class="product-compare__row product-compare__row--features">
+                  {% if block.settings.feature_icon != blank %}
+                    <div class="product-compare__icon product-compare__icon--feature">
+                      {% render 'image', image: block.settings.feature_icon, class: 'product-compare__icon-el' %}
+                    </div>
+                  {% endif %}
+                  {% if block.settings.features != blank %}
+                    <div class="product-compare__features rte">{{ block.settings.features }}</div>
+                  {% endif %}
+                </div>
+              {% endif %}
+
+              {% assign has_highlight = false %}
+              {% if block.settings.highlight_1_text != blank or block.settings.highlight_2_text != blank or block.settings.highlight_3_text != blank %}
+                {% assign has_highlight = true %}
+              {% endif %}
+              {% if has_highlight %}
+                <span class="product-compare__divider" aria-hidden="true"></span>
+                <div class="product-compare__highlights">
+                  {% for i in (1..3) %}
+                    {% liquid
+                      assign icon_key = 'highlight_' | append: i | append: '_icon'
+                      assign text_key = 'highlight_' | append: i | append: '_text'
+                      assign hl_icon = block.settings[icon_key]
+                      assign hl_text = block.settings[text_key]
+                    %}
+                    {% if hl_text != blank or hl_icon != blank %}
+                      <div class="product-compare__highlight">
+                        {% if hl_icon != blank %}
+                          <div class="product-compare__icon product-compare__icon--highlight">
+                            {% render 'image', image: hl_icon, class: 'product-compare__icon-el' %}
+                          </div>
+                        {% endif %}
+                        {% if hl_text != blank %}
+                          <p class="product-compare__highlight-text">{{ hl_text }}</p>
+                        {% endif %}
+                      </div>
+                    {% endif %}
+                  {% endfor %}
+                </div>
+              {% endif %}
+
+              {% if button_link != blank %}
+                <span class="product-compare__divider" aria-hidden="true"></span>
+                <div class="product-compare__button">
+                  {% render 'button', text: button_label, link: button_link, style: 'secondary', size: 'sm' %}
+                </div>
+              {% endif %}
+            </div>
+          </xo-carousel-slide>
+        {% endfor %}
+        </xo-carousel-list>
+        </xo-carousel-inner>
+      </xo-carousel>
+    </xo-container>
+  </div>
+</section>
+
+{% schema %}
+{
+  "tag": "section",
+  "name": "t:sections.product_compare.name",
+  "class": "section-product-compare",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Text"
+    },
+    {
+      "type": "select",
+      "id": "text_tag_name",
+      "label": "Tag name",
+      "options": [
+        {
+          "value": "h1",
+          "label": "H1"
+        },
+        {
+          "value": "h2",
+          "label": "H2"
+        },
+        {
+          "value": "h3",
+          "label": "H3"
+        },
+        {
+          "value": "h4",
+          "label": "H4"
+        },
+        {
+          "value": "h5",
+          "label": "H5"
+        },
+        {
+          "value": "h6",
+          "label": "H6"
+        }
+      ],
+      "default": "h2"
+    },
+    {
+      "type": "textarea",
+      "id": "text_heading",
+      "label": "Text",
+      "default": "Find Your Perfect Phone Case"
+    },
+    {
+      "type": "select",
+      "id": "font_size_heading",
+      "label": "Font size heading",
+      "default": "h4",
+      "options": [
+        {
+          "value": "h1",
+          "label": "Extra extra large"
+        },
+        {
+          "value": "h2",
+          "label": "Extra large"
+        },
+        {
+          "value": "h3",
+          "label": "Large"
+        },
+        {
+          "value": "h4",
+          "label": "Medium"
+        },
+        {
+          "value": "h5",
+          "label": "Small"
+        },
+        {
+          "value": "h6",
+          "label": "Extra small"
+        }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "text_line_height",
+      "label": "Line height",
+      "min": 0,
+      "max": 3,
+      "step": 0.1,
+      "default": 1.2
+    },
+    {
+      "type": "select",
+      "id": "text_effect",
+      "label": "Effect",
+      "options": [
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "reveal",
+          "label": "Blur"
+        },
+        {
+          "value": "split",
+          "label": "Split"
+        }
+      ],
+      "default": "split"
+    },
+    {
+      "type": "number",
+      "id": "text_duration",
+      "label": "Duration (milliseconds)",
+      "default": 1000
+    },
+    {
+      "type": "range",
+      "id": "text_heading_width_desktop",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "label": "Desktop heading width",
+      "default": 100
+    },
+    {
+      "type": "range",
+      "id": "text_heading_width_mobile",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "label": "Mobile heading width",
+      "default": 100
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_colors",
+      "label": "Show color swatches",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "color_label",
+      "label": "Color row label",
+      "default": "Color"
+    },
+    {
+      "type": "header",
+      "content": "Button"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label",
+      "default": "View detail"
+    },
+    {
+      "type": "header",
+      "content": "General settings"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Section color scheme"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color"
+    },
+    {
+      "type": "color_background",
+      "id": "background_gradient",
+      "label": "Background gradient"
+    },
+    {
+      "type": "number",
+      "id": "padding_top_desktop",
+      "label": "Padding top desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_desktop",
+      "label": "Padding bottom desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_top_mobile",
+      "label": "Padding top mobile",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_mobile",
+      "label": "Padding bottom mobile",
+      "default": 50
+    }
+  ],
+  "blocks": [
+    {
+      "name": "Product",
+      "type": "compare_item",
+      "settings": [
+        {
+          "type": "product",
+          "id": "product",
+          "label": "Product"
+        },
+        {
+          "type": "text",
+          "id": "compatibility",
+          "label": "Compatibility",
+          "default": "iPhone 13, iPhone 14, iPhone 15"
+        },
+        {
+          "type": "header",
+          "content": "Material"
+        },
+        {
+          "type": "image_picker",
+          "id": "material_icon",
+          "label": "Material icon"
+        },
+        {
+          "type": "text",
+          "id": "material_text",
+          "label": "Material",
+          "default": "Eco-friendly ABS plastic"
+        },
+        {
+          "type": "header",
+          "content": "Features"
+        },
+        {
+          "type": "image_picker",
+          "id": "feature_icon",
+          "label": "Feature icon"
+        },
+        {
+          "type": "richtext",
+          "id": "features",
+          "label": "Features",
+          "default": "<p>Case thickness 1.5mm</p><p>Compatible with wireless charging</p><p>Custom fit with shock absorption</p>"
+        },
+        {
+          "type": "header",
+          "content": "Highlights"
+        },
+        {
+          "type": "image_picker",
+          "id": "highlight_1_icon",
+          "label": "Highlight 1 icon"
+        },
+        {
+          "type": "text",
+          "id": "highlight_1_text",
+          "label": "Highlight 1 text",
+          "default": "Water-resistant up to IP67"
+        },
+        {
+          "type": "image_picker",
+          "id": "highlight_2_icon",
+          "label": "Highlight 2 icon"
+        },
+        {
+          "type": "text",
+          "id": "highlight_2_text",
+          "label": "Highlight 2 text",
+          "default": "Drop test from 5 meters"
+        },
+        {
+          "type": "image_picker",
+          "id": "highlight_3_icon",
+          "label": "Highlight 3 icon"
+        },
+        {
+          "type": "text",
+          "id": "highlight_3_text",
+          "label": "Highlight 3 text",
+          "default": "Using Magsafe compatible"
+        },
+        {
+          "type": "header",
+          "content": "Button"
+        },
+        {
+          "type": "url",
+          "id": "button_link",
+          "label": "Button link",
+          "info": "Defaults to the product page when empty."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.product_compare.presets.name",
+      "category": "Products",
+      "settings": {
+        "text_heading": "Find Your Perfect Phone Case",
+        "font_size_heading": "h4",
+        "text_tag_name": "h2",
+        "text_effect": "none",
+        "show_colors": true,
+        "color_label": "Color",
+        "button_label": "View detail",
+        "color_scheme": "",
+        "background_color": "",
+        "background_gradient": "",
+        "padding_top_desktop": 80,
+        "padding_bottom_desktop": 96,
+        "padding_top_mobile": 50,
+        "padding_bottom_mobile": 50
+      },
+      "blocks": [
+        {
+          "type": "compare_item",
+          "settings": {
+            "compatibility": "iPhone 13, iPhone 14, iPhone 15",
+            "material_text": "Eco-friendly ABS plastic",
+            "features": "<p>Case thickness 1.5mm</p><p>Compatible with wireless charging</p><p>Custom fit with shock absorption</p>",
+            "highlight_1_text": "Water-resistant up to IP67",
+            "highlight_2_text": "Drop test from 5 meters",
+            "highlight_3_text": "Using Magsafe compatible"
+          }
+        },
+        {
+          "type": "compare_item",
+          "settings": {
+            "compatibility": "iPhone 13, iPhone 14, iPhone 15",
+            "material_text": "Eco-friendly PLA plastic",
+            "features": "<p>Case thickness 1.2mm</p><p>Supports wireless charging</p><p>Precision cut for optimal grip</p>",
+            "highlight_1_text": "Water-resistant up to IP68",
+            "highlight_2_text": "Drop test from 4 meters",
+            "highlight_3_text": "Using Magsafe compatible"
+          }
+        },
+        {
+          "type": "compare_item",
+          "settings": {
+            "compatibility": "iPhone 13, iPhone 14, iPhone 15",
+            "material_text": "Eco-friendly ABS plastic",
+            "features": "<p>Case thickness 1.0mm</p><p>Works with wireless charging</p><p>Tailored fit with shock resistance</p>",
+            "highlight_1_text": "Water-resistant up to IP67",
+            "highlight_2_text": "Drop test from 6 meters",
+            "highlight_3_text": "Using Magsafe compatible"
+          }
+        }
+      ]
+    }
+  ],
+  "disabled_on": {
+    "groups": [
+      "header",
+      "footer",
+      "custom.overlay",
+      "custom.popups"
+    ]
+  }
+}
+{% endschema %}

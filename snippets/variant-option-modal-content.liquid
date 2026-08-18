@@ -1,0 +1,71 @@
+{% comment %}
+  Renders a product info content quickview with thumbnails.
+
+  Accepts:
+  - zoom_enabled: {Boolean} Whether to enable zoom on the main image (optional)
+
+  Usage:
+  {% render 'product-info-content-quickview' %}
+{% endcomment %}
+
+{% liquid
+  assign variant = product.selected_or_first_available_variant
+  assign is_preorder = false
+  if variant.inventory_quantity <= 0 and variant.inventory_policy == 'continue'
+    assign is_preorder = true
+  endif
+
+  if is_preorder
+    assign button_text = 'products.product.pre_order_text' | t
+  elsif variant.available
+    assign button_text = 'products.product.add_to_cart' | t
+  else
+    assign button_text = 'products.product.sold_out' | t
+  endif
+  assign button_text_unavailable = 'products.product.unavailable' | t
+%}
+
+<div class="product-info-content-quickview">
+  <div class="product-info-content-quickview__content">
+    {% comment %} vendor {% endcomment %}
+    <span class="product-info-content-quickview__vendor">{{ product.vendor }}</span>
+    {% comment %} title {% endcomment %}
+    <h3 class="product-info-content-quickview__title h5">{{ product.title }}</h3>
+    <div class="product-info-content-quickview__price">
+      <xo-product-will-change xo-unique-id="product-price-{{ section.id }}" xo-morph-selector="[xo-price]">
+        {% render 'price', product: product, use_variant: true %}
+        {% if cart.taxes_included == true %}
+          <span class="product-info-content-quickview__tax">{{ 'products.product.price.include_tax' | t }}</span>
+        {% endif %}
+      </xo-product-will-change>
+    </div>
+    {% comment %} variants {% endcomment %}
+    {% unless product.has_only_default_variant %}
+      <xo-product-variants>
+        <div class="product-info-content-quickview__variant">
+          {%- for option in product.options_with_values -%}
+            {% assign color_option_names = settings.product_card_color_option_name | downcase | split: ',' %}
+            {% assign option_name = option.name | downcase %}
+            {% if color_option_names contains option_name %}
+              {% render 'product-variant', option: option, style: 'color', product: product %}
+            {% else %}
+              {% render 'product-variant', option: option, style: 'boxed', product: product %}
+            {% endif %}
+          {%- endfor -%}
+        </div>
+      </xo-product-variants>
+    {% endunless %}
+
+    {% comment %} pre-order note {% endcomment %}
+    {% if is_preorder %}
+      {% render 'pre-order-note', product: product %}
+    {% endif %}
+
+    <xo-animate xo-cascade>
+      <xo-modal-trigger style="width: 100%;">
+        {% assign button_text = 'sections.quick_view.apply_variant' | t %}
+        {% render 'button', text: button_text, style: 'primary', size: 'md', block: true %}
+      </xo-modal-trigger>
+    </xo-animate>
+  </div>
+</div>

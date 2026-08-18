@@ -14,7 +14,24 @@
   %}
 {% endcomment %}
 
-{%- assign placeholder_image = 'collection-1' -%}
+{% liquid
+  assign placeholder_image = 'collection-1'
+
+  assign variant = product.selected_or_first_available_variant
+  assign is_preorder = false
+  if variant.inventory_quantity <= 0 and variant.inventory_policy == 'continue'
+    assign is_preorder = true
+  endif
+
+  if is_preorder
+    assign button_text = 'products.product.pre_order_text' | t
+  elsif variant.available
+    assign button_text = 'products.product.add_to_cart' | t
+  else
+    assign button_text = 'products.product.sold_out' | t
+  endif
+  assign button_text_unavailable = 'products.product.unavailable' | t
+%}
 
 <xo-product
   xo-selected-or-first-available-variant-id="{{ product.selected_or_first_available_variant.id }}"
@@ -113,7 +130,9 @@
                             <div class="featured-product-1__variant">
                               {% if product and product != empty %}
                                 {% for option in product.options_with_values %}
-                                  {% if option.name == settings.product_card_color_option_name %}
+                                  {% assign color_option_names = settings.product_card_color_option_name | downcase | split: ',' %}
+                                  {% assign option_name = option.name | downcase %}
+                                  {% if color_option_names contains option_name %}
                                     {% render 'product-variant', option: option, style: settings.product_card_color_style, product: product %}
                                     {% break %}
                                   {% endif %}
@@ -129,24 +148,16 @@
                           <xo-product-will-change xo-unique-id="xo-product-add-button-{{ section.id }}" style="width: 100%;">
                             <xo-cart-add
                               class="featured-product-1__add-cart"
-                              {% if product.selected_or_first_available_variant.available == false %}
+                              {% if variant.available == false and is_preorder == false %}
                                 xo-disabled
                               {% endif %}
                               {% if settings.cart_type == 'page' %}
                                 xo-cart-redirection
                               {% endif %}
                             >
-                              {% if product.selected_or_first_available_variant.available == false %}
-                                {%- assign sold_out = 'onboarding.product_sold_out' | t -%}
-                                <div class="featured-product-1__button-add">
-                                  {% render 'button', style: 'primary', text: sold_out, size: 'md' %}
-                                </div>
-                              {%- else -%}
-                                {%- assign add_to_cart = 'onboarding.product_add_cart' | t -%}
-                                <div class="featured-product-1__button-add">
-                                  {% render 'button', style: 'primary', text: add_to_cart, size: 'md' %}
-                                </div>
-                              {% endif %}
+                              <div class="featured-product-1__button-add">
+                                {% render 'button', style: 'primary', text: button_text, size: 'md', text_unavailable: button_text_unavailable %}
+                              </div>
                             </xo-cart-add>
                           </xo-product-will-change>
                         {%- else -%}

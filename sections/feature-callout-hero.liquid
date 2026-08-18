@@ -1,0 +1,551 @@
+{{ 'section-feature-callout-hero.css' | asset_url | stylesheet_tag }}
+
+{% liquid
+  assign image = section.settings.image
+
+  assign aspect_ratio = section.settings.aspect_ratio
+  if aspect_ratio == 'custom'
+    assign aspect_ratio = section.settings.aspect_ratio_width | append: '/' | append: section.settings.aspect_ratio_height
+  endif
+
+  assign image_width = section.settings.image_width
+  assign button_text = section.settings.button_text
+  assign button_link = section.settings.button_link
+  assign button_style = section.settings.button_style
+  assign button_size = section.settings.button_size
+
+  assign heading_image_blocks = section.blocks | where: 'type', 'image-text'
+  assign callout_blocks = section.blocks | where: 'type', 'callout'
+%}
+
+<div {% render 'section-attr' %}>
+  <div class="feature-callout-hero">
+    <xo-container class="feature-callout-hero__container">
+      <div class="feature-callout-hero__heading">
+        <xo-animate xo-cascade>
+          {% render 'text-with-image', context: section, blocks: heading_image_blocks %}
+        </xo-animate>
+      </div>
+
+      <div class="feature-callout-hero__stage">
+        <div class="feature-callout-hero__product" style="--image-width: {{ image_width }}%">
+          <xo-animate xo-cascade>
+            {% render 'image', image: image, alt: image.alt, aspect_ratio: aspect_ratio, class: 'feature-callout-hero__product-image' %}
+          </xo-animate>
+        </div>
+
+        {%- comment -%}
+          Desktop: each callout is a free-floating pin absolutely positioned on
+          the stage. Hidden below md — the carousel below takes over there.
+        {%- endcomment -%}
+        {% for block in callout_blocks %}
+          <div
+            class="feature-callout-hero__card feature-callout-hero__card--pin"
+            style="--top_dt: {{ block.settings.top_dt }}; --left_dt: {{ block.settings.left_dt }}"
+            {{ block.shopify_attributes }}
+          >
+            <xo-animate xo-cascade class="feature-callout-hero__card-inner">
+              <div class="feature-callout-hero__card-icon">
+                {% render 'image',
+                  image: block.settings.icon,
+                  aspect_ratio: '1',
+                  disable_alt: true,
+                  class: 'feature-callout-hero__card-icon-image'
+                %}
+              </div>
+              {% if block.settings.text != blank %}
+                <p class="feature-callout-hero__card-text">{{ block.settings.text }}</p>
+              {% endif %}
+            </xo-animate>
+          </div>
+        {% endfor %}
+
+        {%- comment -%}
+          Mobile: the same callouts as a swipeable carousel. Hidden from md up.
+        {%- endcomment -%}
+        <xo-carousel
+          class="feature-callout-hero__cards"
+          xo-per-view="1"
+          xo-gap="12"
+          xo-overflow="visible"
+          xo-speed="400"
+        >
+          <xo-carousel-inner class="feature-callout-hero__cards-viewport">
+            <xo-carousel-list class="feature-callout-hero__cards-list">
+              {% for block in callout_blocks %}
+                <xo-carousel-slide class="feature-callout-hero__slide">
+                  <div class="feature-callout-hero__card" {{ block.shopify_attributes }}>
+                    <xo-animate xo-cascade class="feature-callout-hero__card-inner">
+                      <div class="feature-callout-hero__card-icon">
+                        {% render 'image',
+                          image: block.settings.icon,
+                          aspect_ratio: '1',
+                          disable_alt: true,
+                          class: 'feature-callout-hero__card-icon-image'
+                        %}
+                      </div>
+                      {% if block.settings.text != blank %}
+                        <p class="feature-callout-hero__card-text">{{ block.settings.text }}</p>
+                      {% endif %}
+                    </xo-animate>
+                  </div>
+                </xo-carousel-slide>
+              {% endfor %}
+            </xo-carousel-list>
+          </xo-carousel-inner>
+        </xo-carousel>
+
+        {% if button_text != blank %}
+          <div class="feature-callout-hero__cta">
+            {% render 'button',
+              text: button_text,
+              link: button_link,
+              style: button_style,
+              size: button_size,
+              radius: settings.button_radius,
+              padding: settings.button_padding
+            %}
+          </div>
+        {% endif %}
+      </div>
+    </xo-container>
+  </div>
+</div>
+
+{% schema %}
+{
+  "tag": "section",
+  "name": "t:sections.feature_callout_hero.name",
+  "class": "section-feature-callout-hero",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Heading"
+    },
+    {
+      "type": "select",
+      "id": "font_size",
+      "label": "Font size",
+      "options": [
+        {
+          "value": "d1",
+          "label": "Display"
+        },
+        {
+          "value": "h1",
+          "label": "Extra extra large"
+        },
+        {
+          "value": "h2",
+          "label": "Extra large"
+        },
+        {
+          "value": "h3",
+          "label": "Large"
+        },
+        {
+          "value": "h4",
+          "label": "Medium"
+        },
+        {
+          "value": "h5",
+          "label": "Small"
+        },
+        {
+          "value": "h6",
+          "label": "Extra small"
+        }
+      ],
+      "default": "h1"
+    },
+    {
+      "type": "textarea",
+      "id": "text",
+      "label": "Text",
+      "default": "Text",
+      "info": "Add [img] to insert Text image, and add [highlight] to insert Highlight text."
+    },
+    {
+      "type": "text",
+      "id": "text_highlight",
+      "label": "Text highlight",
+      "default": "Text highlight",
+      "info": "Insert texts to replace the [highlight] part in Text box"
+    },
+    {
+      "type": "color",
+      "id": "text_highlight_color",
+      "label": "Text highlight color",
+      "default": "#D8C6F1",
+      "visible_if": "{{ section.settings.text_highlight != blank }}"
+    },
+    {
+      "type": "header",
+      "content": "Product image"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+    {
+      "type": "select",
+      "id": "aspect_ratio",
+      "label": "Image aspect ratio",
+      "default": "auto",
+      "options": [
+        {
+          "value": "auto",
+          "label": "Auto"
+        },
+        {
+          "value": "2/3",
+          "label": "2:3"
+        },
+        {
+          "value": "3/4",
+          "label": "3:4"
+        },
+        {
+          "value": "3/2",
+          "label": "3:2"
+        },
+        {
+          "value": "1",
+          "label": "1:1"
+        },
+        {
+          "value": "4/3",
+          "label": "4:3"
+        },
+        {
+          "value": "16/9",
+          "label": "16:9"
+        },
+        {
+          "value": "21/9",
+          "label": "21:9"
+        },
+        {
+          "value": "custom",
+          "label": "Custom"
+        }
+      ]
+    },
+    {
+      "type": "number",
+      "id": "aspect_ratio_width",
+      "label": "Width",
+      "default": 400,
+      "visible_if": "{{ section.settings.aspect_ratio == 'custom' }}"
+    },
+    {
+      "type": "number",
+      "id": "aspect_ratio_height",
+      "label": "Height",
+      "default": 300,
+      "visible_if": "{{ section.settings.aspect_ratio == 'custom' }}"
+    },
+    {
+      "type": "range",
+      "id": "image_width",
+      "min": 20,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "label": "Image width (desktop)",
+      "default": 55
+    },
+    {
+      "type": "header",
+      "content": "Button"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button text",
+      "default": "Shop now"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link",
+      "default": "/collections/all"
+    },
+    {
+      "type": "select",
+      "id": "button_style",
+      "label": "Button style",
+      "options": [
+        {
+          "value": "primary",
+          "label": "Primary"
+        },
+        {
+          "value": "secondary",
+          "label": "Secondary"
+        },
+        {
+          "value": "link",
+          "label": "Link"
+        }
+      ],
+      "default": "primary"
+    },
+    {
+      "type": "select",
+      "id": "button_size",
+      "label": "Button size",
+      "options": [
+        {
+          "value": "xs",
+          "label": "Extra small"
+        },
+        {
+          "value": "sm",
+          "label": "Small"
+        },
+        {
+          "value": "md",
+          "label": "Medium"
+        },
+        {
+          "value": "lg",
+          "label": "Large"
+        }
+      ],
+      "default": "md"
+    },
+    {
+      "type": "header",
+      "content": "General settings"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Section color scheme"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color"
+    },
+    {
+      "type": "color_background",
+      "id": "background_gradient",
+      "label": "Background gradient"
+    },
+    {
+      "type": "number",
+      "id": "padding_top_desktop",
+      "label": "Padding top desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_desktop",
+      "label": "Padding bottom desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_top_mobile",
+      "label": "Padding top mobile",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_mobile",
+      "label": "Padding bottom mobile",
+      "default": 50
+    }
+  ],
+  "blocks": [
+    {
+      "name": "Heading image",
+      "type": "image-text",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "header",
+          "content": "Size"
+        },
+        {
+          "type": "select",
+          "id": "device",
+          "label": "Device",
+          "options": [
+            {
+              "value": "desktop",
+              "label": "Desktop"
+            },
+            {
+              "value": "mobile",
+              "label": "Mobile"
+            }
+          ],
+          "default": "desktop"
+        },
+        {
+          "type": "checkbox",
+          "id": "inherit_desktop_value",
+          "label": "Inherit desktop value",
+          "default": true,
+          "visible_if": "{{ block.settings.device == 'mobile' }}"
+        },
+        {
+          "type": "number",
+          "id": "width_desktop",
+          "label": "Width",
+          "default": 120,
+          "visible_if": "{{ block.settings.device == 'desktop' }}"
+        },
+        {
+          "type": "number",
+          "id": "height_desktop",
+          "label": "Height",
+          "default": 120,
+          "visible_if": "{{ block.settings.device == 'desktop' }}"
+        },
+        {
+          "type": "number",
+          "id": "width_mobile",
+          "label": "Width",
+          "default": 80,
+          "visible_if": "{{ block.settings.device == 'mobile' and block.settings.inherit_desktop_value == false }}"
+        },
+        {
+          "type": "number",
+          "id": "height_mobile",
+          "label": "Height",
+          "default": 80,
+          "visible_if": "{{ block.settings.device == 'mobile' and block.settings.inherit_desktop_value == false }}"
+        }
+      ]
+    },
+    {
+      "name": "Callout",
+      "type": "callout",
+      "limit": 6,
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "icon",
+          "label": "Icon image"
+        },
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Text",
+          "default": "Feature highlight"
+        },
+        {
+          "type": "header",
+          "content": "Position"
+        },
+        {
+          "type": "range",
+          "id": "top_dt",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "%",
+          "label": "Top (desktop)",
+          "default": 40
+        },
+        {
+          "type": "range",
+          "id": "left_dt",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "%",
+          "label": "Left (desktop)",
+          "default": 20
+        },
+        {
+          "type": "paragraph",
+          "content": "On mobile, callouts sit in a swipeable row in the order added."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.feature_callout_hero.presets.name",
+      "category": "Hotspots",
+      "settings": {
+        "font_size": "d1",
+        "text": "An App that [img] Revolves Around Your Pet",
+        "aspect_ratio": "auto",
+        "image_width": 55,
+        "button_text": "Shop now",
+        "color_scheme": "background-2",
+        "background_color": "",
+        "background_gradient": "",
+        "padding_top_desktop": 80,
+        "padding_bottom_desktop": 80,
+        "padding_top_mobile": 64,
+        "padding_bottom_mobile": 50
+      },
+      "blocks": [
+        {
+          "type": "image-text",
+          "settings": {
+            "device": "desktop",
+            "width_desktop": 120,
+            "height_desktop": 120,
+            "inherit_desktop_value": false,
+            "width_mobile": 74,
+            "height_mobile": 74
+          }
+        },
+        {
+          "type": "callout",
+          "settings": {
+            "text": "Multifunctional Bounce Angles",
+            "top_dt": 30,
+            "left_dt": 14
+          }
+        },
+        {
+          "type": "callout",
+          "settings": {
+            "text": "Integrated camera control button",
+            "top_dt": 66,
+            "left_dt": 16
+          }
+        },
+        {
+          "type": "callout",
+          "settings": {
+            "text": "Drop protection from 6.5m",
+            "top_dt": 22,
+            "left_dt": 82
+          }
+        },
+        {
+          "type": "callout",
+          "settings": {
+            "text": "Wireless charging and MagSafe compatible",
+            "top_dt": 78,
+            "left_dt": 80
+          }
+        }
+      ]
+    }
+  ],
+  "disabled_on": {
+    "groups": [
+      "header",
+      "footer",
+      "custom.overlay",
+      "custom.popups"
+    ]
+  }
+}
+{% endschema %}

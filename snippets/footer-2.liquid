@@ -1,3 +1,21 @@
+{% comment %}
+  Render footer 2
+
+  @param {object} section - Section object
+  @param {object} blocks - Blocks object
+  @param {string} columns_desktop - Number of columns on desktop
+  @param {string} columns_mobile - Number of columns on mobile
+  @param {string} show_icon - Show icon
+  @param {string} show_form - Show form
+  @param {string} logo - Logo
+  @param {string} sub_heading - Sub heading
+  @param {string} width_dt - Width of logo on desktop
+  @param {string} width_mb - Width of logo on mobile
+
+  @example
+    {% render 'footer-2', section: section, blocks: blocks, columns_desktop: columns_desktop, columns_mobile: columns_mobile, show_icon: show_icon, show_form: show_form, logo: logo, sub_heading: sub_heading, width_dt: width_dt, width_mb: width_mb %}
+{% endcomment %}
+
 {% if columns_desktop == 4 %}
   {% capture grid_style_1 %}
     style='--xxl: {{ columns_desktop }}; --xl: {{ columns_desktop }}; --lg: {{ columns_desktop | minus: 1 }}; --md: {{ columns_mobile | plus: 1 }}; --xs: {{ columns_mobile }}'
@@ -33,12 +51,12 @@
     <xo-grid class="xo-footer-2__grid">
       <div class="xo-footer-2__left" {{ left_style }}>
   {% endif %}
-  <!-- logo, social media, menu footer -->
+  {% comment %} logo, social media, menu footer {% endcomment %}
   <div class="xo-footer-2__top">
     <xo-grid class="xo-footer-2__grid">
       <div class="xo-footer-2__grid-logo" style="--xxl: 5; --xl: 12; --lg: 12; --md: 7; --xs: 12">
         <xo-animate xo-cascade>
-          <!-- logo -->
+          {% comment %} logo {% endcomment %}
           <a href="{{ routes.root_url }}" class="xo-footer-2__logo">
             {% if logo != blank %}
               <div class="xo-footer-2__logo-image" style="--width_dt: {{ width_dt }}px; --width_md: {{ width_mb }}px;">
@@ -48,11 +66,11 @@
               <h4 class="xo-footer-2__logo-name h4">{{ shop.name }}</h4>
             {% endif %}
           </a>
-          <!-- description -->
+          {% comment %} description {% endcomment %}
           {% if sub_heading != blank %}
             <div class="xo-footer-2__sub-heading">{{ sub_heading }}</div>
           {% endif %}
-          <!-- social media -->
+          {% comment %} social media {% endcomment %}
           <div class="xo-footer-2__social {% if show_icon == 'hidden' %} xo-footer-2__social--hidden{% endif %}">
             {%- render 'socials' -%}
           </div>
@@ -65,7 +83,7 @@
           </xo-animate>
         {%- endif -%}
       </div>
-      <!-- menu -->
+      {% comment %} menu {% endcomment %}
       <div class="xo-footer-2__grid-nav" style="--xxl: 12; --xl: 12; --lg: 12; --md: 12; --xs: 12">
         <xo-grid class="xo-footer-2__nav" {{ grid_style_1 }}>
           {% for block in blocks %}
@@ -84,7 +102,7 @@
       </div>
     </xo-grid>
   </div>
-  <!-- subcribe -->
+  {% comment %} subcribe {% endcomment %}
   <xo-animate xo-cascade>
     <div class="xo-footer-2__middle">
       <div class="xo-footer-2__input {% if settings.enable_border_radius %}xo-footer-2__input--radius{% endif %} {% if show_form == 'hidden' %} xo-footer-2__input--hidden{% endif %}">
@@ -116,7 +134,7 @@
               {% render 'button-slide', icon: 'arrow-right', icon_size: '2.4rem', size: '3.6rem', direction: 'right', style: 'secondary' %}
             </button>
           </div>
-          <!-- submit error -->
+          {% comment %} submit error {% endcomment %}
           <div class="xo-footer-2__form-message xo-footer-2__form-message--error xo-footer-2__form-error h6" id="xo-footer-form-message" style="display: none;">
             {% render 'icon', name: 'error' %}
             <p class="xo-footer-2__message">{{ 'customer.subscribe.error_text' | t }}</p>
@@ -126,7 +144,7 @@
               {% render 'form-error', form: form %}
             </div>
           {%- endif -%}
-          <!-- submit success -->
+          {% comment %} submit success {% endcomment %}
           {%- if form.posted_successfully? -%}
             <div
               class="xo-footer-2__form-message xo-footer-2__form-message--success h6"
@@ -142,12 +160,23 @@
       </div>
     </div>
   </xo-animate>
-  <!-- policy, payment, language, curency -->
+  {% comment %} policy, payment, language, curency {% endcomment %}
   <xo-animate xo-cascade>
     <div class="xo-footer-2__bottom">
       <div class="xo-footer-2__bottom-left">
         <div class="xo-footer-2__copy-right">
-          <p>&copy; {{ 'now' | date: '%Y' }} - {{ shop.name | link_to: routes.root_url }} - {{ powered_by_link }}</p>
+          <span>
+            &copy; {{ 'now' | date: '%Y' }} -
+            <span xo-animate-text-normal-hover>
+              <a href="{{ routes.root_url }}">
+                {% render 'animate-text-normal', text: shop.name, effect: 'underline-in' %}
+              </a>
+            </span>
+            -
+            <span xo-animate-text-normal-hover>
+              {% render 'animate-text-normal', text: powered_by_link, effect: 'underline-in' %}
+            </span>
+          </span>
         </div>
         <div class="xo-footer-2__policy">
           {%- if show_policy -%}
@@ -156,9 +185,8 @@
                 {%- if policy != blank -%}
                   <div class="xo-footer-2__policy-list-item">
                     <div class="xo-footer-2__policy-dot"></div>
-                    <a href="{{ policy.url }}">
-                      {{ policy.title }}
-                      <span class="xo-footer-2__line-hover"></span>
+                    <a class="focus-inset" href="{{ policy.url }}" xo-animate-text-normal-hover>
+                      {% render 'animate-text-normal', text: policy.title, effect: 'underline-in' %}
                     </a>
                   </div>
                 {%- endif -%}

@@ -45,53 +45,53 @@
 %}
 
 {%- if article and article != empty -%}
-  <{{ tag_name }} xo-cascade class='{{ container_class }}'>
+  <{{ tag_name }} xo-cascade class="{{ container_class }}">
     {%- if show_image == true and article.image -%}
-      <a href='{{ article.url }}' class='xo-article-card__image {% if settings.enable_border_radius %}xo-article-card__image--radius{% endif %}'>
+      <a href="{{ article.url }}" class="xo-article-card__image {% if settings.enable_border_radius %}xo-article-card__image--radius{% endif %}">
         {% render 'image', image: article.image, aspect_ratio: final_aspect_ratio, lazyload: lazyload, disable_alt: true %}
         {%- if show_tags -%}
-          <div class='xo-article-card__tag'>
+          <div class="xo-article-card__tag">
             {% render 'blog-tags', all_tags: article.tags %}
           </div>
         {%- endif -%}
       </a>
     {%- endif -%}
     <div
-      class='xo-article-card__information{% if settings.article_card_text_alignment %} xo-article-card__information--{{ settings.article_card_text_alignment }}{% endif %}'
+      class="xo-article-card__information{% if settings.article_card_text_alignment %} xo-article-card__information--{{ settings.article_card_text_alignment }}{% endif %}"
       {% if settings.article_card_style == 'boxed' and settings.article_card_content_padding == 0 %}
-        style='--article-card-content-padding: initial'
+        style="--article-card-content-padding: initial"
       {% endif %}
     >
-      <a href='{{ article.url }}' class='xo-article-card__heading'>
+      <a href="{{ article.url }}" class="xo-article-card__heading">
         {{ article.title }}
       </a>
       <div
-        class='xo-article-card__box'
-        style='{%- if settings.article_card_text_alignment == 'left' -%}--alignment: start;{%- elsif settings.article_card_text_alignment == 'center' -%}--alignment: center;{%- else -%}--alignment: right;{%- endif -%}'
+        class="xo-article-card__box"
+        style="{%- if settings.article_card_text_alignment == 'left' -%}--alignment: start;{%- elsif settings.article_card_text_alignment == 'center' -%}--alignment: center;{%- else -%}--alignment: right;{%- endif -%}"
       >
         {%- if show_author -%}
-          <span class='xo-article-card__author'>{{ article.author }}</span>
+          <span class="xo-article-card__author">{{ article.author }}</span>
         {%- endif -%}
         {% if show_author and show_date %}
-          <span class='xo-article-card__dot'></span>
+          <span class="xo-article-card__dot"></span>
         {% endif %}
         {%- if show_date -%}
-          <span class='xo-article-card__date'>{{ article.published_at | time_tag: format: 'date' }}</span>
+          <span class="xo-article-card__date">{{ article.published_at | time_tag: format: 'date' }}</span>
         {%- endif -%}
       </div>
       {%- if show_excerpt != blank -%}
         {%- if article.excerpt.size > 0 or article.content.size > 0 -%}
-          <div class='xo-article-card__description'>
+          <div class="xo-article-card__description xo-line-3">
             {%- if article.excerpt.size > 0 -%}
-              {{ article.excerpt | strip_html | truncatewords: 42 }}
+              {{ article.excerpt | strip_html }}
             {%- else -%}
-              {{ article.content | strip_html | truncatewords: 42 }}
+              {{ article.content | strip_html }}
             {%- endif -%}
           </div>
         {%- endif -%}
       {%- endif -%}
       {%- if show_badge -%}
-        <div class='xo-article-card__badge {{ article.badge }}'></div>
+        <div class="xo-article-card__badge {{ article.badge }}"></div>
       {%- endif -%}
     </div>
   </{{ tag_name }}>

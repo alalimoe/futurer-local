@@ -28,39 +28,39 @@
   assign final_aspect_ratio = media_aspect_ratio | default: '3/4'
 %}
 
-<xo-animate xo-cascade class='{{ container_class }}'>
-    {%- if show_image -%}
-      <div class='xo-article-card__image {% if settings.enable_border_radius %}xo-article-card__image--radius{% endif %}'>
-        {% render 'image', placeholder: placeholder_image, aspect_ratio: final_aspect_ratio, lazyload: lazyload %}
-      </div>
-    {%- endif -%}
+<xo-animate xo-cascade class="{{ container_class }}">
+  {%- if show_image -%}
+    <div class="xo-article-card__image {% if settings.enable_border_radius %}xo-article-card__image--radius{% endif %}">
+      {% render 'image', placeholder: placeholder_image, aspect_ratio: final_aspect_ratio, lazyload: lazyload %}
+    </div>
+  {%- endif -%}
+  <div
+    class="xo-article-card__information"
+    {% if settings.article_card_style == 'boxed' and settings.article_card_content_padding == 0 %}
+      style="--article-card-content-padding: initial"
+    {% endif %}
+  >
+    <a href="{{ article.url }}" class="xo-article-card__heading">
+      {{ title_default }}
+    </a>
     <div
-      class='xo-article-card__information'
-      {% if settings.article_card_style == 'boxed' and settings.article_card_content_padding == 0 %}
-        style='--article-card-content-padding: initial'
-      {% endif %}
+      class="xo-article-card__box"
+      style="{%- if settings.article_card_text_alignment == 'left' -%}--alignment: start;{%- elsif settings.article_card_text_alignment == 'center' -%}--alignment: center;{%- else -%}--alignment: right;{%- endif -%}"
     >
-      <a href='{{ article.url }}' class='xo-article-card__heading'>
-        {{ title_default }}
-      </a>
-      <div
-        class='xo-article-card__box'
-        style='{%- if settings.article_card_text_alignment == 'left' -%}--alignment: start;{%- elsif settings.article_card_text_alignment == 'center' -%}--alignment: center;{%- else -%}--alignment: right;{%- endif -%}'
-      >
-        {%- if show_author -%}
-          <span class='xo-article-card__author'>{{ author_default }}</span>
-        {%- endif -%}
-        {% if show_author and show_date %}
-          <span class='xo-article-card__dot'></span>
-        {% endif %}
-        {%- if show_date -%}
-          <span class='xo-article-card__date'>{{ date_default }}</span>
-        {%- endif -%}
-      </div>
-      {%- if show_excerpt != blank -%}
-        <div class='xo-article-card__description'>
-          {{ description_default | strip_html | truncatewords: 42 }}
-        </div>
+      {%- if show_author -%}
+        <span class="xo-article-card__author">{{ author_default }}</span>
+      {%- endif -%}
+      {% if show_author and show_date %}
+        <span class="xo-article-card__dot"></span>
+      {% endif %}
+      {%- if show_date -%}
+        <span class="xo-article-card__date">{{ date_default }}</span>
       {%- endif -%}
     </div>
-  </xo-animate>
+    {%- if show_excerpt != blank -%}
+      <div class="xo-article-card__description xo-line-3">
+        {{ description_default }}
+      </div>
+    {%- endif -%}
+  </div>
+</xo-animate>

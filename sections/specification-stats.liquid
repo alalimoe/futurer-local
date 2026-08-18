@@ -1,0 +1,569 @@
+{{ 'section-specification-stats.css' | asset_url | stylesheet_tag }}
+
+{% liquid
+  assign image = section.settings.image
+
+  assign aspect_ratio_desktop = section.settings.aspect_ratio_desktop
+  if aspect_ratio_desktop == 'custom'
+    assign aspect_ratio_desktop = section.settings.aspect_ratio_desktop_width | append: '/' | append: section.settings.aspect_ratio_desktop_height
+  endif
+
+  assign aspect_ratio_mobile = section.settings.aspect_ratio_mobile
+  if aspect_ratio_mobile == 'custom'
+    assign aspect_ratio_mobile = section.settings.aspect_ratio_mobile_width | append: '/' | append: section.settings.aspect_ratio_mobile_height
+  endif
+
+  assign media_style = '--specification-stats-ratio-desktop: ' | append: aspect_ratio_desktop | append: '; --specification-stats-ratio-mobile: ' | append: aspect_ratio_mobile
+%}
+
+{% capture stat_left %}
+  {% for block in section.blocks %}
+    {% if block.settings.side == 'left' %}
+      <xo-animate xo-cascade>
+        <div class="specification-stats__stat" {{ block.shopify_attributes }}>
+          <span class="specification-stats__stat-divider" aria-hidden="true"></span>
+          {% if block.settings.label != blank %}
+            <span class="specification-stats__stat-label">{{ block.settings.label }}</span>
+          {% endif %}
+          {% if block.settings.value != blank %}
+            <span class="specification-stats__stat-value h2">{{ block.settings.value }}</span>
+          {% endif %}
+        </div>
+      </xo-animate>
+    {% endif %}
+  {% endfor %}
+{% endcapture %}
+
+{% capture stat_right %}
+  {% for block in section.blocks %}
+    {% if block.settings.side == 'right' %}
+      <xo-animate xo-cascade>
+        <div class="specification-stats__stat" {{ block.shopify_attributes }}>
+          <span class="specification-stats__stat-divider" aria-hidden="true"></span>
+          {% if block.settings.label != blank %}
+            <span class="specification-stats__stat-label">{{ block.settings.label }}</span>
+          {% endif %}
+          {% if block.settings.value != blank %}
+            <span class="specification-stats__stat-value h2">{{ block.settings.value }}</span>
+          {% endif %}
+        </div>
+      </xo-animate>
+    {% endif %}
+  {% endfor %}
+{% endcapture %}
+
+<section {% render 'section-attr' %}>
+  <div class="specification-stats">
+    <xo-container class="specification-stats__container">
+      <xo-animate xo-cascade>
+        <div class="specification-stats__head">
+          {% render 'text', context: section %}
+          {% if section.settings.button_text != blank %}
+            <div class="specification-stats__actions">
+              {% render 'button',
+                text: section.settings.button_text,
+                link: section.settings.button_link,
+                style: section.settings.button_style,
+                size: section.settings.button_size
+              %}
+            </div>
+          {% endif %}
+        </div>
+      </xo-animate>
+
+      <div class="specification-stats__body">
+        <div class="specification-stats__col specification-stats__col--left">
+          {{ stat_left }}
+        </div>
+
+        <div class="specification-stats__media" style="{{ media_style }}">
+          <xo-animate xo-cascade class="specification-stats__frame">
+            {% render 'image',
+              image: image,
+              aspect_ratio: 'var(--specification-stats-ratio)',
+              class: 'specification-stats__media-el'
+            %}
+          </xo-animate>
+        </div>
+
+        <div class="specification-stats__col specification-stats__col--right">
+          {{ stat_right }}
+        </div>
+      </div>
+    </xo-container>
+  </div>
+</section>
+
+{% schema %}
+{
+  "tag": "section",
+  "name": "t:sections.specification_stats.name",
+  "class": "section-specification-stats",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Text"
+    },
+    {
+      "type": "select",
+      "id": "text_tag_name",
+      "label": "Tag name",
+      "options": [
+        {
+          "value": "h1",
+          "label": "H1"
+        },
+        {
+          "value": "h2",
+          "label": "H2"
+        },
+        {
+          "value": "h3",
+          "label": "H3"
+        },
+        {
+          "value": "h4",
+          "label": "H4"
+        },
+        {
+          "value": "h5",
+          "label": "H5"
+        },
+        {
+          "value": "h6",
+          "label": "H6"
+        }
+      ],
+      "default": "h2"
+    },
+    {
+      "type": "textarea",
+      "id": "text_heading",
+      "label": "Text",
+      "default": "Introducing the Plasma XTE Case, blend of cutting-edge design and unwavering protection"
+    },
+    {
+      "type": "select",
+      "id": "font_size_heading",
+      "label": "Font size heading",
+      "default": "h6",
+      "options": [
+        {
+          "value": "h1",
+          "label": "Extra extra large"
+        },
+        {
+          "value": "h2",
+          "label": "Extra large"
+        },
+        {
+          "value": "h3",
+          "label": "Large"
+        },
+        {
+          "value": "h4",
+          "label": "Medium"
+        },
+        {
+          "value": "h5",
+          "label": "Small"
+        },
+        {
+          "value": "h6",
+          "label": "Extra small"
+        }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "text_line_height",
+      "label": "Line height",
+      "min": 0,
+      "max": 3,
+      "step": 0.1,
+      "default": 1.2
+    },
+    {
+      "type": "select",
+      "id": "text_effect",
+      "label": "Effect",
+      "options": [
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "reveal",
+          "label": "Blur"
+        },
+        {
+          "value": "split",
+          "label": "Split"
+        }
+      ],
+      "default": "split"
+    },
+    {
+      "type": "number",
+      "id": "text_duration",
+      "label": "Duration (milliseconds)",
+      "default": 1000
+    },
+    {
+      "type": "range",
+      "id": "text_heading_width_desktop",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "label": "Desktop heading width",
+      "default": 45
+    },
+    {
+      "type": "range",
+      "id": "text_heading_width_mobile",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "label": "Mobile heading width",
+      "default": 100
+    },
+    {
+      "type": "header",
+      "content": "Button"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button text",
+      "default": "Shop Now"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link",
+      "default": "/collections/all"
+    },
+    {
+      "type": "select",
+      "id": "button_style",
+      "label": "Button style",
+      "options": [
+        {
+          "value": "primary",
+          "label": "Primary"
+        },
+        {
+          "value": "secondary",
+          "label": "Secondary"
+        },
+        {
+          "value": "link",
+          "label": "Link"
+        }
+      ],
+      "default": "primary"
+    },
+    {
+      "type": "select",
+      "id": "button_size",
+      "label": "Button size",
+      "options": [
+        {
+          "value": "xs",
+          "label": "Extra small"
+        },
+        {
+          "value": "sm",
+          "label": "Small"
+        },
+        {
+          "value": "md",
+          "label": "Medium"
+        },
+        {
+          "value": "lg",
+          "label": "Large"
+        }
+      ],
+      "default": "md"
+    },
+    {
+      "type": "header",
+      "content": "Image"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Product image"
+    },
+    {
+      "type": "select",
+      "id": "aspect_ratio_desktop",
+      "label": "Image aspect ratio (Desktop)",
+      "default": "3/4",
+      "options": [
+        {
+          "value": "auto",
+          "label": "Auto"
+        },
+        {
+          "value": "2/3",
+          "label": "2:3"
+        },
+        {
+          "value": "3/4",
+          "label": "3:4"
+        },
+        {
+          "value": "3/2",
+          "label": "3:2"
+        },
+        {
+          "value": "1",
+          "label": "1:1"
+        },
+        {
+          "value": "4/3",
+          "label": "4:3"
+        },
+        {
+          "value": "16/9",
+          "label": "16:9"
+        },
+        {
+          "value": "21/9",
+          "label": "21:9"
+        },
+        {
+          "value": "custom",
+          "label": "Custom"
+        }
+      ]
+    },
+    {
+      "type": "number",
+      "id": "aspect_ratio_desktop_width",
+      "label": "Width",
+      "default": 400,
+      "visible_if": "{{ section.settings.aspect_ratio_desktop == 'custom' }}"
+    },
+    {
+      "type": "number",
+      "id": "aspect_ratio_desktop_height",
+      "label": "Height",
+      "default": 300,
+      "visible_if": "{{ section.settings.aspect_ratio_desktop == 'custom' }}"
+    },
+    {
+      "type": "select",
+      "id": "aspect_ratio_mobile",
+      "label": "Image aspect ratio (Mobile)",
+      "default": "custom",
+      "options": [
+        {
+          "value": "auto",
+          "label": "Auto"
+        },
+        {
+          "value": "2/3",
+          "label": "2:3"
+        },
+        {
+          "value": "3/4",
+          "label": "3:4"
+        },
+        {
+          "value": "3/2",
+          "label": "3:2"
+        },
+        {
+          "value": "1",
+          "label": "1:1"
+        },
+        {
+          "value": "4/3",
+          "label": "4:3"
+        },
+        {
+          "value": "16/9",
+          "label": "16:9"
+        },
+        {
+          "value": "21/9",
+          "label": "21:9"
+        },
+        {
+          "value": "custom",
+          "label": "Custom"
+        }
+      ]
+    },
+    {
+      "type": "number",
+      "id": "aspect_ratio_mobile_width",
+      "label": "Width",
+      "default": 400,
+      "visible_if": "{{ section.settings.aspect_ratio_mobile == 'custom' }}"
+    },
+    {
+      "type": "number",
+      "id": "aspect_ratio_mobile_height",
+      "label": "Height",
+      "default": 300,
+      "visible_if": "{{ section.settings.aspect_ratio_mobile == 'custom' }}"
+    },
+    {
+      "type": "header",
+      "content": "General settings"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Section color scheme"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color"
+    },
+    {
+      "type": "color_background",
+      "id": "background_gradient",
+      "label": "Background gradient"
+    },
+    {
+      "type": "number",
+      "id": "padding_top_desktop",
+      "label": "Padding top desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_desktop",
+      "label": "Padding bottom desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_top_mobile",
+      "label": "Padding top mobile",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_mobile",
+      "label": "Padding bottom mobile",
+      "default": 50
+    }
+  ],
+  "blocks": [
+    {
+      "name": "Stat",
+      "type": "stat",
+      "settings": [
+        {
+          "type": "select",
+          "id": "side",
+          "label": "Side",
+          "options": [
+            {
+              "value": "left",
+              "label": "Left"
+            },
+            {
+              "value": "right",
+              "label": "Right"
+            }
+          ],
+          "default": "right"
+        },
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Label",
+          "default": "Ultra thin design"
+        },
+        {
+          "type": "text",
+          "id": "value",
+          "label": "Value",
+          "default": "01mm"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.specification_stats.presets.name",
+      "category": "Products",
+      "settings": {
+        "text_heading": "Introducing the Plasma XTE Case, blend of cutting-edge design and unwavering protection",
+        "font_size_heading": "h6",
+        "text_tag_name": "h2",
+        "text_effect": "none",
+        "text_heading_width_desktop": 45,
+        "text_heading_width_mobile": 100,
+        "button_text": "Shop Now",
+        "button_link": "/collections/all",
+        "button_style": "primary",
+        "button_size": "md",
+        "aspect_ratio_desktop": "3/4",
+        "aspect_ratio_mobile": "custom",
+        "aspect_ratio_mobile_width": 400,
+        "aspect_ratio_mobile_height": 500,
+        "color_scheme": "background-2",
+        "background_color": "#1E1E1E",
+        "background_gradient": "",
+        "padding_top_desktop": 80,
+        "padding_bottom_desktop": 96,
+        "padding_top_mobile": 56,
+        "padding_bottom_mobile": 64
+      },
+      "blocks": [
+        {
+          "type": "stat",
+          "settings": {
+            "side": "right",
+            "label": "Ultra thin design",
+            "value": "01mm"
+          }
+        },
+        {
+          "type": "stat",
+          "settings": {
+            "side": "right",
+            "label": "Custom fit with",
+            "value": "360°"
+          }
+        },
+        {
+          "type": "stat",
+          "settings": {
+            "side": "left",
+            "label": "Military Standard",
+            "value": "810G"
+          }
+        },
+        {
+          "type": "stat",
+          "settings": {
+            "side": "left",
+            "label": "Magsafe Compatible",
+            "value": "100%"
+          }
+        }
+      ]
+    }
+  ],
+  "disabled_on": {
+    "groups": [
+      "header",
+      "footer",
+      "custom.overlay",
+      "custom.popups"
+    ]
+  }
+}
+{% endschema %}

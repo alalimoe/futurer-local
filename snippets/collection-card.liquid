@@ -27,7 +27,7 @@
 
   if collection_item and collection_item != empty
     assign image = collection_item.featured_image
-    assign description = collection_item.description | strip_html | truncatewords: 12
+    assign description = collection_item.description | strip_html
     assign title = collection_item.title | escape
     assign link = collection_item.url
   endif
@@ -45,17 +45,17 @@
 
 <{{ tag_name }}
   xo-cascade
-  class='xo-collection-card{% if settings.collection_card_style %} xo-collection-card--{{ settings.collection_card_style }}{% endif %}{% if color_scheme %} color-{{ color_scheme }}{% endif %}'
+  class="xo-collection-card{% if settings.collection_card_style %} xo-collection-card--{{ settings.collection_card_style }}{% endif %}{% if color_scheme %} color-{{ color_scheme }}{% endif %}"
 >
   <a
     {% if link == blank %}
-      role='link' aria-disabled='true'
+      role="link" aria-disabled="true"
     {% else %}
-      href='{{ link }}'
+      href="{{ link }}"
     {% endif %}
-    class='xo-collection-card__link'
+    class="xo-collection-card__link"
   >
-    <div class='xo-collection-card__image'>
+    <div class="xo-collection-card__image">
       {% if image == blank %}
         {% if placeholder_image %}
           {{ placeholder | default: placeholder_image | placeholder_svg_tag: 'placeholder-svg' }}
@@ -67,14 +67,14 @@
       {% endif %}
     </div>
     <div
-      class='xo-collection-card__content'
+      class="xo-collection-card__content"
       {% if settings.collection_card_style == 'boxed' and settings.collection_card_content_padding == 0 %}
-        style='--collection-card-content-padding: initial'
+        style="--collection-card-content-padding: initial"
       {% endif %}
     >
-      <h3 class='xo-collection-card__title'>{{ title }}</h3>
+      <h3 class="xo-collection-card__title">{{ title }}</h3>
       {% if show_description and description %}
-        <div class='xo-collection-card__description'>
+        <div class="xo-collection-card__description xo-line-2">
           {{- description -}}
         </div>
       {% endif %}

@@ -17,6 +17,23 @@
   %}
 {% endcomment %}
 
+{% liquid
+  assign variant = product.selected_or_first_available_variant
+  assign is_preorder = false
+  if variant.inventory_quantity <= 0 and variant.inventory_policy == 'continue'
+    assign is_preorder = true
+  endif
+
+  if is_preorder
+    assign button_text = 'products.product.pre_order_text' | t
+  elsif variant.available
+    assign button_text = 'products.product.add_to_cart' | t
+  else
+    assign button_text = 'products.product.sold_out' | t
+  endif
+  assign button_text_unavailable = 'products.product.unavailable' | t
+%}
+
 <div class="featured-product-2">
   <div class="featured-product-2__inner">
     <div class="featured-product-2__top">
@@ -62,7 +79,9 @@
                         <div class="featured-product-2__product-variant">
                           {% for option in product.options_with_values %}
                             <div class="featured-product-2__variant-option">
-                              {% if option.name == settings.product_card_color_option_name %}
+                              {% assign color_option_names = settings.product_card_color_option_name | downcase | split: ',' %}
+                              {% assign option_name = option.name | downcase %}
+                              {% if color_option_names contains option_name %}
                                 {% render 'product-variant', option: option, style: 'color', product: product %}
                               {% else %}
                                 {% render 'product-variant', option: option, style: 'select', product: product %}
@@ -85,22 +104,11 @@
                   <xo-product-will-change xo-unique-id="xo-product-add-button-{{ section.id }}" class="featured-product-2__button">
                     <xo-cart-add
                       class="featured-product-2__button-add"
-                      {% if product.selected_or_first_available_variant.available == false %}
+                      {% if variant.available == false and is_preorder == false %}
                         xo-disabled
                       {% endif %}
                     >
-                      {% if product and product != empty %}
-                        {% if product.selected_or_first_available_variant.available %}
-                          {% assign button_text = 'products.product.add_to_cart' | t %}
-                          {% render 'button', style: 'primary', text: button_text, size: 'md', block: true %}
-                        {% else %}
-                          {% assign button_text = 'products.product.sold_out' | t %}
-                          {% render 'button', style: 'primary', text: button_text, size: 'md', block: true %}
-                        {% endif %}
-                      {% else %}
-                        {% assign button_text = 'products.product.add_to_cart' | t %}
-                        {% render 'button', style: 'primary', text: button_text, size: 'md', block: true %}
-                      {% endif %}
+                      {% render 'button', style: 'primary', text: button_text, size: 'md', block: true, text_unavailable: button_text_unavailable %}
                     </xo-cart-add>
                   </xo-product-will-change>
                 </xo-animate>

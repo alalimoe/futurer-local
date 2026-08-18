@@ -4,8 +4,11 @@
   Accepts:
   - heading: {String} Heading (required)
   - collection_list: {Object} Collection list (required)
+  - button: {Object} Button (required)
+  - number: {Number} Number (required)
+
   Usage:
-  {% render 'collection-link', heading: heading, collection_list: collection_list %}
+  {% render 'collection-link', heading: heading, collection_list: collection_list, button: button, number: number %}
 {% endcomment %}
 
 {% liquid
@@ -13,43 +16,43 @@
   assign offset = limit | plus: 1
 %}
 
-<div class='collection-link'>
+<div class="collection-link">
   <xo-collapse-provider>
-    <div class='collection-link__desktop'>
-      <div class='collection-link__item'>
+    <div class="collection-link__desktop">
+      <div class="collection-link__item">
         {% if heading != blank %}
-          <div class='collection-link__title'>{{ heading }}</div>
+          <div class="collection-link__title">{{ heading }}</div>
         {% endif %}
         {% if collection_list != blank %}
           {% if collection_list.count > limit %}
-            <div class='collection-link__wrapper'>
-              <ul class='collection-link__nav'>
+            <div class="collection-link__wrapper">
+              <ul class="collection-link__nav">
                 {% for collection in collection_list limit: limit %}
-                  <li class='collection-link__nav-item'>
-                    <a href='{{ collection.url }}'>{{ collection.title }}</a>
+                  <li class="collection-link__nav-item">
+                    <a href="{{ collection.url }}">{{ collection.title }}</a>
                   </li>
                 {% endfor %}
               </ul>
-              <ul class='collection-link__nav'>
+              <ul class="collection-link__nav">
                 {% for collection in collection_list offset: offset limit: limit %}
-                  <li class='collection-link__nav-item'>
-                    <a href='{{ collection.url }}'>{{ collection.title }}</a>
+                  <li class="collection-link__nav-item">
+                    <a href="{{ collection.url }}">{{ collection.title }}</a>
                   </li>
                 {% endfor %}
               </ul>
             </div>
           {% else %}
-            <ul class='collection-link__nav'>
+            <ul class="collection-link__nav">
               {% for collection in collection_list %}
-                <li class='collection-link__nav-item'>
-                  <a href='{{ collection.url }}'>{{ collection.title }}</a>
+                <li class="collection-link__nav-item">
+                  <a href="{{ collection.url }}">{{ collection.title }}</a>
                 </li>
               {% endfor %}
             </ul>
           {% endif %}
           {% if button.button_text != blank %}
-            <div class='collection-link__button'>
-              <a href='{{ button.button_link }}' class='collection-link__button-link'>
+            <div class="collection-link__button">
+              <a href="{{ button.button_link }}" class="collection-link__button-link">
                 {% render 'button-slide', text: button.button_text, icon: 'arrow-right', icon_size: '1.6rem', direction: 'right', style: 'transparent' %}
               </a>
             </div>
@@ -57,19 +60,19 @@
         {% endif %}
       </div>
     </div>
-    <div class='collection-link__mobile'>
-      <div class='collection-link__item'>
-        <xo-collapse-trigger class='collection-link__trigger' xo-name='{{ heading }}'>
-          <div class='collection-link__title'>{{ heading }}</div>
-          <div class='collection-link__icon'>
+    <div class="collection-link__mobile">
+      <div class="collection-link__item">
+        <xo-collapse-trigger class="collection-link__trigger" xo-name="{{ heading | default: 'collapse-item-' | append: number }}">
+          <div class="collection-link__title">{{ heading }}</div>
+          <div class="collection-link__icon">
             {% render 'icon', name: 'arrow-down', size: '2.4rem' %}
           </div>
         </xo-collapse-trigger>
-        <xo-collapse class='collection-link__collapse' xo-name='{{ heading }}'>
-          <ul class='collection-link__nav'>
+        <xo-collapse class="collection-link__collapse" xo-name="{{ heading | default: 'collapse-item-' | append: number }}">
+          <ul class="collection-link__nav">
             {% for collection in collection_list %}
-              <li class='collection-link__nav-item'>
-                <a href='{{ collection.url }}'>{{ collection.title }}</a>
+              <li class="collection-link__nav-item">
+                <a href="{{ collection.url }}">{{ collection.title }}</a>
               </li>
             {% endfor %}
           </ul>

@@ -1,0 +1,503 @@
+{{ 'section-shoppable-feed.css' | asset_url | stylesheet_tag }}
+
+{% liquid
+  assign columns_desktop = section.settings.columns_desktop | default: 3
+  assign active_index = section.settings.active_index
+  assign enable_loop = section.settings.enable_loop
+  assign media_aspect_ratio = section.settings.media_aspect_ratio
+  if media_aspect_ratio == 'custom'
+    assign media_aspect_ratio = section.settings.media_aspect_ratio_width | append: '/' | append: section.settings.media_aspect_ratio_height
+  endif
+  assign columns_tablet = 2
+  if columns_desktop < 2
+    assign columns_tablet = columns_desktop
+  endif
+%}
+
+<section {% render 'section-attr' %}>
+  <div class="shoppable-feed">
+    <xo-container class="shoppable-feed__container">
+      <div class="shoppable-feed__head">
+        {% render 'text', context: section %}
+      </div>
+
+      <xo-carousel
+        class="shoppable-feed__carousel"
+        xo-per-view="{{ columns_desktop }}"
+        xo-gap="28"
+        xo-overflow="visible"
+        xo-speed="400"
+        xo-active-index="{{ active_index }}"
+        {% if enable_loop %}
+          xo-loop
+        {% endif %}
+        xo-breakpoints="
+          {
+            768: { perView: 1, gap: 12 },
+            992: { perView: {{ columns_tablet }} }
+          }
+        "
+      >
+        <xo-carousel-inner class="shoppable-feed__viewport">
+          <xo-carousel-list class="shoppable-feed__list">
+            {% if section.blocks.size > 0 %}
+              {% for block in section.blocks %}
+                {% liquid
+                  assign product = block.settings.product
+                  assign media_type = block.settings.media_type
+                %}
+                <xo-carousel-slide class="shoppable-feed__slide" {{ block.shopify_attributes }}>
+                  <xo-animate xo-cascade>
+                    <div class="shoppable-feed__card{% if settings.enable_border_radius %} shoppable-feed__card--radius{% endif %}" style="--aspect-ratio: {{ media_aspect_ratio | default: '3/4' }}">
+                      <div class="shoppable-feed__media">
+                        {% if media_type == 'video' and block.settings.video != blank %}
+                          {% render 'media',
+                            media: block.settings.video,
+                            type: 'video',
+                            class: 'shoppable-feed__media-el',
+                            autoplay: true,
+                            muted: true,
+                            controls: false,
+                            enable_video_looping: true
+                          %}
+                        {% else %}
+                          {% render 'image',
+                            image: block.settings.image,
+                            aspect_ratio: media_aspect_ratio,
+                            class: 'shoppable-feed__media-el'
+                          %}
+                        {% endif %}
+                      </div>
+  
+                      {% if product != blank %}
+                        <div class="shoppable-feed__tag">
+                          <xo-product
+                            xo-selected-or-first-available-variant-id="{{ product.selected_or_first_available_variant.id }}"
+                            xo-product-url="{{ product.url }}"
+                            xo-product-id="{{ product.id }}"
+                            xo-section-id="{{ section.id }}"
+                            data-section="{{ section.id }}"
+                            class="shoppable-feed__tag-product"
+                          >
+                            <a href="{{ product.url }}" class="shoppable-feed__thumb" aria-label="{{ product.title | escape }}">
+                              {% render 'image', image: product.featured_image, aspect_ratio: '4/5', class: 'shoppable-feed__thumb-img' %}
+                            </a>
+                            <div class="shoppable-feed__tag-info">
+                              <a href="{{ product.url }}" class="shoppable-feed__tag-title">{{ product.title | escape }}</a>
+                              <div class="shoppable-feed__tag-price">
+                                {% render 'price', product: product, use_variant: true %}
+                              </div>
+                            </div>
+                            <xo-cart-add class="shoppable-feed__add">
+                              {% render 'button-icon', size: 'md', style: 'primary', type: 'boxed', icon: 'add-to-cart', icon_size: '20', effect: 'slide-up' %}
+                            </xo-cart-add>
+                            {% render 'product-data', product: product %}
+                          </xo-product>
+                        </div>
+                      {% endif %}
+                    </div>
+                  </xo-animate>
+                </xo-carousel-slide>
+              {% endfor %}
+            {% else %}
+              {% for i in (1..4) %}
+                <xo-carousel-slide class="shoppable-feed__slide">
+                  <xo-animate xo-cascade>
+                    <div class="shoppable-feed__card{% if settings.enable_border_radius %} shoppable-feed__card--radius{% endif %}">
+                      <div class="shoppable-feed__media">
+                        {% render 'image', image: blank, aspect_ratio: '5/8', class: 'shoppable-feed__media-el' %}
+                      </div>
+                      <div class="shoppable-feed__tag">
+                        <div class="shoppable-feed__tag-product">
+                          <div class="shoppable-feed__thumb">
+                            {% render 'image', image: blank, aspect_ratio: '4/5', class: 'shoppable-feed__thumb-img' %}
+                          </div>
+                          <div class="shoppable-feed__tag-info">
+                            <span class="shoppable-feed__tag-title">{{ 'onboarding.product_title' | t }}</span>
+                            <div class="shoppable-feed__tag-price">
+                              {% render 'price', product: empty, use_variant: true %}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </xo-animate>
+                </xo-carousel-slide>
+              {% endfor %}
+            {% endif %}
+          </xo-carousel-list>
+        </xo-carousel-inner>
+      </xo-carousel>
+    </xo-container>
+  </div>
+</section>
+
+{% schema %}
+{
+  "tag": "section",
+  "name": "t:sections.shoppable_feed.name",
+  "class": "section-shoppable-feed",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Text"
+    },
+    {
+      "type": "select",
+      "id": "text_tag_name",
+      "label": "Tag name",
+      "options": [
+        {
+          "value": "h1",
+          "label": "H1"
+        },
+        {
+          "value": "h2",
+          "label": "H2"
+        },
+        {
+          "value": "h3",
+          "label": "H3"
+        },
+        {
+          "value": "h4",
+          "label": "H4"
+        },
+        {
+          "value": "h5",
+          "label": "H5"
+        },
+        {
+          "value": "h6",
+          "label": "H6"
+        }
+      ],
+      "default": "h2"
+    },
+    {
+      "type": "textarea",
+      "id": "text_heading",
+      "label": "Text",
+      "default": "Shop the feed"
+    },
+    {
+      "type": "select",
+      "id": "font_size_heading",
+      "label": "Font size heading",
+      "default": "h4",
+      "options": [
+        {
+          "value": "h1",
+          "label": "Extra extra large"
+        },
+        {
+          "value": "h2",
+          "label": "Extra large"
+        },
+        {
+          "value": "h3",
+          "label": "Large"
+        },
+        {
+          "value": "h4",
+          "label": "Medium"
+        },
+        {
+          "value": "h5",
+          "label": "Small"
+        },
+        {
+          "value": "h6",
+          "label": "Extra small"
+        }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "text_line_height",
+      "label": "Line height",
+      "min": 0,
+      "max": 3,
+      "step": 0.1,
+      "default": 1.2
+    },
+    {
+      "type": "select",
+      "id": "text_effect",
+      "label": "Effect",
+      "options": [
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "reveal",
+          "label": "Blur"
+        },
+        {
+          "value": "split",
+          "label": "Split"
+        }
+      ],
+      "default": "split"
+    },
+    {
+      "type": "number",
+      "id": "text_duration",
+      "label": "Duration (milliseconds)",
+      "default": 1000
+    },
+    {
+      "type": "range",
+      "id": "text_heading_width_desktop",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "label": "Desktop heading width",
+      "default": 100
+    },
+    {
+      "type": "range",
+      "id": "text_heading_width_mobile",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "label": "Mobile heading width",
+      "default": 100
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "columns_desktop",
+      "min": 2,
+      "max": 6,
+      "step": 1,
+      "label": "Cards per view",
+      "default": 3
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_loop",
+      "label": "Enable loop",
+      "info": "Slides repeat endlessly in both directions.",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "active_index",
+      "min": 0,
+      "max": 6,
+      "step": 1,
+      "label": "Active index",
+      "default": 1
+    },
+    {
+      "type": "select",
+      "id": "media_aspect_ratio",
+      "label": "Media aspect ratio",
+      "default": "3/4",
+      "options": [
+        {
+          "value": "auto",
+          "label": "Auto"
+        },
+        {
+          "value": "2/3",
+          "label": "2:3"
+        },
+        {
+          "value": "3/4",
+          "label": "3:4"
+        },
+        {
+          "value": "3/2",
+          "label": "3:2"
+        },
+        {
+          "value": "1",
+          "label": "1:1"
+        },
+        {
+          "value": "4/3",
+          "label": "4:3"
+        },
+        {
+          "value": "16/9",
+          "label": "16:9"
+        },
+        {
+          "value": "21/9",
+          "label": "21:9"
+        },
+        {
+          "value": "custom",
+          "label": "Custom"
+        }
+      ]
+    },
+    {
+      "type": "number",
+      "id": "media_aspect_ratio_width",
+      "label": "Width",
+      "default": 400,
+      "visible_if": "{{ section.settings.media_aspect_ratio == 'custom' }}"
+    },
+    {
+      "type": "number",
+      "id": "media_aspect_ratio_height",
+      "label": "Height",
+      "default": 300,
+      "visible_if": "{{ section.settings.media_aspect_ratio == 'custom' }}"
+    },
+    {
+      "type": "header",
+      "content": "General settings"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Section color scheme"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color"
+    },
+    {
+      "type": "color_background",
+      "id": "background_gradient",
+      "label": "Background gradient"
+    },
+    {
+      "type": "number",
+      "id": "padding_top_desktop",
+      "label": "Padding top desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_desktop",
+      "label": "Padding bottom desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_top_mobile",
+      "label": "Padding top mobile",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_mobile",
+      "label": "Padding bottom mobile",
+      "default": 50
+    }
+  ],
+  "blocks": [
+    {
+      "name": "Feed item",
+      "type": "feed_item",
+      "settings": [
+        {
+          "type": "select",
+          "id": "media_type",
+          "label": "Media type",
+          "options": [
+            {
+              "value": "image",
+              "label": "Image"
+            },
+            {
+              "value": "video",
+              "label": "Video"
+            }
+          ],
+          "default": "image"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image",
+          "visible_if": "{{ block.settings.media_type == 'image' }}"
+        },
+        {
+          "type": "video",
+          "id": "video",
+          "label": "Video",
+          "visible_if": "{{ block.settings.media_type == 'video' }}"
+        },
+        {
+          "type": "header",
+          "content": "Product"
+        },
+        {
+          "type": "product",
+          "id": "product",
+          "label": "Product"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.shoppable_feed.presets.name",
+      "category": "Collections",
+      "settings": {
+        "text_heading": "Shop the feed",
+        "font_size_heading": "h4",
+        "text_tag_name": "h2",
+        "text_effect": "none",
+        "columns_desktop": 3,
+        "enable_loop": false,
+        "media_aspect_ratio": "5/8",
+        "color_scheme": "",
+        "background_color": "",
+        "background_gradient": "",
+        "padding_top_desktop": 64,
+        "padding_bottom_desktop": 64,
+        "padding_top_mobile": 40,
+        "padding_bottom_mobile": 40
+      },
+      "blocks": [
+        {
+          "type": "feed_item",
+          "settings": {
+            "media_type": "image"
+          }
+        },
+        {
+          "type": "feed_item",
+          "settings": {
+            "media_type": "image"
+          }
+        },
+        {
+          "type": "feed_item",
+          "settings": {
+            "media_type": "image"
+          }
+        },
+        {
+          "type": "feed_item",
+          "settings": {
+            "media_type": "image"
+          }
+        }
+      ]
+    }
+  ],
+  "disabled_on": {
+    "groups": [
+      "header",
+      "footer",
+      "custom.overlay",
+      "custom.popups"
+    ]
+  }
+}
+{% endschema %}

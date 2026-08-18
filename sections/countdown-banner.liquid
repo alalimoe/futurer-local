@@ -1,0 +1,544 @@
+{{ 'section-countdown-banner.css' | asset_url | stylesheet_tag }}
+
+{% liquid
+  assign image = section.settings.background_image
+  assign image_mobile = section.settings.background_image_mobile | default: image
+  assign overlay_opacity = section.settings.overlay_opacity | default: 20
+  assign overlay = overlay_opacity | divided_by: 100.0
+  assign countdown_label = section.settings.countdown_label
+  assign end_time = section.settings.end_time
+
+  # Resolve the section aspect ratio from its setting. 'auto' follows the
+  # uploaded image's natural ratio (falling back when no image is set).
+  assign ar_dt = section.settings.aspect_ratio_desktop
+  if ar_dt == 'custom'
+    assign ar_dt = section.settings.aspect_ratio_desktop_width | append: '/' | append: section.settings.aspect_ratio_desktop_height
+  elsif ar_dt == 'auto'
+    if image != blank and image.aspect_ratio != blank
+      assign ar_dt = image.aspect_ratio
+    else
+      assign ar_dt = '16/9'
+    endif
+  endif
+
+  assign ar_mb = section.settings.aspect_ratio_mobile
+  if ar_mb == 'custom'
+    assign ar_mb = section.settings.aspect_ratio_mobile_width | append: '/' | append: section.settings.aspect_ratio_mobile_height
+  elsif ar_mb == 'auto'
+    if image_mobile != blank and image_mobile.aspect_ratio != blank
+      assign ar_mb = image_mobile.aspect_ratio
+    else
+      assign ar_mb = '375/667'
+    endif
+  endif
+
+  if end_time != blank
+    assign timestamp = end_time | date: '%s' | append: '000'
+  else
+    assign add_day = 3 | times: 86400
+    assign timestamp = 'now' | date: '%s' | plus: add_day | append: '000'
+  endif
+%}
+
+{%- capture banner_style -%}
+  --overlay: {{ overlay }};
+  --ar-dt: {{ ar_dt }};
+  --ar-mb: {{ ar_mb }};
+  {%- if image != blank %} --img-dt: url('{{ image | image_url: width: 2400 }}');{% endif -%}
+  {%- if image_mobile != blank %} --img-mb: url('{{ image_mobile | image_url: width: 1200 }}');{% endif -%}
+{%- endcapture -%}
+
+<section {% render 'section-attr' %}>
+  <div class="countdown-banner" style="{{ banner_style }}">
+    <div class="countdown-banner__bg xo-background-lazyload" aria-hidden="true"></div>
+    <div class="countdown-banner__overlay" aria-hidden="true"></div>
+
+    <xo-container class="countdown-banner__container">
+      <div class="countdown-banner__inner">
+        <div class="countdown-banner__top">
+          <xo-animate xo-cascade class="countdown-banner__heading">
+            {% render 'text', context: section %}
+          </xo-animate>
+          {% if section.settings.button_text != blank %}
+            <xo-animate xo-cascade class="countdown-banner__actions">
+              {% render 'button',
+                text: section.settings.button_text,
+                link: section.settings.button_link,
+                style: section.settings.button_style,
+                size: section.settings.button_size
+              %}
+            </xo-animate>
+          {% endif %}
+        </div>
+
+        <div class="countdown-banner__bottom">
+          {% if countdown_label != blank %}
+            <xo-animate xo-cascade>
+              <p class="countdown-banner__label">{{ countdown_label }}</p>
+            </xo-animate>
+          {% endif %}
+
+          <xo-animate xo-cascade>
+            <xo-countdown xo-timestamp="{{ timestamp }}" class="countdown-banner__timer">
+              <div class="countdown-banner__unit">
+                <xo-countdown-day class="countdown-banner__num"></xo-countdown-day>
+                <span class="countdown-banner__unit-label">{{ 'general.popup.day' | t }}</span>
+              </div>
+              <span class="countdown-banner__divider" aria-hidden="true"></span>
+              <div class="countdown-banner__unit">
+                <xo-countdown-hour class="countdown-banner__num"></xo-countdown-hour>
+                <span class="countdown-banner__unit-label">{{ 'general.popup.hour' | t }}</span>
+              </div>
+              <span class="countdown-banner__divider" aria-hidden="true"></span>
+              <div class="countdown-banner__unit">
+                <xo-countdown-minute class="countdown-banner__num"></xo-countdown-minute>
+                <span class="countdown-banner__unit-label">{{ 'general.popup.minus' | t }}</span>
+              </div>
+              <span class="countdown-banner__divider" aria-hidden="true"></span>
+              <div class="countdown-banner__unit">
+                <xo-countdown-second class="countdown-banner__num"></xo-countdown-second>
+                <span class="countdown-banner__unit-label">{{ 'general.popup.second' | t }}</span>
+              </div>
+            </xo-countdown>
+          </xo-animate>
+        </div>
+      </div>
+    </xo-container>
+  </div>
+</section>
+
+{% schema %}
+{
+  "tag": "section",
+  "name": "t:sections.countdown_banner.name",
+  "class": "section-countdown-banner",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Background"
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image",
+      "label": "Background image"
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image_mobile",
+      "label": "Background image (mobile)",
+      "info": "Falls back to the desktop image when empty."
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "label": "Overlay opacity",
+      "default": 20
+    },
+    {
+      "type": "select",
+      "id": "aspect_ratio_desktop",
+      "label": "Desktop aspect ratio",
+      "default": "auto",
+      "options": [
+        {
+          "value": "auto",
+          "label": "Auto"
+        },
+        {
+          "value": "2/3",
+          "label": "2:3"
+        },
+        {
+          "value": "3/4",
+          "label": "3:4"
+        },
+        {
+          "value": "3/2",
+          "label": "3:2"
+        },
+        {
+          "value": "1",
+          "label": "1:1"
+        },
+        {
+          "value": "4/3",
+          "label": "4:3"
+        },
+        {
+          "value": "16/9",
+          "label": "16:9"
+        },
+        {
+          "value": "21/9",
+          "label": "21:9"
+        },
+        {
+          "value": "custom",
+          "label": "Custom"
+        }
+      ]
+    },
+    {
+      "type": "number",
+      "id": "aspect_ratio_desktop_width",
+      "label": "Width",
+      "default": 400,
+      "visible_if": "{{ section.settings.aspect_ratio_desktop == 'custom' }}"
+    },
+    {
+      "type": "number",
+      "id": "aspect_ratio_desktop_height",
+      "label": "Height",
+      "default": 300,
+      "visible_if": "{{ section.settings.aspect_ratio_desktop == 'custom' }}"
+    },
+    {
+      "type": "select",
+      "id": "aspect_ratio_mobile",
+      "label": "Mobile aspect ratio",
+      "default": "auto",
+      "options": [
+        {
+          "value": "auto",
+          "label": "Auto"
+        },
+        {
+          "value": "2/3",
+          "label": "2:3"
+        },
+        {
+          "value": "3/4",
+          "label": "3:4"
+        },
+        {
+          "value": "3/2",
+          "label": "3:2"
+        },
+        {
+          "value": "1",
+          "label": "1:1"
+        },
+        {
+          "value": "4/3",
+          "label": "4:3"
+        },
+        {
+          "value": "16/9",
+          "label": "16:9"
+        },
+        {
+          "value": "21/9",
+          "label": "21:9"
+        },
+        {
+          "value": "custom",
+          "label": "Custom"
+        }
+      ]
+    },
+    {
+      "type": "number",
+      "id": "aspect_ratio_mobile_width",
+      "label": "Width",
+      "default": 400,
+      "visible_if": "{{ section.settings.aspect_ratio_mobile == 'custom' }}"
+    },
+    {
+      "type": "number",
+      "id": "aspect_ratio_mobile_height",
+      "label": "Height",
+      "default": 300,
+      "visible_if": "{{ section.settings.aspect_ratio_mobile == 'custom' }}"
+    },
+    {
+      "type": "header",
+      "content": "Text"
+    },
+    {
+      "type": "select",
+      "id": "text_tag_name",
+      "label": "Tag name",
+      "options": [
+        {
+          "value": "h1",
+          "label": "H1"
+        },
+        {
+          "value": "h2",
+          "label": "H2"
+        },
+        {
+          "value": "h3",
+          "label": "H3"
+        },
+        {
+          "value": "h4",
+          "label": "H4"
+        },
+        {
+          "value": "h5",
+          "label": "H5"
+        },
+        {
+          "value": "h6",
+          "label": "H6"
+        }
+      ],
+      "default": "h2"
+    },
+    {
+      "type": "textarea",
+      "id": "text_heading",
+      "label": "Text",
+      "default": "Don't miss out the offer 50% Sale off"
+    },
+    {
+      "type": "select",
+      "id": "font_size_heading",
+      "label": "Font size heading",
+      "default": "h5",
+      "options": [
+        {
+          "value": "h1",
+          "label": "Extra extra large"
+        },
+        {
+          "value": "h2",
+          "label": "Extra large"
+        },
+        {
+          "value": "h3",
+          "label": "Large"
+        },
+        {
+          "value": "h4",
+          "label": "Medium"
+        },
+        {
+          "value": "h5",
+          "label": "Small"
+        },
+        {
+          "value": "h6",
+          "label": "Extra small"
+        }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "text_line_height",
+      "label": "Line height",
+      "min": 0,
+      "max": 3,
+      "step": 0.1,
+      "default": 1.2
+    },
+    {
+      "type": "select",
+      "id": "text_effect",
+      "label": "Effect",
+      "options": [
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "reveal",
+          "label": "Blur"
+        },
+        {
+          "value": "split",
+          "label": "Split"
+        }
+      ],
+      "default": "split"
+    },
+    {
+      "type": "number",
+      "id": "text_duration",
+      "label": "Duration (milliseconds)",
+      "default": 1000
+    },
+    {
+      "type": "range",
+      "id": "text_heading_width_desktop",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "label": "Desktop heading width",
+      "default": 100
+    },
+    {
+      "type": "range",
+      "id": "text_heading_width_mobile",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "label": "Mobile heading width",
+      "default": 100
+    },
+    {
+      "type": "header",
+      "content": "Button"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button text",
+      "default": "Shop Now"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link",
+      "default": "/collections/all"
+    },
+    {
+      "type": "select",
+      "id": "button_style",
+      "label": "Button style",
+      "options": [
+        {
+          "value": "primary",
+          "label": "Primary"
+        },
+        {
+          "value": "secondary",
+          "label": "Secondary"
+        },
+        {
+          "value": "link",
+          "label": "Link"
+        }
+      ],
+      "default": "primary"
+    },
+    {
+      "type": "select",
+      "id": "button_size",
+      "label": "Button size",
+      "options": [
+        {
+          "value": "xs",
+          "label": "Extra small"
+        },
+        {
+          "value": "sm",
+          "label": "Small"
+        },
+        {
+          "value": "md",
+          "label": "Medium"
+        },
+        {
+          "value": "lg",
+          "label": "Large"
+        }
+      ],
+      "default": "md"
+    },
+    {
+      "type": "header",
+      "content": "Countdown"
+    },
+    {
+      "type": "text",
+      "id": "countdown_label",
+      "label": "Label",
+      "default": "Hurry Up! It'll end up in:"
+    },
+    {
+      "type": "text",
+      "id": "end_time",
+      "label": "End time",
+      "info": "Format: YYYY-MM-DD HH:MM (e.g. 2026-12-31 23:59). Leave blank for 3 days from now."
+    },
+    {
+      "type": "header",
+      "content": "General settings"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Section color scheme"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color"
+    },
+    {
+      "type": "color_background",
+      "id": "background_gradient",
+      "label": "Background gradient"
+    },
+    {
+      "type": "number",
+      "id": "padding_top_desktop",
+      "label": "Padding top desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_desktop",
+      "label": "Padding bottom desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_top_mobile",
+      "label": "Padding top mobile",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_mobile",
+      "label": "Padding bottom mobile",
+      "default": 50
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.countdown_banner.presets.name",
+      "category": "Banners",
+      "settings": {
+        "overlay_opacity": 20,
+        "aspect_ratio_desktop": "auto",
+        "aspect_ratio_mobile": "custom",
+        "aspect_ratio_mobile_width": 375,
+        "aspect_ratio_mobile_height": 667,
+        "text_heading": "Don't miss out the offer 50% Sale off",
+        "font_size_heading": "h5",
+        "text_tag_name": "h2",
+        "text_effect": "none",
+        "button_text": "Shop Now",
+        "button_link": "/collections/all",
+        "button_style": "primary",
+        "button_size": "md",
+        "countdown_label": "Hurry Up! It'll end up in:",
+        "color_scheme": "",
+        "background_color": "",
+        "background_gradient": "",
+        "padding_top_desktop": 0,
+        "padding_bottom_desktop": 0,
+        "padding_top_mobile": 0,
+        "padding_bottom_mobile": 0
+      }
+    }
+  ],
+  "disabled_on": {
+    "groups": [
+      "header",
+      "footer",
+      "custom.overlay",
+      "custom.popups"
+    ]
+  }
+}
+{% endschema %}

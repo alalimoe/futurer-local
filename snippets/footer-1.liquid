@@ -1,3 +1,21 @@
+{% comment %}
+  Render footer 1
+
+  @param {object} section - Section object
+  @param {object} blocks - Blocks object
+  @param {string} columns_desktop - Number of columns on desktop
+  @param {string} columns_mobile - Number of columns on mobile
+  @param {string} show_icon - Show icon
+  @param {string} show_form - Show form
+  @param {string} logo - Logo
+  @param {string} sub_heading - Sub heading
+  @param {string} width_dt - Width of logo on desktop
+  @param {string} width_mb - Width of logo on mobile
+
+  @example
+    {% render 'footer-1', section: section, blocks: blocks, columns_desktop: columns_desktop, columns_mobile: columns_mobile, show_icon: show_icon, show_form: show_form, logo: logo, sub_heading: sub_heading, width_dt: width_dt, width_mb: width_mb %}
+{% endcomment %}
+
 {% if columns_desktop == 4 %}
   {% capture grid_style_1 %}
     style='--xxl: {{ columns_desktop }}; --xl: {{ columns_desktop }}; --lg: {{ columns_desktop | minus: 1 }}; --md: {{ columns_mobile | plus: 1 }}; --xs: {{ columns_mobile }};'
@@ -36,13 +54,13 @@
 %}
 
 <div class="xo-footer-1">
-  <!-- logo, social media, menu footer -->
+  {% comment %} logo, social media, menu footer {% endcomment %}
   <div class="xo-footer-1__top">
     <xo-grid class="xo-footer-1__grid">
       <div class="{{ logo_class }}" style="{{ logo_style }}">
         <xo-animate xo-cascade>
           <div class="xo-footer-1__wrapper">
-            <!-- logo -->
+            {% comment %} logo {% endcomment %}
             <a href="{{ routes.root_url }}" class="xo-footer-1__logo">
               {% if logo != blank %}
                 <div class="xo-footer-1__logo-image" style="--width_dt: {{ width_dt }}px; --width_md: {{ width_mb }}px;">
@@ -52,11 +70,11 @@
                 <h4 class="xo-footer-1__logo-name h4">{{ shop.name }}</h4>
               {% endif %}
             </a>
-            <!-- description -->
+            {% comment %} description {% endcomment %}
             {% if sub_heading != blank %}
               <div class="xo-footer-1__sub-heading">{{ sub_heading }}</div>
             {% endif %}
-            <!-- social media -->
+            {% comment %} social media {% endcomment %}
             {% if show_icon == 'show' %}
               <div class="xo-footer-1__social">
                 {%- render 'socials' -%}
@@ -73,7 +91,7 @@
         {%- endif -%}
       </div>
       {% if link_list_blocks.size > 0 or information_blocks.size > 0 %}
-        <!-- menu -->
+        {% comment %} menu {% endcomment %}
         <div class="xo-footer-1__grid-nav" {{ grid_style_2 }}>
           <xo-grid class="xo-footer-1__nav" {{ grid_style_1 }}>
             {% for block in blocks %}
@@ -93,7 +111,7 @@
       {% endif %}
     </xo-grid>
   </div>
-  <!-- subcribe -->
+  {% comment %} subcribe {% endcomment %}
   <xo-animate xo-cascade>
     <div class="xo-footer-1__center">
       <div class="xo-footer-1__input {% if settings.enable_border_radius %}xo-footer-1__input--radius{% endif %} {% if show_form == 'hidden' %} xo-footer-1__input--hidden{% endif %}">
@@ -125,7 +143,7 @@
               {% render 'button-slide', icon: 'arrow-right', icon_size: '2.4rem', size: '3.6rem', direction: 'right', style: 'secondary' %}
             </button>
           </div>
-          <!-- submit error -->
+          {% comment %} submit error {% endcomment %}
           <div class="xo-footer-1__form-message xo-footer-1__form-message--error xo-footer-1__form-error h6" id="xo-footer-form-message" style="display: none;">
             {% render 'icon', name: 'error' %}
             <p class="xo-footer-1__message">{{ 'customer.subscribe.error_text' | t }}</p>
@@ -135,7 +153,7 @@
               {% render 'form-error', form: form %}
             </div>
           {%- endif -%}
-          <!-- submit success -->
+          {% comment %} submit success {% endcomment %}
           {%- if form.posted_successfully? -%}
             <div
               class="xo-footer-1__form-message xo-footer-1__form-message--success h6"
@@ -151,54 +169,62 @@
       </div>
     </div>
   </xo-animate>
-  <!-- policy, payment, language, curency -->
-  <xo-animate xo-cascade>
-    <div class="xo-footer-1__bottom">
-      <div class="xo-footer-1__bottom-left">
-        <div class="xo-footer-1__copy-right">
-          <p>&copy; {{ 'now' | date: '%Y' }} - {{ shop.name | link_to: routes.root_url }} - {{ powered_by_link }}</p>
-        </div>
-        <div class="xo-footer-1__policy">
-          {%- if show_policy -%}
-            <div class="xo-footer-1__policy-list">
-              {%- for policy in shop.policies -%}
-                {%- if policy != blank -%}
-                  <div class="xo-footer-1__policy-list-item">
-                    <div class="xo-footer-1__policy-dot"></div>
-                    <a href="{{ policy.url }}">
-                      {{ policy.title }}
-                      <span class="xo-footer-1__line-hover"></span>
-                    </a>
-                  </div>
-                {%- endif -%}
-              {%- endfor -%}
-            </div>
-          {%- endif -%}
-        </div>
+  {% comment %} policy, payment, language, curency {% endcomment %}
+  <div class="xo-footer-1__bottom">
+    <div class="xo-footer-1__bottom-left">
+      <div class="xo-footer-1__copy-right">
+        <span>
+          &copy; {{ 'now' | date: '%Y' }} -
+          <span xo-animate-text-normal-hover>
+            <a href="{{ routes.root_url }}">
+              {% render 'animate-text-normal', text: shop.name, effect: 'underline-in' %}
+            </a>
+          </span>
+          -
+          <span xo-animate-text-normal-hover>
+            {% render 'animate-text-normal', text: powered_by_link, effect: 'underline-in' %}
+          </span>
+        </span>
       </div>
-      <div class="xo-footer-1__bottom-right">
-        {% if show_payment == 'show' %}
-          <div class="xo-footer-1__payment">
-            <ul class="xo-footer-1__list-payment" role="list">
-              {% for type in shop.enabled_payment_types %}
-                <li class="xo-footer-1__payment-item">
-                  {{ type | payment_type_svg_tag: class: '' }}
-                </li>
-              {%- endfor -%}
-            </ul>
+      <div class="xo-footer-1__policy">
+        {%- if show_policy -%}
+          <div class="xo-footer-1__policy-list">
+            {%- for policy in shop.policies -%}
+              {%- if policy != blank -%}
+                <div class="xo-footer-1__policy-list-item">
+                  <div class="xo-footer-1__policy-dot"></div>
+                  <a class="focus-inset" href="{{ policy.url }}" xo-animate-text-normal-hover>
+                    {% render 'animate-text-normal', text: policy.title, effect: 'underline-in' %}
+                  </a>
+                </div>
+              {%- endif -%}
+            {%- endfor -%}
           </div>
-        {% endif %}
-        {% if show_language_selector == 'show' %}
-          <div class="xo-footer-1__language-select">
-            {% render 'language-select', selector_position: 'footer' %}
-          </div>
-        {% endif %}
-        {% if show_currency_selector == 'show' %}
-          <div class="xo-footer-1__currency-select">
-            {% render 'currency-select', selector_position: 'footer' %}
-          </div>
-        {% endif %}
+        {%- endif -%}
       </div>
     </div>
-  </xo-animate>
+    <div class="xo-footer-1__bottom-right">
+      {% if show_payment == 'show' %}
+        <div class="xo-footer-1__payment">
+          <ul class="xo-footer-1__list-payment" role="list">
+            {% for type in shop.enabled_payment_types %}
+              <li class="xo-footer-1__payment-item">
+                {{ type | payment_type_svg_tag: class: '' }}
+              </li>
+            {%- endfor -%}
+          </ul>
+        </div>
+      {% endif %}
+      {% if show_language_selector == 'show' %}
+        <div class="xo-footer-1__language-select">
+          {% render 'language-select', selector_position: 'footer' %}
+        </div>
+      {% endif %}
+      {% if show_currency_selector == 'show' %}
+        <div class="xo-footer-1__currency-select">
+          {% render 'currency-select', selector_position: 'footer' %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
 </div>
