@@ -29,13 +29,15 @@
       </div>
 
       {%- if shop.customer_accounts_enabled -%}
-        <a href="{%- if customer -%}{{ routes.account_url }}{%- else -%}{{ routes.account_login_url }}{%- endif -%}" class="xo-menu-hamburger__action-account" aria-label="Account">
+        <shopify-account menu="{{ customer_account_menu | default: 'customer-account-main-menu' }}">
           {% if customer %}
-            {% render 'icon', name: 'user', size: '1.6rem' %}
+            <div class="account-button__fallback{% if settings.enable_border_radius %} account-button__fallback--radius{% endif %}"></div>
           {% else %}
-            {% render 'icon', name: 'user', size: '1.6rem' %}
+            <div class="xo-menu-hamburger__action-account" slot="signed-out-avatar">
+              {% render 'icon', name: 'user', size: '1.6rem' %}
+            </div>
           {% endif %}
-        </a>
+        </shopify-account>
       {%- endif -%}
 
       {% if settings.cart_type == 'page' or settings.cart_type == 'notification' %}

@@ -1,0 +1,405 @@
+{{ 'section-product-highlight.css' | asset_url | stylesheet_tag }}
+
+{% liquid
+  assign image = section.settings.image
+
+  assign aspect_ratio = section.settings.aspect_ratio
+  if aspect_ratio == 'custom'
+    assign aspect_ratio = section.settings.aspect_ratio_width | append: '/' | append: section.settings.aspect_ratio_height
+  endif
+
+  assign image_width = section.settings.image_width
+%}
+
+<div {% render 'section-attr' %}>
+  <div class="product-highlight">
+    <xo-container class="product-highlight__container">
+      <div class="product-highlight__stage">
+        <div class="product-highlight__product" style="--image-width: {{ image_width }}%">
+          <xo-animate xo-cascade>
+            {% render 'image', image: image, alt: image.alt, aspect_ratio: aspect_ratio, class: 'product-highlight__product-image' %}
+          </xo-animate>
+        </div>
+
+        {% for block in section.blocks %}
+          {% liquid
+            assign a_image = block.settings.image
+            assign a_text = block.settings.text
+            assign top_dt = block.settings.top_dt
+            assign left_dt = block.settings.left_dt
+            assign width = block.settings.width
+            assign show_line = block.settings.show_line
+            assign line_direction = block.settings.line_direction | default: 'right'
+            assign line_length = block.settings.line_length
+
+            assign a_aspect_ratio = block.settings.image_aspect_ratio
+            if a_aspect_ratio == 'custom'
+              assign a_aspect_ratio = block.settings.image_aspect_ratio_width | append: '/' | append: block.settings.image_aspect_ratio_height
+            endif
+
+            assign annotation_class = 'product-highlight__annotation'
+            if show_line
+              assign annotation_class = annotation_class | append: ' product-highlight__annotation--has-line'
+            endif
+          %}
+          <xo-animate
+            xo-type="fade"
+            class="{{ annotation_class }}"
+            style="--top_dt: {{ top_dt }}; --left_dt: {{ left_dt }}; --width: {{ width }}rem; --line-length: {{ line_length }}rem"
+            {{ block.shopify_attributes }}
+          >
+            {% if show_line and line_direction == 'left' %}
+              <span class="product-highlight__line product-highlight__line--left"></span>
+            {% endif %}
+
+            <div class="product-highlight__annotation-inner">
+              {% if a_image != blank %}
+                <div class="product-highlight__annotation-image">
+                  {% render 'image', image: a_image, aspect_ratio: a_aspect_ratio, disable_alt: true, class: 'product-highlight__annotation-image-media' %}
+                </div>
+              {% endif %}
+              {% if a_text != blank %}
+                <div class="product-highlight__annotation-text h5">{{ a_text }}</div>
+              {% endif %}
+            </div>
+
+            {% if show_line and line_direction == 'right' %}
+              <span class="product-highlight__line product-highlight__line--right"></span>
+            {% endif %}
+          </xo-animate>
+        {% endfor %}
+      </div>
+    </xo-container>
+  </div>
+</div>
+
+{% schema %}
+{
+  "tag": "section",
+  "name": "t:sections.product_highlight.name",
+  "class": "section-product-highlight",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Product image"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+    {
+      "type": "select",
+      "id": "aspect_ratio",
+      "label": "Image aspect ratio",
+      "default": "auto",
+      "options": [
+        {
+          "value": "auto",
+          "label": "Auto"
+        },
+        {
+          "value": "2/3",
+          "label": "2:3"
+        },
+        {
+          "value": "3/4",
+          "label": "3:4"
+        },
+        {
+          "value": "3/2",
+          "label": "3:2"
+        },
+        {
+          "value": "1",
+          "label": "1:1"
+        },
+        {
+          "value": "4/3",
+          "label": "4:3"
+        },
+        {
+          "value": "16/9",
+          "label": "16:9"
+        },
+        {
+          "value": "21/9",
+          "label": "21:9"
+        },
+        {
+          "value": "custom",
+          "label": "Custom"
+        }
+      ]
+    },
+    {
+      "type": "number",
+      "id": "aspect_ratio_width",
+      "label": "Width",
+      "default": 400,
+      "visible_if": "{{ section.settings.aspect_ratio == 'custom' }}"
+    },
+    {
+      "type": "number",
+      "id": "aspect_ratio_height",
+      "label": "Height",
+      "default": 300,
+      "visible_if": "{{ section.settings.aspect_ratio == 'custom' }}"
+    },
+    {
+      "type": "range",
+      "id": "image_width",
+      "min": 20,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "label": "Image width (desktop)",
+      "default": 42
+    },
+    {
+      "type": "header",
+      "content": "General settings"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Section color scheme"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color"
+    },
+    {
+      "type": "color_background",
+      "id": "background_gradient",
+      "label": "Background gradient"
+    },
+    {
+      "type": "number",
+      "id": "padding_top_desktop",
+      "label": "Padding top desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_desktop",
+      "label": "Padding bottom desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_top_mobile",
+      "label": "Padding top mobile",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_mobile",
+      "label": "Padding bottom mobile",
+      "default": 50
+    }
+  ],
+  "blocks": [
+    {
+      "name": "Annotation",
+      "type": "annotation",
+      "limit": 6,
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "select",
+          "id": "image_aspect_ratio",
+          "label": "Image aspect ratio",
+          "default": "3/2",
+          "options": [
+            {
+              "value": "auto",
+              "label": "Auto"
+            },
+            {
+              "value": "2/3",
+              "label": "2:3"
+            },
+            {
+              "value": "3/4",
+              "label": "3:4"
+            },
+            {
+              "value": "3/2",
+              "label": "3:2"
+            },
+            {
+              "value": "1",
+              "label": "1:1"
+            },
+            {
+              "value": "4/3",
+              "label": "4:3"
+            },
+            {
+              "value": "16/9",
+              "label": "16:9"
+            },
+            {
+              "value": "21/9",
+              "label": "21:9"
+            },
+            {
+              "value": "custom",
+              "label": "Custom"
+            }
+          ]
+        },
+        {
+          "type": "number",
+          "id": "image_aspect_ratio_width",
+          "label": "Width",
+          "default": 400,
+          "visible_if": "{{ block.settings.image_aspect_ratio == 'custom' }}"
+        },
+        {
+          "type": "number",
+          "id": "image_aspect_ratio_height",
+          "label": "Height",
+          "default": 300,
+          "visible_if": "{{ block.settings.image_aspect_ratio == 'custom' }}"
+        },
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Text"
+        },
+        {
+          "type": "range",
+          "id": "width",
+          "min": 10,
+          "max": 60,
+          "step": 1,
+          "unit": "rem",
+          "label": "Width (desktop)",
+          "default": 32
+        },
+        {
+          "type": "header",
+          "content": "Position"
+        },
+        {
+          "type": "range",
+          "id": "top_dt",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "%",
+          "label": "Top (desktop)",
+          "default": 45
+        },
+        {
+          "type": "range",
+          "id": "left_dt",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "%",
+          "label": "Left (desktop)",
+          "default": 12
+        },
+        {
+          "type": "paragraph",
+          "content": "On mobile, annotations stack above the product image in the order added."
+        },
+        {
+          "type": "header",
+          "content": "Connector line"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_line",
+          "label": "Show connector line",
+          "default": false
+        },
+        {
+          "type": "select",
+          "id": "line_direction",
+          "label": "Line direction",
+          "options": [
+            {
+              "value": "right",
+              "label": "Right"
+            },
+            {
+              "value": "left",
+              "label": "Left"
+            }
+          ],
+          "default": "right",
+          "visible_if": "{{ block.settings.show_line }}"
+        },
+        {
+          "type": "range",
+          "id": "line_length",
+          "min": 2,
+          "max": 40,
+          "step": 1,
+          "unit": "rem",
+          "label": "Line length",
+          "default": 12,
+          "visible_if": "{{ block.settings.show_line }}"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.product_highlight.presets.name",
+      "category": "Products",
+      "settings": {
+        "aspect_ratio": "auto",
+        "image_width": 42,
+        "color_scheme": "",
+        "background_color": "",
+        "background_gradient": "linear-gradient(180deg, rgba(255, 255, 255, 1) 55%, rgba(9, 106, 159, 0.35) 100%)",
+        "padding_top_desktop": 156,
+        "padding_bottom_desktop": 0,
+        "padding_top_mobile": 48,
+        "padding_bottom_mobile": 0
+      },
+      "blocks": [
+        {
+          "type": "annotation",
+          "settings": {
+            "text": "<p>The case is designed with gently cushioned corners and a soft silicone material, protecting your phone from everyday bumps and drops from heights up to 2 meters.</p>",
+            "width": 46,
+            "top_dt": 51,
+            "left_dt": 84,
+            "show_line": false
+          }
+        },
+        {
+          "type": "annotation",
+          "settings": {
+            "width": 32,
+            "top_dt": 44,
+            "left_dt": 12,
+            "show_line": true,
+            "line_direction": "right",
+            "line_length": 36
+          }
+        }
+      ]
+    }
+  ],
+  "disabled_on": {
+    "groups": [
+      "header",
+      "footer",
+      "custom.overlay",
+      "custom.popups"
+    ]
+  }
+}
+{% endschema %}

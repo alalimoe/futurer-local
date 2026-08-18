@@ -30,9 +30,20 @@
       assign total_price_after_discount = total_price | minus: total_price_discount
     endif
   endif
+
+  assign variant = product.selected_or_first_available_variant
+  assign is_preorder = false
+  if variant.inventory_quantity <= 0 and variant.inventory_policy == 'continue'
+    assign is_preorder = true
+  endif
 %}
 
 <div class="combo-product">
+  <xo-combo-price
+    style="display: contents;"
+    xo-discount-type="{{ discount_type }}"
+    xo-discount-value="{{ discount_value }}"
+  >
   <xo-grid class="combo-product__grid">
     <div class="combo-product__inner" style="--lg: 8; --md: 10; --xs: 12; --start-lg: 3; --start-md: 2;">
       {% if heading != blank %}
@@ -42,95 +53,76 @@
       {% endif %}
       <div class="combo-product__content{% if color_scheme_box %} color-{{ color_scheme_box }}{% endif %}{% if settings.enable_border_radius %} combo-product__content--radius{% endif %}">
         <div class="combo-product__wrap">
-          <xo-carousel
-            xo-per-view="2"
-            xo-overflow="visible"
-            xo-gap="0"
-            xo-breakpoints='
-              {
-                400: {
-                  perView: 1,
-                  overflow: "visible",
-                  gap: 5
-                },
-              }
-            '
-          >
-            <xo-carousel-inner>
-              <xo-carousel-list>
-                {% if products and products != empty %}
-                  {% for product in products %}
-                    <xo-carousel-slide class="combo-product__slide">
-                      <div class="combo-product__item">
-                        <xo-product
-                          xo-selected-or-first-available-variant-id="{{ product.selected_or_first_available_variant.id }}"
-                          xo-product-id="{{ product.id }}"
-                          xo-section-id="{{ section.id }}"
-                          class="combo-product__product"
-                        >
-                          <a href="{%- render 'product-card-variant-url', product: product -%}" class="combo-product__link">
-                            <div class="combo-product__product-media">
-                              {% render 'product-image', product: product, aspect_ratio: '1' %}
+          <div class="combo-product__list">
+            {% if products and products != empty %}
+              {% for product in products %}
+                <div class="combo-product__slide">
+                  <div class="combo-product__item">
+                    <xo-product
+                      xo-selected-or-first-available-variant-id="{{ product.selected_or_first_available_variant.id }}"
+                      xo-product-id="{{ product.id }}"
+                      xo-section-id="{{ section.id }}"
+                      data-price="{{ product.selected_or_first_available_variant.price }}"
+                      class="combo-product__product"
+                    >
+                      <a href="{%- render 'product-card-variant-url', product: product -%}" class="combo-product__link">
+                        <div class="combo-product__product-media">
+                          {% render 'product-image', product: product, aspect_ratio: '1' %}
+                        </div>
+                      </a>
+                      <div class="combo-product__product-info">
+                        <xo-animate xo-cascade>
+                          {% if product and product != empty %}
+                            <a href="{%- render 'product-card-variant-url', product: product -%}" class="combo-product__link">
+                              <span class="combo-product__product-title">{{ product.title }}</span>
+                            </a>
+                          {% else %}
+                            <span class="combo-product__product-title">{{ 'onboarding.product_title' | t }}</span>
+                          {% endif %}
+                        </xo-animate>
+                        {% if product and product != empty %}
+                          {% unless product.has_only_default_variant %}
+                            {% assign product_url = shop.url | append: '/products/' | append: product.handle | append: '/?section_id=variant-option-modal' %}
+                            <div class="combo-product__variant-hidden" xo-binding="variant_price" id="variant-price-{{ product.id }}">
+                              {{ product.selected_or_first_available_variant.price }}
                             </div>
-                          </a>
-                          <div class="combo-product__product-info">
-                            <xo-animate xo-cascade>
-                              {% if product and product != empty %}
-                                <a href="{%- render 'product-card-variant-url', product: product -%}" class="combo-product__link">
-                                  <span class="combo-product__product-title">{{ product.title }}</span>
-                                </a>
-                              {% else %}
-                                <span class="combo-product__product-title">{{ 'onboarding.product_title' | t }}</span>
-                              {% endif %}
-                            </xo-animate>
-                            {% if product and product != empty %}
-                              {% unless product.has_only_default_variant %}
-                                <xo-animate xo-cascade>
-                                  <xo-product-variants>
-                                    <div class="combo-product__product-variant">
-                                      {% for option in product.options_with_values %}
-                                        <div class="combo-product__variant-option">
-                                          {% if option.name == settings.product_card_color_option_name %}
-                                            {% render 'product-variant', option: option, style: 'color', product: product %}
-                                          {% else %}
-                                            {% render 'product-variant', option: option, style: 'boxed', product: product, select_custom_popover_name_suffix: product.id %}
-                                          {% endif %}
-                                        </div>
-                                      {% endfor %}
-                                    </div>
-                                  </xo-product-variants>
-                                </xo-animate>
-                              {% endunless %}
-                            {% endif %}
-                          </div>
-                          {% render 'product-data', product: product %}
-                        </xo-product>
+                            <xo-product-quick-view-trigger 
+                              class="combo-product__quick-view"
+                              xo-modal-name="quick-view"
+                              xo-product-url="{{ product_url }}"
+                            >
+                              <span>{{ 'sections.combo_product.option' | t }} </span>
+                              <xo-product-variant-title>{{ product.selected_or_first_available_variant.title }}</xo-product-variant-title>
+                            </xo-product-quick-view-trigger>
+                          {% endunless %}
+                        {% endif %}
                       </div>
-                    </xo-carousel-slide>
-                  {% endfor %}
-                {% else %}
-                  {% for i in (1..2) %}
-                    <xo-carousel-slide class="combo-product__slide">
-                      <div class="combo-product__item">
-                        <div class="combo-product__product">
-                          <div class="combo-product__link">
-                            <div class="combo-product__product-media">
-                              {% render 'product-image', product: empty, aspect_ratio: '1' %}
-                            </div>
-                          </div>
-                          <div class="combo-product__product-info">
-                            <xo-animate xo-cascade>
-                              <span class="combo-product__product-title">{{ 'onboarding.product_title' | t }}</span>
-                            </xo-animate>
-                          </div>
+                      {% render 'product-data', product: product %}
+                    </xo-product>
+                  </div>
+                </div>
+              {% endfor %}
+            {% else %}
+              {% for i in (1..2) %}
+                <div class="combo-product__slide">
+                  <div class="combo-product__item">
+                    <div class="combo-product__product">
+                      <div class="combo-product__link">
+                        <div class="combo-product__product-media">
+                          {% render 'product-image', product: empty, aspect_ratio: '1' %}
                         </div>
                       </div>
-                    </xo-carousel-slide>
-                  {% endfor %}
-                {% endif %}
-              </xo-carousel-list>
-            </xo-carousel-inner>
-          </xo-carousel>
+                      <div class="combo-product__product-info">
+                        <xo-animate xo-cascade>
+                          <span class="combo-product__product-title">{{ 'onboarding.product_title' | t }}</span>
+                        </xo-animate>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              {% endfor %}
+            {% endif %}
+          </div>
         </div>
         <div class="combo-product__bottom">
           <xo-animate xo-cascade>
@@ -143,24 +135,14 @@
             <xo-product-will-change class="combo-product__button" xo-unique-id="combo-product-add-button-{{ section.id }}">
               <xo-cart-add
                 class="combo-product__button"
-                {% if product.selected_or_first_available_variant.available == false %}
+                {% if variant.available == false and is_preorder == false %}
                   xo-disabled
                 {% endif %}
                 xo-product-id="[{{ product_id_arr }}]"
                 xo-section-id="{{ section.id }}"
               >
-                {% if product and product != empty %}
-                  {% if product.selected_or_first_available_variant.available %}
-                    {% assign button_text = 'products.product.add_to_cart' | t %}
-                    {% render 'button', style: 'primary', text: button_text, size: 'md', block: true %}
-                  {% else %}
-                    {% assign button_text = 'products.product.sold_out' | t %}
-                    {% render 'button', style: 'primary', text: button_text, size: 'md', block: true %}
-                  {% endif %}
-                {% else %}
-                  {% assign button_text = 'products.product.add_to_cart' | t %}
-                  {% render 'button', style: 'primary', text: button_text, size: 'md', block: true %}
-                {% endif %}
+                {% assign add_button_text = 'sections.combo_product.add_to_cart' | t %}
+                {% render 'button', style: 'primary', text: add_button_text, size: 'md', block: true, text_unavailable: button_text_unavailable %}
               </xo-cart-add>
             </xo-product-will-change>
           </xo-animate>
@@ -168,4 +150,5 @@
       </div>
     </div>
   </xo-grid>
+  </xo-combo-price>
 </div>

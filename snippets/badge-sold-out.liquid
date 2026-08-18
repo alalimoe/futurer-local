@@ -22,12 +22,22 @@
   endif
 
   assign available = target.available | default: false
+
+  assign variant = product.selected_or_first_available_variant
+  assign is_preorder = false
+  if variant.inventory_quantity <= 0 and variant.inventory_policy == 'continue'
+    assign is_preorder = true
+  endif
 -%}
 
 {% if available == false %}
-  <div class='xo-badge-sold-out{% if settings.enable_border_radius %} xo-badge-sold-out--radius{% endif %}'>
-    <span class='xo-badge-sold-out__title'>
-      {{ 'products.product.sold_out' | t }}
+  <div class="xo-badge-sold-out{% if settings.enable_border_radius %} xo-badge-sold-out--radius{% endif %}">
+    <span class="xo-badge-sold-out__title">
+      {%- if is_preorder -%}
+        {{ 'products.product.pre_order_text' | t }}
+      {%- else -%}
+        {{ 'products.product.sold_out' | t }}
+      {%- endif -%}
     </span>
   </div>
 {% endif %}

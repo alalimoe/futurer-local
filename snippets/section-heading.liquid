@@ -6,15 +6,57 @@
   - description: {String} Description of the page (optional)
   - align: {String} Alignment of the page heading (optional)
   - heading_tag: {String} Heading tag (required)
+  - font_size_desktop: {Number} Heading font-size on desktop in px, 0/blank = theme default (optional)
+  - font_size_mobile: {Number} Heading font-size on mobile in px, 0/blank = theme default (optional)
+
+  When both font sizes are provided the heading size is interpolated fluidly
+  between the mobile (375px viewport) and desktop (1440px viewport) values with CSS clamp.
 
   Usage:
   {% render 'section-heading', heading: section_heading, description: section_description, align: section_align, heading_tag: heading_tag %}
 {% endcomment %}
 
+{% liquid
+  assign fs_desktop = font_size_desktop | default: 0
+  assign fs_mobile = font_size_mobile | default: 0
+  assign heading_style = ''
+
+  if fs_desktop > 0 or fs_mobile > 0
+    # Fall back to the single provided value when only one device is set.
+    if fs_desktop <= 0
+      assign fs_desktop = fs_mobile
+    endif
+    if fs_mobile <= 0
+      assign fs_mobile = fs_desktop
+    endif
+
+    # clamp() bounds must be ordered low -> high regardless of which device is larger.
+    if fs_desktop >= fs_mobile
+      assign fs_lower = fs_mobile
+      assign fs_upper = fs_desktop
+    else
+      assign fs_lower = fs_desktop
+      assign fs_upper = fs_mobile
+    endif
+
+    # Fluid preferred value: mobile size at 375px viewport, desktop size at 1920px.
+    assign vw_min = 375
+    assign vw_max = 1920
+    assign fs_diff = fs_desktop | minus: fs_mobile
+    assign vw_diff = vw_max | minus: vw_min
+    assign slope = fs_diff | times: 1.00 | divided_by: vw_diff
+    assign slope_vw = slope | times: 100 | round: 4
+    assign intercept = slope | times: vw_min
+    assign intercept = fs_mobile | minus: intercept | round: 3
+
+    assign heading_style = 'font-size:clamp(' | append: fs_lower | append: 'px, ' | append: intercept | append: 'px + ' | append: slope_vw | append: 'vw, ' | append: fs_upper | append: 'px);'
+  endif
+%}
+
 {% if heading != blank or description != blank %}
   <div class="xo-section-heading{% if align  %} xo-section-heading--{{ align }}{% endif %}">
     {% if heading != blank %}
-      <{{ heading_tag }} class="xo-section-heading__heading">
+      <{{ heading_tag }} class="xo-section-heading__heading"{% if heading_style != blank %} style="{{ heading_style }}"{% endif %}>
         {{ heading }}
       </{{ heading_tag }}>
     {% endif %}

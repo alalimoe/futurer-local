@@ -30,19 +30,42 @@
 
     assign discount_saving = compare_at_price | minus: price
   endif
+
+  assign container_class = 'xo-badge-sale'
+  if class
+    assign container_class = container_class | append: ' ' | append: class
+  endif
+
+  if settings.enable_border_radius
+    assign container_class = container_class | append: ' xo-badge-sale--radius'
+  endif
+
+  if settings.discount_type != blank
+    assign container_class = container_class | append: ' xo-badge-sale--' | append: settings.discount_type
+  endif
 -%}
 
 {% if compare_at_price > price %}
-  <div class='xo-badge-sale{% if class %} {{ class }}{% endif %}{% if settings.enable_border_radius %} xo-badge-sale--radius{% endif %}'>
-    <div class='xo-badge-sale__wrapper xo-stack' style='--ai: center; --jc: center; --gap: 2; --gap-mobile: 2'>
-      <span>
-        {{ 'products.product.on_sale' | t }}
-        {% if settings.product_card_show_discount_as == 'saving' %}
-          {{ discount_saving | money_with_currency }}
-        {% else %}
-          {{ discount_percentage | round }}%
-        {% endif %}
-      </span>
-    </div>
+  <div class="{{ container_class }}">
+    {% capture content %}
+      <div class="xo-badge-sale__wrapper xo-stack" style="--ai: center; --jc: center; --gap: 2; --gap-mobile: 2">
+        <span>
+          {{ 'products.product.on_sale' | t }}
+          {% if settings.product_card_show_discount_as == 'saving' %}
+            {{ discount_saving | money_with_currency }}
+          {% else %}
+            {{ discount_percentage | round }}%
+          {% endif %}
+        </span>
+      </div>
+    {% endcapture %}
+
+    {% if settings.discount_type == 'marquee' %}
+      <xo-marquee xo-speed="1">
+        {{ content }}
+      </xo-marquee>
+    {% else %}
+      {{ content }}
+    {% endif %}
   </div>
 {% endif %}

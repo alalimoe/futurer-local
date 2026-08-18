@@ -10,6 +10,12 @@
 
 {% liquid
   assign final_aspect_ratio = media_aspect_ratio | default: '1'
+
+  assign variant = product.selected_or_first_available_variant
+  assign is_preorder = false
+  if variant.inventory_quantity <= 0 and variant.inventory_policy == 'continue'
+    assign is_preorder = true
+  endif
 %}
 
 {% if product and product != empty %}
@@ -70,23 +76,22 @@
           <div class="product-card-custom__button">
             <xo-cart-add
               class="xo-product-card-custom__add"
-              {% if product.selected_or_first_available_variant.available == false %}
+              {% if variant.available == false and is_preorder == false %}
                 xo-disabled
               {% endif %}
             >
               {% liquid
-                assign tooltip_title = 'onboarding.product_add_cart' | t
-                if product.selected_or_first_available_variant.available == false
-                  assign tooltip_title = 'onboarding.product_sold_out' | t
+                if is_preorder
+                  assign tooltip_title = 'products.product.pre_order_text' | t
+                elsif variant.available
+                  assign tooltip_title = 'products.product.add_to_cart' | t
+                else
+                  assign tooltip_title = 'products.product.sold_out' | t
                 endif
               %}
               <xo-tooltip xo-title="{{ tooltip_title }}" xo-placement="top-center" class="tooltip{% if settings.enable_border_radius %} tooltip--radius{% endif %}">
                 <div class="product-card-custom__add-cart">
-                  {% if product.selected_or_first_available_variant.available == false %}
-                    {% render 'button-icon', size: 'md', style: 'primary', type: 'boxed', icon: 'plus', icon_size: '20', effect: 'rotate' %}
-                  {%- else -%}
-                    {% render 'button-icon', size: 'md', style: 'primary', type: 'boxed', icon: 'plus', icon_size: '20', effect: 'rotate' %}
-                  {% endif %}
+                  {% render 'button-icon', size: 'md', style: 'primary', type: 'boxed', icon: 'plus', icon_size: '20', effect: 'rotate' %}
                 </div>
               </xo-tooltip>
             </xo-cart-add>

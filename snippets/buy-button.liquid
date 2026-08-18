@@ -1,9 +1,17 @@
-{% assign form_id = 'product_form_id-' | append: section.id %}
+{% liquid
+  assign form_id = 'product_form_id-' | append: section.id
+
+  assign variant = product.selected_or_first_available_variant
+  assign is_preorder = false
+  if variant.inventory_quantity <= 0 and variant.inventory_policy == 'continue'
+    assign is_preorder = true
+  endif
+%}
 
 {%- form 'product', product, id: form_id, novalidate: 'novalidate', data-type: 'add-to-cart-form' -%}
-  <input type='hidden' name='id' value='{{ product.selected_or_first_available_variant.id }}'>
+  <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
   <xo-cart-quantity>
-    <input type='hidden' name='quantity' value='1'>
+    <input type="hidden" name="quantity" value="1">
   </xo-cart-quantity>
 
   {% comment %} button này dùng để query của app subscription, không xoá {% endcomment %}
@@ -19,12 +27,12 @@
     {%- render 'recipient-form', product: product, form: form, section: section -%}
   {% endif %}
 
-  <div class='shopify-payment-button__group {% if settings.enable_border_radius %}shopify-payment-button__group--radius{% endif %}'>
+  <div class="shopify-payment-button__group {% if settings.enable_border_radius %}shopify-payment-button__group--radius{% endif %}">
     {% if show_dynamic_checkout and gift_card_recipient_feature_active == false %}
       <xo-product-will-change
-        class='shopify-payment-button__buy'
-        xo-unique-id='product-buy-now-button-{{ section.id }}'
-        {% if product.selected_or_first_available_variant.available == false %}
+        class="shopify-payment-button__buy"
+        xo-unique-id="product-buy-now-button-{{ section.id }}"
+        {% if variant.available == false and is_preorder == false %}
           xo-disabled
         {% endif %}
       >

@@ -16,6 +16,12 @@
 {% liquid
   assign is_bundle = is_bundle | default: false
   assign is_select_options = is_select_options | default: true, allow_false: true
+
+  assign variant = product.selected_or_first_available_variant
+  assign is_preorder = false
+  if variant.inventory_quantity <= 0 and variant.inventory_policy == 'continue'
+    assign is_preorder = true
+  endif
 %}
 
 {% if product.variants.size > 1 and is_select_options %}
@@ -25,13 +31,15 @@
     {{ 'products.product.add_to_cart' | t }}
   {% endif %}
 {% else %}
-  {% if product.selected_or_first_available_variant.available %}
+  {%- if is_preorder -%}
+    {{ 'products.product.pre_order_text' | t }}
+  {%- elsif variant.available == false -%}
+    {{ 'products.product.sold_out' | t }}
+  {%- else -%}
     {% if is_bundle %}
       {{ 'products.product.button_bundle_text' | t }}
     {% else %}
       {{ 'products.product.add_to_cart' | t }}
     {% endif %}
-  {% else %}
-    {{ 'products.product.sold_out' | t }}
-  {% endif %}
+  {%- endif -%}
 {% endif %}

@@ -64,7 +64,7 @@
                             </a>
                           </xo-animate>
                           <xo-animate xo-cascade>
-                            <div class="product-carousel__product-description">{{ product.description | truncatewords: 30 }}</div>
+                            <div class="product-carousel__product-description xo-line-3">{{ product.description }}</div>
                           </xo-animate>
                           <xo-animate xo-cascade>
                             <div class="product-carousel__product-price">
@@ -79,7 +79,9 @@
                                 <div class="product-carousel__product-variant">
                                   {% for option in product.options_with_values %}
                                     <div class="product-carousel__variant-option">
-                                      {% if option.name == settings.product_card_color_option_name %}
+                                      {% assign color_option_names = settings.product_card_color_option_name | downcase | split: ',' %}
+                                      {% assign option_name = option.name | downcase %}
+                                      {% if color_option_names contains option_name %}
                                         {% render 'product-variant', option: option, style: 'color', product: product %}
                                       {% else %}
                                         {% render 'product-variant', option: option, style: 'select', product: product %}

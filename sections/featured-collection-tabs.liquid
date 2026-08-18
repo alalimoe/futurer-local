@@ -1,0 +1,355 @@
+{{ 'section-featured-collection-tabs.css' | asset_url | stylesheet_tag }}
+
+{% liquid
+  assign current_handle = section.blocks.first.settings.spf_collection.handle
+  if request.path contains '/collections/'
+    assign current_handle = request.path | split: '/' | last
+  endif
+  assign current_collection = collections[current_handle]
+  assign products = current_collection.products
+  assign count = section.settings.count
+  assign button_text = section.settings.button_text
+%}
+
+<div {% render 'section-attr' %}>
+  <div class="xo-featured-collection-tabs">
+    <xo-container>
+      <xo-collection-tabs class="xo-featured-collection-tabs__inner" xo-section-id="{{ section.id }}">
+        <div class="xo-featured-collection-tabs__head">
+          {%- if section.blocks.size > 0 -%}
+            <xo-drag-scroll class="xo-featured-collection-tabs__tabs" role="tablist">
+              {%- for block in section.blocks -%}
+                {%- assign col = block.settings.spf_collection -%}
+                {%- liquid
+                  assign tab_label = block.settings.tab_label | default: col.title
+                  if tab_label == blank
+                    assign tab_label = 'sections.featured_collection_tabs.tab_placeholder' | t: number: forloop.index
+                  endif
+                -%}
+                <xo-collection-tabs-trigger
+                  class="xo-featured-collection-tabs__tab h4"
+                  role="tab"
+                  tabindex="0"
+                  xo-handle="{{ col.handle }}"
+                  {%- if col.handle == current_handle %} xo-active{% endif %}
+                  {{ block.shopify_attributes }}>
+                  {{ tab_label }}
+                </xo-collection-tabs-trigger>
+              {%- endfor -%}
+            </xo-drag-scroll>
+          {%- endif -%}
+
+          {%- if button_text != blank -%}
+            <div class="xo-featured-collection-tabs__actions">
+              {% render 'button',
+                text: section.settings.button_text,
+                link: section.settings.button_link,
+                style: section.settings.button_style,
+                size: section.settings.button_size,
+                radius: settings.button_radius,
+                padding: settings.button_padding
+              %}
+            </div>
+          {%- endif -%}
+        </div>
+
+        <xo-collection-tabs-content class="xo-featured-collection-tabs__content">
+          <xo-carousel
+            class="xo-featured-collection-tabs__carousel"
+            xo-per-view="4"
+            xo-gap="28"
+            xo-render-bullet="<span class='xo-featured-collection-tabs__bar'></span>"
+            xo-breakpoints="
+              {
+                768: { perView: 1 },
+                992: { perView: 2 },
+                1200: { perView: 3 }
+              }
+            "
+          >
+            <xo-carousel-inner>
+              <xo-carousel-list>
+                {% if products.size > 0 %}
+                  {% for product in products limit: count %}
+                    <xo-carousel-slide class="xo-featured-collection-tabs__slide">
+                      {% render 'product-card',
+                        product: product,
+                        show_image: settings.product_card_show_image,
+                        show_secondary_image: settings.product_card_show_secondary_image,
+                        show_vendor: settings.product_card_show_vendor,
+                        show_description: settings.product_card_show_description,
+                        show_quick_add: settings.product_card_show_quick_add,
+                        show_quick_view: settings.product_card_show_quick_view,
+                        show_favorite: settings.product_card_show_favorite,
+                        show_price: settings.product_card_show_price,
+                        show_badge: settings.product_card_show_badge,
+                        media_aspect_ratio: section.settings.product_card_aspect_ratio,
+                        color_scheme: section.settings.card_color_scheme,
+                        placeholder_image: 'collection-1',
+                        animate_enabled: true
+                      %}
+                    </xo-carousel-slide>
+                  {% endfor %}
+                {% else %}
+                  {% for i in (1..4) %}
+                    <xo-carousel-slide class="xo-featured-collection-tabs__slide">
+                      {% render 'product-card',
+                        product: empty,
+                        show_image: settings.product_card_show_image,
+                        show_price: settings.product_card_show_price,
+                        show_badge: settings.product_card_show_badge,
+                        media_aspect_ratio: section.settings.product_card_aspect_ratio,
+                        color_scheme: section.settings.card_color_scheme,
+                        placeholder_image: 'collection-1',
+                        animate_enabled: true
+                      %}
+                    </xo-carousel-slide>
+                  {% endfor %}
+                {% endif %}
+              </xo-carousel-list>
+            </xo-carousel-inner>
+
+            <div class="xo-featured-collection-tabs__pagination-wrap">
+              <xo-carousel-pagination class="xo-featured-collection-tabs__pagination"></xo-carousel-pagination>
+            </div>
+          </xo-carousel>
+        </xo-collection-tabs-content>
+      </xo-collection-tabs>
+    </xo-container>
+  </div>
+</div>
+
+{% schema %}
+{
+  "tag": "section",
+  "name": "t:sections.featured_collection_tabs.name",
+  "class": "section-featured-collection-tabs",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Tabs",
+      "info": "Each tab loads one collection. Add a tab block per collection — the first tab shows by default."
+    },
+    {
+      "type": "range",
+      "id": "count",
+      "min": 2,
+      "max": 12,
+      "step": 1,
+      "label": "Number of products per tab",
+      "default": 8
+    },
+    {
+      "type": "header",
+      "content": "Button"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button text",
+      "default": "Shop all"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link",
+      "default": "/collections/all"
+    },
+    {
+      "type": "select",
+      "id": "button_style",
+      "label": "Button style",
+      "options": [
+        {
+          "value": "primary",
+          "label": "Primary"
+        },
+        {
+          "value": "secondary",
+          "label": "Secondary"
+        },
+        {
+          "value": "link",
+          "label": "Link"
+        }
+      ],
+      "default": "primary"
+    },
+    {
+      "type": "select",
+      "id": "button_size",
+      "label": "Button size",
+      "options": [
+        {
+          "value": "xs",
+          "label": "Extra small"
+        },
+        {
+          "value": "sm",
+          "label": "Small"
+        },
+        {
+          "value": "md",
+          "label": "Medium"
+        },
+        {
+          "value": "lg",
+          "label": "Large"
+        }
+      ],
+      "default": "md"
+    },
+    {
+      "type": "header",
+      "content": "Product card"
+    },
+    {
+      "type": "select",
+      "id": "product_card_aspect_ratio",
+      "label": "Aspect ratio",
+      "options": [
+        {
+          "value": "auto",
+          "label": "Adapt to image"
+        },
+        {
+          "value": "2/3",
+          "label": "2:3"
+        },
+        {
+          "value": "3/4",
+          "label": "3:4"
+        },
+        {
+          "value": "3/2",
+          "label": "3:2"
+        },
+        {
+          "value": "1",
+          "label": "1:1"
+        },
+        {
+          "value": "4/3",
+          "label": "4:3"
+        },
+        {
+          "value": "16/9",
+          "label": "16:9"
+        },
+        {
+          "value": "21/9",
+          "label": "21:9"
+        }
+      ],
+      "default": "1"
+    },
+    {
+      "type": "color_scheme",
+      "id": "card_color_scheme",
+      "label": "Color scheme"
+    },
+    {
+      "type": "header",
+      "content": "General settings"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Section color scheme"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color"
+    },
+    {
+      "type": "color_background",
+      "id": "background_gradient",
+      "label": "Background gradient"
+    },
+    {
+      "type": "number",
+      "id": "padding_top_desktop",
+      "label": "Padding top desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_desktop",
+      "label": "Padding bottom desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_top_mobile",
+      "label": "Padding top mobile",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_mobile",
+      "label": "Padding bottom mobile",
+      "default": 50
+    }
+  ],
+  "blocks": [
+    {
+      "type": "tab",
+      "name": "Tab",
+      "settings": [
+        {
+          "type": "collection",
+          "id": "spf_collection",
+          "label": "Collection"
+        },
+        {
+          "type": "text",
+          "id": "tab_label",
+          "label": "Tab label",
+          "info": "Optional. Falls back to the collection title."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.featured_collection_tabs.presets.name",
+      "category": "Collections",
+      "settings": {
+        "count": 8,
+        "button_text": "Shop all",
+        "button_link": "/collections/all",
+        "button_style": "secondary",
+        "button_size": "md",
+        "product_card_aspect_ratio": "1",
+        "color_scheme": "",
+        "background_color": "",
+        "background_gradient": "",
+        "padding_top_desktop": 86,
+        "padding_bottom_desktop": 86,
+        "padding_top_mobile": 48,
+        "padding_bottom_mobile": 48
+      },
+      "blocks": [
+        {
+          "type": "tab"
+        },
+        {
+          "type": "tab"
+        },
+        {
+          "type": "tab"
+        }
+      ]
+    }
+  ],
+  "disabled_on": {
+    "groups": [
+      "header",
+      "footer",
+      "custom.overlay",
+      "custom.popups"
+    ]
+  }
+}
+{% endschema %}

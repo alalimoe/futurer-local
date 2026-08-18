@@ -7,10 +7,10 @@ var __publicField = (obj, key, value) => {
 (function(global, factory) {
   typeof exports === "object" && typeof module !== "undefined" ? factory(exports) : typeof define === "function" && define.amd ? define(["exports"], factory) : (global = typeof globalThis !== "undefined" ? globalThis : global || self, factory(global.xobuildercomponents = {}));
 })(this, function(exports2) {
-  var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _A, _B, _C, _D, _E, _F, _G, _H, _I, _J, _K, _L, _M, _N, _O, _P, _Q, _R, _S, _T, _U, _V, _W, _X, _Y, _Z, __, _$, _aa, _ba, _ca, _da, _ea, _fa, _ga, _ha, _ia, _ja, _ka, _la, _ma, _na, _oa, _pa, _qa, _ra, _sa, _ta, _ua;
+  var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _A, _B, _C, _D, _E, _F, _G, _H, _I, _J, _K, _L, _M, _N, _O, _P, _Q, _R, _S, _T, _U, _V, _W, _X, _Y, _Z, __, _$, _aa, _ba, _ca, _da, _ea, _fa, _ga, _ha, _ia, _ja, _ka, _la, _ma, _na, _oa, _pa, _qa, _ra, _sa, _ta, _ua, _va, _wa;
   "use strict";
-  /*! (c) Andrea Giammarchi @webreflection ISC */
-  (function() {
+  function customElementsPollyfill() {
+    /*! (c) Andrea Giammarchi @webreflection ISC */
     var attributesObserver = function(whenDefined2, MutationObserver2) {
       var attributeChanged = function attributeChanged2(records) {
         for (var i = 0, length = records.length; i < length; i++)
@@ -317,7 +317,7 @@ var __publicField = (obj, key, value) => {
       };
       var augment = attributesObserver(whenDefined, MutationObserver$1);
       self.customElements = {
-        define: function define3(is2, Class) {
+        define: function define22(is2, Class) {
           if (registry.has(is2))
             throw new Error2('the name "'.concat(is2, '" has already been used with this registry'));
           classes.set(Class, is2);
@@ -360,7 +360,7 @@ var __publicField = (obj, key, value) => {
           BR.prototype = HTMLLIElement.prototype;
           var is = "extends-br";
           self.customElements.define("extends-br", BR, {
-            "extends": "br"
+            extends: "br"
           });
           legacy = document$1.createElement("br", {
             is
@@ -385,8 +385,8 @@ var __publicField = (obj, key, value) => {
       var _createElement = document$1.createElement;
       var define2 = customElements2.define, _get = customElements2.get, upgrade = customElements2.upgrade;
       var _ref = Reflect2 || {
-        construct: function construct2(HTMLElement3) {
-          return HTMLElement3.call(this);
+        construct: function construct2(HTMLElement22) {
+          return HTMLElement22.call(this);
         }
       }, construct = _ref.construct;
       var shadowRoots = new WeakMap2();
@@ -457,7 +457,7 @@ var __publicField = (obj, key, value) => {
       getOwnPropertyNames(self).filter(function(k) {
         return /^HTML.*Element$/.test(k);
       }).forEach(function(k) {
-        var HTMLElement3 = self[k];
+        var HTMLElement22 = self[k];
         function HTMLBuiltIn2() {
           var constructor = this.constructor;
           if (!_classes.has(constructor))
@@ -470,9 +470,9 @@ var __publicField = (obj, key, value) => {
             element.setAttribute("is", is2);
             return _augment(setPrototypeOf(element, constructor.prototype), is2);
           } else
-            return construct.call(this, HTMLElement3, [], constructor);
+            return construct.call(this, HTMLElement22, [], constructor);
         }
-        defineProperty(HTMLBuiltIn2.prototype = HTMLElement3.prototype, "constructor", {
+        defineProperty(HTMLBuiltIn2.prototype = HTMLElement22.prototype, "constructor", {
           value: HTMLBuiltIn2
         });
         defineProperty(self, k, {
@@ -492,7 +492,6 @@ var __publicField = (obj, key, value) => {
         return element;
       };
       customElements2.get = getCE;
-      customElements2.whenDefined = _whenDefined2;
       customElements2.upgrade = function(element) {
         var is2 = element.getAttribute("is");
         if (is2) {
@@ -535,7 +534,8 @@ var __publicField = (obj, key, value) => {
         _defined.get(is2)._(Class);
       };
     }
-  })();
+  }
+  customElementsPollyfill();
   const utils = window.XotinyUtils;
   const attrBoolean = utils == null ? void 0 : utils.attrBoolean;
   const clamp = utils == null ? void 0 : utils.clamp;
@@ -738,6 +738,7 @@ var __publicField = (obj, key, value) => {
     ProductWillChange: "xo-product-will-change",
     ProductVariant: "xo-product-variant",
     ProductVariants: "xo-product-variants",
+    ProductVariantsTitle: "xo-product-variant-title",
     ProductVariantActive: "xo-product-variant-active",
     ProductProperties: "xo-product-properties",
     ProductProperty: "xo-product-property",
@@ -841,7 +842,6 @@ var __publicField = (obj, key, value) => {
   const DEFAULT_DEVICE_PIXEL_RATIO = window.devicePixelRatio > 1 ? 1.2 : 1;
   const MIN_DEVICE_PIXEL_RATIO = (_a = window == null ? void 0 : window.xoImgDevicePixelRatio) != null ? _a : DEFAULT_DEVICE_PIXEL_RATIO;
   const MAX_DEVICE_PIXEL_RATIO = (_b = window == null ? void 0 : window.xoImgDevicePixelRatio) != null ? _b : DEFAULT_DEVICE_PIXEL_RATIO;
-  const MAX_WIDTH = 2e3;
   function getSrc(src, width, min, max) {
     const oldSrc = src;
     if (!oldSrc) {
@@ -852,7 +852,7 @@ var __publicField = (obj, key, value) => {
     }
     const oldSrcRemoveWidth = oldSrc.replace(/(\?|&)(w|width)=\d*/g, "").replace(new RegExp(`(\\?|&)${WIDTH_PARAM}=\\d*`, "g"), "");
     const devicePixelRatio = clamp(window.devicePixelRatio, MIN_DEVICE_PIXEL_RATIO, MAX_DEVICE_PIXEL_RATIO);
-    const lastWidth = clamp(Math.min(Math.round(width * devicePixelRatio), MAX_WIDTH), min, max);
+    const lastWidth = clamp(Math.round(width * devicePixelRatio), min, max);
     if (lastWidth === 0) {
       return oldSrc;
     }
@@ -884,7 +884,7 @@ var __publicField = (obj, key, value) => {
     const fallbackWidth = getFallbackWidth(el);
     const compareImageEl = el.closest(WebComponent.ImageComparison);
     const xoImageEl = el.closest(".xo-image");
-    const { width } = (compareImageEl || xoImageEl || el).getBoundingClientRect();
+    const width = (compareImageEl || xoImageEl || el).clientWidth;
     const coverEl = el.parentElement;
     const _width = hasWidthRange(el) ? width : Math.max(width, fallbackWidth);
     if (!coverEl) {
@@ -939,7 +939,11 @@ var __publicField = (obj, key, value) => {
       });
       __publicField(this, "init", async (isResize = false) => {
         await delay();
+        const blocking = !!this.closest(`${WebComponent.Carousel}:not([xo-overflow="visible"]) ${WebComponent.CarouselList}, ${WebComponent.Popover}, ${WebComponent.Modal}:not([xo-active]), ${WebComponent.Toggle}:not([xo-active]), ${WebComponent.TabsPane}:not([xo-active]), [xo-ignore-lazyload]`) && !isResize;
         if (this.loading === "eager") {
+          if (blocking) {
+            return;
+          }
           const image = new Image();
           image.src = this.getAttribute("xo-src") || this.getAttribute("data-src") || this.src;
           image.onload = () => {
@@ -950,7 +954,6 @@ var __publicField = (obj, key, value) => {
         if (this.loading === "auto") {
           this.loading = "lazy";
         }
-        const blocking = !!this.closest(`${WebComponent.Carousel}:not([xo-overflow="visible"]) ${WebComponent.CarouselList}, ${WebComponent.Popover}, ${WebComponent.Modal}:not([xo-active]), ${WebComponent.Toggle}:not([xo-active]), ${WebComponent.TabsPane}:not([xo-active]), [xo-ignore-lazyload]`) && !isResize;
         if (blocking) {
           return;
         }
@@ -1420,10 +1423,10 @@ var __publicField = (obj, key, value) => {
         const pathBox = pathEl.getBBox();
         const sizerBox = sizerEl.getBBox();
         const containerWidth = this.getBoundingClientRect().width;
-        const height = pathBox.height + sizerBox.height + sizerBox.height / 3;
+        const height = pathBox.height + sizerBox.height + sizerBox.height / 2;
         const finalWidth = Math.min(pathBox.width, containerWidth);
         svgEl.setAttribute("viewBox", `0 0 ${finalWidth} ${height}`);
-        textEl.style.transform = `translateY(${sizerBox.height / 3}px)`;
+        textEl.style.transform = `translateY(${sizerBox.height / 1.2}px)`;
         sizerEl.remove();
       });
       __publicField(this, "setTextPathData", () => {
@@ -1479,6 +1482,7 @@ var __publicField = (obj, key, value) => {
         }
         const ratioTextPathEls = Array.from(ratioEl.querySelectorAll("textPath"));
         const textWidth = ratioTextPathEls.reduce((total, textPathEl2) => total + this.getTextPathWidth(textPathEl2), 0);
+        console.log(textWidth);
         const pathWidth = pathEl.getBBox().width;
         const ratio = textWidth / pathWidth * 100;
         this.setState({ ratio, duration: this.getDuration(textWidth) });
@@ -1533,7 +1537,7 @@ var __publicField = (obj, key, value) => {
       return `
       <svg version="1.1" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" width="100%" style="vertical-align: top;">
         <path id="${this.pathId}" fill="none" d="${xoPath}"></path>
-        <text dominant-baseline="hanging">
+        <text dominant-baseline="middle">
           <textPath href="#${this.pathId}">
             <animate attributeName="startOffset" from="0" to="0" dur="0" repeatCount="indefinite" calcMode="linear" />
             ${text}
@@ -1686,7 +1690,7 @@ var __publicField = (obj, key, value) => {
           };
         })(`${this.stateName}/toggle`);
       });
-      __publicField(this, "open", (name, triggerElement) => {
+      __publicField(this, "open", (name, triggerElement, usePan) => {
         const finalTriggerElement = this.getTriggerElement(name, triggerElement);
         xoStore.set(this.stateName, (state) => {
           return {
@@ -1702,6 +1706,9 @@ var __publicField = (obj, key, value) => {
                 isOpen: true,
                 ...finalTriggerElement != null ? {
                   triggerElement: finalTriggerElement
+                } : {},
+                ...usePan != null ? {
+                  usePan
                 } : {}
               }
             }
@@ -1874,16 +1881,18 @@ var __publicField = (obj, key, value) => {
       __publicField(this, "lastA11yIndex", null);
       __publicField(this, "index", null);
       __publicField(this, "listener", async () => {
+        var _a2, _b2;
         const { isOpen } = this.state;
         if (this.initialized && isOpen !== this.prevIsOpen) {
           if (isOpen) {
             this.componentOpen();
             this.handleAutoFocus();
-            await delay();
+            await delay(device.isSafari ? this.querySelector(WebComponent.ProductQuickView) ? 1e3 : 100 : 0);
             attrBoolean.set(this, "xo-active", true);
             bindingHelper(this, "xo-active-binding", true);
             document.addEventListener("keydown", this.handleA11y);
             triggerA11yEl = focusA11yEl != null ? focusA11yEl : prevFocusA11yEl;
+            await delay(((_b2 = (_a2 = this.state) == null ? void 0 : _a2.options) == null ? void 0 : _b2.xoDuration) || 300);
             loadImages(this);
           } else {
             attrBoolean.set(this, "xo-active", false);
@@ -2181,9 +2190,11 @@ var __publicField = (obj, key, value) => {
         if (this.initialized && isOpen !== this.prevIsOpen) {
           if (isOpen) {
             attrBoolean.set(this, "xo-active", true);
+            bindingHelper(this, "xo-active-binding", true);
             this.componentOpen();
           } else {
             attrBoolean.set(this, "xo-active", false);
+            bindingHelper(this, "xo-active-binding", false);
             this.componentClose();
           }
           this.prevIsOpen = isOpen;
@@ -2634,6 +2645,7 @@ var __publicField = (obj, key, value) => {
       __publicField(this, "dialog", document.createElement("div"));
       __publicField(this, "tabsEls", Array.from(this.querySelectorAll(WebComponent.Tabs)));
       __publicField(this, "currentZIndex", window.getComputedStyle(this).zIndex);
+      __publicField(this, "contentObserver", null);
       __publicField(this, "_options");
       __publicField(this, "setOptions", () => {
         var _a2;
@@ -2913,13 +2925,20 @@ var __publicField = (obj, key, value) => {
         if (xoBreakpoints && objectKeys(xoBreakpoints).length > 0) {
           window.addEventListener("resize", this.handleResize);
         }
+        this.contentObserver = new MutationObserver(debounce(() => {
+          loadImages(this);
+        }, 100));
+        this.contentObserver.observe(this, { childList: true, subtree: true });
       });
       __publicField(this, "componentUnmount", () => {
+        var _a2;
         this.animated.off();
         clearTimeout(this.timeId1);
         clearTimeout(this.timeId2);
         window.removeEventListener("resize", this.handleResize);
         this.dialog.removeEventListener("cancel", this.handleDialogCancel);
+        (_a2 = this.contentObserver) == null ? void 0 : _a2.disconnect();
+        this.contentObserver = null;
       });
       __publicField(this, "handleClose", () => {
         const { xoName } = this.options;
@@ -4452,6 +4471,23 @@ var __publicField = (obj, key, value) => {
   const _PopoverTrigger = class extends ToggleTriggerBase {
     constructor() {
       super(...arguments);
+      __publicField(this, "intersectionObserver", null);
+      __publicField(this, "componentMount", () => {
+        this.intersectionObserver = new IntersectionObserver(([entry]) => {
+          if (!entry.isIntersecting && this.state.isOpen) {
+            this.closePopover();
+          }
+        }, { threshold: 0 });
+        this.intersectionObserver.observe(this);
+      });
+      __publicField(this, "componentUnmount", () => {
+        var _a2;
+        (_a2 = this.intersectionObserver) == null ? void 0 : _a2.disconnect();
+        this.intersectionObserver = null;
+      });
+      __publicField(this, "closePopover", () => {
+        xoPopover.close(this.options.xoName, this);
+      });
       __publicField(this, "componentTrigger", () => {
         const { xoName, xoType } = this.options;
         const { isOpen } = this.state;
@@ -4800,8 +4836,19 @@ var __publicField = (obj, key, value) => {
       __publicField(this, "initialized", false);
       __publicField(this, "prevIsOpen", false);
       __publicField(this, "_options");
+      __publicField(this, "scrollToTrigger", () => {
+        var _a2;
+        const offset2 = Number(((_a2 = this.providerElement) == null ? void 0 : _a2.getAttribute("xo-scroll-offset")) || 0);
+        const triggerEl = this.triggerElement;
+        if (triggerEl) {
+          const top = triggerEl.getBoundingClientRect().top + window.scrollY - offset2;
+          window.scrollTo({ top, behavior: "smooth" });
+        }
+      });
       __publicField(this, "componentOpen", () => {
+        var _a2;
         const { xoDuration, xoEasing } = this.options;
+        const xoScroll = (_a2 = this.providerElement) == null ? void 0 : _a2.hasAttribute("xo-scroll");
         const height = this.scrollHeight;
         this.animated({
           from: 0,
@@ -4817,6 +4864,12 @@ var __publicField = (obj, key, value) => {
           },
           onEnd: () => {
             this.style.height = "auto";
+            if (this.providerElement) {
+              if (xoScroll && this.providerElement.needScroll) {
+                this.scrollToTrigger();
+              }
+              this.providerElement.needScroll = true;
+            }
           }
         });
       });
@@ -5093,6 +5146,7 @@ var __publicField = (obj, key, value) => {
     constructor() {
       super();
       __publicField(this, "xoName");
+      __publicField(this, "needScroll", false);
       id$3++;
       this.xoName = `collapse-${id$3}`;
     }
@@ -5965,7 +6019,7 @@ var __publicField = (obj, key, value) => {
     const fistSlideEls = [...slideEls.slice(0, xoPerView * 2), ...slideEls.slice(0, xoPerView * 2)];
     const lastSlideEls = [...slideEls.slice(-xoPerView * 2), ...slideEls.slice(-xoPerView * 2)];
     each(fistSlideEls, (slideEl, index) => {
-      const isSlide = slideEl.tagName.toLowerCase() === WebComponent.CarouselSlide || slideEl.hasAttribute(WebComponent.CarouselSlide);
+      const isSlide = slideEl.localName === WebComponent.CarouselSlide || slideEl.localName === WebComponent.Item || slideEl.hasAttribute(WebComponent.CarouselSlide);
       if (index < xoPerView * 2 && isSlide) {
         const cloneEl = slideEl.cloneNode(true);
         cloneEl.removeAttribute("xo-active");
@@ -6078,7 +6132,8 @@ var __publicField = (obj, key, value) => {
             "xoStopAutoplayOnInteraction",
             "xoProgress",
             "xoSyncId",
-            "xoDragable"
+            "xoDragable",
+            "xoVideoCoverLazyload"
           ],
           types: {
             xoName: "string",
@@ -6103,7 +6158,8 @@ var __publicField = (obj, key, value) => {
             xoStopAutoplayOnInteraction: "boolean",
             xoProgress: "boolean",
             xoSyncId: "string",
-            xoDragable: "boolean"
+            xoDragable: "boolean",
+            xoVideoCoverLazyload: "boolean"
           }
         });
         if (((_a2 = { "BASE_URL": "/", "MODE": "production", "DEV": false, "PROD": true }) == null ? void 0 : _a2.VITE_BUILD_MODE) === "xoSections") {
@@ -6313,6 +6369,7 @@ var __publicField = (obj, key, value) => {
               duration: options.xoAutoplay,
               onUpdate: (value) => {
                 this.style.setProperty("--xo-autoplay-progress", `${value}%`);
+                this.style.setProperty("--xo-autoplay-progress-raw", `${value}`);
               }
             });
           }
@@ -6374,7 +6431,8 @@ var __publicField = (obj, key, value) => {
     xoStopAutoplayOnInteraction: false,
     xoProgress: false,
     xoSyncId: "",
-    xoDragable: true
+    xoDragable: true,
+    xoVideoCoverLazyload: true
   });
   const _CarouselThumbnail = class extends XoHTMLElement {
     constructor() {
@@ -6484,6 +6542,7 @@ var __publicField = (obj, key, value) => {
     constructor() {
       super(...arguments);
       __publicField(this, "isThumbMoving", false);
+      __publicField(this, "thumbClickBlocking", false);
       __publicField(this, "unsubscribe", () => {
       });
       __publicField(this, "animated", createAnimate());
@@ -6518,8 +6577,6 @@ var __publicField = (obj, key, value) => {
       __publicField(this, "autoplayReady", false);
       __publicField(this, "isProductMedia", this.closest(WebComponent.ProductMedia));
       __publicField(this, "slideSizeCache", createCache(this.isProductMedia ? 1e5 : 0));
-      __publicField(this, "cancel", () => {
-      });
       __publicField(this, "setOptions", () => {
         const { options, thumbnailOptions } = getState$3(this.providerElement.xoName);
         if (this.isThumbnail) {
@@ -6781,7 +6838,7 @@ var __publicField = (obj, key, value) => {
         }, 300);
         this.prevScrollY = window.scrollY;
       });
-      __publicField(this, "thumbPanMove", ({ dx, dy, vx, vy, isHorizontalSwipe }, event) => {
+      __publicField(this, "thumbPanMove", ({ dx, dy, prevDx, prevDy, vx, vy, isHorizontalSwipe }, event) => {
         var _a2, _b2;
         const { options } = this;
         if (!options.xoVertical) {
@@ -6814,7 +6871,7 @@ var __publicField = (obj, key, value) => {
           this.isThumbMoving = true;
           if (device.mobile()) {
             if (window.scrollY !== this.prevScrollY) {
-              this.thumbPanEnd({ dx, dy, vx, vy });
+              this.thumbPanEnd({ dx, dy, prevDx, prevDy, vx, vy });
             }
           }
           const d = options.xoVertical ? dy : this.withRtl(dx);
@@ -6828,7 +6885,7 @@ var __publicField = (obj, key, value) => {
           this.prevThumbTranslate = translate;
         }
       });
-      __publicField(this, "thumbPanEnd", ({ vx, vy }) => {
+      __publicField(this, "thumbPanEnd", ({ dx, dy, prevDx, prevDy, vx, vy }) => {
         const { options } = this;
         const { slideLength } = getState$3(this.providerElement.xoName);
         const v = options.xoVertical ? vy : this.withRtl(vx);
@@ -6866,10 +6923,14 @@ var __publicField = (obj, key, value) => {
               loadImages(this);
             }
             this.isThumbMoving = false;
+            this.thumbClickBlocking = false;
             this.prevScrollY = window.scrollY;
           }
         });
         this.isHorizontalSwipeState = void 0;
+        if (prevDx != null && prevDy != null) {
+          this.thumbClickBlocking = Math.abs(prevDx - dx) > 20 || Math.abs(prevDy - dy) > 20;
+        }
       });
       __publicField(this, "handlePause", () => {
         window.clearInterval(this.intervalId);
@@ -6907,16 +6968,6 @@ var __publicField = (obj, key, value) => {
           event.preventDefault();
           nextSlide(getNames(this.providerElement), xoPerMove);
         }
-      });
-      __publicField(this, "handleVideoCover", (el, visible) => {
-        const videoCoverEls = el.querySelectorAll(WebComponent.VideoCover);
-        videoCoverEls.forEach((videoCoverEl) => {
-          if (visible) {
-            videoCoverEl.run();
-          } else {
-            videoCoverEl.pause();
-          }
-        });
       });
       __publicField(this, "handleActiveSlide", (indexForVisibleAttrr) => {
         let index = -1;
@@ -6959,8 +7010,6 @@ var __publicField = (obj, key, value) => {
           }
           if (index >= visibleIndex && index < visibleIndex + options.xoPerView) {
             attrBoolean.set(childEl, "xo-visible", true);
-            loadImages(childEl);
-            this.handleVideoCover(childEl, true);
             if (options.xoAutoheight) {
               if (childEl.children[0] instanceof HTMLElement) {
                 if (!indexForVisibleAttrr) {
@@ -6985,7 +7034,6 @@ var __publicField = (obj, key, value) => {
             }
           } else {
             attrBoolean.set(childEl, "xo-visible", false);
-            this.handleVideoCover(childEl, false);
           }
         });
       });
@@ -7035,7 +7083,7 @@ var __publicField = (obj, key, value) => {
           anchorEl.addEventListener("click", this.handleAnchor);
         });
       });
-      __publicField(this, "handleLoop", () => {
+      __publicField(this, "handleLoop", async () => {
         const { xoPerView, xoLoop, xoType } = this.options;
         if (!xoLoop) {
           return;
@@ -7043,11 +7091,12 @@ var __publicField = (obj, key, value) => {
         if (xoType !== "slide") {
           return;
         }
+        await delay();
         cloneSlides(this, xoPerView);
       });
       __publicField(this, "removeSlideCloned", () => {
         each(Array.from(this.children), (slideEl) => {
-          const isSlide = slideEl.localName === WebComponent.CarouselSlide || slideEl.hasAttribute(WebComponent.CarouselSlide);
+          const isSlide = slideEl.localName === WebComponent.CarouselSlide || slideEl.localName === WebComponent.Item || slideEl.hasAttribute(WebComponent.CarouselSlide);
           if (isSlide) {
             if (attrBoolean.get(slideEl, "xo-cloned")) {
               this.removeChild(slideEl);
@@ -7086,7 +7135,6 @@ var __publicField = (obj, key, value) => {
         this.removeSlideCloned();
         (_a2 = this.pan) == null ? void 0 : _a2.destroy();
         (_b2 = this.thumbPan) == null ? void 0 : _b2.destroy();
-        this.cancel();
         clearTimeout(this.timeoutId);
         clearTimeout(this.wheelEndTimeId);
         this.animated.off();
@@ -7172,7 +7220,10 @@ var __publicField = (obj, key, value) => {
       this.handlePause();
     }
     async onConnected() {
-      this.cancel = await delay(100);
+      var _a2, _b2;
+      if (((_a2 = window.xbEditor) == null ? void 0 : _a2.designMode) || ((_b2 = window.Shopify) == null ? void 0 : _b2.designMode) || this.isThumbnail) {
+        await delay(100);
+      }
       if (!this.providerElement) {
         return;
       }
@@ -7277,15 +7328,26 @@ var __publicField = (obj, key, value) => {
       __publicField(this, "unsubscribe", () => {
       });
       __publicField(this, "intersectionObserver", null);
-      __publicField(this, "handleClick", () => {
+      __publicField(this, "intersectionObserver2", null);
+      __publicField(this, "handleClick", throttle(() => {
         const { index } = this.el;
         const carouselListElement = this.el.closest(WebComponent.CarouselList);
-        if (!(carouselListElement == null ? void 0 : carouselListElement.isThumbMoving)) {
+        if (!(carouselListElement == null ? void 0 : carouselListElement.thumbClickBlocking)) {
           goToSlide(getNames(this.providerElement), index, true);
         }
-      });
+      }, 400));
       __publicField(this, "handleFocus", () => {
         loadImages(this.el);
+      });
+      __publicField(this, "handleVideoCover", (el, visible) => {
+        const videoCoverEls = el.querySelectorAll(WebComponent.VideoCover);
+        videoCoverEls.forEach((videoCoverEl) => {
+          if (visible) {
+            videoCoverEl.run();
+          } else {
+            videoCoverEl.pause();
+          }
+        });
       });
       __publicField(this, "handleIntersection", (entries) => {
         for (const entry of entries) {
@@ -7300,6 +7362,30 @@ var __publicField = (obj, key, value) => {
             }
           });
         }
+      });
+      __publicField(this, "handleIntersection2", (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            loadImages(entry.target);
+            this.handleVideoCover(this.el, true);
+          } else {
+            this.handleVideoCover(this.el, false);
+          }
+        }
+      });
+      __publicField(this, "getIntersectionRoot", () => {
+        var _a2;
+        const { xoVideoCoverLazyload } = this.providerElement.options;
+        if (this.el.closest(WebComponent.MegaMenu)) {
+          return this.el.closest(WebComponent.MegaMenu);
+        }
+        if (xoVideoCoverLazyload) {
+          if (this.el.closest(WebComponent.CarouselThumbnail)) {
+            return this.el.closest(WebComponent.CarouselThumbnail);
+          }
+          return (_a2 = this.el.closest(".shopify-section")) != null ? _a2 : this.providerElement;
+        }
+        return this.el.closest(".shopify-section");
       });
       this.el = el;
     }
@@ -7333,7 +7419,15 @@ var __publicField = (obj, key, value) => {
       this.intersectionObserver = new IntersectionObserver(this.handleIntersection, {
         root: this.providerElement
       });
-      this.intersectionObserver.observe(this.el.children[0]);
+      this.intersectionObserver.observe(getComputedStyle(this.el.children[0]).display === "contents" ? this.el : this.el.children[0]);
+      if (this.el.closest(WebComponent.ProductRecommendations)) {
+        loadImages(this.el);
+      } else {
+        this.intersectionObserver2 = new IntersectionObserver(this.handleIntersection2, {
+          root: this.getIntersectionRoot()
+        });
+        this.intersectionObserver2.observe(this.el);
+      }
     }
     unmount() {
       var _a2;
@@ -7713,6 +7807,7 @@ var __publicField = (obj, key, value) => {
     constructor() {
       super(...arguments);
       __publicField(this, "carouselEls", []);
+      __publicField(this, "controller", new AbortController());
       __publicField(this, "handleCarouselChange", (event) => {
         var _a2;
         const { xoIndex } = this.props;
@@ -7730,7 +7825,11 @@ var __publicField = (obj, key, value) => {
           event.preventDefault();
         }
         each(this.carouselEls, (carouselEl) => {
-          goToSlide([carouselEl.xoName], this.props.xoIndex, true);
+          var _a2;
+          const { options } = carouselEl;
+          const minIndex = options.xoLoop && options.xoType === "slide" ? options.xoPerView * 2 : 0;
+          const pageIndex = Number((_a2 = this.props.xoIndex) != null ? _a2 : 0) * options.xoPerView + minIndex;
+          goToSlide([carouselEl.xoName], pageIndex, true);
         });
       });
       __publicField(this, "getEventType", () => {
@@ -7749,14 +7848,18 @@ var __publicField = (obj, key, value) => {
       const { xoCarouselSelector } = this.props;
       const containerEl = (_a2 = this.closest(".shopify-section")) != null ? _a2 : document;
       this.carouselEls = Array.from(containerEl.querySelectorAll(xoCarouselSelector));
-      this.addEventListener(this.getEventType(), this.handleChange);
+      const type = this.getEventType();
+      this.addEventListener(type, this.handleChange, this.controller);
+      if (type === "mouseover") {
+        this.addEventListener("focusin", this.handleChange, this.controller);
+      }
       each(this.carouselEls, (carouselEl) => {
         carouselEl.addEventListener("xo:carousel:init", this.handleCarouselChange);
         carouselEl.addEventListener("xo:carousel:change", this.handleCarouselChange);
       });
     }
     unmount() {
-      this.removeEventListener(this.getEventType(), this.handleChange);
+      this.controller.abort();
       each(this.carouselEls, (carouselEl) => {
         carouselEl.removeEventListener("xo:carousel:init", this.handleCarouselChange);
         carouselEl.removeEventListener("xo:carousel:change", this.handleCarouselChange);
@@ -8642,7 +8745,6 @@ var __publicField = (obj, key, value) => {
       __publicField(this, "innerEl");
       __publicField(this, "contentEl");
       __publicField(this, "prevScrollY", 0);
-      __publicField(this, "contentHeightCache", createCache(5e3));
       __publicField(this, "ticking", false);
       __publicField(this, "_options");
       __publicField(this, "setOptions", () => {
@@ -8779,17 +8881,22 @@ var __publicField = (obj, key, value) => {
         }
       });
       __publicField(this, "handler", () => {
+        var _a2, _b2;
         if (this.ticking) {
           return;
         }
         this.ticking = true;
         const { xoPlacement } = this.options;
-        const height = this.contentHeightCache.set(() => this.contentEl.offsetHeight);
+        const height = (_b2 = (_a2 = Array.from(this.children)[0]) == null ? void 0 : _a2.offsetHeight) != null ? _b2 : this.contentEl.offsetHeight;
         const { top } = this.getBoundingClientRect();
         requestAnimationFrame(() => {
+          if (xoPlacement === "top") {
+            this.style.height = `${height}px`;
+            this.setHeaderHeightVariable(height);
+          }
           this.contentEl.style.height = `${height}px`;
           this.innerEl.style.height = `${height}px`;
-          this.setHeaderHeightVariable(height);
+          changeHeight(this.contentEl, xoPlacement, height);
           if (xoPlacement === "top") {
             this.handleStickyTop(height, top);
           } else {
@@ -9280,7 +9387,7 @@ var __publicField = (obj, key, value) => {
           const label = item.name.includes("filter.v.price.") ? map(objectParse(item.value), (item2) => withMoneyFormat(this, item2)).join(" - ") : (_a2 = fieldEl == null ? void 0 : fieldEl.getAttribute("xo-label")) != null ? _a2 : "";
           const clearIcon = (_c2 = (_b2 = this.querySelector(WebComponent.FiltersRefineClearIcon)) == null ? void 0 : _b2.innerHTML) != null ? _c2 : "<span>&times;</span>";
           return `
-        <${WebComponent.FiltersClear} xo-name="${item.name}" xo-value='${item.value}' role="button" tabindex="0">
+        <${WebComponent.FiltersClear} xo-name="${item.name}" xo-value="${item.value.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/'/g, "&#39;")}" role="button" tabindex="0">
           ${label} ${clearIcon}
         </${WebComponent.FiltersClear}>
       `;
@@ -9320,6 +9427,7 @@ var __publicField = (obj, key, value) => {
         this.callback = callback;
       });
       __publicField(this, "listener", async () => {
+        var _a2, _b2, _c2, _d2, _e2, _f2;
         if (!this.isReady) {
           return;
         }
@@ -9327,79 +9435,76 @@ var __publicField = (obj, key, value) => {
         const currentIndex = Array.from(this.closest(WebComponent.Filters).querySelectorAll(WebComponent.FiltersContent)).indexOf(this);
         cancelIdleCallback$1(this.timeId);
         await delay();
-        this.timeId = requestIdleCallback$1(() => {
-          var _a2, _b2, _c2, _d2, _e2, _f2;
-          if (status === "success") {
-            if (html !== prevHtml) {
-              const domParser = new DOMParser();
-              const doc = domParser.parseFromString(html, "text/html");
-              setHoverLevel(doc);
-              const contentEls = Array.from(doc.querySelectorAll(WebComponent.FiltersContent));
-              const contentEl = contentEls[currentIndex];
-              if (contentEl) {
-                const contentClone = contentEl.cloneNode(true);
-                const animateEls = Array.from(contentClone.querySelectorAll('[xo-animate="scroll"]'));
-                each(animateEls, (animateEl) => {
-                  animateEl.setAttribute("xo-animate", "none");
-                });
-                const currentEl = document.querySelectorAll(WebComponent.FiltersContent)[currentIndex];
-                const anchorEl = currentEl.querySelector(WebComponent.FiltersContentAnchor);
-                const isLoadMore = this.loadMoreEl && !((_a2 = this.loadMoreEl) == null ? void 0 : _a2.state.UIUpdated);
-                if (this.callback) {
-                  if (contentEl.querySelector(WebComponent.Product)) {
-                    if (isLoadMore && anchorEl) {
-                      const domParser2 = new DOMParser();
-                      const doc2 = domParser2.parseFromString(this.callback(contentClone.outerHTML), "text/html");
-                      const nextAnchorEl = doc2.querySelector(WebComponent.FiltersContentAnchor);
-                      const wrapEl = nextAnchorEl == null ? void 0 : nextAnchorEl.parentElement;
-                      nextAnchorEl == null ? void 0 : nextAnchorEl.remove();
-                      if (wrapEl) {
-                        anchorEl.insertAdjacentHTML("beforebegin", wrapEl.innerHTML);
-                        (_b2 = this.loadMoreEl) == null ? void 0 : _b2.UIUpdated();
-                      } else {
-                        (_c2 = this.loadMoreEl) == null ? void 0 : _c2.remove();
-                      }
-                    } else {
-                      this.innerHTML = this.callback(contentClone.innerHTML);
-                      const attrs = Array.from(contentClone.attributes);
-                      each(attrs, (attr) => {
-                        this.setAttribute(attr.name, attr.value);
-                      });
-                    }
-                  } else if (!isLoadMore) {
-                    this.innerHTML = contentClone.innerHTML;
-                    const attrs = Array.from(contentClone.attributes);
-                    each(attrs, (attr) => {
-                      this.setAttribute(attr.name, attr.value);
-                    });
+        if (status === "success" && html !== prevHtml) {
+          const domParser = new DOMParser();
+          const doc = domParser.parseFromString(html, "text/html");
+          setHoverLevel(doc);
+          const contentEls = Array.from(doc.querySelectorAll(WebComponent.FiltersContent));
+          const contentEl = contentEls[currentIndex];
+          if (contentEl) {
+            const contentClone = contentEl.cloneNode(true);
+            const animateEls = Array.from(contentClone.querySelectorAll('[xo-animate="scroll"]'));
+            each(animateEls, (animateEl) => {
+              animateEl.setAttribute("xo-animate", "none");
+            });
+            const currentEl = document.querySelectorAll(WebComponent.FiltersContent)[currentIndex];
+            const anchorEl = currentEl.querySelector(WebComponent.FiltersContentAnchor);
+            const isLoadMore = this.loadMoreEl && !((_a2 = this.loadMoreEl) == null ? void 0 : _a2.state.UIUpdated);
+            if (this.callback) {
+              if (contentEl.querySelector(WebComponent.Product)) {
+                if (isLoadMore && anchorEl) {
+                  const domParser2 = new DOMParser();
+                  const doc2 = domParser2.parseFromString(this.callback(contentClone.outerHTML), "text/html");
+                  const nextAnchorEl = doc2.querySelector(WebComponent.FiltersContentAnchor);
+                  const wrapEl = nextAnchorEl == null ? void 0 : nextAnchorEl.parentElement;
+                  nextAnchorEl == null ? void 0 : nextAnchorEl.remove();
+                  if (wrapEl) {
+                    anchorEl.insertAdjacentHTML("beforebegin", wrapEl.innerHTML);
+                    (_b2 = this.loadMoreEl) == null ? void 0 : _b2.UIUpdated();
                   } else {
-                    (_d2 = this.loadMoreEl) == null ? void 0 : _d2.remove();
+                    (_c2 = this.loadMoreEl) == null ? void 0 : _c2.remove();
                   }
                 } else {
-                  if (isLoadMore && anchorEl) {
-                    const nextAnchorEl = contentClone.querySelector(WebComponent.FiltersContentAnchor);
-                    const wrapEl = nextAnchorEl == null ? void 0 : nextAnchorEl.parentElement;
-                    nextAnchorEl == null ? void 0 : nextAnchorEl.remove();
-                    if (wrapEl) {
-                      anchorEl.insertAdjacentHTML("beforebegin", wrapEl.innerHTML);
-                      (_e2 = this.loadMoreEl) == null ? void 0 : _e2.UIUpdated();
-                    } else {
-                      (_f2 = this.loadMoreEl) == null ? void 0 : _f2.remove();
-                    }
-                  } else {
-                    this.outerHTML = contentClone.outerHTML;
-                  }
+                  this.innerHTML = this.callback(contentClone.innerHTML);
+                  const attrs = Array.from(contentClone.attributes);
+                  each(attrs, (attr) => {
+                    this.setAttribute(attr.name, attr.value);
+                  });
                 }
-                xoFilters.emit("done", void 0);
-                resetStatus();
+              } else if (!isLoadMore) {
+                this.innerHTML = contentClone.innerHTML;
+                const attrs = Array.from(contentClone.attributes);
+                each(attrs, (attr) => {
+                  this.setAttribute(attr.name, attr.value);
+                });
+              } else {
+                (_d2 = this.loadMoreEl) == null ? void 0 : _d2.remove();
+              }
+            } else {
+              if (isLoadMore && anchorEl) {
+                const nextAnchorEl = contentClone.querySelector(WebComponent.FiltersContentAnchor);
+                const wrapEl = nextAnchorEl == null ? void 0 : nextAnchorEl.parentElement;
+                nextAnchorEl == null ? void 0 : nextAnchorEl.remove();
+                if (wrapEl) {
+                  anchorEl.insertAdjacentHTML("beforebegin", wrapEl.innerHTML);
+                  (_e2 = this.loadMoreEl) == null ? void 0 : _e2.UIUpdated();
+                } else {
+                  (_f2 = this.loadMoreEl) == null ? void 0 : _f2.remove();
+                }
+              } else {
+                this.outerHTML = contentClone.outerHTML;
               }
             }
+            xoFilters.emit("done", void 0);
+            resetStatus();
           }
-        });
+        }
       });
     }
     onConnected() {
-      this.unsubscribe = subscribe$3(this.listener);
+      this.unsubscribe = subscribe$3(this.listener, (prevState, nextState) => {
+        return (prevState == null ? void 0 : prevState.status) === (nextState == null ? void 0 : nextState.status);
+      });
       this.isReady = true;
     }
     disconnectedCallback() {
@@ -9677,7 +9782,7 @@ var __publicField = (obj, key, value) => {
   FiltersLoadMore = __decorate([
     customElements$1(WebComponent.FiltersLoadMore)
   ], FiltersLoadMore);
-  const propTypes$1 = {
+  const propTypes$2 = {
     xoLoading: Boolean
   };
   const COLLECTIONS_KEY = "collections";
@@ -9871,7 +9976,7 @@ var __publicField = (obj, key, value) => {
       this.controller.abort();
       this.radioAndSearchRemoveListener();
     }
-  }, __publicField(_t, "propTypes", propTypes$1), _t);
+  }, __publicField(_t, "propTypes", propTypes$2), _t);
   __decorate([
     stateUpdate(["path", "query"]),
     __metadata("design:type", Object)
@@ -10465,7 +10570,7 @@ var __publicField = (obj, key, value) => {
       sections: getServiceSections(),
       section_url: window.location.pathname
     };
-    const res = await fetch(`${window.Shopify.routes.root}cart/add`, {
+    const res = await fetch(`${window.Shopify.routes.root}cart/add.js`, {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -10484,6 +10589,21 @@ var __publicField = (obj, key, value) => {
       return Promise.reject(data);
     }
     return data;
+  }
+  function getCart() {
+    const res = fetch(`${window.Shopify.routes.root}cart.js`, {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json"
+      }
+    }).then((res2) => {
+      if (res2.status === 404) {
+        return Promise.reject(new Error(res2.statusText));
+      }
+      return res2.json();
+    });
+    return res;
   }
   async function changeCart$1(line, quantity) {
     const res = await fetch(`${window.Shopify.routes.root}cart/change`, {
@@ -10650,7 +10770,8 @@ var __publicField = (obj, key, value) => {
     postCartNote: postCartNote$1,
     postCartDiscount: postCartDiscount$1,
     getShippingRates,
-    getPickupAvailability
+    getPickupAvailability,
+    getCart
   };
   const initialState = {
     "properties[__shopify_send_gift_card_to_recipient]": "",
@@ -10762,6 +10883,11 @@ var __publicField = (obj, key, value) => {
       let quantities = [];
       if (variantIdsParam.length) {
         variantIds = variantIdsParam;
+        if (variantIds.length === quantitiesParam.length) {
+          quantities = quantitiesParam;
+        } else {
+          quantities = variantIds.map(() => quantitiesParam[0] || 1);
+        }
       } else if (!isBundle) {
         variantIds = productIds.reduce((acc, productId) => {
           var _a3, _b3, _c3;
@@ -10784,7 +10910,7 @@ var __publicField = (obj, key, value) => {
       xoStore.set("xo-cart", (prevState) => {
         return {
           ...prevState,
-          size: data.items.reduce((acc, item) => acc + item.quantity, 0),
+          size: data.items.reduce((acc, item) => acc + item.quantity, prevState.size),
           sections: data.sections,
           items: data.items,
           addIdLoading: "",
@@ -11741,6 +11867,13 @@ var __publicField = (obj, key, value) => {
               return;
             }
             each(willChangeEls, (willChangeEl, index) => {
+              const willChangeClosestEl = willChangeEl.closest(WebComponent.CartWillChange);
+              if (willChangeClosestEl && willChangeClosestEl !== willChangeEl) {
+                return;
+              }
+              if (willChangeEl.querySelector(WebComponent.CartSize)) {
+                return;
+              }
               const uid2 = willChangeEl.getAttribute("xo-unique-id");
               let newCartWillChangeEl = null;
               if (uid2) {
@@ -11825,6 +11958,7 @@ var __publicField = (obj, key, value) => {
           if (xoDisabled) {
             return;
           }
+          const cartFlyEl = document.querySelector(WebComponent.CartFly);
           const hasCartError = !!((_a2 = this.closest(WebComponent.Product)) == null ? void 0 : _a2.querySelector(WebComponent.CartAddError));
           const properties = getProductProperties(this.closest(WebComponent.Product));
           let propertiesArr = properties ? [properties] : void 0;
@@ -11833,6 +11967,9 @@ var __publicField = (obj, key, value) => {
           }
           const quickviewEl = this.closest(WebComponent.ProductQuickView);
           const sectionId = this.getSectionId();
+          if (!quickviewEl) {
+            cartFlyEl == null ? void 0 : cartFlyEl.setTarget(this);
+          }
           if (this.productEl) {
             const id2 = getId(sectionId, xoProductId);
             let quantity = (_d2 = (_c2 = (_b2 = getState.cartForm()) == null ? void 0 : _b2[id2]) == null ? void 0 : _c2.quantity) != null ? _d2 : 1;
@@ -11888,14 +12025,10 @@ var __publicField = (obj, key, value) => {
             }
           }
           if (nextCart.addErrorMessage === "" || xoTestFly) {
-            this.handleCartFly();
+            cartFlyEl == null ? void 0 : cartFlyEl.handle();
           }
         } catch {
         }
-      });
-      __publicField(this, "handleCartFly", () => {
-        const cartFlyEl = document.querySelector(WebComponent.CartFly);
-        cartFlyEl == null ? void 0 : cartFlyEl.handle(this);
       });
       __publicField(this, "handleBundle", () => {
         const { xoForBundle } = this.getOptions();
@@ -12054,9 +12187,18 @@ var __publicField = (obj, key, value) => {
       this.prevSize = defaultSize;
       setCartSize(defaultSize);
       this.unsubscribe = subscribe.cart(async (state) => {
-        this.innerText = `${state.size}`;
+        const cartFlyEndEl = document.querySelector("[xo-cart-fly-end]");
+        if (cartFlyEndEl) {
+          const cartFlyEl = document.querySelector(WebComponent.CartFly);
+          if (cartFlyEl) {
+            const speed = Number(cartFlyEl.getAttribute("xo-speed")) || 1e3;
+            await delay(speed);
+            this.innerText = `${state.size}`;
+          }
+        } else {
+          this.innerText = `${state.size}`;
+        }
         if ((this.prevSize !== state.size || attrBoolean.get(this, "xo-test-fly")) && !state.addIdLoading) {
-          const cartFlyEndEl = document.querySelector("[xo-cart-fly-end]");
           if (cartFlyEndEl) {
             clearTimeout(this.timeId);
             attrBoolean.set(cartFlyEndEl, "xo-cart-fly-end-animated", false);
@@ -12226,6 +12368,13 @@ var __publicField = (obj, key, value) => {
           quantityChangeCart(this, cartLine, Number(targetEl.value));
         }
       });
+      __publicField(this, "handleKeydown", (event) => {
+        if (event.key === "Enter") {
+          const el = event.target;
+          event.preventDefault();
+          el.blur();
+        }
+      });
     }
     getProductEl() {
       return this.closest(WebComponent.Product);
@@ -12266,6 +12415,10 @@ var __publicField = (obj, key, value) => {
             const quantity = bundle == null ? void 0 : bundle.quantity;
             if (quantity != null) {
               this.inputEl.value = `${quantity}`;
+              const minusEl = this.querySelector(WebComponent.CartQuantityMinus);
+              if (minusEl) {
+                attrBoolean.set(minusEl, "xo-disabled", quantity === 1);
+              }
             }
           });
         }
@@ -12278,6 +12431,7 @@ var __publicField = (obj, key, value) => {
         this.inputEl.addEventListener("input", this.handleInput, this.controller);
         this.inputEl.addEventListener("focus", this.handleFocus, this.controller);
         this.inputEl.addEventListener("blur", this.handleBlur, this.controller);
+        this.inputEl.addEventListener("keydown", this.handleKeydown, this.controller);
         this.unsubscribe = subscribe.cartForm((state) => {
           var _a3;
           const quantity = (_a3 = state == null ? void 0 : state[getId(xoSectionId, xoProductId, xoLine)]) == null ? void 0 : _a3.quantity;
@@ -12735,6 +12889,10 @@ var __publicField = (obj, key, value) => {
             bundleAddEl == null ? void 0 : bundleAddEl.setProviderEl(bundleProviderEl);
           }
         }
+        const bundleGroup = (quickviewTriggerEl == null ? void 0 : quickviewTriggerEl.getAttribute("xo-bundle-group")) || "";
+        if (bundleGroup) {
+          this.setAttribute("xo-bundle-group", bundleGroup);
+        }
       });
     }
     onConnected() {
@@ -12811,7 +12969,7 @@ var __publicField = (obj, key, value) => {
         attrBoolean.set(this, "xo-loading", false);
         bindingHelper(this, "xo-loading-binding", false);
         if (xoModalName) {
-          xoModal.open(xoModalName);
+          xoModal.open(xoModalName, this, false);
         }
         if (xoToggleName) {
           xoToggle$1.open(xoToggleName);
@@ -12823,6 +12981,8 @@ var __publicField = (obj, key, value) => {
         if (productQuickViewEl) {
           productQuickViewEl.innerHTML = "";
         }
+        const cartFlyEl = document.querySelector(WebComponent.CartFly);
+        cartFlyEl == null ? void 0 : cartFlyEl.setTarget(this);
         attrBoolean.set(this, "xo-loading", true);
         bindingHelper(this, "xo-loading-binding", true);
         await getQuickviewProductHtml(xoName, this.getProductUrl(), this);
@@ -12837,12 +12997,13 @@ var __publicField = (obj, key, value) => {
     }
     getOptions() {
       return getAttrs(this, {
-        pick: ["xoName", "xoProductUrl", "xoModalName", "xoToggleName"],
+        pick: ["xoName", "xoProductUrl", "xoModalName", "xoToggleName", "xoBundleGroup"],
         types: {
           xoName: "string",
           xoProductUrl: "string",
           xoModalName: "string",
-          xoToggleName: "string"
+          xoToggleName: "string",
+          xoBundleGroup: "string"
         }
       });
     }
@@ -13699,24 +13860,14 @@ var __publicField = (obj, key, value) => {
     `;
       });
       __publicField(this, "renderVideo", () => {
-        var _a2;
+        var _a2, _b2;
         if (!this.media) {
           return "";
         }
         if (this.contentEl) {
           return "";
         }
-        const videoMedia = (_a2 = this.media.filter((media) => media.media_type === "video")) == null ? void 0 : _a2[0];
-        const videoMp4Arr = videoMedia.sources.filter((source) => source.format === "mp4");
-        const video = videoMp4Arr.reduce((acc, source) => {
-          if (source.width > acc.maxWidth) {
-            return {
-              url: source.url,
-              maxWidth: source.width
-            };
-          }
-          return acc;
-        }, { url: "", maxWidth: 0 }).url;
+        let video = ((_a2 = this.media.find((media) => media.media_type === "external_video")) == null ? void 0 : _a2.external_video_url) || ((_b2 = this.media.find((media) => media.media_type === "video")) == null ? void 0 : _b2.video_url);
         if (!video) {
           return "";
         }
@@ -13834,6 +13985,13 @@ var __publicField = (obj, key, value) => {
           this.media = data.media;
         }
       });
+      __publicField(this, "getTargetEl", () => {
+        const { xoTargetSelector } = this.props;
+        if (xoTargetSelector) {
+          return this.querySelector(xoTargetSelector) || this.closest(xoTargetSelector) || this;
+        }
+        return this;
+      });
     }
     async mount() {
       var _a2, _b2;
@@ -13845,10 +14003,8 @@ var __publicField = (obj, key, value) => {
       if (!this.productEl) {
         throw new Error(`${WebComponent.ProductMedia} must be in ${WebComponent.Product}`);
       }
-      const { xoTargetSelector } = this.props;
       this.setMedia();
-      const targetEl = xoTargetSelector ? this.querySelector(xoTargetSelector) : this;
-      const finalTargetEl = targetEl != null ? targetEl : this;
+      const targetEl = this.getTargetEl();
       if (device.mobile()) {
         if (!xoMobileEnabled) {
           return;
@@ -13864,8 +14020,8 @@ var __publicField = (obj, key, value) => {
         });
         this.intersectionObserver.observe(this);
       } else {
-        finalTargetEl.addEventListener("mousemove", this.handleMouseMove);
-        finalTargetEl.addEventListener("mouseleave", this.handleMouseLeave);
+        targetEl.addEventListener("mousemove", this.handleMouseMove);
+        targetEl.addEventListener("mouseleave", this.handleMouseLeave);
       }
       this.setState({
         carouselNextContent: (_a2 = this.props.xoCarouselNextContent) != null ? _a2 : "",
@@ -13907,7 +14063,7 @@ var __publicField = (obj, key, value) => {
     xoMobileEnabled: "boolean"
   }), __publicField(_v, "defaultProps", {
     xoType: "carousel",
-    xoTargetSelector: "",
+    xoTargetSelector: "xo-product",
     xoCarouselAutoplay: 1500,
     xoCarouselPrevContent: "",
     xoCarouselNextContent: "",
@@ -13924,6 +14080,8 @@ var __publicField = (obj, key, value) => {
   ProductMedia = __decorate([
     customElements$1(WebComponent.ProductMedia)
   ], ProductMedia);
+  const CART_FLY_START_ATTR = "xo-cart-fly-start";
+  const CART_FLY_END_ATTR = "xo-cart-fly-end";
   const FROM = 0;
   const TO = 100;
   let CartFly = (_w = class extends XoComponent {
@@ -13932,14 +14090,20 @@ var __publicField = (obj, key, value) => {
       __publicField(this, "unsubscribe", () => {
       });
       __publicField(this, "animated", createAnimate());
+      __publicField(this, "targetEl", null);
       __publicField(this, "handleAnimate", (target, cartFlyEndEl) => (value) => {
         const { top: targetTop, left: targetLeft } = offset(target);
         const { width: targetWidth, height: targetHeight } = target.getBoundingClientRect();
+        const { xoSizeMapStart } = this.props;
+        const startWidth = (xoSizeMapStart == null ? void 0 : xoSizeMapStart.width) === "height" ? targetHeight : targetWidth;
+        const startHeight = (xoSizeMapStart == null ? void 0 : xoSizeMapStart.height) === "width" ? targetWidth : targetHeight;
+        const startTop = targetTop + targetHeight / 2 - startHeight / 2;
+        const startLeft = targetLeft + targetWidth / 2 - startWidth / 2;
         const { top, left } = offset(cartFlyEndEl);
         const { width, height } = cartFlyEndEl.getBoundingClientRect();
         const finalTop = interpolate({
           inputRange: [FROM, TO],
-          outputRange: [targetTop, top],
+          outputRange: [startTop, top],
           easing: (t) => {
             const c1 = -3;
             const c3 = c1 + 1;
@@ -13949,17 +14113,17 @@ var __publicField = (obj, key, value) => {
         });
         const finalLeft = interpolate({
           inputRange: [FROM, TO],
-          outputRange: [targetLeft, left],
+          outputRange: [startLeft, left],
           value
         });
         const finalWidth = interpolate({
           inputRange: [FROM, TO],
-          outputRange: [targetWidth, width],
+          outputRange: [startWidth, width],
           value
         });
         const finalHeight = interpolate({
           inputRange: [FROM, TO],
-          outputRange: [targetHeight, height],
+          outputRange: [startHeight, height],
           value
         });
         this.style.top = `${finalTop}px`;
@@ -13967,19 +14131,29 @@ var __publicField = (obj, key, value) => {
         this.style.width = `${finalWidth}px`;
         this.style.height = `${finalHeight}px`;
       });
-      __publicField(this, "handle", (target) => {
+      __publicField(this, "setTarget", (target) => {
+        this.targetEl = target;
+        return this;
+      });
+      __publicField(this, "handle", () => {
+        var _a2, _b2, _c2;
         const { xoSpeed, xoEasing } = this.props;
-        const cartFlyEndEl = document.querySelector("[xo-cart-fly-end]");
-        if (cartFlyEndEl) {
+        const cartFlyStartEl = (_c2 = (_b2 = (_a2 = this.targetEl) == null ? void 0 : _a2.closest(WebComponent.Product)) == null ? void 0 : _b2.querySelector(`[${CART_FLY_START_ATTR}]`)) != null ? _c2 : this.targetEl;
+        const cartFlyEndEl = document.querySelector(`[${CART_FLY_END_ATTR}]`);
+        if (cartFlyEndEl && cartFlyStartEl) {
           this.style.display = "block";
+          this.style.setProperty("--xo-speed", `${xoSpeed}ms`);
+          this.setProps({ xoFlying: true });
           this.animated({
             from: FROM,
             to: TO,
             duration: xoSpeed,
             easing: easings[xoEasing],
-            onUpdate: this.handleAnimate(target, cartFlyEndEl),
+            onUpdate: this.handleAnimate(cartFlyStartEl, cartFlyEndEl),
             onEnd: () => {
               this.style.removeProperty("display");
+              this.setProps({ xoFlying: false });
+              this.targetEl = null;
             }
           });
         }
@@ -13987,15 +14161,24 @@ var __publicField = (obj, key, value) => {
     }
     mount() {
       this.unsubscribe = subscribe.cart((state) => {
-        var _a2, _b2;
+        var _a2, _b2, _c2, _d2, _e2, _f2;
         let src = "";
+        if (!state.isAdded) {
+          return;
+        }
         if (state.item) {
-          src = (_a2 = state.item) == null ? void 0 : _a2.featured_image.src;
+          src = (_b2 = (_a2 = state.item) == null ? void 0 : _a2.featured_image) == null ? void 0 : _b2.url;
         } else if (state.items && state.items.length > 0) {
-          src = (_b2 = state.items[0]) == null ? void 0 : _b2.featured_image.src;
+          src = (_d2 = (_c2 = state.items[0]) == null ? void 0 : _c2.featured_image) == null ? void 0 : _d2.url;
         }
         if (src) {
-          this.style.setProperty("--product-featured-image", `url('${imageUrl(src, { width: 300 })}')`);
+          const imgEl = (_f2 = (_e2 = this.targetEl) == null ? void 0 : _e2.closest(WebComponent.Product)) == null ? void 0 : _f2.querySelector(`img[src*="${src.replace(/.*\/|\?.*/g, "")}"]`);
+          if (imgEl) {
+            src = imgEl.src;
+          } else {
+            src = imageUrl(src, { width: 300 });
+          }
+          this.style.setProperty("--product-featured-image", `url('${src}')`);
         }
       });
     }
@@ -14004,7 +14187,9 @@ var __publicField = (obj, key, value) => {
     }
   }, __publicField(_w, "propTypes", {
     xoSpeed: "number",
-    xoEasing: "string"
+    xoEasing: "string",
+    xoSizeMapStart: "object",
+    xoFlying: "boolean"
   }), __publicField(_w, "defaultProps", {
     xoSpeed: 1e3,
     xoEasing: "ease"
@@ -14080,13 +14265,16 @@ var __publicField = (obj, key, value) => {
         return this.providerEl.querySelector(`template[${BUNDLE_PROP_ATTR}]`);
       });
       __publicField(this, "addBundleItem", (bundleUI, variantId, priceFinal, properties, quantity) => {
-        var _a2, _b2, _c2, _d2;
+        var _a2, _b2, _c2, _d2, _e2;
         const xoName = ((_a2 = this.providerEl) == null ? void 0 : _a2.props.xoName) || ((_b2 = this.quickViewEl) == null ? void 0 : _b2.getAttribute("xo-bundle-name"));
         if (!xoName) {
           return;
         }
         const xoCombineByQuantity = (_d2 = (_c2 = this.providerEl) == null ? void 0 : _c2.props.xoCombineByQuantity) != null ? _d2 : true;
-        const { xoGroup: xoGroup2 } = this.props;
+        let { xoGroup: xoGroup2 } = this.props;
+        if (this.quickViewEl) {
+          xoGroup2 = ((_e2 = this.quickViewEl) == null ? void 0 : _e2.getAttribute("xo-bundle-group")) || xoGroup2;
+        }
         const { xoProductId } = this.productEl.getOptions();
         const id2 = uid();
         const doc = new DOMParser().parseFromString(bundleUI, "text/html");
@@ -14173,6 +14361,10 @@ var __publicField = (obj, key, value) => {
       this.providerEl = providerEl;
     }
     mount() {
+      const { xoDisabled = false } = this.props;
+      if (xoDisabled) {
+        return;
+      }
       this.addEventListener("click", this.handleClick);
       this.unsubscribe = subscribe.bundle(async ({ bundles }) => {
         var _a2, _b2;
@@ -14205,7 +14397,8 @@ var __publicField = (obj, key, value) => {
     }
   }, __publicField(_z, "propTypes", {
     xoGroup: "string",
-    xoVariantId: "string"
+    xoVariantId: "string",
+    xoDisabled: "boolean"
   }), __publicField(_z, "defaultProps", {}), _z);
   BundleAdd = __decorate([
     customElements$1(WebComponent.BundleAdd)
@@ -14514,6 +14707,13 @@ var __publicField = (obj, key, value) => {
           setFormQuantity(xoSectionId, xoProductId, xoLine, () => valueToggle);
         }
       });
+      __publicField(this, "handleDefaultQuantity", () => {
+        const { xoValue, xoChecked } = this.props;
+        const { xoSectionId, xoProductId, xoLine } = this.productOptions;
+        if (xoValue && xoChecked) {
+          setFormQuantity(xoSectionId, xoProductId, xoLine, () => xoValue);
+        }
+      });
     }
     getProductEl() {
       return this.closest(WebComponent.Product);
@@ -14522,20 +14722,32 @@ var __publicField = (obj, key, value) => {
       return this.getProductEl().getOptions();
     }
     async mount() {
+      var _a2, _b2;
       await delay();
       if (!this.getProductEl()) {
         console.error(`${WebComponent.CartQuantityTrigger} must be a child of ${WebComponent.Product}}`);
       }
       const { xoValue, xoChecked } = this.props;
       const { xoSectionId, xoProductId, xoLine } = this.productOptions;
+      const quantity = (_b2 = (_a2 = getState.cartForm()) == null ? void 0 : _a2[getId(xoSectionId, xoProductId, xoLine)]) == null ? void 0 : _b2.quantity;
+      this.setProps({ xoChecked: quantity === xoValue });
+      this.emit("xo-change", { detail: { checked: quantity === xoValue } });
       this.addEventListener("click", this.handleQuantity);
       this.unsubscribe = subscribe.cartForm((state) => {
-        var _a2;
-        const quantity = (_a2 = state == null ? void 0 : state[getId(xoSectionId, xoProductId, xoLine)]) == null ? void 0 : _a2.quantity;
-        this.setProps({ xoChecked: quantity === xoValue });
+        queueMicrotask(() => {
+          var _a3;
+          const quantity2 = (_a3 = state == null ? void 0 : state[getId(xoSectionId, xoProductId, xoLine)]) == null ? void 0 : _a3.quantity;
+          this.setProps({ xoChecked: quantity2 === xoValue });
+          this.emit("xo-change", { detail: { checked: quantity2 === xoValue } });
+        });
+      }, (prev2, next2) => {
+        var _a3, _b3;
+        const prevQuantity = (_a3 = prev2 == null ? void 0 : prev2[getId(xoSectionId, xoProductId, xoLine)]) == null ? void 0 : _a3.quantity;
+        const nextQuantity = (_b3 = next2 == null ? void 0 : next2[getId(xoSectionId, xoProductId, xoLine)]) == null ? void 0 : _b3.quantity;
+        return prevQuantity === nextQuantity;
       });
       if (xoChecked) {
-        this.handleQuantity();
+        this.handleDefaultQuantity();
       }
     }
     unmount() {
@@ -14970,6 +15182,23 @@ var __publicField = (obj, key, value) => {
       __publicField(this, "handleLocationChange", () => {
         var _a2;
         const { xoSectionId, xoProductId } = this.productEl.getOptions();
+        const variantId = queryString.parse(window.location.search, true).variant;
+        if (variantId) {
+          setVariantId(xoSectionId, xoProductId, variantId);
+          each(getFieldEls(this), (fieldEl) => {
+            var _a3;
+            if (fieldEl instanceof HTMLInputElement) {
+              if (fieldEl.getAttribute("xo-variant-id") === variantId && !fieldEl.checked) {
+                fieldEl.checked = true;
+              }
+            } else if (fieldEl instanceof HTMLSelectElement) {
+              const currentOption = fieldEl.querySelector(`option[xo-variant-id="${variantId}"]`);
+              if (currentOption) {
+                fieldEl.value = (_a3 = currentOption == null ? void 0 : currentOption.getAttribute("value")) != null ? _a3 : "";
+              }
+            }
+          });
+        }
         getProductHtml(this.getUrl(window.location.href));
         const pickupEl = (_a2 = this.productEl) == null ? void 0 : _a2.querySelector(WebComponent.ProductPickupAvailability);
         if (pickupEl) {
@@ -15187,6 +15416,51 @@ var __publicField = (obj, key, value) => {
   ProductVariants = __decorate([
     customElements$1(WebComponent.ProductVariants)
   ], ProductVariants);
+  const propTypes$1 = {};
+  let HelloComponent = (_O = class extends XoComponent {
+    constructor() {
+      super(...arguments);
+      __publicField(this, "prevQuickviewProductHtml", "");
+      __publicField(this, "productEl", this.closest(WebComponent.Product));
+      __publicField(this, "productQuickviewTriggerEl", this.closest(WebComponent.ProductQuickViewTrigger));
+      __publicField(this, "unsubscribe", () => {
+      });
+    }
+    mount() {
+      var _a2;
+      if (!this.productEl) {
+        return;
+      }
+      if (!this.productQuickviewTriggerEl) {
+        return;
+      }
+      const productId = this.productEl.getAttribute("xo-product-id");
+      const quickviewName = (_a2 = this.productQuickviewTriggerEl.getAttribute("xo-name")) != null ? _a2 : QUICKVIEW_NAME;
+      this.unsubscribe = subscribe.product(async (state) => {
+        var _a3, _b2, _c2, _d2;
+        await delay(100);
+        if (this.prevQuickviewProductHtml === ((_a3 = state.quickviewProductHtml) == null ? void 0 : _a3[quickviewName])) {
+          return;
+        }
+        if (((_b2 = state.quickviewTriggerEl) == null ? void 0 : _b2.querySelector(WebComponent.ProductVariantsTitle)) !== this) {
+          return;
+        }
+        const sectionId = getShopifySectionId(this);
+        const currentVariantId = getVariantId(sectionId, productId);
+        const templateEl = document.querySelector(`${WebComponent.ProductQuickView} template[${WebComponent.ProductVariantsTitle}]`);
+        if (templateEl && currentVariantId) {
+          this.innerHTML = templateEl.innerHTML.trim();
+        }
+        this.prevQuickviewProductHtml = (_d2 = (_c2 = state.quickviewProductHtml) == null ? void 0 : _c2[quickviewName]) != null ? _d2 : "";
+      });
+    }
+    unmount() {
+      this.unsubscribe();
+    }
+  }, __publicField(_O, "propTypes", propTypes$1), _O);
+  HelloComponent = __decorate([
+    customElements$1(WebComponent.ProductVariantsTitle)
+  ], HelloComponent);
   const styles$g = "";
   createState();
   const xoProductQuickView = {
@@ -15204,6 +15478,19 @@ var __publicField = (obj, key, value) => {
   window.cartSubscribe = cartSubscribe;
   window.getCartFormState = getCartFormState;
   window.productSubscribe = productSubscribe;
+  window.cartTrigger = async () => {
+    const data = await services.getCart();
+    xoStore.set("xo-cart", (prevState) => {
+      return {
+        ...prevState,
+        size: data.items.reduce((acc, item) => acc + item.quantity, prevState.size),
+        sections: data.sections,
+        items: data.items,
+        addIdLoading: "",
+        isAdded: true
+      };
+    });
+  };
   componentDefine({
     [WebComponent.Cart]: Cart,
     [WebComponent.CartMini]: CartMini,
@@ -15833,11 +16120,11 @@ var __publicField = (obj, key, value) => {
   };
   let Animate = _Animate;
   __publicField(Animate, "defaultOptions", {
-    xoDuration: (_P = (_O = window.settings) == null ? void 0 : _O.animate_duration) != null ? _P : 500,
-    xoType: (_R = (_Q = window.settings) == null ? void 0 : _Q.animate_effect) != null ? _R : "fade-up",
+    xoDuration: (_Q = (_P = window.settings) == null ? void 0 : _P.animate_duration) != null ? _Q : 500,
+    xoType: (_S = (_R = window.settings) == null ? void 0 : _R.animate_effect) != null ? _S : "fade-up",
     xoConstant: 75,
     xoOrder: 0,
-    xoStrength: (_T = (_S = window.settings) == null ? void 0 : _S.animate_strength) != null ? _T : 1,
+    xoStrength: (_U = (_T = window.settings) == null ? void 0 : _T.animate_strength) != null ? _U : 1,
     xoEasing: "easeLight",
     xoCascade: false,
     xoDisabled: false,
@@ -16042,11 +16329,11 @@ var __publicField = (obj, key, value) => {
   let AnimateScroll = _AnimateScroll;
   __publicField(AnimateScroll, "defaultOptions", {
     xoAnimate: "none",
-    xoDuration: (_V = (_U = window.settings) == null ? void 0 : _U.animate_duration) != null ? _V : 500,
-    xoType: (_X = (_W = window.settings) == null ? void 0 : _W.animate_effect) != null ? _X : "fade-up",
+    xoDuration: (_W = (_V = window.settings) == null ? void 0 : _V.animate_duration) != null ? _W : 500,
+    xoType: (_Y = (_X = window.settings) == null ? void 0 : _X.animate_effect) != null ? _Y : "fade-up",
     xoConstant: 75,
     xoOrder: 0,
-    xoStrength: (_Z = (_Y = window.settings) == null ? void 0 : _Y.animate_strength) != null ? _Z : 1,
+    xoStrength: (__ = (_Z = window.settings) == null ? void 0 : _Z.animate_strength) != null ? __ : 1,
     xoEasing: "easeLight",
     xoCascade: false,
     xoDisabled: false,
@@ -16054,7 +16341,7 @@ var __publicField = (obj, key, value) => {
   });
   const animate = new AnimateScroll();
   let elementAdded = false;
-  if ((__ = window == null ? void 0 : window.xbEditor) == null ? void 0 : __.designMode) {
+  if ((_$ = window == null ? void 0 : window.xbEditor) == null ? void 0 : _$.designMode) {
     animate.init();
     DOMLoaded(async () => {
       if (!elementAdded) {
@@ -16070,7 +16357,7 @@ var __publicField = (obj, key, value) => {
     DOMLoaded(() => {
       animate.init();
     });
-    if ((_$ = window.Shopify) == null ? void 0 : _$.designMode) {
+    if ((_aa = window.Shopify) == null ? void 0 : _aa.designMode) {
       document.addEventListener("shopify:section:load", () => animate.init());
       document.addEventListener("shopify:section:reorder", () => animate.init());
     }
@@ -16480,7 +16767,7 @@ var __publicField = (obj, key, value) => {
   componentDefine({
     [WebComponent.Countdown]: Countdown
   });
-  let Countto = (_aa = class extends XoComponent {
+  let Countto = (_ba = class extends XoComponent {
     constructor() {
       super(...arguments);
       __publicField(this, "observer", null);
@@ -16551,19 +16838,19 @@ var __publicField = (obj, key, value) => {
       this.animated.off();
       this.attrAnimated.off();
     }
-  }, __publicField(_aa, "propTypes", {
+  }, __publicField(_ba, "propTypes", {
     xoFrom: "number",
     xoTo: "number",
     xoDuration: "number",
     xoDelay: "number",
     xoEasing: "string"
-  }), __publicField(_aa, "defaultProps", {
+  }), __publicField(_ba, "defaultProps", {
     xoFrom: 0,
     xoTo: 100,
     xoDuration: 2e3,
     xoDelay: 0,
     xoEasing: "ease"
-  }), __publicField(_aa, "observedProps", ["xoObserved"]), _aa);
+  }), __publicField(_ba, "observedProps", ["xoObserved"]), _ba);
   Countto = __decorate([
     customElements$1(WebComponent.Countto)
   ], Countto);
@@ -16596,6 +16883,7 @@ var __publicField = (obj, key, value) => {
       __publicField(this, "videoRatio", 16 / 9);
       __publicField(this, "itemEl", null);
       __publicField(this, "videoEl", null);
+      __publicField(this, "videoButtonEl", this.querySelector(WebComponent.VideoCoverButton));
       __publicField(this, "getAutoplay", () => {
         const { xoAutoplay = true } = this.options;
         return xoAutoplay ? "autoplay" : "";
@@ -16670,6 +16958,7 @@ var __publicField = (obj, key, value) => {
           if (this.videoEl.readyState >= 2) {
             this.handleVideoRatio();
           } else {
+            this.videoEl.removeEventListener("loadedmetadata", this.handleVideoRatio);
             this.videoEl.addEventListener("loadedmetadata", this.handleVideoRatio);
           }
         }
@@ -16684,15 +16973,21 @@ var __publicField = (obj, key, value) => {
         const { xoSrc, xoAutoplay = true } = this.options;
         const videoUrl = changeUrl(xoSrc, xoAutoplay);
         if (isVimeo(xoSrc)) {
-          this.insertAdjacentHTML("beforeend", this.renderVimeo(videoUrl));
+          if (!this.querySelector("iframe")) {
+            this.insertAdjacentHTML("beforeend", this.renderVimeo(videoUrl));
+          }
           this.assignEl();
           this.setVideoSize();
         } else if (isYoutube(xoSrc)) {
-          this.insertAdjacentHTML("beforeend", this.renderYoutube(videoUrl));
+          if (!this.querySelector("iframe")) {
+            this.insertAdjacentHTML("beforeend", this.renderYoutube(videoUrl));
+          }
           this.assignEl();
           this.handleYoutubeRatio();
         } else {
-          this.insertAdjacentHTML("beforeend", this.renderVideo(videoUrl));
+          if (!this.querySelector("video")) {
+            this.insertAdjacentHTML("beforeend", this.renderVideo(videoUrl));
+          }
           this.assignEl();
           this.handleVideo();
         }
@@ -16737,22 +17032,30 @@ var __publicField = (obj, key, value) => {
         };
       }
     }
-    run() {
-      if (this.querySelector("video, iframe")) {
-        return;
+    async run() {
+      var _a2;
+      if (!this.querySelector("video, iframe")) {
+        this.init();
+        this.dispatchEvent(new CustomEvent("xo-video-cover:init"));
+        window.addEventListener("resize", this.handleResize);
       }
-      this.init();
-      attrBoolean.set(this, "xo-playing", true);
-      attrBoolean.set(this, "xo-paused", false);
-      this.dispatchEvent(new CustomEvent("xo-video-cover:init"));
-      window.addEventListener("resize", this.handleResize);
+      const { xoAutoplay = true } = this.options;
+      if (xoAutoplay) {
+        attrBoolean.set(this, "xo-playing", true);
+        attrBoolean.set(this, "xo-paused", false);
+        await delay();
+        (_a2 = this.videoButtonEl) == null ? void 0 : _a2.setState({ isPlaying: true });
+      }
     }
-    pause() {
+    async pause() {
+      var _a2;
       attrBoolean.set(this, "xo-paused", true);
       attrBoolean.set(this, "xo-playing", false);
+      await delay();
+      (_a2 = this.videoButtonEl) == null ? void 0 : _a2.setState({ isPlaying: false });
     }
     onConnected() {
-      if (this.closest(WebComponent.CarouselInner)) {
+      if (this.closest(WebComponent.CarouselInner) && !this.closest(WebComponent.ProductMedia)) {
         return;
       }
       this.init();
@@ -17078,7 +17381,7 @@ var __publicField = (obj, key, value) => {
     xoEffect: "typing",
     xoCursorChar: "|"
   });
-  let TypingFactory = (_ba = class extends XoComponent {
+  let TypingFactory = (_ca = class extends XoComponent {
     constructor() {
       super(...arguments);
       __publicField(this, "typing", null);
@@ -17125,13 +17428,13 @@ var __publicField = (obj, key, value) => {
     unmount() {
       this.destroy();
     }
-  }, __publicField(_ba, "propTypes", {
+  }, __publicField(_ca, "propTypes", {
     xoContent: "array",
     xoDuration: "number",
     xoDelay: "number",
     xoEffect: "string",
     xoCursorChar: "string"
-  }), __publicField(_ba, "observedProps", ["xoEffect", "xoContent", "xoCursorChar", "xoDelay", "xoDuration"]), _ba);
+  }), __publicField(_ca, "observedProps", ["xoEffect", "xoContent", "xoCursorChar", "xoDelay", "xoDuration"]), _ca);
   TypingFactory = __decorate([
     customElements$1(WebComponent.Typing)
   ], TypingFactory);
@@ -17566,8 +17869,8 @@ var __publicField = (obj, key, value) => {
   class DarkMode extends XoHTMLElement {
     constructor() {
       super();
-      __publicField(this, "colorSchemeIds", ((_ca = window.settings) == null ? void 0 : _ca.color_scheme_ids) || []);
-      __publicField(this, "darkModeMapping", (_da = window.settings) == null ? void 0 : _da.dark_mode_mapping);
+      __publicField(this, "colorSchemeIds", ((_da = window.settings) == null ? void 0 : _da.color_scheme_ids) || []);
+      __publicField(this, "darkModeMapping", (_ea = window.settings) == null ? void 0 : _ea.dark_mode_mapping);
       __publicField(this, "colorSchemeMapping");
       __publicField(this, "prevIds", /* @__PURE__ */ new Map());
       __publicField(this, "nextIds", /* @__PURE__ */ new Map());
@@ -17665,12 +17968,12 @@ var __publicField = (obj, key, value) => {
       for (let key in this.colorSchemeMapping) {
         const prevIndex = Number(key.replace(/Scheme\s/g, "")) - 1;
         const { prevId } = this.getIdFromKey(key);
-        this.colorEls = Array.from(document.querySelectorAll(`.color-${prevId}:not([${COLOR_SCHEME_ADDED}])`));
+        this.colorEls = Array.from(document.querySelectorAll(`.color-${prevId}:not([${COLOR_SCHEME_ADDED}])`)).filter((el) => !attrBoolean.get(el, "xo-color-freeze"));
         this.setIds(this.colorEls, key);
         this.setRootIds(key);
         let isDark = ((_a2 = objectParse(storage.getItem("@xo/darkMode") || "{}")) == null ? void 0 : _a2[prevId]) === "dark";
         const pushIds = () => {
-          const newColorEls = Array.from(document.querySelectorAll(`.color-${prevId}:not([${COLOR_SCHEME_ADDED}])`));
+          const newColorEls = Array.from(document.querySelectorAll(`.color-${prevId}:not([${COLOR_SCHEME_ADDED}])`)).filter((el) => !attrBoolean.get(el, "xo-color-freeze"));
           this.setIds(newColorEls, key);
           const prevIds = /* @__PURE__ */ new Map();
           each(newColorEls, (el) => {
@@ -18236,7 +18539,7 @@ var __publicField = (obj, key, value) => {
   const VX_OFFSET = 30;
   const CLAMP_THRESHOLD = 0.3;
   const THROTTLE = 400;
-  let ScrollCarousel = (_ea = class extends XoComponent {
+  let ScrollCarousel = (_fa = class extends XoComponent {
     constructor() {
       super(...arguments);
       __publicField(this, "innerEl", this.children[0]);
@@ -18312,10 +18615,27 @@ var __publicField = (obj, key, value) => {
         }
         this.setState({ isHorizontalSwipeState: void 0, navTarget: false });
       });
+      __publicField(this, "nextPrevShowHide", () => {
+        var _a2, _b2, _c2, _d2;
+        const { xoGap } = this.props;
+        if (this.offsetWidth >= this.innerEl.scrollWidth - xoGap) {
+          (_a2 = this.nextEl) == null ? void 0 : _a2.style.setProperty("display", "none");
+          (_b2 = this.prevEl) == null ? void 0 : _b2.style.setProperty("display", "none");
+        } else {
+          (_c2 = this.nextEl) == null ? void 0 : _c2.style.setProperty("display", "block");
+          (_d2 = this.prevEl) == null ? void 0 : _d2.style.setProperty("display", "block");
+        }
+      });
       __publicField(this, "handleWheel", (event) => {
         var _a2;
+        const { xoGap } = this.props;
         const { deltaX, deltaY } = event;
         if (deltaY) {
+          return;
+        }
+        this.nextPrevShowHide();
+        if (this.offsetWidth >= this.innerEl.scrollWidth - xoGap) {
+          this.innerEl.style.transform = "translate3d(0, 0, 0)";
           return;
         }
         event.preventDefault();
@@ -18361,6 +18681,23 @@ var __publicField = (obj, key, value) => {
           }
         });
         this.setState({ isHorizontalSwipeState: void 0 });
+      });
+      __publicField(this, "handleActiveIndex", (index) => {
+        var _a2;
+        const itemEls = Array.from(this.innerEl.children);
+        if (!itemEls.length) {
+          return;
+        }
+        const { xoRtl } = this.props;
+        const { x } = this.state;
+        const itemEl = itemEls[clamp(index, 0, itemEls.length - 1)];
+        const carouselRect = this.getBoundingClientRect();
+        const itemRect = itemEl.getBoundingClientRect();
+        const delta = xoRtl ? carouselRect.right - itemRect.right : carouselRect.left - itemRect.left;
+        const nextX = this.getValue(x + delta, false);
+        this.stopAnimated();
+        this.setState({ x: nextX });
+        (_a2 = this.pan) == null ? void 0 : _a2.setValue({ dx: nextX });
       });
       __publicField(this, "handleNext", throttle((event) => {
         event.preventDefault();
@@ -18420,22 +18757,26 @@ var __publicField = (obj, key, value) => {
       __publicField(this, "updateUI", () => {
         const { x } = this.state;
         this.innerEl.style.transform = `translate3d(${x}px, 0, 0)`;
-        if (this.nextEl) {
-          attrBoolean.set(this.nextEl, "xo-disabled", x >= 0);
-        }
         if (this.prevEl) {
-          attrBoolean.set(this.prevEl, "xo-disabled", x <= this.endX());
+          attrBoolean.set(this.prevEl, "xo-disabled", x >= 0);
+        }
+        if (this.nextEl) {
+          attrBoolean.set(this.nextEl, "xo-disabled", x !== 0 && x <= this.endX());
         }
       });
     }
     mount() {
       var _a2, _b2;
-      const { xoGap } = this.props;
+      const { xoGap, xoActiveIndex } = this.props;
       if (!this.innerEl) {
         return;
       }
-      this.updateUI();
       this.innerEl.style.setProperty("--xo-gap", `${xoGap}px`);
+      if (xoActiveIndex != null) {
+        this.handleActiveIndex(xoActiveIndex);
+      }
+      this.updateUI();
+      this.nextPrevShowHide();
       this.bindAnchor();
       this.pan = panGesture({
         element: this,
@@ -18456,17 +18797,18 @@ var __publicField = (obj, key, value) => {
       (_b2 = this.nextEl) == null ? void 0 : _b2.removeEventListener("click", this.handleNext);
       (_c2 = this.prevEl) == null ? void 0 : _c2.removeEventListener("click", this.handlePrev);
     }
-  }, __publicField(_ea, "propTypes", {
+  }, __publicField(_fa, "propTypes", {
     xoSpeed: Number,
     xoGap: Number,
     xoEasing: String,
-    xoRtl: Boolean
-  }), __publicField(_ea, "defaultProps", {
+    xoRtl: Boolean,
+    xoActiveIndex: Number
+  }), __publicField(_fa, "defaultProps", {
     xoSpeed: 200,
     xoEasing: "ease",
     xoGap: 30,
     xoRtl: document.dir === "rtl"
-  }), _ea);
+  }), _fa);
   __decorate([
     stateUpdate(),
     __metadata("design:type", Object)
@@ -18476,7 +18818,7 @@ var __publicField = (obj, key, value) => {
   ], ScrollCarousel);
   const styles$7 = "";
   const EASING = "cubic-bezier(.29,.99,.53,.88)";
-  let Magnetic = (_fa = class extends XoComponent {
+  let Magnetic = (_ga = class extends XoComponent {
     constructor() {
       super(...arguments);
       __publicField(this, "handleMouseMove", (event) => {
@@ -18548,20 +18890,20 @@ var __publicField = (obj, key, value) => {
       container.removeEventListener("mousemove", this.handleMouseMove);
       container.removeEventListener("mouseleave", this.handleMouseLeave);
     }
-  }, __publicField(_fa, "propTypes", {
+  }, __publicField(_ga, "propTypes", {
     xoDuration: "number",
     xoRadius: "number",
     xoRadiusMove: "number",
     xoTarget: "string"
-  }), __publicField(_fa, "defaultProps", {
+  }), __publicField(_ga, "defaultProps", {
     xoDuration: 600,
     xoRadius: 100
-  }), _fa);
+  }), _ga);
   Magnetic = __decorate([
     customElements$1(WebComponent.Magnetic)
   ], Magnetic);
   const styles$6 = "";
-  let ScrollScene = (_ga = class extends XoComponent {
+  let ScrollScene = (_ha = class extends XoComponent {
     constructor() {
       super(...arguments);
       __publicField(this, "timeId", -1);
@@ -18688,15 +19030,15 @@ var __publicField = (obj, key, value) => {
       document.removeEventListener("focusin", this.handleFocusIn);
       (_a2 = this.resizeObserver) == null ? void 0 : _a2.disconnect();
     }
-  }, __publicField(_ga, "propTypes", {
+  }, __publicField(_ha, "propTypes", {
     xoThreshold: "number",
     xoMobileDisabled: "boolean",
     xoMobileBreakpoint: "number"
-  }), __publicField(_ga, "defaultProps", {
+  }), __publicField(_ha, "defaultProps", {
     xoThreshold: 0.5,
     xoMobileDisabled: false,
     xoMobileBreakpoint: 0
-  }), _ga);
+  }), _ha);
   ScrollScene = __decorate([
     customElements$1(WebComponent.ScrollScene)
   ], ScrollScene);
@@ -18720,7 +19062,7 @@ var __publicField = (obj, key, value) => {
       return (_a2 = tabContentEl == null ? void 0 : tabContentEl.innerHTML.trim()) != null ? _a2 : "";
     });
   }
-  let CollectionTabs = (_ha = class extends XoComponent {
+  let CollectionTabs = (_ia = class extends XoComponent {
     constructor() {
       super(...arguments);
       __publicField(this, "intersectionObserver", null);
@@ -18832,9 +19174,9 @@ var __publicField = (obj, key, value) => {
       (_a2 = this.intersectionObserver) == null ? void 0 : _a2.disconnect();
       document.removeEventListener("click", this.handleClick);
     }
-  }, __publicField(_ha, "propTypes", {
+  }, __publicField(_ia, "propTypes", {
     xoSectionId: "string"
-  }), __publicField(_ha, "defaultProps", {}), __publicField(_ha, "observeOnMount", true), _ha);
+  }), __publicField(_ia, "defaultProps", {}), __publicField(_ia, "observeOnMount", true), _ia);
   CollectionTabs = __decorate([
     customElements$1(WebComponent.CollectionTabs)
   ], CollectionTabs);
@@ -18929,7 +19271,7 @@ var __publicField = (obj, key, value) => {
       }
     });
   }
-  let IntersectionVideo = (_ia = class extends XoComponent {
+  let IntersectionVideo = (_ja = class extends XoComponent {
     constructor() {
       super(...arguments);
       __publicField(this, "state", {
@@ -19030,11 +19372,11 @@ var __publicField = (obj, key, value) => {
       (_a2 = this.intersectionObserver) == null ? void 0 : _a2.disconnect();
       this.controller.abort();
     }
-  }, __publicField(_ia, "propTypes", {
+  }, __publicField(_ja, "propTypes", {
     xoThreshold: "number"
-  }), __publicField(_ia, "defaultProps", {
+  }), __publicField(_ja, "defaultProps", {
     xoThreshold: 0.75
-  }), _ia);
+  }), _ja);
   IntersectionVideo = __decorate([
     customElements$1(WebComponent.IntersectionVideo)
   ], IntersectionVideo);
@@ -19127,7 +19469,7 @@ var __publicField = (obj, key, value) => {
   }
   const ORDER_ATTR = WebComponent.ProductsFetcher + "-order";
   const SCROLL_ATTR = WebComponent.ProductsFetcher + "-scroll";
-  let ProductsFetcher = (_ja = class extends XoComponent {
+  let ProductsFetcher = (_ka = class extends XoComponent {
     constructor() {
       super(...arguments);
       __publicField(this, "state", {
@@ -19265,7 +19607,7 @@ var __publicField = (obj, key, value) => {
       (_a2 = this.intersectionObserver) == null ? void 0 : _a2.disconnect();
       (_b2 = this.scrollEl) == null ? void 0 : _b2.removeEventListener("scroll", this.handleScroll);
     }
-  }, __publicField(_ja, "propTypes", {
+  }, __publicField(_ka, "propTypes", {
     xoType: "string",
     xoEmpty: "boolean",
     xoLoading: "boolean",
@@ -19273,15 +19615,15 @@ var __publicField = (obj, key, value) => {
     xoModalName: "string",
     xoLimit: "number",
     xoPageLimit: "number"
-  }), __publicField(_ja, "defaultProps", {
+  }), __publicField(_ka, "defaultProps", {
     xoEmpty: false,
     xoLoading: false,
     xoPageLimit: Infinity
-  }), _ja);
+  }), _ka);
   ProductsFetcher = __decorate([
     customElements$1(WebComponent.ProductsFetcher)
   ], ProductsFetcher);
-  let ProductsFetcherAdd = (_ka = class extends XoComponent {
+  let ProductsFetcherAdd = (_la = class extends XoComponent {
     constructor() {
       super(...arguments);
       __publicField(this, "state", {
@@ -19329,18 +19671,18 @@ var __publicField = (obj, key, value) => {
       this.unsubscribe();
       this.unsubscribe2();
     }
-  }, __publicField(_ka, "propTypes", {
+  }, __publicField(_la, "propTypes", {
     xoType: "string",
     xoAdded: "boolean",
     xoLimited: "boolean"
-  }), __publicField(_ka, "defaultProps", {
+  }), __publicField(_la, "defaultProps", {
     xoAdded: false,
     xoLimited: false
-  }), _ka);
+  }), _la);
   ProductsFetcherAdd = __decorate([
     customElements$1(WebComponent.ProductsFetcherAdd)
   ], ProductsFetcherAdd);
-  let ProductsFetcherRemove = (_la = class extends XoComponent {
+  let ProductsFetcherRemove = (_ma = class extends XoComponent {
     constructor() {
       super(...arguments);
       __publicField(this, "productEl", this.closest(WebComponent.Product));
@@ -19364,14 +19706,14 @@ var __publicField = (obj, key, value) => {
     unmount() {
       this.removeEventListener("click", this.handleClick);
     }
-  }, __publicField(_la, "propTypes", {
+  }, __publicField(_ma, "propTypes", {
     xoType: "string",
     xoLoading: "boolean"
-  }), __publicField(_la, "defaultProps", {}), _la);
+  }), __publicField(_ma, "defaultProps", {}), _ma);
   ProductsFetcherRemove = __decorate([
     customElements$1(WebComponent.ProductsFetcherRemove)
   ], ProductsFetcherRemove);
-  let ProductsFetcherClear = (_ma = class extends XoComponent {
+  let ProductsFetcherClear = (_na = class extends XoComponent {
     constructor() {
       super(...arguments);
       __publicField(this, "unsubscribe", () => {
@@ -19395,16 +19737,16 @@ var __publicField = (obj, key, value) => {
       this.removeEventListener("click", this.handleClick);
       this.unsubscribe();
     }
-  }, __publicField(_ma, "propTypes", {
+  }, __publicField(_na, "propTypes", {
     xoType: "string",
     xoEmpty: "boolean"
-  }), __publicField(_ma, "defaultProps", {
+  }), __publicField(_na, "defaultProps", {
     xoEmpty: false
-  }), _ma);
+  }), _na);
   ProductsFetcherClear = __decorate([
     customElements$1(WebComponent.ProductsFetcherClear)
   ], ProductsFetcherClear);
-  let ProductsFetcherSize = (_na = class extends XoComponent {
+  let ProductsFetcherSize = (_oa = class extends XoComponent {
     constructor() {
       super(...arguments);
       __publicField(this, "unsubscribe", () => {
@@ -19423,16 +19765,16 @@ var __publicField = (obj, key, value) => {
     unmount() {
       this.unsubscribe();
     }
-  }, __publicField(_na, "propTypes", {
+  }, __publicField(_oa, "propTypes", {
     xoType: "string",
     xoEmpty: "boolean"
-  }), __publicField(_na, "defaultProps", {
+  }), __publicField(_oa, "defaultProps", {
     xoEmpty: false
-  }), _na);
+  }), _oa);
   ProductsFetcherSize = __decorate([
     customElements$1(WebComponent.ProductsFetcherSize)
   ], ProductsFetcherSize);
-  let ProductsFetcherPaginate = (_oa = class extends XoComponent {
+  let ProductsFetcherPaginate = (_pa = class extends XoComponent {
     constructor() {
       super(...arguments);
       __publicField(this, "state", {
@@ -19469,15 +19811,15 @@ var __publicField = (obj, key, value) => {
     unmount() {
       this.unsubscribe();
     }
-  }, __publicField(_oa, "propTypes", {
+  }, __publicField(_pa, "propTypes", {
     xoType: "string"
-  }), __publicField(_oa, "defaultProps", {}), _oa);
+  }), __publicField(_pa, "defaultProps", {}), _pa);
   ProductsFetcherPaginate = __decorate([
     customElements$1(WebComponent.ProductsFetcherPaginate)
   ], ProductsFetcherPaginate);
   createStore();
   let count = 0;
-  let PhotoSwipe = (_pa = class extends XoComponent {
+  let PhotoSwipe = (_qa = class extends XoComponent {
     constructor() {
       super();
       __publicField(this, "cssId", `${WebComponent.Photoswipe}-css`);
@@ -19524,11 +19866,11 @@ var __publicField = (obj, key, value) => {
       (_a2 = this.lightbox) == null ? void 0 : _a2.destroy();
       this.lightbox = null;
     }
-  }, __publicField(_pa, "propTypes", {
+  }, __publicField(_qa, "propTypes", {
     xoOptions: "object"
-  }), __publicField(_pa, "defaultProps", {
+  }), __publicField(_qa, "defaultProps", {
     xoOptions: {}
-  }), __publicField(_pa, "observeOnMount", true), _pa);
+  }), __publicField(_qa, "observeOnMount", true), _qa);
   PhotoSwipe = __decorate([
     customElements$1(WebComponent.Photoswipe),
     __metadata("design:paramtypes", [])
@@ -19557,7 +19899,7 @@ var __publicField = (obj, key, value) => {
   const styles$2 = "";
   const styles$1 = "";
   var TurboProgressBar_1;
-  let TurboProgressBar = TurboProgressBar_1 = (_qa = class extends XoComponent {
+  let TurboProgressBar = TurboProgressBar_1 = (_ra = class extends XoComponent {
     mount() {
       if (TurboProgressBar_1.progressBar) {
         return;
@@ -19606,9 +19948,9 @@ var __publicField = (obj, key, value) => {
         TurboProgressBar_1.progressBar.removeAttribute("popover");
       }, { timeout: 100 });
     }
-  }, __publicField(_qa, "propTypes", {
+  }, __publicField(_ra, "propTypes", {
     xoRunning: "boolean"
-  }), __publicField(_qa, "progressBar"), __publicField(_qa, "running", false), __publicField(_qa, "completed", false), __publicField(_qa, "rid", -1), _qa);
+  }), __publicField(_ra, "progressBar"), __publicField(_ra, "running", false), __publicField(_ra, "completed", false), __publicField(_ra, "rid", -1), _ra);
   TurboProgressBar = TurboProgressBar_1 = __decorate([
     customElements$1(WebComponent.TurboProgressBar)
   ], TurboProgressBar);
@@ -19618,7 +19960,10 @@ var __publicField = (obj, key, value) => {
     }
     const currentFetch = window.fetch;
     window.fetch = async function(...args) {
-      TurboProgressBar.run();
+      const isRequestToSameOrigin = (args == null ? void 0 : args[0]) && typeof (args == null ? void 0 : args[0]) === "string" && args[0].replace(/https?:\/\/(www\.|)/g, "").startsWith(window.location.host);
+      if (isRequestToSameOrigin) {
+        TurboProgressBar.run();
+      }
       try {
         const response = await currentFetch.apply(this, args);
         TurboProgressBar.complete();
@@ -19773,11 +20118,12 @@ var __publicField = (obj, key, value) => {
       gridEl.setAttribute("xo-observed", Date.now().toString());
     }
   }
-  let ColumnOptionsProvider = (_ra = class extends XoComponent {
+  let ColumnOptionsProvider = (_sa = class extends XoComponent {
     constructor() {
       super(...arguments);
       __publicField(this, "resizeObserver", null);
       __publicField(this, "debounce", createDebounce());
+      __publicField(this, "filterId", -1);
       __publicField(this, "prevWidth", this.getBoundingClientRect().width);
       __publicField(this, "state", {});
       __publicField(this, "handleResize", this.debounce((entries) => {
@@ -19790,13 +20136,16 @@ var __publicField = (obj, key, value) => {
         }
       }, RESIZE_DELAY));
     }
+    getStorageKey() {
+      return `@columnOptions/${this.props.xoId}`;
+    }
     stateUpdate() {
-      storage.setItem("@columnOptions", JSON.stringify(this.state));
+      storage.setItem(this.getStorageKey(), JSON.stringify(this.state));
       updateGrid(this, this.state.currentColumn, this.state.currentColumns);
     }
     mount() {
       var _a2;
-      const columnOptions = storage.getItem("@columnOptions");
+      const columnOptions = storage.getItem(this.getStorageKey());
       if (columnOptions) {
         this.setState(JSON.parse(columnOptions));
       }
@@ -19809,12 +20158,18 @@ var __publicField = (obj, key, value) => {
       }
       this.resizeObserver = new ResizeObserver(this.handleResize);
       this.resizeObserver.observe(document.body);
+      this.filterId = xoFilters.on("done", () => {
+        updateGrid(this, this.state.currentColumn, this.state.currentColumns);
+      });
     }
     unmount() {
       var _a2;
       (_a2 = this.resizeObserver) == null ? void 0 : _a2.disconnect();
+      xoFilters.off(this.filterId);
     }
-  }, __publicField(_ra, "propTypes", {}), _ra);
+  }, __publicField(_sa, "propTypes", {
+    xoId: String
+  }), _sa);
   ColumnOptionsProvider = __decorate([
     customElements$1(WebComponent.ColumnOptionsProvider, { isProvider: true })
   ], ColumnOptionsProvider);
@@ -19824,16 +20179,16 @@ var __publicField = (obj, key, value) => {
     xoDevice: String,
     xoActive: XoComponent.Optional.Boolean
   };
-  let ColumnOptionsTrigger = (_ua = class extends XoComponent {
+  let ColumnOptionsTrigger = (_va = class extends XoComponent {
     constructor() {
       super(...arguments);
       __publicField(this, "context", this.queryContext(WebComponent.ColumnOptionsProvider));
       __publicField(this, "sectionEl", this.closest(".shopify-section"));
-      __publicField(this, "columnOptionsEl", (_sa = this.sectionEl) == null ? void 0 : _sa.querySelector(WebComponent.ColumnOptionsProvider));
+      __publicField(this, "columnOptionsEl", (_ta = this.sectionEl) == null ? void 0 : _ta.querySelector(WebComponent.ColumnOptionsProvider));
       __publicField(this, "controller", new AbortController());
       __publicField(this, "resizeObserver", null);
       __publicField(this, "debounce", createDebounce());
-      __publicField(this, "prevWidth", (_ta = this.context) == null ? void 0 : _ta.getBoundingClientRect().width);
+      __publicField(this, "prevWidth", (_ua = this.context) == null ? void 0 : _ua.getBoundingClientRect().width);
       __publicField(this, "setCurrentColumn", () => {
         const { xoColumn, xoColumns } = this.props;
         this.context.setState({ currentColumn: xoColumn, currentColumns: xoColumns, updatedAt: Date.now() });
@@ -19895,7 +20250,7 @@ var __publicField = (obj, key, value) => {
       this.controller.abort();
       (_a2 = this.resizeObserver) == null ? void 0 : _a2.disconnect();
     }
-  }, __publicField(_ua, "propTypes", propTypes), _ua);
+  }, __publicField(_va, "propTypes", propTypes), _va);
   __decorate([
     contextUpdate(),
     __metadata("design:type", Function),
@@ -20001,8 +20356,8 @@ var __publicField = (obj, key, value) => {
   }
   function handleSmoothScroll() {
     if (attrBoolean.get(document.documentElement, "xo-desktop-smooth-scroll")) {
-      const lerp2 = Number(attrBoolean.get(document.documentElement, "xo-desktop-smooth-scroll-lerp") || "0.1");
-      const speed = Number(attrBoolean.get(document.documentElement, "xo-desktop-smooth-scroll-speed") || "1");
+      const lerp2 = Number(document.documentElement.getAttribute("xo-desktop-smooth-scroll-lerp") || "0.1");
+      const speed = Number(document.documentElement.getAttribute("xo-desktop-smooth-scroll-speed") || "1");
       desktopSmoothScroll({
         platform: attrBoolean.get(document.documentElement, "xo-desktop-smooth-scroll"),
         lerp: isNaN(lerp2) ? 0.1 : lerp2,
@@ -20037,8 +20392,20 @@ var __publicField = (obj, key, value) => {
     handleSmoothScroll();
     handleScrollbarWidth();
   });
+  if ((_wa = window.Shopify) == null ? void 0 : _wa.designMode) {
+    document.addEventListener("shopify:section:load", async () => {
+      await delay(100);
+      handleYtbSrc();
+      handleRoleButton();
+      handleAnchor();
+      setHoverLevel();
+      viewedProducts();
+      measure();
+      stickyCartPropertySignal();
+    });
+  }
   const base = "";
-  console.log("WC V1.9.17");
+  console.log("WC V1.9.24");
   exports2.CircleBar = CircleBar;
   exports2.cartFormSubscribe = cartFormSubscribe;
   exports2.cartSubscribe = cartSubscribe;

@@ -1,0 +1,25 @@
+{% comment %}
+  Render pre-order note
+
+  Accepts:
+  - product: {Object} Product Liquid object (optional)
+
+  Usage:
+  {% render 'pre-order-note', product: product %}
+{% endcomment %}
+
+{% liquid
+  assign variant = product.selected_or_first_available_variant
+  assign is_preorder = false
+  if variant.inventory_quantity <= 0 and variant.inventory_policy == 'continue'
+    assign is_preorder = true
+  endif
+%}
+
+{% if is_preorder %}
+  <xo-animate xo-cascade>
+    <div class="xo-pre-order-note{% if settings.enable_border_radius %} xo-pre-order-note--radius{% endif %}">
+      {{ 'products.product.pre_order_note' | t }}
+    </div>
+  </xo-animate>
+{% endif %}

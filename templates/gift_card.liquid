@@ -77,9 +77,9 @@
           </div>
         </xo-animate>
         <xo-animate xo-cascade>
-          <div class='gift-card__qr-code' data-identifier='{{ gift_card.qr_identifier }}' role='img' aria-label='{{ "gift_cards.issued.qr_image_alt" | t }}'></div>
+          <div class='gift-card__qr-code' data-identifier='{{ gift_card.qr_identifier }}'></div>
         </xo-animate>
-        <p id='gift-card-code' class='gift-card__number' aria-label='{{ "gift_cards.issued.gift_card_code" | t | default: "Gift card code" }}'>{{ gift_card.code | format_code }}</p>
+        <p id='gift-card-code' class='gift-card__number'>{{ gift_card.code | format_code }}</p>
         {%- if gift_card.pass_url -%}
           <xo-animate xo-cascade>
             <a href='{{ gift_card.pass_url }}' class='gift-card__apple-wallet no-print'>
@@ -104,7 +104,7 @@
               <div class='gift-card__icon'>
                 {% render 'icon', name: 'copy', size: '1.3rem' %}
               </div>
-              <button class='button button--link' aria-label='{{ "gift_cards.issued.copy_code" | t }}'>{{ 'gift_cards.issued.copy_code' | t }}</button>
+              <button class='button button--link'>{{ 'gift_cards.issued.copy_code' | t }}</button>
             </div>
           </xo-animate>
           <xo-animate xo-cascade>
@@ -120,8 +120,9 @@
               </a>
               <button
                 class='button button--secondary btn-print {% if settings.enable_border_radius %}button--radius{% endif %}'
-                type='button'
-                aria-label='{{ "gift_cards.issued.print_gift_card" | t }}'
+                target='_blank'
+                rel='noopener'
+                aria-describedby='a11y-new-window-message'
               >
                 {{ 'gift_cards.issued.print_gift_card' | t }}
               </button>
@@ -153,39 +154,27 @@
   var clonedTemplate = template.content.cloneNode(true);
   var isMessageDisplayed = false;
 
-  document.querySelector('.button--link').addEventListener('click', function() {
-    var code = document.querySelector('.gift-card__number').innerText.trim();
+  document.querySelector('.button--link').addEventListener('click', () => {
+    var copyText = document.querySelector('.gift-card__number').innerText;
+    var tempInput = document.createElement("input");
+    tempInput.style = "position: absolute; top: -9999px;";
+    document.body.appendChild(tempInput);
+    tempInput.value = copyText;
+    tempInput.select();
+    tempInput.setSelectionRange(0, 99999); /* For mobile devices */
+    document.execCommand("copy");
+    document.body.removeChild(tempInput);
 
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(code).then(showSuccess).catch(fallbackCopy);
-    } else {
-      fallbackCopy();
-    }
-
-    function fallbackCopy() {
-      var ta = document.createElement('textarea');
-      ta.value = code;
-      ta.setAttribute('readonly', '');
-      ta.style.cssText = 'position:fixed;top:-9999px;left:-9999px;opacity:0';
-      document.body.appendChild(ta);
-      ta.select();
-      ta.setSelectionRange(0, 99999);
-      try { document.execCommand('copy'); } catch (e) {}
-      document.body.removeChild(ta);
-      showSuccess();
-    }
-
-    function showSuccess() {
-      if (!isMessageDisplayed) {
-        var infoSuccess = document.querySelector('.gift-card__copy-success');
-        infoSuccess.classList.add('active');
-        infoSuccess.appendChild(clonedTemplate);
-        isMessageDisplayed = true;
-      }
+    if (!isMessageDisplayed) {
+      const infoSuccess = document.querySelector('.gift-card__copy-success');
+      infoSuccess.classList.add("active");
+      document.querySelector('.gift-card__copy-success').appendChild(clonedTemplate);
+      isMessageDisplayed = true;
     }
   });
 
-  document.querySelectorAll('.btn-print').forEach(function(button) {
+  // Print
+  document.querySelectorAll('.button--secondary').forEach(button => {
     button.addEventListener('click', function() {
       window.print();
     });

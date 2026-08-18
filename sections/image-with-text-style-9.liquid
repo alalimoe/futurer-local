@@ -8,10 +8,27 @@
   assign alignment_desktop = section.settings.alignment_desktop
   assign alignment_mobile = section.settings.alignment_mobile
   assign expand_grid = section.settings.expand_grid
+
+  assign section_ratio = section.settings.section_ratio
+  assign ratio_desktop = section_ratio
+  assign ratio_mobile = section_ratio
+  if section_ratio == 'auto'
+    assign img_desktop = section.settings.background_image_desktop
+    assign img_mobile = section.settings.background_image_mobile
+    assign ratio_desktop = img_desktop.aspect_ratio | default: 1.7778
+    if img_mobile != blank
+      assign ratio_mobile = img_mobile.aspect_ratio | default: ratio_desktop
+    else
+      assign ratio_mobile = ratio_desktop
+    endif
+  endif
 %}
 
 <section {% render 'section-attr' %}>
-  <div class="xo-image-with-text-style-9">
+  <div
+    class="xo-image-with-text-style-9"
+    style="--section-ratio-desktop: {{ ratio_desktop }}; --section-ratio-mobile: {{ ratio_mobile }};"
+  >
     {% render 'section-bg-image' %}
     <xo-container class="xo-image-with-text-style-9__container">
       <div class="xo-image-with-text-style-9__content">
@@ -225,6 +242,50 @@
     },
     {
       "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "section_ratio",
+      "label": "Section ratio",
+      "default": "auto",
+      "options": [
+        {
+          "value": "auto",
+          "label": "Auto"
+        },
+        {
+          "value": "2/3",
+          "label": "2:3"
+        },
+        {
+          "value": "3/4",
+          "label": "3:4"
+        },
+        {
+          "value": "3/2",
+          "label": "3:2"
+        },
+        {
+          "value": "1",
+          "label": "1:1"
+        },
+        {
+          "value": "4/3",
+          "label": "4:3"
+        },
+        {
+          "value": "16/9",
+          "label": "16:9"
+        },
+        {
+          "value": "21/9",
+          "label": "21:9"
+        }
+      ]
+    },
+    {
+      "type": "header",
       "content": "t:sections.image_with_text_style_9.settings.header_advanced.content"
     },
     {
@@ -327,6 +388,7 @@
   "presets": [
     {
       "name": "t:sections.image_with_text_style_9.presets.name",
+      "category": "Image & Media",
       "settings": {},
       "blocks": []
     }

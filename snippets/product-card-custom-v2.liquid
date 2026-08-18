@@ -8,6 +8,14 @@
   {% render 'product-card-custom-v2', product: product %}
 {% endcomment %}
 
+{% liquid
+  assign variant = product.selected_or_first_available_variant
+  assign is_preorder = false
+  if variant.inventory_quantity <= 0 and variant.inventory_policy == 'continue'
+    assign is_preorder = true
+  endif
+%}
+
 <xo-product
   xo-selected-or-first-available-variant-id="{{ product.selected_or_first_available_variant.id }}"
   xo-product-id="{{ product.id }}"
@@ -55,7 +63,9 @@
               <xo-product-variants>
                 <div class="xo-product-card-custom-v2__variant">
                   {%- for option in product.options_with_values -%}
-                    {% if option.name == settings.product_card_color_option_name %}
+                    {% assign color_option_names = settings.product_card_color_option_name | downcase | split: ',' %}
+                    {% assign option_name = option.name | downcase %}
+                    {% if color_option_names contains option_name %}
                       {% render 'product-variant', option: option, style: 'color', product: product %}
                     {% endif %}
                   {%- endfor -%}
@@ -75,7 +85,7 @@
       <xo-product-will-change xo-unique-id="product-add-button-{{ section.id }}">
         <xo-cart-add
           class="xo-product-card-custom-v2__add-cart"
-          {% if product.selected_or_first_available_variant.available == false %}
+          {% if variant.available == false and is_preorder == false %}
             xo-disabled
           {% endif %}
         >

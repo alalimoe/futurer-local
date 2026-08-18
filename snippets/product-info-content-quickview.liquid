@@ -8,6 +8,23 @@
   {% render 'product-info-content-quickview' %}
 {% endcomment %}
 
+{% liquid
+  assign variant = product.selected_or_first_available_variant
+  assign is_preorder = false
+  if variant.inventory_quantity <= 0 and variant.inventory_policy == 'continue'
+    assign is_preorder = true
+  endif
+
+  if is_preorder
+    assign button_text = 'products.product.pre_order_text' | t
+  elsif variant.available
+    assign button_text = 'products.product.add_to_cart' | t
+  else
+    assign button_text = 'products.product.sold_out' | t
+  endif
+  assign button_text_unavailable = 'products.product.unavailable' | t
+%}
+
 <div class="product-info-content-quickview">
   <div class="product-info-content-quickview__content">
     {% comment %} vendor {% endcomment %}
@@ -27,7 +44,9 @@
       <xo-product-variants>
         <div class="product-info-content-quickview__variant">
           {%- for option in product.options_with_values -%}
-            {% if option.name == settings.product_card_color_option_name %}
+            {% assign color_option_names = settings.product_card_color_option_name | downcase | split: ',' %}
+            {% assign option_name = option.name | downcase %}
+            {% if color_option_names contains option_name %}
               {% render 'product-variant', option: option, style: 'color', product: product %}
             {% else %}
               {% render 'product-variant', option: option, style: 'boxed', product: product %}
@@ -36,6 +55,12 @@
         </div>
       </xo-product-variants>
     {% endunless %}
+
+    {% comment %} pre-order note {% endcomment %}
+    {% if is_preorder %}
+      {% render 'pre-order-note', product: product %}
+    {% endif %}
+
     {% comment %} button group {% endcomment %}
     <div class="product-info-content-quickview__group-button">
       <div class="product-info-content-quickview__quantity">
@@ -43,49 +68,33 @@
       </div>
       {% comment %} buy now, add to cart {% endcomment %}
       <div class="product-info-content-quickview__row">
-                {% comment %} add to cart {% endcomment %}
-                <div class="product-info-content-quickview__add-cart">
-                  <xo-product-will-change class="product-info-content-quickview__add-cart-inner" xo-unique-id="product-add-button-{{ section.id }}">
-                    {% if is_bundle %}
-                      <xo-bundle-add
-                        class="product-info-content-quickview__button-add-cart"
-                        {% if product.selected_or_first_available_variant.available == false %}
-                          xo-disabled
-                        {% endif %}
-                      >
-                        {% if product.selected_or_first_available_variant.available %}
-                          {% assign button_text = 'products.product.button_bundle_text' | t %}
-                          {% assign button_text_unavailable = 'products.product.unavailable' | t %}
-                          {% render 'button', style: 'secondary', text: button_text, size: 'md', block: true, text_unavailable: button_text_unavailable %}
-                        {%- else -%}
-                          {% assign button_text = 'products.product.sold_out' | t %}
-                          {% assign button_text_unavailable = 'products.product.unavailable' | t %}
-                          {% render 'button', style: 'secondary', text: button_text, size: 'md', block: true, text_unavailable: button_text_unavailable %}
-                        {% endif %}
-                      </xo-bundle-add>
-                    {% else %}
-                      <xo-cart-add
-                        class="product-info-content-quickview__button-add-cart"
-                        {% if product.selected_or_first_available_variant.available == false %}
-                          xo-disabled
-                        {% endif %}
-                        {% if settings.cart_type == 'page' %}
-                          xo-cart-redirection
-                        {% endif %}
-                      >
-                        {% if product.selected_or_first_available_variant.available %}
-                          {% assign button_text = 'products.product.add_to_cart' | t %}
-                          {% assign button_text_unavailable = 'products.product.unavailable' | t %}
-                          {% render 'button', style: 'secondary', text: button_text, size: 'md', block: true, text_unavailable: button_text_unavailable %}
-                        {%- else -%}
-                          {% assign button_text = 'products.product.sold_out' | t %}
-                          {% assign button_text_unavailable = 'products.product.unavailable' | t %}
-                          {% render 'button', style: 'secondary', text: button_text, size: 'md', block: true, text_unavailable: button_text_unavailable %}
-                        {% endif %}
-                      </xo-cart-add>
-                    {% endif %}
-                  </xo-product-will-change>
-                </div>
+        {% comment %} add to cart {% endcomment %}
+        <div class="product-info-content-quickview__add-cart">
+          <xo-product-will-change class="product-info-content-quickview__add-cart-inner" xo-unique-id="product-add-button-{{ section.id }}">
+            {% if is_bundle %}
+              <xo-bundle-add
+                class="product-info-content-quickview__button-add-cart"
+                {% if variant.available == false and is_preorder == false %}
+                  xo-disabled
+                {% endif %}
+              >
+                {% render 'button', style: 'secondary', text: button_text, size: 'md', block: true, text_unavailable: button_text_unavailable %}
+              </xo-bundle-add>
+            {% else %}
+              <xo-cart-add
+                class="product-info-content-quickview__button-add-cart"
+                {% if variant.available == false and is_preorder == false %}
+                  xo-disabled
+                {% endif %}
+                {% if settings.cart_type == 'page' %}
+                  xo-cart-redirection
+                {% endif %}
+              >
+                {% render 'button', style: 'secondary', text: button_text, size: 'md', block: true, text_unavailable: button_text_unavailable %}
+              </xo-cart-add>
+            {% endif %}
+          </xo-product-will-change>
+        </div>
         {% comment %} buy now {% endcomment %}
         {% if product and product != empty %}
           <div class="product-info-content-quickview__buy-now">

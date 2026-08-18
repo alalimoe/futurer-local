@@ -12,6 +12,21 @@
   assign featured_media = product.selected_or_first_available_variant.featured_media
   assign variant_images_grouping = product.metafields.custom.variant_images_grouping_list.value
   assign timer_data = product.metafields.theme.countdown.value
+
+  assign variant = product.selected_or_first_available_variant
+  assign is_preorder = false
+  if variant.inventory_quantity <= 0 and variant.inventory_policy == 'continue'
+    assign is_preorder = true
+  endif
+
+  if is_preorder
+    assign button_text = 'products.product.pre_order_text' | t
+  elsif variant.available
+    assign button_text = 'products.product.add_to_cart' | t
+  else
+    assign button_text = 'products.product.sold_out' | t
+  endif
+  assign button_text_unavailable = 'products.product.unavailable' | t
 %}
 
 {% if product.media.size == 1 %}
@@ -359,7 +374,9 @@
                 <xo-product-variants class="xo-product-info-media-slide__variants w-full" {{ block.shopify_attributes }}>
                   <div class="xo-product-info-media-slide__variants-inner">
                     {%- for option in product.options_with_values -%}
-                      {% if option.name == settings.product_card_color_option_name %}
+                      {% assign color_option_names = settings.product_card_color_option_name | downcase | split: ',' %}
+                      {% assign option_name = option.name | downcase %}
+                      {% if color_option_names contains option_name %}
                         {% render 'product-variant', option: option, style: block.settings.variant_color_style, product: product %}
                       {% else %}
                         {% render 'product-variant', option: option, style: block.settings.variant_style, product: product %}
@@ -403,6 +420,11 @@
               </xo-product-will-change>
             </xo-animate>
 
+            {% if is_preorder %}
+              <!-- pre-order note -->
+              {% render 'pre-order-note', product: product %}
+            {% endif %}
+
             <!-- buy button -->
           {% when 'buy_button' %}
             <xo-animate xo-cascade class="xo-product-info-media-slide__buy-button w-full" {{ block.shopify_attributes }}>
@@ -419,20 +441,14 @@
                       <xo-product-will-change xo-unique-id="product-add-button-{{ section.id }}">
                         <xo-cart-add
                           class="xo-product-info-media-slide__add"
-                          {% if product.selected_or_first_available_variant.available == false %}
+                          {% if variant.available == false and is_preorder == false %}
                             xo-disabled
                           {% endif %}
                           {% if settings.cart_type == 'page' %}
                             xo-cart-redirection
                           {% endif %}
                         >
-                          {% if product.selected_or_first_available_variant.available %}
-                            {% assign button_text = 'products.product.add_to_cart' | t %}
-                            {% render 'button', style: 'secondary', text: button_text, size: 'md', block: true %}
-                          {%- else -%}
-                            {% assign button_text = 'products.product.sold_out' | t %}
-                            {% render 'button', style: 'secondary', text: button_text, size: 'md', block: true %}
-                          {% endif %}
+                          {% render 'button', style: 'secondary', text: button_text, size: 'md', block: true %}
                         </xo-cart-add>
                       </xo-product-will-change>
                     {% endform %}

@@ -1,0 +1,284 @@
+{{ 'section-collection-accordion.css' | asset_url | stylesheet_tag }}
+
+{% liquid
+  assign products_to_show = section.settings.products_to_show | default: 2
+  assign banner_image = section.settings.banner_image
+  assign banner_overline = section.settings.banner_overline
+  assign banner_heading = section.settings.banner_heading
+  assign banner_button_text = section.settings.banner_button_text
+  assign banner_button_link = section.settings.banner_button_link
+  assign banner_overlay = section.settings.banner_overlay_opacity | default: 20 | divided_by: 100.0
+%}
+
+<section {% render 'section-attr' %}>
+  <div class="collection-accordion">
+    <xo-container class="collection-accordion__container">
+      <xo-grid style="--xs: 1; --md: 1; --lg: 2">
+        <div class="collection-accordion__col collection-accordion__col--list">
+          <xo-collapse-provider>
+            {% for block in section.blocks %}
+              {% liquid
+                assign heading = block.settings.heading
+                assign subtitle = block.settings.subtitle
+                assign products = block.settings.product_list
+                assign name = 'ca-' | append: block.id
+              %}
+
+              {% capture ac_title %}
+                <span class="collection-accordion__ac-heading h6">{{ heading }}</span>
+                
+              {% endcapture %}
+
+              {% capture ac_content %}
+                {% if subtitle != blank %}
+                  <div class="collection-accordion__ac-subtitle">{{ subtitle }}</div>
+                {% endif %}
+                <xo-carousel 
+                  class="collection-accordion__carousel"
+                  xo-overflow="visible"
+                  xo-per-view="2"
+                  xo-breakpoints="
+                    {
+                      768: { perView: 2, gap: 12 },
+                      992: { perView: 2 }
+                    }
+                  "
+                >
+                  <xo-carousel-inner>
+                    <xo-carousel-list>
+                      {% if products != blank %}
+                        {% for product in products %}
+                          <xo-carousel-slide class="collection-accordion__product">
+                            {% render 'product-card',
+                              product: product,
+                              show_image: true,
+                              show_price: true,
+                              show_vendor: false,
+                              show_rating: false,
+                              show_badge: false,
+                              show_quick_add: true,
+                              show_quick_view: true,
+                              animate_enabled: false
+                            %}
+                          </xo-carousel-slide>
+                        {% endfor %}
+                      {% else %}
+                        {% for i in (1..products_to_show) %}
+                          <xo-carousel-slide class="collection-accordion__product">
+                            {% render 'product-card', product: blank, show_image: true, show_price: true, animate_enabled: false %}
+                          </xo-carousel-slide>
+                        {% endfor %}
+                      {% endif %}
+                    </xo-carousel-list>
+                  </xo-carousel-inner>
+                </xo-carousel>
+              {% endcapture %}
+
+              <div class="collection-accordion__item" {{ block.shopify_attributes }}>
+                {% render 'collapse',
+                  title: ac_title,
+                  content: ac_content,
+                  name: name,
+                  style: forloop.first,
+                  show_icon_arrow: true
+                %}
+              </div>
+            {% endfor %}
+          </xo-collapse-provider>
+        </div>
+
+        <div class="collection-accordion__col collection-accordion__col--banner" style="--order-xs: -1; --order-lg: 2">
+          <xo-animate xo-cascade class="collection-accordion__banner color-inverse" style="--overlay: {{ banner_overlay }};{% if banner_image != blank %} --img: url('{{ banner_image | image_url: width: 1400 }}');{% endif %}">
+            <div class="collection-accordion__banner-bg xo-background-lazyload" aria-hidden="true"></div>
+            <div class="collection-accordion__banner-overlay" aria-hidden="true"></div>
+            <div class="collection-accordion__banner-inner">
+              {% if banner_overline != blank or banner_heading != blank %}
+                <div class="collection-accordion__banner-text">
+                  {% if banner_overline != blank %}
+                    <p class="collection-accordion__banner-overline">{{ banner_overline }}</p>
+                  {% endif %}
+                  {% if banner_heading != blank %}
+                    <p class="collection-accordion__banner-heading h5">{{ banner_heading }}</p>
+                  {% endif %}
+                </div>
+              {% endif %}
+              {% if banner_button_text != blank %}
+                <div class="collection-accordion__banner-actions">
+                  {% render 'button', text: banner_button_text, link: banner_button_link, style: 'primary', size: 'md' %}
+                </div>
+              {% endif %}
+            </div>
+          </xo-animate>
+        </div>
+      </xo-grid>
+    </xo-container>
+  </div>
+</section>
+
+{% schema %}
+{
+  "tag": "section",
+  "name": "t:sections.collection_accordion.name",
+  "class": "section-collection-accordion",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Banner"
+    },
+    {
+      "type": "image_picker",
+      "id": "banner_image",
+      "label": "Banner image"
+    },
+    {
+      "type": "text",
+      "id": "banner_overline",
+      "label": "Overline",
+      "default": "EXPRESS OFFER"
+    },
+    {
+      "type": "textarea",
+      "id": "banner_heading",
+      "label": "Heading",
+      "default": "Flash Sale Up to 50%"
+    },
+    {
+      "type": "range",
+      "id": "banner_overlay_opacity",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "label": "Overlay opacity",
+      "default": 20
+    },
+    {
+      "type": "text",
+      "id": "banner_button_text",
+      "label": "Button label",
+      "default": "Shop now"
+    },
+    {
+      "type": "url",
+      "id": "banner_button_link",
+      "label": "Button link"
+    },
+    {
+      "type": "header",
+      "content": "General settings"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Section color scheme"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color"
+    },
+    {
+      "type": "color_background",
+      "id": "background_gradient",
+      "label": "Background gradient"
+    },
+    {
+      "type": "number",
+      "id": "padding_top_desktop",
+      "label": "Padding top desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_desktop",
+      "label": "Padding bottom desktop",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_top_mobile",
+      "label": "Padding top mobile",
+      "default": 50
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_mobile",
+      "label": "Padding bottom mobile",
+      "default": 50
+    }
+  ],
+  "blocks": [
+    {
+      "name": "Product list",
+      "type": "product_list",
+      "settings": [
+        {
+          "type": "product_list",
+          "id": "product_list",
+          "label": "Product list",
+          "limit": 4
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading",
+          "default": "New Arrivals"
+        },
+        {
+          "type": "textarea",
+          "id": "subtitle",
+          "label": "Subtitle"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.collection_accordion.presets.name",
+      "category": "Collections",
+      "settings": {
+        "banner_overline": "EXPRESS OFFER",
+        "banner_heading": "Flash Sale Up to 50%",
+        "banner_overlay_opacity": 20,
+        "banner_button_text": "Shop now",
+        "color_scheme": "",
+        "background_color": "",
+        "background_gradient": "",
+        "padding_top_desktop": 80,
+        "padding_bottom_desktop": 80,
+        "padding_top_mobile": 56,
+        "padding_bottom_mobile": 56
+      },
+      "blocks": [
+        {
+          "type": "product_list",
+          "settings": {
+            "heading": "New Arrivals",
+            "subtitle": "Different disciplines. Different products. The same commitment to refinement, sustainability, and intentional design."
+          }
+        },
+        {
+          "type": "product_list",
+          "settings": {
+            "heading": "Best Sellers"
+          }
+        },
+        {
+          "type": "product_list",
+          "settings": {
+            "heading": "Flash Sales"
+          }
+        }
+      ]
+    }
+  ],
+  "disabled_on": {
+    "groups": [
+      "header",
+      "footer",
+      "custom.overlay",
+      "custom.popups"
+    ]
+  }
+}
+{% endschema %}
