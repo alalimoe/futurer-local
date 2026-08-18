@@ -159,7 +159,11 @@
             assign pill_price = ''
             assign save_label = ''
             if show_pill_price and value.variant.price != blank
-              assign pill_price = value.variant.price | money
+              if settings.currency_code_enabled
+                assign pill_price = value.variant.price | money_with_currency
+              else
+                assign pill_price = value.variant.price | money
+              endif
               assign count = value_label | replace: 'ct', '' | replace: ' ', '' | plus: 0
               if count > 0 and baseline_unit > 0 and value.variant.available
                 assign unit = value.variant.price | times: 1.0 | divided_by: count
