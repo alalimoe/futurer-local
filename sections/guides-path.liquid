@@ -1,0 +1,318 @@
+{%- style -%}
+  .xo-section--{{ section.id }} {
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+
+  .xo-section--{{ section.id }} .gp-inner {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(2.4rem, 4vw, 4rem);
+  }
+
+  .xo-section--{{ section.id }} .gp-crumbs {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin: 0 0 1.2rem;
+    font-size: 1.4rem;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 55%, transparent);
+  }
+
+  .xo-section--{{ section.id }} .gp-crumbs a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .xo-section--{{ section.id }} .gp-crumbs a:hover {
+    color: rgba(var(--color-foreground));
+  }
+
+  .xo-section--{{ section.id }} .gp-crumbs a:focus-visible {
+    outline: 2px solid rgba(var(--color-accent));
+    outline-offset: 2px;
+  }
+
+  .xo-section--{{ section.id }} .gp-title {
+    margin: 0 0 1.2rem;
+    font-size: clamp(3.2rem, 5vw, 5.2rem);
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    line-height: 1.15;
+    color: rgba(var(--color-foreground));
+  }
+
+  .xo-section--{{ section.id }} .gp-sub {
+    margin: 0;
+    max-width: 54ch;
+    font-size: 1.6rem;
+    line-height: 1.6;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 75%, transparent);
+  }
+
+  .xo-section--{{ section.id }} .gp-doors {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.6rem;
+  }
+
+  @media (min-width: 768px) {
+    .xo-section--{{ section.id }} .gp-doors {
+      grid-template-columns: 1fr 1fr;
+      gap: 2.4rem;
+    }
+  }
+
+  .xo-section--{{ section.id }} .gp-door {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+    padding: clamp(2.4rem, 3vw, 3.2rem);
+    border-radius: var(--general-radius-3, 2rem);
+    background: rgba(var(--color-background-2));
+    min-height: 100%;
+  }
+
+  .xo-section--{{ section.id }} .gp-door__eyebrow {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 60%, transparent);
+  }
+
+  .xo-section--{{ section.id }} .gp-door__title {
+    margin: 0;
+    font-size: clamp(2.2rem, 2.4vw, 2.8rem);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    color: rgba(var(--color-foreground));
+  }
+
+  .xo-section--{{ section.id }} .gp-door__text {
+    margin: 0;
+    flex: 1;
+    font-size: 1.5rem;
+    line-height: 1.6;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 75%, transparent);
+  }
+
+  .xo-section--{{ section.id }} .gp-door__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.2rem;
+    align-items: center;
+    margin-top: 0.8rem;
+  }
+
+  .xo-section--{{ section.id }} .gp-chips {
+    display: flex;
+    gap: 0.8rem;
+    overflow-x: auto;
+    padding: 0.4rem 0.2rem 0.8rem;
+    margin: 0;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .xo-section--{{ section.id }} .gp-chips::-webkit-scrollbar {
+    display: none;
+  }
+
+  .xo-section--{{ section.id }} .gp-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 4.4rem;
+    padding: 0.8rem 1.8rem;
+    border-radius: var(--button-radius, 10rem);
+    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 12%, transparent);
+    background: rgba(var(--color-background));
+    color: rgba(var(--color-foreground));
+    font-size: 1.4rem;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+  }
+
+  .xo-section--{{ section.id }} .gp-chip:hover {
+    border-color: rgba(var(--color-accent));
+    background: color-mix(in srgb, rgba(var(--color-accent)) 12%, rgba(var(--color-background)));
+  }
+
+  .xo-section--{{ section.id }} .gp-chip:focus-visible {
+    outline: 2px solid rgba(var(--color-accent));
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .xo-section--{{ section.id }} .gp-chip {
+      transition: none;
+    }
+  }
+{%- endstyle -%}
+
+{%- liquid
+  assign door_1_primary = section.settings.door_1_primary_url
+  assign door_1_secondary = section.settings.door_1_secondary_url
+  assign door_2_primary = section.settings.door_2_primary_url
+  assign door_2_secondary = section.settings.door_2_secondary_url
+-%}
+
+<section {% render 'section-attr' %}>
+  <xo-container>
+    <div class="gp-inner">
+      <header class="gp-hero">
+        <nav class="gp-crumbs" aria-label="Breadcrumb">
+          <a href="{{ routes.root_url }}">Home</a>
+          <span aria-hidden="true">/</span>
+          <span aria-current="page">Guides</span>
+        </nav>
+        <h1 class="gp-title">{{ section.settings.heading | escape }}</h1>
+        {%- if section.settings.subtitle != blank -%}
+          <p class="gp-sub">{{ section.settings.subtitle | escape }}</p>
+        {%- endif -%}
+      </header>
+
+      <div class="gp-doors">
+        <article class="gp-door">
+          {%- if section.settings.door_1_eyebrow != blank -%}
+            <p class="gp-door__eyebrow">{{ section.settings.door_1_eyebrow | escape }}</p>
+          {%- endif -%}
+          <h2 class="gp-door__title">{{ section.settings.door_1_title | escape }}</h2>
+          {%- if section.settings.door_1_text != blank -%}
+            <p class="gp-door__text">{{ section.settings.door_1_text | escape }}</p>
+          {%- endif -%}
+          <div class="gp-door__actions">
+            {%- if section.settings.door_1_primary_label != blank and door_1_primary != blank -%}
+              {% render 'button',
+                text: section.settings.door_1_primary_label,
+                link: door_1_primary,
+                style: 'primary',
+                size: 'md'
+              %}
+            {%- endif -%}
+            {%- if section.settings.door_1_secondary_label != blank and door_1_secondary != blank -%}
+              {% render 'button',
+                text: section.settings.door_1_secondary_label,
+                link: door_1_secondary,
+                style: 'secondary',
+                size: 'md'
+              %}
+            {%- endif -%}
+          </div>
+        </article>
+
+        <article class="gp-door">
+          {%- if section.settings.door_2_eyebrow != blank -%}
+            <p class="gp-door__eyebrow">{{ section.settings.door_2_eyebrow | escape }}</p>
+          {%- endif -%}
+          <h2 class="gp-door__title">{{ section.settings.door_2_title | escape }}</h2>
+          {%- if section.settings.door_2_text != blank -%}
+            <p class="gp-door__text">{{ section.settings.door_2_text | escape }}</p>
+          {%- endif -%}
+          <div class="gp-door__actions">
+            {%- if section.settings.door_2_primary_label != blank and door_2_primary != blank -%}
+              {% render 'button',
+                text: section.settings.door_2_primary_label,
+                link: door_2_primary,
+                style: 'primary',
+                size: 'md'
+              %}
+            {%- endif -%}
+            {%- if section.settings.door_2_secondary_label != blank and door_2_secondary != blank -%}
+              {% render 'button',
+                text: section.settings.door_2_secondary_label,
+                link: door_2_secondary,
+                style: 'secondary',
+                size: 'md'
+              %}
+            {%- endif -%}
+          </div>
+        </article>
+      </div>
+
+      {%- if section.blocks.size > 0 -%}
+        <nav class="gp-chips" aria-label="Jump to a decision path">
+          {%- for block in section.blocks -%}
+            {%- liquid
+              assign chip_href = block.settings.link
+              if block.settings.anchor != blank
+                assign chip_href = '#' | append: block.settings.anchor
+              endif
+            -%}
+            {%- if chip_href != blank and block.settings.label != blank -%}
+              <a
+                class="gp-chip"
+                href="{{ chip_href }}"
+                {{ block.shopify_attributes }}
+              >
+                {{ block.settings.label | escape }}
+              </a>
+            {%- endif -%}
+          {%- endfor -%}
+        </nav>
+      {%- endif -%}
+    </div>
+  </xo-container>
+</section>
+
+{% schema %}
+{
+  "name": "Guides path",
+  "tag": "section",
+  "disabled_on": {
+    "groups": ["header", "footer", "custom.overlay", "custom.popups", "custom.features"]
+  },
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Start with a job, not a compound" },
+    { "type": "textarea", "id": "subtitle", "label": "Subtitle", "default": "New here? Get a first stack. Already chasing deep work? Pick a Focus routine. Either way, you do not need to start with a racetam." },
+    { "type": "header", "content": "First stack" },
+    { "type": "text", "id": "door_1_eyebrow", "label": "Eyebrow", "default": "New to nootropics" },
+    { "type": "text", "id": "door_1_title", "label": "Title", "default": "First stack" },
+    { "type": "textarea", "id": "door_1_text", "label": "Text", "default": "A conservative starting path: what to take first, how to dose, and what to skip until you have a baseline." },
+    { "type": "text", "id": "door_1_primary_label", "label": "Primary button", "default": "Beginner's Guide" },
+    { "type": "url", "id": "door_1_primary_url", "label": "Primary link" },
+    { "type": "text", "id": "door_1_secondary_label", "label": "Secondary button", "default": "Shop the Novice stack" },
+    { "type": "url", "id": "door_1_secondary_url", "label": "Secondary link" },
+    { "type": "header", "content": "Focus" },
+    { "type": "text", "id": "door_2_eyebrow", "label": "Eyebrow", "default": "I know my goal" },
+    { "type": "text", "id": "door_2_title", "label": "Title", "default": "Focus / deep work" },
+    { "type": "textarea", "id": "door_2_text", "label": "Text", "default": "Match a work or study day to a named routine, then read why those compounds are paired before you buy." },
+    { "type": "text", "id": "door_2_primary_label", "label": "Primary button", "default": "Focus guide" },
+    { "type": "url", "id": "door_2_primary_url", "label": "Primary link" },
+    { "type": "text", "id": "door_2_secondary_label", "label": "Secondary button", "default": "Shop Focus" },
+    { "type": "url", "id": "door_2_secondary_url", "label": "Secondary link" },
+    { "type": "header", "content": "Section" },
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme" },
+    { "type": "range", "id": "padding_top", "min": 0, "max": 120, "step": 4, "unit": "px", "label": "Padding top", "default": 48 },
+    { "type": "range", "id": "padding_bottom", "min": 0, "max": 120, "step": 4, "unit": "px", "label": "Padding bottom", "default": 24 }
+  ],
+  "blocks": [
+    {
+      "type": "chip",
+      "name": "Jump chip",
+      "settings": [
+        { "type": "text", "id": "label", "label": "Label" },
+        { "type": "url", "id": "link", "label": "Link" },
+        { "type": "text", "id": "anchor", "label": "In-page anchor", "info": "If set (e.g. guides-focus), used instead of the link." }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Guides path",
+      "blocks": [
+        { "type": "chip", "settings": { "label": "Quiz", "anchor": "" } },
+        { "type": "chip", "settings": { "label": "First stack", "anchor": "guides-first-stack" } },
+        { "type": "chip", "settings": { "label": "Focus routines", "anchor": "guides-focus" } },
+        { "type": "chip", "settings": { "label": "Dosing" } },
+        { "type": "chip", "settings": { "label": "COA" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

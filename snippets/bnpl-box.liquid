@@ -1,88 +1,70 @@
 {% doc %}
-  Compact buy-now-pay-later caption with Tabby and Tamara widgets.
+  Caption under the product price: split in 4 payments of the selected variant.
 
   @example
   {% render 'bnpl-box' %}
 {% enddoc %}
 
 {%- liquid
-  assign installment_amount = product.selected_or_first_available_variant.price | divided_by: 4.0 | round | money
+  assign variant_price = product.selected_or_first_available_variant.price
+  assign installment_amount = variant_price | divided_by: 4.0 | round | money
+  if settings.currency_code_enabled
+    assign installment_amount = variant_price | divided_by: 4.0 | round | money_with_currency
+  endif
 -%}
 <div class="premium-bnpl-box">
-  <div class="premium-bnpl-box__label">
-    <svg width="18" height="18" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-      <rect x="1" y="3" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.5"/>
-      <path d="M1 6.5h14" stroke="currentColor" stroke-width="1.5"/>
-    </svg>
-    <span>{{ 'products.bnpl.eyebrow' | t }}</span>
-  </div>
-  <p class="premium-bnpl-box__tagline">{{ 'products.bnpl.tagline' | t }}</p>
   <p class="premium-bnpl-box__caption">
-    {{ 'products.bnpl.caption_prefix' | t }}
-    {{ installment_amount }}
+    {{ 'products.bnpl.split_html' | t: amount: installment_amount }}
   </p>
-  <div class="premium-bnpl-box__merged" aria-hidden="true">
-    <div class="premium-bnpl-box__col premium-bnpl-box__col--tabby">
-      {% render 'tabby-installments' %}
-    </div>
-    <span class="premium-bnpl-box__divider" aria-hidden="true"></span>
-    <div class="premium-bnpl-box__col premium-bnpl-box__col--tamara">
-      {% render 'tamara' %}
-    </div>
+  <script type="application/json" data-bnpl-installments>
+    {
+      {%- for variant in product.variants -%}
+        {%- liquid
+          assign bnpl_inst = variant.price | divided_by: 4.0 | round | money
+          if settings.currency_code_enabled
+            assign bnpl_inst = variant.price | divided_by: 4.0 | round | money_with_currency
+          endif
+        -%}
+        "{{ variant.id }}": {{ bnpl_inst | json }}{% unless forloop.last %},{% endunless %}
+      {%- endfor -%}
+    }
+  </script>
+  <div class="premium-bnpl-box__widgets">
+    {% render 'tabby-installments' %}
+    {% render 'tamara' %}
   </div>
 </div>
+<script>
+  (function () {
+    const box = document.querySelector('.premium-bnpl-box');
+    if (!box) return;
+    const caption = box.querySelector('.premium-bnpl-box__caption');
+    const mapEl = box.querySelector('[data-bnpl-installments]');
+    const productEl = box.closest('xo-product');
+    if (!caption || !mapEl || !productEl) return;
 
-{% stylesheet %}
-  .premium-bnpl-box {
-    position: relative;
-    margin: 0.8rem 0 0;
-    padding: 0;
-    border: none;
-    background: none;
-  }
+    let installments = {};
+    try {
+      installments = JSON.parse(mapEl.textContent);
+    } catch (e) {
+      return;
+    }
 
-  .premium-bnpl-box__label,
-  .premium-bnpl-box__tagline,
-  .premium-bnpl-box__divider {
-    display: none;
-  }
+    const template = {{ 'products.bnpl.split_html' | t: amount: '__AMOUNT__' | json }};
 
-  .premium-bnpl-box__caption {
-    margin: 0;
-    font-size: 1.3rem;
-    font-weight: 400;
-    line-height: 1.6rem;
-    color: rgba(var(--color-foreground-3));
-  }
+    const update = () => {
+      const idInput = productEl.querySelector('input[name="id"]');
+      const variantId = idInput && idInput.value;
+      const amount = variantId && installments[variantId];
+      if (!amount) return;
+      caption.innerHTML = template.replace('__AMOUNT__', amount);
+    };
 
-  .premium-bnpl-box__merged {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-  }
-
-  .premium-bnpl-box #TabbyPromo,
-  .premium-bnpl-box #TabbyPromo > div,
-  .premium-bnpl-box tamara-widget,
-  .premium-bnpl-box .tamara-widget-container {
-    border: none !important;
-    background: transparent !important;
-    box-shadow: none !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    max-height: 1.6rem;
-    overflow: hidden;
-  }
-
-  .premium-bnpl-box tamara-widget::part(container),
-  .premium-bnpl-box tabby-promo::part(container) {
-    border: none !important;
-    background: transparent !important;
-    box-shadow: none !important;
-    padding: 0 !important;
-    margin: 0 !important;
-  }
-{% endstylesheet %}
+    productEl.addEventListener('change', update, true);
+    const idInput = productEl.querySelector('input[name="id"]');
+    if (idInput && typeof MutationObserver !== 'undefined') {
+      new MutationObserver(update).observe(idInput, { attributes: true, attributeFilter: ['value'] });
+    }
+    update();
+  })();
+</script>

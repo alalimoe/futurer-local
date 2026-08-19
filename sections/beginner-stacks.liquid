@@ -7,6 +7,7 @@
   .xo-section--{{ section.id }} {
     padding-top: {{ section.settings.padding_top }}px;
     padding-bottom: {{ section.settings.padding_bottom }}px;
+    scroll-margin-top: 10rem;
   }
 
   .xo-section--{{ section.id }} .bgs-hero {
@@ -207,12 +208,29 @@
     font-size: calc(var(--font-body-scale, 1) * 1.4rem);
     font-weight: 600;
     letter-spacing: 0.02em;
+    text-decoration: none;
+    box-sizing: border-box;
     transition: opacity 0.3s var(--out-soft, ease);
   }
 
   .xo-section--{{ section.id }} .bgs-card__cta:hover { opacity: 0.85; }
   .xo-section--{{ section.id }} .bgs-card__cta:focus-visible { outline: 2px solid rgba(var(--color-accent)); outline-offset: 3px; }
   .xo-section--{{ section.id }} .bgs-card__cta[disabled] { opacity: 0.5; cursor: not-allowed; }
+
+  .xo-section--{{ section.id }} .bgs-card__learn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 4.4rem;
+    margin-top: 0.6rem;
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: rgba(var(--color-foreground));
+    text-decoration: none;
+  }
+
+  .xo-section--{{ section.id }} .bgs-card__learn:hover { opacity: 0.7; }
+  .xo-section--{{ section.id }} .bgs-card__learn:focus-visible { outline: 2px solid rgba(var(--color-accent)); outline-offset: 2px; }
 
   .xo-section--{{ section.id }} .bgs-card__price {
     margin-top: auto;
@@ -338,12 +356,20 @@
   }
 {%- endstyle -%}
 
-<section {% render 'section-attr' %}>
+<section
+  {% render 'section-attr' %}
+  {% if section.settings.anchor_id != blank %}id="{{ section.settings.anchor_id | escape }}"{% endif %}
+>
   <xo-container>
+    {%- if section.settings.show_hero -%}
     <div class="bgs-hero" aria-label="{{ section.settings.heading | escape }}">
       <div class="bgs-hero__inner">
         <div class="bgs-hero__content">
-          <h1 class="bgs-hero__h1">{{ section.settings.heading }}</h1>
+          {%- if section.settings.heading_tag == 'h2' -%}
+            <h2 class="bgs-hero__h1">{{ section.settings.heading }}</h2>
+          {%- else -%}
+            <h1 class="bgs-hero__h1">{{ section.settings.heading }}</h1>
+          {%- endif -%}
           <div class="bgs-hero__body rte">{{ section.settings.subheading }}</div>
 
           <div class="bgs-hero__badges" role="list">
@@ -386,6 +412,7 @@
         {%- endif -%}
       </div>
     </div>
+    {%- endif -%}
 
     {%- assign bgs_coll = section.settings.collection -%}
     {%- assign bgs_has_collection = false -%}
@@ -433,18 +460,32 @@
 
           {%- else -%}
             {%- for block in stack_blocks -%}
-              {%- assign prod = block.settings.product -%}
+              {%- liquid
+                assign prod = block.settings.product
+                assign card_url = block.settings.link
+                if prod != blank
+                  assign card_url = prod.url
+                endif
+              -%}
               <article class="bgs-card" {{ block.shopify_attributes }}>
                 {%- if prod != blank -%}
                   <div class="bgs-card__img-wrap">
+                    {%- if card_url != blank -%}<a href="{{ card_url }}">{%- endif -%}
                     <img class="bgs-card__img" src="{{ prod.featured_image | image_url: width: 600 }}" alt="{{ prod.featured_image.alt | default: prod.title | escape }}" width="600" height="600" loading="lazy" decoding="async">
+                    {%- if card_url != blank -%}</a>{%- endif -%}
                     {%- if block.settings.savings_tag != blank -%}
                       <span class="bgs-card__savings">{{ block.settings.savings_tag }}</span>
                     {%- endif -%}
                   </div>
                 {%- endif -%}
                 <div class="bgs-card__body">
-                  <h3 class="bgs-card__title">{{ block.settings.title | default: prod.title }}</h3>
+                  <h3 class="bgs-card__title">
+                    {%- if card_url != blank -%}
+                      <a href="{{ card_url }}">{{ block.settings.title | default: prod.title }}</a>
+                    {%- else -%}
+                      {{ block.settings.title | default: prod.title }}
+                    {%- endif -%}
+                  </h3>
                   {%- if block.settings.compounds != blank -%}
                     {%- assign items = block.settings.compounds | split: ',' -%}
                     <ul class="bgs-card__compounds">
@@ -467,6 +508,11 @@
                       </button>
                       <input type="hidden" name="id" value="{{ prod.selected_or_first_available_variant.id }}">
                     </xo-cart-add>
+                  {%- elsif card_url != blank -%}
+                    <a href="{{ card_url }}" class="bgs-card__cta">{{ block.settings.cta_label | default: 'View stack' }}</a>
+                  {%- endif -%}
+                  {%- if block.settings.learn_url != blank -%}
+                    <a href="{{ block.settings.learn_url }}" class="bgs-card__learn">Learn the why</a>
                   {%- endif -%}
                 </div>
               </article>
@@ -476,7 +522,7 @@
       </div>
     {%- endif -%}
 
-    {%- if faq_blocks.size > 0 -%}
+    {%- if section.settings.show_faq and faq_blocks.size > 0 -%}
       <div class="bgs-faq" aria-labelledby="bgs-faq-heading-{{ section.id }}">
         <h2 class="bgs-faq__h2" id="bgs-faq-heading-{{ section.id }}">{{ section.settings.faq_heading }}</h2>
         <div class="bgs-faq__list">
@@ -509,7 +555,7 @@
       </script>
     {%- endif -%}
 
-    {%- if section.settings.disclaimer != blank -%}
+    {%- if section.settings.show_disclaimer and section.settings.disclaimer != blank -%}
       <aside class="bgs-trust" role="note" aria-label="Disclaimer">
         <p class="bgs-trust__text">{{ section.settings.disclaimer }}</p>
       </aside>
@@ -522,6 +568,14 @@
   "name": "Beginner Stacks",
   "settings": [
     { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "default" },
+    { "type": "text", "id": "anchor_id", "label": "Anchor ID", "info": "Used by jump chips, e.g. guides-first-stack" },
+    { "type": "checkbox", "id": "show_hero", "label": "Show hero", "default": true },
+    { "type": "select", "id": "heading_tag", "label": "Hero heading tag", "options": [
+      { "value": "h1", "label": "H1" },
+      { "value": "h2", "label": "H2" }
+    ], "default": "h1" },
+    { "type": "checkbox", "id": "show_faq", "label": "Show FAQ", "default": true },
+    { "type": "checkbox", "id": "show_disclaimer", "label": "Show disclaimer", "default": true },
     { "type": "header", "content": "Hero" },
     { "type": "text", "id": "heading", "label": "Heading", "default": "Beginner Nootropic Stacks" },
     { "type": "richtext", "id": "subheading", "label": "Value proposition", "default": "<p>New to cognitive enhancement? Our beginner stacks combine synergistic compounds at clinically studied dosages — so you get meaningful results without the guesswork.</p><p>Our stacks are third-party tested for purity, with Certificates of Analysis published for new batches. Start low, go slow, and build the foundation for long-term cognitive performance.</p>" },
@@ -551,7 +605,10 @@
         { "type": "product", "id": "product", "label": "Product" },
         { "type": "text", "id": "title", "label": "Stack title (overrides product title)" },
         { "type": "textarea", "id": "compounds", "label": "Includes (comma-separated)", "default": "Compound A, Compound B, Compound C" },
-        { "type": "text", "id": "savings_tag", "label": "Savings badge", "default": "Bundle Savings: 10% Off" }
+        { "type": "text", "id": "savings_tag", "label": "Savings badge", "default": "Bundle Savings: 10% Off" },
+        { "type": "url", "id": "link", "label": "Card link (when no product)" },
+        { "type": "text", "id": "cta_label", "label": "Link button label", "default": "View stack" },
+        { "type": "url", "id": "learn_url", "label": "Learn the why URL" }
       ]
     },
     {

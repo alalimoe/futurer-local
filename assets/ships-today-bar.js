@@ -188,7 +188,7 @@
       return;
     }
 
-    var templateDefault = root.getAttribute('data-template') || 'Order in __TIME__ for ships today';
+    var templateDefault = root.getAttribute('data-template') || 'Ships today if you order within __TIME__.';
     ensureLabel(root, templateDefault);
 
     setVisible(bar, showBar);

@@ -65,6 +65,7 @@
   <div class="nx-gh-inner">
 
     {%- comment -%} ── HERO ── {%- endcomment -%}
+    {%- if s.show_hero -%}
     <header class="nx-gh-hero">
       {% if s.hero_pill_text != blank %}
         <div class="nx-gh-pill" role="note">
@@ -73,23 +74,32 @@
         </div>
       {% endif %}
 
+      {%- if s.show_breadcrumbs -%}
       <nav class="nx-gh-breadcrumbs" aria-label="Breadcrumb">
         <a href="{{ routes.root_url }}">Home</a>
         <span aria-hidden="true">/</span>
         <span aria-current="page">Guides</span>
       </nav>
+      {%- endif -%}
 
-      <h1 id="nx-gh-title-{{ sid }}" class="nx-gh-title">{{ s.hero_title | escape }}</h1>
+      {%- if s.hero_heading_tag == 'h2' -%}
+        <h2 id="nx-gh-title-{{ sid }}" class="nx-gh-title">{{ s.hero_title | escape }}</h2>
+      {%- else -%}
+        <h1 id="nx-gh-title-{{ sid }}" class="nx-gh-title">{{ s.hero_title | escape }}</h1>
+      {%- endif -%}
       {% if s.hero_subtitle != blank %}
         <p class="nx-gh-sub">{{ s.hero_subtitle }}</p>
       {% endif %}
 
+      {%- if s.show_hero_ctas -%}
       <div class="nx-gh-quick">
         <a class="nx-gh-btn nx-gh-btn--primary" href="{{ s.start_here_url | default: '/pages/guides-beginners-nootropics' }}">Start here (Beginner's Guide)</a>
         <a class="nx-gh-btn nx-gh-btn--ghost" href="{{ s.shipping_url | default: '/pages/nootropics-dubai-shipping' }}">Shipping & delivery</a>
         <a class="nx-gh-btn nx-gh-btn--ghost" href="{{ s.contact_url | default: '/pages/help-faq' }}">Help / FAQs</a>
       </div>
+      {%- endif -%}
     </header>
+    {%- endif -%}
 
     {%- comment -%} ── SEARCH + FILTERS (glassmorphism bar) ── {%- endcomment -%}
     <section class="nx-gh-filters" aria-label="Search and filters">
@@ -142,7 +152,7 @@
       {% endif %}
     {% endfor %}
 
-    {% if featured_block %}
+    {% if s.show_featured and featured_block %}
       {% assign f = featured_block %}
       {% assign f_tags = f.settings.tag | default: 'Guide' %}
       <section class="nx-gh-feature" aria-label="Featured guide">
@@ -217,7 +227,7 @@
 
     {%- comment -%} ── BUNDLES / STACKS ── {%- endcomment -%}
     {% assign bundle_blocks = section.blocks | where: 'type', 'bundle' %}
-    {% if bundle_blocks.size > 0 %}
+    {% if s.show_bundles and bundle_blocks.size > 0 %}
       <section class="nx-gh-bundles" aria-label="Recommended stacks">
         <h2 class="nx-gh-section-heading">Recommended Stacks</h2>
         <div class="nx-gh-bundle-grid">
@@ -249,6 +259,7 @@
     {% endif %}
 
     {%- comment -%} ── TRUST BAR ── {%- endcomment -%}
+    {%- if s.show_trust -%}
     <section class="nx-gh-trust" aria-label="Why Nootropix">
       <div class="nx-gh-trust-grid">
         <div class="nx-gh-trust-item">
@@ -269,8 +280,10 @@
         </div>
       </div>
     </section>
+    {%- endif -%}
 
     {%- comment -%} ── FOOTER CTA ── {%- endcomment -%}
+    {%- if s.show_footer_cta -%}
     <section class="nx-gh-footer-cta">
       <h2 class="nx-gh-section-heading">Need a hand choosing?</h2>
       <p class="nx-gh-footer-desc">Start with the Beginner's Guide or message us — we'll point you to the right path.</p>
@@ -279,15 +292,18 @@
         <a class="nx-gh-btn nx-gh-btn--ghost" href="{{ s.contact_url | default: '/pages/help-faq' }}">Chat with us</a>
       </div>
     </section>
+    {%- endif -%}
 
   </div>
 
   {%- comment -%} ── STICKY MOBILE CTA ── {%- endcomment -%}
+  {%- if s.show_sticky -%}
   <div class="nx-gh-sticky" data-sticky>
     <a class="nx-gh-sticky-btn" href="{{ s.start_here_url | default: '/pages/guides-beginners-nootropics' }}">Start here</a>
     <a class="nx-gh-sticky-btn" href="{{ s.shipping_url | default: '/pages/nootropics-dubai-shipping' }}">Shipping</a>
     <a class="nx-gh-sticky-btn" href="{{ s.contact_url | default: '/pages/help-faq' }}">Help</a>
   </div>
+  {%- endif -%}
 </section>
 
 {%- style -%}
@@ -1077,6 +1093,18 @@
     { "type": "text", "id": "hero_pill_text", "label": "Hero pill text", "default": "Knowledge Hub" },
     { "type": "text", "id": "hero_title", "label": "Hero title", "default": "Nootropix Guides" },
     { "type": "richtext", "id": "hero_subtitle", "label": "Hero subtitle", "default": "<p>Start simple, choose your goal, and build a stack that fits your brain and your day.</p>" },
+    { "type": "select", "id": "hero_heading_tag", "label": "Hero heading tag", "options": [
+      { "value": "h1", "label": "H1" },
+      { "value": "h2", "label": "H2" }
+    ], "default": "h1" },
+    { "type": "checkbox", "id": "show_hero", "label": "Show hero", "default": true },
+    { "type": "checkbox", "id": "show_breadcrumbs", "label": "Show breadcrumbs", "default": true },
+    { "type": "checkbox", "id": "show_hero_ctas", "label": "Show hero buttons", "default": true },
+    { "type": "checkbox", "id": "show_featured", "label": "Show featured guide card", "default": true },
+    { "type": "checkbox", "id": "show_bundles", "label": "Show recommended stacks", "default": true },
+    { "type": "checkbox", "id": "show_trust", "label": "Show trust bar", "default": true },
+    { "type": "checkbox", "id": "show_footer_cta", "label": "Show footer CTA", "default": true },
+    { "type": "checkbox", "id": "show_sticky", "label": "Show sticky mobile CTA", "default": true },
     { "type": "text", "id": "search_placeholder", "label": "Search placeholder", "default": "Search guides…" },
     { "type": "checkbox", "id": "show_tags", "label": "Show filter chips", "default": true },
     { "type": "checkbox", "id": "show_sort", "label": "Show sort dropdown", "default": true },
