@@ -1,28 +1,12 @@
 {% doc %}
-  Caption cluster under Add to cart: ships-today status and delivery ETA.
+  Caption above Add to cart: ships-today status.
 
   @example
   {% render 'pdp-buy-captions' %}
 {% enddoc %}
 
-{%- liquid
-  assign country_code = localization.country.iso_code | upcase
-  if country_code == 'AE'
-    assign eta_label = 'products.product.delivery_eta_ae' | t
-  else
-    assign eta_label = 'products.product.delivery_eta_intl' | t
-  endif
-  assign shipping_url = pages['shipping-and-returns'].url
-  if shipping_url == blank
-    assign shipping_url = routes.root_url | append: 'pages/shipping-and-returns'
-  endif
--%}
-
-<div class="pdp-buy-captions">
-  {%- if product.selected_or_first_available_variant.available -%}
+{%- if product.selected_or_first_available_variant.available -%}
+  <div class="pdp-buy-captions">
     {% render 'ships-today-bar', context: 'product', show_stock_fallback: true %}
-  {%- endif -%}
-  <p class="pdp-buy-captions__row">
-    <a class="pdp-buy-captions__eta" href="{{ shipping_url }}">{{ eta_label }}</a>
-  </p>
-</div>
+  </div>
+{%- endif -%}

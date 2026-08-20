@@ -14,7 +14,38 @@
 -%}
 <div class="premium-bnpl-box">
   <p class="premium-bnpl-box__caption">
-    {{ 'products.bnpl.split_html' | t: amount: installment_amount }}
+    <span class="premium-bnpl-box__caption-text">
+      {{ 'products.bnpl.split_html' | t: amount: installment_amount }}
+    </span>
+    <span class="premium-bnpl-box__logos">
+      <img
+        class="premium-bnpl-box__logo"
+        src="{{ 'bnpl-tabby-badge.png' | asset_url }}"
+        alt="{{ 'products.bnpl.logo_tabby' | t | escape }}"
+        width="45"
+        height="18"
+        loading="eager"
+      >
+      {%- if request.locale.iso_code == 'ar' -%}
+        <img
+          class="premium-bnpl-box__logo"
+          src="{{ 'bnpl-tamara-badge-ar.png' | asset_url }}"
+          alt="{{ 'products.bnpl.logo_tamara' | t | escape }}"
+          width="55"
+          height="18"
+          loading="eager"
+        >
+      {%- else -%}
+        <img
+          class="premium-bnpl-box__logo"
+          src="{{ 'bnpl-tamara-badge-en.png' | asset_url }}"
+          alt="{{ 'products.bnpl.logo_tamara' | t | escape }}"
+          width="55"
+          height="18"
+          loading="eager"
+        >
+      {%- endif -%}
+    </span>
   </p>
   <script type="application/json" data-bnpl-installments>
     {
@@ -38,7 +69,7 @@
   (function () {
     const box = document.querySelector('.premium-bnpl-box');
     if (!box) return;
-    const caption = box.querySelector('.premium-bnpl-box__caption');
+    const caption = box.querySelector('.premium-bnpl-box__caption-text');
     const mapEl = box.querySelector('[data-bnpl-installments]');
     const productEl = box.closest('xo-product');
     if (!caption || !mapEl || !productEl) return;
