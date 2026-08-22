@@ -20,6 +20,7 @@
 
   .xo-section--{{ section.id }} .ft__tabs {
     display: inline-flex;
+    flex-wrap: wrap;
     gap: 8px;
     margin-bottom: 14px;
   }
@@ -56,6 +57,12 @@
 
   .xo-section--{{ section.id }} .ft__panel[hidden] {
     display: none;
+  }
+
+  .xo-section--{{ section.id }} .ft__group + .ft__group {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 8%, transparent);
   }
 
   .xo-section--{{ section.id }} .ft__label {
@@ -152,27 +159,37 @@
     <div class="ft__wrap" id="track">
       <h2 class="ft__title">{{ section.settings.heading }}</h2>
 
-      <div class="ft__tabs" role="tablist" aria-label="Tracking type">
-        <button class="ft__tab ft__tab--active" data-tab="local" role="tab" aria-selected="true">Dubai / UAE (Quiqup)</button>
-        <button class="ft__tab" data-tab="intl" role="tab" aria-selected="false">International (Aramex)</button>
+      <div class="ft__tabs" role="tablist" aria-label="{{ 'sections.faq_tracker.tabs_label' | t }}">
+        <button class="ft__tab ft__tab--active" data-tab="local" role="tab" aria-selected="true">{{ 'sections.faq_tracker.tab_local' | t }}</button>
+        <button class="ft__tab" data-tab="intl" role="tab" aria-selected="false">{{ 'sections.faq_tracker.tab_intl' | t }}</button>
       </div>
 
       <div class="ft__panel ft__panel--active" data-panel="local" role="tabpanel">
-        <label for="ftLocalRef-{{ section.id }}" class="ft__label">Enter your Quiqup reference or order number</label>
+        <label for="ftLocalRef-{{ section.id }}" class="ft__label">{{ 'sections.faq_tracker.local_label' | t }}</label>
         <div class="ft__row">
           <input id="ftLocalRef-{{ section.id }}" type="text" class="ft__input" placeholder="{{ section.settings.local_placeholder }}" enterkeyhint="go">
-          <button class="ft__btn" data-track="local">Track with Quiqup</button>
+          <button class="ft__btn" data-track="quiqup" data-input="ftLocalRef-{{ section.id }}">{{ 'sections.faq_tracker.track_quiqup' | t }}</button>
         </div>
-        <p class="ft__hint" data-hint="local" aria-live="polite">We'll open Quiqup's tracking page in a new tab. If asked, paste your reference number to see live status.</p>
+        <p class="ft__hint" data-hint="quiqup" data-copied="{{ 'sections.faq_tracker.copied' | t: ref: '__REF__' }}" aria-live="polite">{{ 'sections.faq_tracker.local_hint' | t }}</p>
       </div>
 
       <div class="ft__panel" data-panel="intl" role="tabpanel" hidden>
-        <label for="ftIntlRef-{{ section.id }}" class="ft__label">Enter your Aramex waybill / tracking number</label>
-        <div class="ft__row">
-          <input id="ftIntlRef-{{ section.id }}" type="text" class="ft__input" placeholder="{{ section.settings.intl_placeholder }}" enterkeyhint="go">
-          <button class="ft__btn" data-track="intl">Track with Aramex</button>
+        <div class="ft__group">
+          <label for="ftIntlQuiqup-{{ section.id }}" class="ft__label">{{ 'sections.faq_tracker.intl_quiqup_label' | t }}</label>
+          <div class="ft__row">
+            <input id="ftIntlQuiqup-{{ section.id }}" type="text" class="ft__input" placeholder="{{ section.settings.local_placeholder }}" enterkeyhint="go">
+            <button class="ft__btn" data-track="quiqup" data-input="ftIntlQuiqup-{{ section.id }}">{{ 'sections.faq_tracker.track_quiqup' | t }}</button>
+          </div>
+          <p class="ft__hint" data-hint="quiqup" data-copied="{{ 'sections.faq_tracker.copied' | t: ref: '__REF__' }}" aria-live="polite">{{ 'sections.faq_tracker.intl_quiqup_hint' | t }}</p>
         </div>
-        <p class="ft__hint">You'll be taken to Aramex's tracking page with your number applied.</p>
+        <div class="ft__group">
+          <label for="ftIntlRef-{{ section.id }}" class="ft__label">{{ 'sections.faq_tracker.intl_aramex_label' | t }}</label>
+          <div class="ft__row">
+            <input id="ftIntlRef-{{ section.id }}" type="text" class="ft__input" placeholder="{{ section.settings.intl_placeholder }}" enterkeyhint="go">
+            <button class="ft__btn" data-track="aramex">{{ 'sections.faq_tracker.track_aramex' | t }}</button>
+          </div>
+          <p class="ft__hint">{{ 'sections.faq_tracker.intl_aramex_hint' | t }}</p>
+        </div>
       </div>
     </div>
   </xo-container>
@@ -185,10 +202,13 @@
 
     var tabs = section.querySelectorAll('.ft__tab');
     var panels = section.querySelectorAll('.ft__panel');
-    var localInput = section.querySelector('[id^="ftLocalRef"]');
-    var intlInput = section.querySelector('[id^="ftIntlRef"]');
-    var localHint = section.querySelector('[data-hint="local"]');
-    var localHintDefault = localHint ? localHint.textContent : '';
+    var localInput = section.querySelector('#ftLocalRef-{{ section.id }}');
+    var intlQuiqupInput = section.querySelector('#ftIntlQuiqup-{{ section.id }}');
+    var intlInput = section.querySelector('#ftIntlRef-{{ section.id }}');
+
+    section.querySelectorAll('[data-hint="quiqup"]').forEach(function(hint){
+      hint.setAttribute('data-default', hint.textContent);
+    });
 
     function selectTab(key){
       tabs.forEach(function(x){
@@ -208,34 +228,63 @@
       });
     });
 
-    function trackLocal(){
-      var ref = localInput ? localInput.value.trim() : '';
+    function trackQuiqup(input, hint){
+      var ref = input ? input.value.trim() : '';
       if (ref && navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(ref).then(function(){
-          if (localHint) localHint.textContent = 'Copied "' + ref + '". Paste it in the reference box on the Quiqup page that just opened.';
+          if (hint) {
+            var tpl = hint.getAttribute('data-copied') || '';
+            hint.textContent = tpl.replace('__REF__', ref);
+          }
         }).catch(function(){});
       }
       window.open('https://track-parcel.quiqup.com/', '_blank', 'noopener');
     }
 
-    function trackIntl(){
+    function trackAramex(){
       var id = intlInput ? intlInput.value.trim() : '';
       if (!id) return;
       window.open('https://www.aramex.com/track/results?ShipmentNumber=' + encodeURIComponent(id), '_blank', 'noopener');
     }
 
-    section.querySelector('[data-track="local"]')?.addEventListener('click', trackLocal);
-    section.querySelector('[data-track="intl"]')?.addEventListener('click', trackIntl);
+    function resetHint(hint){
+      if (!hint) return;
+      var fallback = hint.getAttribute('data-default') || '';
+      if (hint.textContent !== fallback) hint.textContent = fallback;
+    }
 
-    localInput?.addEventListener('keydown', function(e){
-      if (e.key === 'Enter') { e.preventDefault(); trackLocal(); }
+    section.querySelectorAll('[data-track="quiqup"]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var input = section.querySelector('#' + btn.getAttribute('data-input'));
+        var wrap = btn.closest('.ft__group') || btn.closest('.ft__panel');
+        var hint = wrap ? wrap.querySelector('[data-hint="quiqup"]') : null;
+        trackQuiqup(input, hint);
+      });
     });
-    localInput?.addEventListener('input', function(){
-      if (localHint && localHint.textContent !== localHintDefault) localHint.textContent = localHintDefault;
-    });
-    intlInput?.addEventListener('keydown', function(e){
-      if (e.key === 'Enter') { e.preventDefault(); trackIntl(); }
-    });
+
+    var aramexBtn = section.querySelector('[data-track="aramex"]');
+    if (aramexBtn) aramexBtn.addEventListener('click', trackAramex);
+
+    function bindQuiqupInput(input){
+      if (!input) return;
+      var wrap = input.closest('.ft__group') || input.closest('.ft__panel');
+      var hint = wrap ? wrap.querySelector('[data-hint="quiqup"]') : null;
+      input.addEventListener('keydown', function(e){
+        if (e.key === 'Enter') { e.preventDefault(); trackQuiqup(input, hint); }
+      });
+      input.addEventListener('input', function(){
+        resetHint(hint);
+      });
+    }
+
+    bindQuiqupInput(localInput);
+    bindQuiqupInput(intlQuiqupInput);
+
+    if (intlInput) {
+      intlInput.addEventListener('keydown', function(e){
+        if (e.key === 'Enter') { e.preventDefault(); trackAramex(); }
+      });
+    }
 
     var params = new URLSearchParams(window.location.search);
     var prefill = params.get('ref') || params.get('order') || params.get('track');
