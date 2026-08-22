@@ -81,6 +81,107 @@
     padding: clamp(32px, 6vw, 64px) 0;
   }
 
+  .xo-section--{{ section.id }} .bgs-stacks--protocols {
+    padding: 0;
+  }
+
+  .xo-section--{{ section.id }} .bgs-stacks--protocols .bgs-stacks__h2,
+  .xo-section--{{ section.id }} .bgs-stacks--protocols .bgs-stacks__sub {
+    text-align: left;
+  }
+
+  .xo-section--{{ section.id }} .bgs-protocols {
+    display: flex;
+    flex-direction: column;
+    border-top: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
+  }
+
+  .xo-section--{{ section.id }} .bgs-protocol {
+    display: grid;
+    grid-template-columns: 4.8rem 1fr;
+    gap: 1.6rem;
+    align-items: start;
+    padding: 2.4rem 0;
+    border-bottom: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
+  }
+
+  @media (min-width: 768px) {
+    .xo-section--{{ section.id }} .bgs-protocol {
+      grid-template-columns: 5.6rem 1fr;
+      gap: 3.2rem;
+      align-items: start;
+      padding: 2.8rem 0;
+    }
+  }
+
+  .xo-section--{{ section.id }} .bgs-protocol__num {
+    font-size: 1.4rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 45%, transparent);
+  }
+
+  .xo-section--{{ section.id }} .bgs-protocol__title {
+    margin: 0 0 0.6rem;
+    font-size: clamp(1.8rem, 2vw, 2.2rem);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.25;
+    color: rgba(var(--color-foreground));
+  }
+
+  .xo-section--{{ section.id }} .bgs-protocol__title a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .xo-section--{{ section.id }} .bgs-protocol__title a:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+    text-decoration-color: rgba(var(--color-accent));
+  }
+
+  .xo-section--{{ section.id }} .bgs-protocol__compounds {
+    margin: 0;
+    font-size: 1.5rem;
+    line-height: 1.5;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 65%, transparent);
+  }
+
+  .xo-section--{{ section.id }} .bgs-protocol__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.2rem 2rem;
+    align-items: center;
+    margin-top: 1.2rem;
+  }
+
+  @media (min-width: 768px) {
+    .xo-section--{{ section.id }} .bgs-protocol__actions {
+      margin-top: 0;
+      justify-content: flex-end;
+    }
+  }
+
+  .xo-section--{{ section.id }} .bgs-protocol__learn {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: rgba(var(--color-foreground));
+    text-decoration: underline;
+    text-underline-offset: 0.35em;
+    text-decoration-thickness: 1px;
+    text-decoration-color: color-mix(in srgb, rgba(var(--color-foreground)) 28%, transparent);
+  }
+
+  .xo-section--{{ section.id }} .bgs-protocol__learn:hover {
+    text-decoration-color: rgba(var(--color-accent));
+  }
+
+  .xo-section--{{ section.id }} .bgs-protocol__learn:focus-visible {
+    outline: 2px solid rgba(var(--color-accent));
+    outline-offset: 3px;
+  }
+
   .xo-section--{{ section.id }} .bgs-stacks__h2 {
     font-size: clamp(1.6rem, 3vw, 2.4rem);
     font-weight: 600;
@@ -421,12 +522,70 @@
     {%- endif -%}
 
     {%- if bgs_has_collection or stack_blocks.size > 0 -%}
-      <div class="bgs-stacks" aria-labelledby="bgs-stacks-heading-{{ section.id }}">
+      {%- liquid
+        assign stacks_layout = section.settings.layout | default: 'cards'
+        assign stacks_class = 'bgs-stacks'
+        if stacks_layout == 'protocols'
+          assign stacks_class = 'bgs-stacks bgs-stacks--protocols'
+        endif
+      -%}
+      <div class="{{ stacks_class }}" aria-labelledby="bgs-stacks-heading-{{ section.id }}">
         <h2 class="bgs-stacks__h2" id="bgs-stacks-heading-{{ section.id }}">{{ section.settings.stacks_heading }}</h2>
         {%- if section.settings.stacks_subheading != blank -%}
           <p class="bgs-stacks__sub">{{ section.settings.stacks_subheading }}</p>
         {%- endif -%}
 
+        {%- if stacks_layout == 'protocols' and stack_blocks.size > 0 -%}
+          <div class="bgs-protocols">
+            {%- for block in stack_blocks -%}
+              {%- liquid
+                assign prod = block.settings.product
+                assign card_url = block.settings.link
+                if prod != blank
+                  assign card_url = prod.url
+                endif
+                assign protocol_num = forloop.index | prepend: '0'
+                assign protocol_num = protocol_num | slice: -2, 2
+              -%}
+              <article class="bgs-protocol" {{ block.shopify_attributes }}>
+                <span class="bgs-protocol__num" aria-hidden="true">{{ protocol_num }}</span>
+                <div class="bgs-protocol__body">
+                  <h3 class="bgs-protocol__title">
+                    {%- if card_url != blank -%}
+                      <a href="{{ card_url }}">{{ block.settings.title | default: prod.title | escape }}</a>
+                    {%- else -%}
+                      {{ block.settings.title | default: prod.title | escape }}
+                    {%- endif -%}
+                  </h3>
+                  {%- if block.settings.compounds != blank -%}
+                    <p class="bgs-protocol__compounds">{{ block.settings.compounds | escape }}</p>
+                  {%- endif -%}
+                  <div class="bgs-protocol__actions">
+                    {%- if block.settings.learn_url != blank -%}
+                      <a class="bgs-protocol__learn" href="{{ block.settings.learn_url }}">Learn</a>
+                    {%- endif -%}
+                    {%- if prod != blank -%}
+                      {% render 'button',
+                        text: 'Shop',
+                        link: prod.url,
+                        style: 'primary',
+                        size: 'sm'
+                      %}
+                    {%- elsif card_url != blank -%}
+                      {%- assign protocol_cta = block.settings.cta_label | default: 'View stack' -%}
+                      {% render 'button',
+                        text: protocol_cta,
+                        link: card_url,
+                        style: 'primary',
+                        size: 'sm'
+                      %}
+                    {%- endif -%}
+                  </div>
+                </div>
+              </article>
+            {%- endfor -%}
+          </div>
+        {%- else -%}
         <div class="bgs-stacks__grid">
           {%- if bgs_has_collection -%}
             {%- for product in bgs_coll.products limit: section.settings.products_limit -%}
@@ -519,6 +678,7 @@
             {%- endfor -%}
           {%- endif -%}
         </div>
+        {%- endif -%}
       </div>
     {%- endif -%}
 
@@ -584,6 +744,10 @@
     { "type": "text", "id": "badge_2_text", "label": "Badge 2", "default": "Pre-Calculated Dosages" },
     { "type": "text", "id": "badge_3_text", "label": "Badge 3", "default": "Synergy Optimized" },
     { "type": "header", "content": "Stacks Grid" },
+    { "type": "select", "id": "layout", "label": "Layout", "options": [
+      { "value": "cards", "label": "Cards" },
+      { "value": "protocols", "label": "Protocol rows" }
+    ], "default": "cards" },
     { "type": "collection", "id": "collection", "label": "Collection" },
     { "type": "range", "id": "products_limit", "min": 2, "max": 12, "step": 1, "default": 6, "label": "Max products" },
     { "type": "text", "id": "global_savings_tag", "label": "Savings badge (all cards)", "default": "Bundle Savings: 10% Off", "info": "Leave blank to hide. Only used when rendering from a collection." },
@@ -594,8 +758,8 @@
     { "type": "header", "content": "Disclaimer" },
     { "type": "textarea", "id": "disclaimer", "label": "YMYL disclaimer", "default": "These statements have not been evaluated by the Food and Drug Administration or any equivalent regulatory body. These products are intended for research and educational purposes only and are not intended to diagnose, treat, cure, or prevent any disease. Consult a qualified healthcare professional before starting any new supplement regimen." },
     { "type": "header", "content": "Section Padding" },
-    { "type": "range", "id": "padding_top", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding top", "default": 0 },
-    { "type": "range", "id": "padding_bottom", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding bottom", "default": 56 }
+    { "type": "range", "id": "padding_top", "min": 0, "max": 120, "step": 4, "unit": "px", "label": "Padding top", "default": 0 },
+    { "type": "range", "id": "padding_bottom", "min": 0, "max": 120, "step": 4, "unit": "px", "label": "Padding bottom", "default": 56 }
   ],
   "blocks": [
     {

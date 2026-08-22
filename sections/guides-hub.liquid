@@ -68,10 +68,7 @@
     {%- if s.show_hero -%}
     <header class="nx-gh-hero">
       {% if s.hero_pill_text != blank %}
-        <div class="nx-gh-pill" role="note">
-          <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M11 2l1.7 3.4L16 6l-3 2.9.7 4.1L11 11l-3.7 2L8 8.9 5 6l3.3-.6L11 2z"/></svg>
-          <span>{{ s.hero_pill_text }}</span>
-        </div>
+        <p class="nx-gh-pill">{{ s.hero_pill_text | escape }}</p>
       {% endif %}
 
       {%- if s.show_breadcrumbs -%}
@@ -197,28 +194,12 @@
             {{ block.shopify_attributes }}
           >
             <a href="{{ block.settings.url | default: '#' }}" class="nx-gh-card-link" aria-label="{{ block.settings.title | escape }}">
-              <div class="nx-gh-card-media">
-                {% if block.settings.image != blank %}
-                  <img loading="lazy" src="{{ block.settings.image | image_url: width: 540 }}" alt="{{ block.settings.image_alt | default: block.settings.title | escape }}" width="540" height="360">
-                {% else %}
-                  <svg viewBox="0 0 48 48" class="nx-gh-icon" aria-hidden="true"><circle cx="24" cy="24" r="22" fill="none" stroke="currentColor" stroke-width="2"/><path d="M16 26h16M16 20h16M16 32h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-                {% endif %}
-                {% if block.settings.featured %}
-                  <span class="nx-gh-card-badge">Featured</span>
-                {% endif %}
-              </div>
-              <div class="nx-gh-card-body">
-                {% assign primary_tag = block.settings.tag | split: ',' | first | strip %}
-                <div class="nx-gh-card-top">
-                  <span class="nx-gh-tag">{{ primary_tag }}</span>
-                  {% if block.settings.read_time != blank %}<span class="nx-gh-read-time">{{ block.settings.read_time }} min</span>{% endif %}
-                </div>
-                <h3 class="nx-gh-card-title">{{ block.settings.title }}</h3>
-                {% if block.settings.desc != blank %}
-                  <p class="nx-gh-card-desc">{{ block.settings.desc }}</p>
-                {% endif %}
-                <span class="nx-gh-card-cta">Read guide<span aria-hidden="true"> &rarr;</span></span>
-              </div>
+              {% assign primary_tag = block.settings.tag | split: ',' | first | strip %}
+              <span class="nx-gh-tag">{{ primary_tag }}</span>
+              <h3 class="nx-gh-card-title">{{ block.settings.title | escape }}</h3>
+              {% if block.settings.desc != blank %}
+                <p class="nx-gh-card-desc">{{ block.settings.desc | escape }}</p>
+              {% endif %}
             </a>
           </article>
         {% endif %}
@@ -307,708 +288,271 @@
 </section>
 
 {%- style -%}
-/* ═══════════════════════════════════════════════════════
-   GUIDES HUB — Premium Design Tokens & Styles
-   ═══════════════════════════════════════════════════════ */
-
 #nx-gh-{{ sid }} {
-  --gh-max: {{ s.max_width | default: 1200 }}px;
-  --gh-py: {{ s.padding_y | default: 48 }}px;
-  --gh-accent: var(--color-accent-primary, #FBBF24);
-  --gh-accent-hover: var(--color-accent-hover, #D97706);
-  --gh-accent-dark: var(--color-accent-dark, #92400e);
-  --gh-accent-glass: rgba(251, 191, 36, 0.08);
-  --gh-accent-glass-strong: rgba(251, 191, 36, 0.14);
-  --gh-text: var(--color-text-main, #111827);
-  --gh-muted: var(--color-text-muted, #4b5563);
-  --gh-bg: {{ s.background_color | default: '#ffffff' }};
-  --gh-bg-alt: var(--color-bg-secondary, #f9fafb);
-  --gh-radius: var(--radius-premium, 14px);
-  --gh-radius-sm: var(--nx-radius-md);
-  --gh-transition: var(--transition-premium, all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1));
-  --gh-shadow-rest: var(--shadow-sm, 0 2px 8px rgba(0, 0, 0, 0.04));
-  --gh-shadow-hover: var(--shadow-md, 0 12px 30px rgba(0, 0, 0, 0.06));
-  --gh-shadow-elevated: var(--shadow-lg, 0 20px 46px rgba(0, 0, 0, 0.10));
-  --gh-gold-glow: var(--shadow-gold-glow, 0 4px 14px rgba(251, 191, 36, 0.25));
-  --gh-gold-glow-hover: var(--shadow-gold-glow-hover, 0 8px 24px rgba(251, 191, 36, 0.35));
-  --gh-font: var(--font-body-family, sans-serif);
-  --gh-font-heading: var(--font-heading-family, sans-serif);
-  --gh-gap: 18px;
-
-  background: var(--gh-bg);
-  color: var(--gh-text);
-  font-family: var(--gh-font);
-  line-height: 1.6;
-  content-visibility: auto;
-  contain-intrinsic-size: 1px 4000px;
+  padding: {{ s.padding_y | default: 80 }}px 0;
+  background: rgba(var(--color-background));
+  color: rgba(var(--color-foreground));
 }
 
-/* ── Utility ── */
-#nx-gh-{{ sid }} .visually-hidden {
-  position: absolute !important;
-  height: 1px; width: 1px;
-  overflow: hidden;
-  clip: rect(1px, 1px, 1px, 1px);
-  white-space: nowrap;
-}
-
-/* ── Inner container ── */
 #nx-gh-{{ sid }} .nx-gh-inner {
-  max-width: var(--gh-max);
+  width: 100%;
+  max-width: var(--page-width);
   margin: 0 auto;
-  padding: var(--gh-py) var(--page-gutter);
-  display: flex;
-  flex-direction: column;
-  gap: 32px;
-}
-@media (min-width: 990px) {
-  #nx-gh-{{ sid }} .nx-gh-inner { gap: 48px; }
+  padding: 0 var(--page-gap, 2.4rem);
 }
 
-/* ═══════════════════════════════════════════════════════
-   HERO
-   ═══════════════════════════════════════════════════════ */
 #nx-gh-{{ sid }} .nx-gh-hero {
-  text-align: center;
-  padding-top: 8px;
+  margin-bottom: 3.2rem;
+  max-width: 48ch;
 }
+
 #nx-gh-{{ sid }} .nx-gh-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  border-radius: var(--nx-radius-pill);
-  padding: 5px 14px;
-  font-size: 0.82rem;
+  margin: 0 0 1.2rem;
+  font-size: 1.3rem;
   font-weight: 600;
-  background: var(--gh-accent-glass);
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
-  color: var(--gh-accent-dark);
-  margin-bottom: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, rgba(var(--color-foreground)) 55%, transparent);
 }
+
 #nx-gh-{{ sid }} .nx-gh-breadcrumbs {
   display: flex;
-  gap: 8px;
-  justify-content: center;
-  align-items: center;
-  font-size: 0.88rem;
-  color: var(--gh-muted);
-  margin-bottom: 10px;
+  gap: 0.8rem;
+  margin: 0 0 1.2rem;
+  font-size: 1.4rem;
+  color: color-mix(in srgb, rgba(var(--color-foreground)) 55%, transparent);
 }
+
 #nx-gh-{{ sid }} .nx-gh-breadcrumbs a {
-  color: var(--gh-muted);
+  color: inherit;
   text-decoration: none;
-  transition: var(--gh-transition);
 }
-#nx-gh-{{ sid }} .nx-gh-breadcrumbs a:hover {
-  color: var(--gh-accent-hover);
-}
+
 #nx-gh-{{ sid }} .nx-gh-title {
-  font-family: var(--gh-font-heading);
-  font-size: clamp(30px, 4.5vw, 52px);
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  line-height: 1.1;
-  color: var(--gh-text);
-  margin: 0 0 12px;
+  margin: 0 0 1rem;
+  font-size: clamp(2.8rem, 3.4vw, 3.6rem);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  color: rgba(var(--color-foreground));
 }
+
 #nx-gh-{{ sid }} .nx-gh-sub {
-  font-size: clamp(15px, 1.5vw, 18px);
-  color: var(--gh-muted);
-  max-width: 720px;
-  margin: 0 auto 16px;
-  line-height: 1.6;
+  margin: 0;
+  font-size: 1.6rem;
+  line-height: 1.65;
+  color: color-mix(in srgb, rgba(var(--color-foreground)) 75%, transparent);
 }
+
+#nx-gh-{{ sid }} .nx-gh-sub p {
+  margin: 0;
+}
+
 #nx-gh-{{ sid }} .nx-gh-quick {
   display: flex;
-  gap: 12px;
-  justify-content: center;
   flex-wrap: wrap;
+  gap: 1.2rem 2rem;
+  margin-top: 2rem;
 }
 
-/* ═══════════════════════════════════════════════════════
-   BUTTONS — Ghost + Primary
-   ═══════════════════════════════════════════════════════ */
-#nx-gh-{{ sid }} .nx-gh-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 11px 20px;
-  border-radius: var(--gh-radius-sm);
-  font-family: var(--gh-font);
-  font-weight: 600;
-  font-size: 15px;
-  text-decoration: none;
-  min-height: var(--touch-min, 44px);
-  transition: var(--gh-transition);
-  cursor: pointer;
-}
-#nx-gh-{{ sid }} .nx-gh-btn--ghost {
-  background: transparent;
-  border: 1.5px solid var(--gh-accent);
-  color: var(--gh-text);
-}
-#nx-gh-{{ sid }} .nx-gh-btn--ghost:hover {
-  background: var(--gh-accent);
-  color: var(--color-text-primary);
-  transform: translateY(-2px);
-  box-shadow: var(--gh-shadow-hover);
-}
-#nx-gh-{{ sid }} .nx-gh-btn--primary {
-  background: var(--gh-accent);
-  color: var(--color-text-primary);
-  border: 1.5px solid var(--gh-accent);
-  box-shadow: var(--gh-gold-glow);
-}
-#nx-gh-{{ sid }} .nx-gh-btn--primary:hover {
-  background: var(--gh-accent-hover);
-  border-color: var(--gh-accent-hover);
-  transform: translateY(-2px);
-  box-shadow: var(--gh-gold-glow-hover);
-}
-#nx-gh-{{ sid }} .nx-gh-btn:active {
-  transform: scale(0.98);
-}
-
-/* ═══════════════════════════════════════════════════════
-   SEARCH + FILTERS — Glassmorphism bar
-   ═══════════════════════════════════════════════════════ */
 #nx-gh-{{ sid }} .nx-gh-filters {
   display: flex;
   flex-wrap: wrap;
-  gap: 14px;
   align-items: center;
-  padding: 18px 20px;
-  border-radius: var(--gh-radius);
-  background: rgba(255, 255, 255, 0.65);
-  -webkit-backdrop-filter: blur(12px);
-  backdrop-filter: blur(12px);
-  box-shadow: var(--gh-shadow-rest);
+  gap: 1.6rem 2.4rem;
+  margin-bottom: 2.4rem;
+  padding-bottom: 1.6rem;
+  border-bottom: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
 }
+
 #nx-gh-{{ sid }} .nx-gh-search {
   position: relative;
-  flex: 1 1 260px;
+  flex: 1 1 22rem;
+  min-width: 18rem;
 }
+
 #nx-gh-{{ sid }} .nx-gh-search-input {
   width: 100%;
-  padding: 12px 40px 12px 14px;
-  border: none;
-  border-radius: var(--gh-radius-sm);
-  background: var(--gh-bg);
-  box-shadow: var(--gh-shadow-rest);
-  font-family: var(--gh-font);
-  font-size: 15px;
-  color: var(--gh-text);
-  transition: var(--gh-transition);
+  min-height: 4.4rem;
+  padding: 0 3.6rem 0 0;
+  border: 0;
+  border-bottom: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 18%, transparent);
+  border-radius: 0;
+  background: transparent;
+  font-size: 1.5rem;
+  color: rgba(var(--color-foreground));
 }
+
 #nx-gh-{{ sid }} .nx-gh-search-input:focus {
-  box-shadow: var(--gh-shadow-hover);
+  outline: none;
+  border-bottom-color: rgba(var(--color-accent));
 }
+
 #nx-gh-{{ sid }} .nx-gh-clear {
   position: absolute;
-  right: 8px;
+  right: 0;
   top: 50%;
   transform: translateY(-50%);
-  border: none;
-  background: var(--gh-bg-alt);
-  border-radius: var(--nx-radius-sm);
-  padding: 4px 8px;
+  border: 0;
+  background: transparent;
+  font-size: 2rem;
+  line-height: 1;
   cursor: pointer;
-  font-size: 16px;
-  color: var(--gh-muted);
-  transition: var(--gh-transition);
-  min-height: 32px;
-  min-width: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  color: color-mix(in srgb, rgba(var(--color-foreground)) 45%, transparent);
 }
-#nx-gh-{{ sid }} .nx-gh-clear:hover {
-  background: var(--gh-accent-glass-strong);
-  color: var(--gh-text);
-}
+
 #nx-gh-{{ sid }} .nx-gh-chips {
   display: flex;
-  gap: 8px;
   flex-wrap: wrap;
-  flex: 1 1 100%;
+  gap: 0.4rem 1.6rem;
 }
+
 #nx-gh-{{ sid }} .nx-gh-chip {
-  border: none;
-  border-radius: var(--nx-radius-pill);
-  padding: 8px 16px;
-  background: var(--gh-bg);
-  box-shadow: var(--gh-shadow-rest);
+  border: 0;
+  background: transparent;
+  padding: 0.6rem 0;
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: color-mix(in srgb, rgba(var(--color-foreground)) 55%, transparent);
   cursor: pointer;
-  font-family: var(--gh-font);
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--gh-muted);
-  transition: var(--gh-transition);
-  min-height: var(--touch-min, 44px);
-  display: inline-flex;
-  align-items: center;
+  text-decoration: none;
+  box-shadow: none;
 }
-#nx-gh-{{ sid }} .nx-gh-chip:hover {
-  box-shadow: var(--gh-shadow-hover);
-  color: var(--gh-text);
-  transform: translateY(-2px);
-}
+
 #nx-gh-{{ sid }} .nx-gh-chip.is-active {
-  background: var(--gh-accent);
-  color: var(--color-text-primary);
-  font-weight: 600;
-  box-shadow: var(--gh-gold-glow);
+  color: rgba(var(--color-foreground));
+  box-shadow: inset 0 -1px 0 rgba(var(--color-accent));
 }
-#nx-gh-{{ sid }} .nx-gh-sort {
-  flex-shrink: 0;
+
+#nx-gh-{{ sid }} .nx-gh-chip:focus-visible {
+  outline: 2px solid rgba(var(--color-accent));
+  outline-offset: 3px;
 }
+
 #nx-gh-{{ sid }} .nx-gh-sort-select {
-  padding: 10px 14px;
-  border: none;
-  border-radius: var(--gh-radius-sm);
-  background: var(--gh-bg);
-  box-shadow: var(--gh-shadow-rest);
-  font-family: var(--gh-font);
-  font-size: 14px;
-  color: var(--gh-text);
-  cursor: pointer;
-  min-height: var(--touch-min, 44px);
-  transition: var(--gh-transition);
-}
-#nx-gh-{{ sid }} .nx-gh-sort-select:hover {
-  box-shadow: var(--gh-shadow-hover);
-}
-
-/* ═══════════════════════════════════════════════════════
-   FEATURED HERO CARD
-   ═══════════════════════════════════════════════════════ */
-#nx-gh-{{ sid }} .nx-gh-feature { /* wrapper spacing handled by parent gap */ }
-#nx-gh-{{ sid }} .nx-gh-hero-card {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 20px;
-  border-radius: var(--nx-radius-lg);
-  padding: 24px;
-  color: #fff;
-  background: linear-gradient(135deg, var(--color-surface-tertiary) 0%, var(--color-surface-tertiary) 100%);
-  box-shadow: var(--gh-shadow-elevated);
-  overflow: hidden;
-  transition: var(--gh-transition);
-}
-#nx-gh-{{ sid }} .nx-gh-hero-card:hover {
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-2px);
-}
-@media (min-width: 990px) {
-  #nx-gh-{{ sid }} .nx-gh-hero-card {
-    grid-template-columns: 1.6fr 1fr;
-    padding: 36px;
-  }
-}
-#nx-gh-{{ sid }} .nx-gh-hero-content {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-#nx-gh-{{ sid }} .nx-gh-badge-pop {
-  display: inline-flex;
-  align-items: center;
-  width: fit-content;
-  border-radius: var(--nx-radius-pill);
-  padding: 4px 12px;
-  font-size: 0.78rem;
+  min-height: 4.4rem;
+  border: 0;
+  border-bottom: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 18%, transparent);
+  border-radius: 0;
+  background: transparent;
+  font-size: 1.4rem;
   font-weight: 600;
-  background: rgba(251, 191, 36, 0.18);
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
-  color: var(--gh-accent);
-}
-#nx-gh-{{ sid }} .nx-gh-hero-heading {
-  font-family: var(--gh-font-heading);
-  font-size: clamp(22px, 3vw, 34px);
-  font-weight: 700;
-  line-height: 1.2;
-  margin: 0;
-}
-#nx-gh-{{ sid }} .nx-gh-hero-desc {
-  color: rgba(255, 255, 255, 0.75);
-  line-height: 1.6;
-  font-size: 15px;
-  margin: 0;
-}
-#nx-gh-{{ sid }} .nx-gh-hero-cta {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-  margin-top: 4px;
-}
-#nx-gh-{{ sid }} .nx-gh-hero-card .nx-gh-btn--primary {
-  background: var(--gh-accent);
-  color: var(--color-text-primary);
-  border-color: var(--gh-accent);
-}
-#nx-gh-{{ sid }} .nx-gh-time {
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 0.88rem;
-}
-#nx-gh-{{ sid }} .nx-gh-hero-illu {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-#nx-gh-{{ sid }} .nx-gh-illu-wrap {
-  border-radius: var(--nx-radius);
-  overflow: hidden;
-  box-shadow: var(--shadow-lg);
-}
-#nx-gh-{{ sid }} .nx-gh-illu-wrap img {
-  display: block;
-  width: 100%;
-  max-height: 260px;
-  object-fit: cover;
-  transition: var(--gh-transition);
-}
-#nx-gh-{{ sid }} .nx-gh-hero-card:hover .nx-gh-illu-wrap img {
-  transform: scale(1.03);
-}
-#nx-gh-{{ sid }} .nx-gh-illu-placeholder {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 120px;
-  height: 120px;
-  color: rgba(255, 255, 255, 0.2);
+  color: rgba(var(--color-foreground));
 }
 
-/* ═══════════════════════════════════════════════════════
-   GUIDE CARDS GRID — Borderless elevation, sibling fade
-   ═══════════════════════════════════════════════════════ */
 #nx-gh-{{ sid }} .nx-gh-grid {
-  display: grid;
-  gap: var(--gh-gap);
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
 }
+
 #nx-gh-{{ sid }} .nx-gh-card {
-  background: var(--gh-bg);
-  border: none;
-  border-radius: var(--gh-radius);
-  overflow: hidden;
-  box-shadow: var(--gh-shadow-rest);
-  transition: var(--gh-transition);
-  display: flex;
-  flex-direction: column;
+  border-bottom: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
 }
-#nx-gh-{{ sid }} .nx-gh-grid:hover .nx-gh-card {
-  opacity: 0.6;
-}
-#nx-gh-{{ sid }} .nx-gh-grid .nx-gh-card:hover {
-  opacity: 1;
-  transform: translateY(-4px);
-  box-shadow: var(--gh-shadow-hover);
-}
-#nx-gh-{{ sid }} .nx-gh-card.is-featured {
-  box-shadow: 0 0 0 2px var(--gh-accent), var(--gh-shadow-rest);
-}
-#nx-gh-{{ sid }} .nx-gh-grid .nx-gh-card.is-featured:hover {
-  box-shadow: 0 0 0 2px var(--gh-accent), var(--gh-shadow-hover);
-}
+
 #nx-gh-{{ sid }} .nx-gh-card-link {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 9rem 1fr;
+  gap: 0.4rem 2rem;
+  padding: 2rem 0;
   text-decoration: none;
   color: inherit;
-  height: 100%;
 }
-#nx-gh-{{ sid }} .nx-gh-card-media {
-  position: relative;
-  aspect-ratio: 16 / 9;
-  background: var(--gh-bg-alt);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
+
+@media (min-width: 768px) {
+  #nx-gh-{{ sid }} .nx-gh-card-link {
+    grid-template-columns: 12rem minmax(16rem, 28rem) 1fr;
+    align-items: baseline;
+    padding: 2.4rem 0;
+  }
 }
-#nx-gh-{{ sid }} .nx-gh-card-media img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: var(--gh-transition);
-}
-#nx-gh-{{ sid }} .nx-gh-card:hover .nx-gh-card-media img {
-  transform: scale(1.03);
-}
-#nx-gh-{{ sid }} .nx-gh-icon {
-  width: 56px;
-  height: 56px;
-  color: var(--gh-muted);
-  opacity: 0.35;
-}
-#nx-gh-{{ sid }} .nx-gh-card-badge {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  background: rgba(0, 0, 0, 0.55);
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
-  color: #fff;
-  padding: 4px 10px;
-  border-radius: var(--nx-radius-pill);
-  font-size: 0.78rem;
-  font-weight: 600;
-}
-#nx-gh-{{ sid }} .nx-gh-card-body {
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  flex: 1;
-}
-#nx-gh-{{ sid }} .nx-gh-card-top {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  justify-content: space-between;
-}
+
 #nx-gh-{{ sid }} .nx-gh-tag {
-  font-size: 0.8rem;
+  font-size: 1.2rem;
   font-weight: 600;
-  color: var(--gh-accent-dark);
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  color: color-mix(in srgb, rgba(var(--color-foreground)) 50%, transparent);
 }
-#nx-gh-{{ sid }} .nx-gh-read-time {
-  font-size: 0.8rem;
-  color: var(--gh-muted);
-}
+
 #nx-gh-{{ sid }} .nx-gh-card-title {
-  font-family: var(--gh-font-heading);
-  font-size: 1.1rem;
-  font-weight: 700;
-  line-height: 1.3;
   margin: 0;
-  color: var(--gh-text);
+  font-size: 1.8rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: rgba(var(--color-foreground));
 }
+
 #nx-gh-{{ sid }} .nx-gh-card-desc {
   margin: 0;
-  color: var(--gh-muted);
-  font-size: 14px;
-  line-height: 1.6;
-}
-#nx-gh-{{ sid }} .nx-gh-card-cta {
-  margin-top: auto;
-  padding-top: 6px;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--gh-accent-dark);
-  transition: var(--gh-transition);
-}
-#nx-gh-{{ sid }} .nx-gh-card:hover .nx-gh-card-cta {
-  color: var(--gh-text);
-}
-
-/* ═══════════════════════════════════════════════════════
-   BUNDLES GRID — Borderless elevation
-   ═══════════════════════════════════════════════════════ */
-#nx-gh-{{ sid }} .nx-gh-bundles { /* spacing from parent gap */ }
-#nx-gh-{{ sid }} .nx-gh-section-heading {
-  font-family: var(--gh-font-heading);
-  font-size: clamp(22px, 3vw, 34px);
-  font-weight: 700;
-  line-height: 1.2;
-  text-align: center;
-  color: var(--gh-text);
-  margin: 0 0 20px;
-}
-#nx-gh-{{ sid }} .nx-gh-bundle-grid {
-  display: grid;
-  gap: var(--gh-gap);
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-}
-#nx-gh-{{ sid }} .nx-gh-bundle-card {
-  background: var(--gh-bg);
-  border: none;
-  border-radius: var(--gh-radius);
-  overflow: hidden;
-  box-shadow: var(--gh-shadow-rest);
-  display: flex;
-  flex-direction: column;
-  transition: var(--gh-transition);
-}
-#nx-gh-{{ sid }} .nx-gh-bundle-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--gh-shadow-hover);
-}
-#nx-gh-{{ sid }} .nx-gh-bundle-media {
-  aspect-ratio: 16 / 9;
-  background: var(--gh-bg-alt);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-}
-#nx-gh-{{ sid }} .nx-gh-bundle-media img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: var(--gh-transition);
-}
-#nx-gh-{{ sid }} .nx-gh-bundle-card:hover .nx-gh-bundle-media img {
-  transform: scale(1.03);
-}
-#nx-gh-{{ sid }} .nx-gh-bundle-body {
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  flex: 1;
-}
-#nx-gh-{{ sid }} .nx-gh-bundle-title {
-  font-family: var(--gh-font-heading);
-  font-size: 1.1rem;
-  font-weight: 700;
-  line-height: 1.3;
-  margin: 0;
-  color: var(--gh-text);
-}
-#nx-gh-{{ sid }} .nx-gh-bundle-desc {
-  color: var(--gh-muted);
-  margin: 0;
-  font-size: 14px;
-  line-height: 1.6;
-}
-#nx-gh-{{ sid }} .nx-gh-bundle-ctas {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-top: auto;
-  padding-top: 4px;
-}
-
-/* ═══════════════════════════════════════════════════════
-   TRUST BAR — Glass cards
-   ═══════════════════════════════════════════════════════ */
-#nx-gh-{{ sid }} .nx-gh-trust-grid {
-  display: grid;
-  gap: 14px;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-}
-#nx-gh-{{ sid }} .nx-gh-trust-item {
-  border: none;
-  border-radius: var(--gh-radius);
-  padding: 16px;
-  display: flex;
-  gap: 12px;
-  align-items: flex-start;
-  background: var(--gh-accent-glass);
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
-  box-shadow: var(--gh-shadow-rest);
-  transition: var(--gh-transition);
+  grid-column: 1 / -1;
+  font-size: 1.5rem;
   line-height: 1.5;
-}
-#nx-gh-{{ sid }} .nx-gh-trust-item:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--gh-shadow-hover);
-}
-#nx-gh-{{ sid }} .nx-gh-trust-icon {
-  font-size: 22px;
-  line-height: 1;
-  flex-shrink: 0;
-}
-#nx-gh-{{ sid }} .nx-gh-trust-item strong {
-  color: var(--gh-text);
-}
-#nx-gh-{{ sid }} .nx-gh-trust-detail {
-  color: var(--gh-muted);
-  font-size: 14px;
+  color: color-mix(in srgb, rgba(var(--color-foreground)) 70%, transparent);
 }
 
-/* ═══════════════════════════════════════════════════════
-   FOOTER CTA
-   ═══════════════════════════════════════════════════════ */
-#nx-gh-{{ sid }} .nx-gh-footer-cta {
-  text-align: center;
-  padding: 24px 0;
-  background: var(--gh-bg-alt);
-  border-radius: var(--gh-radius);
-}
-#nx-gh-{{ sid }} .nx-gh-footer-desc {
-  color: var(--gh-muted);
-  max-width: 520px;
-  margin: 0 auto 16px;
-  line-height: 1.6;
-}
-#nx-gh-{{ sid }} .nx-gh-footer-btns {
-  display: flex;
-  gap: 12px;
-  justify-content: center;
-  flex-wrap: wrap;
+@media (min-width: 768px) {
+  #nx-gh-{{ sid }} .nx-gh-card-desc {
+    grid-column: auto;
+  }
 }
 
-/* ═══════════════════════════════════════════════════════
-   STICKY MOBILE CTA — Glassmorphism
-   ═══════════════════════════════════════════════════════ */
-#nx-gh-{{ sid }} .nx-gh-sticky {
-  position: sticky;
-  bottom: 0;
-  z-index: 3;
-  display: none;
-  gap: 8px;
-  padding: 10px 12px;
-  background: rgba(255, 255, 255, 0.8);
-  -webkit-backdrop-filter: saturate(140%) blur(14px);
-  backdrop-filter: saturate(140%) blur(14px);
-  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.06);
+#nx-gh-{{ sid }} .nx-gh-card-link:hover .nx-gh-card-title {
+  text-decoration: underline;
+  text-underline-offset: 0.25em;
+  text-decoration-color: rgba(var(--color-accent));
 }
-@media (max-width: 720px) {
-  #nx-gh-{{ sid }} .nx-gh-sticky { display: flex; }
+
+#nx-gh-{{ sid }} .nx-gh-card-link:focus-visible {
+  outline: 2px solid rgba(var(--color-accent));
+  outline-offset: 3px;
 }
-#nx-gh-{{ sid }} .nx-gh-sticky-btn {
-  flex: 1;
-  text-align: center;
-  text-decoration: none;
-  border: none;
-  border-radius: var(--gh-radius-sm);
-  padding: 10px 12px;
-  font-family: var(--gh-font);
+
+#nx-gh-{{ sid }} .nx-gh-btn {
+  font-size: 1.5rem;
   font-weight: 600;
-  font-size: 14px;
-  color: var(--gh-text);
-  background: var(--gh-bg);
-  box-shadow: var(--gh-shadow-rest);
-  min-height: var(--touch-min, 44px);
-  display: flex;
+  text-decoration: underline;
+  text-underline-offset: 0.35em;
+  color: rgba(var(--color-foreground));
+}
+
+#nx-gh-{{ sid }} .nx-gh-btn--primary {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: var(--gh-transition);
-}
-#nx-gh-{{ sid }} .nx-gh-sticky-btn:hover {
-  box-shadow: var(--gh-shadow-hover);
-}
-#nx-gh-{{ sid }} .nx-gh-sticky-btn:active {
-  transform: scale(0.98);
+  min-height: 4.4rem;
+  padding: 0 2.4rem;
+  border-radius: var(--button-radius, 10rem);
+  background: rgba(var(--color-accent));
+  color: rgba(var(--color-foreground));
+  text-decoration: none;
 }
 
-/* ═══════════════════════════════════════════════════════
-   ACCESSIBILITY — focus-visible + reduced motion
-   ═══════════════════════════════════════════════════════ */
-#nx-gh-{{ sid }} :focus-visible {
-  outline: 2px solid var(--gh-accent);
-  outline-offset: 2px;
+#nx-gh-{{ sid }} .nx-gh-feature,
+#nx-gh-{{ sid }} .nx-gh-bundles,
+#nx-gh-{{ sid }} .nx-gh-trust,
+#nx-gh-{{ sid }} .nx-gh-footer-cta {
+  margin-top: 4rem;
+}
+
+#nx-gh-{{ sid }} .nx-gh-section-heading {
+  margin: 0 0 1.6rem;
+  font-size: clamp(2.4rem, 3vw, 3.2rem);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+
+#nx-gh-{{ sid }} .nx-gh-sticky {
+  display: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  #nx-gh-{{ sid }} *,
-  #nx-gh-{{ sid }} *::before,
-  #nx-gh-{{ sid }} *::after {
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
+  #nx-gh-{{ sid }} * {
+    transition: none !important;
   }
 }
 {%- endstyle -%}
+
 
 <script>
   (function() {
