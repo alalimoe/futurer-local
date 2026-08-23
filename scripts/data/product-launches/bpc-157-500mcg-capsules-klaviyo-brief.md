@@ -3,7 +3,7 @@
 ## Campaign
 
 - Campaign name: `BPC-157 Oral Capsules Launch`
-- Product URL: `https://nootropix.shop/products/bpc-157-500mcg-capsules`
+- Product URL: `https://nootropix.ae/products/bpc-157-500mcg-capsules`
 - UTM campaign: `bpc157_oral_launch`
 - Email HTML: `email-bpc-157-oral-capsules-launch.html`
 - Primary CTA: `Shop BPC-157 Capsules`
