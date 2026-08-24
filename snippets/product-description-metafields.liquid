@@ -7,7 +7,7 @@ Nootropix — Product description renderer from metafields
 {%- if tldr_src and tldr_src.value -%}
   {%- assign tldr = tldr_src.value -%}
 {%- elsif tldr_src -%}
-  {%- assign tldr = tldr_src | parse_json -%}
+  {%- assign tldr = tldr_src -%}
 {%- endif -%}
 
 {%- assign what_it_is = product.metafields.npx.what_it_is.value | default: product.metafields.npx.what_it_is -%}
@@ -66,6 +66,13 @@ Nootropix — Product description renderer from metafields
         <li>{% if h.label %}<strong>{{ h.label }}:</strong> {% endif %}{{ h.text }}</li>
       {%- endfor -%}
     </ul>
+    {%- assign dg_page = pages['dosing-guide'] -%}
+    {%- if dg_page != empty -%}
+      {%- assign dg_hub_url = dg_page.url -%}
+    {%- else -%}
+      {%- assign dg_hub_url = '/pages/dosing-guide' -%}
+    {%- endif -%}
+    <p><a href="{{ dg_hub_url }}#dose-{{ product.handle }}">Open the Dosing Guide for this product</a></p>
   {%- endif -%}
 
   {%- if why != blank -%}

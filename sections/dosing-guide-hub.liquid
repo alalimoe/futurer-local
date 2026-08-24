@@ -6,19 +6,67 @@
   endif
 
   assign dg_manual = false
-  assign dg_handles = ''
+  assign dg_seen = ','
+  assign dg_card_count = 0
+
   for block in section.blocks
     if block.type == 'product' and block.settings.product != blank
-      assign dg_handles = dg_handles | append: block.settings.product.handle | append: ','
+      assign dg_manual = true
+      assign product = block.settings.product
+      assign mf_dose = product.metafields.custom.dose
+      assign mf_timing = product.metafields.custom.timing
+      assign dg_key = ',' | append: product.handle | append: ','
+      unless dg_seen contains dg_key
+        if mf_dose != blank or mf_timing != blank
+          assign dg_seen = dg_seen | append: product.handle | append: ','
+          assign dg_card_count = dg_card_count | plus: 1
+        endif
+      endunless
     endif
   endfor
-  assign dg_handles = dg_handles | split: ','
-  if dg_handles.size > 0
-    assign dg_manual = true
-  else
-    assign dg_handles = dg_coll.products | sort_natural: 'title' | map: 'handle'
+
+  assign dg_coll_2 = section.settings.collection_secondary
+  assign dg_has_secondary = false
+  if dg_coll_2 != blank
+    unless dg_coll_2.handle == dg_coll.handle
+      assign dg_sorted_2 = dg_coll_2.products | sort_natural: 'title'
+      assign dg_has_secondary = true
+    endunless
   endif
-  assign dg_products = dg_handles
+
+  unless dg_manual
+    assign dg_sorted = dg_coll.products | sort_natural: 'title'
+    assign dg_seen = ','
+    assign dg_card_count = 0
+    for product in dg_sorted
+      unless product == empty
+        assign mf_dose = product.metafields.custom.dose
+        assign mf_timing = product.metafields.custom.timing
+        assign dg_key = ',' | append: product.handle | append: ','
+        unless dg_seen contains dg_key
+          if mf_dose != blank or mf_timing != blank
+            assign dg_seen = dg_seen | append: product.handle | append: ','
+            assign dg_card_count = dg_card_count | plus: 1
+          endif
+        endunless
+      endunless
+    endfor
+    if dg_has_secondary
+      for product in dg_sorted_2
+        unless product == empty
+          assign mf_dose = product.metafields.custom.dose
+          assign mf_timing = product.metafields.custom.timing
+          assign dg_key = ',' | append: product.handle | append: ','
+          unless dg_seen contains dg_key
+            if mf_dose != blank or mf_timing != blank
+              assign dg_seen = dg_seen | append: product.handle | append: ','
+              assign dg_card_count = dg_card_count | plus: 1
+            endif
+          endunless
+        endunless
+      endfor
+    endif
+  endunless
 -%}
 
 {%- style -%}
@@ -62,7 +110,7 @@
 
   /* ── Hero ── */
   .xo-section--{{ dg_id }} .dg-hero {
-    padding: clamp(40px, 7vw, 80px) 0 clamp(24px, 4vw, 40px);
+    padding: clamp(24px, 5vw, 48px) 0 clamp(16px, 3vw, 24px);
   }
   .xo-section--{{ dg_id }} .dg-hero__eyebrow {
     display: inline-block;
@@ -148,10 +196,37 @@
     color: color-mix(in srgb, rgba(var(--color-foreground)) 65%, transparent);
   }
 
-  /* ── Zone 2: Product search ── */
-  .xo-section--{{ dg_id }} .dg-search-zone { margin-bottom: clamp(28px, 4vw, 40px); }
+  .xo-section--{{ dg_id }} .dg-principles-disclosure {
+    margin-bottom: clamp(28px, 4vw, 40px);
+  }
+  .xo-section--{{ dg_id }} .dg-search-zone {
+    margin-bottom: clamp(20px, 3vw, 28px);
+  }
+  .xo-section--{{ dg_id }} .dg-principles-disclosure__summary {
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 44px;
+    margin-bottom: 16px;
+  }
+  .xo-section--{{ dg_id }} .dg-principles-disclosure__summary::-webkit-details-marker { display: none; }
+  .xo-section--{{ dg_id }} .dg-principles-disclosure__summary .dg-zone__h2 {
+    margin: 0;
+  }
+  .xo-section--{{ dg_id }} .dg-principles-disclosure__summary::after {
+    content: '+';
+    font-size: 1.2rem;
+    font-weight: 400;
+    flex-shrink: 0;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 45%, transparent);
+  }
+  .xo-section--{{ dg_id }} .dg-principles-disclosure[open] .dg-principles-disclosure__summary::after { content: '−'; }
+  .xo-section--{{ dg_id }} .dg-search-zone { margin-bottom: clamp(20px, 3vw, 28px); }
   .xo-section--{{ dg_id }} .dg-search {
-    position: sticky; top: 72px; z-index: 5;
+    position: sticky; top: 96px; z-index: 5;
     background: rgba(var(--color-background-2));
     border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 7%, transparent);
     border-radius: var(--general-radius-1, 1rem);
@@ -197,20 +272,35 @@
     margin: 10px 2px 0; font-size: 0.78rem;
     color: color-mix(in srgb, rgba(var(--color-foreground)) 55%, transparent);
   }
-  .xo-section--{{ dg_id }} .dg-noresults {
-    background: rgba(var(--color-background-2));
-    border: 1px dashed color-mix(in srgb, rgba(var(--color-foreground)) 18%, transparent);
-    border-radius: var(--general-radius-1, 1rem);
-    padding: 28px; text-align: center; font-size: 0.9rem;
-    color: color-mix(in srgb, rgba(var(--color-foreground)) 60%, transparent);
+  .xo-section--{{ dg_id }} .dg-search__hint {
+    margin: 6px 2px 0;
+    font-size: 0.72rem;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 50%, transparent);
   }
+  .xo-section--{{ dg_id }} .dg-search__hint kbd {
+    display: inline-block;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 0.7rem;
+    font-weight: 600;
+    background: color-mix(in srgb, rgba(var(--color-foreground)) 8%, transparent);
+  }
+  .xo-section--{{ dg_id }} .dg-noresults a {
+    display: inline-block;
+    margin-top: 10px;
+    color: rgba(var(--color-accent));
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .xo-section--{{ dg_id }} .dg-noresults a:hover { text-decoration: underline; }
 
   /* ── Zone 3: Per-product cards ── */
   .xo-section--{{ dg_id }} .dg-products {
     display: flex; flex-direction: column; gap: 16px;
   }
   .xo-section--{{ dg_id }} .dg-product {
-    scroll-margin-top: 84px;
+    scroll-margin-top: 160px;
     background: rgba(var(--color-background));
     border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 8%, transparent);
     border-radius: var(--general-radius-1, 1rem);
@@ -230,12 +320,22 @@
     font-weight: 600; letter-spacing: -0.02em; line-height: 1.2;
     margin: 0;
   }
-  .xo-section--{{ dg_id }} .dg-product__link {
+  .xo-section--{{ dg_id }} .dg-product__links {
     flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+  }
+  .xo-section--{{ dg_id }} .dg-product__link {
     display: inline-flex; align-items: center; gap: 5px;
     font-size: 0.82rem; font-weight: 600;
-    color: rgba(var(--color-accent)); text-decoration: none;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 55%, transparent);
+    text-decoration: none;
     white-space: nowrap;
+  }
+  .xo-section--{{ dg_id }} .dg-product__link--secondary {
+    color: rgba(var(--color-accent));
   }
   .xo-section--{{ dg_id }} .dg-product__link:hover { text-decoration: underline; }
   .xo-section--{{ dg_id }} .dg-product__link:focus-visible {
@@ -449,9 +549,36 @@
         {%- endif -%}
       </header>
 
-      {%- comment -%} ═══ ZONE 1: UNIVERSAL PRINCIPLES ═══ {%- endcomment -%}
-      <div class="dg-zone" id="principles">
-        <h2 class="dg-zone__h2">{{ section.settings.principles_heading }}</h2>
+      {%- comment -%} ═══ FIND PRODUCT (first) ═══ {%- endcomment -%}
+      {%- if dg_card_count > 0 -%}
+        <div class="dg-zone dg-search-zone">
+          <div class="dg-search" data-dg-search-root>
+            <label class="dg-search__label" for="dg-search-{{ dg_id }}">{{ section.settings.jump_label }}</label>
+            <div class="dg-search__field">
+              <svg class="dg-search__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input
+                type="search"
+                id="dg-search-{{ dg_id }}"
+                class="dg-search__input"
+                placeholder="{{ section.settings.search_placeholder | escape }}"
+                autocomplete="off"
+                aria-controls="dosing-by-product"
+                data-dg-search-input>
+              <button type="button" class="dg-search__clear" data-dg-search-clear hidden aria-label="Clear search">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+            <p class="dg-search__count" aria-live="polite" data-dg-search-count></p>
+            <p class="dg-search__hint">Press <kbd>/</kbd> to find a product</p>
+          </div>
+        </div>
+      {%- endif -%}
+
+      {%- comment -%} ═══ UNIVERSAL PRINCIPLES (disclosure) ═══ {%- endcomment -%}
+      <details class="dg-zone dg-principles-disclosure" id="principles">
+        <summary class="dg-principles-disclosure__summary">
+          <h2 class="dg-zone__h2">{{ section.settings.principles_heading }}</h2>
+        </summary>
         <div class="dg-principles">
           {%- for i in (1..4) -%}
             {%- assign title_key = 'principle_' | append: i -%}
@@ -471,108 +598,96 @@
             {%- endif -%}
           {%- endfor -%}
         </div>
-      </div>
-
-      {%- comment -%} ═══ ZONE 2: PRODUCT SEARCH ═══ {%- endcomment -%}
-      {%- if dg_products.size > 0 -%}
-        <div class="dg-zone dg-search-zone">
-          <div class="dg-search" data-dg-search-root>
-            <label class="dg-search__label" for="dg-search-{{ dg_id }}">{{ section.settings.jump_label }}</label>
-            <div class="dg-search__field">
-              <svg class="dg-search__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-              <input
-                type="search"
-                id="dg-search-{{ dg_id }}"
-                class="dg-search__input"
-                placeholder="{{ section.settings.search_placeholder | escape }}"
-                autocomplete="off"
-                aria-controls="dosing-by-product"
-                data-dg-search-input>
-              <button type="button" class="dg-search__clear" data-dg-search-clear hidden aria-label="Clear search">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-              </button>
-            </div>
-            <p class="dg-search__count" aria-live="polite" data-dg-search-count></p>
-          </div>
-        </div>
-      {%- endif -%}
+      </details>
 
       {%- comment -%} ═══ ZONE 3: PER-PRODUCT ENTRIES (H2 each) ═══ {%- endcomment -%}
+      {%- assign dg_render_seen = ',' -%}
+      {%- assign dg_json_items = '' -%}
+      {%- assign li_pos = 0 -%}
       <div class="dg-zone" id="dosing-by-product">
-        {%- if dg_products.size > 0 -%}
+        {%- if dg_card_count > 0 -%}
           <div class="dg-products">
-            {%- for dg_handle in dg_products -%}
-              {%- assign product = all_products[dg_handle] -%}
-              {%- if product == empty -%}{%- continue -%}{%- endif -%}
-              {%- assign mf_dose = product.metafields.custom.dose -%}
-              {%- assign mf_timing = product.metafields.custom.timing -%}
-              {%- assign mf_food = product.metafields.custom.with_food -%}
-              {%- assign mf_cycling = product.metafields.custom.cycling -%}
-              {%- assign mf_notes = product.metafields.custom.dosing_notes -%}
-
-              {%- assign dg_has_specs = false -%}
-              {%- if mf_dose != blank or mf_timing != blank or mf_food != blank or mf_cycling != blank or mf_notes != blank -%}
-                {%- assign dg_has_specs = true -%}
-              {%- endif -%}
-
-              {%- if dg_manual or mf_dose != blank or mf_timing != blank -%}
-                {%- capture dg_kw -%}{{ product.title }} {{ product.metafields.custom.primary_use }} {{ product.metafields.custom.benefit }}{%- endcapture -%}
-                <article class="dg-product" id="dose-{{ product.handle }}" data-dg-item data-dg-name="{{ dg_kw | strip | downcase | escape }}">
-                  <div class="dg-product__head">
-                    <h2 class="dg-product__h2">{{ product.title }}</h2>
-                    <a class="dg-product__link" href="{{ product.url }}">
-                      View product
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-                    </a>
-                  </div>
-
-                  {%- if dg_has_specs -%}
-                    <dl class="dg-specs">
-                      {%- if mf_dose != blank -%}
-                        <div class="dg-spec">
-                          <dt class="dg-spec__label">Dose</dt>
-                          <dd class="dg-spec__value">{{ mf_dose }}</dd>
-                        </div>
-                      {%- endif -%}
-                      {%- if mf_timing != blank -%}
-                        <div class="dg-spec">
-                          <dt class="dg-spec__label">Timing</dt>
-                          <dd class="dg-spec__value">{{ mf_timing }}</dd>
-                        </div>
-                      {%- endif -%}
-                      {%- if mf_food != blank -%}
-                        <div class="dg-spec">
-                          <dt class="dg-spec__label">Food</dt>
-                          <dd class="dg-spec__value">
-                            {%- if mf_food.value == true -%}
-                              <span class="dg-badge">Take with food</span>
-                            {%- else -%}
-                              <span class="dg-badge dg-badge--muted">Empty stomach OK</span>
-                            {%- endif -%}
-                          </dd>
-                        </div>
-                      {%- endif -%}
-                      {%- if mf_cycling != blank -%}
-                        <div class="dg-spec">
-                          <dt class="dg-spec__label">Cycling</dt>
-                          <dd class="dg-spec__value">{{ mf_cycling }}</dd>
-                        </div>
-                      {%- endif -%}
-                      {%- if mf_notes != blank -%}
-                        <div class="dg-spec">
-                          <dt class="dg-spec__label">Notes</dt>
-                          <dd class="dg-spec__value">{{ mf_notes }}</dd>
-                        </div>
-                      {%- endif -%}
-                    </dl>
-                  {%- else -%}
-                    <p class="dg-empty-note">Dosing details coming soon. Add this product's <code>custom.dose</code> and <code>custom.timing</code> metafields to populate this card.</p>
+            {%- if dg_manual -%}
+              {%- for block in section.blocks -%}
+                {%- if block.type == 'product' and block.settings.product != blank -%}
+                  {%- assign product = block.settings.product -%}
+                  {%- assign mf_dose = product.metafields.custom.dose -%}
+                  {%- assign mf_timing = product.metafields.custom.timing -%}
+                  {%- assign dg_key = ',' | append: product.handle | append: ',' -%}
+                  {%- if mf_dose != blank or mf_timing != blank -%}
+                    {%- unless dg_render_seen contains dg_key -%}
+                      {%- assign dg_render_seen = dg_render_seen | append: product.handle | append: ',' -%}
+                      {%- render 'dosing-guide-card', product: product -%}
+                      {%- assign li_pos = li_pos | plus: 1 -%}
+                      {%- capture dg_one -%}
+                        {%- if li_pos > 1 -%},{%- endif -%}
+                        {
+                          "@type": "ListItem",
+                          "position": {{ li_pos }},
+                          "name": {{ product.title | json }},
+                          "url": {{ canonical_url | append: '#dose-' | append: product.handle | json }}
+                        }
+                      {%- endcapture -%}
+                      {%- assign dg_json_items = dg_json_items | append: dg_one -%}
+                    {%- endunless -%}
                   {%- endif -%}
-                </article>
+                {%- endif -%}
+              {%- endfor -%}
+            {%- else -%}
+              {%- for product in dg_sorted -%}
+                {%- if product == empty -%}{%- continue -%}{%- endif -%}
+                {%- assign mf_dose = product.metafields.custom.dose -%}
+                {%- assign mf_timing = product.metafields.custom.timing -%}
+                {%- assign dg_key = ',' | append: product.handle | append: ',' -%}
+                {%- if mf_dose != blank or mf_timing != blank -%}
+                  {%- unless dg_render_seen contains dg_key -%}
+                    {%- assign dg_render_seen = dg_render_seen | append: product.handle | append: ',' -%}
+                    {%- render 'dosing-guide-card', product: product -%}
+                    {%- assign li_pos = li_pos | plus: 1 -%}
+                    {%- capture dg_one -%}
+                      {%- if li_pos > 1 -%},{%- endif -%}
+                      {
+                        "@type": "ListItem",
+                        "position": {{ li_pos }},
+                        "name": {{ product.title | json }},
+                        "url": {{ canonical_url | append: '#dose-' | append: product.handle | json }}
+                      }
+                    {%- endcapture -%}
+                    {%- assign dg_json_items = dg_json_items | append: dg_one -%}
+                  {%- endunless -%}
+                {%- endif -%}
+              {%- endfor -%}
+              {%- if dg_has_secondary -%}
+                {%- for product in dg_sorted_2 -%}
+                  {%- if product == empty -%}{%- continue -%}{%- endif -%}
+                  {%- assign mf_dose = product.metafields.custom.dose -%}
+                  {%- assign mf_timing = product.metafields.custom.timing -%}
+                  {%- assign dg_key = ',' | append: product.handle | append: ',' -%}
+                  {%- if mf_dose != blank or mf_timing != blank -%}
+                    {%- unless dg_render_seen contains dg_key -%}
+                      {%- assign dg_render_seen = dg_render_seen | append: product.handle | append: ',' -%}
+                      {%- render 'dosing-guide-card', product: product -%}
+                      {%- assign li_pos = li_pos | plus: 1 -%}
+                      {%- capture dg_one -%}
+                        {%- if li_pos > 1 -%},{%- endif -%}
+                        {
+                          "@type": "ListItem",
+                          "position": {{ li_pos }},
+                          "name": {{ product.title | json }},
+                          "url": {{ canonical_url | append: '#dose-' | append: product.handle | json }}
+                        }
+                      {%- endcapture -%}
+                      {%- assign dg_json_items = dg_json_items | append: dg_one -%}
+                    {%- endunless -%}
+                  {%- endif -%}
+                {%- endfor -%}
               {%- endif -%}
-            {%- endfor -%}
+            {%- endif -%}
           </div>
-          <p class="dg-noresults" data-dg-noresults hidden>No products match your search. Try a different term or clear the search.</p>
+          <p class="dg-noresults" data-dg-noresults hidden>
+            No products match this list.
+            <a class="dg-noresults__link" data-dg-search-fallback href="{{ routes.search_url }}">Search the store for this name</a>
+          </p>
         {%- else -%}
           <p class="dg-empty">No collection selected yet. Choose a collection in the theme editor to populate per-product dosing entries.</p>
         {%- endif -%}
@@ -611,28 +726,12 @@
 </section>
 
 {%- capture dg_item_list_markup -%}
-{%- if dg_products.size > 0 -%}
+{%- if dg_card_count > 0 -%}
 {
   "@type": "ItemList",
   "name": {{ section.settings.heading | json }},
   "itemListElement": [
-    {%- assign li_pos = 0 -%}
-    {%- for dg_handle in dg_products -%}
-      {%- assign product = all_products[dg_handle] -%}
-      {%- if product == empty -%}{%- continue -%}{%- endif -%}
-      {%- assign mf_dose = product.metafields.custom.dose -%}
-      {%- assign mf_timing = product.metafields.custom.timing -%}
-      {%- if dg_manual or mf_dose != blank or mf_timing != blank -%}
-        {%- assign li_pos = li_pos | plus: 1 -%}
-        {%- if li_pos > 1 -%},{%- endif -%}
-        {
-          "@type": "ListItem",
-          "position": {{ li_pos }},
-          "name": {{ product.title | json }},
-          "url": {{ canonical_url | append: '#dose-' | append: product.handle | json }}
-        }
-      {%- endif -%}
-    {%- endfor -%}
+    {{ dg_json_items }}
   ]
 }
 {%- endif -%}
@@ -648,27 +747,78 @@
   var clear = root.querySelector('[data-dg-search-clear]');
   var count = root.querySelector('[data-dg-search-count]');
   var noResults = root.querySelector('[data-dg-noresults]');
+  var fallback = root.querySelector('[data-dg-search-fallback]');
+  var searchUrl = {{ routes.search_url | json }};
   var items = Array.prototype.slice.call(root.querySelectorAll('[data-dg-item]'));
   if (!input || items.length === 0) { return; }
 
   var total = items.length;
   function label(n) { return n + (n === 1 ? ' product' : ' products'); }
 
-  function apply() {
+  function apply(exactHandle) {
     var q = input.value.trim().toLowerCase();
     var shown = 0;
+    var firstMatch = null;
     for (var i = 0; i < items.length; i++) {
       var hay = items[i].getAttribute('data-dg-name') || '';
-      var match = q === '' || hay.indexOf(q) !== -1;
+      var handle = items[i].getAttribute('data-dg-handle') || '';
+      var match;
+      if (exactHandle) {
+        match = handle === exactHandle;
+      } else {
+        match = q === '' || hay.indexOf(q) !== -1 || handle === q;
+      }
       items[i].hidden = !match;
-      if (match) { shown++; }
+      if (match) {
+        shown++;
+        if (!firstMatch) { firstMatch = items[i]; }
+      }
     }
-    if (clear) { clear.hidden = q.length === 0; }
+    if (clear) { clear.hidden = q.length === 0 && !exactHandle; }
     if (noResults) { noResults.hidden = shown !== 0; }
-    if (count) { count.textContent = q === '' ? label(total) : label(shown) + ' found'; }
+    if (fallback) {
+      var term = exactHandle || q;
+      fallback.href = term ? searchUrl + '?q=' + encodeURIComponent(term) : searchUrl;
+    }
+    if (count) { count.textContent = q === '' && !exactHandle ? label(total) : label(shown) + ' found'; }
+    return firstMatch;
   }
 
-  input.addEventListener('input', apply);
+  function handleFromHash() {
+    var raw = (window.location.hash || '').replace(/^#/, '');
+    if (raw.indexOf('dose-') === 0) { return raw.slice(5); }
+    return '';
+  }
+
+  function applyDeepLink() {
+    var params = new URLSearchParams(window.location.search);
+    var hashHandle = handleFromHash();
+    var productParam = (params.get('product') || '').trim();
+    var qParam = (params.get('q') || '').trim();
+    var exact = hashHandle || productParam;
+    var first;
+    if (exact) {
+      input.value = exact;
+      first = apply(exact.toLowerCase());
+      if (first) {
+        first.setAttribute('tabindex', '-1');
+        first.scrollIntoView({ block: 'start' });
+        try { first.focus({ preventScroll: true }); } catch (err) { first.focus(); }
+      }
+      return;
+    }
+    if (qParam) {
+      input.value = qParam;
+      first = apply();
+      if (first) {
+        first.scrollIntoView({ block: 'start' });
+      }
+      return;
+    }
+    apply();
+  }
+
+  input.addEventListener('input', function () { apply(); });
   if (clear) {
     clear.addEventListener('click', function () { input.value = ''; apply(); input.focus(); });
   }
@@ -683,8 +833,9 @@
       input.focus();
     }
   });
+  window.addEventListener('hashchange', applyDeepLink);
 
-  apply();
+  applyDeepLink();
 })();
 </script>
 
@@ -696,8 +847,9 @@
   "settings": [
     { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "default" },
     { "type": "header", "content": "Data Source" },
-    { "type": "paragraph", "content": "By default (no Product blocks and no collection selected) this lists ALL products that have dosing metafields. Pick a collection to scope the list, or add Product blocks to pin an exact set and order." },
-    { "type": "collection", "id": "collection", "label": "Product source (optional)", "info": "Leave blank to include all products (any with a custom.dose or custom.timing metafield appears, up to 50). Or choose a collection to scope it. Ignored when Product blocks are added. Populate custom.dose, custom.timing, custom.with_food, custom.cycling, and custom.dosing_notes on each product." },
+    { "type": "paragraph", "content": "By default (no Product blocks and no collection selected) this lists products from All that have dosing metafields (first 50). Add a second collection for remaining SKUs, or Product blocks to pin an exact set and order. Do not use page pagination on this template." },
+    { "type": "collection", "id": "collection", "label": "Product source (optional)", "info": "Leave blank to use All (up to 50 products). Any with custom.dose or custom.timing appears. Ignored when Product blocks are added." },
+    { "type": "collection", "id": "collection_secondary", "label": "Additional product source (optional)", "info": "Each collection contributes up to 50 products. Assign a Dosing or N–Z collection here so SKUs outside the first 50 of All can appear. Duplicate handles are shown once. Ignored when Product blocks are added." },
     { "type": "header", "content": "Hero" },
     { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Reference Guide" },
     { "type": "text", "id": "heading", "label": "Page heading (H1)", "default": "Dosing Guide" },
@@ -705,19 +857,19 @@
       "type": "richtext",
       "id": "subtitle",
       "label": "Subtitle",
-      "default": "<p>How to dose every product we carry — plus the universal rules that make any nootropic work better. Find your product below or scroll the principles first.</p>"
+      "default": "<p>Look up dose, timing, food, and cycling. Search for the product you have, then use the four rules if you are starting a new protocol.</p>"
     },
     { "type": "text", "id": "author", "label": "Author", "default": "Nootropix Research" },
     { "type": "text", "id": "date_published", "label": "Published date (YYYY-MM-DD)", "default": "2026-01-01" },
-    { "type": "text", "id": "read_time", "label": "Read time", "default": "6 min read" },
+    { "type": "text", "id": "read_time", "label": "Read time", "default": "Product lookup" },
     { "type": "header", "content": "Trust Badges" },
     { "type": "text", "id": "badge_1_text", "label": "Badge 1", "default": "Evidence-Based Dosing" },
     { "type": "text", "id": "badge_2_text", "label": "Badge 2", "default": "3rd-Party Tested" },
-    { "type": "text", "id": "badge_3_text", "label": "Badge 3", "default": "Updated Regularly" },
+    { "type": "text", "id": "badge_3_text", "label": "Badge 3", "default": "Pairs with Cycling Guide" },
     { "type": "header", "content": "Zone 1 — Universal Principles" },
     { "type": "text", "id": "principles_heading", "label": "Section heading (H2)", "default": "Start here: four rules for everything" },
     { "type": "text", "id": "principle_1", "label": "Principle 1 title", "default": "Consistency beats dose size" },
-    { "type": "textarea", "id": "principle_1_body", "label": "Principle 1 detail", "default": "Taking the same dose at the same time daily beats a bigger, random dose. Routine is the active ingredient." },
+    { "type": "textarea", "id": "principle_1_body", "label": "Principle 1 detail", "default": "On days you take a product, use the same dose at the same time. A steady on-day routine beats a bigger, random dose. Cycling still applies: off-days stay off-days." },
     { "type": "text", "id": "principle_2", "label": "Principle 2 title", "default": "Start at the lower end" },
     { "type": "textarea", "id": "principle_2_body", "label": "Principle 2 detail", "default": "Begin at the bottom of your range for the first few days, then adjust upward once you know how you respond." },
     { "type": "text", "id": "principle_3", "label": "Principle 3 title", "default": "Most stacks work best with food" },
@@ -739,7 +891,7 @@
       "type": "textarea",
       "id": "seo_description",
       "label": "SEO description",
-      "default": "The complete Nootropix dosing guide — dose, timing, food, and cycling for every compound we carry, plus universal dosing principles."
+      "default": "Nootropix dosing guide — dose, timing, food, and cycling for listed products, plus universal dosing principles."
     },
     { "type": "header", "content": "Disclaimer" },
     {

@@ -1,0 +1,89 @@
+{% doc %}
+  One dosing-guide product card. Only render products that have custom.dose or custom.timing.
+  @param {product} product - Store product with dosing metafields
+  @example
+  {% render 'dosing-guide-card', product: product %}
+{% enddoc %}
+
+{%- liquid
+  assign mf_dose = product.metafields.custom.dose
+  assign mf_timing = product.metafields.custom.timing
+  assign mf_food = product.metafields.custom.with_food
+  assign mf_cycling = product.metafields.custom.cycling
+  assign mf_notes = product.metafields.custom.dosing_notes
+  assign cycling_page = pages['cycling-guide']
+  if cycling_page != empty
+    assign cycling_url = cycling_page.url
+  else
+    assign cycling_url = '/pages/cycling-guide'
+  endif
+  capture dg_kw
+    echo product.title
+    echo ' '
+    echo product.handle
+    echo ' '
+    echo product.metafields.custom.primary_use
+    echo ' '
+    echo product.metafields.custom.benefit
+  endcapture
+-%}
+
+<article
+  class="dg-product"
+  id="dose-{{ product.handle }}"
+  data-dg-item
+  data-dg-handle="{{ product.handle | escape }}"
+  data-dg-name="{{ dg_kw | strip | downcase | escape }}"
+>
+  <div class="dg-product__head">
+    <h2 class="dg-product__h2">{{ product.title }}</h2>
+    <div class="dg-product__links">
+      {%- if mf_cycling != blank -%}
+        <a class="dg-product__link dg-product__link--secondary" href="{{ cycling_url }}">Cycling guide</a>
+      {%- endif -%}
+      <a class="dg-product__link" href="{{ product.url }}" aria-label="View product: {{ product.title | escape }}">
+        View product
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"></polyline></svg>
+      </a>
+    </div>
+  </div>
+
+  <dl class="dg-specs">
+    {%- if mf_dose != blank -%}
+      <div class="dg-spec">
+        <dt class="dg-spec__label">Dose</dt>
+        <dd class="dg-spec__value">{{ mf_dose }}</dd>
+      </div>
+    {%- endif -%}
+    {%- if mf_timing != blank -%}
+      <div class="dg-spec">
+        <dt class="dg-spec__label">Timing</dt>
+        <dd class="dg-spec__value">{{ mf_timing }}</dd>
+      </div>
+    {%- endif -%}
+    {%- if mf_food != blank -%}
+      <div class="dg-spec">
+        <dt class="dg-spec__label">Food</dt>
+        <dd class="dg-spec__value">
+          {%- if mf_food.value == true -%}
+            <span class="dg-badge">Take with food</span>
+          {%- else -%}
+            <span class="dg-badge dg-badge--muted">Empty stomach OK</span>
+          {%- endif -%}
+        </dd>
+      </div>
+    {%- endif -%}
+    {%- if mf_cycling != blank -%}
+      <div class="dg-spec">
+        <dt class="dg-spec__label">Cycling</dt>
+        <dd class="dg-spec__value">{{ mf_cycling }}</dd>
+      </div>
+    {%- endif -%}
+    {%- if mf_notes != blank -%}
+      <div class="dg-spec">
+        <dt class="dg-spec__label">Notes</dt>
+        <dd class="dg-spec__value">{{ mf_notes }}</dd>
+      </div>
+    {%- endif -%}
+  </dl>
+</article>
