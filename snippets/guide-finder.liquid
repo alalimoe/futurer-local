@@ -1,0 +1,31 @@
+{% doc %}
+  Shared quick-find control. Filtering is progressive enhancement via guide-system.js.
+  @param {string} input_id - Unique input id
+  @param {string} label - Visible label
+  @param {string} placeholder - Input placeholder
+  @param {string} [controls] - aria-controls id
+  @example
+  {% render 'guide-finder', input_id: 'dg-find', label: 'Find a product', placeholder: 'Search by name', controls: 'dosing-by-product' %}
+{% enddoc %}
+
+<div class="guide-finder" data-guide-finder>
+  <label class="guide-finder__label" for="{{ input_id }}">{{ label }}</label>
+  <div class="guide-finder__field">
+    <svg class="guide-finder__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input
+      type="search"
+      id="{{ input_id }}"
+      class="guide-finder__input"
+      placeholder="{{ placeholder | escape }}"
+      autocomplete="off"
+      spellcheck="false"
+      data-guide-search-input
+      {% if controls != blank %}aria-controls="{{ controls }}"{% endif %}
+    >
+    <button type="button" class="guide-finder__clear" data-guide-search-clear hidden aria-label="Clear search">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <p class="guide-finder__count" aria-live="polite" data-guide-search-count></p>
+  <p class="guide-finder__hint">Type a name to filter this page. Press <kbd>/</kbd> to focus.</p>
+</div>

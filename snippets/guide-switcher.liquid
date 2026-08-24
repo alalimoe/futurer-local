@@ -1,0 +1,34 @@
+{% doc %}
+  Shared Dosing / Cycling Guide switcher. Marks the current guide with aria-current.
+  @param {string} current - "dosing" or "cycling"
+  @example
+  {% render 'guide-switcher', current: 'dosing' %}
+{% enddoc %}
+
+{%- liquid
+  assign dosing_page = pages['dosing-guide']
+  assign cycling_page = pages['cycling-guide']
+  if dosing_page != empty
+    assign dosing_href = dosing_page.url
+  else
+    assign dosing_href = '/pages/dosing-guide'
+  endif
+  if cycling_page != empty
+    assign cycling_href = cycling_page.url
+  else
+    assign cycling_href = '/pages/cycling-guide'
+  endif
+-%}
+
+<nav class="guide-switcher" aria-label="Usage guides">
+  <a
+    class="guide-switcher__link{% if current == 'dosing' %} is-active{% endif %}"
+    href="{{ dosing_href }}"
+    {% if current == 'dosing' %}aria-current="page"{% endif %}
+  >Dosing Guide</a>
+  <a
+    class="guide-switcher__link{% if current == 'cycling' %} is-active{% endif %}"
+    href="{{ cycling_href }}"
+    {% if current == 'cycling' %}aria-current="page"{% endif %}
+  >Cycling Guide</a>
+</nav>

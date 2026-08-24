@@ -11,11 +11,42 @@
   assign mf_food = product.metafields.custom.with_food
   assign mf_cycling = product.metafields.custom.cycling
   assign mf_notes = product.metafields.custom.dosing_notes
+  assign pdp_coa_override = product.metafields.pdp.coa_url
+  assign coa_pdf_mf = product.metafields.pep.coa_pdf
+  assign coa_files_mf = product.metafields.peptide.coa_file
+  assign coa_url = nil
+  if pdp_coa_override != blank
+    assign coa_url = pdp_coa_override
+  endif
+  if coa_url == nil
+    if coa_pdf_mf and coa_pdf_mf.value and coa_pdf_mf.value.url
+      assign coa_url = coa_pdf_mf.value.url
+    endif
+  endif
+  if coa_url == nil
+    if coa_files_mf and coa_files_mf.value and coa_files_mf.value.size > 0
+      assign first_coa = coa_files_mf.value.first
+      if first_coa and first_coa.url
+        assign coa_url = first_coa.url
+      endif
+    endif
+  endif
   assign cycling_page = pages['cycling-guide']
   if cycling_page != empty
     assign cycling_url = cycling_page.url
   else
     assign cycling_url = '/pages/cycling-guide'
+  endif
+  assign title_l = product.title | downcase
+  assign cats = 'all'
+  if title_l contains 'capsule'
+    assign cats = cats | append: ' capsules'
+  endif
+  if title_l contains 'powder'
+    assign cats = cats | append: ' powder'
+  endif
+  if mf_cycling != blank
+    assign cats = cats | append: ' has-cycle'
   endif
   capture dg_kw
     echo product.title
@@ -32,14 +63,21 @@
   class="dg-product"
   id="dose-{{ product.handle }}"
   data-dg-item
+  data-guide-item
   data-dg-handle="{{ product.handle | escape }}"
+  data-guide-handle="{{ product.handle | escape }}"
   data-dg-name="{{ dg_kw | strip | downcase | escape }}"
+  data-guide-name="{{ dg_kw | strip | downcase | escape }}"
+  data-guide-cats="{{ cats | strip }}"
 >
   <div class="dg-product__head">
     <h2 class="dg-product__h2">{{ product.title }}</h2>
     <div class="dg-product__links">
       {%- if mf_cycling != blank -%}
-        <a class="dg-product__link dg-product__link--secondary" href="{{ cycling_url }}">Cycling guide</a>
+        <a class="dg-product__link dg-product__link--secondary" href="{{ cycling_url }}#cycle-{{ product.handle }}">See cycling guidance</a>
+      {%- endif -%}
+      {%- if coa_url != blank -%}
+        <a class="dg-product__link dg-product__link--secondary" href="{{ coa_url }}" rel="noopener">View batch COA</a>
       {%- endif -%}
       <a class="dg-product__link" href="{{ product.url }}" aria-label="View product: {{ product.title | escape }}">
         View product
@@ -75,7 +113,7 @@
     {%- endif -%}
     {%- if mf_cycling != blank -%}
       <div class="dg-spec">
-        <dt class="dg-spec__label">Cycling</dt>
+        <dt class="dg-spec__label">Cycling note</dt>
         <dd class="dg-spec__value">{{ mf_cycling }}</dd>
       </div>
     {%- endif -%}
@@ -86,4 +124,7 @@
       </div>
     {%- endif -%}
   </dl>
+  {%- unless mf_cycling != blank -%}
+    <p class="dg-product__cycle-gap">No cycling note is stored for this product. That does not mean a schedule is required.</p>
+  {%- endunless -%}
 </article>

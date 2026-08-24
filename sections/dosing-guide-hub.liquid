@@ -1,5 +1,22 @@
 {%- liquid
   assign dg_id = section.id
+  assign dg_paths_id = 'guide-paths-' | append: dg_id
+  assign dg_related_id = 'guide-related-' | append: dg_id
+  assign dg_coa_page = pages['quality-coa-library']
+  if dg_coa_page == empty
+    assign dg_coa_page = pages['coa-library']
+  endif
+  if dg_coa_page != empty
+    assign dg_coa_href = dg_coa_page.url
+  else
+    assign dg_coa_href = '/pages/quality-coa-library'
+  endif
+  assign dg_contact_page = pages['contact']
+  if dg_contact_page != empty
+    assign dg_contact_href = dg_contact_page.url
+  else
+    assign dg_contact_href = '/pages/contact'
+  endif
   assign dg_coll = section.settings.collection
   if dg_coll == blank
     assign dg_coll = collections.all
@@ -79,6 +96,148 @@
     max-width: 880px;
     margin: 0 auto;
   }
+  @media (min-width: 768px) {
+    .xo-section--{{ dg_id }} .dg__wrap { max-width: 1120px; }
+  }
+
+  .xo-section--{{ dg_id }} .dg-catalog {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 4.4rem;
+    column-gap: 10px;
+    align-items: start;
+  }
+  .xo-section--{{ dg_id }} .dg-products { grid-column: 1; min-width: 0; }
+  .xo-section--{{ dg_id }} .dg-noresults { grid-column: 1; }
+  .xo-section--{{ dg_id }} .dg-index {
+    grid-column: 2;
+    grid-row: 1 / span 8;
+    position: sticky;
+    top: 96px;
+    z-index: 4;
+    align-self: start;
+    max-height: calc(100dvh - 112px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, rgba(var(--color-foreground)) 25%, transparent) transparent;
+    padding-block: 4px;
+  }
+  .xo-section--{{ dg_id }} .dg-index__title {
+    display: none;
+  }
+  .xo-section--{{ dg_id }} .dg-index__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .xo-section--{{ dg_id }} .dg-index__item:not(.dg-index__item--letter-start) {
+    display: none;
+  }
+  .xo-section--{{ dg_id }} .dg-index__item[hidden] {
+    display: none !important;
+  }
+  .xo-section--{{ dg_id }} .dg-index__link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 0;
+    text-decoration: none;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 65%, transparent);
+    border-radius: 0.5rem;
+  }
+  .xo-section--{{ dg_id }} .dg-index__link:hover {
+    color: rgba(var(--color-foreground));
+    background: color-mix(in srgb, rgba(var(--color-foreground)) 5%, transparent);
+  }
+  .xo-section--{{ dg_id }} .dg-index__link:focus-visible {
+    outline: 2px solid rgba(var(--color-accent));
+    outline-offset: 2px;
+  }
+  .xo-section--{{ dg_id }} .dg-index__item--active .dg-index__link {
+    color: rgba(var(--color-foreground));
+    background: color-mix(in srgb, rgba(var(--color-accent)) 16%, transparent);
+    font-weight: 600;
+  }
+  .xo-section--{{ dg_id }} .dg-index__letter {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    line-height: 1;
+  }
+  .xo-section--{{ dg_id }} .dg-index__name {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
+
+  @media (min-width: 768px) {
+    .xo-section--{{ dg_id }} .dg-catalog {
+      grid-template-columns: 22rem minmax(0, 1fr);
+      column-gap: 24px;
+    }
+    .xo-section--{{ dg_id }} .dg-index {
+      grid-column: 1;
+      border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 8%, transparent);
+      border-radius: var(--general-radius-1, 1rem);
+      background: rgba(var(--color-background));
+      padding: 16px 10px 16px 12px;
+      max-height: calc(100dvh - 120px);
+    }
+    .xo-section--{{ dg_id }} .dg-products { grid-column: 2; }
+    .xo-section--{{ dg_id }} .dg-noresults { grid-column: 2; }
+    .xo-section--{{ dg_id }} .dg-index__title {
+      display: block;
+      margin: 0 8px 10px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: color-mix(in srgb, rgba(var(--color-foreground)) 55%, transparent);
+    }
+    .xo-section--{{ dg_id }} .dg-index__item:not(.dg-index__item--letter-start) {
+      display: list-item;
+    }
+    .xo-section--{{ dg_id }} .dg-index__item[hidden] { display: none; }
+    .xo-section--{{ dg_id }} .dg-index__link {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      justify-content: flex-start;
+      min-height: 44px;
+      padding: 8px 10px;
+      border-radius: 0.8rem;
+      font-size: 0.88rem;
+      line-height: 1.35;
+    }
+    .xo-section--{{ dg_id }} .dg-index__letter {
+      display: none;
+    }
+    .xo-section--{{ dg_id }} .dg-index__item--letter-start .dg-index__letter {
+      display: block;
+      margin: 0 0 4px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: rgba(var(--color-accent));
+    }
+    .xo-section--{{ dg_id }} .dg-index__name {
+      position: static;
+      width: auto;
+      height: auto;
+      overflow: visible;
+      clip: auto;
+      white-space: normal;
+    }
+  }
 
   /* Breadcrumbs */
   .xo-section--{{ dg_id }} .rg-breadcrumbs {
@@ -110,7 +269,7 @@
 
   /* ── Hero ── */
   .xo-section--{{ dg_id }} .dg-hero {
-    padding: clamp(24px, 5vw, 48px) 0 clamp(16px, 3vw, 24px);
+    padding: clamp(8px, 2vw, 16px) 0 clamp(12px, 2vw, 20px);
   }
   .xo-section--{{ dg_id }} .dg-hero__eyebrow {
     display: inline-block;
@@ -120,9 +279,9 @@
   }
   .xo-section--{{ dg_id }} .dg-hero__h1 {
     font-family: var(--font-heading-family, sans-serif);
-    font-size: clamp(2.2rem, 4.5vw, 3.4rem);
-    font-weight: 600; letter-spacing: -0.03em; line-height: 1.1;
-    margin: 0 0 16px;
+    font-size: clamp(1.75rem, 4vw, 2.5rem);
+    font-weight: 600; letter-spacing: -0.03em; line-height: 1.15;
+    margin: 0 0 12px;
   }
   .xo-section--{{ dg_id }} .dg-hero__sub {
     font-size: clamp(0.95rem, 1.2vw, 1.1rem); line-height: 1.7;
@@ -307,6 +466,7 @@
     padding: clamp(20px, 3vw, 28px);
     transition: border-color 0.3s var(--out-soft, ease);
   }
+  .xo-section--{{ dg_id }} .dg-product[hidden] { display: none !important; }
   .xo-section--{{ dg_id }} .dg-product:hover {
     border-color: color-mix(in srgb, rgba(var(--color-foreground)) 16%, transparent);
   }
@@ -319,6 +479,7 @@
     font-size: clamp(1.2rem, 2vw, 1.5rem);
     font-weight: 600; letter-spacing: -0.02em; line-height: 1.2;
     margin: 0;
+    overflow-wrap: break-word;
   }
   .xo-section--{{ dg_id }} .dg-product__links {
     flex-shrink: 0;
@@ -329,6 +490,7 @@
   }
   .xo-section--{{ dg_id }} .dg-product__link {
     display: inline-flex; align-items: center; gap: 5px;
+    min-height: 44px;
     font-size: 0.82rem; font-weight: 600;
     color: color-mix(in srgb, rgba(var(--color-foreground)) 55%, transparent);
     text-decoration: none;
@@ -354,6 +516,9 @@
   }
   @media (max-width: 480px) {
     .xo-section--{{ dg_id }} .dg-spec { grid-template-columns: 1fr; gap: 2px; }
+    .xo-section--{{ dg_id }} .dg-product__head { flex-direction: column; align-items: stretch; }
+    .xo-section--{{ dg_id }} .dg-product__links { align-items: flex-start; }
+    .xo-section--{{ dg_id }} .dg-product__link { white-space: normal; }
   }
   .xo-section--{{ dg_id }} .dg-spec__label {
     font-size: 0.7rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
@@ -474,22 +639,37 @@
   .xo-section--{{ dg_id }} .dg-faq__answer p { margin: 0 0 10px; }
   .xo-section--{{ dg_id }} .dg-faq__answer p:last-child { margin-bottom: 0; }
 
+  .xo-section--{{ dg_id }} .dg-index__link {
+    transition: color 0.2s var(--out-soft, ease), background 0.2s var(--out-soft, ease);
+  }
+
+  .xo-section--{{ dg_id }} .dg-product__cycle-gap {
+    margin: 12px 0 0;
+    font-size: 0.8rem;
+    line-height: 1.5;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 55%, transparent);
+  }
+
   /* ── Reduced motion ── */
   @media (prefers-reduced-motion: reduce) {
     .xo-section--{{ dg_id }} .dg-search__field,
-    .xo-section--{{ dg_id }} .dg-product { transition: none; }
+    .xo-section--{{ dg_id }} .dg-product,
+    .xo-section--{{ dg_id }} .dg-index__link { transition: none; }
   }
 {%- endstyle -%}
 
-<section {% render 'section-attr' %}>
+<section {% render 'section-attr' %} data-guide-page="dosing">
+  {% render 'guide-system' %}
   <xo-container>
-    <div class="dg__wrap">
+    <div class="dg__wrap" data-guide-root data-guide-search-url="{{ routes.search_url }}" data-guide-noun="products">
 
       {% render 'reference-guide-breadcrumbs',
         parent_label: section.settings.breadcrumb_parent_label,
         parent_url: section.settings.breadcrumb_parent_url,
         current_label: section.settings.heading
       %}
+
+      {% render 'guide-switcher', current: 'dosing' %}
 
       {%- comment -%} ═══ HERO (single H1) ═══ {%- endcomment -%}
       <header class="dg-hero">
@@ -549,30 +729,73 @@
         {%- endif -%}
       </header>
 
-      {%- comment -%} ═══ FIND PRODUCT (first) ═══ {%- endcomment -%}
+      {% render 'guide-orientation',
+        answers: section.settings.answers_text,
+        does_not: section.settings.does_not_text,
+        note: section.settings.orientation_note
+      %}
+
       {%- if dg_card_count > 0 -%}
-        <div class="dg-zone dg-search-zone">
-          <div class="dg-search" data-dg-search-root>
-            <label class="dg-search__label" for="dg-search-{{ dg_id }}">{{ section.settings.jump_label }}</label>
-            <div class="dg-search__field">
-              <svg class="dg-search__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-              <input
-                type="search"
-                id="dg-search-{{ dg_id }}"
-                class="dg-search__input"
-                placeholder="{{ section.settings.search_placeholder | escape }}"
-                autocomplete="off"
-                aria-controls="dosing-by-product"
-                data-dg-search-input>
-              <button type="button" class="dg-search__clear" data-dg-search-clear hidden aria-label="Clear search">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-              </button>
-            </div>
-            <p class="dg-search__count" aria-live="polite" data-dg-search-count></p>
-            <p class="dg-search__hint">Press <kbd>/</kbd> to find a product</p>
-          </div>
+        {%- assign dg_finder_id = 'dg-search-' | append: dg_id -%}
+        {% render 'guide-finder',
+          input_id: dg_finder_id,
+          label: section.settings.jump_label,
+          placeholder: section.settings.search_placeholder,
+          controls: 'dosing-by-product'
+        %}
+        <div class="guide-rail" data-guide-rail role="toolbar" aria-label="Filter listed products">
+          <button type="button" class="guide-rail__btn" data-guide-cat="" aria-pressed="true">
+            <svg class="guide-rail__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
+            All listed
+          </button>
+          <button type="button" class="guide-rail__btn" data-guide-cat="capsules" aria-pressed="false">
+            <svg class="guide-rail__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="8" y="3" width="8" height="18" rx="4"/></svg>
+            Capsules
+          </button>
+          <button type="button" class="guide-rail__btn" data-guide-cat="powder" aria-pressed="false">
+            <svg class="guide-rail__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M7 8h10l-1 13H8L7 8z"/><path d="M9 8V5h6v3"/></svg>
+            Powder
+          </button>
+          <button type="button" class="guide-rail__btn" data-guide-cat="has-cycle" aria-pressed="false">
+            <svg class="guide-rail__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.6"/><polyline points="4 4 4 12 12 12"/></svg>
+            Has a cycling note
+          </button>
+          <button type="button" class="guide-rail__clear" data-guide-rail-clear hidden>Clear filter</button>
         </div>
       {%- endif -%}
+
+      {% render 'guide-pathways',
+        heading: section.settings.pathways_heading,
+        heading_id: dg_paths_id,
+        p1_title: section.settings.p1_title,
+        p1_for: section.settings.p1_for,
+        p1_answers: section.settings.p1_answers,
+        p1_learn: section.settings.p1_learn,
+        p1_leads: section.settings.p1_leads,
+        p1_limit: section.settings.p1_limit,
+        p1_href: section.settings.p1_href,
+        p2_title: section.settings.p2_title,
+        p2_for: section.settings.p2_for,
+        p2_answers: section.settings.p2_answers,
+        p2_learn: section.settings.p2_learn,
+        p2_leads: section.settings.p2_leads,
+        p2_limit: section.settings.p2_limit,
+        p2_href: section.settings.p2_href,
+        p3_title: section.settings.p3_title,
+        p3_for: section.settings.p3_for,
+        p3_answers: section.settings.p3_answers,
+        p3_learn: section.settings.p3_learn,
+        p3_leads: section.settings.p3_leads,
+        p3_limit: section.settings.p3_limit,
+        p3_href: section.settings.p3_href,
+        p4_title: section.settings.p4_title,
+        p4_for: section.settings.p4_for,
+        p4_answers: section.settings.p4_answers,
+        p4_learn: section.settings.p4_learn,
+        p4_leads: section.settings.p4_leads,
+        p4_limit: section.settings.p4_limit,
+        p4_href: section.settings.p4_href
+      %}
 
       {%- comment -%} ═══ UNIVERSAL PRINCIPLES (disclosure) ═══ {%- endcomment -%}
       <details class="dg-zone dg-principles-disclosure" id="principles">
@@ -603,8 +826,10 @@
       {%- comment -%} ═══ ZONE 3: PER-PRODUCT ENTRIES (H2 each) ═══ {%- endcomment -%}
       {%- assign dg_render_seen = ',' -%}
       {%- assign dg_json_items = '' -%}
+      {%- assign dg_index_items = '' -%}
+      {%- assign dg_prev_letter = '' -%}
       {%- assign li_pos = 0 -%}
-      <div class="dg-zone" id="dosing-by-product">
+      <div class="dg-zone dg-catalog" id="dosing-by-product">
         {%- if dg_card_count > 0 -%}
           <div class="dg-products">
             {%- if dg_manual -%}
@@ -617,6 +842,16 @@
                   {%- if mf_dose != blank or mf_timing != blank -%}
                     {%- unless dg_render_seen contains dg_key -%}
                       {%- assign dg_render_seen = dg_render_seen | append: product.handle | append: ',' -%}
+                      {%- assign dg_letter = product.title | strip | slice: 0, 1 | upcase -%}
+                      {%- assign dg_ls = '0' -%}
+                      {%- if dg_letter != dg_prev_letter -%}
+                        {%- assign dg_ls = '1' -%}
+                        {%- assign dg_prev_letter = dg_letter -%}
+                      {%- endif -%}
+                      {%- capture dg_idx_one -%}
+                        {%- render 'dosing-guide-index-item', product: product, letter_start: dg_ls -%}
+                      {%- endcapture -%}
+                      {%- assign dg_index_items = dg_index_items | append: dg_idx_one -%}
                       {%- render 'dosing-guide-card', product: product -%}
                       {%- assign li_pos = li_pos | plus: 1 -%}
                       {%- capture dg_one -%}
@@ -642,6 +877,16 @@
                 {%- if mf_dose != blank or mf_timing != blank -%}
                   {%- unless dg_render_seen contains dg_key -%}
                     {%- assign dg_render_seen = dg_render_seen | append: product.handle | append: ',' -%}
+                    {%- assign dg_letter = product.title | strip | slice: 0, 1 | upcase -%}
+                    {%- assign dg_ls = '0' -%}
+                    {%- if dg_letter != dg_prev_letter -%}
+                      {%- assign dg_ls = '1' -%}
+                      {%- assign dg_prev_letter = dg_letter -%}
+                    {%- endif -%}
+                    {%- capture dg_idx_one -%}
+                      {%- render 'dosing-guide-index-item', product: product, letter_start: dg_ls -%}
+                    {%- endcapture -%}
+                    {%- assign dg_index_items = dg_index_items | append: dg_idx_one -%}
                     {%- render 'dosing-guide-card', product: product -%}
                     {%- assign li_pos = li_pos | plus: 1 -%}
                     {%- capture dg_one -%}
@@ -666,6 +911,16 @@
                   {%- if mf_dose != blank or mf_timing != blank -%}
                     {%- unless dg_render_seen contains dg_key -%}
                       {%- assign dg_render_seen = dg_render_seen | append: product.handle | append: ',' -%}
+                      {%- assign dg_letter = product.title | strip | slice: 0, 1 | upcase -%}
+                      {%- assign dg_ls = '0' -%}
+                      {%- if dg_letter != dg_prev_letter -%}
+                        {%- assign dg_ls = '1' -%}
+                        {%- assign dg_prev_letter = dg_letter -%}
+                      {%- endif -%}
+                      {%- capture dg_idx_one -%}
+                        {%- render 'dosing-guide-index-item', product: product, letter_start: dg_ls -%}
+                      {%- endcapture -%}
+                      {%- assign dg_index_items = dg_index_items | append: dg_idx_one -%}
                       {%- render 'dosing-guide-card', product: product -%}
                       {%- assign li_pos = li_pos | plus: 1 -%}
                       {%- capture dg_one -%}
@@ -684,9 +939,15 @@
               {%- endif -%}
             {%- endif -%}
           </div>
-          <p class="dg-noresults" data-dg-noresults hidden>
-            No products match this list.
-            <a class="dg-noresults__link" data-dg-search-fallback href="{{ routes.search_url }}">Search the store for this name</a>
+          <nav class="dg-index" data-dg-index aria-labelledby="dg-index-title-{{ dg_id }}">
+            <p class="dg-index__title" id="dg-index-title-{{ dg_id }}">A to Z</p>
+            <ol class="dg-index__list">
+              {{ dg_index_items }}
+            </ol>
+          </nav>
+          <p class="dg-noresults guide-empty" data-dg-noresults data-guide-empty hidden>
+            No products on this page match that name.
+            <a class="dg-noresults__link" data-dg-search-fallback data-guide-search-fallback href="{{ routes.search_url }}">Search the store for this name</a>
           </p>
         {%- else -%}
           <p class="dg-empty">No collection selected yet. Choose a collection in the theme editor to populate per-product dosing entries.</p>
@@ -710,6 +971,24 @@
           </div>
         </div>
       {%- endif -%}
+
+      {%- liquid
+        assign dg_cycling_page = pages['cycling-guide']
+        if dg_cycling_page != empty
+          assign dg_cycling_href = dg_cycling_page.url
+        else
+          assign dg_cycling_href = '/pages/cycling-guide'
+        endif
+      -%}
+      {% render 'guide-related',
+        heading: section.settings.related_heading,
+        heading_id: dg_related_id,
+        body: section.settings.related_body,
+        href: dg_cycling_href,
+        cta: section.settings.related_cta,
+        coa_href: dg_coa_href,
+        contact_href: dg_contact_href
+      %}
 
       {%- comment -%} ═══ DISCLAIMER ═══ {%- endcomment -%}
       {%- if section.settings.disclaimer != blank -%}
@@ -742,100 +1021,25 @@
 <script>
 (function () {
   var root = document.getElementById('shopify-section-{{ section.id }}');
-  if (!root) { return; }
-  var input = root.querySelector('[data-dg-search-input]');
-  var clear = root.querySelector('[data-dg-search-clear]');
-  var count = root.querySelector('[data-dg-search-count]');
-  var noResults = root.querySelector('[data-dg-noresults]');
-  var fallback = root.querySelector('[data-dg-search-fallback]');
-  var searchUrl = {{ routes.search_url | json }};
-  var items = Array.prototype.slice.call(root.querySelectorAll('[data-dg-item]'));
-  if (!input || items.length === 0) { return; }
-
-  var total = items.length;
-  function label(n) { return n + (n === 1 ? ' product' : ' products'); }
-
-  function apply(exactHandle) {
-    var q = input.value.trim().toLowerCase();
-    var shown = 0;
-    var firstMatch = null;
-    for (var i = 0; i < items.length; i++) {
-      var hay = items[i].getAttribute('data-dg-name') || '';
-      var handle = items[i].getAttribute('data-dg-handle') || '';
-      var match;
-      if (exactHandle) {
-        match = handle === exactHandle;
-      } else {
-        match = q === '' || hay.indexOf(q) !== -1 || handle === q;
-      }
-      items[i].hidden = !match;
-      if (match) {
-        shown++;
-        if (!firstMatch) { firstMatch = items[i]; }
+  if (!root || !('IntersectionObserver' in window)) { return; }
+  var items = root.querySelectorAll('[data-guide-item]');
+  var indexItems = root.querySelectorAll('[data-dg-index-item]');
+  if (!items.length || !indexItems.length) { return; }
+  var io = new IntersectionObserver(function (entries) {
+    for (var i = 0; i < entries.length; i++) {
+      if (!entries[i].isIntersecting) { continue; }
+      var handle = entries[i].target.getAttribute('data-guide-handle');
+      for (var n = 0; n < indexItems.length; n++) {
+        var on = indexItems[n].getAttribute('data-dg-handle') === handle && !indexItems[n].hidden;
+        indexItems[n].classList.toggle('dg-index__item--active', on);
+        var a = indexItems[n].querySelector('a');
+        if (!a) { continue; }
+        if (on) { a.setAttribute('aria-current', 'location'); }
+        else { a.removeAttribute('aria-current'); }
       }
     }
-    if (clear) { clear.hidden = q.length === 0 && !exactHandle; }
-    if (noResults) { noResults.hidden = shown !== 0; }
-    if (fallback) {
-      var term = exactHandle || q;
-      fallback.href = term ? searchUrl + '?q=' + encodeURIComponent(term) : searchUrl;
-    }
-    if (count) { count.textContent = q === '' && !exactHandle ? label(total) : label(shown) + ' found'; }
-    return firstMatch;
-  }
-
-  function handleFromHash() {
-    var raw = (window.location.hash || '').replace(/^#/, '');
-    if (raw.indexOf('dose-') === 0) { return raw.slice(5); }
-    return '';
-  }
-
-  function applyDeepLink() {
-    var params = new URLSearchParams(window.location.search);
-    var hashHandle = handleFromHash();
-    var productParam = (params.get('product') || '').trim();
-    var qParam = (params.get('q') || '').trim();
-    var exact = hashHandle || productParam;
-    var first;
-    if (exact) {
-      input.value = exact;
-      first = apply(exact.toLowerCase());
-      if (first) {
-        first.setAttribute('tabindex', '-1');
-        first.scrollIntoView({ block: 'start' });
-        try { first.focus({ preventScroll: true }); } catch (err) { first.focus(); }
-      }
-      return;
-    }
-    if (qParam) {
-      input.value = qParam;
-      first = apply();
-      if (first) {
-        first.scrollIntoView({ block: 'start' });
-      }
-      return;
-    }
-    apply();
-  }
-
-  input.addEventListener('input', function () { apply(); });
-  if (clear) {
-    clear.addEventListener('click', function () { input.value = ''; apply(); input.focus(); });
-  }
-  input.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape') { input.value = ''; apply(); }
-  });
-  document.addEventListener('keydown', function (e) {
-    if (e.key !== '/' || document.activeElement === input) { return; }
-    var tag = (document.activeElement && document.activeElement.tagName) || '';
-    if (tag !== 'INPUT' && tag !== 'TEXTAREA' && tag !== 'SELECT') {
-      e.preventDefault();
-      input.focus();
-    }
-  });
-  window.addEventListener('hashchange', applyDeepLink);
-
-  applyDeepLink();
+  }, { rootMargin: '-18% 0px -70% 0px', threshold: 0.01 });
+  for (var o = 0; o < items.length; o++) { io.observe(items[o]); }
 })();
 </script>
 
@@ -857,8 +1061,46 @@
       "type": "richtext",
       "id": "subtitle",
       "label": "Subtitle",
-      "default": "<p>Look up dose, timing, food, and cycling. Search for the product you have, then use the four rules if you are starting a new protocol.</p>"
+      "default": "<p>Look up dose, timing, food, and any cycling note stored on the product. Search first if you already know the name.</p>"
     },
+    { "type": "header", "content": "Orientation" },
+    { "type": "text", "id": "answers_text", "label": "This page answers", "default": "Dose, timing, food, and any cycling note already stored on a listed product." },
+    { "type": "text", "id": "does_not_text", "label": "It does not", "default": "Give a personal protocol, medical advice, or a cycling schedule for every compound." },
+    { "type": "text", "id": "orientation_note", "label": "Educational note", "default": "Educational reference only. It is not personalized medical advice." },
+    { "type": "header", "content": "Pathways" },
+    { "type": "text", "id": "pathways_heading", "label": "Pathways heading", "default": "Choose how you want to start" },
+    { "type": "text", "id": "p1_title", "label": "Pathway 1 title", "default": "I know the product" },
+    { "type": "text", "id": "p1_for", "label": "Pathway 1 for", "default": "You already have a name, SKU, or bottle." },
+    { "type": "text", "id": "p1_answers", "label": "Pathway 1 question", "default": "What dose, timing, and food notes are listed?" },
+    { "type": "text", "id": "p1_learn", "label": "Pathway 1 you will find", "default": "The matching entry on this page, when a dose or timing note exists." },
+    { "type": "text", "id": "p1_leads", "label": "Pathway 1 leads to", "default": "The product finder above." },
+    { "type": "text", "id": "p1_limit", "label": "Pathway 1 limitation", "default": "Only products with a stored dose or timing note appear." },
+    { "type": "text", "id": "p1_href", "label": "Pathway 1 URL", "default": "#dosing-by-product" },
+    { "type": "text", "id": "p2_title", "label": "Pathway 2 title", "default": "I am starting a protocol" },
+    { "type": "text", "id": "p2_for", "label": "Pathway 2 for", "default": "You have not settled a routine yet." },
+    { "type": "text", "id": "p2_answers", "label": "Pathway 2 question", "default": "What rules apply on any on-day?" },
+    { "type": "text", "id": "p2_learn", "label": "Pathway 2 you will find", "default": "The four general rules already on this page." },
+    { "type": "text", "id": "p2_leads", "label": "Pathway 2 leads to", "default": "Start here: four rules." },
+    { "type": "text", "id": "p2_limit", "label": "Pathway 2 limitation", "default": "These rules are not a personal plan." },
+    { "type": "text", "id": "p2_href", "label": "Pathway 2 URL", "default": "#principles" },
+    { "type": "text", "id": "p3_title", "label": "Pathway 3 title", "default": "Does this need off-days?" },
+    { "type": "text", "id": "p3_for", "label": "Pathway 3 for", "default": "You want to know if a schedule is listed." },
+    { "type": "text", "id": "p3_answers", "label": "Pathway 3 question", "default": "Is a cycling note stored, and where is the schedule guide?" },
+    { "type": "text", "id": "p3_learn", "label": "Pathway 3 you will find", "default": "Cycling notes on cards that have them, then the Cycling Guide for tiers." },
+    { "type": "text", "id": "p3_leads", "label": "Pathway 3 leads to", "default": "The Cycling Guide." },
+    { "type": "text", "id": "p3_limit", "label": "Pathway 3 limitation", "default": "Not every product needs cycling. A missing note is not a schedule." },
+    { "type": "text", "id": "p3_href", "label": "Pathway 3 URL", "default": "/pages/cycling-guide" },
+    { "type": "text", "id": "p4_title", "label": "Pathway 4 title", "default": "I missed a planned dose" },
+    { "type": "text", "id": "p4_for", "label": "Pathway 4 for", "default": "You skipped an on-day or are unsure what to do next." },
+    { "type": "text", "id": "p4_answers", "label": "Pathway 4 question", "default": "Should I take it now, skip, or avoid doubling?" },
+    { "type": "text", "id": "p4_learn", "label": "Pathway 4 you will find", "default": "The existing miss-dose FAQ on this page." },
+    { "type": "text", "id": "p4_leads", "label": "Pathway 4 leads to", "default": "Frequently asked questions." },
+    { "type": "text", "id": "p4_limit", "label": "Pathway 4 limitation", "default": "Strict-cycle compounds should not be doubled up." },
+    { "type": "text", "id": "p4_href", "label": "Pathway 4 URL", "default": "#faq" },
+    { "type": "header", "content": "Related guide" },
+    { "type": "text", "id": "related_heading", "label": "Related heading", "default": "Need off-day or break schedules?" },
+    { "type": "text", "id": "related_body", "label": "Related body", "default": "Dose is how much on an on-day. The Cycling Guide covers which days are on-days for compounds listed there." },
+    { "type": "text", "id": "related_cta", "label": "Related CTA", "default": "See cycling guidance" },
     { "type": "text", "id": "author", "label": "Author", "default": "Nootropix Research" },
     { "type": "text", "id": "date_published", "label": "Published date (YYYY-MM-DD)", "default": "2026-01-01" },
     { "type": "text", "id": "read_time", "label": "Read time", "default": "Product lookup" },

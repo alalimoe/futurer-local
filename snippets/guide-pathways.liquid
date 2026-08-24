@@ -1,0 +1,82 @@
+{% doc %}
+  Featured guidance pathways. Hide a card by leaving its title blank.
+  @param {string} heading - Section heading
+  @param {string} [p1_title]
+  @param {string} [p1_for]
+  @param {string} [p1_answers]
+  @param {string} [p1_learn]
+  @param {string} [p1_leads]
+  @param {string} [p1_limit]
+  @param {string} [p1_href]
+  @param {string} [p2_title]
+  @param {string} [p2_for]
+  @param {string} [p2_answers]
+  @param {string} [p2_learn]
+  @param {string} [p2_leads]
+  @param {string} [p2_limit]
+  @param {string} [p2_href]
+  @param {string} [p3_title]
+  @param {string} [p3_for]
+  @param {string} [p3_answers]
+  @param {string} [p3_learn]
+  @param {string} [p3_leads]
+  @param {string} [p3_limit]
+  @param {string} [p3_href]
+  @param {string} [p4_title]
+  @param {string} [p4_for]
+  @param {string} [p4_answers]
+  @param {string} [p4_learn]
+  @param {string} [p4_leads]
+  @param {string} [p4_limit]
+  @param {string} [p4_href]
+  @param {string} [heading_id] - Unique heading id
+  @example
+  {% render 'guide-pathways', heading: 'Common starting points', p1_title: 'Find a product', p1_href: '#dosing-by-product' %}
+{% enddoc %}
+
+{%- liquid
+  if heading_id == blank
+    assign heading_id = 'guide-paths-heading'
+  endif
+-%}
+{%- if p1_title != blank or p2_title != blank or p3_title != blank or p4_title != blank -%}
+  <section class="guide-paths" aria-labelledby="{{ heading_id }}">
+    {%- if heading != blank -%}
+      <h2 class="guide-paths__h2" id="{{ heading_id }}">{{ heading }}</h2>
+    {%- endif -%}
+    <ul class="guide-paths__list">
+      {%- for i in (1..4) -%}
+        {%- case i -%}
+          {%- when 1 -%}
+            {%- assign t = p1_title -%}{%- assign f = p1_for -%}{%- assign a = p1_answers -%}{%- assign lrn = p1_learn -%}{%- assign ld = p1_leads -%}{%- assign lim = p1_limit -%}{%- assign href = p1_href -%}
+          {%- when 2 -%}
+            {%- assign t = p2_title -%}{%- assign f = p2_for -%}{%- assign a = p2_answers -%}{%- assign lrn = p2_learn -%}{%- assign ld = p2_leads -%}{%- assign lim = p2_limit -%}{%- assign href = p2_href -%}
+          {%- when 3 -%}
+            {%- assign t = p3_title -%}{%- assign f = p3_for -%}{%- assign a = p3_answers -%}{%- assign lrn = p3_learn -%}{%- assign ld = p3_leads -%}{%- assign lim = p3_limit -%}{%- assign href = p3_href -%}
+          {%- when 4 -%}
+            {%- assign t = p4_title -%}{%- assign f = p4_for -%}{%- assign a = p4_answers -%}{%- assign lrn = p4_learn -%}{%- assign ld = p4_leads -%}{%- assign lim = p4_limit -%}{%- assign href = p4_href -%}
+        {%- endcase -%}
+        {%- if t != blank -%}
+          <li class="guide-path">
+            {%- if href != blank -%}
+              <a class="guide-path__link" href="{{ href }}">
+            {%- else -%}
+              <div class="guide-path__link">
+            {%- endif -%}
+              <h3 class="guide-path__title">{{ t }}</h3>
+              {%- if f != blank -%}<p class="guide-path__meta"><span class="guide-path__k">For</span> {{ f }}</p>{%- endif -%}
+              {%- if a != blank -%}<p class="guide-path__meta"><span class="guide-path__k">Question</span> {{ a }}</p>{%- endif -%}
+              {%- if lrn != blank -%}<p class="guide-path__meta"><span class="guide-path__k">You will find</span> {{ lrn }}</p>{%- endif -%}
+              {%- if ld != blank -%}<p class="guide-path__meta"><span class="guide-path__k">Leads to</span> {{ ld }}</p>{%- endif -%}
+              {%- if lim != blank -%}<p class="guide-path__limit">{{ lim }}</p>{%- endif -%}
+            {%- if href != blank -%}
+              </a>
+            {%- else -%}
+              </div>
+            {%- endif -%}
+          </li>
+        {%- endif -%}
+      {%- endfor -%}
+    </ul>
+  </section>
+{%- endif -%}

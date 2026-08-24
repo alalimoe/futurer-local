@@ -1,13 +1,43 @@
-{% comment %}
-  Cycling Guide — single long-form reference section
-  TOC scroll-spy: assets/cycling-guide.js
-{% endcomment %}
-
 {%- liquid
   assign cg_id = section.id
+  assign cg_paths_id = 'guide-paths-' | append: cg_id
+  assign cg_related_id = 'guide-related-' | append: cg_id
+  assign cg_finder_id = 'cg-search-' | append: cg_id
+  assign cg_coa_page = pages['quality-coa-library']
+  if cg_coa_page == empty
+    assign cg_coa_page = pages['coa-library']
+  endif
+  if cg_coa_page != empty
+    assign cg_coa_href = cg_coa_page.url
+  else
+    assign cg_coa_href = '/pages/quality-coa-library'
+  endif
+  assign cg_contact_page = pages['contact']
+  if cg_contact_page != empty
+    assign cg_contact_href = cg_contact_page.url
+  else
+    assign cg_contact_href = '/pages/contact'
+  endif
 -%}
-
-<script src="{{ 'cycling-guide.js' | asset_url }}" defer></script>
+{%- capture cg_t1_html -%}
+  {%- for block in section.blocks -%}
+    {%- if block.type == 'tier1_row' -%}{{ block.settings.compound }} {%- endif -%}
+  {%- endfor -%}
+{%- endcapture -%}
+{%- capture cg_t2_html -%}
+  {%- for block in section.blocks -%}
+    {%- if block.type == 'tier2_row' -%}{{ block.settings.compound }} {%- endif -%}
+  {%- endfor -%}
+{%- endcapture -%}
+{%- capture cg_t3_html -%}{{ section.settings.tier3_list }}{%- endcapture -%}
+{%- capture cg_play_html -%}
+  {%- for block in section.blocks -%}
+    {%- if block.type == 'playbook_card' -%}{{ block.settings.title }} {{ block.settings.body }} {%- endif -%}
+  {%- endfor -%}
+{%- endcapture -%}
+{%- capture cg_t1_keys -%}{% render 'guide-cycle-keys', html: cg_t1_html %}{%- endcapture -%}
+{%- capture cg_t2_keys -%}{% render 'guide-cycle-keys', html: cg_t2_html %}{%- endcapture -%}
+{%- capture cg_t3_keys -%}{% render 'guide-cycle-keys', html: cg_t3_html %}{%- endcapture -%}
 
 {%- style -%}
   .xo-section--{{ cg_id }} {
@@ -71,7 +101,7 @@
 
   /* Hero */
   .xo-section--{{ cg_id }} .cg-hero {
-    padding: clamp(32px, 6vw, 72px) 0 clamp(28px, 5vw, 48px);
+    padding: clamp(8px, 2vw, 16px) 0 clamp(12px, 2vw, 20px);
   }
   .xo-section--{{ cg_id }} .cg-hero__eyebrow {
     display: inline-block;
@@ -80,9 +110,9 @@
   }
   .xo-section--{{ cg_id }} .cg-hero__h1 {
     font-family: var(--font-heading-family, sans-serif);
-    font-size: clamp(2.2rem, 4.5vw, 3.4rem);
-    font-weight: 600; letter-spacing: -0.03em; line-height: 1.1;
-    margin: 0 0 16px;
+    font-size: clamp(1.75rem, 4vw, 2.5rem);
+    font-weight: 600; letter-spacing: -0.03em; line-height: 1.15;
+    margin: 0 0 12px;
   }
   .xo-section--{{ cg_id }} .cg-hero__sub {
     font-size: clamp(0.95rem, 1.2vw, 1.1rem); line-height: 1.7;
@@ -274,6 +304,7 @@
   .xo-section--{{ cg_id }} .cg-table th,
   .xo-section--{{ cg_id }} .cg-table td {
     padding: 14px 16px; text-align: left; vertical-align: top;
+    overflow-wrap: break-word;
     border-bottom: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 8%, transparent);
   }
   .xo-section--{{ cg_id }} .cg-table th {
@@ -301,8 +332,10 @@
   .xo-section--{{ cg_id }} .cg-table-card__value {
     font-size: calc(var(--font-body-scale, 1) * 1.4rem);
     line-height: 1.55;
+    overflow-wrap: break-word;
     color: color-mix(in srgb, rgba(var(--color-foreground)) 78%, transparent);
   }
+  .xo-section--{{ cg_id }} .cg-zone[hidden] { display: none !important; }
   @media (max-width: 639px) {
     .xo-section--{{ cg_id }} .cg-table-wrap { display: none; }
     .xo-section--{{ cg_id }} .cg-table-cards { display: flex; flex-direction: column; }
@@ -608,15 +641,18 @@
   }
 {%- endstyle -%}
 
-<section {% render 'section-attr' %} data-cycling-guide>
+<section {% render 'section-attr' %} data-cycling-guide data-guide-page="cycling">
+  {% render 'guide-system' %}
   <xo-container>
-    <div class="cg__wrap">
+    <div class="cg__wrap" data-guide-root data-guide-search-url="{{ routes.search_url }}" data-guide-noun="sections">
 
       {% render 'reference-guide-breadcrumbs',
         parent_label: section.settings.breadcrumb_parent_label,
         parent_url: section.settings.breadcrumb_parent_url,
         current_label: section.settings.heading
       %}
+
+      {% render 'guide-switcher', current: 'cycling' %}
 
       {%- if section.settings.safety_text != blank -%}
         <div class="cg-safety rte">{{ section.settings.safety_text }}</div>
@@ -667,6 +703,76 @@
         {%- endif -%}
       </header>
 
+      {% render 'guide-orientation',
+        answers: section.settings.answers_text,
+        does_not: section.settings.does_not_text,
+        note: section.settings.orientation_note
+      %}
+
+      {% render 'guide-finder',
+        input_id: cg_finder_id,
+        label: 'Find a compound in this guide',
+        placeholder: 'Search names in this guide',
+        controls: 'why-cycling'
+      %}
+      <div class="guide-rail" data-guide-rail role="toolbar" aria-label="Browse cycling sections">
+        <button type="button" class="guide-rail__btn" data-guide-cat="" aria-pressed="true">
+          <svg class="guide-rail__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
+          All sections
+        </button>
+        <button type="button" class="guide-rail__btn" data-guide-cat="tier-1" aria-pressed="false">
+          <svg class="guide-rail__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+          Strict-cycle
+        </button>
+        <button type="button" class="guide-rail__btn" data-guide-cat="tier-2" aria-pressed="false">
+          <svg class="guide-rail__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 12h16M12 4v16"/></svg>
+          Periodic-break
+        </button>
+        <button type="button" class="guide-rail__btn" data-guide-cat="tier-3" aria-pressed="false">
+          <svg class="guide-rail__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M5 12h14"/></svg>
+          Daily-friendly
+        </button>
+        <button type="button" class="guide-rail__btn" data-guide-cat="track" aria-pressed="false">
+          <svg class="guide-rail__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="6" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="18" cy="12" r="2"/></svg>
+          How to track
+        </button>
+        <button type="button" class="guide-rail__clear" data-guide-rail-clear hidden>Clear filter</button>
+      </div>
+      <p class="guide-empty" data-guide-empty hidden>No section in this guide matches that name. Try a compound listed in the tables below, or open the Dosing Guide.</p>
+
+      {% render 'guide-pathways',
+        heading: section.settings.pathways_heading,
+        heading_id: cg_paths_id,
+        p1_title: section.settings.p1_title,
+        p1_for: section.settings.p1_for,
+        p1_answers: section.settings.p1_answers,
+        p1_learn: section.settings.p1_learn,
+        p1_leads: section.settings.p1_leads,
+        p1_limit: section.settings.p1_limit,
+        p1_href: section.settings.p1_href,
+        p2_title: section.settings.p2_title,
+        p2_for: section.settings.p2_for,
+        p2_answers: section.settings.p2_answers,
+        p2_learn: section.settings.p2_learn,
+        p2_leads: section.settings.p2_leads,
+        p2_limit: section.settings.p2_limit,
+        p2_href: section.settings.p2_href,
+        p3_title: section.settings.p3_title,
+        p3_for: section.settings.p3_for,
+        p3_answers: section.settings.p3_answers,
+        p3_learn: section.settings.p3_learn,
+        p3_leads: section.settings.p3_leads,
+        p3_limit: section.settings.p3_limit,
+        p3_href: section.settings.p3_href,
+        p4_title: section.settings.p4_title,
+        p4_for: section.settings.p4_for,
+        p4_answers: section.settings.p4_answers,
+        p4_learn: section.settings.p4_learn,
+        p4_leads: section.settings.p4_leads,
+        p4_limit: section.settings.p4_limit,
+        p4_href: section.settings.p4_href
+      %}
+
       <div class="cg-toc cg-toc--mobile" aria-label="On this page">
         <nav class="cg-toc__nav">
           {%- for block in section.blocks -%}
@@ -692,7 +798,7 @@
         <div class="cg-main">
 
           {%- comment -%} Why cycling {%- endcomment -%}
-          <div class="cg-zone" id="why-cycling">
+          <div class="cg-zone" id="why-cycling" data-guide-static>
             <h2 class="cg-zone__h2">Why cycling exists</h2>
             {%- if section.settings.why_cycling != blank -%}
               <div class="cg-prose rte">{{ section.settings.why_cycling }}</div>
@@ -700,7 +806,7 @@
           </div>
 
           {%- comment -%} Universal rules {%- endcomment -%}
-          <div class="cg-zone" id="universal-rules">
+          <div class="cg-zone" id="universal-rules" data-guide-static>
             <h2 class="cg-zone__h2">The universal rules</h2>
             <div class="cg-rules">
               {%- assign rule_num = 0 -%}
@@ -724,7 +830,8 @@
           </div>
 
           {%- comment -%} Tier 1 {%- endcomment -%}
-          <div class="cg-zone" id="tier-1">
+          <div class="cg-zone" id="tier-1" data-guide-item data-guide-cats="tier-1" data-guide-name="{{ cg_t1_html | strip_html | strip | escape }}" data-cycle-keys="{{ cg_t1_keys | strip | escape }}">
+            {% render 'guide-cycle-anchors', html: cg_t1_html %}
             <h2 class="cg-zone__h2">Tier 1: Strict-cycle compounds</h2>
             {%- if section.settings.tier1_intro != blank -%}
               <div class="cg-prose rte">{{ section.settings.tier1_intro }}</div>
@@ -744,7 +851,10 @@
                     {%- for block in section.blocks -%}
                       {%- if block.type == 'tier1_row' -%}
                         <tr {{ block.shopify_attributes }}>
-                          <td>{% if block.settings.compound != blank %}<div class="rte">{{ block.settings.compound }}</div>{% endif %}</td>
+                          <td>
+                            {% if block.settings.compound != blank %}<div class="rte">{{ block.settings.compound }}</div>{% endif %}
+                            {% render 'guide-dosing-exits', html: block.settings.compound %}
+                          </td>
                           <td>{{ block.settings.on_days }}</td>
                           <td>{{ block.settings.break_pattern }}</td>
                           <td>{{ block.settings.off_day_pairing }}</td>
@@ -766,6 +876,7 @@
                       <div class="cg-table-card__value">{{ block.settings.break_pattern }}</div>
                       <div class="cg-table-card__label">Off-day pairing</div>
                       <div class="cg-table-card__value">{{ block.settings.off_day_pairing }}</div>
+                      {% render 'guide-dosing-exits', html: block.settings.compound %}
                     </div>
                   {%- endif -%}
                 {%- endfor -%}
@@ -791,7 +902,8 @@
           </div>
 
           {%- comment -%} Tier 2 {%- endcomment -%}
-          <div class="cg-zone" id="tier-2">
+          <div class="cg-zone" id="tier-2" data-guide-item data-guide-cats="tier-2" data-guide-name="{{ cg_t2_html | strip_html | strip | escape }}" data-cycle-keys="{{ cg_t2_keys | strip | escape }}">
+            {% render 'guide-cycle-anchors', html: cg_t2_html %}
             <h2 class="cg-zone__h2">Tier 2: Periodic-break compounds</h2>
             {%- if section.settings.tier2_intro != blank -%}
               <div class="cg-prose rte">{{ section.settings.tier2_intro }}</div>
@@ -809,7 +921,10 @@
                     {%- for block in section.blocks -%}
                       {%- if block.type == 'tier2_row' -%}
                         <tr {{ block.shopify_attributes }}>
-                          <td>{{ block.settings.compound }}</td>
+                          <td>
+                            {{ block.settings.compound }}
+                            {% render 'guide-dosing-exits', html: block.settings.compound %}
+                          </td>
                           <td>{{ block.settings.pattern }}</td>
                         </tr>
                       {%- endif -%}
@@ -825,6 +940,7 @@
                       <div class="cg-table-card__value">{{ block.settings.compound }}</div>
                       <div class="cg-table-card__label">Suggested pattern</div>
                       <div class="cg-table-card__value">{{ block.settings.pattern }}</div>
+                      {% render 'guide-dosing-exits', html: block.settings.compound %}
                     </div>
                   {%- endif -%}
                 {%- endfor -%}
@@ -833,7 +949,8 @@
           </div>
 
           {%- comment -%} Tier 3 {%- endcomment -%}
-          <div class="cg-zone" id="tier-3">
+          <div class="cg-zone" id="tier-3" data-guide-item data-guide-cats="tier-3" data-guide-name="{{ cg_t3_html | strip_html | strip | escape }}" data-cycle-keys="{{ cg_t3_keys | strip | escape }}">
+            {% render 'guide-cycle-anchors', html: cg_t3_html %}
             <h2 class="cg-zone__h2">Tier 3: Daily-friendly compounds</h2>
             {%- if section.settings.tier3_intro != blank -%}
               <div class="cg-prose rte">{{ section.settings.tier3_intro }}</div>
@@ -855,7 +972,7 @@
           </div>
 
           {%- comment -%} Dot grid {%- endcomment -%}
-          <div class="cg-zone" id="dot-grid">
+          <div class="cg-zone" id="dot-grid" data-guide-item data-guide-cats="track" data-guide-name="dot-grid tracker weekly calendar">
             <h2 class="cg-zone__h2">The weekly dot-grid method</h2>
             {%- if section.settings.dot_grid_intro != blank -%}
               <div class="cg-prose rte">{{ section.settings.dot_grid_intro }}</div>
@@ -883,7 +1000,7 @@
           </div>
 
           {%- comment -%} Off-day playbook {%- endcomment -%}
-          <div class="cg-zone" id="off-day-playbook">
+          <div class="cg-zone" id="off-day-playbook" data-guide-item data-guide-cats="tier-3 track" data-guide-name="{{ cg_play_html | strip_html | strip | escape }}">
             <h2 class="cg-zone__h2">The off-day playbook</h2>
             {%- if section.settings.playbook_intro != blank -%}
               <div class="cg-prose rte">{{ section.settings.playbook_intro }}</div>
@@ -913,7 +1030,7 @@
           </div>
 
           {%- comment -%} Bottle math {%- endcomment -%}
-          <div class="cg-zone" id="bottle-math">
+          <div class="cg-zone" id="bottle-math" data-guide-item data-guide-cats="track" data-guide-name="bottle math count reorder">
             <h2 class="cg-zone__h2">Bottle math: what your count says about your cycle</h2>
             {%- if section.settings.bottle_math != blank -%}
               <div class="cg-prose rte">{{ section.settings.bottle_math }}</div>
@@ -921,7 +1038,7 @@
           </div>
 
           {%- comment -%} FAQ {%- endcomment -%}
-          <div class="cg-zone" id="faq">
+          <div class="cg-zone" id="faq" data-guide-static>
             <h2 class="cg-zone__h2">Frequently asked questions</h2>
             <div class="cg-faq">
               {%- for block in section.blocks -%}
@@ -936,8 +1053,26 @@
           </div>
 
           {%- if section.settings.cross_link != blank -%}
-            <div class="cg-crosslink rte">{{ section.settings.cross_link }}</div>
+            <div class="cg-crosslink rte" data-guide-static>{{ section.settings.cross_link }}</div>
           {%- endif -%}
+
+          {%- liquid
+            assign cg_dosing_page = pages['dosing-guide']
+            if cg_dosing_page != empty
+              assign cg_dosing_href = cg_dosing_page.url
+            else
+              assign cg_dosing_href = '/pages/dosing-guide'
+            endif
+          -%}
+          {% render 'guide-related',
+            heading: section.settings.related_heading,
+            heading_id: cg_related_id,
+            body: section.settings.related_body,
+            href: cg_dosing_href,
+            cta: section.settings.related_cta,
+            coa_href: cg_coa_href,
+            contact_href: cg_contact_href
+          %}
 
           {%- if section.settings.disclaimer != blank -%}
             <div class="cg-disclaimer">
@@ -967,6 +1102,44 @@
       "label": "Safety callout",
       "default": "<p><strong>Safety first:</strong> nootropics are not for everyone. Not for use by anyone under 18, or during pregnancy or nursing. If you take medication or have a health condition, talk to a qualified clinician before starting anything on this page. This guide covers scheduling, not medical advice.</p>"
     },
+    { "type": "header", "content": "Orientation" },
+    { "type": "text", "id": "answers_text", "label": "This page answers", "default": "Which listed compounds have off-days, periodic breaks, or daily use, and how to track a planned schedule." },
+    { "type": "text", "id": "does_not_text", "label": "It does not", "default": "Give one cycle for every product, cover peptides, or replace clinician advice for tapering." },
+    { "type": "text", "id": "orientation_note", "label": "Educational note", "default": "Educational scheduling reference only. It is not personalized medical advice." },
+    { "type": "header", "content": "Pathways" },
+    { "type": "text", "id": "pathways_heading", "label": "Pathways heading", "default": "Choose how you want to start" },
+    { "type": "text", "id": "p1_title", "label": "Pathway 1 title", "default": "Find a compound's tier" },
+    { "type": "text", "id": "p1_for", "label": "Pathway 1 for", "default": "You already know the name." },
+    { "type": "text", "id": "p1_answers", "label": "Pathway 1 question", "default": "Is it listed as strict-cycle, periodic-break, or daily-friendly?" },
+    { "type": "text", "id": "p1_learn", "label": "Pathway 1 you will find", "default": "The matching table in this guide, when the name appears." },
+    { "type": "text", "id": "p1_leads", "label": "Pathway 1 leads to", "default": "The finder above." },
+    { "type": "text", "id": "p1_limit", "label": "Pathway 1 limitation", "default": "Names not listed here have no cycling schedule on this page." },
+    { "type": "text", "id": "p1_href", "label": "Pathway 1 URL", "default": "#tier-1" },
+    { "type": "text", "id": "p2_title", "label": "Pathway 2 title", "default": "Why off-days exist" },
+    { "type": "text", "id": "p2_for", "label": "Pathway 2 for", "default": "You want the idea before the tables." },
+    { "type": "text", "id": "p2_answers", "label": "Pathway 2 question", "default": "What problem cycling is meant to address in this guide?" },
+    { "type": "text", "id": "p2_learn", "label": "Pathway 2 you will find", "default": "The existing explanation and universal rules." },
+    { "type": "text", "id": "p2_leads", "label": "Pathway 2 leads to", "default": "Why cycling exists." },
+    { "type": "text", "id": "p2_limit", "label": "Pathway 2 limitation", "default": "Not every compound needs cycling." },
+    { "type": "text", "id": "p2_href", "label": "Pathway 2 URL", "default": "#why-cycling" },
+    { "type": "text", "id": "p3_title", "label": "Pathway 3 title", "default": "How to track a week" },
+    { "type": "text", "id": "p3_for", "label": "Pathway 3 for", "default": "You want a simple on-day / off-day record." },
+    { "type": "text", "id": "p3_answers", "label": "Pathway 3 question", "default": "How do I keep the schedule honest?" },
+    { "type": "text", "id": "p3_learn", "label": "Pathway 3 you will find", "default": "The weekly dot-grid method already on this page." },
+    { "type": "text", "id": "p3_leads", "label": "Pathway 3 leads to", "default": "The weekly dot-grid method." },
+    { "type": "text", "id": "p3_limit", "label": "Pathway 3 limitation", "default": "It is a tracker, not a medical taper." },
+    { "type": "text", "id": "p3_href", "label": "Pathway 3 URL", "default": "#dot-grid" },
+    { "type": "text", "id": "p4_title", "label": "Pathway 4 title", "default": "Off-day options already listed" },
+    { "type": "text", "id": "p4_for", "label": "Pathway 4 for", "default": "You want a daily-friendly option on a planned off-day." },
+    { "type": "text", "id": "p4_answers", "label": "Pathway 4 question", "default": "What does this guide suggest instead of an empty off-day?" },
+    { "type": "text", "id": "p4_learn", "label": "Pathway 4 you will find", "default": "The off-day playbook cards already on this page." },
+    { "type": "text", "id": "p4_leads", "label": "Pathway 4 leads to", "default": "The off-day playbook." },
+    { "type": "text", "id": "p4_limit", "label": "Pathway 4 limitation", "default": "These options do not replicate a strict-cycle compound." },
+    { "type": "text", "id": "p4_href", "label": "Pathway 4 URL", "default": "#off-day-playbook" },
+    { "type": "header", "content": "Related guide" },
+    { "type": "text", "id": "related_heading", "label": "Related heading", "default": "Need dose, timing, or food notes?" },
+    { "type": "text", "id": "related_body", "label": "Related body", "default": "Cycling sets which days are on-days. The Dosing Guide lists dose and timing for products that have those notes stored." },
+    { "type": "text", "id": "related_cta", "label": "Related CTA", "default": "See dosing guidance" },
     { "type": "header", "content": "Hero" },
     { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Reference Guide" },
     { "type": "text", "id": "heading", "label": "Page heading (H1)", "default": "Cycling Guide" },

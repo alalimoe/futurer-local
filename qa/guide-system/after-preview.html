@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Guide system after preview (local chrome)</title>
+  <style>
+    :root {
+      --color-accent: 251, 191, 36;
+      --color-foreground: 30, 30, 30;
+      --color-background: 255, 255, 255;
+      --color-background-2: 246, 246, 246;
+      --color-error: 218, 30, 40;
+      --button-radius: 10rem;
+      --general-radius-1: 1rem;
+      --font-heading-family: Inter, system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, sans-serif;
+      color: rgba(var(--color-foreground));
+      background: rgba(var(--color-background));
+    }
+    .page { max-width: 1120px; margin: 0 auto; padding: 16px 22px 48px; }
+    .dg-hero__h1, .cg-hero__h1 {
+      font-size: clamp(1.75rem, 4vw, 2.5rem);
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      margin: 0 0 12px;
+    }
+    .dg-hero__eyebrow, .cg-hero__eyebrow {
+      display: inline-block;
+      font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+      color: rgba(var(--color-accent)); margin-bottom: 12px;
+    }
+    .dg-hero__sub, .cg-hero__sub {
+      font-size: 1rem; line-height: 1.6;
+      color: color-mix(in srgb, rgba(var(--color-foreground)) 60%, transparent);
+      margin: 0 0 16px; max-width: 65ch;
+    }
+    .dg-product {
+      border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 8%, transparent);
+      border-radius: 1rem; padding: 20px; margin: 12px 0;
+    }
+    .dg-product__h2 { margin: 0 0 8px; overflow-wrap: break-word; }
+    .dg-product__links { display: flex; flex-wrap: wrap; gap: 8px; }
+    .dg-product__link { min-height: 44px; display: inline-flex; align-items: center; font-weight: 600; color: rgba(var(--color-accent)); text-decoration: none; }
+    .split { border-top: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent); margin: 48px 0 24px; padding-top: 24px; }
+  </style>
+  <link rel="stylesheet" href="./guide-system.css">
+</head>
+<body>
+  <main class="page" data-guide-root data-guide-noun="products" id="dosing-preview">
+    <nav class="guide-switcher" aria-label="Usage guides">
+      <a class="guide-switcher__link is-active" href="#dosing-preview" aria-current="page">Dosing Guide</a>
+      <a class="guide-switcher__link" href="#cycling-preview">Cycling Guide</a>
+    </nav>
+    <header>
+      <span class="dg-hero__eyebrow">Reference Guide</span>
+      <h1 class="dg-hero__h1">Dosing Guide</h1>
+      <p class="dg-hero__sub">Look up dose, timing, food, and any cycling note stored on the product. Search first if you already know the name.</p>
+    </header>
+    <div class="guide-orient">
+      <p class="guide-orient__row"><span class="guide-orient__label">This page answers</span> <span class="guide-orient__text">Dose, timing, food, and any cycling note already stored on a listed product.</span></p>
+      <p class="guide-orient__row"><span class="guide-orient__label">It does not</span> <span class="guide-orient__text">Give a personal protocol, medical advice, or a cycling schedule for every compound.</span></p>
+      <p class="guide-orient__note">Educational reference only. It is not personalized medical advice.</p>
+    </div>
+    <div class="guide-finder">
+      <label class="guide-finder__label" for="dg-find">Find your product</label>
+      <div class="guide-finder__field">
+        <input class="guide-finder__input" id="dg-find" type="search" data-guide-search-input placeholder="Search products by name…">
+        <button type="button" class="guide-finder__clear" data-guide-search-clear hidden aria-label="Clear search">×</button>
+      </div>
+      <p class="guide-finder__count" aria-live="polite" data-guide-search-count></p>
+    </div>
+    <div class="guide-rail" data-guide-rail role="toolbar" aria-label="Filter listed products">
+      <button type="button" class="guide-rail__btn" data-guide-cat="" aria-pressed="true">All listed</button>
+      <button type="button" class="guide-rail__btn" data-guide-cat="capsules" aria-pressed="false">Capsules</button>
+      <button type="button" class="guide-rail__btn" data-guide-cat="powder" aria-pressed="false">Powder</button>
+      <button type="button" class="guide-rail__btn" data-guide-cat="has-cycle" aria-pressed="false">Has a cycling note</button>
+      <button type="button" class="guide-rail__clear" data-guide-rail-clear hidden>Clear filter</button>
+    </div>
+    <section class="guide-paths">
+      <h2 class="guide-paths__h2" id="guide-paths-dosing">Choose how you want to start</h2>
+      <ul class="guide-paths__list">
+        <li class="guide-path"><a class="guide-path__link" href="#dose-phenibut-500mg-capsules"><h3 class="guide-path__title">I know the product</h3><p class="guide-path__meta"><span class="guide-path__k">For</span> You already have a name, SKU, or bottle.</p><p class="guide-path__limit">Only products with a stored dose or timing note appear.</p></a></li>
+        <li class="guide-path"><a class="guide-path__link" href="#cycling-preview"><h3 class="guide-path__title">Does this need off-days?</h3><p class="guide-path__meta"><span class="guide-path__k">Question</span> Is a cycling note stored, and where is the schedule guide?</p><p class="guide-path__limit">Not every product needs cycling. A missing note is not a schedule.</p></a></li>
+      </ul>
+    </section>
+    <article class="dg-product" id="dose-phenibut-500mg-capsules" data-guide-item data-guide-handle="phenibut-500mg-capsules" data-guide-name="phenibut 500mg capsules" data-guide-cats="all capsules has-cycle">
+      <h2 class="dg-product__h2">Phenibut 500mg Capsules</h2>
+      <div class="dg-product__links">
+        <a class="dg-product__link" href="#cycle-phenibut-500mg-capsules">See cycling guidance</a>
+        <a class="dg-product__link" href="#">View product</a>
+      </div>
+    </article>
+    <article class="dg-product" id="dose-lions-mane-capsules" data-guide-item data-guide-handle="lions-mane-capsules" data-guide-name="lion mane capsules" data-guide-cats="all capsules">
+      <h2 class="dg-product__h2">Lion’s Mane Capsules with an extra-long product title to check wrapping</h2>
+      <p>No cycling note is stored for this product. That does not mean a schedule is required.</p>
+    </article>
+    <p class="guide-empty" data-guide-empty hidden>No products on this page match that name.</p>
+    <aside class="guide-related">
+      <h2 class="guide-related__h2">Need off-day or break schedules?</h2>
+      <p class="guide-related__body">Dose is how much on an on-day. The Cycling Guide covers which days are on-days for compounds listed there.</p>
+      <p class="guide-related__actions">
+        <a class="guide-related__cta" href="#cycling-preview">See cycling guidance</a>
+        <a class="guide-related__text" href="#">View the COA library</a>
+        <a class="guide-related__text" href="#">Contact support</a>
+      </p>
+    </aside>
+  </main>
+
+  <main class="page split" data-guide-root data-guide-noun="sections" id="cycling-preview">
+    <nav class="guide-switcher" aria-label="Usage guides">
+      <a class="guide-switcher__link" href="#dosing-preview">Dosing Guide</a>
+      <a class="guide-switcher__link is-active" href="#cycling-preview" aria-current="page">Cycling Guide</a>
+    </nav>
+    <header>
+      <span class="cg-hero__eyebrow">Reference Guide</span>
+      <h1 class="cg-hero__h1">Cycling Guide</h1>
+      <p class="cg-hero__sub">Know which compounds need off-days, which need periodic breaks, and which are fine daily.</p>
+    </header>
+    <div class="guide-orient">
+      <p class="guide-orient__row"><span class="guide-orient__label">This page answers</span> <span class="guide-orient__text">Which listed compounds have off-days, periodic breaks, or daily use, and how to track a planned schedule.</span></p>
+      <p class="guide-orient__row"><span class="guide-orient__label">It does not</span> <span class="guide-orient__text">Give one cycle for every product, cover peptides, or replace clinician advice for tapering.</span></p>
+      <p class="guide-orient__note">Educational scheduling reference only. It is not personalized medical advice.</p>
+    </div>
+    <div class="guide-finder">
+      <label class="guide-finder__label" for="cg-find">Find a compound in this guide</label>
+      <div class="guide-finder__field">
+        <input class="guide-finder__input" id="cg-find" type="search" data-guide-search-input placeholder="Search names in this guide">
+        <button type="button" class="guide-finder__clear" data-guide-search-clear hidden aria-label="Clear search">×</button>
+      </div>
+      <p class="guide-finder__count" aria-live="polite" data-guide-search-count></p>
+    </div>
+    <div class="guide-rail" data-guide-rail role="toolbar" aria-label="Browse cycling sections">
+      <button type="button" class="guide-rail__btn" data-guide-cat="" aria-pressed="true">All sections</button>
+      <button type="button" class="guide-rail__btn" data-guide-cat="tier-1" aria-pressed="false">Strict-cycle</button>
+      <button type="button" class="guide-rail__btn" data-guide-cat="tier-2" aria-pressed="false">Periodic-break</button>
+      <button type="button" class="guide-rail__btn" data-guide-cat="tier-3" aria-pressed="false">Daily-friendly</button>
+      <button type="button" class="guide-rail__btn" data-guide-cat="track" aria-pressed="false">How to track</button>
+      <button type="button" class="guide-rail__clear" data-guide-rail-clear hidden>Clear filter</button>
+    </div>
+    <div id="tier-1" data-guide-item data-guide-cats="tier-1" data-guide-name="phenibut fladrafinil sulbutiamine" data-cycle-keys="phenibut-500mg-capsules fladrafinil-20mg-capsules sulbutiamine">
+      <span class="guide-anchor" id="cycle-phenibut-500mg-capsules"></span>
+      <h2>Tier 1: Strict-cycle compounds</h2>
+      <p>Phenibut 500mg, Fladrafinil 20mg, Sulbutiamine 200mg</p>
+      <div class="guide-entry-actions"><a href="#dose-phenibut-500mg-capsules">See dosing guidance</a></div>
+    </div>
+    <div id="tier-3" data-guide-item data-guide-cats="tier-3" data-guide-name="theanine lion mane bacopa">
+      <h2>Tier 3: Daily-friendly compounds</h2>
+      <p>L-Theanine, Lion’s Mane, Bacopa Monnieri</p>
+    </div>
+    <p class="guide-empty" data-guide-empty hidden>No section in this guide matches that name.</p>
+  </main>
+  <script src="./guide-system.js"></script>
+</body>
+</html>

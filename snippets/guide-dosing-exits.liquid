@@ -1,0 +1,46 @@
+{% doc %}
+  Dosing Guide exits for a cycling row. Uses product URLs when present; otherwise a Dosing Guide search query.
+  @param {string} html
+  @example
+  {% render 'guide-dosing-exits', html: block.settings.compound %}
+{% enddoc %}
+
+{%- liquid
+  assign dosing_page = pages['dosing-guide']
+  if dosing_page != empty
+    assign dosing_href = dosing_page.url
+  else
+    assign dosing_href = '/pages/dosing-guide'
+  endif
+  assign has_product_url = false
+  if html contains '/products/'
+    assign has_product_url = true
+  endif
+-%}
+<div class="guide-entry-actions">
+  {%- if has_product_url -%}
+    {%- assign ge_parts = html | split: '/products/' -%}
+    {%- assign ge_seen = ',' -%}
+    {%- for ge_part in ge_parts -%}
+      {%- unless forloop.first -%}
+        {%- assign ge_handle = ge_part | split: '"' | first | split: "'" | first | split: '<' | first | split: '?' | first | split: '#' | first | split: '/' | first | split: ' ' | first -%}
+        {%- assign ge_key = ',' | append: ge_handle | append: ',' -%}
+        {%- if ge_handle != blank -%}
+          {%- unless ge_seen contains ge_key -%}
+            <a href="{{ dosing_href }}#dose-{{ ge_handle }}" aria-label="See dosing guidance for {{ ge_handle | replace: '-', ' ' }}">See dosing guidance</a>
+            {%- assign ge_seen = ge_seen | append: ge_handle | append: ',' -%}
+          {%- endunless -%}
+        {%- endif -%}
+      {%- endunless -%}
+    {%- endfor -%}
+  {%- else -%}
+    {%- assign ge_plain = html | strip_html -%}
+    {%- assign ge_names = ge_plain | split: ',' -%}
+    {%- for ge_name in ge_names -%}
+      {%- assign ge_label = ge_name | split: ' and ' | first | strip -%}
+      {%- if ge_label != blank -%}
+        <a href="{{ dosing_href }}?q={{ ge_label | url_encode }}">Look up {{ ge_label }} in the Dosing Guide</a>
+      {%- endif -%}
+    {%- endfor -%}
+  {%- endif -%}
+</div>

@@ -1,0 +1,27 @@
+{% doc %}
+  Space-separated cycle keys from compound HTML or names, for search matching.
+  @param {string} html
+  @example
+  {% render 'guide-cycle-keys', html: block.settings.compound %}
+{% enddoc %}
+{%- if html != blank -%}
+  {%- assign gk_out = '' -%}
+  {%- assign gk_parts = html | split: '/products/' -%}
+  {%- for gk_part in gk_parts -%}
+    {%- unless forloop.first -%}
+      {%- assign gk_handle = gk_part | split: '"' | first | split: "'" | first | split: '<' | first | split: '?' | first | split: '#' | first | split: '/' | first | split: ' ' | first -%}
+      {%- if gk_handle != blank -%}
+        {%- assign gk_out = gk_out | append: ' ' | append: gk_handle -%}
+      {%- endif -%}
+    {%- endunless -%}
+  {%- endfor -%}
+  {%- assign gk_plain = html | strip_html | replace: '&amp;', '&' -%}
+  {%- assign gk_names = gk_plain | split: ',' -%}
+  {%- for gk_name in gk_names -%}
+    {%- assign gk_slug = gk_name | split: ' and ' | first | strip | handleize -%}
+    {%- if gk_slug != blank -%}
+      {%- assign gk_out = gk_out | append: ' ' | append: gk_slug -%}
+    {%- endif -%}
+  {%- endfor -%}
+  {{- gk_out | strip -}}
+{%- endif -%}

@@ -1,0 +1,37 @@
+{% doc %}
+  Related-guide panel plus optional COA and support exits.
+  @param {string} heading
+  @param {string} body
+  @param {string} href
+  @param {string} cta
+  @param {string} [coa_href]
+  @param {string} [contact_href]
+  @param {string} [heading_id] - Unique heading id
+  @example
+  {% render 'guide-related', heading: 'Need off-days?', body: 'Open the Cycling Guide.', href: '/pages/cycling-guide', cta: 'See cycling guidance' %}
+{% enddoc %}
+
+{%- liquid
+  if heading_id == blank
+    assign heading_id = 'guide-related-heading'
+  endif
+-%}
+<aside class="guide-related" aria-labelledby="{{ heading_id }}">
+  {%- if heading != blank -%}
+    <h2 class="guide-related__h2" id="{{ heading_id }}">{{ heading }}</h2>
+  {%- endif -%}
+  {%- if body != blank -%}
+    <p class="guide-related__body">{{ body }}</p>
+  {%- endif -%}
+  <p class="guide-related__actions">
+    {%- if href != blank and cta != blank -%}
+      <a class="guide-related__cta" href="{{ href }}">{{ cta }}</a>
+    {%- endif -%}
+    {%- if coa_href != blank -%}
+      <a class="guide-related__text" href="{{ coa_href }}">View the COA library</a>
+    {%- endif -%}
+    {%- if contact_href != blank -%}
+      <a class="guide-related__text" href="{{ contact_href }}">Contact support</a>
+    {%- endif -%}
+  </p>
+</aside>

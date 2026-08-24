@@ -1,0 +1,22 @@
+{% doc %}
+  One A–Z sidebar row for the Dosing Guide. Pass letter_start true for the first product of each letter.
+  @param {product} product - Store product shown as a dosing card
+  @param {string} [letter_start] - "1" when this is the first product for its initial
+  @example
+  {% render 'dosing-guide-index-item', product: product, letter_start: '1' %}
+{% enddoc %}
+
+{%- liquid
+  assign letter = product.title | strip | slice: 0, 1 | upcase
+-%}
+<li
+  class="dg-index__item{% if letter_start == '1' %} dg-index__item--letter-start{% endif %}"
+  data-dg-index-item
+  data-dg-handle="{{ product.handle | escape }}"
+  data-dg-letter="{{ letter | escape }}"
+>
+  <a class="dg-index__link" href="#dose-{{ product.handle }}">
+    <span class="dg-index__letter" aria-hidden="true">{{ letter }}</span>
+    <span class="dg-index__name">{{ product.title }}</span>
+  </a>
+</li>

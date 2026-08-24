@@ -1,0 +1,35 @@
+{% doc %}
+  Stable cycling anchors from product URLs in HTML and from comma-separated names.
+  @param {string} html - Richtext or plain compound field
+  @example
+  {% render 'guide-cycle-anchors', html: block.settings.compound %}
+{% enddoc %}
+
+{%- if html != blank -%}
+  {%- assign gc_seen = ',' -%}
+  {%- assign gc_parts = html | split: '/products/' -%}
+  {%- for gc_part in gc_parts -%}
+    {%- unless forloop.first -%}
+      {%- assign gc_handle = gc_part | split: '"' | first | split: "'" | first | split: '<' | first | split: '?' | first | split: '#' | first | split: '/' | first | split: ' ' | first -%}
+      {%- assign gc_key = ',' | append: gc_handle | append: ',' -%}
+      {%- if gc_handle != blank -%}
+        {%- unless gc_seen contains gc_key -%}
+          <span class="guide-anchor" id="cycle-{{ gc_handle }}"></span>
+          {%- assign gc_seen = gc_seen | append: gc_handle | append: ',' -%}
+        {%- endunless -%}
+      {%- endif -%}
+    {%- endunless -%}
+  {%- endfor -%}
+  {%- assign gc_plain = html | strip_html | replace: '&amp;', '&' -%}
+  {%- assign gc_names = gc_plain | split: ',' -%}
+  {%- for gc_name in gc_names -%}
+    {%- assign gc_slug = gc_name | split: ' and ' | first | strip | handleize -%}
+    {%- assign gc_key = ',' | append: gc_slug | append: ',' -%}
+    {%- if gc_slug != blank -%}
+      {%- unless gc_seen contains gc_key -%}
+        <span class="guide-anchor" id="cycle-{{ gc_slug }}"></span>
+        {%- assign gc_seen = gc_seen | append: gc_slug | append: ',' -%}
+      {%- endunless -%}
+    {%- endif -%}
+  {%- endfor -%}
+{%- endif -%}
