@@ -1,186 +1,59 @@
-{% doc %}
-  @name Nootropics 101
-  @desc FAQ-style explainer section with card grid, accordion Q&A, optional icons, per-card CTAs, disclaimer, and FAQPage JSON-LD.
-{% enddoc %}
+{% comment %}
+  Nootropics 101 — hairline accordion explainer with per-item CTAs, disclaimer, and optional FAQ JSON-LD.
+{% endcomment %}
 
-{%- style -%}
-  .xo-section--{{ section.id }} .xo-section-heading {
-    margin-bottom: 1.6rem;
-  }
-
-  .xo-section--{{ section.id }} .xo-section-heading__description {
-    margin-bottom: 2.4rem;
-  }
-
-  .xo-section--{{ section.id }} .noot101__grid {
-    margin-top: 0.8rem;
-  }
-
-  .xo-section--{{ section.id }} .noot101__grid xo-grid {
-    --grid-desktop-vertical-spacing: 1.6rem;
-    --grid-desktop-horizontal-spacing: 1.6rem;
-    --grid-mobile-vertical-spacing: 1.2rem;
-    --grid-mobile-horizontal-spacing: 1.2rem;
-  }
-
-  .xo-section--{{ section.id }} .noot101__card {
-    border-radius: var(--general-radius-3);
-    background: rgba(var(--color-background));
-    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 8%, transparent);
-    overflow: hidden;
-    transition: border-color 0.3s var(--out-soft, ease);
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-  }
-
-  .xo-section--{{ section.id }} .noot101__card:hover,
-  .xo-section--{{ section.id }} .noot101__card[open] {
-    border-color: color-mix(in srgb, rgba(var(--color-accent)) 40%, transparent);
-  }
-
-  .xo-section--{{ section.id }} .noot101__card[open] {
-    background: color-mix(in srgb, rgba(var(--color-accent)) 4%, rgba(var(--color-background)));
-  }
-
-  .xo-section--{{ section.id }} .noot101__summary {
-    list-style: none;
-    display: flex;
-    align-items: center;
-    gap: 1.2rem;
-    padding: 2rem;
-    cursor: pointer;
-    min-height: 44px;
-    transition: background 0.3s var(--out-soft, ease);
-  }
-
-  .xo-section--{{ section.id }} .noot101__summary::-webkit-details-marker {
-    display: none;
-  }
-
-  .xo-section--{{ section.id }} .noot101__summary:focus-visible {
-    outline: 2px solid rgba(var(--color-accent));
-    outline-offset: -2px;
-  }
-
-  .xo-section--{{ section.id }} .noot101__summary::after {
-    content: '+';
-    margin-left: auto;
-    font-size: 2rem;
-    line-height: 1;
-    flex-shrink: 0;
-    color: color-mix(in srgb, rgba(var(--color-foreground)) 40%, transparent);
-    transition: transform 0.3s var(--out-soft, ease), color 0.3s var(--out-soft, ease);
-  }
-
-  .xo-section--{{ section.id }} .noot101__card[open] .noot101__summary::after {
-    transform: rotate(45deg);
-    color: rgba(var(--color-accent));
-  }
-
-  .xo-section--{{ section.id }} .noot101__question {
-    font-size: calc(var(--font-body-scale, 1) * 1.8rem);
-    line-height: 1.3;
-    font-weight: 600;
-    letter-spacing: -0.015em;
-    color: rgba(var(--color-foreground));
-    margin: 0;
-  }
-
-  .xo-section--{{ section.id }} .noot101__icon {
-    width: 3.6rem;
-    height: 3.6rem;
-    border-radius: var(--general-radius-1);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    color: rgba(var(--color-accent));
-    background: #ffffff;
-  }
-
-  .xo-section--{{ section.id }} .noot101__answer {
-    padding: 0 2rem 2rem;
-    color: color-mix(in srgb, rgba(var(--color-foreground)) 75%, transparent);
-    line-height: 1.6;
-    font-size: calc(var(--font-body-scale, 1) * 1.5rem);
-  }
-
-  .xo-section--{{ section.id }} .noot101__answer p {
-    margin: 0 0 0.75rem;
-  }
-
-  .xo-section--{{ section.id }} .noot101__cta {
-    margin-top: 1.6rem;
-  }
-
-  @media (min-width: 768px) {
-    .xo-section--{{ section.id }} .xo-section-heading__description {
-      margin-bottom: 3.2rem;
-    }
-
-    .xo-section--{{ section.id }} .noot101__grid {
-      margin-top: 1.2rem;
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .xo-section--{{ section.id }} .noot101__card,
-    .xo-section--{{ section.id }} .noot101__summary,
-    .xo-section--{{ section.id }} .noot101__summary::after {
-      transition: none;
-    }
-  }
-{%- endstyle -%}
+{{ 'faq-hairline.css' | asset_url | stylesheet_tag }}
 
 <section {% render 'section-attr' %}>
   <xo-container>
-    {% render 'section-heading',
-      heading: section.settings.heading,
-      description: section.settings.subheading,
-      heading_tag: 'h2'
-    %}
+    <div class="faq-hairline__layout">
+      <header class="faq-hairline__intro">
+        {% render 'section-heading',
+          heading: section.settings.heading,
+          description: section.settings.subheading,
+          heading_tag: 'h2',
+          align: 'left',
+          font_size_mobile: 32,
+          font_size_desktop: 48
+        %}
+      </header>
 
-    <div class="noot101__grid">
-      <xo-grid style="--lg: {{ section.settings.columns_desktop }}; --md: 2; --xs: 1;">
-        {% for block in section.blocks %}
-          <article id="{{ block.settings.anchor | default: block.id }}" {{ block.shopify_attributes }}>
-            <details class="noot101__card" {% if block.settings.open_by_default %}open{% endif %}>
-              <summary class="noot101__summary">
-                {% if section.settings.show_icons %}
-                  <span class="noot101__icon" aria-hidden="true">
-                    {% case block.settings.icon %}
-                      {% when 'shield' %}
-                        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 2l8 3v6c0 5-3.4 9.7-8 11-4.6-1.3-8-6-8-11V5l8-3z"/></svg>
-                      {% when 'rocket' %}
-                        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 2c3.9 0 7 3.1 7 7 0 1.8-.7 3.5-2 4.8l-2.3 2.3-4.8-4.8L12 7c.6-.6 1.4-1 2.3-1-1.3-1.3-3-2-4.8-2C6.1 4 3 7.1 3 11v2l3-1 2 2-1 3h2c3.9 0 7.1-3.1 7.1-7 0-.9-.4-1.7-1-2.3z"/></svg>
-                      {% when 'layers' %}
-                        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 3l10 5-10 5L2 8l10-5zm0 9l8.9-4.4L22 10l-10 5-10-5 1.1-2.4L12 12zm0 5l8.9-4.4L22 15l-10 5-10-5 1.1-2.4L12 17z"/></svg>
-                      {% else %}
-                        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M8.5 3C6.6 3 5 4.6 5 6.5c-1.7.2-3 1.7-3 3.5s1.3 3.3 3 3.5V14c0 2.2 1.8 4 4 4h1v-2H9c-1.1 0-2-.9-2-2v-1h1.5c1.9 0 3.5-1.6 3.5-3.5V4H9C8.8 3.4 8.7 3 8.5 3zm7 0c-.2 0-.3.4-.5 1H13v4.5c0 1.9 1.6 3.5 3.5 3.5H18v1c0 1.1-.9 2-2 2h-1.5v2H15c2.2 0 4-1.8 4-4v-.5c1.7-.2 3-1.7 3-3.5s-1.3-3.3-3-3.5C19 4.6 17.4 3 15.5 3z"/></svg>
-                    {% endcase %}
-                  </span>
-                {% endif %}
-                <h3 class="noot101__question">{{ block.settings.title | escape }}</h3>
-              </summary>
+      <div class="faq-hairline__body">
+        <div class="faq-hairline">
+          {% for block in section.blocks %}
+            <article
+              class="faq-hairline__item"
+              id="{{ block.settings.anchor | default: block.id }}"
+              {{ block.shopify_attributes }}
+            >
+              <details class="faq-hairline__row" {% if block.settings.open_by_default %}open{% endif %}>
+                <summary class="faq-hairline__summary">
+                  <h3 class="faq-hairline__question">{{ block.settings.title | escape }}</h3>
+                </summary>
+                <div class="faq-hairline__answer rte">
+                  {{ block.settings.answer }}
 
-              <div class="noot101__answer rte">
-                {{ block.settings.answer }}
+                  {% if block.settings.cta_label != blank and block.settings.cta_url != blank %}
+                    <div class="faq-hairline__cta">
+                      {% render 'button',
+                        text: block.settings.cta_label,
+                        link: block.settings.cta_url,
+                        style: section.settings.cta_style
+                      %}
+                    </div>
+                  {% endif %}
+                </div>
+              </details>
+            </article>
+          {% endfor %}
+        </div>
 
-                {% if block.settings.cta_label != blank and block.settings.cta_url != blank %}
-                  <div class="noot101__cta">
-                    {% render 'button',
-                      text: block.settings.cta_label,
-                      link: block.settings.cta_url,
-                      style: section.settings.cta_style
-                    %}
-                  </div>
-                {% endif %}
-              </div>
-            </details>
-          </article>
-        {% endfor %}
-      </xo-grid>
+        {% if section.settings.show_disclaimer and section.settings.disclaimer_text != blank %}
+          <aside class="faq-hairline__disclaimer">
+            <small>{{ section.settings.disclaimer_text }}</small>
+          </aside>
+        {% endif %}
+      </div>
     </div>
   </xo-container>
 </section>
@@ -240,6 +113,7 @@
       "type": "checkbox",
       "id": "show_icons",
       "label": "Show icons in card headers",
+      "info": "Unused in the hairline list layout. Kept for Theme Editor compatibility.",
       "default": false
     },
     {

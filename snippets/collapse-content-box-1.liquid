@@ -1,32 +1,80 @@
-{% comment %}
-  Renders a collapse content.
+{% doc %}
+  Renders collapse / FAQ content.
 
-  Accepts:
-  - class: {String} Font size heading of the collapse (required)
-  - heading: {String} Heading of the collapse (required)
-  - subheading: {String} Subheading below the heading (optional)
-  - block: {Array} Section blocks (required)
-  - accordion_style: {String} 'legacy' or 'native' (optional, default legacy)
-  - section_id: {String} Section ID for scoped styles (optional)
-  - show_view_all_link: {Boolean} Show footer link (optional)
-  - view_all_label: {String} Footer link label (optional)
-  - view_all_url: {String} Footer link URL (optional)
+  @param {string} class - Heading size class
+  @param {string} heading - Section heading
+  @param {string} [subheading] - Optional subheading
+  @param {object} block - Section blocks
+  @param {string} [accordion_style] - legacy, native, or list
+  @param {boolean} [show_view_all_link] - Show footer link
+  @param {string} [view_all_label] - Footer link label
+  @param {string} [view_all_url] - Footer link URL
+  @param {boolean} [show_disclaimer] - Show disclaimer
+  @param {string} [disclaimer_text] - Disclaimer HTML
 
-  Usage:
-  {% render 'collapse-content-box-1',
-    class: class,
-    heading: heading,
-    block: block,
-  %}
-{% endcomment %}
+  @example
+    {% render 'collapse-content-box-1', class: class, heading: heading, block: block %}
+{% enddoc %}
 
 {% liquid
   assign accordion_style = accordion_style | default: 'legacy'
   assign heading_plain = heading | strip_html
 %}
 
-<div class="collapse-content-box-1{% if accordion_style == 'native' %} collapse-content-box-1--native{% endif %}">
-  {% if accordion_style == 'native' %}
+<div class="collapse-content-box-1{% if accordion_style == 'native' %} collapse-content-box-1--native{% endif %}{% if accordion_style == 'list' %} collapse-content-box-1--list{% endif %}">
+  {% if accordion_style == 'list' %}
+    <div class="faq-hairline__layout">
+      {% if heading_plain != blank or subheading != blank %}
+        <header class="faq-hairline__intro">
+          {% render 'section-heading',
+            heading: heading_plain,
+            description: subheading,
+            heading_tag: 'h2',
+            align: 'left',
+            font_size_mobile: 32,
+            font_size_desktop: 48
+          %}
+        </header>
+      {% endif %}
+
+      <div class="faq-hairline__body">
+        <div class="faq-hairline">
+          {% for item in block %}
+            {% liquid
+              assign title = item.settings.title | strip_html
+              assign content = item.settings.content
+            %}
+            <article class="faq-hairline__item" {{ item.shopify_attributes }}>
+              <details class="faq-hairline__row">
+                <summary class="faq-hairline__summary">
+                  <h3 class="faq-hairline__question">{{ title | escape }}</h3>
+                </summary>
+                <div class="faq-hairline__answer rte">
+                  {{ content }}
+                </div>
+              </details>
+            </article>
+          {% endfor %}
+        </div>
+
+        {% if show_view_all_link and view_all_label != blank and view_all_url != blank %}
+          <div class="faq-hairline__view-all">
+            {% render 'button',
+              text: view_all_label,
+              link: view_all_url,
+              style: 'link'
+            %}
+          </div>
+        {% endif %}
+
+        {% if show_disclaimer and disclaimer_text != blank %}
+          <aside class="faq-hairline__disclaimer">
+            <small>{{ disclaimer_text }}</small>
+          </aside>
+        {% endif %}
+      </div>
+    </div>
+  {% elsif accordion_style == 'native' %}
     {% if heading_plain != blank or subheading != blank %}
       {% render 'section-heading',
         heading: heading_plain,

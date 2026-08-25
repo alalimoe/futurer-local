@@ -1,8 +1,11 @@
 {{ 'section-collapse-content.css' | asset_url | stylesheet_tag }}
 {{ 'collapse-content-box-1.css' | asset_url | stylesheet_tag }}
-{% unless section.settings.accordion_style == 'native' %}
+{% if section.settings.accordion_style == 'legacy' or section.settings.accordion_style == blank %}
   {{ 'collapse.css' | asset_url | stylesheet_tag }}
-{% endunless %}
+{% endif %}
+{% if section.settings.accordion_style == 'list' %}
+  {{ 'faq-hairline.css' | asset_url | stylesheet_tag }}
+{% endif %}
 
 {%- if section.settings.accordion_style == 'native' -%}
   {%- style -%}
@@ -125,7 +128,6 @@
         subheading: section.settings.subheading,
         block: block,
         accordion_style: section.settings.accordion_style,
-        section_id: section.id,
         show_view_all_link: section.settings.show_view_all_link,
         view_all_label: section.settings.view_all_label,
         view_all_url: section.settings.view_all_url,
@@ -174,7 +176,8 @@
       "default": "legacy",
       "options": [
         { "value": "legacy", "label": "Legacy (xo-collapse)" },
-        { "value": "native", "label": "Native (FAQ cards)" }
+        { "value": "native", "label": "Native (FAQ cards)" },
+        { "value": "list", "label": "List (hairline accordion)" }
       ]
     },
     {
@@ -219,7 +222,7 @@
       "type": "textarea",
       "id": "subheading",
       "label": "Subheading",
-      "info": "Shown below the heading when using native accordion style"
+      "info": "Shown below the heading when using native or list accordion style"
     },
     {
       "type": "header",
