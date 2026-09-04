@@ -1,0 +1,628 @@
+{%- liquid
+  assign pieces_image = section.settings.pieces_image
+  assign nx01_image = section.settings.nx01_image
+  assign show_media = false
+  if pieces_image != blank or nx01_image != blank
+    assign show_media = true
+  endif
+  assign piece_count = 0
+  for block in section.blocks
+    if block.type == 'piece' and block.settings.label != blank
+      assign piece_count = piece_count | plus: 1
+    endif
+  endfor
+  assign show_vials = false
+  if piece_count > 0 and show_media == false
+    assign show_vials = true
+  endif
+  assign show_link = false
+  if section.settings.link_label != blank and section.settings.link_href != blank
+    assign show_link = true
+  endif
+-%}
+
+<section
+  id="nx01-why"
+  class="nx01-story xo-section xo-section--{{ section.id }}{% if section.settings.color_scheme != blank %} color-{{ section.settings.color_scheme }}{% endif %}"
+  aria-labelledby="nx01-story-heading-{{ section.id }}"
+>
+  <div class="nx01-story__inner">
+    <div class="nx01-story__intro">
+      <div class="nx01-story__lead">
+        {%- if section.settings.heading != blank -%}
+          <h2 class="nx01-story__heading" id="nx01-story-heading-{{ section.id }}">
+            {{ section.settings.heading | escape }}
+          </h2>
+        {%- endif -%}
+
+        {%- if section.settings.quote != blank -%}
+          <blockquote class="nx01-story__quote">
+            <p>{{ section.settings.quote | escape }}</p>
+            {%- if section.settings.quote_credit != blank -%}
+              <footer>{{ section.settings.quote_credit | escape }}</footer>
+            {%- endif -%}
+          </blockquote>
+        {%- endif -%}
+      </div>
+
+      <div class="nx01-story__explain">
+        {%- if section.settings.supporting != blank -%}
+          <p class="nx01-story__supporting">{{ section.settings.supporting | escape }}</p>
+        {%- endif -%}
+
+        {%- if section.settings.body != blank -%}
+          <div class="nx01-story__body">{{ section.settings.body }}</div>
+        {%- endif -%}
+
+        {%- if show_link -%}
+          <a class="nx01-story__link" href="{{ section.settings.link_href | escape }}">
+            {{ section.settings.link_label | escape }}
+          </a>
+        {%- endif -%}
+      </div>
+    </div>
+
+    {%- if show_media or show_vials -%}
+      <div class="nx01-story__transition" aria-label="{{ 'sections.nx01_launch_story.transition_label' | t }}">
+        {%- if show_media -%}
+          <div class="nx01-story__media">
+            <div class="nx01-story__media-from">
+              {%- if pieces_image != blank -%}
+                {{
+                  pieces_image
+                  | image_url: width: 1200
+                  | image_tag:
+                    class: 'nx01-story__img',
+                    loading: 'lazy',
+                    widths: '480, 720, 960, 1200',
+                    sizes: '(max-width: 767px) 92vw, 42vw',
+                    alt: section.settings.pieces_alt,
+                    width: pieces_image.width,
+                    height: pieces_image.height,
+                    decoding: 'async'
+                }}
+              {%- endif -%}
+              {%- if section.settings.pieces_caption != blank -%}
+                <p class="nx01-story__caption">{{ section.settings.pieces_caption | escape }}</p>
+              {%- endif -%}
+            </div>
+
+            <div class="nx01-story__rule" aria-hidden="true"></div>
+
+            <div class="nx01-story__media-to">
+              {%- if nx01_image != blank -%}
+                {{
+                  nx01_image
+                  | image_url: width: 900
+                  | image_tag:
+                    class: 'nx01-story__img nx01-story__img--single',
+                    loading: 'lazy',
+                    widths: '360, 540, 720, 900',
+                    sizes: '(max-width: 767px) 56vw, 22vw',
+                    alt: section.settings.nx01_alt,
+                    width: nx01_image.width,
+                    height: nx01_image.height,
+                    decoding: 'async'
+                }}
+              {%- endif -%}
+              {%- if section.settings.result_caption != blank -%}
+                <p class="nx01-story__caption">{{ section.settings.result_caption | escape }}</p>
+              {%- endif -%}
+            </div>
+          </div>
+        {%- endif -%}
+
+        {%- if show_vials -%}
+          <div class="nx01-story__pieces">
+            <ul class="nx01-story__piece-list">
+              {%- for block in section.blocks -%}
+                {%- if block.type == 'piece' and block.settings.label != blank -%}
+                  <li class="nx01-story__piece" {{ block.shopify_attributes }}>
+                    <span class="nx01-story__vial" aria-hidden="true"></span>
+                    <span class="nx01-story__piece-name">{{ block.settings.label | escape }}</span>
+                  </li>
+                {%- endif -%}
+              {%- endfor -%}
+            </ul>
+            {%- if section.settings.result_name != blank -%}
+              <p class="nx01-story__result">
+                <span class="nx01-story__result-rule" aria-hidden="true"></span>
+                <span class="nx01-story__vial nx01-story__vial--one" aria-hidden="true"></span>
+                <span class="nx01-story__result-name">{{ section.settings.result_name | escape }}</span>
+              </p>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+  </div>
+</section>
+
+{% stylesheet %}
+  .nx01-story {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    background: rgb(var(--color-background));
+    color: rgb(var(--color-foreground));
+    font-family: var(--font-body-family);
+    box-sizing: border-box;
+  }
+
+  .nx01-story *,
+  .nx01-story *::before,
+  .nx01-story *::after {
+    box-sizing: border-box;
+  }
+
+  .nx01-story::before,
+  .nx01-story::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .nx01-story::before {
+    background-image:
+      linear-gradient(color-mix(in srgb, rgba(var(--color-foreground)) 5%, transparent) 1px, transparent 1px),
+      linear-gradient(90deg, color-mix(in srgb, rgba(var(--color-foreground)) 5%, transparent) 1px, transparent 1px);
+    background-size: 4.8rem 4.8rem;
+    mask-image: radial-gradient(ellipse 70% 56% at 18% 18%, #000 12%, transparent 74%);
+    opacity: 0.7;
+  }
+
+  .nx01-story::after {
+    background:
+      radial-gradient(52% 42% at 86% 12%, color-mix(in srgb, rgba(var(--color-foreground)) 6%, transparent), transparent 70%),
+      linear-gradient(180deg, color-mix(in srgb, rgba(var(--color-foreground)) 4%, transparent), transparent 18%);
+  }
+
+  .nx01-story__inner {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: var(--page-width);
+    margin: 0 auto;
+    padding: 8rem var(--page-gap) 8.8rem;
+    display: flex;
+    flex-direction: column;
+    gap: 6.4rem;
+  }
+
+  .nx01-story__intro {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 3.2rem;
+  }
+
+  .nx01-story__heading {
+    margin: 0;
+    font-family: var(--font-heading-family);
+    font-size: clamp(3.6rem, 7vw, 7.2rem);
+    font-weight: 600;
+    letter-spacing: -0.04em;
+    line-height: 1.04;
+    color: rgb(var(--color-foreground));
+  }
+
+  .nx01-story__quote {
+    margin: 2.8rem 0 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .nx01-story__quote p {
+    margin: 0;
+    max-width: 16ch;
+    font-family: var(--font-heading-family);
+    font-size: clamp(2.2rem, 3.2vw, 3.2rem);
+    font-weight: 500;
+    letter-spacing: -0.035em;
+    line-height: 1.2;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 78%, transparent);
+  }
+
+  .nx01-story__quote p::before {
+    content: "“";
+    display: block;
+    margin-bottom: 0.4rem;
+    font-size: 0.55em;
+    font-weight: 600;
+    letter-spacing: 0;
+    line-height: 1;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 28%, transparent);
+  }
+
+  .nx01-story__quote footer {
+    margin-top: 1.6rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 46%, transparent);
+  }
+
+  .nx01-story__supporting {
+    margin: 0 0 1.6rem;
+    font-family: var(--font-heading-family);
+    font-size: clamp(2rem, 2.4vw, 2.6rem);
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    line-height: 1.25;
+    color: rgb(var(--color-foreground));
+  }
+
+  .nx01-story__body {
+    max-width: 42rem;
+    font-size: 1.7rem;
+    line-height: 1.65;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 68%, transparent);
+  }
+
+  .nx01-story__body p {
+    margin: 0 0 1.6rem;
+  }
+
+  .nx01-story__body p:last-child {
+    margin-bottom: 0;
+  }
+
+  .nx01-story__link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 4.8rem;
+    margin-top: 1.6rem;
+    font-size: 1.4rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: rgb(var(--color-foreground));
+    border-bottom: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 22%, transparent);
+  }
+
+  .nx01-story__link:hover,
+  .nx01-story__link:focus-visible {
+    border-bottom-color: rgb(var(--color-foreground));
+  }
+
+  .nx01-story__transition {
+    padding-top: 4rem;
+    border-top: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
+  }
+
+  .nx01-story__media {
+    display: grid;
+    grid-template-columns: 1fr;
+    align-items: end;
+    gap: 2.4rem;
+  }
+
+  .nx01-story__media-from,
+  .nx01-story__media-to {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+  }
+
+  .nx01-story__media-to {
+    align-items: flex-start;
+    max-width: 22rem;
+  }
+
+  .nx01-story__img {
+    display: block;
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+  }
+
+  .nx01-story__img--single {
+    max-width: 22rem;
+  }
+
+  .nx01-story__rule {
+    display: none;
+    height: 1px;
+    background: color-mix(in srgb, rgba(var(--color-foreground)) 16%, transparent);
+  }
+
+  .nx01-story__caption,
+  .nx01-story__piece-name,
+  .nx01-story__result-name {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    line-height: 1.3;
+    text-transform: uppercase;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 48%, transparent);
+  }
+
+  .nx01-story__piece-name {
+    min-height: 2.6em;
+  }
+
+  .nx01-story__pieces {
+    display: flex;
+    flex-direction: column;
+    gap: 2.8rem;
+  }
+
+  .nx01-story__piece-list {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 1.6rem 1.4rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .nx01-story__piece,
+  .nx01-story__result {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    width: 7.2rem;
+    margin: 0;
+    text-align: center;
+  }
+
+  .nx01-story__vial {
+    position: relative;
+    display: block;
+    width: 1.6rem;
+    height: 5.2rem;
+    margin-top: 0.8rem;
+    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 20%, transparent);
+    border-radius: 0.16rem 0.16rem 0.55rem 0.55rem;
+    background: color-mix(in srgb, rgba(var(--color-foreground)) 4%, transparent);
+  }
+
+  .nx01-story__vial::before {
+    content: "";
+    position: absolute;
+    top: -0.72rem;
+    left: 50%;
+    width: 0.62rem;
+    height: 0.72rem;
+    transform: translateX(-50%);
+    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 20%, transparent);
+    border-bottom: 0;
+    border-radius: 0.1rem 0.1rem 0 0;
+  }
+
+  .nx01-story__vial--one {
+    width: 2.6rem;
+    height: 8.4rem;
+    border-color: color-mix(in srgb, rgba(var(--color-foreground)) 36%, transparent);
+    background: color-mix(in srgb, rgba(var(--color-foreground)) 9%, transparent);
+  }
+
+  .nx01-story__vial--one::before {
+    width: 0.9rem;
+    height: 0.9rem;
+    top: -0.9rem;
+    border-color: color-mix(in srgb, rgba(var(--color-foreground)) 36%, transparent);
+  }
+
+  .nx01-story__result {
+    align-self: flex-start;
+  }
+
+  .nx01-story__result-name {
+    color: rgb(var(--color-foreground));
+  }
+
+  .nx01-story__result-rule {
+    display: block;
+    width: 3.2rem;
+    height: 1px;
+    background: color-mix(in srgb, rgba(var(--color-foreground)) 20%, transparent);
+  }
+
+  @media screen and (min-width: 768px) {
+    .nx01-story__inner {
+      padding-top: 12rem;
+      padding-bottom: 12.8rem;
+      gap: 8.8rem;
+    }
+
+    .nx01-story__intro {
+      grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+      column-gap: 8rem;
+      align-items: start;
+    }
+
+    .nx01-story__quote {
+      margin-top: 4rem;
+    }
+
+    .nx01-story__explain {
+      padding-top: 0.8rem;
+    }
+
+    .nx01-story__media {
+      grid-template-columns: minmax(0, 1fr) 4.8rem minmax(0, 0.42fr);
+      column-gap: 3.2rem;
+    }
+
+    .nx01-story__rule {
+      display: block;
+      align-self: center;
+    }
+
+    .nx01-story__pieces {
+      flex-direction: row;
+      align-items: flex-end;
+      justify-content: flex-start;
+      gap: 3.2rem;
+    }
+
+    .nx01-story__piece-list {
+      flex: 0 1 auto;
+      gap: 2rem 1.2rem;
+    }
+
+    .nx01-story__result {
+      flex-direction: row;
+      align-items: flex-end;
+      align-self: flex-end;
+      width: auto;
+      gap: 2.4rem;
+    }
+
+    .nx01-story__result-rule {
+      display: block;
+      width: 4.8rem;
+      height: 1px;
+      margin-bottom: 3.4rem;
+      background: color-mix(in srgb, rgba(var(--color-foreground)) 20%, transparent);
+    }
+
+    .nx01-story__result-name {
+      margin-bottom: 0.2rem;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:sections.nx01_launch_story.name",
+  "tag": "section",
+  "class": "section-nx01-story",
+  "enabled_on": {
+    "templates": ["page"]
+  },
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:sections.nx01_launch_story.settings.color_scheme",
+      "default": "background-1"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "t:sections.nx01_launch_story.settings.heading",
+      "default": "For years, we sold the pieces."
+    },
+    {
+      "type": "text",
+      "id": "quote",
+      "label": "t:sections.nx01_launch_story.settings.quote",
+      "default": "What should I actually take every day?"
+    },
+    {
+      "type": "text",
+      "id": "quote_credit",
+      "label": "t:sections.nx01_launch_story.settings.quote_credit",
+      "default": "The question we kept hearing"
+    },
+    {
+      "type": "text",
+      "id": "supporting",
+      "label": "t:sections.nx01_launch_story.settings.supporting",
+      "default": "NX-01 is our answer to what belongs in the daily foundation."
+    },
+    {
+      "type": "richtext",
+      "id": "body",
+      "label": "t:sections.nx01_launch_story.settings.body",
+      "default": "<p>The catalog made it possible to build a stack one compound at a time. Useful — until the daily base became another decision.</p><p>NX-01 is the first formula we built ourselves. One bottle for the foundation. Everything else stays optional.</p>"
+    },
+    {
+      "type": "text",
+      "id": "link_label",
+      "label": "t:sections.nx01_launch_story.settings.link_label",
+      "default": "Explore the Formula"
+    },
+    {
+      "type": "text",
+      "id": "link_href",
+      "label": "t:sections.nx01_launch_story.settings.link_href",
+      "default": "#nx01-formula",
+      "info": "t:sections.nx01_launch_story.settings.href_info"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.nx01_launch_story.settings.images_header"
+    },
+    {
+      "type": "image_picker",
+      "id": "pieces_image",
+      "label": "t:sections.nx01_launch_story.settings.pieces_image",
+      "info": "t:sections.nx01_launch_story.settings.cutout_info"
+    },
+    {
+      "type": "text",
+      "id": "pieces_alt",
+      "label": "t:sections.nx01_launch_story.settings.pieces_alt"
+    },
+    {
+      "type": "text",
+      "id": "pieces_caption",
+      "label": "t:sections.nx01_launch_story.settings.pieces_caption",
+      "default": "The pieces"
+    },
+    {
+      "type": "image_picker",
+      "id": "nx01_image",
+      "label": "t:sections.nx01_launch_story.settings.nx01_image",
+      "info": "t:sections.nx01_launch_story.settings.cutout_info"
+    },
+    {
+      "type": "text",
+      "id": "nx01_alt",
+      "label": "t:sections.nx01_launch_story.settings.nx01_alt"
+    },
+    {
+      "type": "text",
+      "id": "result_caption",
+      "label": "t:sections.nx01_launch_story.settings.result_caption",
+      "default": "The foundation"
+    },
+    {
+      "type": "text",
+      "id": "result_name",
+      "label": "t:sections.nx01_launch_story.settings.result_name",
+      "default": "NX-01"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "piece",
+      "name": "t:sections.nx01_launch_story.blocks.piece.name",
+      "settings": [
+        {
+          "type": "text",
+          "id": "label",
+          "label": "t:sections.nx01_launch_story.blocks.piece.settings.label",
+          "default": "ALCAR"
+        }
+      ]
+    }
+  ],
+  "max_blocks": 9,
+  "presets": [
+    {
+      "name": "t:sections.nx01_launch_story.presets.name",
+      "blocks": [
+        { "type": "piece", "settings": { "label": "ALCAR" } },
+        { "type": "piece", "settings": { "label": "CDP-Choline" } },
+        { "type": "piece", "settings": { "label": "NMN" } },
+        { "type": "piece", "settings": { "label": "Rhodiola" } },
+        { "type": "piece", "settings": { "label": "Ubiquinol" } },
+        { "type": "piece", "settings": { "label": "L-Theanine" } },
+        { "type": "piece", "settings": { "label": "P-5-P" } },
+        { "type": "piece", "settings": { "label": "Methyl B12" } },
+        { "type": "piece", "settings": { "label": "5-MTHF" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

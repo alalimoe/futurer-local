@@ -1,0 +1,625 @@
+{%- liquid
+  assign diy_image = section.settings.diy_image
+  assign nx01_image = section.settings.nx01_image
+  assign compound_count = 0
+  assign note_count = 0
+  assign point_count = 0
+  for block in section.blocks
+    if block.type == 'compound' and block.settings.label != blank
+      assign compound_count = compound_count | plus: 1
+    endif
+    if block.type == 'note' and block.settings.label != blank
+      assign note_count = note_count | plus: 1
+    endif
+    if block.type == 'point' and block.settings.label != blank or block.settings.value != blank
+      assign point_count = point_count | plus: 1
+    endif
+  endfor
+  assign show_cta = false
+  if section.settings.cta_label != blank and section.settings.cta_href != blank
+    assign show_cta = true
+  endif
+-%}
+
+<section
+  id="nx01-compare"
+  class="nx01-compare xo-section xo-section--{{ section.id }}{% if section.settings.color_scheme != blank %} color-{{ section.settings.color_scheme }}{% endif %}"
+  aria-labelledby="nx01-compare-heading-{{ section.id }}"
+>
+  <div class="nx01-compare__inner">
+    {%- if section.settings.heading != blank -%}
+      <h2 class="nx01-compare__heading" id="nx01-compare-heading-{{ section.id }}">
+        {{ section.settings.heading | escape }}
+      </h2>
+    {%- endif -%}
+
+    <div class="nx01-compare__board" aria-label="{{ 'sections.nx01_launch_compare.board_label' | t }}">
+      <article class="nx01-compare__pane nx01-compare__pane--diy">
+        <h3 class="nx01-compare__kicker">
+          <span class="nx01-compare__kicker-full">{{ section.settings.left_label | escape }}</span>
+          {%- if section.settings.left_label_mobile != blank -%}
+            <span class="nx01-compare__kicker-short">{{ section.settings.left_label_mobile | escape }}</span>
+          {%- endif -%}
+        </h3>
+
+        <div class="nx01-compare__media nx01-compare__media--many">
+          {%- if diy_image != blank -%}
+            {{
+              diy_image
+              | image_url: width: 900
+              | image_tag:
+                class: 'nx01-compare__img',
+                loading: 'lazy',
+                widths: '360, 540, 720, 900',
+                sizes: '(max-width: 767px) 88vw, 32vw',
+                alt: section.settings.diy_alt,
+                width: diy_image.width,
+                height: diy_image.height,
+                decoding: 'async'
+            }}
+          {%- elsif compound_count > 0 -%}
+            <div class="nx01-compare__cluster" aria-hidden="true">
+              {%- for block in section.blocks -%}
+                {%- if block.type == 'compound' and block.settings.label != blank -%}
+                  <span class="nx01-compare__vial"></span>
+                {%- endif -%}
+              {%- endfor -%}
+            </div>
+          {%- endif -%}
+        </div>
+
+        {%- if compound_count > 0 -%}
+          <ul class="nx01-compare__compounds">
+            {%- for block in section.blocks -%}
+              {%- if block.type == 'compound' and block.settings.label != blank -%}
+                <li {{ block.shopify_attributes }}>{{ block.settings.label | escape }}</li>
+              {%- endif -%}
+            {%- endfor -%}
+          </ul>
+        {%- endif -%}
+
+        {%- if note_count > 0 -%}
+          <ul class="nx01-compare__notes">
+            {%- for block in section.blocks -%}
+              {%- if block.type == 'note' and block.settings.label != blank -%}
+                <li {{ block.shopify_attributes }}>
+                  <span class="nx01-compare__tick" aria-hidden="true"></span>
+                  {{ block.settings.label | escape }}
+                </li>
+              {%- endif -%}
+            {%- endfor -%}
+          </ul>
+        {%- endif -%}
+      </article>
+
+      <p class="nx01-compare__then" aria-hidden="true">
+        <span class="nx01-compare__then-rule"></span>
+      </p>
+
+      <article class="nx01-compare__pane nx01-compare__pane--nx">
+        {%- if section.settings.right_label != blank -%}
+          <h3 class="nx01-compare__kicker">{{ section.settings.right_label | escape }}</h3>
+        {%- endif -%}
+
+        <div class="nx01-compare__media nx01-compare__media--one">
+          {%- if nx01_image != blank -%}
+            {{
+              nx01_image
+              | image_url: width: 720
+              | image_tag:
+                class: 'nx01-compare__img nx01-compare__img--single',
+                loading: 'lazy',
+                widths: '240, 360, 540, 720',
+                sizes: '(max-width: 767px) 40vw, 14vw',
+                alt: section.settings.nx01_alt,
+                width: nx01_image.width,
+                height: nx01_image.height,
+                decoding: 'async'
+            }}
+          {%- else -%}
+            <span class="nx01-compare__vial nx01-compare__vial--one" aria-hidden="true"></span>
+          {%- endif -%}
+        </div>
+
+        {%- if point_count > 0 -%}
+          <ul class="nx01-compare__points">
+            {%- for block in section.blocks -%}
+              {%- if block.type == 'point' -%}
+                {%- if block.settings.value != blank or block.settings.label != blank -%}
+                  <li {{ block.shopify_attributes }}>
+                    {%- if block.settings.value != blank -%}
+                      <span class="nx01-compare__point-value">{{ block.settings.value | escape }}</span>
+                    {%- endif -%}
+                    {%- if block.settings.label != blank -%}
+                      <span class="nx01-compare__point-label">{{ block.settings.label | escape }}</span>
+                    {%- endif -%}
+                  </li>
+                {%- endif -%}
+              {%- endif -%}
+            {%- endfor -%}
+          </ul>
+        {%- endif -%}
+      </article>
+    </div>
+
+    {%- if section.settings.highlight != blank or show_cta -%}
+      <div class="nx01-compare__close">
+        {%- if section.settings.highlight != blank -%}
+          <p class="nx01-compare__highlight">{{ section.settings.highlight | escape }}</p>
+        {%- endif -%}
+        {%- if show_cta -%}
+          <div class="nx01-compare__cta">
+            {% render 'button', style: 'secondary', text: section.settings.cta_label, link: section.settings.cta_href %}
+          </div>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+  </div>
+</section>
+
+{% stylesheet %}
+  .nx01-compare {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    background: rgb(var(--color-background));
+    color: rgb(var(--color-foreground));
+    font-family: var(--font-body-family);
+    box-sizing: border-box;
+  }
+
+  .nx01-compare *,
+  .nx01-compare *::before,
+  .nx01-compare *::after {
+    box-sizing: border-box;
+  }
+
+  .nx01-compare::before,
+  .nx01-compare::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .nx01-compare::before {
+    background-image:
+      linear-gradient(color-mix(in srgb, rgba(var(--color-foreground)) 5%, transparent) 1px, transparent 1px),
+      linear-gradient(90deg, color-mix(in srgb, rgba(var(--color-foreground)) 5%, transparent) 1px, transparent 1px);
+    background-size: 4.8rem 4.8rem;
+    mask-image: radial-gradient(ellipse 64% 50% at 50% 0%, #000 10%, transparent 72%);
+    opacity: 0.65;
+  }
+
+  .nx01-compare__inner {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: var(--page-width);
+    margin: 0 auto;
+    padding: 8rem var(--page-gap) 8.8rem;
+  }
+
+  .nx01-compare__heading {
+    margin: 0 0 4.8rem;
+    max-width: 16ch;
+    font-family: var(--font-heading-family);
+    font-size: clamp(3.2rem, 6vw, 6.4rem);
+    font-weight: 600;
+    letter-spacing: -0.04em;
+    line-height: 1.06;
+  }
+
+  .nx01-compare__board {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .nx01-compare__pane {
+    min-width: 0;
+  }
+
+  .nx01-compare__kicker {
+    margin: 0 0 2.4rem;
+    font-size: 1.2rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 50%, transparent);
+  }
+
+  .nx01-compare__kicker:has(.nx01-compare__kicker-short) .nx01-compare__kicker-full {
+    display: none;
+  }
+
+  .nx01-compare__media {
+    display: flex;
+    align-items: flex-end;
+    min-height: 8.8rem;
+    margin-bottom: 2.4rem;
+  }
+
+  .nx01-compare__img {
+    display: block;
+    width: 100%;
+    max-width: 28rem;
+    height: auto;
+    object-fit: contain;
+  }
+
+  .nx01-compare__img--single {
+    max-width: 12rem;
+  }
+
+  .nx01-compare__cluster {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 0.8rem 0.7rem;
+    max-width: 18rem;
+  }
+
+  .nx01-compare__vial {
+    position: relative;
+    display: block;
+    width: 1.4rem;
+    height: 4.4rem;
+    margin-top: 0.7rem;
+    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 20%, transparent);
+    border-radius: 0.14rem 0.14rem 0.5rem 0.5rem;
+    background: color-mix(in srgb, rgba(var(--color-foreground)) 4%, transparent);
+  }
+
+  .nx01-compare__vial::before {
+    content: "";
+    position: absolute;
+    top: -0.64rem;
+    left: 50%;
+    width: 0.54rem;
+    height: 0.64rem;
+    transform: translateX(-50%);
+    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 20%, transparent);
+    border-bottom: 0;
+    border-radius: 0.08rem 0.08rem 0 0;
+  }
+
+  .nx01-compare__cluster .nx01-compare__vial:nth-child(2n) {
+    transform: translateY(-0.6rem);
+  }
+
+  .nx01-compare__cluster .nx01-compare__vial:nth-child(3n) {
+    transform: translateY(0.4rem);
+  }
+
+  .nx01-compare__vial--one {
+    width: 2.8rem;
+    height: 9rem;
+    border-color: color-mix(in srgb, rgba(var(--color-foreground)) 36%, transparent);
+    background: color-mix(in srgb, rgba(var(--color-foreground)) 9%, transparent);
+  }
+
+  .nx01-compare__vial--one::before {
+    width: 0.96rem;
+    height: 0.96rem;
+    top: -0.96rem;
+    border-color: color-mix(in srgb, rgba(var(--color-foreground)) 36%, transparent);
+  }
+
+  .nx01-compare__compounds {
+    margin: 0 0 2.4rem;
+    padding: 0;
+    list-style: none;
+  }
+
+  .nx01-compare__compounds li {
+    padding: 0.9rem 0;
+    font-size: 1.5rem;
+    line-height: 1.4;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 72%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 8%, transparent);
+  }
+
+  .nx01-compare__compounds li:first-child {
+    border-top: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 8%, transparent);
+  }
+
+  .nx01-compare__notes {
+    margin: 0;
+    padding: 0.8rem 0 0;
+    list-style: none;
+  }
+
+  .nx01-compare__notes li {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    min-height: 3.2rem;
+    font-size: 1.2rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 46%, transparent);
+  }
+
+  .nx01-compare__tick {
+    flex: 0 0 2.4rem;
+    height: 1px;
+    background: color-mix(in srgb, rgba(var(--color-foreground)) 22%, transparent);
+  }
+
+  .nx01-compare__then {
+    display: flex;
+    align-items: center;
+    margin: 3.2rem 0;
+    padding: 0;
+  }
+
+  .nx01-compare__then-rule {
+    display: block;
+    width: 4.8rem;
+    height: 1px;
+    background: color-mix(in srgb, rgba(var(--color-foreground)) 22%, transparent);
+  }
+
+  .nx01-compare__points {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2.4rem 1.6rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .nx01-compare__points li {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .nx01-compare__point-value {
+    font-family: var(--font-heading-family);
+    font-size: clamp(2.8rem, 4vw, 4rem);
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    line-height: 1;
+  }
+
+  .nx01-compare__point-label {
+    font-size: 1.2rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 50%, transparent);
+  }
+
+  .nx01-compare__close {
+    margin-top: 5.6rem;
+    padding-top: 3.2rem;
+    border-top: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
+  }
+
+  .nx01-compare__highlight {
+    margin: 0 0 2rem;
+    max-width: 18ch;
+    font-family: var(--font-heading-family);
+    font-size: clamp(2.4rem, 3.2vw, 3.6rem);
+    font-weight: 600;
+    letter-spacing: -0.035em;
+    line-height: 1.15;
+  }
+
+  .nx01-compare__cta .xo-btn {
+    min-height: 4.8rem;
+  }
+
+  @media screen and (min-width: 768px) {
+    .nx01-compare__inner {
+      padding-top: 12rem;
+      padding-bottom: 12.8rem;
+    }
+
+    .nx01-compare__heading {
+      margin-bottom: 7.2rem;
+    }
+
+    .nx01-compare__board {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      column-gap: 0;
+    }
+
+    .nx01-compare__kicker-short {
+      display: none;
+    }
+
+    .nx01-compare__kicker:has(.nx01-compare__kicker-short) .nx01-compare__kicker-full {
+      display: inline;
+    }
+
+    .nx01-compare__pane--diy {
+      padding-right: 5.6rem;
+      border-right: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
+    }
+
+    .nx01-compare__pane--nx {
+      padding-left: 5.6rem;
+    }
+
+    .nx01-compare__then {
+      display: none;
+    }
+
+    .nx01-compare__points {
+      grid-template-columns: 1fr 1fr;
+      gap: 2.8rem 2rem;
+    }
+
+    .nx01-compare__close {
+      margin-top: 7.2rem;
+      padding-top: 4rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nx01-compare__cluster .nx01-compare__vial:nth-child(n) {
+      transform: none;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:sections.nx01_launch_compare.name",
+  "tag": "section",
+  "class": "section-nx01-compare",
+  "enabled_on": {
+    "templates": ["page"]
+  },
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:sections.nx01_launch_compare.settings.color_scheme",
+      "default": "background-1"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "t:sections.nx01_launch_compare.settings.heading",
+      "default": "A good daily stack shouldn’t require a spreadsheet."
+    },
+    {
+      "type": "text",
+      "id": "left_label",
+      "label": "t:sections.nx01_launch_compare.settings.left_label",
+      "default": "Build it yourself"
+    },
+    {
+      "type": "text",
+      "id": "left_label_mobile",
+      "label": "t:sections.nx01_launch_compare.settings.left_label_mobile",
+      "default": "Before"
+    },
+    {
+      "type": "text",
+      "id": "right_label",
+      "label": "t:sections.nx01_launch_compare.settings.right_label",
+      "default": "NX-01"
+    },
+    {
+      "type": "text",
+      "id": "highlight",
+      "label": "t:sections.nx01_launch_compare.settings.highlight",
+      "default": "Same foundation. Less friction."
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "t:sections.nx01_launch_compare.settings.cta_label",
+      "default": "See What’s Inside"
+    },
+    {
+      "type": "text",
+      "id": "cta_href",
+      "label": "t:sections.nx01_launch_compare.settings.cta_href",
+      "default": "#nx01-formula",
+      "info": "t:sections.nx01_launch_compare.settings.href_info"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.nx01_launch_compare.settings.images_header"
+    },
+    {
+      "type": "image_picker",
+      "id": "diy_image",
+      "label": "t:sections.nx01_launch_compare.settings.diy_image",
+      "info": "t:sections.nx01_launch_compare.settings.cutout_info"
+    },
+    {
+      "type": "text",
+      "id": "diy_alt",
+      "label": "t:sections.nx01_launch_compare.settings.diy_alt"
+    },
+    {
+      "type": "image_picker",
+      "id": "nx01_image",
+      "label": "t:sections.nx01_launch_compare.settings.nx01_image",
+      "info": "t:sections.nx01_launch_compare.settings.cutout_info"
+    },
+    {
+      "type": "text",
+      "id": "nx01_alt",
+      "label": "t:sections.nx01_launch_compare.settings.nx01_alt"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "compound",
+      "name": "t:sections.nx01_launch_compare.blocks.compound.name",
+      "settings": [
+        {
+          "type": "text",
+          "id": "label",
+          "label": "t:sections.nx01_launch_compare.blocks.compound.settings.label",
+          "default": "Acetyl-L-Carnitine"
+        }
+      ]
+    },
+    {
+      "type": "note",
+      "name": "t:sections.nx01_launch_compare.blocks.note.name",
+      "settings": [
+        {
+          "type": "text",
+          "id": "label",
+          "label": "t:sections.nx01_launch_compare.blocks.note.settings.label",
+          "default": "Multiple bottles"
+        }
+      ]
+    },
+    {
+      "type": "point",
+      "name": "t:sections.nx01_launch_compare.blocks.point.name",
+      "settings": [
+        {
+          "type": "text",
+          "id": "value",
+          "label": "t:sections.nx01_launch_compare.blocks.point.settings.value",
+          "default": "9"
+        },
+        {
+          "type": "text",
+          "id": "label",
+          "label": "t:sections.nx01_launch_compare.blocks.point.settings.label",
+          "default": "Actives"
+        }
+      ]
+    }
+  ],
+  "max_blocks": 24,
+  "presets": [
+    {
+      "name": "t:sections.nx01_launch_compare.presets.name",
+      "blocks": [
+        { "type": "compound", "settings": { "label": "Acetyl-L-Carnitine" } },
+        { "type": "compound", "settings": { "label": "CDP-Choline" } },
+        { "type": "compound", "settings": { "label": "NMN" } },
+        { "type": "compound", "settings": { "label": "L-Theanine" } },
+        { "type": "compound", "settings": { "label": "Rhodiola" } },
+        { "type": "compound", "settings": { "label": "Ubiquinol CoQ10" } },
+        { "type": "compound", "settings": { "label": "Active B vitamins" } },
+        { "type": "note", "settings": { "label": "Multiple bottles" } },
+        { "type": "note", "settings": { "label": "Multiple reorder points" } },
+        { "type": "note", "settings": { "label": "More complexity" } },
+        { "type": "note", "settings": { "label": "More decisions" } },
+        { "type": "point", "settings": { "value": "9", "label": "Actives" } },
+        { "type": "point", "settings": { "value": "3", "label": "Capsules" } },
+        { "type": "point", "settings": { "value": "1", "label": "Daily formula" } },
+        { "type": "point", "settings": { "value": "1", "label": "Bottle" } },
+        { "type": "point", "settings": { "value": "30-day", "label": "Supply" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

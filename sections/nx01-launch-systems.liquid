@@ -1,0 +1,630 @@
+{%- liquid
+  assign system_count = 0
+  for block in section.blocks
+    if block.type == 'system'
+      assign system_count = system_count | plus: 1
+    endif
+  endfor
+-%}
+
+<section
+  id="nx01-formula"
+  class="nx01-systems xo-section xo-section--{{ section.id }}{% if section.settings.color_scheme != blank %} color-{{ section.settings.color_scheme }}{% endif %}"
+  aria-labelledby="nx01-systems-heading-{{ section.id }}"
+>
+  <div class="nx01-systems__inner">
+    <div class="nx01-systems__intro">
+      {%- if section.settings.heading != blank -%}
+        <h2 class="nx01-systems__heading" id="nx01-systems-heading-{{ section.id }}">
+          {{ section.settings.heading | escape }}
+        </h2>
+      {%- endif -%}
+      {%- if section.settings.subheading != blank -%}
+        <p class="nx01-systems__sub">{{ section.settings.subheading | escape }}</p>
+      {%- endif -%}
+    </div>
+
+    {%- if system_count > 0 -%}
+      <ol class="nx01-systems__grid" aria-label="{{ 'sections.nx01_launch_systems.grid_label' | t }}">
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'system' -%}
+            {%- liquid
+              assign diagram = block.settings.diagram | default: 'energy'
+              assign actives = block.settings.ingredients | newline_to_br | split: '<br />'
+            -%}
+            <li class="nx01-systems__card" {{ block.shopify_attributes }}>
+              <div class="nx01-systems__card-top">
+                {%- if block.settings.number != blank -%}
+                  <p class="nx01-systems__number">{{ block.settings.number | escape }}</p>
+                {%- endif -%}
+                <span class="nx01-systems__diagram nx01-systems__diagram--{{ diagram }}" aria-hidden="true">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </span>
+              </div>
+
+              {%- if block.settings.title != blank -%}
+                <h3 class="nx01-systems__title">{{ block.settings.title | escape }}</h3>
+              {%- endif -%}
+
+              {%- if block.settings.descriptor != blank -%}
+                <p class="nx01-systems__descriptor">{{ block.settings.descriptor | escape }}</p>
+              {%- endif -%}
+
+              {%- if block.settings.ingredients != blank -%}
+                <ul class="nx01-systems__actives">
+                  {%- for active in actives -%}
+                    {%- assign active_label = active | strip_html | strip -%}
+                    {%- if active_label != blank -%}
+                      <li>{{ active_label | escape }}</li>
+                    {%- endif -%}
+                  {%- endfor -%}
+                </ul>
+              {%- endif -%}
+
+              {%- if block.settings.body != blank -%}
+                <p class="nx01-systems__body">{{ block.settings.body | escape }}</p>
+              {%- endif -%}
+            </li>
+          {%- endif -%}
+        {%- endfor -%}
+      </ol>
+    {%- endif -%}
+  </div>
+</section>
+
+{% stylesheet %}
+  .nx01-systems {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    background: rgb(var(--color-background));
+    color: rgb(var(--color-foreground));
+    font-family: var(--font-body-family);
+    box-sizing: border-box;
+  }
+
+  .nx01-systems *,
+  .nx01-systems *::before,
+  .nx01-systems *::after {
+    box-sizing: border-box;
+  }
+
+  .nx01-systems::before,
+  .nx01-systems::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .nx01-systems::before {
+    background-image:
+      linear-gradient(color-mix(in srgb, rgba(var(--color-foreground)) 5%, transparent) 1px, transparent 1px),
+      linear-gradient(90deg, color-mix(in srgb, rgba(var(--color-foreground)) 5%, transparent) 1px, transparent 1px);
+    background-size: 4.8rem 4.8rem;
+    mask-image: radial-gradient(ellipse 72% 48% at 82% 12%, #000 8%, transparent 70%);
+    opacity: 0.6;
+  }
+
+  .nx01-systems__inner {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: var(--page-width);
+    margin: 0 auto;
+    padding: 8rem var(--page-gap) 8.8rem;
+  }
+
+  .nx01-systems__intro {
+    max-width: 64rem;
+    margin-bottom: 4.8rem;
+  }
+
+  .nx01-systems__heading {
+    margin: 0 0 1.6rem;
+    font-family: var(--font-heading-family);
+    font-size: clamp(3.2rem, 6vw, 6.4rem);
+    font-weight: 600;
+    letter-spacing: -0.04em;
+    line-height: 1.06;
+  }
+
+  .nx01-systems__sub {
+    margin: 0;
+    max-width: 36rem;
+    font-size: 1.7rem;
+    line-height: 1.55;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 64%, transparent);
+  }
+
+  .nx01-systems__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .nx01-systems__card {
+    position: relative;
+    padding: 2.8rem 0 2.8rem 2.4rem;
+    border-top: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
+  }
+
+  .nx01-systems__card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 1px;
+    background: color-mix(in srgb, rgba(var(--color-foreground)) 12%, transparent);
+  }
+
+  .nx01-systems__card:last-child {
+    border-bottom: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
+  }
+
+  .nx01-systems__card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1.6rem;
+    margin-bottom: 2rem;
+  }
+
+  .nx01-systems__number {
+    margin: 0;
+    font-family: var(--font-heading-family);
+    font-size: 1.3rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 46%, transparent);
+  }
+
+  .nx01-systems__title {
+    margin: 0 0 0.6rem;
+    font-family: var(--font-heading-family);
+    font-size: clamp(2rem, 2.4vw, 2.4rem);
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    line-height: 1.2;
+    text-transform: uppercase;
+  }
+
+  .nx01-systems__descriptor {
+    margin: 0 0 1.6rem;
+    font-size: 1.3rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 48%, transparent);
+  }
+
+  .nx01-systems__actives {
+    margin: 0 0 1.6rem;
+    padding: 0;
+    list-style: none;
+  }
+
+  .nx01-systems__actives li {
+    padding: 0.55rem 0;
+    font-size: 1.5rem;
+    line-height: 1.4;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 78%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 8%, transparent);
+  }
+
+  .nx01-systems__actives li:first-child {
+    border-top: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 8%, transparent);
+  }
+
+  .nx01-systems__body {
+    margin: 0;
+    max-width: 34rem;
+    font-size: 1.5rem;
+    line-height: 1.55;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 62%, transparent);
+  }
+
+  .nx01-systems__diagram {
+    position: relative;
+    flex: 0 0 5.6rem;
+    width: 5.6rem;
+    height: 5.6rem;
+  }
+
+  .nx01-systems__diagram span {
+    position: absolute;
+    width: 0.7rem;
+    height: 0.7rem;
+    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 36%, transparent);
+    border-radius: 50%;
+    background: rgb(var(--color-background));
+  }
+
+  .nx01-systems__diagram--energy::before,
+  .nx01-systems__diagram--energy::after,
+  .nx01-systems__diagram--calm::before,
+  .nx01-systems__diagram--cofactors::before {
+    content: "";
+    position: absolute;
+    background: color-mix(in srgb, rgba(var(--color-foreground)) 16%, transparent);
+  }
+
+  .nx01-systems__diagram--energy::before {
+    top: 1.7rem;
+    left: 1.5rem;
+    width: 2.6rem;
+    height: 1px;
+    transform: rotate(58deg);
+    transform-origin: left center;
+  }
+
+  .nx01-systems__diagram--energy::after {
+    top: 1.7rem;
+    right: 1.5rem;
+    width: 2.6rem;
+    height: 1px;
+    transform: rotate(-58deg);
+    transform-origin: right center;
+  }
+
+  .nx01-systems__diagram--energy span:nth-child(1) {
+    top: 0.4rem;
+    left: 2.45rem;
+  }
+
+  .nx01-systems__diagram--energy span:nth-child(2) {
+    bottom: 0.8rem;
+    left: 0.7rem;
+  }
+
+  .nx01-systems__diagram--energy span:nth-child(3) {
+    bottom: 0.8rem;
+    right: 0.7rem;
+  }
+
+  .nx01-systems__diagram--energy span:nth-child(2)::after {
+    content: "";
+    position: absolute;
+    top: 0.3rem;
+    left: 0.7rem;
+    width: 3.4rem;
+    height: 1px;
+    background: color-mix(in srgb, rgba(var(--color-foreground)) 16%, transparent);
+  }
+
+  .nx01-systems__diagram--cholinergic {
+    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 14%, transparent);
+    border-radius: 50%;
+  }
+
+  .nx01-systems__diagram--cholinergic::before {
+    content: "";
+    position: absolute;
+    inset: 0.8rem;
+    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 20%, transparent);
+    border-radius: 50%;
+  }
+
+  .nx01-systems__diagram--cholinergic span:nth-child(1) {
+    top: 50%;
+    left: 50%;
+    width: 0.9rem;
+    height: 0.9rem;
+    transform: translate(-50%, -50%);
+    background: color-mix(in srgb, rgba(var(--color-foreground)) 18%, transparent);
+  }
+
+  .nx01-systems__diagram--cholinergic span:nth-child(2),
+  .nx01-systems__diagram--cholinergic span:nth-child(3) {
+    display: none;
+  }
+
+  .nx01-systems__diagram--calm::before {
+    top: 50%;
+    left: 1.1rem;
+    width: 3.4rem;
+    height: 1px;
+  }
+
+  .nx01-systems__diagram--calm::after {
+    content: "";
+    position: absolute;
+    top: 1.4rem;
+    left: 1.4rem;
+    width: 2.8rem;
+    height: 1.8rem;
+    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 16%, transparent);
+    border-bottom: 0;
+    border-radius: 2.8rem 2.8rem 0 0;
+  }
+
+  .nx01-systems__diagram--calm span:nth-child(1) {
+    top: 50%;
+    left: 0.8rem;
+    transform: translateY(-50%);
+  }
+
+  .nx01-systems__diagram--calm span:nth-child(2) {
+    top: 50%;
+    right: 0.8rem;
+    transform: translateY(-50%);
+  }
+
+  .nx01-systems__diagram--calm span:nth-child(3) {
+    display: none;
+  }
+
+  .nx01-systems__diagram--cofactors::before {
+    left: 0.6rem;
+    right: 0.6rem;
+    bottom: 1.4rem;
+    height: 1px;
+  }
+
+  .nx01-systems__diagram--cofactors span:nth-child(1),
+  .nx01-systems__diagram--cofactors span:nth-child(2),
+  .nx01-systems__diagram--cofactors span:nth-child(3) {
+    bottom: 1.1rem;
+    border-radius: 0.1rem;
+    width: 0.2rem;
+    height: 1.4rem;
+    background: color-mix(in srgb, rgba(var(--color-foreground)) 28%, transparent);
+    border: 0;
+  }
+
+  .nx01-systems__diagram--cofactors span:nth-child(1) {
+    left: 1rem;
+  }
+
+  .nx01-systems__diagram--cofactors span:nth-child(2) {
+    left: 2.7rem;
+  }
+
+  .nx01-systems__diagram--cofactors span:nth-child(3) {
+    right: 1rem;
+    left: auto;
+  }
+
+  @media screen and (min-width: 768px) {
+    .nx01-systems__inner {
+      padding-top: 12rem;
+      padding-bottom: 12.8rem;
+    }
+
+    .nx01-systems__intro {
+      margin-bottom: 6.4rem;
+    }
+
+    .nx01-systems__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0;
+      border-top: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
+    }
+
+    .nx01-systems__card {
+      padding: 3.2rem 3.2rem 3.6rem 0;
+      border-top: 0;
+      border-bottom: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
+    }
+
+    .nx01-systems__card:nth-child(odd) {
+      padding-right: 3.2rem;
+      border-right: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
+    }
+
+    .nx01-systems__card:nth-child(even) {
+      padding-left: 3.2rem;
+    }
+
+    .nx01-systems__card::before {
+      display: none;
+    }
+
+    .nx01-systems__card:last-child {
+      border-bottom: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
+    }
+  }
+
+  @media screen and (min-width: 1100px) {
+    .nx01-systems__grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      border-top: 0;
+    }
+
+    .nx01-systems__card,
+    .nx01-systems__card:nth-child(odd),
+    .nx01-systems__card:nth-child(even),
+    .nx01-systems__card:last-child {
+      padding: 0 2.4rem 0 0;
+      border: 0;
+      border-right: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
+    }
+
+    .nx01-systems__card:last-child {
+      padding-right: 0;
+      border-right: 0;
+    }
+
+    .nx01-systems__card-top {
+      position: relative;
+      padding-top: 2.4rem;
+      margin-bottom: 2.8rem;
+    }
+
+    .nx01-systems__card-top::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: color-mix(in srgb, rgba(var(--color-foreground)) 14%, transparent);
+    }
+
+    .nx01-systems__number {
+      position: relative;
+    }
+
+    .nx01-systems__number::after {
+      content: "";
+      position: absolute;
+      top: -2.4rem;
+      left: 0;
+      width: 2.4rem;
+      height: 1px;
+      background: rgb(var(--color-foreground));
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:sections.nx01_launch_systems.name",
+  "tag": "section",
+  "class": "section-nx01-systems",
+  "enabled_on": {
+    "templates": ["page"]
+  },
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:sections.nx01_launch_systems.settings.color_scheme",
+      "default": "background-1"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "t:sections.nx01_launch_systems.settings.heading",
+      "default": "9 actives. Four jobs."
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "t:sections.nx01_launch_systems.settings.subheading",
+      "default": "Nine actives, arranged by the job they do in the daily foundation."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "system",
+      "name": "t:sections.nx01_launch_systems.blocks.system.name",
+      "settings": [
+        {
+          "type": "text",
+          "id": "number",
+          "label": "t:sections.nx01_launch_systems.blocks.system.settings.number",
+          "default": "01"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "t:sections.nx01_launch_systems.blocks.system.settings.title",
+          "default": "Cellular energy"
+        },
+        {
+          "type": "text",
+          "id": "descriptor",
+          "label": "t:sections.nx01_launch_systems.blocks.system.settings.descriptor",
+          "default": "The metabolic module"
+        },
+        {
+          "type": "textarea",
+          "id": "ingredients",
+          "label": "t:sections.nx01_launch_systems.blocks.system.settings.ingredients",
+          "default": "Acetyl-L-Carnitine\nNMN\nUbiquinol CoQ10"
+        },
+        {
+          "type": "textarea",
+          "id": "body",
+          "label": "t:sections.nx01_launch_systems.blocks.system.settings.body",
+          "default": "ALCAR, NMN, and Ubiquinol CoQ10 are grouped as the cellular-energy module of the daily foundation."
+        },
+        {
+          "type": "select",
+          "id": "diagram",
+          "label": "t:sections.nx01_launch_systems.blocks.system.settings.diagram",
+          "options": [
+            {
+              "value": "energy",
+              "label": "t:sections.nx01_launch_systems.blocks.system.settings.diagram_energy"
+            },
+            {
+              "value": "cholinergic",
+              "label": "t:sections.nx01_launch_systems.blocks.system.settings.diagram_cholinergic"
+            },
+            {
+              "value": "calm",
+              "label": "t:sections.nx01_launch_systems.blocks.system.settings.diagram_calm"
+            },
+            {
+              "value": "cofactors",
+              "label": "t:sections.nx01_launch_systems.blocks.system.settings.diagram_cofactors"
+            }
+          ],
+          "default": "energy"
+        }
+      ]
+    }
+  ],
+  "max_blocks": 8,
+  "presets": [
+    {
+      "name": "t:sections.nx01_launch_systems.presets.name",
+      "blocks": [
+        {
+          "type": "system",
+          "settings": {
+            "number": "01",
+            "title": "Cellular energy",
+            "descriptor": "The metabolic module",
+            "ingredients": "Acetyl-L-Carnitine\nNMN\nUbiquinol CoQ10",
+            "body": "ALCAR, NMN, and Ubiquinol CoQ10 are grouped as the cellular-energy module of the daily foundation.",
+            "diagram": "energy"
+          }
+        },
+        {
+          "type": "system",
+          "settings": {
+            "number": "02",
+            "title": "Cholinergic support",
+            "descriptor": "The choline source",
+            "ingredients": "CDP-Choline",
+            "body": "CDP-Choline stands as the single cholinergic input — one dedicated choline source.",
+            "diagram": "cholinergic"
+          }
+        },
+        {
+          "type": "system",
+          "settings": {
+            "number": "03",
+            "title": "Calm focus",
+            "descriptor": "The modulation pair",
+            "ingredients": "L-Theanine\nRhodiola rosea",
+            "body": "L-Theanine and Rhodiola rosea are paired here. No caffeine in the formula.",
+            "diagram": "calm"
+          }
+        },
+        {
+          "type": "system",
+          "settings": {
+            "number": "04",
+            "title": "Active cofactors",
+            "descriptor": "The B-vitamin forms",
+            "ingredients": "P-5-P\nMethyl B12\n5-MTHF",
+            "body": "P-5-P, Methyl B12, and 5-MTHF are the active-form B vitamins used as cofactors.",
+            "diagram": "cofactors"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
