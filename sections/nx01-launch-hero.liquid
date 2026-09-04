@@ -1,0 +1,529 @@
+{%- liquid
+  assign bottle = section.settings.bottle_image
+  assign bottle_mobile = section.settings.bottle_image_mobile
+  assign bottle_alt = section.settings.bottle_alt | strip
+  assign show_primary = false
+  if section.settings.primary_label != blank and section.settings.primary_href != blank
+    assign show_primary = true
+  endif
+  assign show_secondary = false
+  if section.settings.secondary_label != blank and section.settings.secondary_href != blank
+    assign show_secondary = true
+  endif
+  assign show_ctas = false
+  if show_primary or show_secondary
+    assign show_ctas = true
+  endif
+  assign show_scroll = false
+  if section.settings.scroll_label != blank and section.settings.scroll_href != blank
+    assign show_scroll = true
+  endif
+  assign fact_count = 0
+  for block in section.blocks
+    if block.type == 'fact'
+      if block.settings.value != blank or block.settings.label != blank
+        assign fact_count = fact_count | plus: 1
+      endif
+    endif
+  endfor
+-%}
+
+<section
+  id="nx01-hero-{{ section.id }}"
+  class="nx01-launch-hero xo-section xo-section--{{ section.id }}{% if section.settings.color_scheme != blank %} color-{{ section.settings.color_scheme }}{% endif %}{% if section.settings.full_viewport %} nx01-launch-hero--viewport{% endif %}"
+  aria-labelledby="nx01-hero-heading-{{ section.id }}"
+>
+  <div class="nx01-launch-hero__inner">
+    <div class="nx01-launch-hero__stage">
+      <div class="nx01-launch-hero__copy">
+        {%- if section.settings.eyebrow != blank -%}
+          <p class="nx01-launch-hero__eyebrow">{{ section.settings.eyebrow | escape }}</p>
+        {%- endif -%}
+
+        {%- if section.settings.heading != blank -%}
+          <h1 class="nx01-launch-hero__heading" id="nx01-hero-heading-{{ section.id }}">
+            {{ section.settings.heading | escape }}
+          </h1>
+        {%- endif -%}
+
+        {%- if section.settings.subheading != blank -%}
+          <div class="nx01-launch-hero__sub">{{ section.settings.subheading }}</div>
+        {%- endif -%}
+      </div>
+
+      {%- if bottle != blank -%}
+        <div class="nx01-launch-hero__media">
+          <picture class="nx01-launch-hero__picture">
+            {%- if bottle_mobile != blank -%}
+              <source
+                media="(max-width: 767px)"
+                srcset="
+                  {{ bottle_mobile | image_url: width: 480 }} 480w,
+                  {{ bottle_mobile | image_url: width: 720 }} 720w,
+                  {{ bottle_mobile | image_url: width: 960 }} 960w
+                "
+                sizes="90vw"
+              >
+            {%- endif -%}
+            {{
+              bottle
+              | image_url: width: 1400
+              | image_tag:
+                class: 'nx01-launch-hero__img',
+                loading: 'eager',
+                fetchpriority: 'high',
+                widths: '480, 720, 960, 1200, 1400',
+                sizes: '(max-width: 767px) 90vw, 48vw',
+                alt: bottle_alt,
+                width: bottle.width,
+                height: bottle.height,
+                decoding: 'async'
+            }}
+          </picture>
+        </div>
+      {%- endif -%}
+
+      {%- if show_ctas -%}
+        <div class="nx01-launch-hero__ctas">
+          {%- if show_primary -%}
+            {% render 'button', style: 'primary', text: section.settings.primary_label, link: section.settings.primary_href %}
+          {%- endif -%}
+          {%- if show_secondary -%}
+            {% render 'button', style: 'secondary', text: section.settings.secondary_label, link: section.settings.secondary_href %}
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+    </div>
+
+    {%- if fact_count > 0 -%}
+      <ul class="nx01-launch-hero__facts" aria-label="{{ 'sections.nx01_launch_hero.facts_label' | t }}">
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'fact' -%}
+            {%- if block.settings.value != blank or block.settings.label != blank -%}
+              <li class="nx01-launch-hero__fact" {{ block.shopify_attributes }}>
+                {%- if block.settings.value != blank -%}
+                  <span class="nx01-launch-hero__fact-value">{{ block.settings.value | escape }}</span>
+                {%- endif -%}
+                {%- if block.settings.label != blank -%}
+                  <span class="nx01-launch-hero__fact-label">{{ block.settings.label | escape }}</span>
+                {%- endif -%}
+              </li>
+            {%- endif -%}
+          {%- endif -%}
+        {%- endfor -%}
+      </ul>
+    {%- endif -%}
+
+    {%- if show_scroll -%}
+      <a class="nx01-launch-hero__scroll" href="{{ section.settings.scroll_href | escape }}">
+        <span>{{ section.settings.scroll_label | escape }}</span>
+        <span class="nx01-launch-hero__scroll-icon" aria-hidden="true">
+          {% render 'icon', name: 'arrow-down', size: '1.6rem' %}
+        </span>
+      </a>
+    {%- endif -%}
+  </div>
+</section>
+
+{% stylesheet %}
+  .nx01-launch-hero {
+    --nx01-chrome: 12.8rem;
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    background: rgb(var(--color-background));
+    color: rgb(var(--color-foreground));
+    font-family: var(--font-body-family);
+  }
+
+  .nx01-launch-hero::before,
+  .nx01-launch-hero::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .nx01-launch-hero::before {
+    background-image:
+      linear-gradient(color-mix(in srgb, rgba(var(--color-foreground)) 6%, transparent) 1px, transparent 1px),
+      linear-gradient(90deg, color-mix(in srgb, rgba(var(--color-foreground)) 6%, transparent) 1px, transparent 1px);
+    background-size: 4.8rem 4.8rem;
+    mask-image: radial-gradient(ellipse 78% 68% at 72% 38%, #000 18%, transparent 76%);
+    opacity: 0.85;
+  }
+
+  .nx01-launch-hero::after {
+    background:
+      radial-gradient(58% 48% at 16% 6%, color-mix(in srgb, rgba(var(--color-foreground)) 7%, transparent), transparent 72%),
+      linear-gradient(180deg, transparent 64%, color-mix(in srgb, rgba(var(--color-foreground)) 5%, transparent) 100%);
+  }
+
+  .nx01-launch-hero__inner {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: var(--page-width);
+    margin: 0 auto;
+    padding: 4rem var(--page-gap) 3.2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 3.2rem;
+  }
+
+  .nx01-launch-hero__stage {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "copy"
+      "media"
+      "ctas";
+    align-items: center;
+    gap: 2.4rem;
+  }
+
+  .nx01-launch-hero__copy {
+    grid-area: copy;
+    max-width: 62rem;
+  }
+
+  .nx01-launch-hero__media {
+    grid-area: media;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    min-height: 0;
+  }
+
+  .nx01-launch-hero__media::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: 2%;
+    width: 48%;
+    height: 10%;
+    transform: translateX(-50%);
+    background: radial-gradient(ellipse, color-mix(in srgb, rgba(var(--color-foreground)) 20%, transparent), transparent 72%);
+    filter: blur(1.2rem);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .nx01-launch-hero__ctas {
+    grid-area: ctas;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.2rem;
+  }
+
+  .nx01-launch-hero__eyebrow {
+    margin: 0 0 1.6rem;
+    font-size: 1.2rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    line-height: 1.4;
+    font-variant: small-caps;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 52%, transparent);
+  }
+
+  .nx01-launch-hero__heading {
+    margin: 0 0 1.6rem;
+    font-family: var(--font-heading-family);
+    font-size: clamp(3.6rem, 8vw, 7.2rem);
+    font-weight: 600;
+    letter-spacing: -0.04em;
+    line-height: 1.06;
+    color: rgb(var(--color-foreground));
+  }
+
+  .nx01-launch-hero__sub {
+    max-width: 42rem;
+    margin: 0;
+    font-size: clamp(1.6rem, 2vw, 1.8rem);
+    line-height: 1.55;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 68%, transparent);
+  }
+
+  .nx01-launch-hero__sub p {
+    margin: 0;
+  }
+
+  .nx01-launch-hero__picture,
+  .nx01-launch-hero__img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .nx01-launch-hero__img {
+    position: relative;
+    z-index: 1;
+    max-height: 26rem;
+    width: auto;
+    max-width: 100%;
+    margin-inline: auto;
+    object-fit: contain;
+  }
+
+  .nx01-launch-hero__ctas .xo-btn {
+    min-height: 4.8rem;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .nx01-launch-hero__facts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2.4rem 1.6rem;
+    margin: 0;
+    padding: 2.4rem 0 0;
+    list-style: none;
+    border-top: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
+  }
+
+  .nx01-launch-hero__fact {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .nx01-launch-hero__fact-value {
+    font-family: var(--font-heading-family);
+    font-size: clamp(2.8rem, 5vw, 4rem);
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    color: rgb(var(--color-foreground));
+  }
+
+  .nx01-launch-hero__fact-label {
+    font-size: 1.1rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 52%, transparent);
+  }
+
+  .nx01-launch-hero__scroll {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    align-self: center;
+    gap: 0.4rem;
+    min-height: 4.8rem;
+    min-width: 4.8rem;
+    padding: 0.8rem 1.2rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 52%, transparent);
+  }
+
+  .nx01-launch-hero__scroll:hover,
+  .nx01-launch-hero__scroll:focus-visible {
+    color: rgb(var(--color-foreground));
+  }
+
+  .nx01-launch-hero__scroll-icon {
+    display: flex;
+  }
+
+  @media screen and (min-width: 768px) {
+    .nx01-launch-hero--viewport .nx01-launch-hero__inner {
+      min-height: calc(100svh - var(--nx01-chrome));
+      justify-content: center;
+      padding-top: 6.4rem;
+      padding-bottom: 4rem;
+    }
+
+    .nx01-launch-hero__stage {
+      grid-template-columns: minmax(0, 0.44fr) minmax(0, 0.56fr);
+      grid-template-rows: 1fr auto auto 1fr;
+      grid-template-areas:
+        ". media"
+        "copy media"
+        "ctas media"
+        ". media";
+      column-gap: 4.8rem;
+      row-gap: 2.4rem;
+      align-items: center;
+    }
+
+    .nx01-launch-hero__ctas .xo-btn {
+      width: auto;
+    }
+
+    .nx01-launch-hero__img {
+      max-height: min(68vh, 64rem);
+    }
+
+    .nx01-launch-hero__facts {
+      grid-template-columns: repeat(4, 1fr);
+      padding-top: 3.2rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nx01-launch-hero__img {
+      transform: none;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:sections.nx01_launch_hero.name",
+  "tag": "section",
+  "class": "section-nx01-launch-hero",
+  "enabled_on": {
+    "templates": ["page"]
+  },
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:sections.nx01_launch_hero.settings.color_scheme",
+      "default": "background-1"
+    },
+    {
+      "type": "checkbox",
+      "id": "full_viewport",
+      "label": "t:sections.nx01_launch_hero.settings.full_viewport",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "t:sections.nx01_launch_hero.settings.eyebrow",
+      "default": "Introducing NX-01 · Baseline"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "t:sections.nx01_launch_hero.settings.heading",
+      "default": "We finally built our own nootropic."
+    },
+    {
+      "type": "richtext",
+      "id": "subheading",
+      "label": "t:sections.nx01_launch_hero.settings.subheading",
+      "default": "<p>A caffeine-free daily cognitive foundation built from 9 complementary actives — in 3 capsules.</p>"
+    },
+    {
+      "type": "text",
+      "id": "primary_label",
+      "label": "t:sections.nx01_launch_hero.settings.primary_label",
+      "default": "Shop NX-01"
+    },
+    {
+      "type": "text",
+      "id": "primary_href",
+      "label": "t:sections.nx01_launch_hero.settings.primary_href",
+      "default": "#nx01-buy",
+      "info": "t:sections.nx01_launch_hero.settings.href_info"
+    },
+    {
+      "type": "text",
+      "id": "secondary_label",
+      "label": "t:sections.nx01_launch_hero.settings.secondary_label",
+      "default": "Explore the Formula"
+    },
+    {
+      "type": "text",
+      "id": "secondary_href",
+      "label": "t:sections.nx01_launch_hero.settings.secondary_href",
+      "default": "#nx01-formula"
+    },
+    {
+      "type": "image_picker",
+      "id": "bottle_image",
+      "label": "t:sections.nx01_launch_hero.settings.bottle_image",
+      "info": "t:sections.nx01_launch_hero.settings.bottle_image_info"
+    },
+    {
+      "type": "image_picker",
+      "id": "bottle_image_mobile",
+      "label": "t:sections.nx01_launch_hero.settings.bottle_image_mobile"
+    },
+    {
+      "type": "text",
+      "id": "bottle_alt",
+      "label": "t:sections.nx01_launch_hero.settings.bottle_alt",
+      "info": "t:sections.nx01_launch_hero.settings.bottle_alt_info"
+    },
+    {
+      "type": "text",
+      "id": "scroll_label",
+      "label": "t:sections.nx01_launch_hero.settings.scroll_label",
+      "default": "Why we built it"
+    },
+    {
+      "type": "text",
+      "id": "scroll_href",
+      "label": "t:sections.nx01_launch_hero.settings.scroll_href",
+      "default": "#nx01-why"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "fact",
+      "name": "t:sections.nx01_launch_hero.blocks.fact.name",
+      "settings": [
+        {
+          "type": "text",
+          "id": "value",
+          "label": "t:sections.nx01_launch_hero.blocks.fact.settings.value",
+          "default": "9"
+        },
+        {
+          "type": "text",
+          "id": "label",
+          "label": "t:sections.nx01_launch_hero.blocks.fact.settings.label",
+          "default": "Actives"
+        }
+      ]
+    }
+  ],
+  "max_blocks": 4,
+  "presets": [
+    {
+      "name": "t:sections.nx01_launch_hero.presets.name",
+      "blocks": [
+        {
+          "type": "fact",
+          "settings": {
+            "value": "9",
+            "label": "Actives"
+          }
+        },
+        {
+          "type": "fact",
+          "settings": {
+            "value": "3",
+            "label": "Capsules daily"
+          }
+        },
+        {
+          "type": "fact",
+          "settings": {
+            "value": "30-day",
+            "label": "Bottle"
+          }
+        },
+        {
+          "type": "fact",
+          "settings": {
+            "value": "0 mg",
+            "label": "Caffeine"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
