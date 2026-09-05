@@ -149,33 +149,21 @@
                 {%- endif -%}
               </div>
 
-              {%- if has_multiple_variants -%}
+              {%- if has_multiple_variants or has_selling_plans -%}
                 {% render 'button', style: 'primary', text: choose_options_label, link: product.url, block: true %}
               {%- else -%}
                 {% form 'product', product, id: form_id, data-type: 'add-to-cart-form' %}
                   <input type="hidden" name="id" value="{{ variant.id }}">
-                  <xo-cart-quantity>
-                    <input type="hidden" name="quantity" value="{{ qty }}">
-                  </xo-cart-quantity>
-                  {%- if has_selling_plans -%}
-                    <label class="nx01-buy__plan-label" for="{{ form_id }}-plan">{{ 'sections.nx01_launch_buy.purchase_option' | t }}</label>
-                    <select class="nx01-buy__plan" id="{{ form_id }}-plan" name="selling_plan">
-                      {%- unless variant.requires_selling_plan -%}
-                        <option value="">{{ 'sections.nx01_launch_buy.one_time' | t }}</option>
-                      {%- endunless -%}
-                      {%- for allocation in variant.selling_plan_allocations -%}
-                        <option value="{{ allocation.selling_plan.id }}">{{ allocation.selling_plan.name | escape }}</option>
-                      {%- endfor -%}
-                    </select>
-                  {%- endif -%}
+                  <input type="hidden" name="quantity" value="{{ qty }}">
                   <xo-cart-add
+                    xo-product-id="{{ product.id }}"
+                    xo-variant-id="{{ variant.id }}"
+                    xo-product-quantity="{{ qty }}"
+                    xo-section-id="{{ section.id }}-{{ block.id }}"
                     {% if settings.cart_type == 'page' %}xo-cart-redirection{% endif %}
                   >
                     {% render 'button', style: 'primary', text: cta_label, type: 'submit', block: true, text_unavailable: unavailable_label %}
                   </xo-cart-add>
-                  <div class="nx01-buy__form-status" role="alert" aria-live="assertive">
-                    {% render 'cart-add-error' %}
-                  </div>
                 {% endform %}
               {%- endif -%}
             </article>
@@ -295,11 +283,6 @@
     margin-top: 2.4rem;
   }
 
-  .nx01-buy__form-status:empty,
-  .nx01-buy__form-status:not(:has(xo-cart-add-error-message:not(:empty))) {
-    display: none;
-  }
-
   .nx01-buy__card {
     display: flex;
     flex-direction: column;
@@ -383,24 +366,6 @@
   .nx01-buy__saving {
     font-weight: 600;
     color: rgb(var(--nx01-navy-deep));
-  }
-
-  .nx01-buy__plan-label {
-    display: block;
-    margin-bottom: 0.8rem;
-    font-size: 1.2rem;
-    font-weight: 600;
-  }
-
-  .nx01-buy__plan {
-    width: 100%;
-    min-height: 4.8rem;
-    margin-bottom: 1.6rem;
-    padding: 0 1.2rem;
-    border: 0.1rem solid rgb(var(--nx01-line));
-    border-radius: var(--nx01-radius);
-    background: rgb(var(--nx01-field));
-    font: inherit;
   }
 
   .nx01-buy__trust {
