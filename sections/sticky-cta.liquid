@@ -3,6 +3,21 @@
   - Fixed position bar, safe-area-inset, reduced-motion
 {% endcomment %}
 
+{%- liquid
+  assign product = section.settings.product
+  assign primary_label = section.settings.primary_label
+  assign primary_href = section.settings.primary_href
+  if product != blank
+    assign variant = product.selected_or_first_available_variant
+    if variant == blank or variant.available == false
+      assign primary_label = section.settings.sold_out_label
+      if primary_label == blank
+        assign primary_label = 'products.product.sold_out' | t
+      endif
+    endif
+  endif
+-%}
+
 {%- style -%}
   .xo-section--{{ section.id }} {
     display: none;
@@ -16,6 +31,15 @@
     background: color-mix(in srgb, rgba(var(--color-foreground)) 96%, transparent);
     -webkit-backdrop-filter: saturate(140%) blur(4px);
     backdrop-filter: saturate(140%) blur(4px);
+  }
+
+  .xo-section--{{ section.id }} .sticky-cta__mobile {
+    display: contents;
+  }
+
+  .xo-section--{{ section.id }} .sticky-cta__desktop,
+  .xo-section--{{ section.id }} .sticky-cta__apps {
+    display: none;
   }
 
   .xo-section--{{ section.id }} .xo-btn {
@@ -37,6 +61,13 @@
   @media (max-width: 768px) {
     .xo-section--{{ section.id }} {
       display: flex;
+      transition: transform 180ms ease, visibility 180ms ease;
+    }
+
+    .xo-section--{{ section.id }}[data-mobile-hidden="true"] {
+      visibility: hidden;
+      pointer-events: none;
+      transform: translateY(110%);
     }
 
     {% if section.settings.reserve_space_mobile %}
@@ -46,6 +77,86 @@
     }
     {% endif %}
   }
+
+  {% if section.settings.desktop_navigation %}
+    @media (min-width: 769px) {
+      #shopify-section-{{ section.id }} {
+        position: sticky;
+        top: 0;
+        z-index: 40;
+      }
+
+      .xo-section--{{ section.id }} {
+        position: static;
+        display: block;
+        padding: 0;
+        background: rgb(var(--color-background));
+        border-top: 0.1rem solid rgba(var(--color-foreground), 0.12);
+        border-bottom: 0.1rem solid rgba(var(--color-foreground), 0.12);
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+      }
+
+      .xo-section--{{ section.id }} .sticky-cta__mobile {
+        display: none;
+      }
+
+      .xo-section--{{ section.id }} .sticky-cta__desktop {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 2.4rem;
+        width: 100%;
+        max-width: 128rem;
+        min-height: 6rem;
+        margin: 0 auto;
+        padding: 0.6rem var(--page-gap, 2.4rem);
+      }
+
+      .xo-section--{{ section.id }} .sticky-cta__product {
+        margin: 0;
+        font-size: 1.3rem;
+        font-weight: 700;
+        white-space: nowrap;
+      }
+
+      .xo-section--{{ section.id }} .sticky-cta__nav-list {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .xo-section--{{ section.id }} .sticky-cta__nav-link {
+        display: inline-flex;
+        align-items: center;
+        min-height: 4.8rem;
+        padding: 0 1.2rem;
+        color: rgb(var(--color-foreground));
+        font-size: 1.2rem;
+        font-weight: 600;
+        text-decoration: none;
+      }
+
+      .xo-section--{{ section.id }} .sticky-cta__nav-link:hover,
+      .xo-section--{{ section.id }} .sticky-cta__nav-link:focus-visible {
+        text-decoration: underline;
+        text-underline-offset: 0.4rem;
+      }
+
+      .xo-section--{{ section.id }} .sticky-cta__desktop > .xo-btn {
+        flex: none;
+        min-height: 4.8rem;
+      }
+
+      .xo-section--{{ section.id }} .sticky-cta__apps {
+        display: block;
+      }
+    }
+  {% endif %}
 
   @media (prefers-reduced-motion: reduce) {
     .xo-section--{{ section.id }} *,
@@ -57,10 +168,79 @@
   }
 {%- endstyle -%}
 
-<section {% render 'section-attr' %} aria-label="Page actions">
-  {% render 'button', style: 'primary', text: section.settings.primary_label, link: section.settings.primary_href %}
-  {% render 'button', style: 'secondary', text: section.settings.secondary_label, link: section.settings.secondary_href %}
+<section
+  {% render 'section-attr' %}
+  id="sticky-cta-{{ section.id }}"
+  aria-label="{{ 'sections.sticky_cta.actions_label' | t }}"
+  data-show-after="{{ section.settings.show_after_id | escape }}"
+  data-hide-at="{{ section.settings.hide_at_id | escape }}"
+>
+  <div class="sticky-cta__mobile">
+    {% render 'button', style: 'primary', text: primary_label, link: primary_href %}
+    {% render 'button', style: 'secondary', text: section.settings.secondary_label, link: section.settings.secondary_href %}
+  </div>
+
+  {%- if section.settings.desktop_navigation -%}
+    <div class="sticky-cta__desktop">
+      <p class="sticky-cta__product">{{ section.settings.product_label | default: product.title | escape }}</p>
+      <nav aria-label="{{ 'sections.sticky_cta.navigation_label' | t }}">
+        <ul class="sticky-cta__nav-list">
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'link' and block.settings.label != blank and block.settings.href != blank -%}
+              <li {{ block.shopify_attributes }}>
+                <a class="sticky-cta__nav-link" href="{{ block.settings.href | escape }}">{{ block.settings.label | escape }}</a>
+              </li>
+            {%- endif -%}
+          {%- endfor -%}
+        </ul>
+      </nav>
+      {% render 'button', style: 'primary', text: primary_label, link: primary_href %}
+    </div>
+  {%- endif -%}
+
+  {%- for block in section.blocks -%}
+    {%- if block.type == '@app' -%}
+      <div class="sticky-cta__apps" {{ block.shopify_attributes }}>{% render block %}</div>
+    {%- endif -%}
+  {%- endfor -%}
 </section>
+
+<script>
+  (() => {
+    const init = () => {
+      const bar = document.getElementById('sticky-cta-{{ section.id }}');
+      if (!bar || !window.matchMedia('(max-width: 768px)').matches) return;
+
+      const start = document.getElementById(bar.dataset.showAfter);
+      const stop = document.getElementById(bar.dataset.hideAt);
+      if (!start && !stop) return;
+
+      let queued = false;
+      const update = () => {
+        queued = false;
+        const afterStart = !start || start.getBoundingClientRect().bottom <= 0;
+        const stopRect = stop ? stop.getBoundingClientRect() : null;
+        const stopVisible = stopRect && stopRect.top < window.innerHeight && stopRect.bottom > 0;
+        bar.dataset.mobileHidden = String(!afterStart || stopVisible);
+      };
+      const requestUpdate = () => {
+        if (queued) return;
+        queued = true;
+        window.requestAnimationFrame(update);
+      };
+
+      update();
+      window.addEventListener('scroll', requestUpdate, { passive: true });
+      window.addEventListener('resize', requestUpdate);
+    };
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init, { once: true });
+    } else {
+      init();
+    }
+  })();
+</script>
 
 {% schema %}
 {
@@ -69,16 +249,30 @@
   "class": "section-phb-sticky-cta",
   "settings": [
     { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "default" },
+    { "type": "product", "id": "product", "label": "Product used for availability" },
+    { "type": "text", "id": "product_label", "label": "Desktop product label" },
     { "type": "text", "id": "primary_label", "label": "Primary label", "default": "Shop Phenibut" },
+    { "type": "text", "id": "sold_out_label", "label": "Sold-out label", "default": "Join restock list" },
     { "type": "text", "id": "primary_href", "label": "Primary link (URL or #anchor)", "default": "#shop-phenibut" },
     { "type": "text", "id": "secondary_label", "label": "Secondary label", "default": "Safety" },
     { "type": "text", "id": "secondary_href", "label": "Secondary link (URL or #anchor)", "default": "#safety" },
     { "type": "checkbox", "id": "reserve_space_mobile", "label": "Reserve bottom space on mobile", "default": true },
+    { "type": "checkbox", "id": "desktop_navigation", "label": "Show desktop jump navigation", "default": false },
+    { "type": "text", "id": "show_after_id", "label": "Show mobile bar after element ID", "info": "Enter an element ID without #. Leave blank to show immediately." },
+    { "type": "text", "id": "hide_at_id", "label": "Hide mobile bar while element ID is visible", "info": "Enter an element ID without #." },
     { "type": "header", "content": "Spacing" },
     { "type": "range", "id": "padding_top", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding top", "default": 0 },
     { "type": "range", "id": "padding_bottom", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding bottom", "default": 0 }
   ],
   "blocks": [
+    {
+      "type": "link",
+      "name": "Desktop navigation link",
+      "settings": [
+        { "type": "text", "id": "label", "label": "Label", "default": "Formula" },
+        { "type": "text", "id": "href", "label": "Anchor or URL", "default": "#nx01-formula" }
+      ]
+    },
     { "type": "@app" }
   ],
   "presets": [ { "name": "Sticky CTA (Mobile)" } ]

@@ -2,6 +2,7 @@
 
 {%- liquid
   assign fact_count = 0
+  assign image_count = 0
   for block in section.blocks
     if block.type == 'fact'
       if block.settings.value != blank or block.settings.label != blank
@@ -9,6 +10,15 @@
       endif
     endif
   endfor
+  if section.settings.image_1 != blank
+    assign image_count = image_count | plus: 1
+  endif
+  if section.settings.image_2 != blank
+    assign image_count = image_count | plus: 1
+  endif
+  if section.settings.image_3 != blank
+    assign image_count = image_count | plus: 1
+  endif
 -%}
 
 <section
@@ -32,7 +42,7 @@
       {%- endif -%}
     </div>
 
-    {%- if fact_count > 0 -%}
+    {%- if section.settings.show_facts and fact_count > 0 -%}
       <ul class="nx01-snapshot__facts" aria-label="{{ 'sections.nx01_launch_snapshot.facts_label' | t }}">
         {%- for block in section.blocks -%}
           {%- if block.type == 'fact' -%}
@@ -52,7 +62,7 @@
     {%- endif -%}
 
     {%- if section.settings.image_1 != blank or section.settings.image_2 != blank or section.settings.image_3 != blank -%}
-      <ul class="nx01-snapshot__gallery">
+      <ul class="nx01-snapshot__gallery" style="--nx01-gallery-count: {{ image_count }};">
         {%- if section.settings.image_1 != blank -%}
           <li>
             {{
@@ -174,7 +184,7 @@
     }
 
     .nx01-snapshot__gallery {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(var(--nx01-gallery-count, 3), minmax(0, 1fr));
     }
 
     .nx01-snapshot__gallery li {
@@ -196,6 +206,7 @@
     { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "09 · Experience Baseline" },
     { "type": "text", "id": "heading", "label": "Heading", "default": "Built to disappear into your routine." },
     { "type": "textarea", "id": "subheading", "label": "Subheading", "default": "Designed to provide a high daily yield with zero friction. Take your capsules, run your day." },
+    { "type": "checkbox", "id": "show_facts", "label": "Show product facts", "default": true },
     { "type": "image_picker", "id": "image_1", "label": "Image 1" },
     { "type": "text", "id": "image_1_alt", "label": "Image 1 alt text" },
     { "type": "image_picker", "id": "image_2", "label": "Image 2" },

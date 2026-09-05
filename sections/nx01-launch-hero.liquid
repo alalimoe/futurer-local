@@ -1,9 +1,30 @@
 {%- liquid
+  assign product = section.settings.product
+  if product == blank
+    assign product = all_products['nx-01-baseline']
+  endif
+  assign variant = product.selected_or_first_available_variant
+  assign product_available = false
+  if variant != blank and variant.available
+    assign product_available = true
+  endif
+  assign primary_label = section.settings.primary_label
+  assign primary_href = section.settings.primary_href
+  assign meta = section.settings.meta
+  if variant != blank
+    assign bottle_price = variant.price | money
+    assign daily_price = variant.price | divided_by: 30 | money
+    assign meta = 'sections.nx01_launch_hero.dynamic_meta' | t: price: bottle_price, daily_price: daily_price
+  endif
+  if product != blank and product_available == false
+    assign primary_label = 'sections.nx01_launch_hero.restock_cta' | t
+    assign primary_href = '#nx01-buy'
+  endif
   assign bottle = section.settings.bottle_image
   assign bottle_mobile = section.settings.bottle_image_mobile
   assign bottle_alt = section.settings.bottle_alt | strip
   assign show_primary = false
-  if section.settings.primary_label != blank and section.settings.primary_href != blank
+  if primary_label != blank and primary_href != blank
     assign show_primary = true
   endif
   assign show_secondary = false
@@ -51,8 +72,12 @@
           </h1>
         {%- endif -%}
 
-        {%- if section.settings.meta != blank -%}
-          <p class="nx01-launch-hero__meta">{{ section.settings.meta | escape }}</p>
+        {%- if meta != blank -%}
+          <p class="nx01-launch-hero__meta">{{ meta | escape }}</p>
+        {%- endif -%}
+
+        {%- if product != blank and product_available == false -%}
+          <p class="nx01-launch-hero__availability" role="status">{{ 'sections.nx01_launch_hero.sold_out' | t }}</p>
         {%- endif -%}
 
         {%- if section.settings.subheading != blank -%}
@@ -62,7 +87,7 @@
         {%- if show_ctas -%}
           <div class="nx01-launch-hero__ctas">
             {%- if show_primary -%}
-              {% render 'button', style: 'primary', text: section.settings.primary_label, link: section.settings.primary_href %}
+              {% render 'button', style: 'primary', text: primary_label, link: primary_href %}
             {%- endif -%}
             {%- if show_secondary -%}
               {% render 'button', style: 'secondary', text: section.settings.secondary_label, link: section.settings.secondary_href %}
@@ -190,6 +215,19 @@
     font-weight: 500;
     line-height: 1.5;
     color: rgb(var(--nx01-ink));
+  }
+
+  .nx01-launch-hero__availability {
+    margin: 0;
+    padding: 0.6rem 1rem;
+    border: 0.1rem solid rgb(var(--nx01-navy-deep));
+    border-radius: 10rem;
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    line-height: 1.4;
+    text-transform: uppercase;
+    color: rgb(var(--nx01-navy-deep));
   }
 
   .nx01-launch-hero__sub {
@@ -338,6 +376,11 @@
       "id": "full_viewport",
       "label": "t:sections.nx01_launch_hero.settings.full_viewport",
       "default": true
+    },
+    {
+      "type": "product",
+      "id": "product",
+      "label": "Product used for live price and availability"
     },
     {
       "type": "text",

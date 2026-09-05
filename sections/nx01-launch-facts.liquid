@@ -45,8 +45,8 @@
                 {%- if block.settings.name != blank or block.settings.amount != blank or block.settings.system != blank -%}
                   <tr {{ block.shopify_attributes }}>
                     <th scope="row">{{ block.settings.name | escape }}</th>
-                    <td>{{ block.settings.amount | escape }}</td>
-                    <td>{{ block.settings.system | escape }}</td>
+                    <td data-label="{{ 'sections.nx01_launch_facts.col_amount' | t }}">{{ block.settings.amount | escape }}</td>
+                    <td data-label="{{ 'sections.nx01_launch_facts.col_system' | t }}">{{ block.settings.system | escape }}</td>
                   </tr>
                 {%- endif -%}
               {%- endif -%}
@@ -59,13 +59,26 @@
       </div>
 
       {%- if section.settings.panel_heading != blank or section.settings.panel_meta != blank or section.settings.panel_note != blank -%}
-        <aside class="nx01-facts__panel" aria-label="{{ section.settings.panel_heading | escape }}">
+        <aside class="nx01-facts__panel" aria-labelledby="nx01-facts-panel-heading-{{ section.id }}">
           {%- if section.settings.panel_heading != blank -%}
-            <h3 class="nx01-facts__panel-title">{{ section.settings.panel_heading | escape }}</h3>
+            <h3 class="nx01-facts__panel-title" id="nx01-facts-panel-heading-{{ section.id }}">{{ section.settings.panel_heading | escape }}</h3>
           {%- endif -%}
           {%- if section.settings.panel_meta != blank -%}
             <p class="nx01-facts__panel-meta">{{ section.settings.panel_meta | escape }}</p>
           {%- endif -%}
+          <div class="nx01-facts__panel-rule" aria-hidden="true"></div>
+          <ul class="nx01-facts__panel-list">
+            {%- for block in section.blocks -%}
+              {%- if block.type == 'ingredient' -%}
+                {%- if block.settings.name != blank or block.settings.amount != blank -%}
+                  <li>
+                    <span>{{ block.settings.name | escape }}</span>
+                    <strong>{{ block.settings.amount | escape }}</strong>
+                  </li>
+                {%- endif -%}
+              {%- endif -%}
+            {%- endfor -%}
+          </ul>
           {%- if section.settings.panel_note != blank -%}
             <p class="nx01-facts__panel-note">{{ section.settings.panel_note | escape }}</p>
           {%- endif -%}
@@ -91,7 +104,7 @@
   .nx01-facts__table th,
   .nx01-facts__table td {
     padding: 2rem 0;
-    text-align: left;
+    text-align: start;
     border-bottom: 0.1rem solid #3a3737;
     vertical-align: top;
   }
@@ -118,17 +131,18 @@
     font-size: 1.3rem;
     font-weight: 600;
     color: rgb(var(--nx01-navy-deep));
-    text-align: right;
+    text-align: end;
   }
 
   .nx01-facts__table thead th:nth-child(2),
   .nx01-facts__table thead th:nth-child(3),
   .nx01-facts__table td:nth-child(2) {
-    text-align: right;
+    text-align: end;
   }
 
   .nx01-facts__panel {
     padding: 3.2rem;
+    border: 0.2rem solid rgb(var(--nx01-rule));
     background: rgb(var(--nx01-surface));
     border-radius: var(--nx01-radius);
   }
@@ -147,14 +161,105 @@
     color: rgb(var(--nx01-body));
   }
 
+  .nx01-facts__panel-rule {
+    height: 0.8rem;
+    margin: 1.6rem 0 0;
+    background: rgb(var(--nx01-rule));
+  }
+
+  .nx01-facts__panel-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .nx01-facts__panel-list li {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 1.6rem;
+    padding: 1.2rem 0;
+    border-bottom: 0.1rem solid rgb(var(--nx01-rule));
+    font-size: 1.2rem;
+    line-height: 1.35;
+  }
+
+  .nx01-facts__panel-list strong {
+    white-space: nowrap;
+  }
+
   .nx01-facts__panel-note {
     margin-top: 2.4rem;
+  }
+
+  @media screen and (max-width: 767px) {
+    .nx01-facts__table,
+    .nx01-facts__table tbody,
+    .nx01-facts__table tr,
+    .nx01-facts__table th,
+    .nx01-facts__table td {
+      display: block;
+      width: 100%;
+    }
+
+    .nx01-facts__table thead {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+
+    .nx01-facts__table tr {
+      margin-bottom: 1.2rem;
+      padding: 1.6rem;
+      border: 0.1rem solid rgb(var(--nx01-line));
+      background: rgb(var(--nx01-surface));
+    }
+
+    .nx01-facts__table th,
+    .nx01-facts__table td {
+      padding: 0;
+      border: 0;
+      text-align: start;
+    }
+
+    .nx01-facts__table tbody th {
+      margin-bottom: 1.2rem;
+      font-size: 1.5rem;
+    }
+
+    .nx01-facts__table td {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 1.6rem;
+      padding-top: 0.8rem;
+      color: rgb(var(--nx01-body));
+    }
+
+    .nx01-facts__table td::before {
+      content: attr(data-label);
+      font-size: 1.1rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .nx01-facts__table tbody td:last-child {
+      text-align: start;
+    }
   }
 
   @media screen and (min-width: 990px) {
     .nx01-facts__grid {
       grid-template-columns: minmax(0, 1fr) 40rem;
       gap: 4.8rem;
+    }
+
+    .nx01-facts__panel {
+      position: sticky;
+      top: 8rem;
     }
   }
 {% endstyle %}

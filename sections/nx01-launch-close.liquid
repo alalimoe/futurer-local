@@ -1,6 +1,20 @@
 {%- liquid
+  assign product = section.settings.product
+  if product == blank
+    assign product = all_products['nx-01-baseline']
+  endif
+  assign variant = product.selected_or_first_available_variant
+  assign cta_label = section.settings.cta_label
+  assign microcopy = section.settings.microcopy
+  if variant != blank
+    assign bottle_price = variant.price | money
+    assign microcopy = 'sections.nx01_launch_close.dynamic_microcopy' | t: price: bottle_price
+    if variant.available == false
+      assign cta_label = 'sections.nx01_launch_close.restock_cta' | t
+    endif
+  endif
   assign show_cta = false
-  if section.settings.cta_label != blank and section.settings.cta_href != blank
+  if cta_label != blank and section.settings.cta_href != blank
     assign show_cta = true
   endif
 -%}
@@ -45,10 +59,10 @@
         <p class="nx01__sub">{{ section.settings.subheading | escape }}</p>
       {%- endif -%}
       {%- if show_cta -%}
-        {% render 'button', style: 'primary', text: section.settings.cta_label, link: section.settings.cta_href %}
+        {% render 'button', style: 'primary', text: cta_label, link: section.settings.cta_href %}
       {%- endif -%}
-      {%- if section.settings.microcopy != blank -%}
-        <p class="nx01-close__micro">{{ section.settings.microcopy | escape }}</p>
+      {%- if microcopy != blank -%}
+        <p class="nx01-close__micro">{{ microcopy | escape }}</p>
       {%- endif -%}
     </div>
   </div>
@@ -109,6 +123,7 @@
   },
   "settings": [
     { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "background-1" },
+    { "type": "product", "id": "product", "label": "Product used for live price and availability" },
     { "type": "image_picker", "id": "image", "label": "Bottle image" },
     { "type": "text", "id": "image_alt", "label": "Bottle image alt text" },
     { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "NX-01 · Baseline" },

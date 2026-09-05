@@ -5,12 +5,29 @@
   endif
   assign variant = product.selected_or_first_available_variant
   assign sold_out = false
-  if product != blank and variant.available == false
-    assign sold_out = true
+  if product != blank
+    if variant == blank or variant.available == false
+      assign sold_out = true
+    endif
+  endif
+  assign has_multiple_variants = false
+  if product != blank and product.has_only_default_variant == false
+    assign has_multiple_variants = true
   endif
   assign has_selling_plans = false
-  if product != blank and product.selling_plan_groups.size > 0
+  if variant != blank and variant.selling_plan_allocations.size > 0
     assign has_selling_plans = true
+  endif
+  assign restock_form_id = 'nx01-restock-' | append: section.id
+  assign restock_submit_label = 'sections.nx01_launch_buy.restock_submit' | t
+  assign choose_options_label = 'products.product.choose_options' | t
+  assign heading = section.settings.heading
+  assign subheading = section.settings.subheading
+  if product == blank
+    assign sold_out = true
+  elsif sold_out
+    assign heading = 'sections.nx01_launch_buy.sold_out_intro_heading' | t
+    assign subheading = 'sections.nx01_launch_buy.sold_out_intro_body' | t
   endif
 -%}
 
@@ -29,29 +46,77 @@
           <span>{{ section.settings.eyebrow | escape }}</span>
         </p>
       {%- endif -%}
-      {%- if section.settings.heading != blank -%}
-        <h2 class="nx01__heading" id="nx01-buy-heading-{{ section.id }}">{{ section.settings.heading | escape }}</h2>
+      {%- if heading != blank -%}
+        <h2 class="nx01__heading" id="nx01-buy-heading-{{ section.id }}">{{ heading | escape }}</h2>
       {%- endif -%}
-      {%- if section.settings.subheading != blank -%}
-        <p class="nx01__sub">{{ section.settings.subheading | escape }}</p>
+      {%- if subheading != blank -%}
+        <p class="nx01__sub">{{ subheading | escape }}</p>
       {%- endif -%}
     </div>
 
-    {%- if product != blank -%}
+    {%- if product == blank -%}
+      <div class="nx01-buy__availability" role="status">
+        <h3>{{ 'sections.nx01_launch_buy.unavailable_heading' | t }}</h3>
+        <p>{{ 'sections.nx01_launch_buy.unavailable_body' | t }}</p>
+      </div>
+    {%- elsif sold_out -%}
+      <div class="nx01-buy__availability">
+        <p class="nx01-buy__status">{{ 'products.product.sold_out' | t }}</p>
+        <h3>{{ 'sections.nx01_launch_buy.sold_out_heading' | t: product: product.title }}</h3>
+        <p>{{ 'sections.nx01_launch_buy.sold_out_body' | t }}</p>
+
+        {% form 'contact', id: restock_form_id, class: 'nx01-buy__restock-form' %}
+          <input
+            type="hidden"
+            name="contact[body]"
+            value="{{ 'sections.nx01_launch_buy.restock_message' | t: product: product.title | escape }}"
+          >
+          {%- if form.posted_successfully? -%}
+            <p class="nx01-buy__success" role="status" tabindex="-1">
+              {{ 'sections.nx01_launch_buy.restock_success' | t }}
+            </p>
+          {%- else -%}
+            {%- if form.errors -%}
+              <div class="nx01-buy__errors" role="alert">{{ form.errors | default_errors }}</div>
+            {%- endif -%}
+            <label class="nx01-buy__restock-label" for="{{ restock_form_id }}-email">
+              {{ 'sections.nx01_launch_buy.restock_email' | t }}
+            </label>
+            <div class="nx01-buy__restock-row">
+              <input
+                class="nx01-buy__restock-input"
+                id="{{ restock_form_id }}-email"
+                type="email"
+                name="contact[email]"
+                value="{{ form.email | escape }}"
+                autocomplete="email"
+                inputmode="email"
+                required
+              >
+              {% render 'button', style: 'primary', text: restock_submit_label, type: 'submit' %}
+            </div>
+          {%- endif -%}
+        {% endform %}
+      </div>
+    {%- else -%}
       <div class="nx01-buy__grid">
         {%- for block in section.blocks -%}
           {%- if block.type == 'tier' -%}
             {%- assign qty = block.settings.quantity | plus: 0 -%}
             {%- if qty >= 1 -%}
             {%- liquid
-              assign line_price = product.price | times: qty
-              assign unit_price = product.price | money
+              assign tier_unit_price = variant.price
+              for price_break in variant.quantity_price_breaks
+                if qty >= price_break.minimum_quantity
+                  assign tier_unit_price = price_break.price
+                endif
+              endfor
+              assign line_price = tier_unit_price | times: qty
+              assign unit_price = tier_unit_price | money
+              assign daily_price = tier_unit_price | divided_by: 30 | money
               assign form_id = 'nx01-buy-' | append: section.id | append: '-' | append: block.id
               assign cta_label = block.settings.cta_label | default: section.settings.cta_label
               assign unavailable_label = 'products.product.unavailable' | t
-              if sold_out
-                assign cta_label = 'products.product.sold_out' | t
-              endif
             -%}
             <article
               class="nx01-buy__card{% if block.settings.featured %} nx01-buy__card--featured{% endif %}"
@@ -78,34 +143,41 @@
 
                 <p class="nx01-buy__price">{{ line_price | money }}</p>
                 <p class="nx01-buy__unit">{{ 'sections.nx01_launch_buy.per_bottle' | t: price: unit_price }}</p>
+                <p class="nx01-buy__unit">{{ 'sections.nx01_launch_buy.per_day' | t: price: daily_price }}</p>
                 {%- if block.settings.saving != blank -%}
                   <p class="nx01-buy__saving">{{ block.settings.saving | escape }}</p>
                 {%- endif -%}
               </div>
 
-              {% form 'product', product, id: form_id, data-type: 'add-to-cart-form' %}
-                <input type="hidden" name="id" value="{{ variant.id }}">
-                <xo-cart-quantity>
-                  <input type="hidden" name="quantity" value="{{ qty }}">
-                </xo-cart-quantity>
-                {%- if has_selling_plans -%}
-                  <label class="nx01-buy__plan-label" for="{{ form_id }}-plan">{{ 'sections.nx01_launch_buy.purchase_option' | t }}</label>
-                  <select class="nx01-buy__plan" id="{{ form_id }}-plan" name="selling_plan">
-                    <option value="">{{ 'sections.nx01_launch_buy.one_time' | t }}</option>
-                    {%- for group in product.selling_plan_groups -%}
-                      {%- for plan in group.selling_plans -%}
-                        <option value="{{ plan.id }}">{{ plan.name | escape }}</option>
+              {%- if has_multiple_variants -%}
+                {% render 'button', style: 'primary', text: choose_options_label, link: product.url, block: true %}
+              {%- else -%}
+                {% form 'product', product, id: form_id, data-type: 'add-to-cart-form' %}
+                  <input type="hidden" name="id" value="{{ variant.id }}">
+                  <xo-cart-quantity>
+                    <input type="hidden" name="quantity" value="{{ qty }}">
+                  </xo-cart-quantity>
+                  {%- if has_selling_plans -%}
+                    <label class="nx01-buy__plan-label" for="{{ form_id }}-plan">{{ 'sections.nx01_launch_buy.purchase_option' | t }}</label>
+                    <select class="nx01-buy__plan" id="{{ form_id }}-plan" name="selling_plan">
+                      {%- unless variant.requires_selling_plan -%}
+                        <option value="">{{ 'sections.nx01_launch_buy.one_time' | t }}</option>
+                      {%- endunless -%}
+                      {%- for allocation in variant.selling_plan_allocations -%}
+                        <option value="{{ allocation.selling_plan.id }}">{{ allocation.selling_plan.name | escape }}</option>
                       {%- endfor -%}
-                    {%- endfor -%}
-                  </select>
-                {%- endif -%}
-                <xo-cart-add
-                  {% if sold_out %}xo-disabled{% endif %}
-                  {% if settings.cart_type == 'page' %}xo-cart-redirection{% endif %}
-                >
-                  {% render 'button', style: 'primary', text: cta_label, type: 'submit', block: true, disabled: sold_out, text_unavailable: unavailable_label %}
-                </xo-cart-add>
-              {% endform %}
+                    </select>
+                  {%- endif -%}
+                  <xo-cart-add
+                    {% if settings.cart_type == 'page' %}xo-cart-redirection{% endif %}
+                  >
+                    {% render 'button', style: 'primary', text: cta_label, type: 'submit', block: true, text_unavailable: unavailable_label %}
+                  </xo-cart-add>
+                  <div class="nx01-buy__form-status" role="alert" aria-live="assertive">
+                    {% render 'cart-add-error' %}
+                  </div>
+                {% endform %}
+              {%- endif -%}
             </article>
             {%- endif -%}
           {%- endif -%}
@@ -128,7 +200,11 @@
               {%- if block.settings.icon != blank and block.settings.icon != 'none' -%}
                 <span class="nx01-buy__trust-icon" aria-hidden="true">{% render 'icon', name: block.settings.icon, size: '1.6rem' %}</span>
               {%- endif -%}
-              <span>{{ block.settings.label | escape }}</span>
+              {%- if block.settings.link != blank -%}
+                <a href="{{ block.settings.link | escape }}">{{ block.settings.label | escape }}</a>
+              {%- else -%}
+                <span>{{ block.settings.label | escape }}</span>
+              {%- endif -%}
             </li>
           {%- endif -%}
         {%- endfor -%}
@@ -147,6 +223,81 @@
     grid-template-columns: 1fr;
     gap: 2.4rem;
     align-items: stretch;
+  }
+
+  .nx01-buy__availability {
+    max-width: 72rem;
+    padding: 3.2rem;
+    border: 0.1rem solid rgb(var(--nx01-line));
+    border-radius: var(--nx01-radius);
+    background: rgb(var(--nx01-surface));
+  }
+
+  .nx01-buy__availability h3,
+  .nx01-buy__availability p {
+    margin: 0;
+  }
+
+  .nx01-buy__availability h3 {
+    margin-top: 1.2rem;
+    font-size: clamp(2.4rem, 4vw, 3.2rem);
+    line-height: 1.2;
+  }
+
+  .nx01-buy__availability h3 + p {
+    margin-top: 1.2rem;
+    color: rgb(var(--nx01-body));
+  }
+
+  .nx01-buy__status {
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgb(var(--nx01-navy-deep));
+  }
+
+  .nx01-buy__restock-form {
+    margin-top: 2.4rem;
+  }
+
+  .nx01-buy__restock-label {
+    display: block;
+    margin-bottom: 0.8rem;
+    font-size: 1.3rem;
+    font-weight: 600;
+  }
+
+  .nx01-buy__restock-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.2rem;
+  }
+
+  .nx01-buy__restock-input {
+    width: 100%;
+    min-height: 4.8rem;
+    padding: 0 1.4rem;
+    border: 0.1rem solid rgb(var(--nx01-rule));
+    border-radius: var(--nx01-radius);
+    background: rgb(var(--nx01-field));
+    color: rgb(var(--nx01-ink));
+    font: inherit;
+  }
+
+  .nx01-buy__restock-input:focus-visible {
+    outline: 0.2rem solid rgb(var(--nx01-navy));
+    outline-offset: 0.2rem;
+  }
+
+  .nx01-buy__success,
+  .nx01-buy__errors {
+    margin-top: 2.4rem;
+  }
+
+  .nx01-buy__form-status:empty,
+  .nx01-buy__form-status:not(:has(xo-cart-add-error-message:not(:empty))) {
+    display: none;
   }
 
   .nx01-buy__card {
@@ -275,6 +426,11 @@
     color: rgb(var(--nx01-navy-deep));
   }
 
+  .nx01-buy__trust a {
+    color: inherit;
+    text-underline-offset: 0.3rem;
+  }
+
   @media screen and (min-width: 990px) {
     .nx01-buy__grid {
       grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -282,6 +438,12 @@
 
     .nx01-buy__trust {
       justify-content: space-between;
+    }
+  }
+
+  @media screen and (min-width: 600px) {
+    .nx01-buy__restock-row {
+      grid-template-columns: minmax(0, 1fr) auto;
     }
   }
 {% endstyle %}
@@ -328,7 +490,8 @@
           { "value": "return", "label": "Returns" },
           { "value": "none", "label": "None" }
         ], "default": "shipping-fast" },
-        { "type": "text", "id": "label", "label": "Label", "default": "Fast UAE Delivery (2-4 Days)" }
+        { "type": "text", "id": "label", "label": "Label", "default": "Fast UAE Delivery (2-4 Days)" },
+        { "type": "url", "id": "link", "label": "Link" }
       ]
     }
   ],
