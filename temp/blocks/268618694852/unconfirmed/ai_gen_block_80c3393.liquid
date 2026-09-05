@@ -1,6 +1,281 @@
+{% doc %}
+  @prompt
+    Design a premium NX-01 FAQ section optimized for conversion.
+    
+    HEADLINE
+    “Before you decide.”
+    
+    Include expandable questions:
+    
+    What is NX-01 designed to replace?
+    
+    Does NX-01 contain caffeine?
+    
+    Does NX-01 contain Phenibut?
+    
+    Can I drink coffee while using NX-01?
+    
+    Can I combine it with other nootropics?
+    
+    Why three capsules?
+    
+    Why CDP-Choline instead of Alpha-GPC?
+    
+    Is NX-01 designed for daily or occasional use?
+    
+    How long does one bottle last?
+    
+    When should I take it?
+    
+    Use clean accordions with generous spacing.
+    
+    Desktop:
+    two-column FAQ layout if appropriate.
+    
+    Mobile:
+    single-column accordion.
+    
+    Keep the design highly readable rather than decorative.
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-nx-faq-{{ ai_gen_id }} {
+    display: block;
+    width: {{ block.settings.desktop_width_percent }}%;
+    max-width: 100%;
+    margin: 0 auto;
+    padding: {{ block.settings.section_padding }}px 0;
+    color: {{ block.settings.text_color }};
+    background: {{ block.settings.background_color }};
+  }
+
+  .ai-nx-faq__inner-{{ ai_gen_id }} {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  .ai-nx-faq__layout-{{ ai_gen_id }} {
+    display: grid;
+    grid-template-columns: minmax(220px, 0.75fr) minmax(0, 1.5fr);
+    gap: 80px;
+    align-items: start;
+  }
+
+  .ai-nx-faq__eyebrow-{{ ai_gen_id }} {
+    margin: 0 0 16px;
+    color: {{ block.settings.accent_color }};
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    line-height: 1.4;
+    text-transform: uppercase;
+  }
+
+  .ai-nx-faq__heading-{{ ai_gen_id }} {
+    margin: 0;
+    color: {{ block.settings.heading_color }};
+    font-size: clamp(32px, 4vw, 56px);
+    line-height: 1.05;
+    letter-spacing: -0.04em;
+  }
+
+  .ai-nx-faq__intro-{{ ai_gen_id }} {
+    margin: 24px 0 0;
+    color: {{ block.settings.muted_color }};
+    font-size: 15px;
+    line-height: 1.65;
+  }
+
+  .ai-nx-faq__list-{{ ai_gen_id }} {
+    border-top: 1px solid {{ block.settings.border_color }};
+  }
+
+  .ai-nx-faq__item-{{ ai_gen_id }} {
+    border-bottom: 1px solid {{ block.settings.border_color }};
+  }
+
+  .ai-nx-faq__question-{{ ai_gen_id }} {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    width: 100%;
+    padding: 24px 0;
+    color: {{ block.settings.heading_color }};
+    cursor: pointer;
+    font: inherit;
+    font-size: 17px;
+    font-weight: 600;
+    line-height: 1.4;
+    list-style: none;
+  }
+
+  .ai-nx-faq__question-{{ ai_gen_id }}::-webkit-details-marker {
+    display: none;
+  }
+
+  .ai-nx-faq__question-{{ ai_gen_id }}:focus-visible {
+    outline: 2px solid {{ block.settings.accent_color }};
+    outline-offset: 5px;
+  }
+
+  .ai-nx-faq__icon-{{ ai_gen_id }} {
+    position: relative;
+    flex: 0 0 18px;
+    width: 18px;
+    height: 18px;
+    color: {{ block.settings.accent_color }};
+  }
+
+  .ai-nx-faq__icon-{{ ai_gen_id }}::before,
+  .ai-nx-faq__icon-{{ ai_gen_id }}::after {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 14px;
+    height: 2px;
+    background: currentColor;
+    content: '';
+    transform: translate(-50%, -50%);
+  }
+
+  .ai-nx-faq__icon-{{ ai_gen_id }}::after {
+    transform: translate(-50%, -50%) rotate(90deg);
+  }
+
+  .ai-nx-faq__item-{{ ai_gen_id }}[open] .ai-nx-faq__icon-{{ ai_gen_id }}::after {
+    display: none;
+  }
+
+  .ai-nx-faq__answer-{{ ai_gen_id }} {
+    max-width: 680px;
+    padding: 0 42px 25px 0;
+    color: {{ block.settings.muted_color }};
+    font-size: 15px;
+    line-height: 1.7;
+  }
+
+  .ai-nx-faq__answer-{{ ai_gen_id }} p {
+    margin: 0;
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-nx-faq__inner-{{ ai_gen_id }} {
+      padding: 0 20px;
+    }
+
+    .ai-nx-faq__layout-{{ ai_gen_id }} {
+      display: block;
+    }
+
+    .ai-nx-faq__intro-{{ ai_gen_id }} {
+      margin-bottom: 40px;
+    }
+
+    .ai-nx-faq__question-{{ ai_gen_id }} {
+      padding: 21px 0;
+      font-size: 16px;
+    }
+  }
+{% endstyle %}
+
+<nx-faq-{{ ai_gen_id }} class="ai-nx-faq-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="ai-nx-faq__inner-{{ ai_gen_id }}">
+    <div class="ai-nx-faq__layout-{{ ai_gen_id }}">
+      <div>
+        {% if block.settings.eyebrow != blank %}
+          <p class="ai-nx-faq__eyebrow-{{ ai_gen_id }}">{{ block.settings.eyebrow }}</p>
+        {% endif %}
+        <h2 class="ai-nx-faq__heading-{{ ai_gen_id }}">{{ block.settings.heading }}</h2>
+        {% if block.settings.intro != blank %}
+          <p class="ai-nx-faq__intro-{{ ai_gen_id }}">{{ block.settings.intro }}</p>
+        {% endif %}
+      </div>
+
+      <div class="ai-nx-faq__list-{{ ai_gen_id }}">
+        {% for i in (1..10) %}
+          {% liquid
+            assign question_key = 'question_' | append: i
+            assign answer_key = 'answer_' | append: i
+            assign question = block.settings[question_key]
+            assign answer = block.settings[answer_key]
+          %}
+          <details class="ai-nx-faq__item-{{ ai_gen_id }}">
+            <summary class="ai-nx-faq__question-{{ ai_gen_id }}">
+              <span>{{ question }}</span>
+              <span class="ai-nx-faq__icon-{{ ai_gen_id }}" aria-hidden="true"></span>
+            </summary>
+            <div class="ai-nx-faq__answer-{{ ai_gen_id }}">{{ answer }}</div>
+          </details>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</nx-faq-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class NxFaq{{ ai_gen_id }} extends HTMLElement {
+      connectedCallback() {
+        this.items = this.querySelectorAll('details');
+        this.items.forEach((item) => {
+          item.addEventListener('toggle', () => {
+            if (item.open) {
+              this.items.forEach((other) => {
+                if (other !== item) other.open = false;
+              });
+            }
+          });
+        });
+      }
+    }
+    if (!customElements.get('nx-faq-{{ ai_gen_id }}')) customElements.define('nx-faq-{{ ai_gen_id }}', NxFaq{{ ai_gen_id }});
+  })();
+</script>
+
 {% schema %}
- {
-   "name": "AI_Block",
-   "tag": "shopify-ai-generated-block"
- }
+{
+  "name": "NX-01 FAQ",
+  "settings": [
+    { "type": "header", "content": "Content" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "NX-01" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Before you decide." },
+    { "type": "textarea", "id": "intro", "label": "Intro", "default": "Clear answers for a more informed choice." },
+    { "type": "header", "content": "Questions and answers" },
+    { "type": "text", "id": "question_1", "label": "Question 1", "default": "What is NX-01 designed to replace?" },
+    { "type": "richtext", "id": "answer_1", "label": "Answer 1", "default": "<p>NX-01 is designed as a focused alternative to a routine built around multiple separate nootropic products. It is not intended to replace prescribed medication or professional medical advice.</p>" },
+    { "type": "text", "id": "question_2", "label": "Question 2", "default": "Does NX-01 contain caffeine?" },
+    { "type": "richtext", "id": "answer_2", "label": "Answer 2", "default": "<p>No. NX-01 is formulated without caffeine, so it does not rely on a stimulant effect to support your routine.</p>" },
+    { "type": "text", "id": "question_3", "label": "Question 3", "default": "Does NX-01 contain Phenibut?" },
+    { "type": "richtext", "id": "answer_3", "label": "Answer 3", "default": "<p>No. NX-01 does not contain Phenibut.</p>" },
+    { "type": "text", "id": "question_4", "label": "Question 4", "default": "Can I drink coffee while using NX-01?" },
+    { "type": "richtext", "id": "answer_4", "label": "Answer 4", "default": "<p>NX-01 contains no caffeine, but your total caffeine intake still matters. If you are sensitive to caffeine or take medication, check with a qualified healthcare professional.</p>" },
+    { "type": "text", "id": "question_5", "label": "Question 5", "default": "Can I combine it with other nootropics?" },
+    { "type": "richtext", "id": "answer_5", "label": "Answer 5", "default": "<p>We recommend introducing one change at a time and reviewing all ingredients with a qualified healthcare professional before combining products.</p>" },
+    { "type": "text", "id": "question_6", "label": "Question 6", "default": "Why three capsules?" },
+    { "type": "richtext", "id": "answer_6", "label": "Answer 6", "default": "<p>The three-capsule serving allows the formula to deliver its selected ingredients in practical amounts while keeping the product straightforward to use.</p>" },
+    { "type": "text", "id": "question_7", "label": "Question 7", "default": "Why CDP-Choline instead of Alpha-GPC?" },
+    { "type": "richtext", "id": "answer_7", "label": "Answer 7", "default": "<p>NX-01 uses CDP-Choline because it is the choline source selected for this formula. Ingredient choice should always be considered in the context of the complete formula and your individual needs.</p>" },
+    { "type": "text", "id": "question_8", "label": "Question 8", "default": "Is NX-01 designed for daily or occasional use?" },
+    { "type": "richtext", "id": "answer_8", "label": "Answer 8", "default": "<p>NX-01 is designed to fit a consistent daily routine when used as directed. Follow the product label and seek professional guidance if you have a medical condition or take medication.</p>" },
+    { "type": "text", "id": "question_9", "label": "Question 9", "default": "How long does one bottle last?" },
+    { "type": "richtext", "id": "answer_9", "label": "Answer 9", "default": "<p>One bottle lasts for the number of servings stated on the product label. Your usage period depends on the recommended serving size and how consistently you use it.</p>" },
+    { "type": "text", "id": "question_10", "label": "Question 10", "default": "When should I take it?" },
+    { "type": "richtext", "id": "answer_10", "label": "Answer 10", "default": "<p>Take NX-01 according to the product label, ideally at a consistent time that suits your routine. Do not exceed the recommended serving.</p>" },
+    { "type": "header", "content": "Layout and colors" },
+    { "type": "range", "id": "desktop_width_percent", "label": "Desktop width", "min": 50, "max": 100, "step": 5, "unit": "%", "default": 100 },
+    { "type": "range", "id": "section_padding", "label": "Section spacing", "min": 20, "max": 120, "step": 10, "unit": "px", "default": 70 },
+    { "type": "color", "id": "background_color", "label": "Background", "default": "#f9f9f9" },
+    { "type": "color", "id": "heading_color", "label": "Heading", "default": "#2a2a2a" },
+    { "type": "color", "id": "text_color", "label": "Text", "default": "#2a2a2a" },
+    { "type": "color", "id": "muted_color", "label": "Secondary text", "default": "#555555" },
+    { "type": "color", "id": "accent_color", "label": "Accent", "default": "#5a9d6f" },
+    { "type": "color", "id": "border_color", "label": "Borders", "default": "#d9d9d9" }
+  ],
+  "presets": [{ "name": "NX-01 FAQ" }],
+  "tag": null,
+  "class": "nx-01-faq-block"
+}
 {% endschema %}
