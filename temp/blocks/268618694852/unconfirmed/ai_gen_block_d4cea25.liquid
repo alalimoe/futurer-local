@@ -1,6 +1,360 @@
+{% doc %}
+  @prompt
+    Design an objection-handling section answering:
+    
+    “Why three capsules?”
+    
+    HEADLINE
+    “Because meaningful amounts take space.”
+    
+    Explain visually:
+    A capsule has finite physical volume.
+    NX-01 uses meaningful quantities of several active ingredients.
+    Trying to force the formula into one capsule would require dramatically reducing ingredient quantities.
+    
+    Create a clean physical-volume visualization:
+    one capsule
+    → limited space
+    versus
+    three capsules
+    → room for the full formulation
+    
+    Include a short statement:
+    “We chose formula integrity over a smaller serving count.”
+    
+    Do not criticize competitors directly.
+    Do not imply other products are deceptive.
+    
+    Use minimal technical diagrams with premium editorial styling.
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-volume-{{ ai_gen_id }} {
+    display: block;
+    width: {{ block.settings.desktop_width_percent }}%;
+    max-width: 100%;
+    margin: 0 auto;
+    padding: {{ block.settings.vertical_padding }}px {{ block.settings.horizontal_padding }}px;
+    background: {{ block.settings.background_color }};
+    color: {{ block.settings.text_color }};
+    box-sizing: border-box;
+  }
+
+  .ai-volume-{{ ai_gen_id }}__inner {
+    max-width: 1120px;
+    margin: 0 auto;
+  }
+
+  .ai-volume-{{ ai_gen_id }}__eyebrow {
+    margin: 0 0 14px;
+    color: {{ block.settings.accent_color }};
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    line-height: 1.4;
+    text-transform: uppercase;
+  }
+
+  .ai-volume-{{ ai_gen_id }}__heading {
+    max-width: 720px;
+    margin: 0;
+    color: {{ block.settings.text_color }};
+    font-size: clamp(32px, 5vw, 64px);
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    line-height: 0.98;
+  }
+
+  .ai-volume-{{ ai_gen_id }}__intro {
+    max-width: 650px;
+    margin: 24px 0 0;
+    color: {{ block.settings.muted_text_color }};
+    font-size: 17px;
+    line-height: 1.65;
+  }
+
+  .ai-volume-{{ ai_gen_id }}__visual {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 28px;
+    margin: 64px 0 52px;
+  }
+
+  .ai-volume-{{ ai_gen_id }}__panel {
+    min-height: 260px;
+    padding: 28px;
+    border: 1px solid {{ block.settings.border_color }};
+    background: {{ block.settings.panel_color }};
+    box-sizing: border-box;
+  }
+
+  .ai-volume-{{ ai_gen_id }}__label {
+    margin: 0 0 28px;
+    color: {{ block.settings.text_color }};
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    line-height: 1.4;
+    text-transform: uppercase;
+  }
+
+  .ai-volume-{{ ai_gen_id }}__capsules {
+    display: flex;
+    min-height: 130px;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+  }
+
+  .ai-volume-{{ ai_gen_id }}__capsule {
+    position: relative;
+    display: block;
+    width: 44px;
+    height: 92px;
+    border: 1px solid {{ block.settings.capsule_border_color }};
+    border-radius: 24px;
+    background: linear-gradient(90deg, {{ block.settings.capsule_color }} 0 48%, {{ block.settings.capsule_highlight_color }} 48% 52%, {{ block.settings.capsule_color }} 52% 100%);
+    transform: rotate(32deg);
+  }
+
+  .ai-volume-{{ ai_gen_id }}__capsule::after {
+    position: absolute;
+    right: 6px;
+    bottom: 10px;
+    left: 6px;
+    height: 1px;
+    background: {{ block.settings.capsule_border_color }};
+    content: '';
+    opacity: 0.55;
+  }
+
+  .ai-volume-{{ ai_gen_id }}__note {
+    margin: 24px 0 0;
+    color: {{ block.settings.muted_text_color }};
+    font-size: 14px;
+    line-height: 1.55;
+  }
+
+  .ai-volume-{{ ai_gen_id }}__arrow {
+    color: {{ block.settings.accent_color }};
+    font-size: 28px;
+    line-height: 1;
+  }
+
+  .ai-volume-{{ ai_gen_id }}__statement {
+    max-width: 760px;
+    margin: 0;
+    padding-top: 28px;
+    border-top: 1px solid {{ block.settings.border_color }};
+    color: {{ block.settings.text_color }};
+    font-size: clamp(22px, 3vw, 34px);
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    line-height: 1.15;
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-volume-{{ ai_gen_id }} {
+      padding: {{ block.settings.mobile_vertical_padding }}px 20px;
+    }
+
+    .ai-volume-{{ ai_gen_id }}__visual {
+      grid-template-columns: 1fr;
+      gap: 18px;
+      margin: 44px 0 40px;
+    }
+
+    .ai-volume-{{ ai_gen_id }}__panel {
+      min-height: 220px;
+      padding: 22px;
+    }
+
+    .ai-volume-{{ ai_gen_id }}__arrow {
+      justify-self: center;
+      transform: rotate(90deg);
+    }
+  }
+{% endstyle %}
+
+<div class="ai-volume-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="ai-volume-{{ ai_gen_id }}__inner">
+    {% if block.settings.eyebrow != blank %}
+      <p class="ai-volume-{{ ai_gen_id }}__eyebrow">{{ block.settings.eyebrow }}</p>
+    {% endif %}
+    <h2 class="ai-volume-{{ ai_gen_id }}__heading">{{ block.settings.heading }}</h2>
+    {% if block.settings.intro != blank %}
+      <p class="ai-volume-{{ ai_gen_id }}__intro">{{ block.settings.intro }}</p>
+    {% endif %}
+
+    <div class="ai-volume-{{ ai_gen_id }}__visual" aria-label="Comparison of one capsule and three capsules">
+      <div class="ai-volume-{{ ai_gen_id }}__panel">
+        <p class="ai-volume-{{ ai_gen_id }}__label">One capsule</p>
+        <div class="ai-volume-{{ ai_gen_id }}__capsules">
+          <span class="ai-volume-{{ ai_gen_id }}__capsule" aria-hidden="true"></span>
+        </div>
+        <p class="ai-volume-{{ ai_gen_id }}__note">A capsule has finite physical volume. There is only so much room inside.</p>
+      </div>
+
+      <div class="ai-volume-{{ ai_gen_id }}__arrow" aria-hidden="true">→</div>
+
+      <div class="ai-volume-{{ ai_gen_id }}__panel">
+        <p class="ai-volume-{{ ai_gen_id }}__label">Three capsules</p>
+        <div class="ai-volume-{{ ai_gen_id }}__capsules">
+          {% for i in (1..3) %}
+            <span class="ai-volume-{{ ai_gen_id }}__capsule" aria-hidden="true"></span>
+          {% endfor %}
+        </div>
+        <p class="ai-volume-{{ ai_gen_id }}__note">NX-01 uses meaningful quantities of several active ingredients, giving the full formulation room to fit.</p>
+      </div>
+    </div>
+
+    <p class="ai-volume-{{ ai_gen_id }}__statement">{{ block.settings.statement }}</p>
+  </div>
+</div>
+
 {% schema %}
- {
-   "name": "AI_Block",
-   "tag": "shopify-ai-generated-block"
- }
+{
+  "name": "Capsule volume explainer",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Why three capsules?"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Headline",
+      "default": "Because meaningful amounts take space."
+    },
+    {
+      "type": "textarea",
+      "id": "intro",
+      "label": "Introduction",
+      "default": "A capsule has finite physical volume. NX-01 uses meaningful quantities of several active ingredients."
+    },
+    {
+      "type": "text",
+      "id": "statement",
+      "label": "Closing statement",
+      "default": "We chose formula integrity over a smaller serving count."
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "desktop_width_percent",
+      "label": "Desktop width",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "range",
+      "id": "vertical_padding",
+      "label": "Desktop spacing",
+      "min": 24,
+      "max": 120,
+      "step": 8,
+      "unit": "px",
+      "default": 72
+    },
+    {
+      "type": "range",
+      "id": "horizontal_padding",
+      "label": "Side spacing",
+      "min": 16,
+      "max": 80,
+      "step": 8,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "mobile_vertical_padding",
+      "label": "Mobile spacing",
+      "min": 24,
+      "max": 80,
+      "step": 8,
+      "unit": "px",
+      "default": 48
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background",
+      "default": "#F9F9F7"
+    },
+    {
+      "type": "color",
+      "id": "panel_color",
+      "label": "Panels",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text",
+      "default": "#1E1E1E"
+    },
+    {
+      "type": "color",
+      "id": "muted_text_color",
+      "label": "Muted text",
+      "default": "#555555"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent",
+      "default": "#5A9D6F"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Borders",
+      "default": "#D9DDD8"
+    },
+    {
+      "type": "color",
+      "id": "capsule_color",
+      "label": "Capsule",
+      "default": "#D6B98C"
+    },
+    {
+      "type": "color",
+      "id": "capsule_highlight_color",
+      "label": "Capsule highlight",
+      "default": "#F7E9CF"
+    },
+    {
+      "type": "color",
+      "id": "capsule_border_color",
+      "label": "Capsule border",
+      "default": "#8B765A"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Capsule volume explainer"
+    }
+  ],
+  "tag": null,
+  "class": "capsule-volume-block"
+}
 {% endschema %}
