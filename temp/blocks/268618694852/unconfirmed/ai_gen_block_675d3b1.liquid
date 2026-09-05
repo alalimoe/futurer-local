@@ -1,6 +1,346 @@
+{% doc %}
+  @prompt
+    Design the detailed NX-01 formula section.
+    
+    HEADLINE
+    “The complete daily serving.”
+    
+    Display the exact formula clearly:
+    
+    Acetyl-L-Carnitine — 500 mg
+    CDP-Choline — 250 mg
+    NMN — 250 mg
+    L-Theanine — 200 mg
+    Rhodiola rosea — 200 mg
+    Ubiquinol CoQ10 — 100 mg
+    P-5-P — 5 mg
+    Methyl B12 — 500 mcg
+    5-MTHF — 400 mcg DFE
+    
+    Daily serving:
+    3 capsules
+    
+    Design it as a premium technical specification panel rather than a standard supplement facts box.
+    
+    Include:
+    ingredient
+    amount
+    system/category
+    
+    Allow the user to quickly understand where each ingredient fits.
+    
+    Desktop:
+    three-column specification layout.
+    
+    Mobile:
+    clean stacked rows.
+    
+    Add a small CTA:
+    “View Supplement Facts”
+    
+    Prioritize legibility.
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-formula-{{ ai_gen_id }} {
+    display: block;
+    width: {{ block.settings.desktop_width_percent }}%;
+    max-width: 100%;
+    color: {{ block.settings.text_color }};
+    background: {{ block.settings.background_color }};
+    border: 1px solid {{ block.settings.border_color }};
+    border-radius: {{ block.settings.radius }}px;
+    padding: clamp(24px, 4vw, 56px);
+    box-sizing: border-box;
+  }
+
+  .ai-formula-{{ ai_gen_id }}__header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    padding-bottom: 28px;
+    border-bottom: 1px solid {{ block.settings.border_color }};
+  }
+
+  .ai-formula-{{ ai_gen_id }}__eyebrow {
+    margin: 0 0 10px;
+    color: {{ block.settings.muted_color }};
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    line-height: 1.3;
+    text-transform: uppercase;
+  }
+
+  .ai-formula-{{ ai_gen_id }}__heading {
+    margin: 0;
+    color: {{ block.settings.text_color }};
+    font-size: clamp(28px, 4vw, 48px);
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+  }
+
+  .ai-formula-{{ ai_gen_id }}__serving {
+    flex: 0 0 auto;
+    padding: 12px 16px;
+    border: 1px solid {{ block.settings.border_color }};
+    color: {{ block.settings.text_color }};
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    line-height: 1.4;
+    text-align: right;
+    text-transform: uppercase;
+  }
+
+  .ai-formula-{{ ai_gen_id }}__serving span {
+    display: block;
+    margin-top: 4px;
+    color: {{ block.settings.accent_color }};
+    font-size: 18px;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  .ai-formula-{{ ai_gen_id }}__table {
+    margin-top: 24px;
+  }
+
+  .ai-formula-{{ ai_gen_id }}__row {
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) minmax(100px, 0.55fr) minmax(0, 1fr);
+    align-items: center;
+    gap: 24px;
+    min-height: 58px;
+    border-bottom: 1px solid {{ block.settings.border_color }};
+  }
+
+  .ai-formula-{{ ai_gen_id }}__row--label {
+    min-height: 36px;
+    border-bottom: 0;
+    color: {{ block.settings.muted_color }};
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .ai-formula-{{ ai_gen_id }}__ingredient,
+  .ai-formula-{{ ai_gen_id }}__amount,
+  .ai-formula-{{ ai_gen_id }}__system {
+    font-size: 15px;
+    line-height: 1.4;
+  }
+
+  .ai-formula-{{ ai_gen_id }}__ingredient {
+    font-weight: 700;
+  }
+
+  .ai-formula-{{ ai_gen_id }}__amount {
+    color: {{ block.settings.accent_color }};
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+  }
+
+  .ai-formula-{{ ai_gen_id }}__system {
+    color: {{ block.settings.muted_color }};
+  }
+
+  .ai-formula-{{ ai_gen_id }}__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding-top: 28px;
+  }
+
+  .ai-formula-{{ ai_gen_id }}__note {
+    margin: 0;
+    color: {{ block.settings.muted_color }};
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .ai-formula-{{ ai_gen_id }}__link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 10px 18px;
+    border: 1px solid {{ block.settings.text_color }};
+    color: {{ block.settings.text_color }};
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: background-color 180ms ease, color 180ms ease;
+  }
+
+  .ai-formula-{{ ai_gen_id }}__link:hover {
+    background: {{ block.settings.text_color }};
+    color: {{ block.settings.background_color }};
+  }
+
+  .ai-formula-{{ ai_gen_id }}__link:focus-visible {
+    outline: 3px solid {{ block.settings.accent_color }};
+    outline-offset: 3px;
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-formula-{{ ai_gen_id }} {
+      width: 100%;
+      padding: 24px 18px;
+    }
+
+    .ai-formula-{{ ai_gen_id }}__header,
+    .ai-formula-{{ ai_gen_id }}__footer {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .ai-formula-{{ ai_gen_id }}__serving {
+      text-align: left;
+    }
+
+    .ai-formula-{{ ai_gen_id }}__row {
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px 16px;
+      padding: 14px 0;
+    }
+
+    .ai-formula-{{ ai_gen_id }}__row--label {
+      display: none;
+    }
+
+    .ai-formula-{{ ai_gen_id }}__system {
+      grid-column: 1 / -1;
+      font-size: 12px;
+    }
+
+    .ai-formula-{{ ai_gen_id }}__amount {
+      text-align: right;
+    }
+  }
+{% endstyle %}
+
+<div class="ai-formula-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="ai-formula-{{ ai_gen_id }}__header">
+    <div>
+      <p class="ai-formula-{{ ai_gen_id }}__eyebrow">NX-01 / Formula specification</p>
+      <h2 class="ai-formula-{{ ai_gen_id }}__heading">{{ block.settings.heading }}</h2>
+    </div>
+    <div class="ai-formula-{{ ai_gen_id }}__serving">
+      Daily serving
+      <span>3 capsules</span>
+    </div>
+  </div>
+
+  <div class="ai-formula-{{ ai_gen_id }}__table" role="table" aria-label="NX-01 formula ingredients">
+    <div class="ai-formula-{{ ai_gen_id }}__row ai-formula-{{ ai_gen_id }}__row--label" role="row">
+      <div role="columnheader">Ingredient</div>
+      <div role="columnheader">Amount</div>
+      <div role="columnheader">System</div>
+    </div>
+    {% assign ingredients = 'Acetyl-L-Carnitine|500 mg|Cellular energy,CDP-Choline|250 mg|Cholinergic support,NMN|250 mg|NAD+ support,L-Theanine|200 mg|Calm focus,Rhodiola rosea|200 mg|Adaptogenic resilience,Ubiquinol CoQ10|100 mg|Mitochondrial energy,P-5-P|5 mg|Active B6 cofactor,Methyl B12|500 mcg|Methylation support,5-MTHF|400 mcg DFE|Folate support' | split: ',' %}
+    {% for item in ingredients %}
+      {% assign fields = item | split: '|' %}
+      <div class="ai-formula-{{ ai_gen_id }}__row" role="row">
+        <div class="ai-formula-{{ ai_gen_id }}__ingredient" role="cell">{{ fields[0] }}</div>
+        <div class="ai-formula-{{ ai_gen_id }}__amount" role="cell">{{ fields[1] }}</div>
+        <div class="ai-formula-{{ ai_gen_id }}__system" role="cell">{{ fields[2] }}</div>
+      </div>
+    {% endfor %}
+  </div>
+
+  <div class="ai-formula-{{ ai_gen_id }}__footer">
+    <p class="ai-formula-{{ ai_gen_id }}__note">Precisely dosed for a complete daily serving.</p>
+    {% if block.settings.cta_link != blank %}
+      <a class="ai-formula-{{ ai_gen_id }}__link" href="{{ block.settings.cta_link }}">{{ block.settings.cta_label }}</a>
+    {% endif %}
+  </div>
+</div>
+
 {% schema %}
- {
-   "name": "AI_Block",
-   "tag": "shopify-ai-generated-block"
- }
+{
+  "name": "NX-01 formula panel",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "The complete daily serving."
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "CTA label",
+      "default": "View Supplement Facts"
+    },
+    {
+      "type": "url",
+      "id": "cta_link",
+      "label": "CTA link"
+    },
+    {
+      "type": "range",
+      "id": "desktop_width_percent",
+      "label": "Desktop width",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "range",
+      "id": "radius",
+      "label": "Corner radius",
+      "min": 0,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 6
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background",
+      "default": "#f9f9f9"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text",
+      "default": "#2a2a2a"
+    },
+    {
+      "type": "color",
+      "id": "muted_color",
+      "label": "Secondary text",
+      "default": "#666666"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent",
+      "default": "#315f43"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Borders",
+      "default": "#d9d9d9"
+    }
+  ],
+  "presets": [
+    {
+      "name": "NX-01 formula panel"
+    }
+  ],
+  "tag": null,
+  "class": "nx-01-formula-block"
+}
 {% endschema %}
