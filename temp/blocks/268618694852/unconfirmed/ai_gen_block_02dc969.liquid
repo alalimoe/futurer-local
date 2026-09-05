@@ -1,6 +1,264 @@
+{% doc %}
+  @prompt
+    Design an “at a glance” NX-01 product experience section.
+    
+    HEADLINE
+    “Built to disappear into your routine.”
+    
+    Create four large product facts:
+    
+    3
+    capsules daily
+    
+    9
+    active ingredients
+    
+    30
+    daily servings
+    
+    0 mg
+    caffeine
+    
+    Below the stats, include:
+    - capsule appearance
+    - bottle size
+    - serving example
+    - suggested routine placement
+    
+    Make this feel like a premium consumer-electronics specification section.
+    
+    Very visual.
+    Very little copy.
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-nx-specs-{{ ai_gen_id }} {
+    display: block;
+    width: {{ block.settings.desktop_width_percent }}%;
+    max-width: 100%;
+    margin: 0 auto;
+    padding: {{ block.settings.section_padding }}px 0;
+    background: {{ block.settings.background_color }};
+    color: {{ block.settings.text_color }};
+  }
+
+  .ai-nx-specs-{{ ai_gen_id }}__inner {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 0 32px;
+  }
+
+  .ai-nx-specs-{{ ai_gen_id }}__eyebrow {
+    margin: 0 0 18px;
+    color: {{ block.settings.accent_color }};
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+  }
+
+  .ai-nx-specs-{{ ai_gen_id }}__heading {
+    max-width: 720px;
+    margin: 0 0 64px;
+    font-size: clamp(36px, 6vw, 84px);
+    line-height: .98;
+    letter-spacing: -.055em;
+    font-weight: 700;
+  }
+
+  .ai-nx-specs-{{ ai_gen_id }}__stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    border-top: 1px solid {{ block.settings.border_color }};
+    border-bottom: 1px solid {{ block.settings.border_color }};
+  }
+
+  .ai-nx-specs-{{ ai_gen_id }}__stat {
+    min-height: 190px;
+    padding: 28px 24px 26px 0;
+    border-right: 1px solid {{ block.settings.border_color }};
+  }
+
+  .ai-nx-specs-{{ ai_gen_id }}__stat:not(:first-child) { padding-left: 24px; }
+  .ai-nx-specs-{{ ai_gen_id }}__stat:last-child { border-right: 0; }
+
+  .ai-nx-specs-{{ ai_gen_id }}__value {
+    display: block;
+    margin-bottom: 18px;
+    font-size: clamp(48px, 7vw, 96px);
+    line-height: .9;
+    letter-spacing: -.07em;
+    font-weight: 700;
+  }
+
+  .ai-nx-specs-{{ ai_gen_id }}__label {
+    display: block;
+    color: {{ block.settings.muted_color }};
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+  }
+
+  .ai-nx-specs-{{ ai_gen_id }}__details {
+    display: grid;
+    grid-template-columns: 1.25fr repeat(3, 1fr);
+    gap: 1px;
+    margin-top: 1px;
+    background: {{ block.settings.border_color }};
+  }
+
+  .ai-nx-specs-{{ ai_gen_id }}__detail {
+    min-height: 240px;
+    padding: 26px;
+    background: {{ block.settings.background_color }};
+  }
+
+  .ai-nx-specs-{{ ai_gen_id }}__detail--visual {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    overflow: hidden;
+    background: {{ block.settings.visual_background }};
+  }
+
+  .ai-nx-specs-{{ ai_gen_id }}__detail-image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: 26px;
+  }
+
+  .ai-nx-specs-{{ ai_gen_id }}__placeholder {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 30px;
+  }
+
+  .ai-nx-specs-{{ ai_gen_id }}__placeholder svg { width: 100%; height: 100%; opacity: .2; }
+
+  .ai-nx-specs-{{ ai_gen_id }}__detail-label {
+    position: relative;
+    z-index: 1;
+    margin: 0 0 34px;
+    color: {{ block.settings.muted_color }};
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+  }
+
+  .ai-nx-specs-{{ ai_gen_id }}__detail-value {
+    position: relative;
+    z-index: 1;
+    margin: 0;
+    font-size: 22px;
+    line-height: 1.15;
+    letter-spacing: -.025em;
+    font-weight: 600;
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-nx-specs-{{ ai_gen_id }}__inner { padding: 0 20px; }
+    .ai-nx-specs-{{ ai_gen_id }}__heading { margin-bottom: 42px; }
+    .ai-nx-specs-{{ ai_gen_id }}__stats { grid-template-columns: repeat(2, 1fr); }
+    .ai-nx-specs-{{ ai_gen_id }}__stat { min-height: 150px; padding: 22px 16px 20px 0; }
+    .ai-nx-specs-{{ ai_gen_id }}__stat:nth-child(2) { border-right: 0; }
+    .ai-nx-specs-{{ ai_gen_id }}__stat:nth-child(n+3) { border-top: 1px solid {{ block.settings.border_color }}; }
+    .ai-nx-specs-{{ ai_gen_id }}__stat:nth-child(3) { padding-left: 0; }
+    .ai-nx-specs-{{ ai_gen_id }}__stat:not(:first-child) { padding-left: 16px; }
+    .ai-nx-specs-{{ ai_gen_id }}__value { font-size: 54px; }
+    .ai-nx-specs-{{ ai_gen_id }}__details { grid-template-columns: 1fr 1fr; }
+    .ai-nx-specs-{{ ai_gen_id }}__detail { min-height: 190px; padding: 20px; }
+    .ai-nx-specs-{{ ai_gen_id }}__detail--visual { grid-column: span 2; min-height: 260px; }
+  }
+{% endstyle %}
+
+<div class="ai-nx-specs-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="ai-nx-specs-{{ ai_gen_id }}__inner">
+    <p class="ai-nx-specs-{{ ai_gen_id }}__eyebrow">{{ block.settings.eyebrow }}</p>
+    <h2 class="ai-nx-specs-{{ ai_gen_id }}__heading">{{ block.settings.heading }}</h2>
+
+    <div class="ai-nx-specs-{{ ai_gen_id }}__stats">
+      {% for i in (1..4) %}
+        {% liquid
+          assign value_key = 'stat_' | append: i | append: '_value'
+          assign label_key = 'stat_' | append: i | append: '_label'
+        %}
+        <div class="ai-nx-specs-{{ ai_gen_id }}__stat">
+          <span class="ai-nx-specs-{{ ai_gen_id }}__value">{{ block.settings[value_key] }}</span>
+          <span class="ai-nx-specs-{{ ai_gen_id }}__label">{{ block.settings[label_key] }}</span>
+        </div>
+      {% endfor %}
+    </div>
+
+    <div class="ai-nx-specs-{{ ai_gen_id }}__details">
+      <div class="ai-nx-specs-{{ ai_gen_id }}__detail ai-nx-specs-{{ ai_gen_id }}__detail--visual">
+        {% if block.settings.product_image %}
+          <img class="ai-nx-specs-{{ ai_gen_id }}__detail-image" src="{{ block.settings.product_image | image_url: width: 900 }}" alt="{{ block.settings.product_image.alt | escape }}" loading="lazy" width="900" height="900">
+        {% else %}
+          <div class="ai-nx-specs-{{ ai_gen_id }}__placeholder">{{ 'product-apparel-1' | placeholder_svg_tag }}</div>
+        {% endif %}
+        <p class="ai-nx-specs-{{ ai_gen_id }}__detail-label">{{ block.settings.detail_1_label }}</p>
+      </div>
+      <div class="ai-nx-specs-{{ ai_gen_id }}__detail">
+        <p class="ai-nx-specs-{{ ai_gen_id }}__detail-label">{{ block.settings.detail_2_label }}</p>
+        <p class="ai-nx-specs-{{ ai_gen_id }}__detail-value">{{ block.settings.detail_2_value }}</p>
+      </div>
+      <div class="ai-nx-specs-{{ ai_gen_id }}__detail">
+        <p class="ai-nx-specs-{{ ai_gen_id }}__detail-label">{{ block.settings.detail_3_label }}</p>
+        <p class="ai-nx-specs-{{ ai_gen_id }}__detail-value">{{ block.settings.detail_3_value }}</p>
+      </div>
+      <div class="ai-nx-specs-{{ ai_gen_id }}__detail">
+        <p class="ai-nx-specs-{{ ai_gen_id }}__detail-label">{{ block.settings.detail_4_label }}</p>
+        <p class="ai-nx-specs-{{ ai_gen_id }}__detail-value">{{ block.settings.detail_4_value }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+
 {% schema %}
- {
-   "name": "AI_Block",
-   "tag": "shopify-ai-generated-block"
- }
+{
+  "name": "NX-01 at a glance",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "NX—01 / SPECIFICATIONS" },
+    { "type": "text", "id": "heading", "label": "Headline", "default": "Built to disappear into your routine." },
+    { "type": "range", "id": "desktop_width_percent", "label": "Desktop width", "min": 50, "max": 100, "step": 5, "unit": "%", "default": 100 },
+    { "type": "header", "content": "Product facts" },
+    { "type": "text", "id": "stat_1_value", "label": "Fact 1 value", "default": "3" },
+    { "type": "text", "id": "stat_1_label", "label": "Fact 1 label", "default": "capsules daily" },
+    { "type": "text", "id": "stat_2_value", "label": "Fact 2 value", "default": "9" },
+    { "type": "text", "id": "stat_2_label", "label": "Fact 2 label", "default": "active ingredients" },
+    { "type": "text", "id": "stat_3_value", "label": "Fact 3 value", "default": "30" },
+    { "type": "text", "id": "stat_3_label", "label": "Fact 3 label", "default": "daily servings" },
+    { "type": "text", "id": "stat_4_value", "label": "Fact 4 value", "default": "0 mg" },
+    { "type": "text", "id": "stat_4_label", "label": "Fact 4 label", "default": "caffeine" },
+    { "type": "header", "content": "Specification details" },
+    { "type": "image_picker", "id": "product_image", "label": "Product image" },
+    { "type": "text", "id": "detail_1_label", "label": "Detail 1 label", "default": "Capsule appearance" },
+    { "type": "text", "id": "detail_2_label", "label": "Detail 2 label", "default": "Bottle size" },
+    { "type": "text", "id": "detail_2_value", "label": "Detail 2 value", "default": "90 capsules" },
+    { "type": "text", "id": "detail_3_label", "label": "Detail 3 label", "default": "Serving example" },
+    { "type": "text", "id": "detail_3_value", "label": "Detail 3 value", "default": "3 capsules with water" },
+    { "type": "text", "id": "detail_4_label", "label": "Detail 4 label", "default": "Routine placement" },
+    { "type": "text", "id": "detail_4_value", "label": "Detail 4 value", "default": "Start of day" },
+    { "type": "header", "content": "Style" },
+    { "type": "color", "id": "background_color", "label": "Background", "default": "#f6f6f6" },
+    { "type": "color", "id": "visual_background", "label": "Visual background", "default": "#eeeeee" },
+    { "type": "color", "id": "text_color", "label": "Text", "default": "#1e1e1e" },
+    { "type": "color", "id": "muted_color", "label": "Muted text", "default": "#666666" },
+    { "type": "color", "id": "accent_color", "label": "Accent", "default": "#5a9d6f" },
+    { "type": "color", "id": "border_color", "label": "Borders", "default": "#d9d9d9" },
+    { "type": "range", "id": "section_padding", "label": "Section spacing", "min": 20, "max": 120, "step": 10, "unit": "px", "default": 70 }
+  ],
+  "presets": [{ "name": "NX-01 at a glance" }],
+  "tag": null,
+  "class": "nx-01-at-a-glance"
+}
 {% endschema %}
