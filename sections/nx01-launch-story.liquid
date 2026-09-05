@@ -71,6 +71,10 @@
           </h2>
         {%- endif -%}
 
+        {%- if section.settings.lead != blank -%}
+          <p class="nx01-story__lead-sub">{{ section.settings.lead | escape }}</p>
+        {%- endif -%}
+
         {%- if section.settings.quote != blank -%}
           <blockquote class="nx01-story__quote">
             <p>{{ section.settings.quote | escape }}</p>
@@ -100,6 +104,9 @@
 
     {%- if show_transition -%}
       <div class="nx01-story__transition" aria-label="{{ 'sections.nx01_launch_story.transition_label' | t }}">
+        {%- if section.settings.transition_heading != blank -%}
+          <p class="nx01-story__transition-heading">{{ section.settings.transition_heading | escape }}</p>
+        {%- endif -%}
         {%- if show_composite -%}
           <div class="nx01-story__media">
             <div class="nx01-story__media-from">
@@ -229,6 +236,10 @@
             {%- endif -%}
           </div>
         {%- endif -%}
+
+        {%- if section.settings.transition_note != blank -%}
+          <p class="nx01-story__transition-note">{{ section.settings.transition_note | escape }}</p>
+        {%- endif -%}
       </div>
     {%- endif -%}
   </div>
@@ -260,6 +271,34 @@
     font-size: clamp(3.2rem, 5vw, 4.4rem);
     letter-spacing: -0.035em;
     line-height: 1.18;
+  }
+
+  .nx01-story__lead-sub {
+    margin: 1.6rem 0 0;
+    max-width: 44rem;
+    font-size: 1.9rem;
+    font-weight: 300;
+    line-height: 1.55;
+    color: rgb(var(--nx01-body));
+  }
+
+  .nx01-story__transition-heading {
+    margin: 0 0 3.2rem;
+    font-family: var(--font-heading-family);
+    font-size: clamp(2.4rem, 3.4vw, 3.6rem);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    text-align: center;
+    color: rgb(var(--nx01-ink));
+  }
+
+  .nx01-story__transition-note {
+    margin: 3.2rem 0 0;
+    font-size: 1.4rem;
+    line-height: 1.5;
+    text-align: center;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 62%, transparent);
   }
 
   .nx01-story__quote {
@@ -705,6 +744,12 @@
     },
     {
       "type": "text",
+      "id": "lead",
+      "label": "Lead line",
+      "info": "Light supporting line shown under the heading."
+    },
+    {
+      "type": "text",
       "id": "quote",
       "label": "t:sections.nx01_launch_story.settings.quote",
       "default": "What should I actually take every day?"
@@ -739,6 +784,18 @@
       "label": "t:sections.nx01_launch_story.settings.link_href",
       "default": "#nx01-formula",
       "info": "t:sections.nx01_launch_story.settings.href_info"
+    },
+    {
+      "type": "text",
+      "id": "transition_heading",
+      "label": "Transition heading",
+      "info": "Centered heading above the ingredient-to-formula diagram."
+    },
+    {
+      "type": "text",
+      "id": "transition_note",
+      "label": "Transition note",
+      "info": "Centered note below the diagram."
     },
     {
       "type": "header",
