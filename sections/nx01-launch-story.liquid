@@ -1,23 +1,50 @@
 {%- liquid
   assign pieces_image = section.settings.pieces_image
   assign nx01_image = section.settings.nx01_image
-  assign show_media = false
-  if pieces_image != blank or nx01_image != blank
-    assign show_media = true
-  endif
   assign piece_count = 0
+  assign piece_image_count = 0
   for block in section.blocks
-    if block.type == 'piece' and block.settings.label != blank
-      assign piece_count = piece_count | plus: 1
+    if block.type == 'piece'
+      if block.settings.label != blank or block.settings.image != blank
+        assign piece_count = piece_count | plus: 1
+      endif
+      if block.settings.image != blank
+        assign piece_image_count = piece_image_count | plus: 1
+      endif
     endif
   endfor
-  assign show_vials = false
-  if piece_count > 0 and show_media == false
-    assign show_vials = true
+  assign show_composite = false
+  if piece_image_count == 0 and pieces_image != blank
+    assign show_composite = true
+  endif
+  assign show_piece_row = false
+  if piece_count > 0 and show_composite == false
+    assign show_piece_row = true
+  endif
+  assign show_result = false
+  if nx01_image != blank or section.settings.result_name != blank
+    assign show_result = true
+  endif
+  assign show_transition = false
+  if show_piece_row or show_composite or show_result
+    assign show_transition = true
+  endif
+  assign show_pieces_wrap = false
+  if show_piece_row
+    assign show_pieces_wrap = true
+  endif
+  if show_composite == false
+    if show_result
+      assign show_pieces_wrap = true
+    endif
   endif
   assign show_link = false
   if section.settings.link_label != blank and section.settings.link_href != blank
     assign show_link = true
+  endif
+  assign nx01_alt = section.settings.nx01_alt | strip
+  if nx01_alt == blank
+    assign nx01_alt = section.settings.result_name
   endif
 -%}
 
@@ -62,48 +89,48 @@
       </div>
     </div>
 
-    {%- if show_media or show_vials -%}
+    {%- if show_transition -%}
       <div class="nx01-story__transition" aria-label="{{ 'sections.nx01_launch_story.transition_label' | t }}">
-        {%- if show_media -%}
+        {%- if show_composite -%}
           <div class="nx01-story__media">
             <div class="nx01-story__media-from">
-              {%- if pieces_image != blank -%}
-                {{
-                  pieces_image
-                  | image_url: width: 1200
-                  | image_tag:
-                    class: 'nx01-story__img',
-                    loading: 'lazy',
-                    widths: '480, 720, 960, 1200',
-                    sizes: '(max-width: 767px) 92vw, 42vw',
-                    alt: section.settings.pieces_alt,
-                    width: pieces_image.width,
-                    height: pieces_image.height,
-                    decoding: 'async'
-                }}
-              {%- endif -%}
+              {{
+                pieces_image
+                | image_url: width: 1200
+                | image_tag:
+                  class: 'nx01-story__img',
+                  loading: 'lazy',
+                  widths: '480, 720, 960, 1200',
+                  sizes: '(max-width: 767px) 92vw, 42vw',
+                  alt: section.settings.pieces_alt,
+                  width: pieces_image.width,
+                  height: pieces_image.height,
+                  decoding: 'async'
+              }}
               {%- if section.settings.pieces_caption != blank -%}
                 <p class="nx01-story__caption">{{ section.settings.pieces_caption | escape }}</p>
               {%- endif -%}
             </div>
 
-            <div class="nx01-story__rule" aria-hidden="true"></div>
+            <span class="nx01-story__arrow" aria-hidden="true"></span>
 
             <div class="nx01-story__media-to">
               {%- if nx01_image != blank -%}
-                {{
-                  nx01_image
-                  | image_url: width: 900
-                  | image_tag:
-                    class: 'nx01-story__img nx01-story__img--single',
-                    loading: 'lazy',
-                    widths: '360, 540, 720, 900',
-                    sizes: '(max-width: 767px) 56vw, 22vw',
-                    alt: section.settings.nx01_alt,
-                    width: nx01_image.width,
-                    height: nx01_image.height,
-                    decoding: 'async'
-                }}
+                <span class="nx01-story__figure nx01-story__figure--one">
+                  {{
+                    nx01_image
+                    | image_url: width: 900
+                    | image_tag:
+                      class: 'nx01-story__bottle nx01-story__bottle--one',
+                      loading: 'lazy',
+                      widths: '360, 540, 720, 900',
+                      sizes: '(max-width: 767px) 48vw, 22vw',
+                      alt: nx01_alt,
+                      width: nx01_image.width,
+                      height: nx01_image.height,
+                      decoding: 'async'
+                  }}
+                </span>
               {%- endif -%}
               {%- if section.settings.result_caption != blank -%}
                 <p class="nx01-story__caption">{{ section.settings.result_caption | escape }}</p>
@@ -112,24 +139,84 @@
           </div>
         {%- endif -%}
 
-        {%- if show_vials -%}
+        {%- if show_pieces_wrap -%}
           <div class="nx01-story__pieces">
-            <ul class="nx01-story__piece-list">
-              {%- for block in section.blocks -%}
-                {%- if block.type == 'piece' and block.settings.label != blank -%}
-                  <li class="nx01-story__piece" {{ block.shopify_attributes }}>
-                    <span class="nx01-story__vial" aria-hidden="true"></span>
-                    <span class="nx01-story__piece-name">{{ block.settings.label | escape }}</span>
-                  </li>
+            {%- if show_piece_row -%}
+              <ul class="nx01-story__piece-list">
+                {%- for block in section.blocks -%}
+                  {%- if block.type == 'piece' -%}
+                    {%- if block.settings.label != blank or block.settings.image != blank -%}
+                      {%- liquid
+                        assign piece_image = block.settings.image
+                        assign piece_alt = block.settings.alt | strip
+                        if piece_alt == blank
+                          assign piece_alt = block.settings.label
+                        endif
+                      -%}
+                      <li
+                        class="nx01-story__piece{% if piece_image != blank %} nx01-story__piece--photo{% endif %}"
+                        {{ block.shopify_attributes }}
+                      >
+                        {%- if piece_image != blank -%}
+                          <span class="nx01-story__figure">
+                            {{
+                              piece_image
+                              | image_url: width: 360
+                              | image_tag:
+                                class: 'nx01-story__bottle',
+                                loading: 'lazy',
+                                widths: '120, 180, 240, 360',
+                                sizes: '(max-width: 767px) 28vw, 12vw',
+                                alt: piece_alt,
+                                width: piece_image.width,
+                                height: piece_image.height,
+                                decoding: 'async'
+                            }}
+                          </span>
+                        {%- else -%}
+                          <span class="nx01-story__vial" aria-hidden="true"></span>
+                          {%- if block.settings.label != blank -%}
+                            <span class="nx01-story__piece-name">{{ block.settings.label | escape }}</span>
+                          {%- endif -%}
+                        {%- endif -%}
+                      </li>
+                    {%- endif -%}
+                  {%- endif -%}
+                {%- endfor -%}
+              </ul>
+            {%- endif -%}
+
+            {%- if show_result -%}
+              {%- if show_piece_row -%}
+                <span class="nx01-story__arrow" aria-hidden="true"></span>
+              {%- endif -%}
+              <div class="nx01-story__result{% if nx01_image != blank %} nx01-story__result--photo{% endif %}">
+                {%- if nx01_image != blank -%}
+                  <span class="nx01-story__figure nx01-story__figure--one">
+                    {{
+                      nx01_image
+                      | image_url: width: 900
+                      | image_tag:
+                        class: 'nx01-story__bottle nx01-story__bottle--one',
+                        loading: 'lazy',
+                        widths: '360, 540, 720, 900',
+                        sizes: '(max-width: 767px) 48vw, 22vw',
+                        alt: nx01_alt,
+                        width: nx01_image.width,
+                        height: nx01_image.height,
+                        decoding: 'async'
+                    }}
+                  </span>
+                {%- else -%}
+                  <span class="nx01-story__vial nx01-story__vial--one" aria-hidden="true"></span>
+                  {%- if section.settings.result_name != blank -%}
+                    <span class="nx01-story__result-name">{{ section.settings.result_name | escape }}</span>
+                  {%- endif -%}
                 {%- endif -%}
-              {%- endfor -%}
-            </ul>
-            {%- if section.settings.result_name != blank -%}
-              <p class="nx01-story__result">
-                <span class="nx01-story__result-rule" aria-hidden="true"></span>
-                <span class="nx01-story__vial nx01-story__vial--one" aria-hidden="true"></span>
-                <span class="nx01-story__result-name">{{ section.settings.result_name | escape }}</span>
-              </p>
+                {%- if nx01_image != blank and section.settings.result_caption != blank -%}
+                  <p class="nx01-story__caption">{{ section.settings.result_caption | escape }}</p>
+                {%- endif -%}
+              </div>
             {%- endif -%}
           </div>
         {%- endif -%}
@@ -288,6 +375,11 @@
     border-bottom-color: rgb(var(--color-foreground));
   }
 
+  .nx01-story__link:focus-visible {
+    outline: 2px solid rgb(var(--color-foreground));
+    outline-offset: 0.4rem;
+  }
+
   .nx01-story__transition {
     padding-top: 4rem;
     border-top: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
@@ -296,6 +388,7 @@
   .nx01-story__media {
     display: grid;
     grid-template-columns: 1fr;
+    justify-items: center;
     align-items: end;
     gap: 2.4rem;
   }
@@ -304,12 +397,8 @@
   .nx01-story__media-to {
     display: flex;
     flex-direction: column;
+    align-items: center;
     gap: 1.2rem;
-  }
-
-  .nx01-story__media-to {
-    align-items: flex-start;
-    max-width: 22rem;
   }
 
   .nx01-story__img {
@@ -317,16 +406,6 @@
     width: 100%;
     height: auto;
     object-fit: contain;
-  }
-
-  .nx01-story__img--single {
-    max-width: 22rem;
-  }
-
-  .nx01-story__rule {
-    display: none;
-    height: 1px;
-    background: color-mix(in srgb, rgba(var(--color-foreground)) 16%, transparent);
   }
 
   .nx01-story__caption,
@@ -338,24 +417,32 @@
     letter-spacing: 0.12em;
     line-height: 1.3;
     text-transform: uppercase;
-    color: color-mix(in srgb, rgba(var(--color-foreground)) 48%, transparent);
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 72%, transparent);
   }
 
   .nx01-story__piece-name {
     min-height: 2.6em;
   }
 
+  .nx01-story__result-name {
+    color: rgb(var(--color-foreground));
+  }
+
   .nx01-story__pieces {
     display: flex;
     flex-direction: column;
-    gap: 2.8rem;
+    align-items: center;
+    gap: 2.4rem;
   }
 
   .nx01-story__piece-list {
     display: flex;
     flex-wrap: wrap;
     align-items: flex-end;
-    gap: 1.6rem 1.4rem;
+    justify-content: center;
+    width: 100%;
+    max-width: 36rem;
+    gap: 1.6rem 1.2rem;
     margin: 0;
     padding: 0;
     list-style: none;
@@ -367,9 +454,53 @@
     flex-direction: column;
     align-items: center;
     gap: 1rem;
-    width: 7.2rem;
     margin: 0;
     text-align: center;
+  }
+
+  .nx01-story__piece {
+    flex: 0 0 calc((100% - 2.4rem) / 3);
+    width: calc((100% - 2.4rem) / 3);
+    max-width: 10.4rem;
+  }
+
+  .nx01-story__result {
+    width: auto;
+    max-width: 16rem;
+  }
+
+  .nx01-story__figure {
+    position: relative;
+    display: block;
+    width: 100%;
+  }
+
+  .nx01-story__figure::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: 2%;
+    width: 62%;
+    height: 12%;
+    transform: translateX(-50%);
+    background: radial-gradient(ellipse, color-mix(in srgb, rgba(var(--color-foreground)) 18%, transparent), transparent 72%);
+    filter: blur(0.8rem);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .nx01-story__bottle {
+    position: relative;
+    z-index: 1;
+    display: block;
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+  }
+
+  .nx01-story__figure--one,
+  .nx01-story__bottle--one {
+    width: 12.8rem;
   }
 
   .nx01-story__vial {
@@ -410,19 +541,25 @@
     border-color: color-mix(in srgb, rgba(var(--color-foreground)) 36%, transparent);
   }
 
-  .nx01-story__result {
-    align-self: flex-start;
-  }
-
-  .nx01-story__result-name {
-    color: rgb(var(--color-foreground));
-  }
-
-  .nx01-story__result-rule {
+  .nx01-story__arrow {
     display: block;
-    width: 3.2rem;
-    height: 1px;
-    background: color-mix(in srgb, rgba(var(--color-foreground)) 20%, transparent);
+    position: relative;
+    flex: 0 0 auto;
+    width: 1px;
+    height: 3.2rem;
+    background: color-mix(in srgb, rgba(var(--color-foreground)) 28%, transparent);
+  }
+
+  .nx01-story__arrow::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    width: 0.7rem;
+    height: 0.7rem;
+    border-right: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 36%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 36%, transparent);
+    transform: translate(-50%, 0.15rem) rotate(45deg);
   }
 
   @media screen and (min-width: 768px) {
@@ -448,44 +585,85 @@
 
     .nx01-story__media {
       grid-template-columns: minmax(0, 1fr) 4.8rem minmax(0, 0.42fr);
+      justify-items: stretch;
       column-gap: 3.2rem;
     }
 
-    .nx01-story__rule {
-      display: block;
+    .nx01-story__media-from,
+    .nx01-story__media-to {
+      align-items: flex-start;
+    }
+
+    .nx01-story__media .nx01-story__arrow {
       align-self: center;
+      width: 4.8rem;
+      height: 1px;
+    }
+
+    .nx01-story__media .nx01-story__arrow::after {
+      left: auto;
+      right: 0;
+      bottom: auto;
+      top: 50%;
+      border-bottom: 0;
+      border-top: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 36%, transparent);
+      transform: translate(0.15rem, -50%) rotate(45deg);
     }
 
     .nx01-story__pieces {
       flex-direction: row;
       align-items: flex-end;
       justify-content: flex-start;
-      gap: 3.2rem;
+      gap: 2.4rem;
     }
 
     .nx01-story__piece-list {
       flex: 0 1 auto;
-      gap: 2rem 1.2rem;
+      width: auto;
+      max-width: 72rem;
+      justify-content: flex-start;
+      gap: 1.6rem 1.6rem;
+    }
+
+    .nx01-story__piece {
+      flex: 0 1 auto;
+      width: 9.6rem;
+      max-width: 10.4rem;
+    }
+
+    .nx01-story__figure--one,
+    .nx01-story__bottle--one {
+      width: 16rem;
     }
 
     .nx01-story__result {
-      flex-direction: row;
-      align-items: flex-end;
+      flex-direction: column;
+      align-items: center;
       align-self: flex-end;
-      width: auto;
-      gap: 2.4rem;
+      max-width: 16rem;
     }
 
-    .nx01-story__result-rule {
-      display: block;
+    .nx01-story__pieces > .nx01-story__arrow {
       width: 4.8rem;
       height: 1px;
-      margin-bottom: 3.4rem;
-      background: color-mix(in srgb, rgba(var(--color-foreground)) 20%, transparent);
+      margin-bottom: 4.8rem;
     }
 
-    .nx01-story__result-name {
-      margin-bottom: 0.2rem;
+    .nx01-story__pieces > .nx01-story__arrow::after {
+      left: auto;
+      right: 0;
+      bottom: auto;
+      top: 50%;
+      border-bottom: 0;
+      border-top: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 36%, transparent);
+      transform: translate(0.15rem, -50%) rotate(45deg);
+    }
+  }
+
+  @media screen and (min-width: 990px) {
+    .nx01-story__piece-list {
+      flex-wrap: nowrap;
+      max-width: none;
     }
   }
 {% endstyle %}
@@ -556,7 +734,7 @@
       "type": "image_picker",
       "id": "pieces_image",
       "label": "t:sections.nx01_launch_story.settings.pieces_image",
-      "info": "t:sections.nx01_launch_story.settings.cutout_info"
+      "info": "t:sections.nx01_launch_story.settings.pieces_priority_info"
     },
     {
       "type": "text",
@@ -602,7 +780,18 @@
           "type": "text",
           "id": "label",
           "label": "t:sections.nx01_launch_story.blocks.piece.settings.label",
-          "default": "ALCAR"
+          "default": "Acetyl-L Carnitine"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "t:sections.nx01_launch_story.blocks.piece.settings.image",
+          "info": "t:sections.nx01_launch_story.settings.cutout_info"
+        },
+        {
+          "type": "text",
+          "id": "alt",
+          "label": "t:sections.nx01_launch_story.blocks.piece.settings.alt"
         }
       ]
     }
@@ -612,15 +801,12 @@
     {
       "name": "t:sections.nx01_launch_story.presets.name",
       "blocks": [
-        { "type": "piece", "settings": { "label": "ALCAR" } },
-        { "type": "piece", "settings": { "label": "CDP-Choline" } },
-        { "type": "piece", "settings": { "label": "NMN" } },
-        { "type": "piece", "settings": { "label": "Rhodiola" } },
-        { "type": "piece", "settings": { "label": "Ubiquinol" } },
+        { "type": "piece", "settings": { "label": "Acetyl-L Carnitine" } },
+        { "type": "piece", "settings": { "label": "CDP-choline" } },
         { "type": "piece", "settings": { "label": "L-Theanine" } },
-        { "type": "piece", "settings": { "label": "P-5-P" } },
-        { "type": "piece", "settings": { "label": "Methyl B12" } },
-        { "type": "piece", "settings": { "label": "5-MTHF" } }
+        { "type": "piece", "settings": { "label": "NMN" } },
+        { "type": "piece", "settings": { "label": "CoEnzyme Q10" } },
+        { "type": "piece", "settings": { "label": "Rhodiola Rosea" } }
       ]
     }
   ]
