@@ -1,6 +1,271 @@
+{% doc %}
+  @prompt
+    Design a visually distinctive formula architecture section for NX-01.
+    
+    HEADLINE
+    “9 actives. Four jobs.”
+    
+    SUBHEAD
+    “Instead of treating NX-01 as an ingredient list, show how the formula is structured.”
+    
+    Create four functional modules:
+    
+    01 — CELLULAR ENERGY
+    Acetyl-L-Carnitine
+    NMN
+    Ubiquinol CoQ10
+    
+    02 — CHOLINERGIC SUPPORT
+    CDP-Choline
+    
+    03 — CALM FOCUS
+    L-Theanine
+    Rhodiola rosea
+    
+    04 — ACTIVE COFACTORS
+    P-5-P
+    Methyl B12
+    5-MTHF
+    
+    Each system should have:
+    - section number
+    - short descriptor
+    - ingredients
+    - a subtle diagram or iconographic element
+    - 1–2 lines explaining the formulation role conservatively
+    
+    Avoid medical graphics.
+    Use abstract scientific/product-system visualization.
+    
+    Design as a highly reusable four-card or horizontal-step component.
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .nx-formula-{{ ai_gen_id }} {
+    display: block;
+    width: {{ block.settings.desktop_width_percent }}%;
+    max-width: 100%;
+    background: {{ block.settings.background_color }};
+    color: {{ block.settings.text_color }};
+    padding: clamp(32px, 6vw, 88px) clamp(20px, 4vw, 64px);
+    box-sizing: border-box;
+  }
+
+  .nx-formula-{{ ai_gen_id }}__inner {
+    max-width: 1440px;
+    margin: 0 auto;
+  }
+
+  .nx-formula-{{ ai_gen_id }}__intro {
+    max-width: 720px;
+    margin-bottom: clamp(28px, 5vw, 56px);
+  }
+
+  .nx-formula-{{ ai_gen_id }}__eyebrow {
+    margin: 0 0 14px;
+    color: {{ block.settings.accent_color }};
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+  }
+
+  .nx-formula-{{ ai_gen_id }}__heading {
+    margin: 0 0 16px;
+    color: {{ block.settings.text_color }};
+    font-size: clamp(34px, 5vw, 72px);
+    line-height: 1;
+    letter-spacing: -.045em;
+  }
+
+  .nx-formula-{{ ai_gen_id }}__subhead {
+    margin: 0;
+    color: {{ block.settings.muted_color }};
+    font-size: clamp(16px, 1.6vw, 20px);
+    line-height: 1.5;
+  }
+
+  .nx-formula-{{ ai_gen_id }}__grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .nx-formula-{{ ai_gen_id }}__card {
+    position: relative;
+    min-height: 390px;
+    padding: 24px;
+    overflow: hidden;
+    border: 1px solid {{ block.settings.border_color }};
+    border-radius: {{ block.settings.card_radius }}px;
+    background: {{ block.settings.card_color }};
+    display: flex;
+    flex-direction: column;
+  }
+
+  .nx-formula-{{ ai_gen_id }}__card::before,
+  .nx-formula-{{ ai_gen_id }}__card::after {
+    content: '';
+    position: absolute;
+    border: 1px solid {{ block.settings.accent_color }};
+    border-radius: 50%;
+    opacity: .28;
+    pointer-events: none;
+  }
+
+  .nx-formula-{{ ai_gen_id }}__card::before {
+    width: 150px;
+    height: 150px;
+    right: -70px;
+    top: 70px;
+  }
+
+  .nx-formula-{{ ai_gen_id }}__card::after {
+    width: 84px;
+    height: 84px;
+    right: -24px;
+    top: 103px;
+  }
+
+  .nx-formula-{{ ai_gen_id }}__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 52px;
+  }
+
+  .nx-formula-{{ ai_gen_id }}__number {
+    color: {{ block.settings.accent_color }};
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .12em;
+  }
+
+  .nx-formula-{{ ai_gen_id }}__glyph {
+    width: 42px;
+    height: 42px;
+    border: 1px solid {{ block.settings.accent_color }};
+    border-radius: 50%;
+    position: relative;
+  }
+
+  .nx-formula-{{ ai_gen_id }}__glyph::before,
+  .nx-formula-{{ ai_gen_id }}__glyph::after {
+    content: '';
+    position: absolute;
+    border: 1px solid {{ block.settings.accent_color }};
+    border-radius: 50%;
+  }
+
+  .nx-formula-{{ ai_gen_id }}__glyph::before { inset: 8px 15px; }
+  .nx-formula-{{ ai_gen_id }}__glyph::after { inset: 15px 8px; }
+
+  .nx-formula-{{ ai_gen_id }}__title {
+    position: relative;
+    z-index: 1;
+    margin: 0 0 18px;
+    max-width: 210px;
+    font-size: clamp(20px, 2vw, 27px);
+    line-height: 1.05;
+    letter-spacing: -.025em;
+  }
+
+  .nx-formula-{{ ai_gen_id }}__ingredients {
+    position: relative;
+    z-index: 1;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    color: {{ block.settings.text_color }};
+    font-size: 15px;
+    line-height: 1.75;
+  }
+
+  .nx-formula-{{ ai_gen_id }}__ingredients li::before {
+    content: '—';
+    margin-right: 8px;
+    color: {{ block.settings.accent_color }};
+  }
+
+  .nx-formula-{{ ai_gen_id }}__role {
+    position: relative;
+    z-index: 1;
+    margin: auto 0 0;
+    padding-top: 24px;
+    color: {{ block.settings.muted_color }};
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  @media screen and (max-width: 989px) {
+    .nx-formula-{{ ai_gen_id }}__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+
+  @media screen and (max-width: 549px) {
+    .nx-formula-{{ ai_gen_id }}__grid { grid-template-columns: 1fr; }
+    .nx-formula-{{ ai_gen_id }}__card { min-height: 320px; }
+  }
+{% endstyle %}
+
+<nx-formula-{{ ai_gen_id }} class="nx-formula-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="nx-formula-{{ ai_gen_id }}__inner">
+    <div class="nx-formula-{{ ai_gen_id }}__intro">
+      <p class="nx-formula-{{ ai_gen_id }}__eyebrow">NX-01 / formula architecture</p>
+      <h2 class="nx-formula-{{ ai_gen_id }}__heading">{{ block.settings.heading }}</h2>
+      <p class="nx-formula-{{ ai_gen_id }}__subhead">{{ block.settings.subheading }}</p>
+    </div>
+
+    <div class="nx-formula-{{ ai_gen_id }}__grid">
+      <article class="nx-formula-{{ ai_gen_id }}__card">
+        <div class="nx-formula-{{ ai_gen_id }}__top"><span class="nx-formula-{{ ai_gen_id }}__number">01</span><span class="nx-formula-{{ ai_gen_id }}__glyph" aria-hidden="true"></span></div>
+        <h3 class="nx-formula-{{ ai_gen_id }}__title">CELLULAR ENERGY</h3>
+        <ul class="nx-formula-{{ ai_gen_id }}__ingredients"><li>Acetyl-L-Carnitine</li><li>NMN</li><li>Ubiquinol CoQ10</li></ul>
+        <p class="nx-formula-{{ ai_gen_id }}__role">A coordinated set of compounds selected to support the formula’s cellular energy architecture.</p>
+      </article>
+
+      <article class="nx-formula-{{ ai_gen_id }}__card">
+        <div class="nx-formula-{{ ai_gen_id }}__top"><span class="nx-formula-{{ ai_gen_id }}__number">02</span><span class="nx-formula-{{ ai_gen_id }}__glyph" aria-hidden="true"></span></div>
+        <h3 class="nx-formula-{{ ai_gen_id }}__title">CHOLINERGIC SUPPORT</h3>
+        <ul class="nx-formula-{{ ai_gen_id }}__ingredients"><li>CDP-Choline</li></ul>
+        <p class="nx-formula-{{ ai_gen_id }}__role">A focused single-ingredient module designed to complement the wider cognitive-support system.</p>
+      </article>
+
+      <article class="nx-formula-{{ ai_gen_id }}__card">
+        <div class="nx-formula-{{ ai_gen_id }}__top"><span class="nx-formula-{{ ai_gen_id }}__number">03</span><span class="nx-formula-{{ ai_gen_id }}__glyph" aria-hidden="true"></span></div>
+        <h3 class="nx-formula-{{ ai_gen_id }}__title">CALM FOCUS</h3>
+        <ul class="nx-formula-{{ ai_gen_id }}__ingredients"><li>L-Theanine</li><li>Rhodiola rosea</li></ul>
+        <p class="nx-formula-{{ ai_gen_id }}__role">Pairs a calming amino acid with a botanical component for a considered, balanced formulation role.</p>
+      </article>
+
+      <article class="nx-formula-{{ ai_gen_id }}__card">
+        <div class="nx-formula-{{ ai_gen_id }}__top"><span class="nx-formula-{{ ai_gen_id }}__number">04</span><span class="nx-formula-{{ ai_gen_id }}__glyph" aria-hidden="true"></span></div>
+        <h3 class="nx-formula-{{ ai_gen_id }}__title">ACTIVE COFACTORS</h3>
+        <ul class="nx-formula-{{ ai_gen_id }}__ingredients"><li>P-5-P</li><li>Methyl B12</li><li>5-MTHF</li></ul>
+        <p class="nx-formula-{{ ai_gen_id }}__role">A supporting cofactor layer that completes the formula architecture without adding visual noise.</p>
+      </article>
+    </div>
+  </div>
+</nx-formula-{{ ai_gen_id }}>
+
 {% schema %}
- {
-   "name": "AI_Block",
-   "tag": "shopify-ai-generated-block"
- }
+{
+  "name": "Formula architecture",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading", "default": "9 actives. Four jobs." },
+    { "type": "textarea", "id": "subheading", "label": "Subheading", "default": "Instead of treating NX-01 as an ingredient list, show how the formula is structured." },
+    { "type": "range", "id": "desktop_width_percent", "label": "Desktop width", "min": 50, "max": 100, "step": 5, "unit": "%", "default": 100 },
+    { "type": "color", "id": "background_color", "label": "Background", "default": "#f9f9f9" },
+    { "type": "color", "id": "card_color", "label": "Card", "default": "#ffffff" },
+    { "type": "color", "id": "text_color", "label": "Text", "default": "#2a2a2a" },
+    { "type": "color", "id": "muted_color", "label": "Muted text", "default": "#666666" },
+    { "type": "color", "id": "accent_color", "label": "Accent", "default": "#5a9d6f" },
+    { "type": "color", "id": "border_color", "label": "Border", "default": "#e8e8e8" },
+    { "type": "range", "id": "card_radius", "label": "Card radius", "min": 0, "max": 32, "step": 2, "unit": "px", "default": 6 }
+  ],
+  "presets": [{ "name": "Formula architecture" }],
+  "tag": null,
+  "class": "formula-architecture-block"
+}
 {% endschema %}
