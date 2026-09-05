@@ -1,0 +1,210 @@
+{% render 'nx01-launch-css' %}
+
+{%- liquid
+  assign qa_blocks = section.blocks | where: 'type', 'qa'
+  assign qa_visible = 0
+  for block in qa_blocks
+    if block.settings.question != blank and block.settings.answer != blank
+      assign qa_visible = qa_visible | plus: 1
+    endif
+  endfor
+  assign split_at = qa_visible | plus: 1 | divided_by: 2
+-%}
+
+<section
+  id="nx01-faq"
+  class="nx01 nx01-faq xo-section xo-section--{{ section.id }}{% if section.settings.color_scheme != blank %} color-{{ section.settings.color_scheme }}{% endif %}"
+  aria-labelledby="nx01-faq-heading-{{ section.id }}"
+>
+  <div class="nx01__inner">
+    <div class="nx01__intro">
+      {%- if section.settings.eyebrow != blank -%}
+        <p class="nx01__label">
+          <span class="nx01__label-rule" aria-hidden="true"></span>
+          <span>{{ section.settings.eyebrow | escape }}</span>
+        </p>
+      {%- endif -%}
+      {%- if section.settings.heading != blank -%}
+        <h2 class="nx01__heading" id="nx01-faq-heading-{{ section.id }}">{{ section.settings.heading | escape }}</h2>
+      {%- endif -%}
+      {%- if section.settings.subheading != blank -%}
+        <p class="nx01__sub">{{ section.settings.subheading | escape }}</p>
+      {%- endif -%}
+    </div>
+
+    {%- if qa_visible > 0 -%}
+      <div class="nx01-faq__columns">
+        <div class="nx01-faq__col">
+          {%- assign shown = 0 -%}
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'qa' and block.settings.question != blank and block.settings.answer != blank -%}
+              {%- if shown < split_at -%}
+                <details class="nx01-faq__item" {{ block.shopify_attributes }}{% if block.settings.open_by_default %} open{% endif %}>
+                  <summary class="nx01-faq__q">
+                    <span>{{ block.settings.question | escape }}</span>
+                    <span class="nx01-faq__icon nx01-faq__icon--plus" aria-hidden="true">{% render 'icon', name: 'plus', size: '1.6rem' %}</span>
+                    <span class="nx01-faq__icon nx01-faq__icon--minus" aria-hidden="true">{% render 'icon', name: 'minus', size: '1.6rem' %}</span>
+                  </summary>
+                  <div class="nx01-faq__a">{{ block.settings.answer }}</div>
+                </details>
+                {%- assign shown = shown | plus: 1 -%}
+              {%- endif -%}
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+        <div class="nx01-faq__col">
+          {%- assign shown = 0 -%}
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'qa' and block.settings.question != blank and block.settings.answer != blank -%}
+              {%- if shown >= split_at -%}
+                <details class="nx01-faq__item" {{ block.shopify_attributes }}{% if block.settings.open_by_default %} open{% endif %}>
+                  <summary class="nx01-faq__q">
+                    <span>{{ block.settings.question | escape }}</span>
+                    <span class="nx01-faq__icon nx01-faq__icon--plus" aria-hidden="true">{% render 'icon', name: 'plus', size: '1.6rem' %}</span>
+                    <span class="nx01-faq__icon nx01-faq__icon--minus" aria-hidden="true">{% render 'icon', name: 'minus', size: '1.6rem' %}</span>
+                  </summary>
+                  <div class="nx01-faq__a">{{ block.settings.answer }}</div>
+                </details>
+              {%- endif -%}
+              {%- assign shown = shown | plus: 1 -%}
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+      </div>
+    {%- endif -%}
+
+    {%- if qa_visible > 0 -%}
+      <script type="application/ld+json">
+        {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": [
+            {%- assign json_index = 0 -%}
+            {%- for b in qa_blocks -%}
+              {%- if b.settings.question != blank and b.settings.answer != blank -%}
+                {%- if json_index > 0 -%},{%- endif -%}
+                {
+                  "@type": "Question",
+                  "name": {{ b.settings.question | json }},
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": {{ b.settings.answer | strip_html | json }}
+                  }
+                }
+                {%- assign json_index = json_index | plus: 1 -%}
+              {%- endif -%}
+            {%- endfor -%}
+          ]
+        }
+      </script>
+    {%- endif -%}
+  </div>
+</section>
+
+{% stylesheet %}
+  .nx01-faq {
+    scroll-margin-top: 9.6rem;
+  }
+
+  .nx01-faq__columns {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .nx01-faq__item {
+    padding: 2.4rem 0;
+    border-bottom: 0.1rem solid rgb(var(--nx01-line));
+  }
+
+  .nx01-faq__q {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.6rem;
+    font-size: 1.6rem;
+    font-weight: 500;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .nx01-faq__q::-webkit-details-marker {
+    display: none;
+  }
+
+  .nx01-faq__q:focus-visible {
+    outline: 0.2rem solid rgb(var(--nx01-navy));
+    outline-offset: 0.4rem;
+  }
+
+  .nx01-faq__icon {
+    display: none;
+    flex-shrink: 0;
+    color: rgb(var(--nx01-ink));
+  }
+
+  .nx01-faq__item:not([open]) .nx01-faq__icon--plus,
+  .nx01-faq__item[open] .nx01-faq__icon--minus {
+    display: inline-flex;
+  }
+
+  .nx01-faq__a {
+    margin-top: 1.6rem;
+    font-size: 1.4rem;
+    line-height: 1.55;
+    color: rgb(var(--nx01-body));
+  }
+
+  .nx01-faq__a p {
+    margin: 0 0 1.2rem;
+  }
+
+  .nx01-faq__a p:last-child {
+    margin-bottom: 0;
+  }
+
+  @media screen and (min-width: 990px) {
+    .nx01-faq__columns {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 0 8rem;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "NX-01 launch FAQ",
+  "tag": "section",
+  "class": "section-nx01-faq",
+  "enabled_on": {
+    "templates": ["page"]
+  },
+  "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "background-1" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Verification Framework" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Before you decide." },
+    { "type": "textarea", "id": "subheading", "label": "Subheading", "default": "Clinical answers to technical integration queries. We believe in high informational transparency." }
+  ],
+  "blocks": [
+    {
+      "type": "qa",
+      "name": "FAQ item",
+      "settings": [
+        { "type": "text", "id": "question", "label": "Question", "default": "What is NX-01 designed to replace?" },
+        { "type": "richtext", "id": "answer", "label": "Answer", "default": "<p>NX-01 is designed as a focused alternative to a routine built around multiple separate nootropic products. It is not intended to replace prescribed medication or professional medical advice.</p>" },
+        { "type": "checkbox", "id": "open_by_default", "label": "Open by default", "default": false }
+      ]
+    },
+    { "type": "@app" }
+  ],
+  "max_blocks": 16,
+  "presets": [
+    {
+      "name": "NX-01 launch FAQ",
+      "blocks": [
+        { "type": "qa", "settings": { "question": "What is NX-01 designed to replace?", "open_by_default": true } }
+      ]
+    }
+  ]
+}
+{% endschema %}

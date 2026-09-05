@@ -1,0 +1,181 @@
+{% render 'nx01-launch-css' %}
+
+<section
+  id="nx01-quality"
+  class="nx01 nx01-quality xo-section xo-section--{{ section.id }}{% if section.settings.color_scheme != blank %} color-{{ section.settings.color_scheme }}{% endif %}"
+  aria-labelledby="nx01-quality-heading-{{ section.id }}"
+>
+  <div class="nx01__inner">
+    <div class="nx01__intro">
+      {%- if section.settings.eyebrow != blank -%}
+        <p class="nx01__label">
+          <span class="nx01__label-rule" aria-hidden="true"></span>
+          <span>{{ section.settings.eyebrow | escape }}</span>
+        </p>
+      {%- endif -%}
+      {%- if section.settings.heading != blank -%}
+        <h2 class="nx01__heading" id="nx01-quality-heading-{{ section.id }}">{{ section.settings.heading | escape }}</h2>
+      {%- endif -%}
+      {%- if section.settings.subheading != blank -%}
+        <p class="nx01__sub">{{ section.settings.subheading | escape }}</p>
+      {%- endif -%}
+    </div>
+
+    {%- assign card_count = 0 -%}
+    {%- for block in section.blocks -%}
+      {%- if block.type == 'card' -%}
+        {%- if block.settings.title != blank or block.settings.body != blank -%}
+          {%- assign card_count = card_count | plus: 1 -%}
+        {%- endif -%}
+      {%- endif -%}
+    {%- endfor -%}
+
+    {%- if card_count > 0 -%}
+      <ul class="nx01-quality__grid">
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'card' -%}
+            {%- if block.settings.title != blank or block.settings.body != blank -%}
+              <li class="nx01-quality__card" {{ block.shopify_attributes }}>
+                {%- if block.settings.title != blank -%}
+                  <h3 class="nx01-quality__title">{{ block.settings.title | escape }}</h3>
+                {%- endif -%}
+                {%- if block.settings.body != blank -%}
+                  <p class="nx01-quality__body">{{ block.settings.body | escape }}</p>
+                {%- endif -%}
+              </li>
+            {%- endif -%}
+          {%- endif -%}
+        {%- endfor -%}
+      </ul>
+    {%- endif -%}
+
+    {%- assign link_count = 0 -%}
+    {%- if section.settings.link_1_label != blank and section.settings.link_1_href != blank -%}
+      {%- assign link_count = link_count | plus: 1 -%}
+    {%- endif -%}
+    {%- if section.settings.link_2_label != blank and section.settings.link_2_href != blank -%}
+      {%- assign link_count = link_count | plus: 1 -%}
+    {%- endif -%}
+    {%- if section.settings.link_3_label != blank and section.settings.link_3_href != blank -%}
+      {%- assign link_count = link_count | plus: 1 -%}
+    {%- endif -%}
+    {%- if section.settings.link_4_label != blank and section.settings.link_4_href != blank -%}
+      {%- assign link_count = link_count | plus: 1 -%}
+    {%- endif -%}
+
+    {%- if link_count > 0 -%}
+      <ul class="nx01-quality__links">
+        {%- if section.settings.link_1_label != blank and section.settings.link_1_href != blank -%}
+          <li><a class="nx01__text-link" href="{{ section.settings.link_1_href | escape }}">{{ section.settings.link_1_label | escape }}</a></li>
+        {%- endif -%}
+        {%- if section.settings.link_2_label != blank and section.settings.link_2_href != blank -%}
+          <li><a class="nx01__text-link" href="{{ section.settings.link_2_href | escape }}">{{ section.settings.link_2_label | escape }}</a></li>
+        {%- endif -%}
+        {%- if section.settings.link_3_label != blank and section.settings.link_3_href != blank -%}
+          <li><a class="nx01__text-link" href="{{ section.settings.link_3_href | escape }}">{{ section.settings.link_3_label | escape }}</a></li>
+        {%- endif -%}
+        {%- if section.settings.link_4_label != blank and section.settings.link_4_href != blank -%}
+          <li><a class="nx01__text-link" href="{{ section.settings.link_4_href | escape }}">{{ section.settings.link_4_label | escape }}</a></li>
+        {%- endif -%}
+      </ul>
+    {%- endif -%}
+  </div>
+</section>
+
+{% stylesheet %}
+  .nx01-quality__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2.4rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .nx01-quality__card {
+    display: flex;
+    flex-direction: column;
+    gap: 1.6rem;
+    padding: 3.2rem;
+    background: rgb(var(--nx01-surface));
+    border: 0.1rem solid rgb(var(--nx01-line));
+    border-radius: 0.8rem;
+  }
+
+  .nx01-quality__title {
+    margin: 0;
+    font-size: 1.8rem;
+    font-weight: 600;
+  }
+
+  .nx01-quality__body {
+    margin: 0;
+    font-size: 1.4rem;
+    line-height: 1.55;
+    color: rgb(var(--nx01-body));
+  }
+
+  .nx01-quality__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.6rem 4rem;
+    margin: 4.8rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  @media screen and (min-width: 768px) {
+    .nx01-quality__grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "NX-01 launch quality",
+  "tag": "section",
+  "class": "section-nx01-quality",
+  "enabled_on": {
+    "templates": ["page"]
+  },
+  "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "background-1" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Evidence & Verifiability" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Evidence over marketing claims." },
+    { "type": "textarea", "id": "subheading", "label": "Subheading", "default": "We build for sophisticated users. Every raw compound must justify its inclusion through independent analysis." },
+    { "type": "text", "id": "link_1_label", "label": "Link 1 label", "default": "View Quality & Trust Protocol →" },
+    { "type": "text", "id": "link_1_href", "label": "Link 1" },
+    { "type": "text", "id": "link_2_label", "label": "Link 2 label", "default": "Access COA Documentation Archive →" },
+    { "type": "text", "id": "link_2_href", "label": "Link 2" },
+    { "type": "text", "id": "link_3_label", "label": "Link 3 label", "default": "Regional Shipping Information →" },
+    { "type": "text", "id": "link_3_href", "label": "Link 3" },
+    { "type": "text", "id": "link_4_label", "label": "Link 4 label", "default": "Contact Specialized Support →" },
+    { "type": "text", "id": "link_4_href", "label": "Link 4" }
+  ],
+  "blocks": [
+    {
+      "type": "card",
+      "name": "Quality card",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Title", "default": "Transparent Formula" },
+        { "type": "textarea", "id": "body", "label": "Body", "default": "We list precise physiological weights. No proprietary trade-secret blends, no hidden under-dosed fillers. You know exactly what reaches your system." }
+      ]
+    }
+  ],
+  "max_blocks": 9,
+  "presets": [
+    {
+      "name": "NX-01 launch quality",
+      "blocks": [
+        { "type": "card", "settings": { "title": "Transparent Formula", "body": "We list precise physiological weights. No proprietary trade-secret blends, no hidden under-dosed fillers. You know exactly what reaches your system." } },
+        { "type": "card", "settings": { "title": "Quality System Integration", "body": "Manufactured in state-of-the-art cGMP certified facilities. Every batch undergoes comprehensive raw material validation prior to processing." } },
+        { "type": "card", "settings": { "title": "Product Documentation", "body": "We maintain accessible public certificate archives (COA). Verification of compound purity, heavy-metal safety thresholds, and active assay standards." } },
+        { "type": "card", "settings": { "title": "Fast UAE Fulfillment", "body": "Direct logistics handled from our local temperature-regulated Dubai warehouse. Reliable domestic dispatch minimizes environmental degradation." } },
+        { "type": "card", "settings": { "title": "Human-to-Human Support", "body": "No complex chat-bot loops. Reach our specialized formulation desk directly for guidance regarding stack integration, timelines, and safety parameters." } },
+        { "type": "card", "settings": { "title": "Biological Synergies", "body": "Active cofactors selected specifically to enhance the metabolic absorption curves of primary cholinergic substrates, preventing baseline depletion." } }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,351 @@
+{%- liquid
+  assign product = section.settings.product
+  if product == blank
+    assign product = all_products['nx-01-baseline']
+  endif
+  assign variant = product.selected_or_first_available_variant
+  assign sold_out = false
+  if product != blank and variant.available == false
+    assign sold_out = true
+  endif
+  assign has_selling_plans = false
+  if product != blank and product.selling_plan_groups.size > 0
+    assign has_selling_plans = true
+  endif
+-%}
+
+{% render 'nx01-launch-css' %}
+
+<section
+  id="nx01-buy"
+  class="nx01 nx01-buy xo-section xo-section--{{ section.id }}{% if section.settings.color_scheme != blank %} color-{{ section.settings.color_scheme }}{% endif %}"
+  aria-labelledby="nx01-buy-heading-{{ section.id }}"
+>
+  <div class="nx01__inner">
+    <div class="nx01__intro">
+      {%- if section.settings.eyebrow != blank -%}
+        <p class="nx01__label">
+          <span class="nx01__label-rule" aria-hidden="true"></span>
+          <span>{{ section.settings.eyebrow | escape }}</span>
+        </p>
+      {%- endif -%}
+      {%- if section.settings.heading != blank -%}
+        <h2 class="nx01__heading" id="nx01-buy-heading-{{ section.id }}">{{ section.settings.heading | escape }}</h2>
+      {%- endif -%}
+      {%- if section.settings.subheading != blank -%}
+        <p class="nx01__sub">{{ section.settings.subheading | escape }}</p>
+      {%- endif -%}
+    </div>
+
+    {%- if product != blank -%}
+      <div class="nx01-buy__grid">
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'tier' -%}
+            {%- assign qty = block.settings.quantity | plus: 0 -%}
+            {%- if qty >= 1 -%}
+            {%- liquid
+              assign line_price = product.price | times: qty
+              assign unit_price = product.price | money
+              assign form_id = 'nx01-buy-' | append: section.id | append: '-' | append: block.id
+              assign cta_label = block.settings.cta_label | default: section.settings.cta_label
+              assign unavailable_label = 'products.product.unavailable' | t
+              if sold_out
+                assign cta_label = 'products.product.sold_out' | t
+              endif
+            -%}
+            <article
+              class="nx01-buy__card{% if block.settings.featured %} nx01-buy__card--featured{% endif %}"
+              {{ block.shopify_attributes }}
+            >
+              <div class="nx01-buy__card-body">
+                <header class="nx01-buy__card-head">
+                  <div>
+                    {%- if block.settings.title != blank -%}
+                      <h3 class="nx01-buy__title">{{ block.settings.title | escape }}</h3>
+                    {%- endif -%}
+                    {%- if block.settings.days_label != blank -%}
+                      <p class="nx01-buy__days">{{ block.settings.days_label | escape }}</p>
+                    {%- endif -%}
+                  </div>
+                  {%- if block.settings.label != blank -%}
+                    <p class="nx01-buy__badge">{{ block.settings.label | escape }}</p>
+                  {%- endif -%}
+                </header>
+
+                {%- if block.settings.description != blank -%}
+                  <p class="nx01-buy__desc">{{ block.settings.description | escape }}</p>
+                {%- endif -%}
+
+                <p class="nx01-buy__price">{{ line_price | money }}</p>
+                <p class="nx01-buy__unit">{{ 'sections.nx01_launch_buy.per_bottle' | t: price: unit_price }}</p>
+                {%- if block.settings.saving != blank -%}
+                  <p class="nx01-buy__saving">{{ block.settings.saving | escape }}</p>
+                {%- endif -%}
+              </div>
+
+              {% form 'product', product, id: form_id, data-type: 'add-to-cart-form' %}
+                <input type="hidden" name="id" value="{{ variant.id }}">
+                <xo-cart-quantity>
+                  <input type="hidden" name="quantity" value="{{ qty }}">
+                </xo-cart-quantity>
+                {%- if has_selling_plans -%}
+                  <label class="nx01-buy__plan-label" for="{{ form_id }}-plan">{{ 'sections.nx01_launch_buy.purchase_option' | t }}</label>
+                  <select class="nx01-buy__plan" id="{{ form_id }}-plan" name="selling_plan">
+                    <option value="">{{ 'sections.nx01_launch_buy.one_time' | t }}</option>
+                    {%- for group in product.selling_plan_groups -%}
+                      {%- for plan in group.selling_plans -%}
+                        <option value="{{ plan.id }}">{{ plan.name | escape }}</option>
+                      {%- endfor -%}
+                    {%- endfor -%}
+                  </select>
+                {%- endif -%}
+                <xo-cart-add
+                  {% if sold_out %}xo-disabled{% endif %}
+                  {% if settings.cart_type == 'page' %}xo-cart-redirection{% endif %}
+                >
+                  {% render 'button', style: 'primary', text: cta_label, type: 'submit', block: true, disabled: sold_out, text_unavailable: unavailable_label %}
+                </xo-cart-add>
+              {% endform %}
+            </article>
+            {%- endif -%}
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+
+    {%- assign trust_count = 0 -%}
+    {%- for block in section.blocks -%}
+      {%- if block.type == 'trust' and block.settings.label != blank -%}
+        {%- assign trust_count = trust_count | plus: 1 -%}
+      {%- endif -%}
+    {%- endfor -%}
+
+    {%- if trust_count > 0 -%}
+      <ul class="nx01-buy__trust">
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'trust' and block.settings.label != blank -%}
+            <li {{ block.shopify_attributes }}>
+              {%- if block.settings.icon != blank and block.settings.icon != 'none' -%}
+                <span class="nx01-buy__trust-icon" aria-hidden="true">{% render 'icon', name: block.settings.icon, size: '1.6rem' %}</span>
+              {%- endif -%}
+              <span>{{ block.settings.label | escape }}</span>
+            </li>
+          {%- endif -%}
+        {%- endfor -%}
+      </ul>
+    {%- endif -%}
+  </div>
+</section>
+
+{% stylesheet %}
+  .nx01-buy {
+    scroll-margin-top: 9.6rem;
+  }
+
+  .nx01-buy__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2.4rem;
+    align-items: stretch;
+  }
+
+  .nx01-buy__card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-width: 0;
+    padding: 3.2rem;
+    background: rgb(var(--nx01-surface));
+    border: 0.1rem solid rgb(var(--nx01-line));
+    border-radius: var(--nx01-radius);
+  }
+
+  .nx01-buy__card--featured {
+    border-width: 0.2rem;
+    border-color: rgb(var(--nx01-navy));
+  }
+
+  .nx01-buy__card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+    margin-bottom: 2.4rem;
+  }
+
+  .nx01-buy__card-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1.2rem;
+  }
+
+  .nx01-buy__title {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 600;
+    color: rgb(var(--nx01-ink));
+  }
+
+  .nx01-buy__days {
+    margin: 0.4rem 0 0;
+    font-size: 1.2rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgb(var(--nx01-body));
+  }
+
+  .nx01-buy__badge {
+    margin: 0;
+    padding: 0.4rem 1rem;
+    border: 0.1rem solid rgb(var(--nx01-navy-deep));
+    border-radius: 10rem;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgb(var(--nx01-navy-deep));
+  }
+
+  .nx01-buy__desc {
+    margin: 0;
+    font-size: 1.4rem;
+    line-height: 1.5;
+    color: rgb(var(--nx01-body));
+  }
+
+  .nx01-buy__price {
+    margin: 1.2rem 0 0;
+    padding-top: 2.4rem;
+    border-top: 0.1rem solid rgb(var(--nx01-line));
+    font-size: 3.2rem;
+    font-weight: 600;
+    line-height: 1.2;
+  }
+
+  .nx01-buy__unit,
+  .nx01-buy__saving {
+    margin: 0;
+    font-size: 1.3rem;
+    color: rgb(var(--nx01-body));
+  }
+
+  .nx01-buy__saving {
+    font-weight: 600;
+    color: rgb(var(--nx01-navy-deep));
+  }
+
+  .nx01-buy__plan-label {
+    display: block;
+    margin-bottom: 0.8rem;
+    font-size: 1.2rem;
+    font-weight: 600;
+  }
+
+  .nx01-buy__plan {
+    width: 100%;
+    min-height: 4.8rem;
+    margin-bottom: 1.6rem;
+    padding: 0 1.2rem;
+    border: 0.1rem solid rgb(var(--nx01-line));
+    border-radius: var(--nx01-radius);
+    background: rgb(var(--nx01-field));
+    font: inherit;
+  }
+
+  .nx01-buy__trust {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.6rem 3.2rem;
+    margin: 4.8rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .nx01-buy__trust li {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.8rem;
+    font-size: 1.3rem;
+    font-weight: 500;
+    color: rgb(var(--nx01-body));
+  }
+
+  .nx01-buy__trust-icon {
+    display: inline-flex;
+    color: rgb(var(--nx01-navy-deep));
+  }
+
+  @media screen and (min-width: 990px) {
+    .nx01-buy__grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .nx01-buy__trust {
+      justify-content: space-between;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "NX-01 launch buy",
+  "tag": "section",
+  "class": "section-nx01-buy",
+  "enabled_on": {
+    "templates": ["page"]
+  },
+  "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "background-1" },
+    { "type": "product", "id": "product", "label": "Product" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Offer Structure" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Start with your baseline." },
+    { "type": "textarea", "id": "subheading", "label": "Subheading", "default": "Available in single or bundled configurations. Simple recurring replacements without commitment." },
+    { "type": "text", "id": "cta_label", "label": "Default button label", "default": "Add to Cart" }
+  ],
+  "blocks": [
+    {
+      "type": "tier",
+      "name": "Quantity tier",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Title", "default": "1 Bottle" },
+        { "type": "range", "id": "quantity", "label": "Quantity", "min": 1, "max": 6, "step": 1, "default": 1 },
+        { "type": "text", "id": "days_label", "label": "Supply label", "default": "30 Day Supply" },
+        { "type": "text", "id": "label", "label": "Badge", "default": "Starter" },
+        { "type": "textarea", "id": "description", "label": "Description", "default": "Best for testing biological compatibility and establishing immediate routine compliance." },
+        { "type": "text", "id": "saving", "label": "Saving label" },
+        { "type": "text", "id": "cta_label", "label": "Button label" },
+        { "type": "checkbox", "id": "featured", "label": "Highlight this tier", "default": false }
+      ]
+    },
+    {
+      "type": "trust",
+      "name": "Trust marker",
+      "settings": [
+        { "type": "select", "id": "icon", "label": "Icon", "options": [
+          { "value": "shipping-fast", "label": "Shipping" },
+          { "value": "padlock", "label": "Lock" },
+          { "value": "verified-user", "label": "Support" },
+          { "value": "return", "label": "Returns" },
+          { "value": "none", "label": "None" }
+        ], "default": "shipping-fast" },
+        { "type": "text", "id": "label", "label": "Label", "default": "Fast UAE Delivery (2-4 Days)" }
+      ]
+    }
+  ],
+  "max_blocks": 12,
+  "presets": [
+    {
+      "name": "NX-01 launch buy",
+      "blocks": [
+        { "type": "tier", "settings": { "title": "1 Bottle", "quantity": 1, "days_label": "30 Day Supply", "label": "Starter", "description": "Best for testing biological compatibility and establishing immediate routine compliance." } },
+        { "type": "tier", "settings": { "title": "2 Bottles", "quantity": 2, "days_label": "60 Day Supply", "label": "Recommended", "description": "Optimized daily dosage cycle. Allows complete biochemical baseline stabilization.", "featured": true } },
+        { "type": "tier", "settings": { "title": "3 Bottles", "quantity": 3, "days_label": "90 Day Supply", "label": "Best Value", "description": "Full cellular saturation protocol. Perfect for long-term cognitive foundation maintenance." } },
+        { "type": "trust", "settings": { "icon": "shipping-fast", "label": "Fast UAE Delivery (2-4 Days)" } },
+        { "type": "trust", "settings": { "icon": "padlock", "label": "Secure SSL Encrypted Checkout" } },
+        { "type": "trust", "settings": { "icon": "verified-user", "label": "Dedicated Nootropix Support" } },
+        { "type": "trust", "settings": { "icon": "return", "label": "Hassle-Free Return Policy" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

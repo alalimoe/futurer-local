@@ -1,0 +1,175 @@
+{%- liquid
+  assign show_cta = false
+  if section.settings.cta_label != blank and section.settings.cta_href != blank
+    assign show_cta = true
+  endif
+  assign layer_count = 0
+  for block in section.blocks
+    if block.type == 'layer' and block.settings.title != blank
+      assign layer_count = layer_count | plus: 1
+    endif
+  endfor
+-%}
+
+{% render 'nx01-launch-css' %}
+
+<section
+  id="nx01-routine"
+  class="nx01 nx01-routine xo-section xo-section--{{ section.id }}{% if section.settings.color_scheme != blank %} color-{{ section.settings.color_scheme }}{% endif %}"
+  aria-labelledby="nx01-routine-heading-{{ section.id }}"
+>
+  <div class="nx01__inner">
+    <div class="nx01__intro">
+      {%- if section.settings.eyebrow != blank -%}
+        <p class="nx01__label">
+          <span class="nx01__label-rule" aria-hidden="true"></span>
+          <span>{{ section.settings.eyebrow | escape }}</span>
+        </p>
+      {%- endif -%}
+      {%- if section.settings.heading != blank -%}
+        <h2 class="nx01__heading" id="nx01-routine-heading-{{ section.id }}">{{ section.settings.heading | escape }}</h2>
+      {%- endif -%}
+      {%- if section.settings.subheading != blank -%}
+        <p class="nx01__sub">{{ section.settings.subheading | escape }}</p>
+      {%- endif -%}
+    </div>
+
+    <div class="nx01-routine__split">
+      {%- if layer_count > 0 or section.settings.base_title != blank -%}
+        <div class="nx01-routine__stack" role="list">
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'layer' and block.settings.title != blank -%}
+              <p class="nx01-routine__layer" role="listitem" {{ block.shopify_attributes }} style="--nx01-layer-width: {{ forloop.index0 | times: 6 | plus: 38 }}rem;">
+                {{ block.settings.title | escape }}
+              </p>
+            {%- endif -%}
+          {%- endfor -%}
+          {%- if section.settings.base_title != blank -%}
+            <p class="nx01-routine__layer nx01-routine__layer--base" role="listitem">{{ section.settings.base_title | escape }}</p>
+          {%- endif -%}
+          {%- if section.settings.note != blank -%}
+            <p class="nx01-routine__note">{{ section.settings.note | escape }}</p>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+
+      <div class="nx01-routine__copy">
+        {%- if section.settings.aside_heading != blank -%}
+          <h3 class="nx01-routine__aside-heading">{{ section.settings.aside_heading | escape }}</h3>
+        {%- endif -%}
+        {%- if section.settings.aside_body != blank -%}
+          <p class="nx01-routine__aside-body">{{ section.settings.aside_body | escape }}</p>
+        {%- endif -%}
+        {%- if show_cta -%}
+          {% render 'button', style: 'primary', text: section.settings.cta_label, link: section.settings.cta_href %}
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+</section>
+
+{% stylesheet %}
+  .nx01-routine__split {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 4.8rem;
+    align-items: center;
+  }
+
+  .nx01-routine__stack {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.2rem;
+  }
+
+  .nx01-routine__layer {
+    width: min(100%, var(--nx01-layer-width, 38rem));
+    margin: 0;
+    padding: 1.6rem 2.4rem;
+    border: 0.1rem solid #3a3737;
+    border-radius: var(--nx01-radius);
+    background: rgb(var(--nx01-surface));
+    font-size: 1.3rem;
+    font-weight: 500;
+    text-align: center;
+  }
+
+  .nx01-routine__layer--base {
+    width: min(100%, 58rem);
+    padding: 2.4rem;
+    border-color: rgb(var(--nx01-navy-deep));
+    font-size: 1.5rem;
+    font-weight: 600;
+  }
+
+  .nx01-routine__note {
+    margin: 1.2rem 0 0;
+    font-size: 1.2rem;
+    text-align: center;
+    color: rgb(var(--nx01-body));
+  }
+
+  .nx01-routine__aside-heading {
+    margin: 0 0 1.6rem;
+    font-size: 2.8rem;
+    font-weight: 600;
+  }
+
+  .nx01-routine__aside-body {
+    margin: 0 0 3.2rem;
+    font-size: 1.5rem;
+    line-height: 1.7;
+    color: rgb(var(--nx01-body));
+  }
+
+  @media screen and (min-width: 990px) {
+    .nx01-routine__split {
+      grid-template-columns: minmax(0, 64rem) minmax(0, 1fr);
+      gap: 8rem;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "NX-01 launch routine",
+  "tag": "section",
+  "class": "section-nx01-routine",
+  "enabled_on": {
+    "templates": ["page"]
+  },
+  "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "background-1" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "07 · Systemic Integration" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Foundation first. Everything else is optional." },
+    { "type": "textarea", "id": "subheading", "label": "Subheading", "default": "NX-01 consolidates the primary cell pathways. Once your daily baseline is locked, you can customize on top safely." },
+    { "type": "text", "id": "base_title", "label": "Base layer title", "default": "01 · NX-01 Baseline daily foundation (Core base)" },
+    { "type": "text", "id": "note", "label": "Note", "default": "* Note: Check overlapping ingredients if incorporating other multi-active formulas." },
+    { "type": "text", "id": "aside_heading", "label": "Aside heading", "default": "A robust daily baseline." },
+    { "type": "textarea", "id": "aside_body", "label": "Aside body", "default": "Stop buying redundant supplement packs that replicate identical cofactors and ALCAR dosages. NX-01 is engineered to form the solid baseline, allowing you to add caffeine or situational nootropics on top with perfect clarity." },
+    { "type": "text", "id": "cta_label", "label": "Button label", "default": "Build Around NX-01" },
+    { "type": "text", "id": "cta_href", "label": "Button link", "default": "#nx01-buy" }
+  ],
+  "blocks": [
+    {
+      "type": "layer",
+      "name": "Optional layer",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Title", "default": "04 · Sleep & Recovery Support (Optional Add-on)" }
+      ]
+    }
+  ],
+  "max_blocks": 6,
+  "presets": [
+    {
+      "name": "NX-01 launch routine",
+      "blocks": [
+        { "type": "layer", "settings": { "title": "04 · Sleep & Recovery Support (Optional Add-on)" } },
+        { "type": "layer", "settings": { "title": "03 · Coffee / Caffeine / Specialized Stimulants (Optional)" } },
+        { "type": "layer", "settings": { "title": "02 · Acute / Situational Nootropics (Optional)" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

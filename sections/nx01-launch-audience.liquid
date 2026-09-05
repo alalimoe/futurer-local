@@ -1,0 +1,133 @@
+{% render 'nx01-launch-css' %}
+
+<section
+  id="nx01-audience"
+  class="nx01 nx01-audience xo-section xo-section--{{ section.id }}{% if section.settings.color_scheme != blank %} color-{{ section.settings.color_scheme }}{% endif %}"
+  aria-labelledby="nx01-audience-heading-{{ section.id }}"
+>
+  <div class="nx01__inner">
+    <div class="nx01__intro">
+      {%- if section.settings.eyebrow != blank -%}
+        <p class="nx01__label">
+          <span class="nx01__label-rule" aria-hidden="true"></span>
+          <span>{{ section.settings.eyebrow | escape }}</span>
+        </p>
+      {%- endif -%}
+      {%- if section.settings.heading != blank -%}
+        <h2 class="nx01__heading" id="nx01-audience-heading-{{ section.id }}">{{ section.settings.heading | escape }}</h2>
+      {%- endif -%}
+      {%- if section.settings.subheading != blank -%}
+        <p class="nx01__sub">{{ section.settings.subheading | escape }}</p>
+      {%- endif -%}
+    </div>
+
+    {%- assign card_count = 0 -%}
+    {%- for block in section.blocks -%}
+      {%- if block.type == 'card' -%}
+        {%- if block.settings.title != blank or block.settings.body != blank -%}
+          {%- assign card_count = card_count | plus: 1 -%}
+        {%- endif -%}
+      {%- endif -%}
+    {%- endfor -%}
+
+    {%- if card_count > 0 -%}
+      <ul class="nx01-audience__grid" aria-label="{{ 'sections.nx01_launch_audience.grid_label' | t }}">
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'card' -%}
+            {%- if block.settings.title != blank or block.settings.body != blank -%}
+              <li class="nx01-audience__card" {{ block.shopify_attributes }}>
+                {%- if block.settings.title != blank -%}
+                  <h3 class="nx01-audience__title">{{ block.settings.title | escape }}</h3>
+                {%- endif -%}
+                {%- if block.settings.body != blank -%}
+                  <p class="nx01-audience__body">{{ block.settings.body | escape }}</p>
+                {%- endif -%}
+              </li>
+            {%- endif -%}
+          {%- endif -%}
+        {%- endfor -%}
+      </ul>
+    {%- endif -%}
+  </div>
+</section>
+
+{% stylesheet %}
+  .nx01-audience__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2.4rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .nx01-audience__card {
+    display: flex;
+    flex-direction: column;
+    gap: 1.6rem;
+    padding: 3.2rem;
+    background: rgb(var(--nx01-surface));
+    border-radius: var(--nx01-radius);
+  }
+
+  .nx01-audience__title {
+    margin: 0;
+    font-size: 1.8rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: rgb(var(--nx01-navy-deep));
+  }
+
+  .nx01-audience__body {
+    margin: 0;
+    font-size: 1.4rem;
+    line-height: 1.55;
+    color: rgb(var(--nx01-body));
+  }
+
+  @media screen and (min-width: 768px) {
+    .nx01-audience__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "NX-01 launch audience",
+  "tag": "section",
+  "class": "section-nx01-audience",
+  "enabled_on": {
+    "templates": ["page"]
+  },
+  "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "background-1" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "08 · Intended Audience" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Built for the everyday baseline." },
+    { "type": "textarea", "id": "subheading", "label": "Subheading", "default": "NX-01 provides daily support without the caffeine peaks or crash schedules typical of modern formulations." }
+  ],
+  "blocks": [
+    {
+      "type": "card",
+      "name": "Audience card",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Title", "default": "Professionals & builders" },
+        { "type": "textarea", "id": "body", "label": "Body", "default": "Engineers, founders, and knowledge workers who require deep focus cycles and high processing stamina over long 10-hour days." }
+      ]
+    }
+  ],
+  "max_blocks": 8,
+  "presets": [
+    {
+      "name": "NX-01 launch audience",
+      "blocks": [
+        { "type": "card", "settings": { "title": "Professionals & builders", "body": "Engineers, founders, and knowledge workers who require deep focus cycles and high processing stamina over long 10-hour days." } },
+        { "type": "card", "settings": { "title": "Academics & students", "body": "Optimized for memory recall, logical processing structures, and intensive conceptual learning without the jitters." } },
+        { "type": "card", "settings": { "title": "Daily stack builders", "body": "A pure baseline cofactor formulation designed to cleanly substitute 6-7 individual, redundant raw bottles." } },
+        { "type": "card", "settings": { "title": "Stimulant-avoiders", "body": "Caffeine-free and stimulant-free baseline. Allows for precise dosing timing without interfering with late-night sleep." } }
+      ]
+    }
+  ]
+}
+{% endschema %}

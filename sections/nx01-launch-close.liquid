@@ -1,0 +1,125 @@
+{%- liquid
+  assign show_cta = false
+  if section.settings.cta_label != blank and section.settings.cta_href != blank
+    assign show_cta = true
+  endif
+-%}
+
+{% render 'nx01-launch-css' %}
+
+<section
+  id="nx01-close"
+  class="nx01 nx01-close xo-section xo-section--{{ section.id }}{% if section.settings.color_scheme != blank %} color-{{ section.settings.color_scheme }}{% endif %}"
+  aria-labelledby="nx01-close-heading-{{ section.id }}"
+>
+  <div class="nx01__inner nx01-close__inner">
+    {%- if section.settings.image != blank -%}
+      <div class="nx01-close__media">
+        {{
+          section.settings.image
+          | image_url: width: 1400
+          | image_tag:
+            class: 'nx01-close__img',
+            loading: 'lazy',
+            widths: '480, 720, 960, 1200, 1400',
+            sizes: '(max-width: 767px) 80vw, 48vw',
+            alt: section.settings.image_alt,
+            width: section.settings.image.width,
+            height: section.settings.image.height,
+            decoding: 'async'
+        }}
+      </div>
+    {%- endif -%}
+
+    <div class="nx01-close__copy">
+      {%- if section.settings.eyebrow != blank -%}
+        <p class="nx01__label">
+          <span class="nx01__label-rule" aria-hidden="true"></span>
+          <span>{{ section.settings.eyebrow | escape }}</span>
+        </p>
+      {%- endif -%}
+      {%- if section.settings.heading != blank -%}
+        <h2 class="nx01__heading nx01-close__heading" id="nx01-close-heading-{{ section.id }}">{{ section.settings.heading | escape }}</h2>
+      {%- endif -%}
+      {%- if section.settings.subheading != blank -%}
+        <p class="nx01__sub">{{ section.settings.subheading | escape }}</p>
+      {%- endif -%}
+      {%- if show_cta -%}
+        {% render 'button', style: 'primary', text: section.settings.cta_label, link: section.settings.cta_href %}
+      {%- endif -%}
+      {%- if section.settings.microcopy != blank -%}
+        <p class="nx01-close__micro">{{ section.settings.microcopy | escape }}</p>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+{% stylesheet %}
+  .nx01-close__inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4.8rem;
+    text-align: center;
+  }
+
+  .nx01-close__copy {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.6rem;
+    max-width: 64rem;
+  }
+
+  .nx01-close__heading {
+    font-size: clamp(2.8rem, 4vw, 3.6rem);
+  }
+
+  .nx01-close__inner .nx01__sub {
+    margin-inline: auto;
+  }
+
+  .nx01-close__media {
+    width: min(100%, 64rem);
+  }
+
+  .nx01-close__img {
+    display: block;
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+  }
+
+  .nx01-close__micro {
+    margin: 0;
+    font-size: 1.1rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgb(var(--nx01-body));
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "NX-01 launch close",
+  "tag": "section",
+  "class": "section-nx01-close",
+  "enabled_on": {
+    "templates": ["page"]
+  },
+  "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "background-1" },
+    { "type": "image_picker", "id": "image", "label": "Bottle image" },
+    { "type": "text", "id": "image_alt", "label": "Bottle image alt text" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "NX-01 · Baseline" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Stop rebuilding the foundation every morning." },
+    { "type": "textarea", "id": "subheading", "label": "Subheading", "default": "9 actives. 3 capsules. One daily formula. Zero daily friction." },
+    { "type": "text", "id": "cta_label", "label": "Button label", "default": "Start with NX-01 Baseline" },
+    { "type": "text", "id": "cta_href", "label": "Button link", "default": "#nx01-buy" },
+    { "type": "text", "id": "microcopy", "label": "Microcopy", "default": "30-day supply · caffeine-free" }
+  ],
+  "presets": [
+    { "name": "NX-01 launch close" }
+  ]
+}
+{% endschema %}

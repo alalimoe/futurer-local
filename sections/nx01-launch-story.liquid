@@ -48,16 +48,25 @@
   endif
 -%}
 
+{% render 'nx01-launch-css' %}
+
 <section
   id="nx01-why"
-  class="nx01-story xo-section xo-section--{{ section.id }}{% if section.settings.color_scheme != blank %} color-{{ section.settings.color_scheme }}{% endif %}"
+  class="nx01 nx01-story xo-section xo-section--{{ section.id }}{% if section.settings.color_scheme != blank %} color-{{ section.settings.color_scheme }}{% endif %}"
   aria-labelledby="nx01-story-heading-{{ section.id }}"
 >
-  <div class="nx01-story__inner">
+  <div class="nx01__inner nx01-story__inner">
     <div class="nx01-story__intro">
       <div class="nx01-story__lead">
+        {%- if section.settings.eyebrow != blank -%}
+          <p class="nx01__label">
+            <span class="nx01__label-rule" aria-hidden="true"></span>
+            <span>{{ section.settings.eyebrow | escape }}</span>
+          </p>
+        {%- endif -%}
+
         {%- if section.settings.heading != blank -%}
-          <h2 class="nx01-story__heading" id="nx01-story-heading-{{ section.id }}">
+          <h2 class="nx01__heading nx01-story__heading" id="nx01-story-heading-{{ section.id }}">
             {{ section.settings.heading | escape }}
           </h2>
         {%- endif -%}
@@ -230,49 +239,11 @@
     position: relative;
     isolation: isolate;
     overflow: hidden;
-    background: rgb(var(--color-background));
-    color: rgb(var(--color-foreground));
-    font-family: var(--font-body-family);
-    box-sizing: border-box;
-  }
-
-  .nx01-story *,
-  .nx01-story *::before,
-  .nx01-story *::after {
-    box-sizing: border-box;
-  }
-
-  .nx01-story::before,
-  .nx01-story::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-    pointer-events: none;
-  }
-
-  .nx01-story::before {
-    background-image:
-      linear-gradient(color-mix(in srgb, rgba(var(--color-foreground)) 5%, transparent) 1px, transparent 1px),
-      linear-gradient(90deg, color-mix(in srgb, rgba(var(--color-foreground)) 5%, transparent) 1px, transparent 1px);
-    background-size: 4.8rem 4.8rem;
-    mask-image: radial-gradient(ellipse 70% 56% at 18% 18%, #000 12%, transparent 74%);
-    opacity: 0.7;
-  }
-
-  .nx01-story::after {
-    background:
-      radial-gradient(52% 42% at 86% 12%, color-mix(in srgb, rgba(var(--color-foreground)) 6%, transparent), transparent 70%),
-      linear-gradient(180deg, color-mix(in srgb, rgba(var(--color-foreground)) 4%, transparent), transparent 18%);
+    border-top: 0.1rem solid rgb(var(--nx01-line));
+    border-bottom: 0.1rem solid rgb(var(--nx01-line));
   }
 
   .nx01-story__inner {
-    position: relative;
-    z-index: 1;
-    width: 100%;
-    max-width: var(--page-width);
-    margin: 0 auto;
-    padding: 8rem var(--page-gap) 8.8rem;
     display: flex;
     flex-direction: column;
     gap: 6.4rem;
@@ -286,12 +257,9 @@
 
   .nx01-story__heading {
     margin: 0;
-    font-family: var(--font-heading-family);
-    font-size: clamp(3.6rem, 7vw, 7.2rem);
-    font-weight: 600;
-    letter-spacing: -0.04em;
-    line-height: 1.04;
-    color: rgb(var(--color-foreground));
+    font-size: clamp(3.2rem, 5vw, 4.4rem);
+    letter-spacing: -0.035em;
+    line-height: 1.18;
   }
 
   .nx01-story__quote {
@@ -601,9 +569,7 @@
 
   @media screen and (min-width: 768px) {
     .nx01-story__inner {
-      padding-top: 12rem;
-      padding-bottom: 12.8rem;
-      gap: 8.8rem;
+      gap: 8rem;
     }
 
     .nx01-story__intro {
@@ -657,15 +623,20 @@
     .nx01-story__piece-list {
       flex: 0 1 auto;
       width: auto;
-      max-width: 72rem;
+      max-width: 73.5rem;
       justify-content: flex-start;
-      gap: 1.6rem 1.6rem;
+      gap: 0;
     }
 
     .nx01-story__piece {
-      flex: 0 1 auto;
-      width: 9.6rem;
-      max-width: 10.4rem;
+      flex: 0 0 20rem;
+      width: 20rem;
+      max-width: 20rem;
+      margin-right: -9.3rem;
+    }
+
+    .nx01-story__piece:last-child {
+      margin-right: 0;
     }
 
     .nx01-story__figure--one,
@@ -719,6 +690,12 @@
       "id": "color_scheme",
       "label": "t:sections.nx01_launch_story.settings.color_scheme",
       "default": "background-1"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Philosophy"
     },
     {
       "type": "text",

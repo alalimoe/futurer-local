@@ -21,29 +21,47 @@
   endif
 -%}
 
+{% render 'nx01-launch-css' %}
+
 <section
   id="nx01-compare"
-  class="nx01-compare xo-section xo-section--{{ section.id }}{% if section.settings.color_scheme != blank %} color-{{ section.settings.color_scheme }}{% endif %}"
+  class="nx01 nx01-compare xo-section xo-section--{{ section.id }}{% if section.settings.color_scheme != blank %} color-{{ section.settings.color_scheme }}{% endif %}"
   aria-labelledby="nx01-compare-heading-{{ section.id }}"
 >
-  <div class="nx01-compare__inner">
-    {%- if section.settings.heading != blank -%}
-      <h2 class="nx01-compare__heading" id="nx01-compare-heading-{{ section.id }}">
-        {{ section.settings.heading | escape }}
-      </h2>
-    {%- endif -%}
+  <div class="nx01__inner nx01-compare__inner">
+    <div class="nx01__intro nx01__intro--center">
+      {%- if section.settings.eyebrow != blank -%}
+        <p class="nx01__label">
+          <span class="nx01__label-rule" aria-hidden="true"></span>
+          <span>{{ section.settings.eyebrow | escape }}</span>
+        </p>
+      {%- endif -%}
+      {%- if section.settings.heading != blank -%}
+        <h2 class="nx01__heading" id="nx01-compare-heading-{{ section.id }}">
+          {{ section.settings.heading | escape }}
+        </h2>
+      {%- endif -%}
+      {%- if section.settings.intro != blank -%}
+        <p class="nx01__sub">{{ section.settings.intro | escape }}</p>
+      {%- endif -%}
+    </div>
 
     <div class="nx01-compare__board" aria-label="{{ 'sections.nx01_launch_compare.board_label' | t }}">
-      <article class="nx01-compare__pane nx01-compare__pane--diy">
-        <h3 class="nx01-compare__kicker">
-          <span class="nx01-compare__kicker-full">{{ section.settings.left_label | escape }}</span>
-          {%- if section.settings.left_label_mobile != blank -%}
-            <span class="nx01-compare__kicker-short">{{ section.settings.left_label_mobile | escape }}</span>
+      <article class="nx01-compare__pane">
+        <header class="nx01-compare__pane-head">
+          {%- if section.settings.left_kicker != blank -%}
+            <p class="nx01-compare__protocol">{{ section.settings.left_kicker | escape }}</p>
           {%- endif -%}
-        </h3>
+          <h3 class="nx01-compare__pane-title{% if section.settings.left_label_mobile != blank %} nx01-compare__pane-title--split{% endif %}">
+            <span class="nx01-compare__kicker-full">{{ section.settings.left_label | escape }}</span>
+            {%- if section.settings.left_label_mobile != blank -%}
+              <span class="nx01-compare__kicker-short">{{ section.settings.left_label_mobile | escape }}</span>
+            {%- endif -%}
+          </h3>
+        </header>
 
-        <div class="nx01-compare__media nx01-compare__media--many">
-          {%- if diy_image != blank -%}
+        {%- if diy_image != blank -%}
+          <div class="nx01-compare__media">
             {{
               diy_image
               | image_url: width: 900
@@ -57,19 +75,11 @@
                 height: diy_image.height,
                 decoding: 'async'
             }}
-          {%- elsif compound_count > 0 -%}
-            <div class="nx01-compare__cluster" aria-hidden="true">
-              {%- for block in section.blocks -%}
-                {%- if block.type == 'compound' and block.settings.label != blank -%}
-                  <span class="nx01-compare__vial"></span>
-                {%- endif -%}
-              {%- endfor -%}
-            </div>
-          {%- endif -%}
-        </div>
+          </div>
+        {%- endif -%}
 
         {%- if compound_count > 0 -%}
-          <ul class="nx01-compare__compounds">
+          <ul class="nx01-compare__list">
             {%- for block in section.blocks -%}
               {%- if block.type == 'compound' and block.settings.label != blank -%}
                 <li {{ block.shopify_attributes }}>{{ block.settings.label | escape }}</li>
@@ -78,31 +88,39 @@
           </ul>
         {%- endif -%}
 
-        {%- if note_count > 0 -%}
-          <ul class="nx01-compare__notes">
+        {%- if section.settings.left_note != blank -%}
+          <p class="nx01-compare__footer">{{ section.settings.left_note | escape }}</p>
+        {%- elsif note_count > 0 -%}
+          <p class="nx01-compare__footer">
+            {%- assign note_index = 0 -%}
             {%- for block in section.blocks -%}
               {%- if block.type == 'note' and block.settings.label != blank -%}
-                <li {{ block.shopify_attributes }}>
-                  <span class="nx01-compare__tick" aria-hidden="true"></span>
-                  {{ block.settings.label | escape }}
-                </li>
+                {%- if note_index > 0 %} · {% endif -%}
+                <span {{ block.shopify_attributes }}>{{ block.settings.label | escape }}</span>
+                {%- assign note_index = note_index | plus: 1 -%}
               {%- endif -%}
             {%- endfor -%}
-          </ul>
+          </p>
         {%- endif -%}
       </article>
 
-      <p class="nx01-compare__then" aria-hidden="true">
-        <span class="nx01-compare__then-rule"></span>
-      </p>
-
       <article class="nx01-compare__pane nx01-compare__pane--nx">
-        {%- if section.settings.right_label != blank -%}
-          <h3 class="nx01-compare__kicker">{{ section.settings.right_label | escape }}</h3>
-        {%- endif -%}
+        <header class="nx01-compare__pane-head">
+          <div class="nx01-compare__pane-row">
+            {%- if section.settings.right_kicker != blank -%}
+              <p class="nx01-compare__protocol">{{ section.settings.right_kicker | escape }}</p>
+            {%- endif -%}
+            {%- if section.settings.badge != blank -%}
+              <span class="nx01-compare__badge">{{ section.settings.badge | escape }}</span>
+            {%- endif -%}
+          </div>
+          {%- if section.settings.right_label != blank -%}
+            <h3 class="nx01-compare__pane-title">{{ section.settings.right_label | escape }}</h3>
+          {%- endif -%}
+        </header>
 
-        <div class="nx01-compare__media nx01-compare__media--one">
-          {%- if nx01_image != blank -%}
+        {%- if nx01_image != blank -%}
+          <div class="nx01-compare__media">
             {{
               nx01_image
               | image_url: width: 720
@@ -116,28 +134,31 @@
                 height: nx01_image.height,
                 decoding: 'async'
             }}
-          {%- else -%}
-            <span class="nx01-compare__vial nx01-compare__vial--one" aria-hidden="true"></span>
-          {%- endif -%}
-        </div>
+          </div>
+        {%- endif -%}
 
         {%- if point_count > 0 -%}
-          <ul class="nx01-compare__points">
+          <ul class="nx01-compare__list">
             {%- for block in section.blocks -%}
               {%- if block.type == 'point' -%}
                 {%- if block.settings.value != blank or block.settings.label != blank -%}
                   <li {{ block.shopify_attributes }}>
-                    {%- if block.settings.value != blank -%}
-                      <span class="nx01-compare__point-value">{{ block.settings.value | escape }}</span>
-                    {%- endif -%}
-                    {%- if block.settings.label != blank -%}
-                      <span class="nx01-compare__point-label">{{ block.settings.label | escape }}</span>
+                    {%- if block.settings.value != blank and block.settings.label != blank -%}
+                      {{ block.settings.value | escape }} {{ block.settings.label | escape }}
+                    {%- elsif block.settings.label != blank -%}
+                      {{ block.settings.label | escape }}
+                    {%- else -%}
+                      {{ block.settings.value | escape }}
                     {%- endif -%}
                   </li>
                 {%- endif -%}
               {%- endif -%}
             {%- endfor -%}
           </ul>
+        {%- endif -%}
+
+        {%- if section.settings.right_note != blank -%}
+          <p class="nx01-compare__footer">{{ section.settings.right_note | escape }}</p>
         {%- endif -%}
       </article>
     </div>
@@ -149,7 +170,7 @@
         {%- endif -%}
         {%- if show_cta -%}
           <div class="nx01-compare__cta">
-            {% render 'button', style: 'secondary', text: section.settings.cta_label, link: section.settings.cta_href %}
+            {% render 'button', style: 'primary', text: section.settings.cta_label, link: section.settings.cta_href %}
           </div>
         {%- endif -%}
       </div>
@@ -158,87 +179,71 @@
 </section>
 
 {% style %}
-  .nx01-compare {
-    position: relative;
-    isolation: isolate;
-    overflow: hidden;
-    background: rgb(var(--color-background));
-    color: rgb(var(--color-foreground));
-    font-family: var(--font-body-family);
-    box-sizing: border-box;
-  }
-
-  .nx01-compare *,
-  .nx01-compare *::before,
-  .nx01-compare *::after {
-    box-sizing: border-box;
-  }
-
-  .nx01-compare::before,
-  .nx01-compare::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-    pointer-events: none;
-  }
-
-  .nx01-compare::before {
-    background-image:
-      linear-gradient(color-mix(in srgb, rgba(var(--color-foreground)) 5%, transparent) 1px, transparent 1px),
-      linear-gradient(90deg, color-mix(in srgb, rgba(var(--color-foreground)) 5%, transparent) 1px, transparent 1px);
-    background-size: 4.8rem 4.8rem;
-    mask-image: radial-gradient(ellipse 64% 50% at 50% 0%, #000 10%, transparent 72%);
-    opacity: 0.65;
-  }
-
-  .nx01-compare__inner {
-    position: relative;
-    z-index: 1;
-    width: 100%;
-    max-width: var(--page-width);
-    margin: 0 auto;
-    padding: 8rem var(--page-gap) 8.8rem;
-  }
-
-  .nx01-compare__heading {
-    margin: 0 0 4.8rem;
-    max-width: 16ch;
-    font-family: var(--font-heading-family);
-    font-size: clamp(3.2rem, 6vw, 6.4rem);
-    font-weight: 600;
-    letter-spacing: -0.04em;
-    line-height: 1.06;
-  }
-
   .nx01-compare__board {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 0;
+    gap: 2.4rem;
   }
 
   .nx01-compare__pane {
+    display: flex;
+    flex-direction: column;
+    gap: 3.2rem;
     min-width: 0;
+    padding: 3.2rem;
+    background: rgb(var(--nx01-surface));
+    border: 0.1rem solid rgb(var(--nx01-rule));
+    border-radius: 0.8rem;
   }
 
-  .nx01-compare__kicker {
-    margin: 0 0 2.4rem;
-    font-size: 1.2rem;
+  .nx01-compare__pane-head {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+
+  .nx01-compare__pane-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.2rem;
+  }
+
+  .nx01-compare__protocol {
+    margin: 0;
+    font-size: 1.1rem;
     font-weight: 600;
-    letter-spacing: 0.16em;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: color-mix(in srgb, rgba(var(--color-foreground)) 50%, transparent);
+    color: rgb(var(--nx01-ink));
   }
 
-  .nx01-compare__kicker:has(.nx01-compare__kicker-short) .nx01-compare__kicker-full {
+  .nx01-compare__pane-title {
+    margin: 0;
+    font-size: 2.2rem;
+    font-weight: 600;
+    line-height: 1.25;
+  }
+
+  .nx01-compare__pane-title--split .nx01-compare__kicker-full {
     display: none;
+  }
+
+  .nx01-compare__badge {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.1rem;
+    padding: 0.4rem 1rem;
+    border: 0.1rem solid rgb(var(--nx01-navy-deep));
+    border-radius: var(--nx01-radius);
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: rgb(var(--nx01-navy-deep));
   }
 
   .nx01-compare__media {
     display: flex;
     align-items: flex-end;
-    min-height: 8.8rem;
-    margin-bottom: 2.4rem;
   }
 
   .nx01-compare__img {
@@ -253,217 +258,72 @@
     max-width: 12rem;
   }
 
-  .nx01-compare__cluster {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: flex-end;
-    gap: 0.8rem 0.7rem;
-    max-width: 18rem;
-  }
-
-  .nx01-compare__vial {
-    position: relative;
-    display: block;
-    width: 1.4rem;
-    height: 4.4rem;
-    margin-top: 0.7rem;
-    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 20%, transparent);
-    border-radius: 0.14rem 0.14rem 0.5rem 0.5rem;
-    background: color-mix(in srgb, rgba(var(--color-foreground)) 4%, transparent);
-  }
-
-  .nx01-compare__vial::before {
-    content: "";
-    position: absolute;
-    top: -0.64rem;
-    left: 50%;
-    width: 0.54rem;
-    height: 0.64rem;
-    transform: translateX(-50%);
-    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 20%, transparent);
-    border-bottom: 0;
-    border-radius: 0.08rem 0.08rem 0 0;
-  }
-
-  .nx01-compare__cluster .nx01-compare__vial:nth-child(2n) {
-    transform: translateY(-0.6rem);
-  }
-
-  .nx01-compare__cluster .nx01-compare__vial:nth-child(3n) {
-    transform: translateY(0.4rem);
-  }
-
-  .nx01-compare__vial--one {
-    width: 2.8rem;
-    height: 9rem;
-    border-color: color-mix(in srgb, rgba(var(--color-foreground)) 36%, transparent);
-    background: color-mix(in srgb, rgba(var(--color-foreground)) 9%, transparent);
-  }
-
-  .nx01-compare__vial--one::before {
-    width: 0.96rem;
-    height: 0.96rem;
-    top: -0.96rem;
-    border-color: color-mix(in srgb, rgba(var(--color-foreground)) 36%, transparent);
-  }
-
-  .nx01-compare__compounds {
-    margin: 0 0 2.4rem;
-    padding: 0;
+  .nx01-compare__list {
+    margin: 0;
+    padding: 3.2rem 0 0;
     list-style: none;
+    border-top: 0.1rem solid rgb(var(--nx01-rule));
   }
 
-  .nx01-compare__compounds li {
-    padding: 0.9rem 0;
+  .nx01-compare__list li {
+    position: relative;
+    padding: 0.8rem 0 0.8rem 1.8rem;
     font-size: 1.5rem;
     line-height: 1.4;
-    color: color-mix(in srgb, rgba(var(--color-foreground)) 72%, transparent);
-    border-bottom: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 8%, transparent);
+    color: rgb(var(--nx01-ink));
   }
 
-  .nx01-compare__compounds li:first-child {
-    border-top: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 8%, transparent);
+  .nx01-compare__list li::before {
+    content: "";
+    position: absolute;
+    top: 1.4rem;
+    left: 0;
+    width: 0.6rem;
+    height: 0.6rem;
+    border-radius: 50%;
+    background: rgb(var(--nx01-ink));
   }
 
-  .nx01-compare__notes {
+  .nx01-compare__footer {
     margin: 0;
-    padding: 0.8rem 0 0;
-    list-style: none;
-  }
-
-  .nx01-compare__notes li {
-    display: flex;
-    align-items: center;
-    gap: 1.2rem;
-    min-height: 3.2rem;
-    font-size: 1.2rem;
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: color-mix(in srgb, rgba(var(--color-foreground)) 46%, transparent);
-  }
-
-  .nx01-compare__tick {
-    flex: 0 0 2.4rem;
-    height: 1px;
-    background: color-mix(in srgb, rgba(var(--color-foreground)) 22%, transparent);
-  }
-
-  .nx01-compare__then {
-    display: flex;
-    align-items: center;
-    margin: 3.2rem 0;
-    padding: 0;
-  }
-
-  .nx01-compare__then-rule {
-    display: block;
-    width: 4.8rem;
-    height: 1px;
-    background: color-mix(in srgb, rgba(var(--color-foreground)) 22%, transparent);
-  }
-
-  .nx01-compare__points {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2.4rem 1.6rem;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  .nx01-compare__points li {
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-  }
-
-  .nx01-compare__point-value {
-    font-family: var(--font-heading-family);
-    font-size: clamp(2.8rem, 4vw, 4rem);
-    font-weight: 600;
-    letter-spacing: -0.03em;
-    line-height: 1;
-  }
-
-  .nx01-compare__point-label {
-    font-size: 1.2rem;
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: color-mix(in srgb, rgba(var(--color-foreground)) 50%, transparent);
+    padding-top: 3.2rem;
+    border-top: 0.1rem solid rgb(var(--nx01-rule));
+    font-size: 1.3rem;
+    line-height: 1.4;
+    color: rgb(var(--nx01-muted));
   }
 
   .nx01-compare__close {
-    margin-top: 5.6rem;
-    padding-top: 3.2rem;
-    border-top: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2.4rem;
+    margin-top: 6.4rem;
+    text-align: center;
   }
 
   .nx01-compare__highlight {
-    margin: 0 0 2rem;
-    max-width: 18ch;
-    font-family: var(--font-heading-family);
-    font-size: clamp(2.4rem, 3.2vw, 3.6rem);
-    font-weight: 600;
-    letter-spacing: -0.035em;
-    line-height: 1.15;
-  }
-
-  .nx01-compare__cta .xo-btn {
-    min-height: 4.8rem;
+    margin: 0;
+    font-size: 1.8rem;
+    font-weight: 500;
   }
 
   @media screen and (min-width: 768px) {
-    .nx01-compare__inner {
-      padding-top: 12rem;
-      padding-bottom: 12.8rem;
-    }
-
-    .nx01-compare__heading {
-      margin-bottom: 7.2rem;
-    }
-
     .nx01-compare__board {
       grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-      column-gap: 0;
+      gap: 4.8rem;
+    }
+
+    .nx01-compare__pane {
+      padding: 4rem;
     }
 
     .nx01-compare__kicker-short {
       display: none;
     }
 
-    .nx01-compare__kicker:has(.nx01-compare__kicker-short) .nx01-compare__kicker-full {
+    .nx01-compare__pane-title--split .nx01-compare__kicker-full {
       display: inline;
-    }
-
-    .nx01-compare__pane--diy {
-      padding-right: 5.6rem;
-      border-right: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
-    }
-
-    .nx01-compare__pane--nx {
-      padding-left: 5.6rem;
-    }
-
-    .nx01-compare__then {
-      display: none;
-    }
-
-    .nx01-compare__points {
-      grid-template-columns: 1fr 1fr;
-      gap: 2.8rem 2rem;
-    }
-
-    .nx01-compare__close {
-      margin-top: 7.2rem;
-      padding-top: 4rem;
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .nx01-compare__cluster .nx01-compare__vial:nth-child(n) {
-      transform: none;
     }
   }
 {% endstyle %}
@@ -485,15 +345,33 @@
     },
     {
       "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Comparison Architecture"
+    },
+    {
+      "type": "text",
       "id": "heading",
       "label": "t:sections.nx01_launch_compare.settings.heading",
       "default": "A good daily stack shouldn’t require a spreadsheet."
     },
     {
+      "type": "textarea",
+      "id": "intro",
+      "label": "Introduction",
+      "default": "Building a foundation from individual ingredients provides flexibility — but it also means more bottles, more decisions, and more things to replenish."
+    },
+    {
+      "type": "text",
+      "id": "left_kicker",
+      "label": "Left protocol label",
+      "default": "Protocol A"
+    },
+    {
       "type": "text",
       "id": "left_label",
       "label": "t:sections.nx01_launch_compare.settings.left_label",
-      "default": "Build it yourself"
+      "default": "Build It Yourself"
     },
     {
       "type": "text",
@@ -503,9 +381,33 @@
     },
     {
       "type": "text",
+      "id": "left_note",
+      "label": "Left footer note",
+      "default": "7+ bottles · separate reorders · fragmented schedule"
+    },
+    {
+      "type": "text",
+      "id": "right_kicker",
+      "label": "Right protocol label",
+      "default": "Protocol B"
+    },
+    {
+      "type": "text",
       "id": "right_label",
       "label": "t:sections.nx01_launch_compare.settings.right_label",
-      "default": "NX-01"
+      "default": "NX-01 Baseline"
+    },
+    {
+      "type": "text",
+      "id": "badge",
+      "label": "Right badge",
+      "default": "Consolidated"
+    },
+    {
+      "type": "text",
+      "id": "right_note",
+      "label": "Right footer note",
+      "default": "1 bottle · single monthly subscription · zero daily decisions"
     },
     {
       "type": "text",
@@ -585,14 +487,13 @@
         {
           "type": "text",
           "id": "value",
-          "label": "t:sections.nx01_launch_compare.blocks.point.settings.value",
-          "default": "9"
+          "label": "t:sections.nx01_launch_compare.blocks.point.settings.value"
         },
         {
           "type": "text",
           "id": "label",
           "label": "t:sections.nx01_launch_compare.blocks.point.settings.label",
-          "default": "Actives"
+          "default": "9 Active ingredients at physiological synergy"
         }
       ]
     }
@@ -602,22 +503,19 @@
     {
       "name": "t:sections.nx01_launch_compare.presets.name",
       "blocks": [
-        { "type": "compound", "settings": { "label": "Acetyl-L-Carnitine" } },
-        { "type": "compound", "settings": { "label": "CDP-Choline" } },
-        { "type": "compound", "settings": { "label": "NMN" } },
+        { "type": "compound", "settings": { "label": "Acetyl-L-Carnitine (ALCAR)" } },
+        { "type": "compound", "settings": { "label": "CDP-Choline (Citicoline)" } },
+        { "type": "compound", "settings": { "label": "Nicotinamide Mononucleotide (NMN)" } },
         { "type": "compound", "settings": { "label": "L-Theanine" } },
-        { "type": "compound", "settings": { "label": "Rhodiola" } },
+        { "type": "compound", "settings": { "label": "Rhodiola rosea (3% Salidroside)" } },
         { "type": "compound", "settings": { "label": "Ubiquinol CoQ10" } },
-        { "type": "compound", "settings": { "label": "Active B vitamins" } },
-        { "type": "note", "settings": { "label": "Multiple bottles" } },
-        { "type": "note", "settings": { "label": "Multiple reorder points" } },
-        { "type": "note", "settings": { "label": "More complexity" } },
-        { "type": "note", "settings": { "label": "More decisions" } },
-        { "type": "point", "settings": { "value": "9", "label": "Actives" } },
-        { "type": "point", "settings": { "value": "3", "label": "Capsules" } },
-        { "type": "point", "settings": { "value": "1", "label": "Daily formula" } },
-        { "type": "point", "settings": { "value": "1", "label": "Bottle" } },
-        { "type": "point", "settings": { "value": "30-day", "label": "Supply" } }
+        { "type": "compound", "settings": { "label": "Active B Vitamins (B12, Folate, B6)" } },
+        { "type": "point", "settings": { "label": "9 Active ingredients at physiological synergy" } },
+        { "type": "point", "settings": { "label": "3 capsule single daily serving size" } },
+        { "type": "point", "settings": { "label": "Zero fillers, binders, or trade secret blends" } },
+        { "type": "point", "settings": { "label": "Caffeine-free design allows anytime routine placement" } },
+        { "type": "point", "settings": { "label": "One simplified bottle replacement" } },
+        { "type": "point", "settings": { "label": "30-day comprehensive supply" } }
       ]
     }
   ]
