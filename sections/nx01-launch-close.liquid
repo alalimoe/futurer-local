@@ -7,7 +7,7 @@
   assign cta_label = section.settings.cta_label
   assign microcopy = section.settings.microcopy
   if variant != blank
-    assign bottle_price = variant.price | money
+    assign bottle_price = variant.price | money | strip_html
     assign microcopy = 'sections.nx01_launch_close.dynamic_microcopy' | t: price: bottle_price
     if variant.available == false
       assign cta_label = 'sections.nx01_launch_close.restock_cta' | t
@@ -27,24 +27,6 @@
   aria-labelledby="nx01-close-heading-{{ section.id }}"
 >
   <div class="nx01__inner nx01-close__inner">
-    {%- if section.settings.image != blank -%}
-      <div class="nx01-close__media">
-        {{
-          section.settings.image
-          | image_url: width: 1400
-          | image_tag:
-            class: 'nx01-close__img',
-            loading: 'lazy',
-            widths: '480, 720, 960, 1200, 1400',
-            sizes: '(max-width: 767px) 80vw, 48vw',
-            alt: section.settings.image_alt,
-            width: section.settings.image.width,
-            height: section.settings.image.height,
-            decoding: 'async'
-        }}
-      </div>
-    {%- endif -%}
-
     <div class="nx01-close__copy">
       {%- if section.settings.eyebrow != blank -%}
         <p class="nx01__label">
@@ -65,6 +47,23 @@
         <p class="nx01-close__micro">{{ microcopy | escape }}</p>
       {%- endif -%}
     </div>
+    {%- if section.settings.image != blank -%}
+      <div class="nx01-close__media">
+        {{
+          section.settings.image
+          | image_url: width: 1400
+          | image_tag:
+            class: 'nx01-close__img',
+            loading: 'lazy',
+            widths: '480, 720, 960, 1200, 1400',
+            sizes: '(max-width: 767px) min(640px, 80vw), min(640px, calc(100vw - 16rem))',
+            alt: section.settings.image_alt,
+            width: section.settings.image.width,
+            height: section.settings.image.height,
+            decoding: 'async'
+        }}
+      </div>
+    {%- endif -%}
   </div>
 </section>
 
@@ -94,6 +93,7 @@
   }
 
   .nx01-close__media {
+    order: -1;
     width: min(100%, 64rem);
   }
 

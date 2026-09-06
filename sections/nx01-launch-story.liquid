@@ -121,7 +121,7 @@
                   class: 'nx01-story__img',
                   loading: 'lazy',
                   widths: '480, 720, 960, 1200',
-                  sizes: '(max-width: 767px) 92vw, 42vw',
+                  sizes: '(max-width: 767px) min(640px, 92vw), min(520px, 42vw)',
                   alt: section.settings.pieces_alt,
                   width: pieces_image.width,
                   height: pieces_image.height,
@@ -143,8 +143,8 @@
                     | image_tag:
                       class: 'nx01-story__bottle nx01-story__bottle--one',
                       loading: 'lazy',
-                      widths: '360, 540, 720, 900',
-                      sizes: '(max-width: 767px) 48vw, 22vw',
+                      widths: '160, 240, 320, 360, 540, 720, 900',
+                      sizes: '(max-width: 767px) 128px, 160px',
                       alt: nx01_alt,
                       width: nx01_image.width,
                       height: nx01_image.height,
@@ -189,7 +189,7 @@
                                 class: 'nx01-story__bottle',
                                 loading: 'lazy',
                                 widths: '120, 180, 240, 360',
-                                sizes: '(max-width: 767px) 28vw, 12vw',
+                                sizes: '(max-width: 767px) 104px, 120px',
                                 alt: piece_alt,
                                 width: piece_image.width,
                                 height: piece_image.height,
@@ -222,8 +222,8 @@
                       | image_tag:
                         class: 'nx01-story__bottle nx01-story__bottle--one',
                         loading: 'lazy',
-                        widths: '360, 540, 720, 900',
-                        sizes: '(max-width: 767px) 48vw, 22vw',
+                        widths: '160, 240, 320, 360, 540, 720, 900',
+                        sizes: '(max-width: 767px) 128px, 160px',
                         alt: nx01_alt,
                         width: nx01_image.width,
                         height: nx01_image.height,
@@ -388,7 +388,7 @@
     content: "";
     width: 0.6rem;
     height: 0.6rem;
-    margin-left: 0.8rem;
+    margin-inline-start: 0.8rem;
     border-top: 1px solid currentColor;
     border-right: 1px solid currentColor;
     transform: rotate(45deg);
@@ -524,7 +524,7 @@
 
   .nx01-story__figure--one,
   .nx01-story__bottle--one {
-    width: 12.8rem;
+    width: min(100%, 12.8rem);
   }
 
   .nx01-story__vial {
@@ -618,45 +618,12 @@
       gap: 8rem;
     }
 
-    .nx01-story__intro {
-      grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
-      column-gap: 8rem;
-      align-items: start;
-    }
-
     .nx01-story__quote {
       margin-top: 4rem;
     }
 
     .nx01-story__explain {
       padding-top: 0.8rem;
-    }
-
-    .nx01-story__media {
-      grid-template-columns: minmax(0, 1fr) 4.8rem minmax(0, 0.42fr);
-      justify-items: stretch;
-      column-gap: 3.2rem;
-    }
-
-    .nx01-story__media-from,
-    .nx01-story__media-to {
-      align-items: flex-start;
-    }
-
-    .nx01-story__media .nx01-story__arrow {
-      align-self: center;
-      width: 4.8rem;
-      height: 1px;
-    }
-
-    .nx01-story__media .nx01-story__arrow::after {
-      left: auto;
-      right: 0;
-      bottom: auto;
-      top: 50%;
-      border-bottom: 0;
-      border-top: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 36%, transparent);
-      transform: translate(0.15rem, -50%) rotate(45deg);
     }
 
     .nx01-story__pieces {
@@ -683,7 +650,7 @@
 
     .nx01-story__figure--one,
     .nx01-story__bottle--one {
-      width: 16rem;
+      width: min(100%, 16rem);
     }
 
     .nx01-story__result {
@@ -697,6 +664,41 @@
       width: 1px;
       height: 3.2rem;
       margin: 0;
+    }
+  }
+
+  @media screen and (min-width: 990px) {
+    .nx01-story__intro {
+      grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+      column-gap: clamp(3.2rem, 5vw, 8rem);
+      align-items: start;
+    }
+
+    .nx01-story__media {
+      grid-template-columns: minmax(0, 1fr) 4.8rem minmax(0, 0.42fr);
+      justify-items: stretch;
+      column-gap: 3.2rem;
+    }
+
+    .nx01-story__media-from,
+    .nx01-story__media-to {
+      align-items: flex-start;
+    }
+
+    .nx01-story__media .nx01-story__arrow {
+      align-self: center;
+      width: 4.8rem;
+      height: 1px;
+    }
+
+    .nx01-story__media .nx01-story__arrow::after {
+      inset-inline-start: auto;
+      inset-inline-end: 0;
+      bottom: auto;
+      top: 50%;
+      border-bottom: 0;
+      border-top: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 36%, transparent);
+      transform: translate(0.15rem, -50%) rotate(45deg);
     }
   }
 
@@ -719,14 +721,25 @@
     }
 
     .nx01-story__pieces > .nx01-story__arrow::after {
-      left: auto;
-      right: 0;
+      inset-inline-start: auto;
+      inset-inline-end: 0;
       bottom: auto;
       top: 50%;
       border-bottom: 0;
       border-top: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 36%, transparent);
       transform: translate(0.15rem, -50%) rotate(45deg);
     }
+  }
+
+  [dir="rtl"] .nx01-story__link::after {
+    transform: rotate(-135deg);
+  }
+
+  [dir="rtl"] .nx01-story__media .nx01-story__arrow::after,
+  [dir="rtl"] .nx01-story__pieces > .nx01-story__arrow::after {
+    inset-inline-start: 0;
+    inset-inline-end: auto;
+    transform: translate(-0.15rem, -50%) rotate(-135deg);
   }
 {% endstyle %}
 

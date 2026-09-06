@@ -59,7 +59,7 @@
       </div>
 
       {%- if section.settings.panel_heading != blank or section.settings.panel_meta != blank or section.settings.panel_note != blank -%}
-        <aside class="nx01-facts__panel" aria-labelledby="nx01-facts-panel-heading-{{ section.id }}">
+        <aside class="nx01-facts__panel"{% if section.settings.panel_heading != blank %} aria-labelledby="nx01-facts-panel-heading-{{ section.id }}"{% endif %}>
           {%- if section.settings.panel_heading != blank -%}
             <h3 class="nx01-facts__panel-title" id="nx01-facts-panel-heading-{{ section.id }}">{{ section.settings.panel_heading | escape }}</h3>
           {%- endif -%}
@@ -67,7 +67,7 @@
             <p class="nx01-facts__panel-meta">{{ section.settings.panel_meta | escape }}</p>
           {%- endif -%}
           <div class="nx01-facts__panel-rule" aria-hidden="true"></div>
-          <ul class="nx01-facts__panel-list">
+          <ul class="nx01-facts__panel-list" aria-hidden="true">
             {%- for block in section.blocks -%}
               {%- if block.type == 'ingredient' -%}
                 {%- if block.settings.name != blank or block.settings.amount != blank -%}
@@ -184,7 +184,7 @@
   }
 
   .nx01-facts__panel-list strong {
-    white-space: nowrap;
+    overflow-wrap: anywhere;
   }
 
   .nx01-facts__panel-note {
@@ -232,7 +232,7 @@
 
     .nx01-facts__table td {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
       gap: 1.6rem;
       padding-top: 0.8rem;
       color: rgb(var(--nx01-body));
@@ -249,17 +249,26 @@
     .nx01-facts__table tbody td:last-child {
       text-align: start;
     }
+
+    .nx01-facts__panel {
+      padding: 2.4rem;
+    }
+
+    .nx01-facts__panel-list,
+    .nx01-facts__panel-rule {
+      display: none;
+    }
   }
 
   @media screen and (min-width: 990px) {
     .nx01-facts__grid {
-      grid-template-columns: minmax(0, 1fr) 40rem;
+      grid-template-columns: minmax(0, 1fr) minmax(24rem, 40rem);
       gap: 4.8rem;
     }
 
     .nx01-facts__panel {
       position: sticky;
-      top: 8rem;
+      top: var(--nx01-scroll-margin, 12.8rem);
     }
   }
 {% endstyle %}

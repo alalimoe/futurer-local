@@ -1,8 +1,11 @@
 {% doc %}
-Shared NX-01 launch tokens and utilities. Render once per section.
-Loads assets/nx01-launch.css; duplicate link tags resolve to a single fetch.
+Shared NX-01 launch tokens and utilities.
+The NX-01 page template loads the stylesheet once from the theme layout.
+This snippet is a fallback when a launch section is reused on another template.
 @example
 {% render 'nx01-launch-css' %}
 {% enddoc %}
 
-{{ 'nx01-launch.css' | asset_url | stylesheet_tag }}
+{%- unless template.suffix == 'nx-01' -%}
+  {{ 'nx01-launch.css' | asset_url | stylesheet_tag }}
+{%- endunless -%}

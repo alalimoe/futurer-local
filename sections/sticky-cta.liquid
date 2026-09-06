@@ -20,6 +20,10 @@
 
 {%- style -%}
   .xo-section--{{ section.id }} {
+    --sticky-cta-gap: calc(var(--page-gap-mobile, 2.4) * 1rem);
+    --sticky-cta-pad-top: {{ section.settings.padding_top }}px;
+    --sticky-cta-pad-bottom: {{ section.settings.padding_bottom }}px;
+    --sticky-cta-reserve: 6.8rem;
     display: none;
     position: fixed;
     left: 0;
@@ -27,10 +31,8 @@
     bottom: 0;
     z-index: 50;
     gap: 1rem;
-    padding: 1rem var(--page-gap, 2.4rem) calc(1rem + env(safe-area-inset-bottom));
+    padding: max(1rem, var(--sticky-cta-pad-top)) var(--sticky-cta-gap) calc(max(1rem, var(--sticky-cta-pad-bottom)) + env(safe-area-inset-bottom));
     background: color-mix(in srgb, rgba(var(--color-foreground)) 96%, transparent);
-    -webkit-backdrop-filter: saturate(140%) blur(4px);
-    backdrop-filter: saturate(140%) blur(4px);
   }
 
   .xo-section--{{ section.id }} .sticky-cta__mobile {
@@ -43,7 +45,11 @@
   }
 
   .xo-section--{{ section.id }} .xo-btn {
-    flex: 1;
+    flex: 1 1 12rem;
+    min-width: 0;
+    min-height: 4.8rem;
+    height: auto;
+    white-space: normal;
   }
 
   .xo-section--{{ section.id }} .xo-btn--secondary {
@@ -58,9 +64,11 @@
     opacity: 0.85;
   }
 
-  @media (max-width: 768px) {
+  @media (max-width: 767px) {
     .xo-section--{{ section.id }} {
       display: flex;
+      flex-wrap: wrap;
+      align-items: stretch;
       transition: transform 180ms ease, visibility 180ms ease;
     }
 
@@ -71,30 +79,28 @@
     }
 
     {% if section.settings.reserve_space_mobile %}
-    /* Reserve room for the fixed bar without leaking a global body rule */
     body:has(.xo-section--{{ section.id }}) {
-      padding-bottom: calc(64px + env(safe-area-inset-bottom));
+      padding-bottom: calc(var(--sticky-cta-reserve) + env(safe-area-inset-bottom));
     }
     {% endif %}
   }
 
   {% if section.settings.desktop_navigation %}
-    @media (min-width: 769px) {
+    @media (min-width: 768px) {
       #shopify-section-{{ section.id }} {
         position: sticky;
-        top: 0;
+        top: var(--sticky-header-offset, 5.2rem);
         z-index: 40;
       }
 
       .xo-section--{{ section.id }} {
+        --sticky-cta-gap: calc(var(--page-gap, 2.4) * 1rem);
         position: static;
         display: block;
         padding: 0;
         background: rgb(var(--color-background));
         border-top: 0.1rem solid rgba(var(--color-foreground), 0.12);
         border-bottom: 0.1rem solid rgba(var(--color-foreground), 0.12);
-        -webkit-backdrop-filter: none;
-        backdrop-filter: none;
       }
 
       .xo-section--{{ section.id }} .sticky-cta__mobile {
@@ -103,25 +109,26 @@
 
       .xo-section--{{ section.id }} .sticky-cta__desktop {
         display: grid;
-        grid-template-columns: auto minmax(0, 1fr) auto;
+        grid-template-columns: minmax(0, auto) minmax(0, 1fr) minmax(0, auto);
         align-items: center;
-        gap: 2.4rem;
+        gap: 1.6rem 2.4rem;
         width: 100%;
         max-width: 128rem;
         min-height: 6rem;
         margin: 0 auto;
-        padding: 0.6rem var(--page-gap, 2.4rem);
+        padding: max(0.6rem, var(--sticky-cta-pad-top)) var(--sticky-cta-gap) max(0.6rem, var(--sticky-cta-pad-bottom));
       }
 
       .xo-section--{{ section.id }} .sticky-cta__product {
         margin: 0;
         font-size: 1.3rem;
         font-weight: 700;
-        white-space: nowrap;
+        overflow-wrap: anywhere;
       }
 
       .xo-section--{{ section.id }} .sticky-cta__nav-list {
         display: flex;
+        flex-wrap: wrap;
         align-items: center;
         justify-content: center;
         gap: 0.4rem;
@@ -174,6 +181,7 @@
   aria-label="{{ 'sections.sticky_cta.actions_label' | t }}"
   data-show-after="{{ section.settings.show_after_id | escape }}"
   data-hide-at="{{ section.settings.hide_at_id | escape }}"
+  {% if section.settings.show_after_id != blank %}data-mobile-hidden="true"{% endif %}
 >
   <div class="sticky-cta__mobile">
     {% render 'button', style: 'primary', text: primary_label, link: primary_href %}
@@ -207,22 +215,61 @@
 
 <script>
   (() => {
-    const init = () => {
-      const bar = document.getElementById('sticky-cta-{{ section.id }}');
-      if (!bar || !window.matchMedia('(max-width: 768px)').matches) return;
+    const barId = 'sticky-cta-{{ section.id }}';
+    const mobileQuery = window.matchMedia('(max-width: 767px)');
+    let cleanup = () => {};
+
+    const measureHeaderOffset = () => {
+      const header = document.querySelector('.shopify-section-group-header-group, header, [data-header]');
+      const height = header ? Math.round(header.getBoundingClientRect().height) : 52;
+      document.documentElement.style.setProperty('--sticky-header-offset', `${height}px`);
+    };
+
+    const measureReserve = (bar) => {
+      if (!mobileQuery.matches || bar.dataset.mobileHidden === 'true') return;
+      const height = Math.ceil(bar.getBoundingClientRect().height);
+      if (height > 0) {
+        bar.style.setProperty('--sticky-cta-reserve', `${height}px`);
+      }
+    };
+
+    const bind = () => {
+      cleanup();
+      const bar = document.getElementById(barId);
+      if (!bar) return;
+
+      measureHeaderOffset();
 
       const start = document.getElementById(bar.dataset.showAfter);
       const stop = document.getElementById(bar.dataset.hideAt);
-      if (!start && !stop) return;
-
+      let hidden = bar.dataset.mobileHidden === 'true';
       let queued = false;
+      const observers = [];
+
+      const setHidden = (next) => {
+        if (hidden === next) return;
+        hidden = next;
+        bar.dataset.mobileHidden = String(next);
+      };
+
       const update = () => {
         queued = false;
+        measureHeaderOffset();
+        if (!mobileQuery.matches) {
+          bar.removeAttribute('data-mobile-hidden');
+          return;
+        }
+        if (!start && !stop) {
+          setHidden(false);
+          measureReserve(bar);
+          return;
+        }
         const afterStart = !start || start.getBoundingClientRect().bottom <= 0;
-        const stopRect = stop ? stop.getBoundingClientRect() : null;
-        const stopVisible = stopRect && stopRect.top < window.innerHeight && stopRect.bottom > 0;
-        bar.dataset.mobileHidden = String(!afterStart || stopVisible);
+        const reachedStop = Boolean(stop && stop.getBoundingClientRect().top <= window.innerHeight);
+        setHidden(!afterStart || reachedStop);
+        measureReserve(bar);
       };
+
       const requestUpdate = () => {
         if (queued) return;
         queued = true;
@@ -230,15 +277,56 @@
       };
 
       update();
+
+      if ('IntersectionObserver' in window && (start || stop)) {
+        const observer = new IntersectionObserver(requestUpdate, { threshold: [0, 1] });
+        if (start) observer.observe(start);
+        if (stop) observer.observe(stop);
+        observers.push(observer);
+      }
+
       window.addEventListener('scroll', requestUpdate, { passive: true });
       window.addEventListener('resize', requestUpdate);
+
+      cleanup = () => {
+        window.removeEventListener('scroll', requestUpdate);
+        window.removeEventListener('resize', requestUpdate);
+        observers.forEach((observer) => observer.disconnect());
+        cleanup = () => {};
+      };
+    };
+
+    const onMediaChange = () => bind();
+
+    const start = () => {
+      bind();
+      if (mobileQuery.addEventListener) {
+        mobileQuery.addEventListener('change', onMediaChange);
+      } else {
+        mobileQuery.addListener(onMediaChange);
+      }
     };
 
     if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', init, { once: true });
+      document.addEventListener('DOMContentLoaded', start, { once: true });
     } else {
-      init();
+      start();
     }
+
+    document.addEventListener('shopify:section:unload', (event) => {
+      if (event.target && event.target.contains(document.getElementById(barId))) {
+        cleanup();
+        if (mobileQuery.removeEventListener) {
+          mobileQuery.removeEventListener('change', onMediaChange);
+        } else {
+          mobileQuery.removeListener(onMediaChange);
+        }
+      }
+    });
+
+    document.addEventListener('shopify:section:load', (event) => {
+      if (event.target && event.target.querySelector(`#${barId}`)) bind();
+    });
   })();
 </script>
 

@@ -112,8 +112,8 @@
                 endif
               endfor
               assign line_price = tier_unit_price | times: qty
-              assign unit_price = tier_unit_price | money
-              assign daily_price = tier_unit_price | divided_by: 30 | money
+              assign unit_price = tier_unit_price | money | strip_html
+              assign daily_price = tier_unit_price | divided_by: 30 | money | strip_html
               assign form_id = 'nx01-buy-' | append: section.id | append: '-' | append: block.id
               assign cta_label = block.settings.cta_label | default: section.settings.cta_label
               assign unavailable_label = 'products.product.unavailable' | t
@@ -288,10 +288,11 @@
     flex-direction: column;
     justify-content: space-between;
     min-width: 0;
-    padding: 3.2rem;
+    padding: 2.4rem;
     background: rgb(var(--nx01-surface));
     border: 0.1rem solid rgb(var(--nx01-line));
     border-radius: var(--nx01-radius);
+    overflow-wrap: anywhere;
   }
 
   .nx01-buy__card--featured {
@@ -308,6 +309,7 @@
 
   .nx01-buy__card-head {
     display: flex;
+    flex-wrap: wrap;
     align-items: flex-start;
     justify-content: space-between;
     gap: 1.2rem;
@@ -330,6 +332,7 @@
 
   .nx01-buy__badge {
     margin: 0;
+    max-width: 100%;
     padding: 0.4rem 1rem;
     border: 0.1rem solid rgb(var(--nx01-navy-deep));
     border-radius: 10rem;
@@ -337,6 +340,8 @@
     font-weight: 600;
     letter-spacing: 0.06em;
     text-transform: uppercase;
+    white-space: normal;
+    overflow-wrap: anywhere;
     color: rgb(var(--nx01-navy-deep));
   }
 
@@ -392,11 +397,20 @@
   }
 
   .nx01-buy__trust a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 4.8rem;
     color: inherit;
     text-underline-offset: 0.3rem;
   }
 
-  @media screen and (min-width: 990px) {
+  @media screen and (min-width: 768px) {
+    .nx01-buy__card {
+      padding: 3.2rem;
+    }
+  }
+
+  @media screen and (min-width: 1100px) {
     .nx01-buy__grid {
       grid-template-columns: repeat(3, minmax(0, 1fr));
     }

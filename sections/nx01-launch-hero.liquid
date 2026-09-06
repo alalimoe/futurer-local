@@ -12,8 +12,8 @@
   assign primary_href = section.settings.primary_href
   assign meta = section.settings.meta
   if variant != blank
-    assign bottle_price = variant.price | money
-    assign daily_price = variant.price | divided_by: 30 | money
+    assign bottle_price = variant.price | money | strip_html
+    assign daily_price = variant.price | divided_by: 30 | money | strip_html
     assign meta = 'sections.nx01_launch_hero.dynamic_meta' | t: price: bottle_price, daily_price: daily_price
   endif
   if product != blank and product_available == false
@@ -103,11 +103,13 @@
               <source
                 media="(max-width: 767px)"
                 srcset="
+                  {{ bottle_mobile | image_url: width: 280 }} 280w,
+                  {{ bottle_mobile | image_url: width: 360 }} 360w,
                   {{ bottle_mobile | image_url: width: 480 }} 480w,
                   {{ bottle_mobile | image_url: width: 720 }} 720w,
                   {{ bottle_mobile | image_url: width: 960 }} 960w
                 "
-                sizes="90vw"
+                sizes="min(280px, 90vw)"
               >
             {%- endif -%}
             {{
@@ -117,8 +119,8 @@
                 class: 'nx01-launch-hero__img',
                 loading: 'eager',
                 fetchpriority: 'high',
-                widths: '480, 720, 960, 1200, 1400',
-                sizes: '(max-width: 767px) 90vw, 48vw',
+                widths: '280, 360, 480, 720, 960, 1200, 1400',
+                sizes: '(max-width: 767px) min(280px, 90vw), min(536px, 48vw)',
                 alt: bottle_alt,
                 width: bottle.width,
                 height: bottle.height,
@@ -337,21 +339,23 @@
       justify-content: center;
     }
 
+    .nx01-launch-hero__ctas .xo-btn {
+      width: auto;
+    }
+
+    .nx01-launch-hero__facts {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  @media screen and (min-width: 990px) {
     .nx01-launch-hero__stage {
       grid-template-columns: minmax(0, 0.5fr) minmax(0, 0.5fr);
       column-gap: 4.8rem;
     }
 
-    .nx01-launch-hero__ctas .xo-btn {
-      width: auto;
-    }
-
     .nx01-launch-hero__img {
       max-height: min(70.3rem, 70vh);
-    }
-
-    .nx01-launch-hero__facts {
-      grid-template-columns: repeat(4, 1fr);
     }
   }
 {% endstyle %}
