@@ -37,7 +37,6 @@
         {%- for block in section.blocks -%}
           {%- if block.type == 'system' -%}
             {%- liquid
-              assign diagram = block.settings.diagram | default: 'energy'
               assign actives = block.settings.ingredients | newline_to_br | split: '<br />'
               assign active_line = ''
               for active in actives
@@ -56,19 +55,13 @@
                 {%- if block.settings.number != blank -%}
                   <p class="nx01-systems__number">{{ block.settings.number | escape }}</p>
                 {%- endif -%}
-                <span class="nx01-systems__diagram nx01-systems__diagram--{{ diagram }}" aria-hidden="true">
-                  <span></span>
-                  <span></span>
-                  <span></span>
-                </span>
+                {%- if block.settings.descriptor != blank -%}
+                  <p class="nx01-systems__amount">{{ block.settings.descriptor | escape }}</p>
+                {%- endif -%}
               </div>
 
               {%- if block.settings.title != blank -%}
                 <h3 class="nx01-systems__title">{{ block.settings.title | escape }}</h3>
-              {%- endif -%}
-
-              {%- if block.settings.descriptor != blank -%}
-                <p class="nx01-systems__descriptor">{{ block.settings.descriptor | escape }}</p>
               {%- endif -%}
 
               {%- if active_line != blank -%}
@@ -132,14 +125,21 @@
     align-items: flex-start;
     justify-content: space-between;
     gap: 1.6rem;
-    margin-bottom: 2rem;
+    margin-bottom: 0.8rem;
   }
 
-  .nx01-systems__number {
+  .nx01-systems__number,
+  .nx01-systems__amount {
     margin: 0;
     font-size: 1.2rem;
     font-weight: 700;
     color: rgb(var(--nx01-navy-deep));
+  }
+
+  .nx01-systems__amount {
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
   }
 
   .nx01-systems__title {
@@ -336,6 +336,12 @@
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
+
+  @media screen and (min-width: 1100px) {
+    .nx01-systems__grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
 {% endstyle %}
 
 {% schema %}
@@ -446,7 +452,7 @@
       ]
     }
   ],
-  "max_blocks": 8,
+  "max_blocks": 12,
   "presets": [
     {
       "name": "t:sections.nx01_launch_systems.presets.name",

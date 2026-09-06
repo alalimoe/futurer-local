@@ -27,43 +27,45 @@
   aria-labelledby="nx01-close-heading-{{ section.id }}"
 >
   <div class="nx01__inner nx01-close__inner">
-    <div class="nx01-close__copy">
-      {%- if section.settings.eyebrow != blank -%}
-        <p class="nx01__label">
-          <span class="nx01__label-rule" aria-hidden="true"></span>
-          <span>{{ section.settings.eyebrow | escape }}</span>
-        </p>
-      {%- endif -%}
-      {%- if section.settings.heading != blank -%}
-        <h2 class="nx01__heading nx01-close__heading" id="nx01-close-heading-{{ section.id }}">{{ section.settings.heading | escape }}</h2>
-      {%- endif -%}
-      {%- if section.settings.subheading != blank -%}
-        <p class="nx01__sub">{{ section.settings.subheading | escape }}</p>
-      {%- endif -%}
-      {%- if show_cta -%}
-        {% render 'button', style: 'primary', text: cta_label, link: section.settings.cta_href %}
-      {%- endif -%}
-      {%- if microcopy != blank -%}
-        <p class="nx01-close__micro">{{ microcopy | escape }}</p>
+    <div class="nx01-close__stage">
+      <div class="nx01-close__copy">
+        {%- if section.settings.eyebrow != blank -%}
+          <p class="nx01__label">
+            <span class="nx01__label-rule" aria-hidden="true"></span>
+            <span>{{ section.settings.eyebrow | escape }}</span>
+          </p>
+        {%- endif -%}
+        {%- if section.settings.heading != blank -%}
+          <h2 class="nx01__heading nx01-close__heading" id="nx01-close-heading-{{ section.id }}">{{ section.settings.heading | escape }}</h2>
+        {%- endif -%}
+        {%- if section.settings.subheading != blank -%}
+          <p class="nx01__sub">{{ section.settings.subheading | escape }}</p>
+        {%- endif -%}
+        {%- if show_cta -%}
+          {% render 'button', style: 'primary', text: cta_label, link: section.settings.cta_href %}
+        {%- endif -%}
+        {%- if microcopy != blank -%}
+          <p class="nx01-close__micro">{{ microcopy | escape }}</p>
+        {%- endif -%}
+      </div>
+      {%- if section.settings.image != blank -%}
+        <div class="nx01-close__media">
+          {{
+            section.settings.image
+            | image_url: width: 1400
+            | image_tag:
+              class: 'nx01-close__img',
+              loading: 'lazy',
+              widths: '480, 720, 960, 1200, 1400',
+              sizes: '(max-width: 989px) min(640px, 80vw), min(640px, 50vw)',
+              alt: section.settings.image_alt,
+              width: section.settings.image.width,
+              height: section.settings.image.height,
+              decoding: 'async'
+          }}
+        </div>
       {%- endif -%}
     </div>
-    {%- if section.settings.image != blank -%}
-      <div class="nx01-close__media">
-        {{
-          section.settings.image
-          | image_url: width: 1400
-          | image_tag:
-            class: 'nx01-close__img',
-            loading: 'lazy',
-            widths: '480, 720, 960, 1200, 1400',
-            sizes: '(max-width: 767px) min(640px, 80vw), min(640px, calc(100vw - 16rem))',
-            alt: section.settings.image_alt,
-            width: section.settings.image.width,
-            height: section.settings.image.height,
-            decoding: 'async'
-        }}
-      </div>
-    {%- endif -%}
   </div>
 </section>
 
@@ -71,37 +73,54 @@
   .nx01-close__inner {
     display: flex;
     flex-direction: column;
-    align-items: center;
     gap: 4.8rem;
-    text-align: center;
+  }
+
+  .nx01-close__stage {
+    display: grid;
+    grid-template-columns: 1fr;
+    align-items: center;
+    gap: 3.2rem;
   }
 
   .nx01-close__copy {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
     gap: 1.6rem;
     max-width: 64rem;
   }
 
   .nx01-close__heading {
-    font-size: clamp(2.8rem, 4vw, 3.6rem);
-  }
-
-  .nx01-close__inner .nx01__sub {
-    margin-inline: auto;
+    font-size: clamp(2.8rem, 4vw, 5.6rem);
   }
 
   .nx01-close__media {
-    order: -1;
-    width: min(100%, 64rem);
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    width: 100%;
   }
 
   .nx01-close__img {
     display: block;
-    width: 100%;
+    width: auto;
+    max-width: 100%;
+    max-height: 28rem;
     height: auto;
+    margin-inline: auto;
     object-fit: contain;
+  }
+
+  @media screen and (min-width: 990px) {
+    .nx01-close__stage {
+      grid-template-columns: minmax(0, 0.5fr) minmax(0, 0.5fr);
+      column-gap: 4.8rem;
+    }
+
+    .nx01-close__img {
+      max-height: min(56rem, 60vh);
+    }
   }
 
   .nx01-close__micro {

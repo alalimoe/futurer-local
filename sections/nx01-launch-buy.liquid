@@ -14,9 +14,11 @@
   if product != blank and product.has_only_default_variant == false
     assign has_multiple_variants = true
   endif
-  assign has_selling_plans = false
+  assign first_selling_plan = blank
+  assign first_selling_price = blank
   if variant != blank and variant.selling_plan_allocations.size > 0
-    assign has_selling_plans = true
+    assign first_selling_plan = variant.selling_plan_allocations.first.selling_plan
+    assign first_selling_price = variant.selling_plan_allocations.first.price
   endif
   assign restock_form_id = 'nx01-restock-' | append: section.id
   assign restock_submit_label = 'sections.nx01_launch_buy.restock_submit' | t
@@ -105,18 +107,34 @@
             {%- assign qty = block.settings.quantity | plus: 0 -%}
             {%- if qty >= 1 -%}
             {%- liquid
+              assign is_subscribe = block.settings.subscribe
+              assign selling_plan = blank
+              assign selling_plan_name = ''
               assign tier_unit_price = variant.price
-              for price_break in variant.quantity_price_breaks
-                if qty >= price_break.minimum_quantity
-                  assign tier_unit_price = price_break.price
-                endif
-              endfor
+              if is_subscribe and first_selling_plan != blank
+                assign selling_plan = first_selling_plan
+                assign selling_plan_name = first_selling_plan.name
+                assign tier_unit_price = first_selling_price
+              else
+                for price_break in variant.quantity_price_breaks
+                  if qty >= price_break.minimum_quantity
+                    assign tier_unit_price = price_break.price
+                  endif
+                endfor
+              endif
               assign line_price = tier_unit_price | times: qty
               assign unit_price = tier_unit_price | money | strip_html
               assign daily_price = tier_unit_price | divided_by: 30 | money | strip_html
               assign form_id = 'nx01-buy-' | append: section.id | append: '-' | append: block.id
               assign cta_label = block.settings.cta_label | default: section.settings.cta_label
               assign unavailable_label = 'products.product.unavailable' | t
+              assign send_to_pdp = false
+              if has_multiple_variants
+                assign send_to_pdp = true
+              endif
+              if is_subscribe and selling_plan == blank
+                assign send_to_pdp = true
+              endif
             -%}
             <article
               class="nx01-buy__card{% if block.settings.featured %} nx01-buy__card--featured{% endif %}"
@@ -142,19 +160,29 @@
                 {%- endif -%}
 
                 <p class="nx01-buy__price">{{ line_price | money }}</p>
-                <p class="nx01-buy__unit">{{ 'sections.nx01_launch_buy.per_bottle' | t: price: unit_price }}</p>
+                {%- if is_subscribe -%}
+                  <p class="nx01-buy__unit">{{ 'sections.nx01_launch_buy.per_delivery' | t: price: unit_price }}</p>
+                  {%- if selling_plan_name != blank -%}
+                    <p class="nx01-buy__unit">{{ selling_plan_name | escape }}</p>
+                  {%- endif -%}
+                {%- else -%}
+                  <p class="nx01-buy__unit">{{ 'sections.nx01_launch_buy.per_bottle' | t: price: unit_price }}</p>
+                {%- endif -%}
                 <p class="nx01-buy__unit">{{ 'sections.nx01_launch_buy.per_day' | t: price: daily_price }}</p>
                 {%- if block.settings.saving != blank -%}
                   <p class="nx01-buy__saving">{{ block.settings.saving | escape }}</p>
                 {%- endif -%}
               </div>
 
-              {%- if has_multiple_variants or has_selling_plans -%}
+              {%- if send_to_pdp -%}
                 {% render 'button', style: 'primary', text: choose_options_label, link: product.url, block: true %}
               {%- else -%}
                 {% form 'product', product, id: form_id, data-type: 'add-to-cart-form' %}
                   <input type="hidden" name="id" value="{{ variant.id }}">
                   <input type="hidden" name="quantity" value="{{ qty }}">
+                  {%- if selling_plan != blank -%}
+                    <input type="hidden" name="selling_plan" value="{{ selling_plan.id }}">
+                  {%- endif -%}
                   <xo-cart-add
                     xo-product-id="{{ product.id }}"
                     xo-variant-id="{{ variant.id }}"
@@ -455,7 +483,8 @@
         { "type": "textarea", "id": "description", "label": "Description", "default": "Best for testing biological compatibility and establishing immediate routine compliance." },
         { "type": "text", "id": "saving", "label": "Saving label" },
         { "type": "text", "id": "cta_label", "label": "Button label" },
-        { "type": "checkbox", "id": "featured", "label": "Highlight this tier", "default": false }
+        { "type": "checkbox", "id": "featured", "label": "Highlight this tier", "default": false },
+        { "type": "checkbox", "id": "subscribe", "label": "Use product subscription (selling plan)", "default": false }
       ]
     },
     {
