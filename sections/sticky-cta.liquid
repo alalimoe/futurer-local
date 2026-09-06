@@ -220,9 +220,20 @@
     let cleanup = () => {};
 
     const measureHeaderOffset = () => {
-      const header = document.querySelector('.shopify-section-group-header-group, header, [data-header]');
-      const height = header ? Math.round(header.getBoundingClientRect().height) : 52;
-      document.documentElement.style.setProperty('--sticky-header-offset', `${height}px`);
+      const groups = document.querySelectorAll('.shopify-section-group-header-group');
+      let bottom = 0;
+      groups.forEach((el) => {
+        const rect = el.getBoundingClientRect();
+        if (rect.height > 0 && rect.bottom > 0 && rect.top < 160) {
+          bottom = Math.max(bottom, rect.bottom);
+        }
+      });
+      if (bottom <= 0) {
+        const header = document.querySelector('xo-sticky.xo-header__body, .xo-header__body, .section-header header, header');
+        const rect = header ? header.getBoundingClientRect() : null;
+        bottom = rect && rect.bottom > 0 ? rect.bottom : 52;
+      }
+      document.documentElement.style.setProperty('--sticky-header-offset', `${Math.max(0, Math.round(bottom))}px`);
     };
 
     const measureReserve = (bar) => {
@@ -347,7 +358,7 @@
     { "type": "checkbox", "id": "reserve_space_mobile", "label": "Reserve bottom space on mobile", "default": true },
     { "type": "checkbox", "id": "desktop_navigation", "label": "Show desktop jump navigation", "default": false },
     { "type": "text", "id": "show_after_id", "label": "Show mobile bar after element ID", "info": "Enter an element ID without #. Leave blank to show immediately." },
-    { "type": "text", "id": "hide_at_id", "label": "Hide mobile bar while element ID is visible", "info": "Enter an element ID without #." },
+    { "type": "text", "id": "hide_at_id", "label": "Hide mobile bar once element ID is reached", "info": "Enter an element ID without #. The bar stays hidden after that section reaches the viewport." },
     { "type": "header", "content": "Spacing" },
     { "type": "range", "id": "padding_top", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding top", "default": 0 },
     { "type": "range", "id": "padding_bottom", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding bottom", "default": 0 }
