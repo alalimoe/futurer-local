@@ -175,7 +175,13 @@
               </div>
 
               {%- if send_to_pdp -%}
-                {% render 'button', style: 'primary', text: choose_options_label, link: product.url, block: true %}
+                {%- liquid
+                  assign pdp_label = choose_options_label
+                  if is_subscribe and cta_label != blank
+                    assign pdp_label = cta_label
+                  endif
+                -%}
+                {% render 'button', style: 'primary', text: pdp_label, link: product.url, block: true %}
               {%- else -%}
                 {% form 'product', product, id: form_id, data-type: 'add-to-cart-form' %}
                   <input type="hidden" name="id" value="{{ variant.id }}">
