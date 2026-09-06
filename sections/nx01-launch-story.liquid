@@ -50,13 +50,18 @@
   if nx01_alt == blank
     assign nx01_alt = section.settings.result_name
   endif
+  assign result_image_size = section.settings.result_image_size | default: 360
+  assign result_image_size_mobile = result_image_size | times: 0.75 | round
+  assign result_image_sizes = '(max-width: 767px) ' | append: result_image_size_mobile | append: 'px, ' | append: result_image_size | append: 'px'
+  assign nx01_anchor = section.settings.anchor_id | default: 'nx01-why' | handleize
 -%}
 
 {% render 'nx01-launch-css' %}
 
 <section
-  id="nx01-why"
+  id="{{ nx01_anchor }}"
   class="nx01 nx01-story xo-section xo-section--{{ section.id }}{% if section.settings.color_scheme != blank %} color-{{ section.settings.color_scheme }}{% endif %}"
+  style="--nx01-result-size: {{ result_image_size }}px;{% if section.settings.padding_top != blank %} --nx01-pad-block-start: {{ section.settings.padding_top }}px;{% endif %}{% if section.settings.padding_bottom != blank %} --nx01-pad-block-end: {{ section.settings.padding_bottom }}px;{% endif %}"
   aria-labelledby="nx01-story-heading-{{ section.id }}"
 >
   <div class="nx01__inner nx01-story__inner">
@@ -146,7 +151,7 @@
                       class: 'nx01-story__bottle nx01-story__bottle--one',
                       loading: 'lazy',
                       widths: '160, 240, 320, 360, 540, 720, 900',
-                      sizes: '(max-width: 767px) 200px, 240px',
+                      sizes: result_image_sizes,
                       alt: nx01_alt,
                       width: nx01_image.width,
                       height: nx01_image.height,
@@ -225,7 +230,7 @@
                         class: 'nx01-story__bottle nx01-story__bottle--one',
                         loading: 'lazy',
                         widths: '160, 240, 320, 360, 540, 720, 900',
-                        sizes: '(max-width: 767px) 200px, 240px',
+                        sizes: result_image_sizes,
                         alt: nx01_alt,
                         width: nx01_image.width,
                         height: nx01_image.height,
@@ -536,7 +541,7 @@
 
   .nx01-story__result {
     width: auto;
-    max-width: 22rem;
+    max-width: var(--nx01-result-size, 36rem);
   }
 
   .nx01-story__figure {
@@ -570,7 +575,7 @@
 
   .nx01-story__figure--one,
   .nx01-story__bottle--one {
-    width: min(100%, 20rem);
+    width: min(100%, calc(var(--nx01-result-size, 36rem) * 0.75));
   }
 
   .nx01-story__vial {
@@ -697,14 +702,14 @@
 
     .nx01-story__figure--one,
     .nx01-story__bottle--one {
-      width: min(100%, 24rem);
+      width: min(100%, var(--nx01-result-size, 36rem));
     }
 
     .nx01-story__result {
       flex-direction: column;
       align-items: center;
       align-self: flex-end;
-      max-width: 24rem;
+      max-width: var(--nx01-result-size, 36rem);
     }
 
     .nx01-story__pieces > .nx01-story__arrow {
@@ -790,7 +795,7 @@
   "tag": "section",
   "class": "section-nx01-story",
   "enabled_on": {
-    "templates": ["page"]
+    "templates": ["*"]
   },
   "settings": [
     {
@@ -799,6 +804,11 @@
       "label": "t:sections.nx01_launch_story.settings.color_scheme",
       "default": "background-1"
     },
+    { "type": "header", "content": "Reuse" },
+    { "type": "text", "id": "anchor_id", "label": "Anchor ID", "info": "Optional in-page link target. Leave blank to keep nx01-why." },
+    { "type": "range", "id": "padding_top", "min": 24, "max": 120, "step": 8, "unit": "px", "label": "Padding top", "default": 48 },
+    { "type": "range", "id": "padding_bottom", "min": 24, "max": 120, "step": 8, "unit": "px", "label": "Padding bottom", "default": 48 },
+    { "type": "range", "id": "result_image_size", "min": 200, "max": 420, "step": 20, "unit": "px", "label": "Result bottle size", "default": 360 },
     {
       "type": "text",
       "id": "eyebrow",
