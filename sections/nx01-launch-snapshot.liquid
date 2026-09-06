@@ -25,15 +25,21 @@
   elsif image_count == 2
     assign gallery_sizes = '(max-width: 767px) 88vw, min(548px, calc((100vw - 16rem) / 2))'
   endif
+  assign nx01_anchor = section.settings.anchor_id | default: 'nx01-snapshot' | handleize
+  assign nx01_intro_class = 'nx01__intro'
+  if section.settings.heading_alignment == 'center'
+    assign nx01_intro_class = 'nx01__intro nx01__intro--center'
+  endif
 -%}
 
 <section
-  id="nx01-snapshot"
+  id="{{ nx01_anchor }}"
   class="nx01 nx01-snapshot xo-section xo-section--{{ section.id }}{% if section.settings.color_scheme != blank %} color-{{ section.settings.color_scheme }}{% endif %}"
+  style="{% if section.settings.padding_top != blank %}--nx01-pad-block-start: {{ section.settings.padding_top }}px;{% endif %}{% if section.settings.padding_bottom != blank %} --nx01-pad-block-end: {{ section.settings.padding_bottom }}px;{% endif %}"
   aria-labelledby="nx01-snapshot-heading-{{ section.id }}"
 >
   <div class="nx01__inner">
-    <div class="nx01__intro">
+    <div class="{{ nx01_intro_class }}">
       {%- if section.settings.eyebrow != blank -%}
         <p class="nx01__label">
           <span class="nx01__label-rule" aria-hidden="true"></span>
@@ -201,13 +207,21 @@
   "tag": "section",
   "class": "section-nx01-snapshot",
   "enabled_on": {
-    "templates": ["page"]
+    "templates": ["*"]
   },
   "settings": [
     { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "background-1" },
-    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "09 · Experience Baseline" },
-    { "type": "text", "id": "heading", "label": "Heading", "default": "Built to disappear into your routine." },
-    { "type": "textarea", "id": "subheading", "label": "Subheading", "default": "Designed to provide a high daily yield with zero friction. Take your capsules, run your day." },
+    { "type": "header", "content": "Reuse" },
+    { "type": "text", "id": "anchor_id", "label": "Anchor ID", "info": "Optional in-page link target. Leave blank to keep nx01-snapshot." },
+    { "type": "select", "id": "heading_alignment", "label": "Heading alignment", "options": [
+      { "value": "left", "label": "Left" },
+      { "value": "center", "label": "Center" }
+    ], "default": "left" },
+    { "type": "range", "id": "padding_top", "min": 24, "max": 120, "step": 8, "unit": "px", "label": "Padding top", "default": 48 },
+    { "type": "range", "id": "padding_bottom", "min": 24, "max": 120, "step": 8, "unit": "px", "label": "Padding bottom", "default": 48 },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Your daily serving" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "3 capsules a day. 30 days in the bottle." },
+    { "type": "textarea", "id": "subheading", "label": "Subheading", "default": "90 capsules. One month of the listed serving." },
     { "type": "checkbox", "id": "show_facts", "label": "Show product facts", "default": true },
     { "type": "image_picker", "id": "image_1", "label": "Image 1" },
     { "type": "text", "id": "image_1_alt", "label": "Image 1 alt text" },

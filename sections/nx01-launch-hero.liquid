@@ -47,13 +47,19 @@
       endif
     endif
   endfor
+  if section.settings.anchor_id != blank
+    assign nx01_anchor = section.settings.anchor_id | handleize
+  else
+    assign nx01_anchor = 'nx01-hero-' | append: section.id
+  endif
 -%}
 
 {% render 'nx01-launch-css' %}
 
 <section
-  id="nx01-hero-{{ section.id }}"
+  id="{{ nx01_anchor }}"
   class="nx01 nx01-launch-hero xo-section xo-section--{{ section.id }}{% if section.settings.color_scheme != blank %} color-{{ section.settings.color_scheme }}{% endif %}{% if section.settings.full_viewport %} nx01-launch-hero--viewport{% endif %}"
+  style="{% if section.settings.padding_top != blank %}--nx01-pad-block-start: {{ section.settings.padding_top }}px;{% endif %}{% if section.settings.padding_bottom != blank %} --nx01-pad-block-end: {{ section.settings.padding_bottom }}px;{% endif %}"
   aria-labelledby="nx01-hero-heading-{{ section.id }}"
 >
   <div class="nx01__inner nx01-launch-hero__inner">
@@ -366,7 +372,7 @@
   "tag": "section",
   "class": "section-nx01-launch-hero",
   "enabled_on": {
-    "templates": ["page"]
+    "templates": ["*"]
   },
   "settings": [
     {
@@ -375,6 +381,10 @@
       "label": "t:sections.nx01_launch_hero.settings.color_scheme",
       "default": "background-1"
     },
+    { "type": "header", "content": "Reuse" },
+    { "type": "text", "id": "anchor_id", "label": "Anchor ID", "info": "Optional in-page link target. Leave blank to keep the default hero ID." },
+    { "type": "range", "id": "padding_top", "min": 24, "max": 120, "step": 8, "unit": "px", "label": "Padding top", "default": 48 },
+    { "type": "range", "id": "padding_bottom", "min": 24, "max": 120, "step": 8, "unit": "px", "label": "Padding bottom", "default": 48 },
     {
       "type": "checkbox",
       "id": "full_viewport",

@@ -5,17 +5,23 @@
       assign system_count = system_count | plus: 1
     endif
   endfor
+  assign nx01_anchor = section.settings.anchor_id | default: 'nx01-formula' | handleize
+  assign nx01_intro_class = 'nx01__intro nx01__intro--center'
+  if section.settings.heading_alignment == 'left'
+    assign nx01_intro_class = 'nx01__intro'
+  endif
 -%}
 
 {% render 'nx01-launch-css' %}
 
 <section
-  id="nx01-formula"
+  id="{{ nx01_anchor }}"
   class="nx01 nx01-systems xo-section xo-section--{{ section.id }}{% if section.settings.color_scheme != blank %} color-{{ section.settings.color_scheme }}{% endif %}"
+  style="{% if section.settings.padding_top != blank %}--nx01-pad-block-start: {{ section.settings.padding_top }}px;{% endif %}{% if section.settings.padding_bottom != blank %} --nx01-pad-block-end: {{ section.settings.padding_bottom }}px;{% endif %}"
   aria-labelledby="nx01-systems-heading-{{ section.id }}"
 >
   <div class="nx01__inner nx01-systems__inner">
-    <div class="nx01__intro nx01__intro--center">
+    <div class="{{ nx01_intro_class }}">
       {%- if section.settings.eyebrow != blank -%}
         <p class="nx01__label">
           <span class="nx01__label-rule" aria-hidden="true"></span>
@@ -350,7 +356,7 @@
   "tag": "section",
   "class": "section-nx01-systems",
   "enabled_on": {
-    "templates": ["page"]
+    "templates": ["*"]
   },
   "settings": [
     {
@@ -359,6 +365,14 @@
       "label": "t:sections.nx01_launch_systems.settings.color_scheme",
       "default": "background-1"
     },
+    { "type": "header", "content": "Reuse" },
+    { "type": "text", "id": "anchor_id", "label": "Anchor ID", "info": "Optional in-page link target. Leave blank to keep nx01-formula." },
+    { "type": "select", "id": "heading_alignment", "label": "Heading alignment", "options": [
+      { "value": "left", "label": "Left" },
+      { "value": "center", "label": "Center" }
+    ], "default": "center" },
+    { "type": "range", "id": "padding_top", "min": 24, "max": 120, "step": 8, "unit": "px", "label": "Padding top", "default": 48 },
+    { "type": "range", "id": "padding_bottom", "min": 24, "max": 120, "step": 8, "unit": "px", "label": "Padding bottom", "default": 48 },
     {
       "type": "text",
       "id": "eyebrow",
@@ -369,13 +383,13 @@
       "type": "text",
       "id": "heading",
       "label": "t:sections.nx01_launch_systems.settings.heading",
-      "default": "9 actives. Four jobs."
+      "default": "Why each ingredient is here."
     },
     {
       "type": "text",
       "id": "subheading",
       "label": "t:sections.nx01_launch_systems.settings.subheading",
-      "default": "NX-01 is easier to understand as a system than as a list of ingredients."
+      "default": "Amount, form, and why it belongs."
     },
     {
       "type": "text",

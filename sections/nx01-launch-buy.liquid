@@ -31,17 +31,23 @@
     assign heading = 'sections.nx01_launch_buy.sold_out_intro_heading' | t
     assign subheading = 'sections.nx01_launch_buy.sold_out_intro_body' | t
   endif
+  assign nx01_anchor = section.settings.anchor_id | default: 'nx01-buy' | handleize
+  assign nx01_intro_class = 'nx01__intro'
+  if section.settings.heading_alignment == 'center'
+    assign nx01_intro_class = 'nx01__intro nx01__intro--center'
+  endif
 -%}
 
 {% render 'nx01-launch-css' %}
 
 <section
-  id="nx01-buy"
+  id="{{ nx01_anchor }}"
   class="nx01 nx01-buy xo-section xo-section--{{ section.id }}{% if section.settings.color_scheme != blank %} color-{{ section.settings.color_scheme }}{% endif %}"
+  style="{% if section.settings.padding_top != blank %}--nx01-pad-block-start: {{ section.settings.padding_top }}px;{% endif %}{% if section.settings.padding_bottom != blank %} --nx01-pad-block-end: {{ section.settings.padding_bottom }}px;{% endif %}"
   aria-labelledby="nx01-buy-heading-{{ section.id }}"
 >
   <div class="nx01__inner">
-    <div class="nx01__intro">
+    <div class="{{ nx01_intro_class }}">
       {%- if section.settings.eyebrow != blank -%}
         <p class="nx01__label">
           <span class="nx01__label-rule" aria-hidden="true"></span>
@@ -467,10 +473,18 @@
   "tag": "section",
   "class": "section-nx01-buy",
   "enabled_on": {
-    "templates": ["page"]
+    "templates": ["*"]
   },
   "settings": [
     { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "background-1" },
+    { "type": "header", "content": "Reuse" },
+    { "type": "text", "id": "anchor_id", "label": "Anchor ID", "info": "Optional in-page link target. Leave blank to keep nx01-buy." },
+    { "type": "select", "id": "heading_alignment", "label": "Heading alignment", "options": [
+      { "value": "left", "label": "Left" },
+      { "value": "center", "label": "Center" }
+    ], "default": "left" },
+    { "type": "range", "id": "padding_top", "min": 24, "max": 120, "step": 8, "unit": "px", "label": "Padding top", "default": 48 },
+    { "type": "range", "id": "padding_bottom", "min": 24, "max": 120, "step": 8, "unit": "px", "label": "Padding bottom", "default": 48 },
     { "type": "product", "id": "product", "label": "Product" },
     { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Offer Structure" },
     { "type": "text", "id": "heading", "label": "Heading", "default": "Start with your baseline." },

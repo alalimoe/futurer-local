@@ -17,13 +17,19 @@
   if cta_label != blank and section.settings.cta_href != blank
     assign show_cta = true
   endif
+  if section.settings.anchor_id != blank
+    assign nx01_anchor = section.settings.anchor_id | handleize
+  else
+    assign nx01_anchor = 'nx01-close'
+  endif
 -%}
 
 {% render 'nx01-launch-css' %}
 
 <section
-  id="nx01-close"
+  id="{{ nx01_anchor }}"
   class="nx01 nx01-close xo-section xo-section--{{ section.id }}{% if section.settings.color_scheme != blank %} color-{{ section.settings.color_scheme }}{% endif %}"
+  style="{% if section.settings.padding_top != blank %}--nx01-pad-block-start: {{ section.settings.padding_top }}px;{% endif %}{% if section.settings.padding_bottom != blank %} --nx01-pad-block-end: {{ section.settings.padding_bottom }}px;{% endif %}"
   aria-labelledby="nx01-close-heading-{{ section.id }}"
 >
   <div class="nx01__inner nx01-close__inner">
@@ -138,10 +144,14 @@
   "tag": "section",
   "class": "section-nx01-close",
   "enabled_on": {
-    "templates": ["page"]
+    "templates": ["*"]
   },
   "settings": [
     { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "background-1" },
+    { "type": "header", "content": "Reuse" },
+    { "type": "text", "id": "anchor_id", "label": "Anchor ID", "info": "Optional in-page link target. Leave blank to keep nx01-close." },
+    { "type": "range", "id": "padding_top", "min": 24, "max": 120, "step": 8, "unit": "px", "label": "Padding top", "default": 48 },
+    { "type": "range", "id": "padding_bottom", "min": 24, "max": 120, "step": 8, "unit": "px", "label": "Padding bottom", "default": 48 },
     { "type": "product", "id": "product", "label": "Product used for live price and availability" },
     { "type": "image_picker", "id": "image", "label": "Bottle image" },
     { "type": "text", "id": "image_alt", "label": "Bottle image alt text" },
