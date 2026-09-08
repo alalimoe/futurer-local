@@ -5,7 +5,6 @@
 {%- liquid
   assign form_mf = product.metafields.peptide.form
   assign storage_mf = product.metafields.peptide.storage
-  assign recon_mf = product.metafields.peptide.reconstitution
   assign research_disc = product.metafields.peptide.research_disclaimer
 
   assign safety_imp = product.metafields.npx.safety_important
@@ -13,7 +12,7 @@
   assign disclaimer_mf = product.metafields.npx.disclaimer
 
   assign has_any = false
-  if form_mf or storage_mf or recon_mf or research_disc or safety_imp or safety_gen or disclaimer_mf
+  if form_mf or storage_mf or research_disc or safety_imp or safety_gen or disclaimer_mf
     assign has_any = true
   endif
 
@@ -31,6 +30,14 @@
     if first_file and first_file.url
       assign coa_url = first_file.url
     endif
+  endif
+
+  assign purity_mf = product.metafields.pep.purity_percent
+  assign purity_value = purity_mf.value | default: purity_mf
+  assign lab_mf = product.metafields.pep.coa_lab
+  assign batch_mf = product.metafields.pep.coa_batch
+  if coa_url or purity_value != blank or lab_mf != blank or batch_mf != blank
+    assign has_any = true
   endif
 -%}
 
@@ -231,9 +238,9 @@
           {% endif %}
           <span class="qt__title">{{ section.settings.title | default: 'Quality & Testing' }}</span>
           <span class="qt__chips">
-            <span class="qt__chip">≥{{ section.settings.assay_floor | default: '99' }}% purity</span>
-            <span class="qt__chip">HPLC verified</span>
-            {% if coa_url and section.settings.show_coa_link %}<span class="qt__chip">Batch COA available</span>{% endif %}
+            {% if purity_value != blank and coa_url %}<span class="qt__chip">Reported purity {{ purity_value }}%</span>{% endif %}
+            {% if lab_mf != blank and coa_url %}<span class="qt__chip">Lab: {{ lab_mf }}</span>{% endif %}
+            {% if coa_url %}<span class="qt__chip">Document linked</span>{% endif %}
           </span>
         </span>
         <svg class="qt__caret" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -242,24 +249,24 @@
       <div class="qt__panel">
         {% if section.settings.use_bullets %}
           <ul class="qt__bullets">
-            <li>Each batch is tested for identity and purity (HPLC), targeting ≥{{ section.settings.assay_floor | default: '99' }}% assay.</li>
-            {% if coa_url and section.settings.show_coa_link %}
-              <li>Independent Certificate of Analysis available: <a class="qt__coa-link" href="{{ coa_url }}" target="_blank" rel="noopener">View COA</a>.</li>
+            {% if batch_mf != blank %}<li>Reported batch or lot: {{ batch_mf }}.</li>{% endif %}
+            {% if purity_value != blank and coa_url %}<li>Reported purity: {{ purity_value }}%. Review the linked document for method and test scope.</li>{% endif %}
+            {% if coa_url %}
+              <li>Product document: <a class="qt__coa-link" href="{{ coa_url }}" target="_blank" rel="noopener">View linked document</a>.</li>
             {% else %}
-              <li>COA available on request for current batches.</li>
+              <li>No product-specific batch document is currently linked on this page.</li>
             {% endif %}
-            <li>Zero-substitution policy — batches that don't meet spec are never released.</li>
           </ul>
         {% elsif section.settings.fallback_note != blank %}
           <div>{{ section.settings.fallback_note }}</div>
         {% endif %}
 
-        <div class="qt__verify-row">
-          {% render 'pep-verify-badge', class: 'qt__verify', label: 'Verified' %}
-          {% if coa_url and section.settings.show_coa_link %}
-            <a class="qt__coa-link" href="{{ coa_url }}" target="_blank" rel="noopener">View Verified COA</a>
-          {% endif %}
-        </div>
+        {% if coa_url and section.settings.show_coa_link %}
+          <div class="qt__verify-row">
+            {% render 'pep-verify-badge', class: 'qt__verify', label: 'Document available' %}
+            <a class="qt__coa-link" href="{{ coa_url }}" target="_blank" rel="noopener">View linked document</a>
+          </div>
+        {% endif %}
 
         <div class="qt__grid">
           {% if form_mf %}
@@ -267,9 +274,6 @@
           {% endif %}
           {% if storage_mf %}
             <div class="qt__item"><span class="qt__label">Storage:</span> {{ storage_mf | metafield_tag }}</div>
-          {% endif %}
-          {% if recon_mf %}
-            <div class="qt__item"><span class="qt__label">Reconstitution:</span> {{ recon_mf | metafield_tag }}</div>
           {% endif %}
           {% if research_disc %}
             <div class="qt__item qt__item--warn">{{ research_disc | metafield_tag }}</div>
@@ -283,7 +287,7 @@
           {% if disclaimer_mf %}
             <div class="qt__item qt__item--small">{{ disclaimer_mf | metafield_tag }}</div>
           {% endif %}
-          {% if form_mf == blank and storage_mf == blank and recon_mf == blank and research_disc == blank and safety_imp == blank and safety_gen == blank and disclaimer_mf == blank and section.settings.fallback_note != blank %}
+          {% if form_mf == blank and storage_mf == blank and research_disc == blank and safety_imp == blank and safety_gen == blank and disclaimer_mf == blank and section.settings.fallback_note != blank %}
             <div class="qt__item">{{ section.settings.fallback_note }}</div>
           {% endif %}
         </div>
@@ -344,14 +348,14 @@
     {
       "type": "text",
       "id": "assay_floor",
-      "label": "Assay proof-point floor (%)",
+      "label": "Legacy assay floor (not displayed)",
       "default": "99"
     },
     {
       "type": "richtext",
       "id": "fallback_note",
       "label": "Fallback note (if no metafields present and bullets disabled)",
-      "default": "<p>Lyophilized research peptide. Keep cold and away from light. For laboratory research only — not for human or veterinary use.</p>"
+      "default": "<p>Laboratory research material. Product-specific handling data and batch documentation are shown only when attached to this product.</p>"
     },
     {
       "type": "range",

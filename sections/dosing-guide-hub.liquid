@@ -25,6 +25,10 @@
   assign dg_manual = false
   assign dg_seen = ','
   assign dg_card_count = 0
+  assign dg_review_ready = false
+  if section.settings.author != blank and section.settings.date_published != blank and section.settings.source_url != blank
+    assign dg_review_ready = true
+  endif
 
   for block in section.blocks
     if block.type == 'product' and block.settings.product != blank
@@ -83,6 +87,10 @@
         endunless
       endfor
     endif
+  endunless
+
+  unless dg_review_ready
+    assign dg_card_count = 0
   endunless
 -%}
 
@@ -705,7 +713,7 @@
           </div>
         {%- endif -%}
 
-        {%- if section.settings.author != blank or section.settings.date_published != blank or section.settings.read_time != blank -%}
+        {%- if section.settings.author != blank or section.settings.date_published != blank or section.settings.read_time != blank or section.settings.source_url != blank -%}
           <div class="dg-hero__meta">
             {%- if section.settings.author != blank -%}
               <span class="dg-hero__meta-item">
@@ -724,6 +732,9 @@
                 <svg class="dg-hero__meta-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                 {{ section.settings.read_time }}
               </span>
+            {%- endif -%}
+            {%- if section.settings.source_url != blank -%}
+              <a class="dg-hero__meta-item" href="{{ section.settings.source_url }}">Review source</a>
             {%- endif -%}
           </div>
         {%- endif -%}
@@ -950,7 +961,11 @@
             <a class="dg-noresults__link" data-dg-search-fallback data-guide-search-fallback href="{{ routes.search_url }}">Search the store for this name</a>
           </p>
         {%- else -%}
-          <p class="dg-empty">No collection selected yet. Choose a collection in the theme editor to populate per-product dosing entries.</p>
+          {% if dg_review_ready %}
+            <p class="dg-empty">No reviewed product-label entries are available in the selected collection.</p>
+          {% else %}
+            <p class="dg-empty">Product-specific dose and timing entries are withheld until a named reviewer, review date, and source URL are supplied. Use the current product label as the source of truth.</p>
+          {% endif %}
         {%- endif -%}
       </div>
 
@@ -1061,63 +1076,64 @@
       "type": "richtext",
       "id": "subtitle",
       "label": "Subtitle",
-      "default": "<p>Look up dose, timing, food, and any cycling note stored on the product. Search first if you already know the name.</p>"
+      "default": "<p>Use the current product label as the source of truth. Product-specific entries stay hidden until they have a named reviewer, review date, and source.</p>"
     },
     { "type": "header", "content": "Orientation" },
-    { "type": "text", "id": "answers_text", "label": "This page answers", "default": "Dose, timing, food, and any cycling note already stored on a listed product." },
-    { "type": "text", "id": "does_not_text", "label": "It does not", "default": "Give a personal protocol, medical advice, or a cycling schedule for every compound." },
-    { "type": "text", "id": "orientation_note", "label": "Educational note", "default": "Educational reference only. It is not personalized medical advice." },
+    { "type": "text", "id": "answers_text", "label": "This page answers", "default": "Where to find the current label, source date, and reviewed educational context." },
+    { "type": "text", "id": "does_not_text", "label": "It does not", "default": "Create a personal dose, combination, cycle, or treatment plan." },
+    { "type": "text", "id": "orientation_note", "label": "Educational note", "default": "Educational context only. The product label and advice from a qualified professional take precedence." },
     { "type": "header", "content": "Pathways" },
     { "type": "text", "id": "pathways_heading", "label": "Pathways heading", "default": "Choose how you want to start" },
     { "type": "text", "id": "p1_title", "label": "Pathway 1 title", "default": "I know the product" },
     { "type": "text", "id": "p1_for", "label": "Pathway 1 for", "default": "You already have a name, SKU, or bottle." },
-    { "type": "text", "id": "p1_answers", "label": "Pathway 1 question", "default": "What dose, timing, and food notes are listed?" },
-    { "type": "text", "id": "p1_learn", "label": "Pathway 1 you will find", "default": "The matching entry on this page, when a dose or timing note exists." },
+    { "type": "text", "id": "p1_answers", "label": "Pathway 1 question", "default": "Where are the current label and reviewed source?" },
+    { "type": "text", "id": "p1_learn", "label": "Pathway 1 you will find", "default": "A reviewed entry only when its reviewer, review date, and source are supplied." },
     { "type": "text", "id": "p1_leads", "label": "Pathway 1 leads to", "default": "The product finder above." },
-    { "type": "text", "id": "p1_limit", "label": "Pathway 1 limitation", "default": "Only products with a stored dose or timing note appear." },
+    { "type": "text", "id": "p1_limit", "label": "Pathway 1 limitation", "default": "A missing entry is not guidance; defer to the current product label." },
     { "type": "text", "id": "p1_href", "label": "Pathway 1 URL", "default": "#dosing-by-product" },
-    { "type": "text", "id": "p2_title", "label": "Pathway 2 title", "default": "I am starting a protocol" },
-    { "type": "text", "id": "p2_for", "label": "Pathway 2 for", "default": "You have not settled a routine yet." },
-    { "type": "text", "id": "p2_answers", "label": "Pathway 2 question", "default": "What rules apply on any on-day?" },
-    { "type": "text", "id": "p2_learn", "label": "Pathway 2 you will find", "default": "The four general rules already on this page." },
-    { "type": "text", "id": "p2_leads", "label": "Pathway 2 leads to", "default": "Start here: four rules." },
+    { "type": "text", "id": "p2_title", "label": "Pathway 2 title", "default": "I need general context" },
+    { "type": "text", "id": "p2_for", "label": "Pathway 2 for", "default": "You want to understand how to assess published guidance." },
+    { "type": "text", "id": "p2_answers", "label": "Pathway 2 question", "default": "Which source should take precedence?" },
+    { "type": "text", "id": "p2_learn", "label": "Pathway 2 you will find", "default": "Label-first rules and source-quality checks." },
+    { "type": "text", "id": "p2_leads", "label": "Pathway 2 leads to", "default": "Start here: label-first checks." },
     { "type": "text", "id": "p2_limit", "label": "Pathway 2 limitation", "default": "These rules are not a personal plan." },
     { "type": "text", "id": "p2_href", "label": "Pathway 2 URL", "default": "#principles" },
-    { "type": "text", "id": "p3_title", "label": "Pathway 3 title", "default": "Does this need off-days?" },
-    { "type": "text", "id": "p3_for", "label": "Pathway 3 for", "default": "You want to know if a schedule is listed." },
-    { "type": "text", "id": "p3_answers", "label": "Pathway 3 question", "default": "Is a cycling note stored, and where is the schedule guide?" },
-    { "type": "text", "id": "p3_learn", "label": "Pathway 3 you will find", "default": "Cycling notes on cards that have them, then the Cycling Guide for tiers." },
-    { "type": "text", "id": "p3_leads", "label": "Pathway 3 leads to", "default": "The Cycling Guide." },
-    { "type": "text", "id": "p3_limit", "label": "Pathway 3 limitation", "default": "Not every product needs cycling. A missing note is not a schedule." },
+    { "type": "text", "id": "p3_title", "label": "Pathway 3 title", "default": "I found conflicting guidance" },
+    { "type": "text", "id": "p3_for", "label": "Pathway 3 for", "default": "A product label and an article do not agree." },
+    { "type": "text", "id": "p3_answers", "label": "Pathway 3 question", "default": "Which information should I follow?" },
+    { "type": "text", "id": "p3_learn", "label": "Pathway 3 you will find", "default": "Use the current label and ask a qualified professional about conflicts." },
+    { "type": "text", "id": "p3_leads", "label": "Pathway 3 leads to", "default": "Product and support links." },
+    { "type": "text", "id": "p3_limit", "label": "Pathway 3 limitation", "default": "This page does not resolve individual medical questions." },
     { "type": "text", "id": "p3_href", "label": "Pathway 3 URL", "default": "/pages/cycling-guide" },
-    { "type": "text", "id": "p4_title", "label": "Pathway 4 title", "default": "I missed a planned dose" },
-    { "type": "text", "id": "p4_for", "label": "Pathway 4 for", "default": "You skipped an on-day or are unsure what to do next." },
-    { "type": "text", "id": "p4_answers", "label": "Pathway 4 question", "default": "Should I take it now, skip, or avoid doubling?" },
-    { "type": "text", "id": "p4_learn", "label": "Pathway 4 you will find", "default": "The existing miss-dose FAQ on this page." },
-    { "type": "text", "id": "p4_leads", "label": "Pathway 4 leads to", "default": "Frequently asked questions." },
-    { "type": "text", "id": "p4_limit", "label": "Pathway 4 limitation", "default": "Strict-cycle compounds should not be doubled up." },
+    { "type": "text", "id": "p4_title", "label": "Pathway 4 title", "default": "I have an individual-use question" },
+    { "type": "text", "id": "p4_for", "label": "Pathway 4 for", "default": "You need advice specific to your health, medicines, or circumstances." },
+    { "type": "text", "id": "p4_answers", "label": "Pathway 4 question", "default": "Who can assess my situation?" },
+    { "type": "text", "id": "p4_learn", "label": "Pathway 4 you will find", "default": "This page cannot provide an individual plan." },
+    { "type": "text", "id": "p4_leads", "label": "Pathway 4 leads to", "default": "A qualified healthcare professional." },
+    { "type": "text", "id": "p4_limit", "label": "Pathway 4 limitation", "default": "Do not use general web content as individualized advice." },
     { "type": "text", "id": "p4_href", "label": "Pathway 4 URL", "default": "#faq" },
     { "type": "header", "content": "Related guide" },
-    { "type": "text", "id": "related_heading", "label": "Related heading", "default": "Need off-day or break schedules?" },
-    { "type": "text", "id": "related_body", "label": "Related body", "default": "Dose is how much on an on-day. The Cycling Guide covers which days are on-days for compounds listed there." },
-    { "type": "text", "id": "related_cta", "label": "Related CTA", "default": "See cycling guidance" },
-    { "type": "text", "id": "author", "label": "Author", "default": "Nootropix Research" },
-    { "type": "text", "id": "date_published", "label": "Published date (YYYY-MM-DD)", "default": "2026-01-01" },
-    { "type": "text", "id": "read_time", "label": "Read time", "default": "Product lookup" },
+    { "type": "text", "id": "related_heading", "label": "Related heading", "default": "Review source context" },
+    { "type": "text", "id": "related_body", "label": "Related body", "default": "General articles cannot replace the current product label or individualized professional advice." },
+    { "type": "text", "id": "related_cta", "label": "Related CTA", "default": "Read the evidence guide" },
+    { "type": "text", "id": "author", "label": "Named reviewer", "info": "Required to display product-specific entries." },
+    { "type": "text", "id": "date_published", "label": "Review date (YYYY-MM-DD)", "info": "Required to display product-specific entries." },
+    { "type": "url", "id": "source_url", "label": "Primary review source", "info": "Required to display product-specific entries." },
+    { "type": "text", "id": "read_time", "label": "Meta label" },
     { "type": "header", "content": "Trust Badges" },
-    { "type": "text", "id": "badge_1_text", "label": "Badge 1", "default": "Evidence-Based Dosing" },
-    { "type": "text", "id": "badge_2_text", "label": "Badge 2", "default": "3rd-Party Tested" },
-    { "type": "text", "id": "badge_3_text", "label": "Badge 3", "default": "Pairs with Cycling Guide" },
+    { "type": "text", "id": "badge_1_text", "label": "Badge 1", "default": "Label First" },
+    { "type": "text", "id": "badge_2_text", "label": "Badge 2", "default": "Educational Context" },
+    { "type": "text", "id": "badge_3_text", "label": "Badge 3", "default": "No Personal Protocols" },
     { "type": "header", "content": "Zone 1 — Universal Principles" },
-    { "type": "text", "id": "principles_heading", "label": "Section heading (H2)", "default": "Start here: four rules for everything" },
-    { "type": "text", "id": "principle_1", "label": "Principle 1 title", "default": "Consistency beats dose size" },
-    { "type": "textarea", "id": "principle_1_body", "label": "Principle 1 detail", "default": "On days you take a product, use the same dose at the same time. A steady on-day routine beats a bigger, random dose. Cycling still applies: off-days stay off-days." },
-    { "type": "text", "id": "principle_2", "label": "Principle 2 title", "default": "Start at the lower end" },
-    { "type": "textarea", "id": "principle_2_body", "label": "Principle 2 detail", "default": "Begin at the bottom of your range for the first few days, then adjust upward once you know how you respond." },
-    { "type": "text", "id": "principle_3", "label": "Principle 3 title", "default": "Most stacks work best with food" },
-    { "type": "textarea", "id": "principle_3_body", "label": "Principle 3 detail", "default": "Unless the label says otherwise, take with a meal. Many compounds are fat-soluble and absorb far better with dietary fat." },
-    { "type": "text", "id": "principle_4", "label": "Principle 4 title", "default": "Give it the full first month" },
-    { "type": "textarea", "id": "principle_4_body", "label": "Principle 4 detail", "default": "Many compounds build over weeks. Judge the result after a consistent month, not after the first few doses." },
+    { "type": "text", "id": "principles_heading", "label": "Section heading (H2)", "default": "Start here: four label-first checks" },
+    { "type": "text", "id": "principle_1", "label": "Principle 1 title", "default": "Use the current label" },
+    { "type": "textarea", "id": "principle_1_body", "label": "Principle 1 detail", "default": "The current product label takes precedence over older articles, saved screenshots, and general category pages." },
+    { "type": "text", "id": "principle_2", "label": "Principle 2 title", "default": "Check the source date" },
+    { "type": "textarea", "id": "principle_2_body", "label": "Principle 2 detail", "default": "Use product-specific context only when a real reviewer, review date, and source are visible." },
+    { "type": "text", "id": "principle_3", "label": "Principle 3 title", "default": "Check interactions" },
+    { "type": "textarea", "id": "principle_3_body", "label": "Principle 3 detail", "default": "Ask a qualified healthcare professional about medicines, conditions, pregnancy, allergies, and conflicting label information." },
+    { "type": "text", "id": "principle_4", "label": "Principle 4 title", "default": "Do not infer a plan" },
+    { "type": "textarea", "id": "principle_4_body", "label": "Principle 4 detail", "default": "A missing product entry, schedule, or review is not permission to invent or combine instructions." },
     { "type": "header", "content": "Zone 2 — Product Search" },
     { "type": "text", "id": "jump_label", "label": "Search section label", "default": "Find your product" },
     { "type": "text", "id": "search_placeholder", "label": "Search placeholder", "default": "Search products by name…" },
@@ -1133,14 +1149,14 @@
       "type": "textarea",
       "id": "seo_description",
       "label": "SEO description",
-      "default": "Nootropix dosing guide — dose, timing, food, and cycling for listed products, plus universal dosing principles."
+      "default": "Label-first educational reference with reviewed product context only when a named reviewer, review date, and source are supplied."
     },
     { "type": "header", "content": "Disclaimer" },
     {
       "type": "richtext",
       "id": "disclaimer",
       "label": "Disclaimer",
-      "default": "<p>This guide is for educational purposes only and has not been evaluated by any regulatory body. These products are not intended to diagnose, treat, cure, or prevent any disease. Consult a qualified healthcare professional before starting any supplement protocol. Individual responses vary.</p>"
+      "default": "<p>Educational context only. This page does not create an individual dose, combination, cycle, or treatment plan. Follow the current product label and consult a qualified healthcare professional about individual circumstances or interactions.</p>"
     },
     { "type": "range", "id": "padding_top", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding top", "default": 0 },
     { "type": "range", "id": "padding_bottom", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding bottom", "default": 48 }
@@ -1158,7 +1174,7 @@
       "type": "product",
       "name": "Product",
       "settings": [
-        { "type": "product", "id": "product", "label": "Product", "info": "Shown as a dosing card in this order. Card content is pulled from the product's custom.dose, custom.timing, custom.with_food, custom.cycling, and custom.dosing_notes metafields." }
+        { "type": "product", "id": "product", "label": "Product", "info": "Shown only after a named reviewer, review date, and source URL are supplied. Content comes from existing product label-note metafields." }
       ]
     }
   ],

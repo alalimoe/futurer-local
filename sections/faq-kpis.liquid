@@ -79,6 +79,7 @@
   }
 {%- endstyle -%}
 
+{% if section.settings.source_url != blank and section.settings.last_updated != blank and section.settings.on_time_attempt != blank and section.settings.on_time_delivery != blank and section.settings.completion_rate != blank %}
 <section {% render 'section-attr' %}>
   <xo-container>
     <div class="kpis__header">
@@ -108,8 +109,10 @@
     {% if section.settings.note != blank %}
       <p class="kpis__note">{{ section.settings.note }}</p>
     {% endif %}
+    <p class="kpis__note"><a href="{{ section.settings.source_url }}">View source</a></p>
   </xo-container>
 </section>
+{% endif %}
 
 {% schema %}
 {
@@ -117,13 +120,14 @@
   "settings": [
     { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "default" },
     { "type": "text", "id": "heading", "label": "Heading", "default": "Fast Local Delivery at a Glance" },
-    { "type": "text", "id": "last_updated", "label": "Last updated", "default": "Jul 2026" },
-    { "type": "text", "id": "on_time_attempt", "label": "On-time first attempt %", "default": "95.4" },
-    { "type": "text", "id": "on_time_delivery", "label": "On-time delivery %", "default": "89.2" },
-    { "type": "text", "id": "completion_rate", "label": "Completion rate %", "default": "97.9" },
-    { "type": "text", "id": "tile4_label", "label": "Fourth tile label", "default": "Average customer rating" },
-    { "type": "text", "id": "tile4_value", "label": "Fourth tile value (blank to hide)", "default": "5.0★" },
-    { "type": "text", "id": "note", "label": "Small note", "default": "Based on our latest delivery report. Times can vary on Fridays/holidays and during peak hours." },
+    { "type": "text", "id": "last_updated", "label": "Last updated" },
+    { "type": "text", "id": "on_time_attempt", "label": "On-time first attempt %" },
+    { "type": "text", "id": "on_time_delivery", "label": "On-time delivery %" },
+    { "type": "text", "id": "completion_rate", "label": "Completion rate %" },
+    { "type": "text", "id": "tile4_label", "label": "Fourth tile label" },
+    { "type": "text", "id": "tile4_value", "label": "Fourth tile value (blank to hide)" },
+    { "type": "text", "id": "note", "label": "Small note" },
+    { "type": "url", "id": "source_url", "label": "Source URL", "info": "Required. This section stays hidden until all three metrics, the checked date, and a source URL are provided." },
     { "type": "range", "id": "padding_top", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding top", "default": 8 },
     { "type": "range", "id": "padding_bottom", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding bottom", "default": 16 }
   ],

@@ -9,19 +9,7 @@
   assign media_column = section.settings.media_column | plus: 0
   assign content_column = 12 | minus: media_column
 
-  assign subtitle_mf = product.metafields.npx.subtitle
-  assign benefits_mf = product.metafields.npx.benefits
-
-  assign benefit1 = product.metafields.pdp.benefit_1
-  assign benefit2 = product.metafields.pdp.benefit_2
-  assign benefit3 = product.metafields.pdp.benefit_3
-
-  assign pdp_headline_mf = product.metafields.pdp.headline
-  assign pdp_intro_mf = product.metafields.pdp.first_paragraph
-
-  assign microcopy_price_mf = product.metafields.pdp.microcopy_price
   assign ship_promise_mf = product.metafields.pdp.shipping_promise
-  assign return_promise_mf = product.metafields.pdp.return_promise
   assign delivery_promise_mf = product.metafields.pdp.delivery_promise
   if ship_promise_mf == blank and delivery_promise_mf
     assign ship_promise_mf = delivery_promise_mf
@@ -31,10 +19,6 @@
   assign pdp_impurity_mf = product.metafields.pdp.impurity_max
   assign pdp_lab_mf = product.metafields.pdp.lab_name
   assign pdp_disclaimer_mf = product.metafields.pdp.disclaimer
-
-  assign highlight_mf = product.metafields.pep.pdp_highlight
-  assign batch_microcopy_mf = product.metafields.pep.batch_microcopy
-  assign shipping_note_mf = product.metafields.peptide.shipping_note
 
   assign pdp_coa_override = product.metafields.pdp.coa_url
   assign coa_pdf_mf = product.metafields.pep.coa_pdf
@@ -99,6 +83,7 @@
   elsif pep and pep.purity_pct
     assign purity_pct = pep.purity_pct
   endif
+  assign purity_value = purity_pct.value | default: purity_pct
 
   assign ref_code = selected_variant.sku | default: product.sku | default: product.id
   assign cas = nil
@@ -132,6 +117,13 @@
     assign show_qc = true
   elsif section.settings.show_coa_link and coa_url
     assign show_qc = true
+  endif
+
+  assign has_doc_metadata = false
+  if coa_url
+    if pdp_assay_mf or pdp_impurity_mf or pdp_lab_mf
+      assign has_doc_metadata = true
+    endif
   endif
 
   assign purity_anchor = section.settings.purity_anchor | default: '#pep-coa-band'
@@ -614,46 +606,12 @@
               </div>
             {% endif %}
 
-            {% if pdp_headline_mf %}
-              <p class="pp__subtitle">{{ pdp_headline_mf }}</p>
-            {% elsif subtitle_mf %}
-              <p class="pp__subtitle">{{ subtitle_mf | metafield_tag }}</p>
-            {% endif %}
-
-            {% if pdp_intro_mf %}
-              <div class="pp__highlight">
-                <span class="pp__highlight-dot" aria-hidden="true"></span>
-                <span>{{ pdp_intro_mf | newline_to_br }}</span>
-              </div>
-            {% elsif highlight_mf %}
-              <div class="pp__highlight">
-                <span class="pp__highlight-dot" aria-hidden="true"></span>
-                <span>{{ highlight_mf | metafield_tag }}</span>
-              </div>
-            {% endif %}
-
             {% if section.settings.show_chips %}
-              {%- capture chips_html -%}
-                {%- assign chips_out = false -%}
-                {% if benefits_mf and benefits_mf.value and benefits_mf.value.size > 0 %}
-                  {% for b in benefits_mf.value %}
-                    {%- assign t = b | strip -%}
-                    {% if t != blank %}
-                      {%- assign chips_out = true -%}
-                      <li>{{ t }}</li>
-                    {% endif %}
-                  {% endfor %}
-                {% endif %}
-                {% if chips_out == false %}
-                  {% if benefit1 %}<li>{{ benefit1 }}</li>{% endif %}
-                  {% if benefit2 %}<li>{{ benefit2 }}</li>{% endif %}
-                  {% if benefit3 %}<li>{{ benefit3 }}</li>{% endif %}
-                {% endif %}
-              {%- endcapture -%}
-              {%- assign chips_trim = chips_html | strip -%}
-              {% if chips_trim != blank %}
-                <ul class="pp__chips">{{ chips_html }}</ul>
-              {% endif %}
+              <ul class="pp__chips">
+                <li>Research Use Only</li>
+                <li>Not for human or animal use</li>
+                {% if coa_url %}<li>Batch document linked</li>{% endif %}
+              </ul>
             {% endif %}
 
             {% unless product.has_only_default_variant %}
@@ -690,11 +648,16 @@
             {% endif %}
 
             <div class="pp__meta-chips">
-              <a href="{{ purity_anchor }}" class="pp__chip pp__chip--purity">
-                {% if purity_pct %}{{ purity_pct }}% HPLC{% else %}PURITY{% endif %}
-              </a>
-              <span class="pp__chip">HPLC tested</span>
               <span class="pp__chip">RUO</span>
+              {% if coa_url %}
+                <a href="{{ purity_anchor }}" class="pp__chip pp__chip--purity">Batch document</a>
+              {% endif %}
+              {% if purity_value != blank and coa_url %}
+                <span class="pp__chip">Reported purity {{ purity_value }}%</span>
+              {% endif %}
+              {% if hplc_img and coa_url %}
+                <span class="pp__chip">HPLC image attached</span>
+              {% endif %}
             </div>
 
             <div class="pp__disclaimer">
@@ -729,11 +692,6 @@
 
             {% if section.settings.enable_microcopy %}
               <ul class="pp__microcopy">
-                {% if batch_microcopy_mf %}<li>{{ batch_microcopy_mf | metafield_tag }}</li>{% endif %}
-                {% if microcopy_price_mf %}<li>{{ microcopy_price_mf }}</li>{% endif %}
-                {% if ship_promise_mf %}<li>{{ ship_promise_mf }}</li>{% endif %}
-                {% if return_promise_mf %}<li>{{ return_promise_mf }}</li>{% endif %}
-                {% if shipping_note_mf %}<li>{{ shipping_note_mf | metafield_tag }}</li>{% endif %}
                 {% if section.settings.microcopy_fallback != blank %}
                   {%- assign lines = section.settings.microcopy_fallback | split: '\n' -%}
                   {% for line in lines %}
@@ -768,14 +726,14 @@
 
               {% if coa_url %}
                 <div class="pp__coa-row">
-                  {% render 'pep-verify-badge', class: 'pp__verify', label: 'Verified', title: 'Batch verified' %}
-                  <a href="{{ coa_url }}" target="_blank" rel="noopener">View Verified COA</a>
+                  {% render 'pep-verify-badge', class: 'pp__verify', label: 'Document available', title: 'Product document available' %}
+                  <a href="{{ coa_url }}" target="_blank" rel="noopener">View linked document</a>
                 </div>
               {% endif %}
 
-              {% if pdp_assay_mf or pdp_impurity_mf or pdp_lab_mf %}
+              {% if has_doc_metadata %}
                 <div class="pp__meta-row">
-                  <span class="label">Verification:</span>
+                  <span class="label">Linked document metadata:</span>
                   <span class="value">
                     {% if pdp_assay_mf %}Assay {{ pdp_assay_mf }}%{% endif %}
                     {% if pdp_impurity_mf %}{% if pdp_assay_mf %} · {% endif %}Impurities ≤ {{ pdp_impurity_mf }}%{% endif %}
@@ -976,7 +934,7 @@
       "type": "textarea",
       "id": "microcopy_fallback",
       "label": "Microcopy fallback (one per line)",
-      "default": "Ships in 24h with temperature-controlled logistics\nIndependent COA available for every batch\nSecure checkout"
+      "default": "Research Use Only — not for human or animal use\nBatch documentation shown when available\nShipping options calculated at checkout"
     },
     {
       "type": "checkbox",

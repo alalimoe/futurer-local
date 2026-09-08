@@ -335,80 +335,88 @@
         </div>
       {% endif %}
 
+      {%- capture clg_rows -%}
+        {%- if clg_has_products -%}
+          {%- for clg_prod in clg_products -%}
+            {%- assign clg_status = clg_prod.metafields.pep.coa_status | default: '' -%}
+            {%- if clg_status == 'hidden' or clg_status == 'pending' -%}{%- continue -%}{%- endif -%}
+
+            {%- assign clg_coa_url = nil -%}
+            {%- assign clg_pdp_override = clg_prod.metafields.pdp.coa_url -%}
+            {%- assign clg_coa_pdf_mf = clg_prod.metafields.pep.coa_pdf -%}
+            {%- if clg_pdp_override and clg_pdp_override != blank -%}
+              {%- assign clg_coa_url = clg_pdp_override -%}
+            {%- elsif clg_coa_pdf_mf and clg_coa_pdf_mf.value and clg_coa_pdf_mf.value.url -%}
+              {%- assign clg_coa_url = clg_coa_pdf_mf.value.url -%}
+            {%- endif -%}
+            {%- if clg_coa_url == blank -%}{%- continue -%}{%- endif -%}
+
+            {%- assign clg_purity_mf = clg_prod.metafields.pep.purity_percent -%}
+            {%- assign clg_purity = clg_purity_mf.value | default: clg_purity_mf -%}
+            {%- assign clg_lab = clg_prod.metafields.pep.coa_lab | default: '' -%}
+            {%- assign clg_batch = clg_prod.metafields.pep.coa_batch | default: '' -%}
+            {%- assign clg_form = clg_prod.metafields.peptide.form | default: '' -%}
+            {%- assign clg_assay_raw = clg_prod.metafields.pep.coa_assay_date -%}
+            {%- assign clg_date = '' -%}
+            {%- if clg_assay_raw -%}
+              {%- assign clg_date = clg_assay_raw | date: '%Y-%m-%d' -%}
+            {%- endif -%}
+
+            {%- assign clg_raw_type = clg_prod.type | downcase | strip -%}
+            {%- assign clg_cat = 'all' -%}
+            {%- if clg_raw_type contains 'peptide' -%}
+              {%- assign clg_cat = 'peptides' -%}
+            {%- elsif clg_raw_type contains 'nootropic' -%}
+              {%- assign clg_cat = 'nootropics' -%}
+            {%- elsif clg_raw_type contains 'phenibut' -%}
+              {%- assign clg_cat = 'phenibut' -%}
+            {%- endif -%}
+
+            <tr class="clg-row" data-clg-category="{{ clg_cat }}" data-clg-name="{{ clg_prod.title | downcase | escape }}" data-clg-report="{{ clg_batch | downcase | escape }}">
+              <td class="clg-cell-product">
+                <a href="{{ clg_prod.url }}" class="clg-product-link">{{ clg_prod.title }}</a>
+                {% render 'compound-id', product: clg_prod, surface: 'light', compact: true %}
+              </td>
+              <td>{% if clg_batch != blank %}{{ clg_batch }}{% else %}Not stated{% endif %}</td>
+              <td>{% if clg_form != blank %}{{ clg_form }}{% else %}Not stated{% endif %}</td>
+              <td>{% if clg_purity != blank %}<span class="clg-purity">{{ clg_purity }}% reported</span>{% else %}See document{% endif %}</td>
+              <td>{% if clg_lab != blank %}{{ clg_lab }}{% else %}Not stated{% endif %}</td>
+              <td>{% if clg_date != blank %}{{ clg_date }}{% else %}Not stated{% endif %}</td>
+              <td>{% if clg_status == 'superseded' %}Superseded{% else %}Linked{% endif %}</td>
+              <td class="clg-cell-actions">
+                <a href="{{ clg_coa_url }}" class="clg-action-link" target="_blank" rel="noopener">View document</a>
+              </td>
+            </tr>
+          {%- endfor -%}
+        {%- endif -%}
+      {%- endcapture -%}
+      {%- assign clg_rows_trimmed = clg_rows | strip -%}
+
       {%- comment -%} ── COA Table ── {%- endcomment -%}
-      {% if clg_has_products %}
+      {% if clg_rows_trimmed != blank %}
         <div class="clg-table-wrap">
           <table class="clg-table">
             <thead>
               <tr>
                 <th>Product</th>
+                <th>Lot / batch</th>
                 <th>Form</th>
-                <th>Purity</th>
+                <th>Reported result</th>
                 <th>Lab</th>
-                <th>Last Verified</th>
-                <th>COA</th>
+                <th>Assay date</th>
+                <th>Status</th>
+                <th>Document</th>
               </tr>
             </thead>
             <tbody>
-              {%- for clg_prod in clg_products -%}
-                {%- assign clg_status = clg_prod.metafields.pep.coa_status | default: 'current' -%}
-                {%- if clg_status == 'hidden' -%}{%- continue -%}{%- endif -%}
-
-                {%- comment -%} Resolve COA URL: pdp override → pep.coa_pdf file_reference {%- endcomment -%}
-                {%- assign clg_coa_url = nil -%}
-                {%- assign clg_pdp_override = clg_prod.metafields.pdp.coa_url -%}
-                {%- assign clg_coa_pdf_mf = clg_prod.metafields.pep.coa_pdf -%}
-                {%- if clg_pdp_override and clg_pdp_override != blank -%}
-                  {%- assign clg_coa_url = clg_pdp_override -%}
-                {%- elsif clg_coa_pdf_mf and clg_coa_pdf_mf.value and clg_coa_pdf_mf.value.url -%}
-                  {%- assign clg_coa_url = clg_coa_pdf_mf.value.url -%}
-                {%- endif -%}
-
-                {%- assign clg_purity = clg_prod.metafields.pep.purity_percent -%}
-                {%- assign clg_lab = clg_prod.metafields.pep.coa_lab | default: 'BT Labs' -%}
-                {%- assign clg_batch = clg_prod.metafields.pep.coa_batch | default: '' -%}
-                {%- assign clg_form = clg_prod.metafields.peptide.form | default: '' -%}
-                {%- assign clg_assay_raw = clg_prod.metafields.pep.coa_assay_date -%}
-                {%- assign clg_date = '' -%}
-                {%- if clg_assay_raw -%}
-                  {%- assign clg_date = clg_assay_raw | date: '%Y-%m-%d' -%}
-                {%- endif -%}
-
-                {%- comment -%} Category from product type {%- endcomment -%}
-                {%- assign clg_raw_type = clg_prod.type | downcase | strip -%}
-                {%- assign clg_cat = 'all' -%}
-                {%- if clg_raw_type contains 'peptide' -%}
-                  {%- assign clg_cat = 'peptides' -%}
-                {%- elsif clg_raw_type contains 'nootropic' -%}
-                  {%- assign clg_cat = 'nootropics' -%}
-                {%- elsif clg_raw_type contains 'phenibut' -%}
-                  {%- assign clg_cat = 'phenibut' -%}
-                {%- endif -%}
-
-                <tr class="clg-row" data-clg-category="{{ clg_cat }}" data-clg-name="{{ clg_prod.title | downcase | escape }}" data-clg-report="{{ clg_batch | downcase | escape }}">
-                  <td class="clg-cell-product">
-                    <a href="{{ clg_prod.url }}" class="clg-product-link">{{ clg_prod.title }}</a>
-                    {% render 'compound-id', product: clg_prod, surface: 'light', compact: true %}
-                  </td>
-                  <td>{{ clg_form }}</td>
-                  <td>{% if clg_purity != blank %}<span class="clg-purity">{{ clg_purity }}%</span>{% endif %}</td>
-                  <td>{{ clg_lab }}</td>
-                  <td>{{ clg_date }}</td>
-                  <td class="clg-cell-actions">
-                    {% if clg_coa_url != blank %}
-                      <a href="{{ clg_coa_url }}" class="clg-action-link" target="_blank" rel="noopener">View</a>
-                      <a href="{{ clg_coa_url }}" class="clg-action-link" download>Download</a>
-                    {% endif %}
-                  </td>
-                </tr>
-              {%- endfor -%}
+              {{ clg_rows }}
             </tbody>
           </table>
         </div>
 
         <p class="clg-no-results" data-clg-empty style="display:none;">No COAs match your search.</p>
       {% else %}
-        <p class="clg-empty">Select a collection in the Theme Editor to populate COA entries.</p>
+        <p class="clg-empty">No product-specific documents are currently linked in this collection. Contact support with the product and lot number to request available documentation.</p>
       {% endif %}
 
       {% if section.settings.disclaimer_text != blank %}
@@ -506,7 +514,7 @@
       "default": "default"
     },
     { "type": "text", "id": "heading", "label": "Heading", "default": "COA Library" },
-    { "type": "textarea", "id": "intro_text", "label": "Intro Text", "default": "Access certificates of analysis for our most requested products. All COAs are third-party verified and updated regularly." },
+    { "type": "textarea", "id": "intro_text", "label": "Intro Text", "default": "Only product-specific documents that are actually linked are listed here. Review each document for its lot, date, laboratory, method, and test scope." },
     { "type": "collection", "id": "coa_collection", "label": "COA Products Collection", "info": "Select a collection whose products have pep.* COA metafields. The grid auto-populates from product data." },
     { "type": "checkbox", "id": "show_search", "label": "Show Search Bar", "default": true },
     { "type": "checkbox", "id": "show_category_chips", "label": "Show Category Chips", "default": true },

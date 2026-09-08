@@ -33,8 +33,8 @@
   endif
 
   assign coa_lab = product.metafields.pep.coa_lab | default: ''
-  assign coa_version = product.metafields.pep.coa_version | default: '1.0.0'
-  assign coa_status = product.metafields.pep.coa_status | default: 'current'
+  assign coa_version = product.metafields.pep.coa_version | default: ''
+  assign coa_status = product.metafields.pep.coa_status | default: ''
   assign purity = product.metafields.pep.purity_percent.value | default: product.metafields.pep.purity_percent
   assign verified_on_mf = product.metafields.pdp.coa_verified_on
   assign coa_note = product.metafields.pdp.coa_note.value | default: product.metafields.pdp.coa_note
@@ -192,17 +192,17 @@
     assign should_render_pcb = true
   endif
 
-  assign pcb_verify_label = 'Supplier COA'
+  assign pcb_verify_label = 'Document available'
   case coa_status
     when 'superseded'
-      assign pcb_verify_label = 'Superseded COA'
+      assign pcb_verify_label = 'Superseded document'
     when 'pending'
-      assign pcb_verify_label = 'COA pending'
+      assign pcb_verify_label = 'Document pending'
     else
       if is_third_party
-        assign pcb_verify_label = 'Verified (independent lab)'
-      else
-        assign pcb_verify_label = 'Supplier COA'
+        assign pcb_verify_label = 'Independent lab document'
+      elsif coa_lab != blank
+        assign pcb_verify_label = 'Supplier document'
       endif
   endcase
 -%}
@@ -450,9 +450,9 @@
                 <img class="pcb__img" src="{{ coa_img | image_url: width: 1200 }}" alt="{{ coa_alt }}" width="1200" height="{{ 1200 | divided_by: coa_img.aspect_ratio | round }}" loading="lazy">
               </a>
             {% elsif is_third_party %}
-              <div class="pcb__note">Independent lab COA available, but no image preview uploaded.</div>
+              <div class="pcb__note">An independent lab document is linked, but no image preview is attached.</div>
             {% else %}
-              <div class="pcb__note">Supplier COA is available via the buttons and archive above. No independent lab image is shown.</div>
+              <div class="pcb__note">A product document is linked above. No independent-lab image is shown.</div>
             {% endif %}
           </div>
         </div>
@@ -465,9 +465,9 @@
                 <img class="pcb__img" src="{{ hplc_img | image_url: width: 1200 }}" alt="{{ hplc_alt }}" width="1200" height="{{ 1200 | divided_by: hplc_img.aspect_ratio | round }}" loading="lazy">
               </a>
             {% elsif is_third_party %}
-              <div class="pcb__note">No standalone HPLC image attached; see COA document for chromatogram.</div>
+              <div class="pcb__note">No standalone HPLC image is attached. Review the linked document for its stated test scope.</div>
             {% else %}
-              <div class="pcb__note">No independent lab HPLC image. See supplier document(s) for assay details.</div>
+              <div class="pcb__note">No independent-lab HPLC image is attached. Review the linked document for its stated method and scope.</div>
             {% endif %}
           </div>
         </div>
@@ -475,9 +475,8 @@
     </div>
 
     {% if purity %}
-      {%- assign purity_number = purity | plus: 0 -%}
       <p class="pcb__verified" style="margin-top: 1rem;">
-        Purity: {% if purity_number >= 100 %}{{ purity }}%{% else %}≥{{ purity }}%{% endif %} (HPLC-verified)
+        Reported purity: {{ purity }}%. Review the linked document for method, lot, date, and test scope.
       </p>
     {% endif %}
   </xo-container>
