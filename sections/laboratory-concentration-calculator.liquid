@@ -1,0 +1,470 @@
+{%- liquid
+  assign calculator_id = 'LabCalculator-' | append: section.id
+-%}
+
+{%- style -%}
+  #{{ calculator_id }} {
+    --lab-accent: {{ section.settings.accent_color }};
+    padding-block: {{ section.settings.padding_top }}px {{ section.settings.padding_bottom }}px;
+  }
+
+  #{{ calculator_id }} .lab-calculator__inner {
+    width: min(100% - 3.2rem, {{ section.settings.max_width }}px);
+    margin-inline: auto;
+  }
+
+  #{{ calculator_id }} .lab-calculator__header {
+    max-width: 72rem;
+    margin: 0 auto 3.2rem;
+    text-align: center;
+  }
+
+  #{{ calculator_id }} .lab-calculator__eyebrow {
+    display: inline-flex;
+    margin-bottom: 1.2rem;
+    padding: 0.6rem 1rem;
+    border: 1px solid color-mix(in srgb, var(--lab-accent) 35%, transparent);
+    border-radius: 999px;
+    color: rgba(var(--color-foreground));
+    font-size: 1.2rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  #{{ calculator_id }} h1 {
+    margin: 0 0 1.2rem;
+    color: rgba(var(--color-foreground));
+    font: 700 clamp(2.8rem, 5vw, 4.8rem) / 1.08 var(--font-heading-family);
+  }
+
+  #{{ calculator_id }} .lab-calculator__intro,
+  #{{ calculator_id }} .lab-calculator__note {
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 72%, transparent);
+    line-height: 1.65;
+  }
+
+  #{{ calculator_id }} .lab-calculator__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(28rem, 0.82fr);
+    gap: 2.4rem;
+    align-items: start;
+  }
+
+  #{{ calculator_id }} .lab-calculator__panel {
+    padding: clamp(2rem, 4vw, 3.2rem);
+    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 12%, transparent);
+    border-radius: var(--general-radius-2, 1.6rem);
+    background: rgba(var(--color-background));
+    box-shadow: 0 1.6rem 4rem color-mix(in srgb, rgba(var(--color-foreground)) 7%, transparent);
+  }
+
+  #{{ calculator_id }} .lab-calculator__fields {
+    display: grid;
+    gap: 2rem;
+  }
+
+  #{{ calculator_id }} .lab-field label {
+    display: block;
+    margin-bottom: 0.8rem;
+    color: rgba(var(--color-foreground));
+    font-size: 1.4rem;
+    font-weight: 700;
+  }
+
+  #{{ calculator_id }} .lab-field small {
+    display: block;
+    margin-top: 0.6rem;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 62%, transparent);
+    font-size: 1.2rem;
+    line-height: 1.45;
+  }
+
+  #{{ calculator_id }} .lab-field__control {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 20%, transparent);
+    border-radius: var(--button-radius, 0.8rem);
+    background: rgba(var(--color-background));
+  }
+
+  #{{ calculator_id }} .lab-field__control:focus-within {
+    border-color: var(--lab-accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--lab-accent) 22%, transparent);
+  }
+
+  #{{ calculator_id }} input {
+    min-width: 0;
+    min-height: 5rem;
+    padding: 1.2rem 1.4rem;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: rgba(var(--color-foreground));
+    font: inherit;
+  }
+
+  #{{ calculator_id }} .lab-field__unit {
+    display: grid;
+    place-items: center;
+    min-width: 6.4rem;
+    padding-inline: 1.2rem;
+    background: color-mix(in srgb, rgba(var(--color-foreground)) 6%, transparent);
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 68%, transparent);
+    font-size: 1.3rem;
+    font-weight: 700;
+  }
+
+  #{{ calculator_id }} .lab-calculator__actions {
+    display: flex;
+    margin-top: 2rem;
+  }
+
+  #{{ calculator_id }} .lab-calculator__reset {
+    min-height: 4.4rem;
+    padding: 0.9rem 1.6rem;
+    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 18%, transparent);
+    border-radius: var(--button-radius, 0.8rem);
+    background: transparent;
+    color: rgba(var(--color-foreground));
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  #{{ calculator_id }} .lab-calculator__reset:hover {
+    border-color: var(--lab-accent);
+  }
+
+  #{{ calculator_id }} .lab-results {
+    position: sticky;
+    top: calc(var(--sticky-header-offset, 0px) + 2rem);
+  }
+
+  #{{ calculator_id }} .lab-results h2 {
+    margin: 0 0 2rem;
+    color: rgba(var(--color-foreground));
+    font: 700 2.2rem / 1.2 var(--font-heading-family);
+  }
+
+  #{{ calculator_id }} .lab-results__list {
+    display: grid;
+    gap: 1.2rem;
+    margin: 0;
+  }
+
+  #{{ calculator_id }} .lab-result {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 1.6rem;
+    align-items: baseline;
+    padding: 1.4rem 0;
+    border-bottom: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
+  }
+
+  #{{ calculator_id }} .lab-result dt {
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 68%, transparent);
+    font-size: 1.3rem;
+  }
+
+  #{{ calculator_id }} .lab-result dd {
+    margin: 0;
+    color: rgba(var(--color-foreground));
+    font: 700 1.7rem / 1.2 ui-monospace, SFMono-Regular, Menlo, monospace;
+    text-align: right;
+  }
+
+  #{{ calculator_id }} .lab-calculator__status {
+    min-height: 2.4rem;
+    margin: 1.6rem 0 0;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 68%, transparent);
+    font-size: 1.3rem;
+    line-height: 1.5;
+  }
+
+  #{{ calculator_id }} .lab-calculator__status[data-state='error'] {
+    color: rgba(var(--color-error));
+    font-weight: 700;
+  }
+
+  #{{ calculator_id }} .lab-calculator__formula {
+    margin-top: 2rem;
+    padding: 1.6rem;
+    border-radius: var(--general-radius-1, 1rem);
+    background: color-mix(in srgb, var(--lab-accent) 9%, rgba(var(--color-background)));
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 76%, transparent);
+    font-size: 1.25rem;
+    line-height: 1.55;
+  }
+
+  #{{ calculator_id }} .lab-calculator__guardrail {
+    margin-top: 2.4rem;
+    padding-top: 2rem;
+    border-top: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 12%, transparent);
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 72%, transparent);
+    font-size: 1.25rem;
+    line-height: 1.6;
+  }
+
+  @media (max-width: 749px) {
+    #{{ calculator_id }} .lab-calculator__grid {
+      grid-template-columns: 1fr;
+    }
+
+    #{{ calculator_id }} .lab-results {
+      position: static;
+    }
+  }
+{%- endstyle -%}
+
+<section
+  id="{{ calculator_id }}"
+  class="lab-calculator color-{{ section.settings.color_scheme }}"
+  data-lab-calculator
+>
+  <div class="lab-calculator__inner">
+    <header class="lab-calculator__header">
+      <span class="lab-calculator__eyebrow">Laboratory math only</span>
+      <h1>{{ section.settings.heading | escape }}</h1>
+      <div class="lab-calculator__intro rte">{{ section.settings.subheading }}</div>
+    </header>
+
+    <div class="lab-calculator__grid">
+      <form class="lab-calculator__panel" data-lab-form novalidate>
+        <div class="lab-calculator__fields">
+          <div class="lab-field">
+            <label for="{{ calculator_id }}-mass">Total analyte mass</label>
+            <div class="lab-field__control">
+              <input id="{{ calculator_id }}-mass" name="mass" type="number" inputmode="decimal" min="0" step="any" autocomplete="off" placeholder="Example: 5">
+              <span class="lab-field__unit" aria-hidden="true">mg</span>
+            </div>
+            <small>Enter a measured or certificate-reported mass. The tool does not verify this input.</small>
+          </div>
+
+          <div class="lab-field">
+            <label for="{{ calculator_id }}-volume">Final solution volume</label>
+            <div class="lab-field__control">
+              <input id="{{ calculator_id }}-volume" name="volume" type="number" inputmode="decimal" min="0" step="any" autocomplete="off" placeholder="Example: 2">
+              <span class="lab-field__unit" aria-hidden="true">mL</span>
+            </div>
+            <small>Use the final measured volume from an approved laboratory procedure.</small>
+          </div>
+
+          <div class="lab-field">
+            <label for="{{ calculator_id }}-aliquot">Target analyte per laboratory aliquot <span class="visually-hidden">(optional)</span></label>
+            <div class="lab-field__control">
+              <input id="{{ calculator_id }}-aliquot" name="aliquot" type="number" inputmode="decimal" min="0" step="any" autocomplete="off" placeholder="Optional">
+              <span class="lab-field__unit" aria-hidden="true">&micro;g</span>
+            </div>
+            <small>Optional. This is a sample-preparation value, not a human or veterinary dose.</small>
+          </div>
+        </div>
+
+        <div class="lab-calculator__actions">
+          <button class="lab-calculator__reset" type="reset">Clear calculation</button>
+        </div>
+      </form>
+
+      <aside class="lab-calculator__panel lab-results" aria-labelledby="{{ calculator_id }}-results-title">
+        <h2 id="{{ calculator_id }}-results-title">Calculated values</h2>
+        <dl class="lab-results__list">
+          <div class="lab-result">
+            <dt>Stock concentration</dt>
+            <dd><span data-lab-mgml>—</span> mg/mL</dd>
+          </div>
+          <div class="lab-result">
+            <dt>Equivalent concentration</dt>
+            <dd><span data-lab-ugul>—</span> &micro;g/&micro;L</dd>
+          </div>
+          <div class="lab-result">
+            <dt>Aliquot volume</dt>
+            <dd><span data-lab-ul>—</span> &micro;L</dd>
+          </div>
+        </dl>
+
+        <p class="lab-calculator__status" data-lab-status aria-live="polite">
+          Enter mass and final volume to calculate concentration.
+        </p>
+
+        {% if section.settings.show_formula %}
+          <div class="lab-calculator__formula">
+            Concentration = mass &divide; final volume. Aliquot volume = target analyte &divide; concentration. Values are rounded for display; retain appropriate significant figures in laboratory records.
+          </div>
+        {% endif %}
+
+        <div class="lab-calculator__guardrail rte">
+          {{ section.settings.disclaimer }}
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<script>
+  (() => {
+    const root = document.getElementById({{ calculator_id | json }});
+    if (!root || root.dataset.labCalculatorReady === 'true') return;
+    root.dataset.labCalculatorReady = 'true';
+
+    const form = root.querySelector('[data-lab-form]');
+    const fields = {
+      mass: form.elements.mass,
+      volume: form.elements.volume,
+      aliquot: form.elements.aliquot
+    };
+    const outputs = {
+      mgml: root.querySelector('[data-lab-mgml]'),
+      ugul: root.querySelector('[data-lab-ugul]'),
+      ul: root.querySelector('[data-lab-ul]'),
+      status: root.querySelector('[data-lab-status]')
+    };
+
+    const parsePositive = (input) => {
+      const value = Number.parseFloat(input.value);
+      return Number.isFinite(value) && value > 0 ? value : null;
+    };
+
+    const format = (value) => new Intl.NumberFormat(undefined, {
+      maximumFractionDigits: 4
+    }).format(value);
+
+    const clearOutputs = () => {
+      outputs.mgml.textContent = '—';
+      outputs.ugul.textContent = '—';
+      outputs.ul.textContent = '—';
+    };
+
+    const update = () => {
+      const massMg = parsePositive(fields.mass);
+      const volumeMl = parsePositive(fields.volume);
+      const aliquotUg = fields.aliquot.value === '' ? null : parsePositive(fields.aliquot);
+
+      outputs.status.dataset.state = '';
+
+      if (!massMg || !volumeMl) {
+        clearOutputs();
+        outputs.status.textContent = 'Enter positive mass and final-volume values to calculate concentration.';
+        return;
+      }
+
+      const concentrationMgMl = massMg / volumeMl;
+      const concentrationUgUl = concentrationMgMl;
+      outputs.mgml.textContent = format(concentrationMgMl);
+      outputs.ugul.textContent = format(concentrationUgUl);
+
+      if (fields.aliquot.value === '') {
+        outputs.ul.textContent = '—';
+        outputs.status.textContent = 'Concentration calculated. Add an optional laboratory aliquot target to calculate sample volume.';
+        return;
+      }
+
+      if (!aliquotUg) {
+        outputs.ul.textContent = '—';
+        outputs.status.dataset.state = 'error';
+        outputs.status.textContent = 'Aliquot target must be a positive number.';
+        return;
+      }
+
+      const aliquotVolumeUl = aliquotUg / concentrationUgUl;
+      const totalVolumeUl = volumeMl * 1000;
+      outputs.ul.textContent = format(aliquotVolumeUl);
+
+      if (aliquotVolumeUl > totalVolumeUl) {
+        outputs.status.dataset.state = 'error';
+        outputs.status.textContent = 'The requested aliquot exceeds the entered final solution volume. Check the source values and laboratory procedure.';
+        return;
+      }
+
+      outputs.status.textContent = 'Laboratory math completed. Independently verify units, source values, and significant figures.';
+    };
+
+    form.addEventListener('input', update);
+    form.addEventListener('reset', () => window.setTimeout(() => {
+      clearOutputs();
+      outputs.status.dataset.state = '';
+      outputs.status.textContent = 'Enter mass and final volume to calculate concentration.';
+    }, 0));
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Laboratory Calculator",
+  "tag": "section",
+  "class": "section-laboratory-calculator",
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "default"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent color",
+      "default": "#FBBF24"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Laboratory Concentration & Aliquot Calculator"
+    },
+    {
+      "type": "richtext",
+      "id": "subheading",
+      "label": "Introduction",
+      "default": "<p>Calculate stock concentration and an optional laboratory aliquot volume from values you enter. No compounds, outcomes, routes, or protocols are recommended.</p>"
+    },
+    {
+      "type": "richtext",
+      "id": "disclaimer",
+      "label": "Guardrail",
+      "default": "<p><strong>Research Use Only.</strong> Not for human or veterinary use. This arithmetic tool does not verify identity, purity, sterility, suitability, stability, procedure, equipment, or source values. Use an approved SOP and independently verify every calculation.</p>"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_formula",
+      "label": "Show formula explanation",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "max_width",
+      "label": "Maximum width",
+      "min": 720,
+      "max": 1280,
+      "step": 40,
+      "unit": "px",
+      "default": 1040
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding top",
+      "min": 0,
+      "max": 160,
+      "step": 8,
+      "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 160,
+      "step": 8,
+      "unit": "px",
+      "default": 80
+    }
+  ],
+  "presets": [
+    {
+      "name": "Laboratory Calculator"
+    }
+  ]
+}
+{% endschema %}
