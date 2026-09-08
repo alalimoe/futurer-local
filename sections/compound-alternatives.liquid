@@ -1,0 +1,156 @@
+{% render 'compound-guide-css' %}
+
+{%- liquid
+  assign cg_anchor = section.settings.anchor_id | default: 'compound-alternatives' | handleize
+  assign row_count = 0
+  for block in section.blocks
+    if block.type == 'alternative' and block.settings.name != blank and block.settings.product != blank
+      assign row_count = row_count | plus: 1
+    endif
+  endfor
+-%}
+
+{%- if section.settings.heading != blank or row_count > 0 -%}
+{%- liquid
+  assign extra_classes = ''
+  if section.settings.layout == 'cards'
+    assign extra_classes = 'cg-alts--cards'
+  endif
+-%}
+<section
+  id="{{ cg_anchor }}"
+  {% render 'compound-section-attrs', section: section, base: 'cg-alts', extra: extra_classes %}
+  aria-labelledby="cg-alts-heading-{{ section.id }}"
+>
+  <div class="cg__inner">
+    <div class="cg__intro">
+      {%- if section.settings.kicker != blank -%}
+        <p class="cg__kicker">{{ section.settings.kicker | escape }}</p>
+      {%- endif -%}
+      {%- if section.settings.heading != blank -%}
+        <h2 class="cg__heading" id="cg-alts-heading-{{ section.id }}">{{ section.settings.heading | escape }}</h2>
+      {%- endif -%}
+      {%- if section.settings.subheading != blank -%}
+        <p class="cg__sub">{{ section.settings.subheading | escape }}</p>
+      {%- endif -%}
+    </div>
+
+    {%- if row_count > 0 -%}
+      <div class="cg-alts__table-wrap">
+        <table>
+          <caption class="visually-hidden">{{ section.settings.heading | escape }}</caption>
+          <thead>
+            <tr>
+              <th scope="col">{{ section.settings.col_name | default: 'Option' | escape }}</th>
+              <th scope="col">{{ section.settings.col_evidence | default: 'Evidence' | escape }}</th>
+              <th scope="col">{{ section.settings.col_caution | default: 'Cautions' | escape }}</th>
+              <th scope="col">{{ section.settings.col_format | default: 'Formats' | escape }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {%- for block in section.blocks -%}
+              {%- if block.type == 'alternative' and block.settings.name != blank and block.settings.product != blank -%}
+                <tr {{ block.shopify_attributes }}>
+                  <th scope="row">
+                    <a href="{{ block.settings.product.url }}">{{ block.settings.name | escape }}</a>
+                  </th>
+                  <td>{{ block.settings.evidence | escape }}</td>
+                  <td>{{ block.settings.caution | escape }}</td>
+                  <td>{{ block.settings.formats | escape }}</td>
+                </tr>
+              {%- endif -%}
+            {%- endfor -%}
+          </tbody>
+        </table>
+      </div>
+
+      <ul class="cg-alts__cards"{% if section.settings.columns_desktop != blank and section.settings.columns_desktop != '3' %} style="--cg-alts-cols: {{ section.settings.columns_desktop }};"{% endif %}>
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'alternative' and block.settings.name != blank and block.settings.product != blank -%}
+            <li class="cg-alts__card" {{ block.shopify_attributes }}>
+              <h3><a href="{{ block.settings.product.url }}">{{ block.settings.name | escape }}</a></h3>
+              {%- if block.settings.evidence != blank -%}
+                <p><strong>{{ section.settings.col_evidence | default: 'Evidence' | escape }}:</strong> {{ block.settings.evidence | escape }}</p>
+              {%- endif -%}
+              {%- if block.settings.caution != blank -%}
+                <p><strong>{{ section.settings.col_caution | default: 'Cautions' | escape }}:</strong> {{ block.settings.caution | escape }}</p>
+              {%- endif -%}
+              {%- if block.settings.formats != blank -%}
+                <p><strong>{{ section.settings.col_format | default: 'Formats' | escape }}:</strong> {{ block.settings.formats | escape }}</p>
+              {%- endif -%}
+            </li>
+          {%- endif -%}
+        {%- endfor -%}
+      </ul>
+    {%- endif -%}
+    {%- if section.settings.note != blank -%}
+      <p class="cg-research__note">{{ section.settings.note | escape }}</p>
+    {%- endif -%}
+  </div>
+</section>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Compound alternatives",
+  "tag": "section",
+  "class": "section-compound-alternatives",
+  "enabled_on": { "templates": ["page"] },
+  "settings": [
+    { "type": "text", "id": "anchor_id", "label": "Anchor ID", "default": "compound-alternatives" },
+    { "type": "text", "id": "kicker", "label": "Kicker", "default": "Options" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Considering other options?" },
+    { "type": "textarea", "id": "subheading", "label": "Subheading", "default": "Compare the evidence, product differences and cautions." },
+    { "type": "text", "id": "col_name", "label": "Name column", "default": "Option" },
+    { "type": "text", "id": "col_evidence", "label": "Evidence column", "default": "Evidence" },
+    { "type": "text", "id": "col_caution", "label": "Cautions column", "default": "Cautions" },
+    { "type": "text", "id": "col_format", "label": "Formats column", "default": "Formats" },
+    { "type": "textarea", "id": "note", "label": "Note", "default": "These compounds are not interchangeable. This is not a ranking and it is not advice to combine products." },
+    { "type": "header", "content": "Layout" },
+    { "type": "select", "id": "layout", "label": "Layout", "options": [
+      { "value": "table", "label": "Table on desktop, cards on mobile" },
+      { "value": "cards", "label": "Cards everywhere" }
+    ], "default": "table" },
+    { "type": "select", "id": "columns_desktop", "label": "Cards per row (desktop)", "options": [
+      { "value": "2", "label": "2" },
+      { "value": "3", "label": "3" }
+    ], "default": "3", "info": "Applies to the cards layout only." },
+    { "type": "select", "id": "tone", "label": "Background", "options": [
+      { "value": "paper", "label": "Paper" },
+      { "value": "white", "label": "White" }
+    ], "default": "paper" },
+    { "type": "select", "id": "heading_size", "label": "Heading size", "options": [
+      { "value": "small", "label": "Small" },
+      { "value": "default", "label": "Default" },
+      { "value": "large", "label": "Large" }
+    ], "default": "default" },
+    { "type": "select", "id": "intro_align", "label": "Intro alignment", "options": [
+      { "value": "left", "label": "Left" },
+      { "value": "center", "label": "Center" }
+    ], "default": "left" },
+    { "type": "select", "id": "content_width", "label": "Content width", "options": [
+      { "value": "narrow", "label": "Narrow" },
+      { "value": "default", "label": "Default" },
+      { "value": "wide", "label": "Wide" }
+    ], "default": "default" },
+    { "type": "range", "id": "padding_top", "label": "Top spacing", "min": 0, "max": 200, "step": 10, "unit": "%", "default": 100, "info": "Scales the responsive section spacing. 100% is the theme default." },
+    { "type": "range", "id": "padding_bottom", "label": "Bottom spacing", "min": 0, "max": 200, "step": 10, "unit": "%", "default": 100 },
+    { "type": "checkbox", "id": "show_divider", "label": "Show top divider", "default": true, "info": "Hairline between this and the previous section." },
+    { "type": "text", "id": "custom_class", "label": "Custom CSS class", "info": "Optional hook for bespoke styling." }
+  ],
+  "blocks": [
+    {
+      "type": "alternative",
+      "name": "Alternative",
+      "settings": [
+        { "type": "product", "id": "product", "label": "Catalogue product", "info": "The row hides if this product is not available in the selected market." },
+        { "type": "text", "id": "name", "label": "Name" },
+        { "type": "textarea", "id": "evidence", "label": "Evidence summary", "info": "Do not invent citations, scores or a strongest-option claim." },
+        { "type": "textarea", "id": "caution", "label": "Cautions" },
+        { "type": "text", "id": "formats", "label": "Available formats" }
+      ]
+    }
+  ],
+  "presets": [{ "name": "Compound alternatives" }]
+}
+{% endschema %}

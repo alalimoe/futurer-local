@@ -1,0 +1,307 @@
+{% render 'compound-guide-css' %}
+
+{%- liquid
+  assign cg_anchor = section.settings.anchor_id | default: 'compound-quality' | handleize
+  assign doc_count = 0
+  assign product_options = ''
+  assign batch_options = ''
+  for block in section.blocks
+    if block.type == 'document' and block.settings.title != blank
+      assign doc_count = doc_count | plus: 1
+      if block.settings.product_label != blank
+        unless product_options contains block.settings.product_label
+          assign product_options = product_options | append: block.settings.product_label | append: '||'
+        endunless
+      endif
+      if block.settings.batch_label != blank
+        unless batch_options contains block.settings.batch_label
+          assign batch_options = batch_options | append: block.settings.batch_label | append: '||'
+        endunless
+      endif
+    endif
+  endfor
+  assign product_list = product_options | split: '||'
+  assign batch_list = batch_options | split: '||'
+  assign show_request = false
+  if section.settings.request_label != blank
+    assign show_request = true
+  endif
+-%}
+
+{%- if section.settings.heading != blank or doc_count > 0 or section.settings.library_label != blank -%}
+<section
+  id="{{ cg_anchor }}"
+  {% render 'compound-section-attrs', section: section, base: 'cg-quality' %}
+  data-cg-quality
+  aria-labelledby="cg-quality-heading-{{ section.id }}"
+>
+  <div class="cg__inner">
+    <div class="cg__intro">
+      {%- if section.settings.kicker != blank -%}
+        <p class="cg__kicker">{{ section.settings.kicker | escape }}</p>
+      {%- endif -%}
+      {%- if section.settings.heading != blank -%}
+        <h2 class="cg__heading" id="cg-quality-heading-{{ section.id }}">{{ section.settings.heading | escape }}</h2>
+      {%- endif -%}
+      {%- if section.settings.subheading != blank -%}
+        <p class="cg__sub">{{ section.settings.subheading | escape }}</p>
+      {%- endif -%}
+    </div>
+
+    {%- if doc_count > 0 -%}
+      {%- assign product_choice_count = 0 -%}
+      {%- for option in product_list -%}
+        {%- if option != blank -%}
+          {%- assign product_choice_count = product_choice_count | plus: 1 -%}
+        {%- endif -%}
+      {%- endfor -%}
+      {%- assign batch_choice_count = 0 -%}
+      {%- for option in batch_list -%}
+        {%- if option != blank -%}
+          {%- assign batch_choice_count = batch_choice_count | plus: 1 -%}
+        {%- endif -%}
+      {%- endfor -%}
+      <div class="cg-quality__viewer{% if product_choice_count < 2 and batch_choice_count < 2 %} cg-quality__viewer--single{% endif %}">
+        {%- if product_choice_count > 1 or batch_choice_count > 1 -%}
+          <div class="cg-quality__controls">
+            {%- if product_choice_count > 1 -%}
+              <label>
+                {{ 'sections.compound_guide.document_product' | t }}
+                <select data-cg-doc-product>
+                  <option value="">{{ 'sections.compound_guide.filter_all' | t }}</option>
+                  {%- for option in product_list -%}
+                    {%- if option != blank -%}
+                      <option value="{{ option | handleize }}">{{ option | escape }}</option>
+                    {%- endif -%}
+                  {%- endfor -%}
+                </select>
+              </label>
+            {%- endif -%}
+            {%- if batch_choice_count > 1 -%}
+              <label>
+                {{ 'sections.compound_guide.document_batch' | t }}
+                <select data-cg-doc-batch>
+                  <option value="">{{ 'sections.compound_guide.filter_all' | t }}</option>
+                  {%- for option in batch_list -%}
+                    {%- if option != blank -%}
+                      <option value="{{ option | handleize }}">{{ option | escape }}</option>
+                    {%- endif -%}
+                  {%- endfor -%}
+                </select>
+              </label>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+
+        <div>
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'document' and block.settings.title != blank -%}
+              {%- liquid
+                assign kind_label = 'sections.compound_guide.raw_material' | t
+                if block.settings.kind == 'finished'
+                  assign kind_label = 'sections.compound_guide.finished_product' | t
+                endif
+                assign doc_url = block.settings.url
+                if doc_url == blank and block.settings.asset != blank
+                  assign doc_url = block.settings.asset | asset_url
+                endif
+                assign preview_alt = block.settings.title
+                assign preview_asset = block.settings.preview_asset
+                assign preview_w = block.settings.preview_width | default: 1200
+                assign preview_h = block.settings.preview_height | default: 1553
+              -%}
+              <article
+                class="cg-quality__doc{% if forloop.first %} is-active{% endif %}"
+                data-cg-doc
+                data-product="{{ block.settings.product_label | handleize }}"
+                data-batch="{{ block.settings.batch_label | handleize }}"
+                {{ block.shopify_attributes }}
+              >
+                {%- assign has_preview = false -%}
+                {%- if block.settings.preview != blank or preview_asset != blank -%}{%- assign has_preview = true -%}{%- endif -%}
+                {%- if section.settings.show_preview and has_preview -%}
+                  {%- if doc_url != blank -%}
+                    <a href="{{ doc_url }}" data-compound-event="document_view" target="_blank" rel="noopener">
+                  {%- endif -%}
+                  {%- if block.settings.preview != blank -%}
+                    {{
+                      block.settings.preview
+                      | image_url: width: 720
+                      | image_tag:
+                        widths: '240, 360, 480, 720',
+                        sizes: '(max-width: 767px) 72vw, 24rem',
+                        alt: preview_alt,
+                        width: block.settings.preview.width,
+                        height: block.settings.preview.height,
+                        loading: 'lazy',
+                        decoding: 'async'
+                    }}
+                  {%- elsif preview_asset != blank -%}
+                    <img
+                      src="{{ preview_asset | asset_url }}"
+                      alt="{{ preview_alt | escape }}"
+                      width="{{ preview_w }}"
+                      height="{{ preview_h }}"
+                      loading="lazy"
+                      decoding="async"
+                    >
+                  {%- endif -%}
+                  {%- if doc_url != blank -%}
+                    </a>
+                  {%- endif -%}
+                {%- endif -%}
+                <div class="cg-quality__doc-body">
+                  <p class="cg-quality__kind">{{ kind_label }}</p>
+                  <h3>{{ block.settings.title | escape }}</h3>
+                  {%- assign has_stats = false -%}
+                  {%- if block.settings.stat_purity != blank or block.settings.stat_method != blank or block.settings.stat_sample != blank or block.settings.stat_lot != blank -%}{%- assign has_stats = true -%}{%- endif -%}
+                  {%- if section.settings.show_stats and has_stats -%}
+                    <dl class="cg-quality__stats">
+                      {%- if block.settings.stat_purity != blank -%}
+                        <div class="cg-quality__stat cg-quality__stat--lead">
+                          <dt>{{ 'sections.compound_guide.stat_purity' | t }}</dt>
+                          <dd>{{ block.settings.stat_purity | escape }}</dd>
+                        </div>
+                      {%- endif -%}
+                      {%- if block.settings.stat_method != blank -%}
+                        <div class="cg-quality__stat">
+                          <dt>{{ 'sections.compound_guide.stat_method' | t }}</dt>
+                          <dd>{{ block.settings.stat_method | escape }}</dd>
+                        </div>
+                      {%- endif -%}
+                      {%- if block.settings.stat_sample != blank -%}
+                        <div class="cg-quality__stat">
+                          <dt>{{ 'sections.compound_guide.stat_sample' | t }}</dt>
+                          <dd>{{ block.settings.stat_sample | escape }}</dd>
+                        </div>
+                      {%- endif -%}
+                      {%- if block.settings.stat_lot != blank -%}
+                        <div class="cg-quality__stat">
+                          <dt>{{ 'sections.compound_guide.stat_lot' | t }}</dt>
+                          <dd>{{ block.settings.stat_lot | escape }}</dd>
+                        </div>
+                      {%- endif -%}
+                    </dl>
+                  {%- endif -%}
+                  {%- if doc_url != blank -%}
+                    <a class="cg__text-link" href="{{ doc_url }}" data-compound-event="document_view" target="_blank" rel="noopener">{{ 'sections.compound_guide.view_report' | t }}</a>
+                  {%- endif -%}
+                  {%- if block.settings.tests != blank -%}
+                    <p class="cg-quality__footnote">{{ block.settings.tests | escape }}</p>
+                  {%- endif -%}
+                </div>
+              </article>
+            {%- endif -%}
+          {%- endfor -%}
+          <p class="cg-quality__empty" data-cg-doc-empty hidden>{{ 'sections.compound_guide.document_empty' | t }}</p>
+        </div>
+      </div>
+    {%- else -%}
+      <p class="cg-quality__empty">{{ 'sections.compound_guide.document_empty' | t }}</p>
+    {%- endif -%}
+
+    {%- if section.settings.show_disclaimer -%}
+      <p class="cg-quality__disclaimer">{{ 'sections.compound_guide.coa_disclaimer' | t }}</p>
+    {%- endif -%}
+
+    <div class="cg-quality__actions">
+      {%- if section.settings.library_label != blank and section.settings.library_href != blank -%}
+        {% render 'button', style: 'secondary', text: section.settings.library_label, link: section.settings.library_href %}
+      {%- endif -%}
+    </div>
+
+    {%- if show_request -%}
+      {%- assign request_id = 'cg-doc-request-' | append: section.id -%}
+      {% form 'contact', id: request_id, class: 'cg-card__restock' %}
+        <input type="hidden" name="contact[body]" value="{{ 'sections.compound_guide.document_request_message' | t: product: page.title | escape }}">
+        {%- if form.posted_successfully? -%}
+          <p role="status">{{ 'sections.compound_guide.document_request_success' | t }}</p>
+        {%- else -%}
+          <label class="visually-hidden" for="{{ request_id }}-email">{{ 'sections.compound_guide.restock_email' | t }}</label>
+          <input
+            id="{{ request_id }}-email"
+            type="email"
+            name="contact[email]"
+            autocomplete="email"
+            required
+            placeholder="{{ 'sections.compound_guide.restock_email' | t }}"
+          >
+          <button class="xo-btn xo-btn--secondary" type="submit">{{ section.settings.request_label | escape }}</button>
+        {%- endif -%}
+      {% endform %}
+    {%- endif -%}
+  </div>
+</section>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Compound quality",
+  "tag": "section",
+  "class": "section-compound-quality",
+  "enabled_on": { "templates": ["page"] },
+  "settings": [
+    { "type": "text", "id": "anchor_id", "label": "Anchor ID", "default": "compound-quality" },
+    { "type": "text", "id": "kicker", "label": "Kicker", "default": "Report" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Batch report." },
+    { "type": "textarea", "id": "subheading", "label": "Subheading", "default": "Available batch documentation for this compound." },
+    { "type": "text", "id": "library_label", "label": "Quality standards label", "default": "Explore our quality standards" },
+    { "type": "url", "id": "library_href", "label": "Quality standards link", "info": "Use the COA library page when no matching batch report is attached." },
+    { "type": "text", "id": "request_label", "label": "Document request label", "default": "Request a document", "info": "Leave blank to hide the request form. Add per-SKU batch reports here when they are available. Do not invent purity figures." },
+    { "type": "header", "content": "Layout" },
+    { "type": "checkbox", "id": "show_preview", "label": "Show document preview image", "default": true },
+    { "type": "checkbox", "id": "show_stats", "label": "Show stat strip", "default": true },
+    { "type": "checkbox", "id": "show_disclaimer", "label": "Show COA disclaimer", "default": true },
+    { "type": "select", "id": "tone", "label": "Background", "options": [
+      { "value": "paper", "label": "Paper" },
+      { "value": "white", "label": "White" }
+    ], "default": "paper" },
+    { "type": "select", "id": "heading_size", "label": "Heading size", "options": [
+      { "value": "small", "label": "Small" },
+      { "value": "default", "label": "Default" },
+      { "value": "large", "label": "Large" }
+    ], "default": "default" },
+    { "type": "select", "id": "intro_align", "label": "Intro alignment", "options": [
+      { "value": "left", "label": "Left" },
+      { "value": "center", "label": "Center" }
+    ], "default": "left" },
+    { "type": "select", "id": "content_width", "label": "Content width", "options": [
+      { "value": "narrow", "label": "Narrow" },
+      { "value": "default", "label": "Default" },
+      { "value": "wide", "label": "Wide" }
+    ], "default": "default" },
+    { "type": "range", "id": "padding_top", "label": "Top spacing", "min": 0, "max": 200, "step": 10, "unit": "%", "default": 100, "info": "Scales the responsive section spacing. 100% is the theme default." },
+    { "type": "range", "id": "padding_bottom", "label": "Bottom spacing", "min": 0, "max": 200, "step": 10, "unit": "%", "default": 100 },
+    { "type": "checkbox", "id": "show_divider", "label": "Show top divider", "default": true, "info": "Hairline between this and the previous section." },
+    { "type": "text", "id": "custom_class", "label": "Custom CSS class", "info": "Optional hook for bespoke styling." }
+  ],
+  "blocks": [
+    {
+      "type": "document",
+      "name": "Batch document",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Title" },
+        { "type": "text", "id": "product_label", "label": "Product label" },
+        { "type": "text", "id": "batch_label", "label": "Batch label" },
+        { "type": "select", "id": "kind", "label": "Report type", "options": [
+          { "value": "raw", "label": "Raw-material report" },
+          { "value": "finished", "label": "Finished-product report" }
+        ], "default": "finished" },
+        { "type": "header", "content": "Stat strip", "info": "Copy each value from the report. Leave blank rather than estimate." },
+        { "type": "text", "id": "stat_purity", "label": "Purity", "info": "E.g. 99.9%" },
+        { "type": "text", "id": "stat_method", "label": "Method", "info": "E.g. HPLC" },
+        { "type": "text", "id": "stat_sample", "label": "Sample", "info": "E.g. Raw-material vial" },
+        { "type": "text", "id": "stat_lot", "label": "Lot", "info": "E.g. N/A as listed" },
+        { "type": "textarea", "id": "tests", "label": "Tests included", "info": "Shown as a footnote under the stats. Describe only tests actually listed on the report. Do not treat a raw-material sample report as a finished pack COA." },
+        { "type": "image_picker", "id": "preview", "label": "Preview image" },
+        { "type": "text", "id": "preview_asset", "label": "Preview theme asset", "info": "Optional image filename in assets/ when no Files image is selected." },
+        { "type": "number", "id": "preview_width", "label": "Preview width" },
+        { "type": "number", "id": "preview_height", "label": "Preview height" },
+        { "type": "url", "id": "url", "label": "Document URL" },
+        { "type": "text", "id": "asset", "label": "Document theme asset", "info": "Optional PDF filename in assets/ when no document URL is set." }
+      ]
+    }
+  ],
+  "presets": [{ "name": "Compound quality" }]
+}
+{% endschema %}

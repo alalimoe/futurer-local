@@ -1,0 +1,135 @@
+{% doc %}
+Renders a compound-range product card with live price and availability.
+@param {product} product
+@param {string} form
+@param {string} format
+@param {string} [dose_value] - Large number shown on the card, e.g. 250
+@param {string} [dose_unit] - Unit for the dose number, e.g. mg
+@param {string} [amount_label] - Qualifier after the dose, e.g. per capsule
+@param {string} [count_label]
+@param {string} [form_label]
+@param {string} [format_label]
+@param {boolean} [show_restock] - Render the restock email form on sold-out cards. Defaults to true.
+@example
+{% render 'compound-product-card', product: product, form: 'hcl', format: 'capsules', dose_value: '250', dose_unit: 'mg' %}
+{% enddoc %}
+
+{%- liquid
+  assign available = product.available
+  assign price_varies = product.price_varies
+  assign image_alt = product.title
+  if product.featured_image.alt != blank
+    assign image_alt = product.featured_image.alt
+  endif
+  assign render_restock = true
+  if show_restock == false
+    assign render_restock = false
+  endif
+-%}
+
+<article
+  class="cg-card{% unless available %} cg-card--out{% endunless %}"
+  data-cg-card
+  data-form="{{ form | escape }}"
+  data-format="{{ format | escape }}"
+>
+  <div class="cg-card__media">
+    {%- if product.featured_image != blank -%}
+      {{
+        product.featured_image
+        | image_url: width: 800
+        | image_tag:
+          widths: '320, 480, 640, 800',
+          sizes: '(max-width: 767px) 88vw, (max-width: 989px) 44vw, 28vw',
+          alt: image_alt,
+          width: product.featured_image.width,
+          height: product.featured_image.height,
+          loading: 'lazy',
+          decoding: 'async'
+      }}
+    {%- endif -%}
+    {%- if form_label != blank or format_label != blank -%}
+      <ul class="cg-card__badges" aria-label="{{ 'sections.compound_guide.compare_label' | t }}">
+        {%- if form_label != blank -%}
+          <li class="cg-card__badge cg-card__badge--form">{{ form_label | escape }}</li>
+        {%- endif -%}
+        {%- if format_label != blank -%}
+          <li class="cg-card__badge">{{ format_label | escape }}</li>
+        {%- endif -%}
+      </ul>
+    {%- endif -%}
+    {%- unless available -%}
+      <span class="cg-card__stamp">{{ 'sections.compound_guide.sold_out' | t }}</span>
+    {%- endunless -%}
+  </div>
+  <div class="cg-card__body">
+    {%- if dose_value != blank -%}
+      <p class="cg-card__dose">
+        <strong>{{ dose_value | escape }}</strong>
+        {%- if dose_unit != blank -%}
+          <span class="cg-card__dose-unit">{{ dose_unit | escape }}</span>
+        {%- endif -%}
+        {%- if amount_label != blank -%}
+          <span class="cg-card__dose-note">{{ amount_label | escape }}</span>
+        {%- endif -%}
+      </p>
+    {%- elsif amount_label != blank -%}
+      <p class="cg-card__meta">{{ amount_label | escape }}</p>
+    {%- endif -%}
+    <h3 class="cg-card__name">{{ product.title | escape }}</h3>
+    {%- if count_label != blank -%}
+      <p class="cg-card__meta">{{ count_label | escape }}</p>
+    {%- endif -%}
+    <p class="cg-card__price">
+      {%- if price_varies -%}
+        {{ 'sections.compound_guide.from_prefix' | t }}
+        {{ product.price_min | money }}
+      {%- else -%}
+        {{ product.price | money }}
+      {%- endif -%}
+    </p>
+    {%- if available -%}
+      <p class="cg-card__status">{{ 'sections.compound_guide.available' | t }}</p>
+      <div class="cg-card__actions">
+        <a
+          class="xo-btn xo-btn--primary"
+          href="{{ product.url }}"
+          data-compound-event="product_selection"
+        >
+          {{ 'sections.compound_guide.view_options' | t }}
+        </a>
+      </div>
+    {%- else -%}
+      <p class="cg-card__status cg-card__status--out">{{ 'sections.compound_guide.sold_out_notify' | t }}</p>
+      {%- if render_restock -%}
+      {%- assign restock_id = 'cg-restock-' | append: product.id -%}
+      {% form 'contact', id: restock_id, class: 'cg-card__restock' %}
+        <input type="hidden" name="contact[body]" value="{{ 'sections.compound_guide.restock_message' | t: product: product.title | escape }}">
+        {%- if form.posted_successfully? -%}
+          <p role="status" data-cg-restock data-posted="true">{{ 'sections.compound_guide.restock_success' | t }}</p>
+        {%- else -%}
+          <label class="visually-hidden" for="{{ restock_id }}-email">{{ 'sections.compound_guide.restock_email' | t }}</label>
+          <input
+            id="{{ restock_id }}-email"
+            type="email"
+            name="contact[email]"
+            autocomplete="email"
+            required
+            placeholder="{{ 'sections.compound_guide.restock_email' | t }}"
+          >
+          <button class="xo-btn xo-btn--secondary" type="submit">{{ 'sections.compound_guide.restock_submit' | t }}</button>
+        {%- endif -%}
+      {% endform %}
+      {%- endif -%}
+      <div class="cg-card__actions">
+        <a
+          class="cg__text-link"
+          href="{{ product.url }}"
+          data-compound-event="product_selection"
+        >
+          {{ 'sections.compound_guide.view_product_page' | t }}
+        </a>
+      </div>
+    {%- endif -%}
+  </div>
+</article>

@@ -1,0 +1,67 @@
+{% doc %}
+Outputs the class and style attributes for a compound-guide section root.
+Reads the shared "Layout" settings every compound section exposes in the
+theme editor (tone, heading size, intro alignment, content width, spacing
+scale, divider, custom class) so each section renders them the same way.
+
+@param {object} section - The calling section (for section.settings)
+@param {string} base - Section class, e.g. cg-forms
+@param {string} [extra] - Additional classes to append
+@param {string} [default_tone] - paper, white or dark. Used when the section has no tone setting.
+@example
+<section {% render 'compound-section-attrs', section: section, base: 'cg-forms' %}>
+{% enddoc %}
+
+{%- liquid
+  assign tone = section.settings.tone | default: default_tone | default: 'paper'
+  assign classes = 'cg ' | append: base
+
+  if tone == 'dark'
+    assign classes = classes | append: ' cg--dark'
+  elsif tone == 'white'
+    assign classes = classes | append: ' cg--white'
+  endif
+
+  if section.settings.heading_size == 'small'
+    assign classes = classes | append: ' cg--heading-sm'
+  elsif section.settings.heading_size == 'large'
+    assign classes = classes | append: ' cg--heading-lg'
+  endif
+
+  if section.settings.intro_align == 'center'
+    assign classes = classes | append: ' cg--center'
+  endif
+
+  if section.settings.show_divider == false
+    assign classes = classes | append: ' cg--no-rule'
+  endif
+
+  if extra != blank
+    assign classes = classes | append: ' ' | append: extra
+  endif
+
+  if section.settings.custom_class != blank
+    assign classes = classes | append: ' ' | append: section.settings.custom_class
+  endif
+
+  assign styles = ''
+
+  if section.settings.content_width == 'narrow'
+    assign styles = styles | append: '--cg-max:96rem;'
+  elsif section.settings.content_width == 'wide'
+    assign styles = styles | append: '--cg-max:144rem;'
+  endif
+
+  assign pad_top = section.settings.padding_top
+  if pad_top != blank and pad_top != 100
+    assign scale = pad_top | divided_by: 100.0
+    assign styles = styles | append: '--cg-pad-scale-start:' | append: scale | append: ';'
+  endif
+
+  assign pad_bottom = section.settings.padding_bottom
+  if pad_bottom != blank and pad_bottom != 100
+    assign scale = pad_bottom | divided_by: 100.0
+    assign styles = styles | append: '--cg-pad-scale-end:' | append: scale | append: ';'
+  endif
+-%}
+class="{{ classes | strip | escape }}"{% if styles != blank %} style="{{ styles }}"{% endif %}

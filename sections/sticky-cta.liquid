@@ -222,6 +222,13 @@
     let cleanup = () => {};
 
     const measureHeaderOffset = () => {
+      const pageNav = document.querySelector('[data-cg-nav]');
+      if (pageNav) {
+        const rect = pageNav.getBoundingClientRect();
+        const bottom = rect.height > 0 ? rect.bottom : 0;
+        document.documentElement.style.setProperty('--sticky-header-offset', `${Math.max(0, Math.round(bottom))}px`);
+        return;
+      }
       const groups = document.querySelectorAll('.shopify-section-group-header-group');
       let bottom = 0;
       groups.forEach((el) => {

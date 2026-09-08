@@ -1,0 +1,130 @@
+{% render 'compound-guide-css' %}
+
+{%- liquid
+  assign cg_anchor = section.settings.anchor_id | default: 'what-is-phenibut' | handleize
+  assign image = blank
+  if section.settings.show_image
+    assign image = section.settings.image
+    if image == blank and section.settings.fallback_product != blank
+      assign image = section.settings.fallback_product.featured_image
+    endif
+  endif
+  assign image_alt = section.settings.image_alt | default: section.settings.heading
+-%}
+
+{%- if section.settings.heading != blank or section.settings.opening != blank -%}
+<section
+  id="{{ cg_anchor }}"
+  {% render 'compound-section-attrs', section: section, base: 'cg-basics' %}
+  aria-labelledby="cg-basics-heading-{{ section.id }}"
+>
+  <div class="cg__inner">
+    <div class="cg-basics__layout{% if section.settings.media_position == 'left' %} cg-basics__layout--media-left{% endif %}">
+      <div class="cg-basics__copy">
+        <div class="cg__intro">
+          {%- if section.settings.kicker != blank -%}
+            <p class="cg__kicker">{{ section.settings.kicker | escape }}</p>
+          {%- endif -%}
+          {%- if section.settings.heading != blank -%}
+            <h2 class="cg__heading" id="cg-basics-heading-{{ section.id }}">{{ section.settings.heading | escape }}</h2>
+          {%- endif -%}
+          {%- if section.settings.disclaimer != blank -%}
+            <p class="cg__callout">{{ section.settings.disclaimer | escape }}</p>
+          {%- endif -%}
+          {%- if section.settings.opening != blank -%}
+            <p class="cg__sub">{{ section.settings.opening | escape }}</p>
+          {%- endif -%}
+        </div>
+        {%- if section.settings.body != blank -%}
+          <div class="cg-basics__body">{{ section.settings.body }}</div>
+        {%- endif -%}
+        {%- if section.settings.source_label != blank and section.settings.source_url != blank -%}
+          <p>
+            <a class="cg__text-link" href="{{ section.settings.source_url }}">{{ section.settings.source_label | escape }}</a>
+          </p>
+        {%- endif -%}
+        {%- if section.settings.review_date != blank -%}
+          <p class="cg-research__note">{{ section.settings.review_date | escape }}</p>
+        {%- endif -%}
+        {%- if section.settings.detail_label != blank and section.settings.detail != blank -%}
+          <details{% if section.settings.detail_open %} open{% endif %}>
+            <summary>{{ section.settings.detail_label | escape }}</summary>
+            <div class="cg-basics__detail">{{ section.settings.detail }}</div>
+          </details>
+        {%- endif -%}
+      </div>
+      {%- if image != blank -%}
+        <div class="cg-basics__media">
+          {{
+            image
+            | image_url: width: 960
+            | image_tag:
+              widths: '320, 480, 720, 960',
+              sizes: '(max-width: 767px) 88vw, 36vw',
+              alt: image_alt,
+              width: image.width,
+              height: image.height,
+              loading: 'lazy',
+              decoding: 'async'
+          }}
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Compound basics",
+  "tag": "section",
+  "class": "section-compound-basics",
+  "enabled_on": { "templates": ["page"] },
+  "settings": [
+    { "type": "text", "id": "anchor_id", "label": "Anchor ID", "default": "what-is-phenibut" },
+    { "type": "text", "id": "kicker", "label": "Kicker", "default": "Basics" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "What is this compound?" },
+    { "type": "text", "id": "disclaimer", "label": "Disclaimer line", "default": "Educational only. Not medical advice.", "info": "Shown as a one-line callout directly under the heading." },
+    { "type": "textarea", "id": "opening", "label": "Opening paragraph" },
+    { "type": "richtext", "id": "body", "label": "Essential explanation", "info": "Keep this visible. Do not mix dosing, onset estimates or format advice into the mechanism." },
+    { "type": "text", "id": "source_label", "label": "Source label" },
+    { "type": "url", "id": "source_url", "label": "Source URL" },
+    { "type": "text", "id": "review_date", "label": "Review date", "info": "Show a genuine medical or editorial review date only. Leave blank if none exists." },
+    { "type": "text", "id": "detail_label", "label": "Technical detail label", "default": "Technical detail" },
+    { "type": "richtext", "id": "detail", "label": "Technical detail" },
+    { "type": "image_picker", "id": "image", "label": "Mechanism illustration", "info": "Use only an accurately labeled illustration. Leave blank if none is available." },
+    { "type": "product", "id": "fallback_product", "label": "Fallback product image", "info": "Used only when no illustration is selected." },
+    { "type": "text", "id": "image_alt", "label": "Illustration alt text" },
+    { "type": "header", "content": "Layout" },
+    { "type": "checkbox", "id": "show_image", "label": "Show illustration", "default": true },
+    { "type": "select", "id": "media_position", "label": "Illustration position (desktop)", "options": [
+      { "value": "right", "label": "Right" },
+      { "value": "left", "label": "Left" }
+    ], "default": "right" },
+    { "type": "checkbox", "id": "detail_open", "label": "Expand technical detail by default", "default": false },
+    { "type": "select", "id": "tone", "label": "Background", "options": [
+      { "value": "paper", "label": "Paper" },
+      { "value": "white", "label": "White" }
+    ], "default": "paper" },
+    { "type": "select", "id": "heading_size", "label": "Heading size", "options": [
+      { "value": "small", "label": "Small" },
+      { "value": "default", "label": "Default" },
+      { "value": "large", "label": "Large" }
+    ], "default": "default" },
+    { "type": "select", "id": "intro_align", "label": "Intro alignment", "options": [
+      { "value": "left", "label": "Left" },
+      { "value": "center", "label": "Center" }
+    ], "default": "left" },
+    { "type": "select", "id": "content_width", "label": "Content width", "options": [
+      { "value": "narrow", "label": "Narrow" },
+      { "value": "default", "label": "Default" },
+      { "value": "wide", "label": "Wide" }
+    ], "default": "default" },
+    { "type": "range", "id": "padding_top", "label": "Top spacing", "min": 0, "max": 200, "step": 10, "unit": "%", "default": 100, "info": "Scales the responsive section spacing. 100% is the theme default." },
+    { "type": "range", "id": "padding_bottom", "label": "Bottom spacing", "min": 0, "max": 200, "step": 10, "unit": "%", "default": 100 },
+    { "type": "checkbox", "id": "show_divider", "label": "Show top divider", "default": true, "info": "Hairline between this and the previous section." },
+    { "type": "text", "id": "custom_class", "label": "Custom CSS class", "info": "Optional hook for bespoke styling." }
+  ],
+  "presets": [{ "name": "Compound basics" }]
+}
+{% endschema %}

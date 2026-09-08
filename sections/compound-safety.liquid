@@ -1,0 +1,155 @@
+{% render 'compound-guide-css' %}
+
+{%- liquid
+  assign cg_anchor = section.settings.anchor_id | default: 'safety' | handleize
+  assign risk_count = 0
+  assign detail_count = 0
+  for block in section.blocks
+    if block.type == 'risk' and block.settings.title != blank
+      assign risk_count = risk_count | plus: 1
+    endif
+    if block.type == 'detail' and block.settings.title != blank and block.settings.body != blank
+      assign detail_count = detail_count | plus: 1
+    endif
+  endfor
+-%}
+
+{%- if section.settings.heading != blank or risk_count > 0 -%}
+{%- liquid
+  assign extra_classes = ''
+  unless section.settings.show_numbers
+    assign extra_classes = 'cg-safety--plain'
+  endunless
+  assign highlight_count = section.settings.highlight_count
+  if highlight_count == blank
+    assign highlight_count = 2
+  endif
+-%}
+<section
+  id="{{ cg_anchor }}"
+  {% render 'compound-section-attrs', section: section, base: 'cg-safety', extra: extra_classes %}
+  aria-labelledby="cg-safety-heading-{{ section.id }}"
+>
+  <div class="cg__inner">
+    <div class="cg__intro">
+      {%- if section.settings.kicker != blank -%}
+        <p class="cg__kicker">{{ section.settings.kicker | escape }}</p>
+      {%- endif -%}
+      {%- if section.settings.heading != blank -%}
+        <h2 class="cg__heading" id="cg-safety-heading-{{ section.id }}">{{ section.settings.heading | escape }}</h2>
+      {%- endif -%}
+      {%- if section.settings.opening != blank -%}
+        <p class="cg__sub">{{ section.settings.opening | escape }}</p>
+      {%- endif -%}
+    </div>
+
+    {%- if risk_count > 0 -%}
+      <ol class="cg-safety__risks"{% if section.settings.columns_desktop != blank and section.settings.columns_desktop != '2' %} style="--cg-safety-cols: {{ section.settings.columns_desktop }};"{% endif %}>
+        {%- assign risk_index = 0 -%}
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'risk' and block.settings.title != blank -%}
+            {%- assign risk_index = risk_index | plus: 1 -%}
+            <li class="cg-safety__risk{% if risk_index <= highlight_count %} cg-safety__risk--primary{% endif %}" {{ block.shopify_attributes }}>
+              <span class="cg-safety__index" aria-hidden="true">{{ risk_index }}</span>
+              <div class="cg-safety__risk-body">
+                {%- if block.settings.rule != blank -%}
+                  <p class="cg-safety__topic">{{ block.settings.title | escape }}</p>
+                  <h3>{{ block.settings.rule | escape }}</h3>
+                {%- else -%}
+                  <h3>{{ block.settings.title | escape }}</h3>
+                {%- endif -%}
+                {%- if block.settings.body != blank -%}
+                  <p>{{ block.settings.body | escape }}</p>
+                {%- endif -%}
+              </div>
+            </li>
+          {%- endif -%}
+        {%- endfor -%}
+      </ol>
+    {%- endif -%}
+
+    {%- if detail_count > 0 -%}
+      <div class="cg-faq__list cg-safety__details">
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'detail' and block.settings.title != blank and block.settings.body != blank -%}
+            <details {{ block.shopify_attributes }}>
+              <summary>{{ block.settings.title | escape }}</summary>
+              <div class="cg-safety__detail">{{ block.settings.body }}</div>
+            </details>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+
+    {%- if section.settings.note != blank -%}
+      <p class="cg-safety__note">{{ section.settings.note | escape }}</p>
+    {%- endif -%}
+  </div>
+</section>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Compound safety",
+  "tag": "section",
+  "class": "section-compound-safety",
+  "enabled_on": { "templates": ["page"] },
+  "settings": [
+    { "type": "text", "id": "anchor_id", "label": "Anchor ID", "default": "safety" },
+    { "type": "text", "id": "kicker", "label": "Kicker", "default": "Safety", "info": "One word above the heading so the section is recognisable while scrolling." },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Important safety information." },
+    { "type": "textarea", "id": "opening", "label": "Opening paragraph" },
+    { "type": "textarea", "id": "note", "label": "Note", "default": "Educational only. Not medical advice.", "info": "Do not add a weekly schedule, dose calculator or abrupt-stop instruction. Add medically reviewed copy and a review date when available." },
+    { "type": "header", "content": "Layout" },
+    { "type": "select", "id": "columns_desktop", "label": "Rules per row (desktop)", "options": [
+      { "value": "1", "label": "1" },
+      { "value": "2", "label": "2" },
+      { "value": "3", "label": "3" }
+    ], "default": "2" },
+    { "type": "checkbox", "id": "show_numbers", "label": "Number the rules", "default": true },
+    { "type": "range", "id": "highlight_count", "label": "Rules with the yellow rail", "min": 0, "max": 6, "step": 1, "default": 2, "info": "The first N rules get the emphasised treatment." },
+    { "type": "select", "id": "tone", "label": "Background", "options": [
+      { "value": "paper", "label": "Paper" },
+      { "value": "white", "label": "White" }
+    ], "default": "paper" },
+    { "type": "select", "id": "heading_size", "label": "Heading size", "options": [
+      { "value": "small", "label": "Small" },
+      { "value": "default", "label": "Default" },
+      { "value": "large", "label": "Large" }
+    ], "default": "default" },
+    { "type": "select", "id": "intro_align", "label": "Intro alignment", "options": [
+      { "value": "left", "label": "Left" },
+      { "value": "center", "label": "Center" }
+    ], "default": "left" },
+    { "type": "select", "id": "content_width", "label": "Content width", "options": [
+      { "value": "narrow", "label": "Narrow" },
+      { "value": "default", "label": "Default" },
+      { "value": "wide", "label": "Wide" }
+    ], "default": "default" },
+    { "type": "range", "id": "padding_top", "label": "Top spacing", "min": 0, "max": 200, "step": 10, "unit": "%", "default": 100, "info": "Scales the responsive section spacing. 100% is the theme default." },
+    { "type": "range", "id": "padding_bottom", "label": "Bottom spacing", "min": 0, "max": 200, "step": 10, "unit": "%", "default": 100 },
+    { "type": "checkbox", "id": "show_divider", "label": "Show top divider", "default": true, "info": "Hairline between this and the previous section." },
+    { "type": "text", "id": "custom_class", "label": "Custom CSS class", "info": "Optional hook for bespoke styling." }
+  ],
+  "blocks": [
+    {
+      "type": "risk",
+      "name": "Major risk",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Topic", "info": "Short label, e.g. Alcohol and other sedatives." },
+        { "type": "text", "id": "rule", "label": "Rule", "info": "Imperative first line, e.g. Do not combine with alcohol. Shown as the card heading." },
+        { "type": "textarea", "id": "body", "label": "Reason", "info": "Keep major risks visible. Do not hide them in an accordion." }
+      ]
+    },
+    {
+      "type": "detail",
+      "name": "Supporting detail",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Title" },
+        { "type": "richtext", "id": "body", "label": "Detail" }
+      ]
+    }
+  ],
+  "presets": [{ "name": "Compound safety" }]
+}
+{% endschema %}

@@ -1,0 +1,138 @@
+{% render 'compound-guide-css' %}
+
+{%- liquid
+  assign home_label = section.settings.home_label | default: 'Home'
+  assign parent_label = section.settings.parent_label
+  assign current_label = section.settings.current_label | default: page.title
+  assign show_crumbs = false
+  if current_label != blank and section.settings.show_crumbs
+    assign show_crumbs = true
+  endif
+  assign link_count = 0
+  for block in section.blocks
+    if block.type == 'link' and block.settings.label != blank and block.settings.href != blank
+      assign link_count = link_count | plus: 1
+    endif
+  endfor
+  assign logo = settings.logo
+  unless section.settings.show_logo
+    assign logo = blank
+  endunless
+  assign nav_max = ''
+  assign nav_max_value = ''
+  if section.settings.content_width == 'narrow'
+    assign nav_max_value = '96rem'
+  elsif section.settings.content_width == 'wide'
+    assign nav_max_value = '144rem'
+  endif
+  if nav_max_value != blank
+    assign nav_max = '--cg-max:' | append: nav_max_value | append: ';'
+  endif
+-%}
+
+{%- if section.settings.show_tools == false or nav_max_value != blank -%}
+  <style>
+    {%- unless section.settings.show_tools %}
+    .cg-page .section-header .xo-header__right { display: none !important; }
+    {%- endunless %}
+    {%- if nav_max_value != blank %}
+    .cg-page .section-header .xo-header__right { inset-inline-end: max(1.6rem, calc((100vw - {{ nav_max_value }}) / 2)); }
+    {%- endif %}
+  </style>
+{%- endif -%}
+
+<header class="cg cg-nav{% if section.settings.custom_class != blank %} {{ section.settings.custom_class | escape }}{% endif %}" data-cg-nav{% if nav_max != blank %} style="{{ nav_max }}"{% endif %}>
+  <div class="cg__inner cg-nav__bar">
+    <a
+      class="cg-nav__brand"
+      href="{{ routes.root_url }}"
+      aria-label="{{ shop.name | escape }} — {{ 'general.home' | t }}"
+    >
+      {%- if logo != blank -%}
+        {{
+          logo
+          | image_url: width: 160
+          | image_tag:
+            class: 'cg-nav__logo',
+            widths: '80, 120, 160',
+            sizes: '80px',
+            alt: shop.name,
+            loading: 'eager',
+            decoding: 'async'
+        }}
+      {%- else -%}
+        <span class="cg-nav__wordmark">{{ shop.name | escape }}</span>
+      {%- endif -%}
+    </a>
+
+    {%- if link_count > 0 -%}
+      <nav class="cg-nav__page" aria-label="{{ 'sections.compound_guide.section_nav_label' | t }}">
+        <ul class="cg-nav__links">
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'link' and block.settings.label != blank and block.settings.href != blank -%}
+              <li {{ block.shopify_attributes }}>
+                <a data-cg-nav-link href="{{ block.settings.href | escape }}">{{ block.settings.label | escape }}</a>
+              </li>
+            {%- endif -%}
+          {%- endfor -%}
+        </ul>
+      </nav>
+    {%- endif -%}
+
+    <div class="cg-nav__tools" data-cg-nav-tools></div>
+  </div>
+</header>
+
+{%- if show_crumbs -%}
+  <nav class="cg cg--dark cg-nav-crumbs" aria-label="{{ 'sections.compound_guide.breadcrumb_label' | t }}"{% if nav_max != blank %} style="{{ nav_max }}"{% endif %}>
+    <ol class="cg__inner cg-nav__crumbs">
+      <li><a href="{{ routes.root_url }}">{{ home_label | escape }}</a></li>
+      {%- if parent_label != blank -%}
+        <li>
+          {%- if section.settings.parent_href != blank -%}
+            <a href="{{ section.settings.parent_href }}">{{ parent_label | escape }}</a>
+          {%- else -%}
+            <span>{{ parent_label | escape }}</span>
+          {%- endif -%}
+        </li>
+      {%- endif -%}
+      <li><span aria-current="page">{{ current_label | escape }}</span></li>
+    </ol>
+  </nav>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Compound nav",
+  "tag": "div",
+  "class": "section-compound-nav",
+  "enabled_on": { "templates": ["page"] },
+  "settings": [
+    { "type": "text", "id": "home_label", "label": "Home label", "default": "Home" },
+    { "type": "text", "id": "parent_label", "label": "Parent crumb", "default": "Compounds" },
+    { "type": "url", "id": "parent_href", "label": "Parent crumb link" },
+    { "type": "text", "id": "current_label", "label": "Current crumb", "info": "Leave blank to use the page title." },
+    { "type": "header", "content": "Layout" },
+    { "type": "checkbox", "id": "show_logo", "label": "Show logo", "default": true, "info": "Uses the theme logo. Falls back to the store name." },
+    { "type": "checkbox", "id": "show_tools", "label": "Show search, account and cart", "default": true },
+    { "type": "checkbox", "id": "show_crumbs", "label": "Show breadcrumb bar", "default": true },
+    { "type": "select", "id": "content_width", "label": "Bar width", "options": [
+      { "value": "narrow", "label": "Narrow" },
+      { "value": "default", "label": "Default" },
+      { "value": "wide", "label": "Wide" }
+    ], "default": "default" },
+    { "type": "text", "id": "custom_class", "label": "Custom CSS class", "info": "Optional hook for bespoke styling." }
+  ],
+  "blocks": [
+    {
+      "type": "link",
+      "name": "Section link",
+      "settings": [
+        { "type": "text", "id": "label", "label": "Label" },
+        { "type": "text", "id": "href", "label": "Link", "info": "Use a URL or in-page anchor such as #compound-products." }
+      ]
+    }
+  ],
+  "presets": [{ "name": "Compound nav" }]
+}
+{% endschema %}

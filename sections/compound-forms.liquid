@@ -1,0 +1,173 @@
+{% render 'compound-guide-css' %}
+
+{%- liquid
+  assign cg_anchor = section.settings.anchor_id | default: 'compound-compare' | handleize
+  assign form_count = 0
+  assign format_count = 0
+  for block in section.blocks
+    if block.type == 'form' and block.settings.title != blank
+      assign form_count = form_count | plus: 1
+    endif
+    if block.type == 'format' and block.settings.title != blank
+      assign format_count = format_count | plus: 1
+    endif
+  endfor
+-%}
+
+{%- if section.settings.heading != blank or form_count > 0 or format_count > 0 -%}
+{%- liquid
+  assign extra_classes = ''
+  unless section.settings.show_glyphs
+    assign extra_classes = 'cg-forms--no-glyph'
+  endunless
+-%}
+<section
+  id="{{ cg_anchor }}"
+  {% render 'compound-section-attrs', section: section, base: 'cg-forms', extra: extra_classes %}
+  aria-labelledby="cg-forms-heading-{{ section.id }}"
+>
+  <div class="cg__inner">
+    <div class="cg__intro">
+      {%- if section.settings.kicker != blank -%}
+        <p class="cg__kicker">{{ section.settings.kicker | escape }}</p>
+      {%- endif -%}
+      {%- if section.settings.heading != blank -%}
+        <h2 class="cg__heading" id="cg-forms-heading-{{ section.id }}">{{ section.settings.heading | escape }}</h2>
+      {%- endif -%}
+      {%- if section.settings.subheading != blank -%}
+        <p class="cg__sub">{{ section.settings.subheading | escape }}</p>
+      {%- endif -%}
+    </div>
+
+    <div class="cg-forms__bands{% if section.settings.bands_layout == 'stacked' %} cg-forms__bands--stacked{% endif %}" aria-label="{{ 'sections.compound_guide.compare_label' | t }}">
+      {%- if form_count > 0 -%}
+        <div class="cg-forms__band">
+          <h3>{{ section.settings.forms_heading | default: 'Chemical form' | escape }}</h3>
+          {%- if section.settings.forms_contrast != blank -%}
+            <p class="cg-forms__contrast">{{ section.settings.forms_contrast | escape }}</p>
+          {%- endif -%}
+          <ul class="cg-forms__list" aria-label="{{ 'sections.compound_guide.forms_label' | t }}">
+            {%- for block in section.blocks -%}
+              {%- if block.type == 'form' and block.settings.title != blank -%}
+                <li class="cg-forms__card" data-glyph="{{ block.settings.filter_value | handleize }}" {{ block.shopify_attributes }}>
+                  <span class="cg-forms__glyph" aria-hidden="true"></span>
+                  <h4>{{ block.settings.title | escape }}</h4>
+                  {%- if block.settings.differentiator != blank -%}
+                    <p class="cg-forms__diff">{{ block.settings.differentiator | escape }}</p>
+                  {%- endif -%}
+                  {%- if block.settings.body != blank -%}
+                    <p class="cg-forms__note">{{ block.settings.body | escape }}</p>
+                  {%- endif -%}
+                  {%- if block.settings.filter_value != blank -%}
+                    <a class="cg__text-link" href="?form={{ block.settings.filter_value | url_encode }}#compound-products" data-cg-set-form="{{ block.settings.filter_value | escape }}">{{ block.settings.link_label | default: 'See matching products' | escape }}</a>
+                  {%- endif -%}
+                </li>
+              {%- endif -%}
+            {%- endfor -%}
+          </ul>
+        </div>
+      {%- endif -%}
+
+      {%- if format_count > 0 -%}
+        <div class="cg-forms__band">
+          <h3>{{ section.settings.formats_heading | default: 'Product format' | escape }}</h3>
+          {%- if section.settings.formats_contrast != blank -%}
+            <p class="cg-forms__contrast">{{ section.settings.formats_contrast | escape }}</p>
+          {%- endif -%}
+          <ul class="cg-forms__list" aria-label="{{ 'sections.compound_guide.formats_label' | t }}">
+            {%- for block in section.blocks -%}
+              {%- if block.type == 'format' and block.settings.title != blank -%}
+                <li class="cg-forms__card" data-glyph="{{ block.settings.filter_value | handleize }}" {{ block.shopify_attributes }}>
+                  <span class="cg-forms__glyph" aria-hidden="true"></span>
+                  <h4>{{ block.settings.title | escape }}</h4>
+                  {%- if block.settings.differentiator != blank -%}
+                    <p class="cg-forms__diff">{{ block.settings.differentiator | escape }}</p>
+                  {%- endif -%}
+                  {%- if block.settings.body != blank -%}
+                    <p class="cg-forms__note">{{ block.settings.body | escape }}</p>
+                  {%- endif -%}
+                  {%- if block.settings.filter_value != blank -%}
+                    <a class="cg__text-link" href="?fmt={{ block.settings.filter_value | url_encode }}#compound-products" data-cg-set-format="{{ block.settings.filter_value | escape }}">{{ block.settings.link_label | default: 'See matching products' | escape }}</a>
+                  {%- endif -%}
+                </li>
+              {%- endif -%}
+            {%- endfor -%}
+          </ul>
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Compound forms",
+  "tag": "section",
+  "class": "section-compound-forms",
+  "enabled_on": { "templates": ["page"] },
+  "settings": [
+    { "type": "text", "id": "anchor_id", "label": "Anchor ID", "default": "compound-compare" },
+    { "type": "text", "id": "kicker", "label": "Kicker", "default": "Compare" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Two forms. Two formats." },
+    { "type": "textarea", "id": "subheading", "label": "Subheading", "default": "Pick a form, then a format. Each pair differs by one thing." },
+    { "type": "text", "id": "forms_heading", "label": "Forms column heading", "default": "Chemical form" },
+    { "type": "text", "id": "forms_contrast", "label": "Forms one-line contrast", "default": "Which version of the compound it is.", "info": "One sentence under the column heading." },
+    { "type": "text", "id": "formats_heading", "label": "Formats column heading", "default": "Product format" },
+    { "type": "text", "id": "formats_contrast", "label": "Formats one-line contrast", "default": "How it is supplied." },
+    { "type": "header", "content": "Layout" },
+    { "type": "select", "id": "bands_layout", "label": "Columns (desktop)", "options": [
+      { "value": "side", "label": "Forms and formats side by side" },
+      { "value": "stacked", "label": "Stacked" }
+    ], "default": "side" },
+    { "type": "checkbox", "id": "show_glyphs", "label": "Show card glyphs", "default": true },
+    { "type": "select", "id": "tone", "label": "Background", "options": [
+      { "value": "paper", "label": "Paper" },
+      { "value": "white", "label": "White" }
+    ], "default": "paper" },
+    { "type": "select", "id": "heading_size", "label": "Heading size", "options": [
+      { "value": "small", "label": "Small" },
+      { "value": "default", "label": "Default" },
+      { "value": "large", "label": "Large" }
+    ], "default": "default" },
+    { "type": "select", "id": "intro_align", "label": "Intro alignment", "options": [
+      { "value": "left", "label": "Left" },
+      { "value": "center", "label": "Center" }
+    ], "default": "left" },
+    { "type": "select", "id": "content_width", "label": "Content width", "options": [
+      { "value": "narrow", "label": "Narrow" },
+      { "value": "default", "label": "Default" },
+      { "value": "wide", "label": "Wide" }
+    ], "default": "default" },
+    { "type": "range", "id": "padding_top", "label": "Top spacing", "min": 0, "max": 200, "step": 10, "unit": "%", "default": 100, "info": "Scales the responsive section spacing. 100% is the theme default." },
+    { "type": "range", "id": "padding_bottom", "label": "Bottom spacing", "min": 0, "max": 200, "step": 10, "unit": "%", "default": 100 },
+    { "type": "checkbox", "id": "show_divider", "label": "Show top divider", "default": true, "info": "Hairline between this and the previous section." },
+    { "type": "text", "id": "custom_class", "label": "Custom CSS class", "info": "Optional hook for bespoke styling." }
+  ],
+  "blocks": [
+    {
+      "type": "form",
+      "name": "Chemical form",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Name" },
+        { "type": "text", "id": "differentiator", "label": "One-line differentiator", "info": "The single fact that separates this card from its pair, e.g. Mixes in water · sharper taste." },
+        { "type": "textarea", "id": "body", "label": "Explanation" },
+        { "type": "text", "id": "filter_value", "label": "Range filter value", "info": "Example: hcl or faa. Leave blank to hide the product-range link." },
+        { "type": "text", "id": "link_label", "label": "Range link label", "default": "See matching products" }
+      ]
+    },
+    {
+      "type": "format",
+      "name": "Product format",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Name" },
+        { "type": "text", "id": "differentiator", "label": "One-line differentiator", "info": "E.g. Pre-measured or You weigh it." },
+        { "type": "textarea", "id": "body", "label": "Explanation" },
+        { "type": "text", "id": "filter_value", "label": "Range filter value", "info": "Example: capsules or powder." },
+        { "type": "text", "id": "link_label", "label": "Range link label", "default": "See matching products" }
+      ]
+    }
+  ],
+  "presets": [{ "name": "Compound forms" }]
+}
+{% endschema %}

@@ -1,0 +1,173 @@
+{% render 'compound-guide-css' %}
+
+{%- liquid
+  assign cg_anchor = section.settings.anchor_id | default: 'faq' | handleize
+  assign visible_count = 0
+  assign product_count = 0
+  assign safety_count = 0
+  assign ordering_count = 0
+  for block in section.blocks
+    if block.type == 'qa' and block.settings.question != blank and block.settings.answer != blank
+      assign visible_count = visible_count | plus: 1
+      if block.settings.group == 'safety'
+        assign safety_count = safety_count | plus: 1
+      elsif block.settings.group == 'ordering'
+        assign ordering_count = ordering_count | plus: 1
+      else
+        assign product_count = product_count | plus: 1
+      endif
+    endif
+  endfor
+-%}
+
+{%- if section.settings.heading != blank or visible_count > 0 -%}
+<section
+  id="{{ cg_anchor }}"
+  {% render 'compound-section-attrs', section: section, base: 'cg-faq' %}
+  data-cg-faq
+  aria-labelledby="cg-faq-heading-{{ section.id }}"
+>
+  <div class="cg__inner">
+    <div class="cg__intro">
+      {%- if section.settings.kicker != blank -%}
+        <p class="cg__kicker">{{ section.settings.kicker | escape }}</p>
+      {%- endif -%}
+      {%- if section.settings.heading != blank -%}
+        <h2 class="cg__heading" id="cg-faq-heading-{{ section.id }}">{{ section.settings.heading | escape }}</h2>
+      {%- endif -%}
+      {%- if section.settings.subheading != blank -%}
+        <p class="cg__sub">{{ section.settings.subheading | escape }}</p>
+      {%- endif -%}
+    </div>
+
+    {%- assign group_total = 0 -%}
+    {%- if product_count > 0 -%}{%- assign group_total = group_total | plus: 1 -%}{%- endif -%}
+    {%- if safety_count > 0 -%}{%- assign group_total = group_total | plus: 1 -%}{%- endif -%}
+    {%- if ordering_count > 0 -%}{%- assign group_total = group_total | plus: 1 -%}{%- endif -%}
+    {%- if section.settings.show_chips and group_total > 1 -%}
+      <nav class="cg-faq__chips" aria-label="{{ 'sections.compound_guide.faq_groups_label' | t }}">
+        <ul>
+          {%- if product_count > 0 -%}
+            <li><a href="#{{ cg_anchor }}-product" data-cg-faq-chip>{{ section.settings.product_heading | default: 'Product details' | escape }}{% if section.settings.show_counts %} <span>{{ product_count }}</span>{% endif %}</a></li>
+          {%- endif -%}
+          {%- if safety_count > 0 -%}
+            <li><a href="#{{ cg_anchor }}-safety" data-cg-faq-chip>{{ section.settings.safety_heading | default: 'Safety' | escape }}{% if section.settings.show_counts %} <span>{{ safety_count }}</span>{% endif %}</a></li>
+          {%- endif -%}
+          {%- if ordering_count > 0 -%}
+            <li><a href="#{{ cg_anchor }}-ordering" data-cg-faq-chip>{{ section.settings.ordering_heading | default: 'Ordering' | escape }}{% if section.settings.show_counts %} <span>{{ ordering_count }}</span>{% endif %}</a></li>
+          {%- endif -%}
+        </ul>
+      </nav>
+    {%- endif -%}
+    {%- assign faq_opened = false -%}
+
+    {%- if product_count > 0 -%}
+      <div class="cg-faq__group" id="{{ cg_anchor }}-product">
+        <h3>{{ section.settings.product_heading | default: 'Product details' | escape }}</h3>
+        <div class="cg-faq__list">
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'qa' and block.settings.group == 'product' and block.settings.question != blank and block.settings.answer != blank -%}
+              <details {{ block.shopify_attributes }}{% if section.settings.open_first and faq_opened == false %} open{% assign faq_opened = true %}{% endif %}>
+                <summary>{{ block.settings.question | escape }}</summary>
+                <div class="cg-faq__answer">{{ block.settings.answer }}</div>
+              </details>
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+      </div>
+    {%- endif -%}
+
+    {%- if safety_count > 0 -%}
+      <div class="cg-faq__group" id="{{ cg_anchor }}-safety">
+        <h3>{{ section.settings.safety_heading | default: 'Safety' | escape }}</h3>
+        <div class="cg-faq__list">
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'qa' and block.settings.group == 'safety' and block.settings.question != blank and block.settings.answer != blank -%}
+              <details {{ block.shopify_attributes }}{% if section.settings.open_first and faq_opened == false %} open{% assign faq_opened = true %}{% endif %}>
+                <summary>{{ block.settings.question | escape }}</summary>
+                <div class="cg-faq__answer">{{ block.settings.answer }}</div>
+              </details>
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+      </div>
+    {%- endif -%}
+
+    {%- if ordering_count > 0 -%}
+      <div class="cg-faq__group" id="{{ cg_anchor }}-ordering">
+        <h3>{{ section.settings.ordering_heading | default: 'Ordering' | escape }}</h3>
+        <div class="cg-faq__list">
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'qa' and block.settings.group == 'ordering' and block.settings.question != blank and block.settings.answer != blank -%}
+              <details {{ block.shopify_attributes }}{% if section.settings.open_first and faq_opened == false %} open{% assign faq_opened = true %}{% endif %}>
+                <summary>{{ block.settings.question | escape }}</summary>
+                <div class="cg-faq__answer">{{ block.settings.answer }}</div>
+              </details>
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+      </div>
+    {%- endif -%}
+  </div>
+</section>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Compound FAQ",
+  "tag": "section",
+  "class": "section-compound-faq",
+  "enabled_on": { "templates": ["page"] },
+  "settings": [
+    { "type": "text", "id": "anchor_id", "label": "Anchor ID", "default": "faq" },
+    { "type": "text", "id": "kicker", "label": "Kicker", "default": "Questions" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Questions before you choose." },
+    { "type": "textarea", "id": "subheading", "label": "Subheading" },
+    { "type": "text", "id": "product_heading", "label": "Product group heading", "default": "Product details" },
+    { "type": "text", "id": "safety_heading", "label": "Safety group heading", "default": "Safety" },
+    { "type": "text", "id": "ordering_heading", "label": "Ordering group heading", "default": "Ordering" },
+    { "type": "header", "content": "Layout" },
+    { "type": "checkbox", "id": "show_chips", "label": "Show sticky group chips", "default": true },
+    { "type": "checkbox", "id": "show_counts", "label": "Show question counts in chips", "default": true },
+    { "type": "checkbox", "id": "open_first", "label": "Expand the first question by default", "default": false },
+    { "type": "select", "id": "tone", "label": "Background", "options": [
+      { "value": "paper", "label": "Paper" },
+      { "value": "white", "label": "White" }
+    ], "default": "paper" },
+    { "type": "select", "id": "heading_size", "label": "Heading size", "options": [
+      { "value": "small", "label": "Small" },
+      { "value": "default", "label": "Default" },
+      { "value": "large", "label": "Large" }
+    ], "default": "default" },
+    { "type": "select", "id": "intro_align", "label": "Intro alignment", "options": [
+      { "value": "left", "label": "Left" },
+      { "value": "center", "label": "Center" }
+    ], "default": "left" },
+    { "type": "select", "id": "content_width", "label": "Content width", "options": [
+      { "value": "narrow", "label": "Narrow" },
+      { "value": "default", "label": "Default" },
+      { "value": "wide", "label": "Wide" }
+    ], "default": "default" },
+    { "type": "range", "id": "padding_top", "label": "Top spacing", "min": 0, "max": 200, "step": 10, "unit": "%", "default": 100, "info": "Scales the responsive section spacing. 100% is the theme default." },
+    { "type": "range", "id": "padding_bottom", "label": "Bottom spacing", "min": 0, "max": 200, "step": 10, "unit": "%", "default": 100 },
+    { "type": "checkbox", "id": "show_divider", "label": "Show top divider", "default": true, "info": "Hairline between this and the previous section." },
+    { "type": "text", "id": "custom_class", "label": "Custom CSS class", "info": "Optional hook for bespoke styling." }
+  ],
+  "blocks": [
+    {
+      "type": "qa",
+      "name": "Question",
+      "settings": [
+        { "type": "select", "id": "group", "label": "Group", "options": [
+          { "value": "product", "label": "Product details" },
+          { "value": "safety", "label": "Safety" },
+          { "value": "ordering", "label": "Ordering" }
+        ], "default": "product" },
+        { "type": "text", "id": "question", "label": "Question" },
+        { "type": "richtext", "id": "answer", "label": "Answer" }
+      ]
+    }
+  ],
+  "presets": [{ "name": "Compound FAQ" }]
+}
+{% endschema %}

@@ -1,0 +1,163 @@
+{% render 'compound-guide-css' %}
+
+{%- liquid
+  assign cg_anchor = section.settings.anchor_id | default: 'compound-research' | handleize
+  assign alias_id = section.settings.alias_id | handleize
+  assign topic_count = 0
+  for block in section.blocks
+    if block.type == 'topic' and block.settings.question != blank
+      assign topic_count = topic_count | plus: 1
+    endif
+  endfor
+-%}
+
+{%- if section.settings.heading != blank or topic_count > 0 -%}
+<section
+  id="{{ cg_anchor }}"
+  {% render 'compound-section-attrs', section: section, base: 'cg-research' %}
+  data-cg-research
+  aria-labelledby="cg-research-heading-{{ section.id }}"
+>
+  {%- if alias_id != blank -%}
+    <div id="{{ alias_id }}" hidden></div>
+  {%- endif -%}
+  <div class="cg__inner">
+    <div class="cg__intro">
+      {%- if section.settings.kicker != blank -%}
+        <p class="cg__kicker">{{ section.settings.kicker | escape }}</p>
+      {%- endif -%}
+      {%- if section.settings.heading != blank -%}
+        <h2 class="cg__heading" id="cg-research-heading-{{ section.id }}">{{ section.settings.heading | escape }}</h2>
+      {%- endif -%}
+      {%- if section.settings.subheading != blank -%}
+        <p class="cg__sub">{{ section.settings.subheading | escape }}</p>
+      {%- endif -%}
+    </div>
+
+    {%- if topic_count > 0 -%}
+      <ul class="cg-research__list">
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'topic' and block.settings.question != blank -%}
+            {%- assign evidence_key = 'sections.compound_guide.evidence_review' -%}
+            {%- if block.settings.evidence_type == 'human' -%}
+              {%- assign evidence_key = 'sections.compound_guide.evidence_human' -%}
+            {%- elsif block.settings.evidence_type == 'animal' -%}
+              {%- assign evidence_key = 'sections.compound_guide.evidence_animal' -%}
+            {%- elsif block.settings.evidence_type == 'anecdotal' -%}
+              {%- assign evidence_key = 'sections.compound_guide.evidence_anecdotal' -%}
+            {%- endif -%}
+            <li class="cg-research__item" {{ block.shopify_attributes }}>
+              {%- if section.settings.show_chips -%}
+                <p class="cg-research__meta">
+                  <span class="cg-research__chip">
+                    {{ evidence_key | t }}
+                    {%- if block.settings.year != blank %} · {{ block.settings.year | escape }}{% endif -%}
+                  </span>
+                </p>
+              {%- endif -%}
+              <h3>{{ block.settings.question | escape }}</h3>
+              {%- if block.settings.summary != blank or block.settings.limitation != blank -%}
+                <div class="cg-research__split{% if section.settings.split_layout == 'stacked' %} cg-research__split--stacked{% endif %}">
+                  {%- if block.settings.summary != blank -%}
+                    <div class="cg-research__col">
+                      <p class="cg-research__col-label">{{ 'sections.compound_guide.describes_label' | t }}</p>
+                      <p>{{ block.settings.summary | escape }}</p>
+                    </div>
+                  {%- endif -%}
+                  {%- if block.settings.limitation != blank -%}
+                    <div class="cg-research__col cg-research__col--limit">
+                      <p class="cg-research__col-label">{{ 'sections.compound_guide.not_shown_label' | t }}</p>
+                      <p>{{ block.settings.limitation | escape }}</p>
+                    </div>
+                  {%- endif -%}
+                </div>
+              {%- endif -%}
+              {%- if block.settings.source_label != blank and block.settings.source_url != blank -%}
+                <a class="cg__text-link" href="{{ block.settings.source_url }}" rel="noopener" target="_blank">{{ block.settings.source_label | escape }}</a>
+              {%- endif -%}
+              {%- if block.settings.detail != blank -%}
+                <details>
+                  <summary>{{ block.settings.detail_label | default: 'Read more' | escape }}</summary>
+                  <div class="cg-research__detail">{{ block.settings.detail }}</div>
+                </details>
+              {%- endif -%}
+            </li>
+          {%- endif -%}
+        {%- endfor -%}
+      </ul>
+    {%- endif -%}
+    {%- if section.settings.note != blank -%}
+      <p class="cg-research__note">{{ section.settings.note | escape }}</p>
+    {%- endif -%}
+  </div>
+</section>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Compound research",
+  "tag": "section",
+  "class": "section-compound-research",
+  "enabled_on": { "templates": ["page"] },
+  "settings": [
+    { "type": "text", "id": "anchor_id", "label": "Anchor ID", "default": "compound-research" },
+    { "type": "text", "id": "alias_id", "label": "Extra anchor ID", "default": "evidence" },
+    { "type": "text", "id": "kicker", "label": "Kicker", "default": "Evidence" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "What does the evidence support?" },
+    { "type": "textarea", "id": "subheading", "label": "Subheading", "default": "Understand the findings, their limitations and the questions that remain." },
+    { "type": "textarea", "id": "note", "label": "Note", "default": "Educational only. Not medical advice." },
+    { "type": "paragraph", "content": "Add a topic only when you have a verified source. Do not treat a review as a clinical trial or invent effect sizes." },
+    { "type": "header", "content": "Layout" },
+    { "type": "checkbox", "id": "show_chips", "label": "Show evidence chips", "default": true },
+    { "type": "select", "id": "split_layout", "label": "Describes / not shown layout", "options": [
+      { "value": "columns", "label": "Two columns (desktop)" },
+      { "value": "stacked", "label": "Stacked" }
+    ], "default": "columns" },
+    { "type": "select", "id": "tone", "label": "Background", "options": [
+      { "value": "paper", "label": "Paper" },
+      { "value": "white", "label": "White" }
+    ], "default": "paper" },
+    { "type": "select", "id": "heading_size", "label": "Heading size", "options": [
+      { "value": "small", "label": "Small" },
+      { "value": "default", "label": "Default" },
+      { "value": "large", "label": "Large" }
+    ], "default": "default" },
+    { "type": "select", "id": "intro_align", "label": "Intro alignment", "options": [
+      { "value": "left", "label": "Left" },
+      { "value": "center", "label": "Center" }
+    ], "default": "left" },
+    { "type": "select", "id": "content_width", "label": "Content width", "options": [
+      { "value": "narrow", "label": "Narrow" },
+      { "value": "default", "label": "Default" },
+      { "value": "wide", "label": "Wide" }
+    ], "default": "default" },
+    { "type": "range", "id": "padding_top", "label": "Top spacing", "min": 0, "max": 200, "step": 10, "unit": "%", "default": 100, "info": "Scales the responsive section spacing. 100% is the theme default." },
+    { "type": "range", "id": "padding_bottom", "label": "Bottom spacing", "min": 0, "max": 200, "step": 10, "unit": "%", "default": 100 },
+    { "type": "checkbox", "id": "show_divider", "label": "Show top divider", "default": true, "info": "Hairline between this and the previous section." },
+    { "type": "text", "id": "custom_class", "label": "Custom CSS class", "info": "Optional hook for bespoke styling." }
+  ],
+  "blocks": [
+    {
+      "type": "topic",
+      "name": "Research topic",
+      "settings": [
+        { "type": "text", "id": "question", "label": "Research question" },
+        { "type": "textarea", "id": "summary", "label": "What it describes" },
+        { "type": "select", "id": "evidence_type", "label": "Evidence type", "options": [
+          { "value": "review", "label": "Review" },
+          { "value": "human", "label": "Human study" },
+          { "value": "animal", "label": "Animal study" },
+          { "value": "anecdotal", "label": "Anecdotal report" }
+        ], "default": "review" },
+        { "type": "text", "id": "year", "label": "Publication year", "info": "Shown in the evidence chip, e.g. 2001." },
+        { "type": "textarea", "id": "limitation", "label": "What it does not show" },
+        { "type": "text", "id": "source_label", "label": "Source label" },
+        { "type": "url", "id": "source_url", "label": "Source URL" },
+        { "type": "text", "id": "detail_label", "label": "Detail label", "default": "Read more" },
+        { "type": "richtext", "id": "detail", "label": "Expandable detail" }
+      ]
+    }
+  ],
+  "presets": [{ "name": "Compound research" }]
+}
+{% endschema %}

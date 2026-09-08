@@ -1,0 +1,276 @@
+{% render 'compound-guide-css' %}
+
+{%- liquid
+  assign cg_anchor = section.settings.anchor_id | default: 'compound-products' | handleize
+  assign alias_id = section.settings.alias_id | handleize
+  assign product_count = 0
+  assign form_hcl = false
+  assign form_faa = false
+  assign form_mixed = false
+  assign format_capsules = false
+  assign format_powder = false
+  assign format_pack = false
+  for block in section.blocks
+    if block.type == 'product' and block.settings.product != blank
+      assign product_count = product_count | plus: 1
+      if block.settings.form == 'hcl'
+        assign form_hcl = true
+      elsif block.settings.form == 'faa'
+        assign form_faa = true
+      elsif block.settings.form == 'mixed'
+        assign form_mixed = true
+      endif
+      if block.settings.format == 'capsules'
+        assign format_capsules = true
+      elsif block.settings.format == 'powder'
+        assign format_powder = true
+      elsif block.settings.format == 'pack'
+        assign format_pack = true
+      endif
+    endif
+  endfor
+  assign form_options = 0
+  if form_hcl
+    assign form_options = form_options | plus: 1
+  endif
+  if form_faa
+    assign form_options = form_options | plus: 1
+  endif
+  if form_mixed
+    assign form_options = form_options | plus: 1
+  endif
+  assign format_options = 0
+  if format_capsules
+    assign format_options = format_options | plus: 1
+  endif
+  if format_powder
+    assign format_options = format_options | plus: 1
+  endif
+  if format_pack
+    assign format_options = format_options | plus: 1
+  endif
+-%}
+
+{%- if section.settings.heading != blank or product_count > 0 -%}
+<section
+  id="{{ cg_anchor }}"
+  {% render 'compound-section-attrs', section: section, base: 'cg-range' %}
+  data-cg-range
+  aria-labelledby="cg-range-heading-{{ section.id }}"
+>
+  {%- if alias_id != blank -%}
+    <div id="{{ alias_id }}" hidden></div>
+  {%- endif -%}
+  <div class="cg__inner">
+    <div class="cg__intro">
+      {%- if section.settings.kicker != blank -%}
+        <p class="cg__kicker">{{ section.settings.kicker | escape }}</p>
+      {%- endif -%}
+      {%- if section.settings.heading != blank -%}
+        <h2 class="cg__heading" id="cg-range-heading-{{ section.id }}">{{ section.settings.heading | escape }}</h2>
+      {%- endif -%}
+      {%- if section.settings.subheading != blank -%}
+        <p class="cg__sub">{{ section.settings.subheading | escape }}</p>
+      {%- endif -%}
+    </div>
+
+    {%- if product_count > 0 -%}
+      {%- liquid
+        unless section.settings.show_filters
+          assign form_options = 0
+          assign format_options = 0
+        endunless
+      -%}
+      <div class="cg-range__toolbar"{% unless section.settings.show_filters or section.settings.show_count %} hidden{% endunless %}>
+        <div class="cg-range__filters">
+          {%- if form_options > 1 -%}
+            <div class="cg-range__filter-group" role="group" aria-label="{{ 'sections.compound_guide.filter_form' | t }}">
+              <p>{{ 'sections.compound_guide.filter_form' | t }}</p>
+              <button type="button" class="cg-range__chip" data-filter-form="all" aria-pressed="true">{{ 'sections.compound_guide.filter_all' | t }}</button>
+              {%- if form_hcl -%}
+                <button type="button" class="cg-range__chip" data-filter-form="hcl" aria-pressed="false">HCl</button>
+              {%- endif -%}
+              {%- if form_faa -%}
+                <button type="button" class="cg-range__chip" data-filter-form="faa" aria-pressed="false">FAA</button>
+              {%- endif -%}
+            </div>
+          {%- endif -%}
+          {%- if format_options > 1 -%}
+            <div class="cg-range__filter-group" role="group" aria-label="{{ 'sections.compound_guide.filter_format' | t }}">
+              <p>{{ 'sections.compound_guide.filter_format' | t }}</p>
+              <button type="button" class="cg-range__chip" data-filter-format="all" aria-pressed="true">{{ 'sections.compound_guide.filter_all' | t }}</button>
+              {%- if format_capsules -%}
+                <button type="button" class="cg-range__chip" data-filter-format="capsules" aria-pressed="false">{{ section.settings.capsules_label | default: 'Capsules' | escape }}</button>
+              {%- endif -%}
+              {%- if format_powder -%}
+                <button type="button" class="cg-range__chip" data-filter-format="powder" aria-pressed="false">{{ section.settings.powder_label | default: 'Powder' | escape }}</button>
+              {%- endif -%}
+              {%- if format_pack -%}
+                <button type="button" class="cg-range__chip" data-filter-format="pack" aria-pressed="false">{{ section.settings.pack_label | default: 'Pack' | escape }}</button>
+              {%- endif -%}
+            </div>
+          {%- endif -%}
+        </div>
+        <div class="cg-range__meta">
+          <p
+            data-cg-count
+            aria-live="polite"
+            {% unless section.settings.show_count %}hidden{% endunless %}
+            data-one="{{ 'sections.compound_guide.results_one' | t: count: '__N__' }}"
+            data-other="{{ 'sections.compound_guide.results_other' | t: count: '__N__' }}"
+          >
+            {{ 'sections.compound_guide.results_other' | t: count: product_count }}
+          </p>
+          {%- if form_options > 1 or format_options > 1 -%}
+            <button type="button" class="cg__text-link" data-filter-reset>{{ 'sections.compound_guide.filter_reset' | t }}</button>
+          {%- endif -%}
+        </div>
+      </div>
+
+      <ul class="cg-range__grid" data-cg-grid data-count="{{ product_count }}"{% if section.settings.columns_desktop != blank and section.settings.columns_desktop != '3' %} style="--cg-range-cols: {{ section.settings.columns_desktop }};"{% endif %}>
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'product' and block.settings.product != blank -%}
+            {%- assign product = block.settings.product -%}
+            <li {{ block.shopify_attributes }}>
+              {%- if product == blank -%}
+                <p class="cg-range__error">{{ 'sections.compound_guide.unavailable_market' | t }}</p>
+              {%- else -%}
+                {% render 'compound-product-card',
+                  product: product,
+                  form: block.settings.form,
+                  format: block.settings.format,
+                  form_label: block.settings.form_label,
+                  format_label: block.settings.format_label,
+                  dose_value: block.settings.dose_value,
+                  dose_unit: block.settings.dose_unit,
+                  amount_label: block.settings.amount_label,
+                  count_label: block.settings.count_label,
+                  show_restock: section.settings.show_restock
+                %}
+              {%- endif -%}
+            </li>
+          {%- endif -%}
+        {%- endfor -%}
+      </ul>
+      <p class="cg-range__empty" data-cg-empty hidden>{{ 'sections.compound_guide.no_matches' | t }}</p>
+
+      {%- liquid
+        assign jump_count = 0
+        if section.settings.jump_1_label != blank and section.settings.jump_1_href != blank
+          assign jump_count = jump_count | plus: 1
+        endif
+        if section.settings.jump_2_label != blank and section.settings.jump_2_href != blank
+          assign jump_count = jump_count | plus: 1
+        endif
+        if section.settings.jump_3_label != blank and section.settings.jump_3_href != blank
+          assign jump_count = jump_count | plus: 1
+        endif
+      -%}
+      {%- if section.settings.jump_text != blank and jump_count > 0 -%}
+        <nav class="cg-range__jump" aria-label="{{ section.settings.jump_text | escape }}">
+          <p class="cg-range__jump-text">{{ section.settings.jump_text | escape }}</p>
+          <ul class="cg-range__jump-links">
+            {%- if section.settings.jump_1_label != blank and section.settings.jump_1_href != blank -%}
+              <li><a href="{{ section.settings.jump_1_href | escape }}">{{ section.settings.jump_1_label | escape }}</a></li>
+            {%- endif -%}
+            {%- if section.settings.jump_2_label != blank and section.settings.jump_2_href != blank -%}
+              <li><a href="{{ section.settings.jump_2_href | escape }}">{{ section.settings.jump_2_label | escape }}</a></li>
+            {%- endif -%}
+            {%- if section.settings.jump_3_label != blank and section.settings.jump_3_href != blank -%}
+              <li><a href="{{ section.settings.jump_3_href | escape }}">{{ section.settings.jump_3_label | escape }}</a></li>
+            {%- endif -%}
+          </ul>
+        </nav>
+      {%- endif -%}
+    {%- else -%}
+      <p class="cg-range__error">{{ 'sections.compound_guide.catalogue_error' | t }}</p>
+    {%- endif -%}
+  </div>
+</section>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Compound range",
+  "tag": "section",
+  "class": "section-compound-range",
+  "enabled_on": { "templates": ["page"] },
+  "settings": [
+    { "type": "text", "id": "anchor_id", "label": "Anchor ID", "default": "compound-products" },
+    { "type": "text", "id": "alias_id", "label": "Extra anchor ID", "default": "shop-phenibut", "info": "Keeps existing inbound links such as #shop-phenibut." },
+    { "type": "text", "id": "kicker", "label": "Kicker", "default": "Range" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Explore the range." },
+    { "type": "textarea", "id": "subheading", "label": "Subheading", "default": "Compare specifications and current availability." },
+    { "type": "text", "id": "capsules_label", "label": "Capsules filter label", "default": "Capsules" },
+    { "type": "text", "id": "powder_label", "label": "Powder filter label", "default": "Powder" },
+    { "type": "text", "id": "pack_label", "label": "Pack filter label", "default": "Pack" },
+    { "type": "header", "content": "Jump strip under the grid" },
+    { "type": "text", "id": "jump_text", "label": "Prompt", "default": "Still deciding?" },
+    { "type": "text", "id": "jump_1_label", "label": "Link 1 label", "default": "Safety" },
+    { "type": "text", "id": "jump_1_href", "label": "Link 1 anchor", "default": "#safety" },
+    { "type": "text", "id": "jump_2_label", "label": "Link 2 label", "default": "Evidence" },
+    { "type": "text", "id": "jump_2_href", "label": "Link 2 anchor", "default": "#compound-research" },
+    { "type": "text", "id": "jump_3_label", "label": "Link 3 label", "default": "Questions" },
+    { "type": "text", "id": "jump_3_href", "label": "Link 3 anchor", "default": "#faq" },
+    { "type": "header", "content": "Layout" },
+    { "type": "select", "id": "columns_desktop", "label": "Cards per row (desktop)", "options": [
+      { "value": "2", "label": "2" },
+      { "value": "3", "label": "3" },
+      { "value": "4", "label": "4" }
+    ], "default": "3" },
+    { "type": "checkbox", "id": "show_filters", "label": "Show form and format filters", "default": true },
+    { "type": "checkbox", "id": "show_count", "label": "Show result count", "default": true },
+    { "type": "checkbox", "id": "show_restock", "label": "Show restock form on sold-out cards", "default": true },
+    { "type": "select", "id": "tone", "label": "Background", "options": [
+      { "value": "paper", "label": "Paper" },
+      { "value": "white", "label": "White" }
+    ], "default": "paper" },
+    { "type": "select", "id": "heading_size", "label": "Heading size", "options": [
+      { "value": "small", "label": "Small" },
+      { "value": "default", "label": "Default" },
+      { "value": "large", "label": "Large" }
+    ], "default": "default" },
+    { "type": "select", "id": "intro_align", "label": "Intro alignment", "options": [
+      { "value": "left", "label": "Left" },
+      { "value": "center", "label": "Center" }
+    ], "default": "left" },
+    { "type": "select", "id": "content_width", "label": "Content width", "options": [
+      { "value": "narrow", "label": "Narrow" },
+      { "value": "default", "label": "Default" },
+      { "value": "wide", "label": "Wide" }
+    ], "default": "default" },
+    { "type": "range", "id": "padding_top", "label": "Top spacing", "min": 0, "max": 200, "step": 10, "unit": "%", "default": 100, "info": "Scales the responsive section spacing. 100% is the theme default." },
+    { "type": "range", "id": "padding_bottom", "label": "Bottom spacing", "min": 0, "max": 200, "step": 10, "unit": "%", "default": 100 },
+    { "type": "checkbox", "id": "show_divider", "label": "Show top divider", "default": true, "info": "Hairline between this and the previous section." },
+    { "type": "text", "id": "custom_class", "label": "Custom CSS class", "info": "Optional hook for bespoke styling." }
+  ],
+  "blocks": [
+    {
+      "type": "product",
+      "name": "Product",
+      "settings": [
+        { "type": "product", "id": "product", "label": "Product" },
+        { "type": "select", "id": "form", "label": "Chemical form", "options": [
+          { "value": "hcl", "label": "HCl" },
+          { "value": "faa", "label": "FAA" },
+          { "value": "mixed", "label": "Mixed / more than one" },
+          { "value": "none", "label": "Not specified" }
+        ], "info": "Required for filters. Do not infer from marketing copy." },
+        { "type": "select", "id": "format", "label": "Format", "options": [
+          { "value": "capsules", "label": "Capsules" },
+          { "value": "powder", "label": "Powder" },
+          { "value": "pack", "label": "Pack" },
+          { "value": "none", "label": "Not specified" }
+        ] },
+        { "type": "text", "id": "form_label", "label": "Form label shown on card", "info": "Example: HCl" },
+        { "type": "text", "id": "format_label", "label": "Format label shown on card", "info": "Example: Capsules" },
+        { "type": "text", "id": "dose_value", "label": "Dose number", "info": "Large number on the card, e.g. 250. Use the labeled amount only." },
+        { "type": "text", "id": "dose_unit", "label": "Dose unit", "default": "mg" },
+        { "type": "text", "id": "amount_label", "label": "Dose qualifier", "info": "Shown after the number, e.g. per capsule. Leave blank if the amount is not on the product." },
+        { "type": "text", "id": "count_label", "label": "Count or net weight", "info": "Use the labeled pack count or net weight only." }
+      ]
+    }
+  ],
+  "presets": [{ "name": "Compound range" }]
+}
+{% endschema %}

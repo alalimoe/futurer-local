@@ -1,0 +1,157 @@
+{% render 'compound-guide-css' %}
+
+{%- liquid
+  assign cg_anchor = section.settings.anchor_id | default: 'compound-delivery' | handleize
+  assign dest_count = 0
+  for block in section.blocks
+    if block.type == 'destination' and block.settings.label != blank
+      if block.settings.body != blank or block.settings.headline != blank
+        assign dest_count = dest_count | plus: 1
+      endif
+    endif
+  endfor
+  assign shipping_url = shop.shipping_policy.url
+  assign refund_url = shop.refund_policy.url
+  if section.settings.shipping_href != blank
+    assign shipping_url = section.settings.shipping_href
+  endif
+  if section.settings.returns_href != blank
+    assign refund_url = section.settings.returns_href
+  endif
+-%}
+
+{%- if section.settings.heading != blank or dest_count > 0 -%}
+<section
+  id="{{ cg_anchor }}"
+  {% render 'compound-section-attrs', section: section, base: 'cg-delivery' %}
+  data-cg-delivery
+  aria-labelledby="cg-delivery-heading-{{ section.id }}"
+>
+  <div class="cg__inner">
+    <div class="cg__intro">
+      {%- if section.settings.kicker != blank -%}
+        <p class="cg__kicker">{{ section.settings.kicker | escape }}</p>
+      {%- endif -%}
+      {%- if section.settings.heading != blank -%}
+        <h2 class="cg__heading" id="cg-delivery-heading-{{ section.id }}">{{ section.settings.heading | escape }}</h2>
+      {%- endif -%}
+      {%- if section.settings.subheading != blank -%}
+        <p class="cg__sub">{{ section.settings.subheading | escape }}</p>
+      {%- endif -%}
+    </div>
+
+    {%- if dest_count > 0 -%}
+      <div class="cg-delivery__tabs" role="group" aria-label="{{ 'sections.compound_guide.destination_label' | t }}">
+        {%- assign dest_index = 0 -%}
+        {%- for block in section.blocks -%}
+          {%- assign has_copy = false -%}
+          {%- if block.settings.body != blank or block.settings.headline != blank -%}{%- assign has_copy = true -%}{%- endif -%}
+          {%- if block.type == 'destination' and block.settings.label != blank and has_copy -%}
+            {%- assign dest_index = dest_index | plus: 1 -%}
+            <button
+              type="button"
+              data-cg-destination="{{ block.id }}"
+              aria-pressed="{% if dest_index == 1 %}true{% else %}false{% endif %}"
+            >
+              {{ block.settings.label | escape }}
+            </button>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+      {%- assign dest_index = 0 -%}
+      {%- for block in section.blocks -%}
+        {%- assign has_copy = false -%}
+        {%- if block.settings.body != blank or block.settings.headline != blank -%}{%- assign has_copy = true -%}{%- endif -%}
+        {%- if block.type == 'destination' and block.settings.label != blank and has_copy -%}
+          {%- assign dest_index = dest_index | plus: 1 -%}
+          <div
+            class="cg-delivery__panel{% if dest_index == 1 %} is-active{% endif %}"
+            data-cg-destination-panel="{{ block.id }}"
+            {{ block.shopify_attributes }}
+          >
+            {%- if block.settings.headline != blank -%}
+              <p class="cg-delivery__headline">{{ block.settings.headline | escape }}</p>
+            {%- endif -%}
+            {%- if block.settings.body != blank -%}
+              <div class="cg-delivery__body">{{ block.settings.body }}</div>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+      {%- endfor -%}
+    {%- endif -%}
+
+    {%- if section.settings.returns_summary != blank -%}
+      <p class="cg-research__note">{{ section.settings.returns_summary | escape }}</p>
+    {%- endif -%}
+
+    {%- if section.settings.show_policy_links -%}
+    <div class="cg-quality__actions">
+      {%- if shipping_url != blank and shipping_url == refund_url -%}
+        <a class="cg__text-link" href="{{ shipping_url }}">{{ 'sections.compound_guide.shipping_returns_policy' | t }}</a>
+      {%- else -%}
+        {%- if refund_url != blank -%}
+          <a class="cg__text-link" href="{{ refund_url }}">{{ 'sections.compound_guide.returns_policies' | t }}</a>
+        {%- endif -%}
+        {%- if shipping_url != blank -%}
+          <a class="cg__text-link" href="{{ shipping_url }}">{{ 'sections.compound_guide.shipping_policy' | t }}</a>
+        {%- endif -%}
+      {%- endif -%}
+    </div>
+    {%- endif -%}
+  </div>
+</section>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Compound delivery",
+  "tag": "section",
+  "class": "section-compound-delivery",
+  "enabled_on": { "templates": ["page"] },
+  "settings": [
+    { "type": "text", "id": "anchor_id", "label": "Anchor ID", "default": "compound-delivery" },
+    { "type": "text", "id": "kicker", "label": "Kicker", "default": "Delivery" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Delivery details for your order." },
+    { "type": "textarea", "id": "subheading", "label": "Subheading" },
+    { "type": "textarea", "id": "returns_summary", "label": "Returns summary", "info": "Use copy from the live returns policy. Do not invent destination restrictions or worldwide eligibility." },
+    { "type": "url", "id": "returns_href", "label": "Returns policy link" },
+    { "type": "url", "id": "shipping_href", "label": "Shipping policy link" },
+    { "type": "header", "content": "Layout" },
+    { "type": "checkbox", "id": "show_policy_links", "label": "Show shipping and returns policy links", "default": true },
+    { "type": "select", "id": "tone", "label": "Background", "options": [
+      { "value": "paper", "label": "Paper" },
+      { "value": "white", "label": "White" }
+    ], "default": "paper" },
+    { "type": "select", "id": "heading_size", "label": "Heading size", "options": [
+      { "value": "small", "label": "Small" },
+      { "value": "default", "label": "Default" },
+      { "value": "large", "label": "Large" }
+    ], "default": "default" },
+    { "type": "select", "id": "intro_align", "label": "Intro alignment", "options": [
+      { "value": "left", "label": "Left" },
+      { "value": "center", "label": "Center" }
+    ], "default": "left" },
+    { "type": "select", "id": "content_width", "label": "Content width", "options": [
+      { "value": "narrow", "label": "Narrow" },
+      { "value": "default", "label": "Default" },
+      { "value": "wide", "label": "Wide" }
+    ], "default": "default" },
+    { "type": "range", "id": "padding_top", "label": "Top spacing", "min": 0, "max": 200, "step": 10, "unit": "%", "default": 100, "info": "Scales the responsive section spacing. 100% is the theme default." },
+    { "type": "range", "id": "padding_bottom", "label": "Bottom spacing", "min": 0, "max": 200, "step": 10, "unit": "%", "default": 100 },
+    { "type": "checkbox", "id": "show_divider", "label": "Show top divider", "default": true, "info": "Hairline between this and the previous section." },
+    { "type": "text", "id": "custom_class", "label": "Custom CSS class", "info": "Optional hook for bespoke styling." }
+  ],
+  "blocks": [
+    {
+      "type": "destination",
+      "name": "Destination",
+      "settings": [
+        { "type": "text", "id": "label", "label": "Destination label" },
+        { "type": "text", "id": "headline", "label": "Headline", "info": "The one fact, large: e.g. 4 hours, Next day, Tracked from Dubai." },
+        { "type": "richtext", "id": "body", "label": "Verified delivery copy", "info": "Use announcement or policy copy only. Separate dispatch from delivery. Do not add countdowns." }
+      ]
+    }
+  ],
+  "presets": [{ "name": "Compound delivery" }]
+}
+{% endschema %}
