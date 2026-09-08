@@ -1089,6 +1089,7 @@
     var form   = gate.querySelector('[data-nq-gate-form]');
     var input  = gate.querySelector('#nqGateEmail');
     var status = gate.querySelector('[data-nq-gate-status]');
+    var skip   = gate.querySelector('[data-nq-gate-skip]');
 
     function setStatus(msg, state) {
       if (!status) return;
@@ -1107,6 +1108,12 @@
     }
 
     if (!form) { unlockQuiz(); return; }
+    if (skip) {
+      skip.addEventListener('click', function () {
+        gatedEmail = '';
+        unlockQuiz();
+      });
+    }
     form.addEventListener('submit', function (e) {
       e.preventDefault();
       var email = (input && input.value ? input.value : '').trim();

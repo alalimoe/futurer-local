@@ -22,6 +22,9 @@
         {%- if section.settings.quiz_subtitle != blank -%}
           <p class="nq-header__subtitle">{{ section.settings.quiz_subtitle }}</p>
         {%- endif -%}
+        {%- if section.settings.method_note != blank -%}
+          <div class="nq-header__method">{{ section.settings.method_note }}</div>
+        {%- endif -%}
       </div>
 
       {%- comment -%} ── Gate hero: benefits + email capture ── {%- endcomment -%}
@@ -75,6 +78,11 @@
                 {%- endif -%}
                 <p class="nq-capture__status" id="nqGateStatus" role="status" aria-live="polite" data-nq-gate-status></p>
               </form>
+              {%- if section.settings.allow_skip -%}
+                <button class="nq-gate__skip" type="button" data-nq-gate-skip>
+                  {{ section.settings.skip_label }}
+                </button>
+              {%- endif -%}
             </div>
             <div class="nq-gate__preview" aria-hidden="true">
               <span></span><span></span><span></span><span></span><span></span>
@@ -457,7 +465,13 @@
       "type": "text",
       "id": "quiz_subtitle",
       "label": "Quiz subtitle",
-      "default": "Answer 5 quick questions and we'll build a personalised stack for your goals, experience level, and preferences."
+      "default": "Answer 5 preference questions to see a rule-based product shortlist."
+    },
+    {
+      "type": "richtext",
+      "id": "method_note",
+      "label": "Recommendation disclosure",
+      "default": "<p>Results use fixed catalog rules, not a medical assessment, and do not predict individual outcomes. Check product labels and ask a qualified healthcare professional about interactions.</p>"
     },
     {
       "type": "header",
@@ -473,13 +487,25 @@
       "type": "text",
       "id": "gate_subtitle",
       "label": "Gate subtext",
-      "default": "Enter your email to start. We'll send your stack plus a one-time 15% off code."
+      "default": "Enter your email for a copy of your shortlist plus the current 10% first-order offer, or continue without email."
     },
     {
       "type": "text",
       "id": "gate_button",
       "label": "Gate button label",
       "default": "Start the quiz"
+    },
+    {
+      "type": "checkbox",
+      "id": "allow_skip",
+      "label": "Allow quiz without email",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "skip_label",
+      "label": "Continue without email label",
+      "default": "Continue without email"
     },
     {
       "type": "header",
@@ -495,13 +521,13 @@
       "type": "text",
       "id": "benefit_2",
       "label": "Benefit 2",
-      "default": "Matched from our COA-verified catalog"
+      "default": "Matched from currently configured products"
     },
     {
       "type": "text",
       "id": "benefit_3",
       "label": "Benefit 3",
-      "default": "15% off code emailed with your stack"
+      "default": "10% first-order offer by email"
     },
     {
       "type": "text",
@@ -551,7 +577,7 @@
       "type": "text",
       "id": "capture_title",
       "label": "Capture heading",
-      "default": "Email me my stack + 15% off"
+      "default": "Email my shortlist + 10% off"
     },
     {
       "type": "text",
@@ -587,7 +613,7 @@
       "type": "richtext",
       "id": "capture_success_message",
       "label": "Capture success message",
-      "default": "<p>Your stack and 15% off code are on the way.</p>"
+      "default": "<p>Your shortlist and 10% first-order offer are on the way.</p>"
     },
     {
       "type": "header",
@@ -745,8 +771,8 @@
           "settings": {
             "result_key": "calm-clarity",
             "stack_name": "The Calm Clarity Stack",
-            "stack_description": "<p>Stress-resilient focus without stimulants. Ashwagandha KSM-66 tames cortisol, L-Theanine sharpens attention, and Bacopa builds memory over weeks.</p>",
-            "product_handle_1": "ashwagandha-ksm-66",
+            "stack_description": "<p>A rule-based shortlist of non-stimulant products to compare by label, format, warnings, and availability.</p>",
+            "product_handle_1": "ashwagandha-ksm-66-300mg-capsules",
             "product_handle_2": "l-theanine",
             "product_handle_3": "bacopa-monnieri",
             "product_handle_4": ""
@@ -769,9 +795,9 @@
           "settings": {
             "result_key": "mood-motivation",
             "stack_name": "The Mood & Motivation Stack",
-            "stack_description": "<p>Elevates drive and emotional baseline. Sulbutiamine enhances dopaminergic tone for motivation; Ashwagandha buffers stress for a steady, positive mood.</p>",
-            "product_handle_1": "sulbutiamine",
-            "product_handle_2": "ashwagandha-ksm-66",
+            "stack_description": "<p>A rule-based shortlist of products commonly browsed for mood and motivation. Review each label and evidence page before deciding.</p>",
+            "product_handle_1": "sulbutiamine-200mg-capsules",
+            "product_handle_2": "ashwagandha-ksm-66-300mg-capsules",
             "product_handle_3": "",
             "product_handle_4": ""
           }
