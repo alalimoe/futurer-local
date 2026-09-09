@@ -205,6 +205,62 @@
     color: rgba(var(--color-foreground));
   }
 
+  .xo-section--{{ section.id }} .ft__intro,
+  .xo-section--{{ section.id }} .ft__notice,
+  .xo-section--{{ section.id }} .ft__support {
+    max-width: 72ch;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 75%, transparent);
+  }
+
+  .xo-section--{{ section.id }} .ft__intro {
+    margin: 0 0 20px;
+  }
+
+  .xo-section--{{ section.id }} .ft__notice {
+    margin: 20px 0 0;
+    padding: 14px;
+    border-inline-start: 3px solid rgba(var(--color-accent));
+    background: color-mix(in srgb, rgba(var(--color-accent)) 6%, transparent);
+  }
+
+  .xo-section--{{ section.id }} .ft__support {
+    margin: 14px 0 0;
+  }
+
+  .xo-section--{{ section.id }} .ft__support a,
+  .xo-section--{{ section.id }} .ft__carrier-link {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+
+  .xo-section--{{ section.id }} .ft__carrier-link {
+    display: inline-block;
+    margin-top: 10px;
+  }
+
+  .xo-section--{{ section.id }} .ft__error {
+    min-height: 1.5em;
+    margin: 8px 0 0;
+    color: rgba(var(--color-error, var(--color-foreground)));
+    font-size: 1.3rem;
+    font-weight: 600;
+  }
+
+  .xo-section--{{ section.id }} .ft__input[aria-invalid='true'] {
+    border-color: rgba(var(--color-error, var(--color-foreground)));
+  }
+
+  .xo-section--{{ section.id }} .ft__status {
+    min-height: 1.5em;
+    margin: 10px 0 0;
+    font-size: 1.3rem;
+  }
+
+  .xo-section--{{ section.id }} noscript p {
+    margin: 12px 0 0;
+  }
+
   @media (max-width: 740px) {
     .xo-section--{{ section.id }} .ft__row {
       grid-template-columns: 1fr;
@@ -234,12 +290,27 @@
     assign login_url = '/customer_authentication/login?return_to=' | append: request.path
   endif
   assign sign_in_label = 'sections.faq_tracker.sign_in_button' | t
+  assign local_carrier_name = section.settings.local_carrier_name | default: 'Quiqup'
+  assign intl_carrier_name = section.settings.intl_carrier_name | default: 'Aramex'
+  assign local_tracking_url = section.settings.local_tracking_url | default: 'https://track-parcel.quiqup.com/'
+  assign intl_tracking_url = section.settings.intl_tracking_url | default: 'https://www.aramex.com/track/results'
+  assign local_reference_pattern = section.settings.local_reference_pattern | default: '[A-Za-z0-9][-A-Za-z0-9 ._/]{2,58}[A-Za-z0-9]'
+  assign intl_reference_pattern = section.settings.intl_reference_pattern | default: '[A-Za-z0-9][-A-Za-z0-9 ._/]{2,58}[A-Za-z0-9]'
+  assign is_tracking_page = false
+  if template.name == 'page' and template.suffix == 'track-order'
+    assign is_tracking_page = true
+  endif
 %}
 
 <section {% render 'section-attr' %}>
   <xo-container>
     <div class="ft__wrap" id="track">
-      <h2 class="ft__title">{{ section.settings.heading }}</h2>
+      {%- if is_tracking_page -%}
+        <h1 class="ft__title">{{ section.settings.heading | escape }}</h1>
+      {%- else -%}
+        <h2 class="ft__title">{{ section.settings.heading | escape }}</h2>
+      {%- endif -%}
+      <p class="ft__intro">{{ 'sections.faq_tracker.intro' | t }}</p>
 
       {%- if customer -%}
         <div class="ft__account">
@@ -259,13 +330,15 @@
                       {%- assign shown_urls = shown_urls | append: track_url | append: '|' -%}
                       <li class="ft__shipment">
                         <div class="ft__shipment-meta">
-                          <span class="ft__shipment-name">{{ order.name }}</span>
+                          <span class="ft__shipment-name">{{ order.name | escape }}</span>
                           <span class="ft__shipment-date">{{ order.created_at | time_tag: format: 'date' }}</span>
                           {%- if item.fulfillment.tracking_company != blank -%}
-                            <span class="ft__shipment-carrier">{{ item.fulfillment.tracking_company }}</span>
+                            <span class="ft__shipment-carrier">{{ item.fulfillment.tracking_company | escape }}</span>
                           {%- endif -%}
                         </div>
-                        <a class="ft__btn" href="{{ track_url }}" target="_blank" rel="noopener">{{ 'sections.faq_tracker.track_shipment' | t }}</a>
+                        <a class="ft__btn" href="{{ track_url | escape }}" target="_blank" rel="noopener noreferrer">
+                          {{- 'sections.faq_tracker.track_shipment' | t -}}
+                        </a>
                       </li>
                     {%- endunless -%}
                   {%- endif -%}
@@ -273,7 +346,7 @@
                 {%- unless order_has_track -%}
                   <li class="ft__shipment">
                     <div class="ft__shipment-meta">
-                      <span class="ft__shipment-name">{{ order.name }}</span>
+                      <span class="ft__shipment-name">{{ order.name | escape }}</span>
                       <span class="ft__shipment-date">{{ order.created_at | time_tag: format: 'date' }}</span>
                       <span class="ft__shipment-status">
                         {%- if order.fulfillment_status_label != blank -%}
@@ -283,7 +356,9 @@
                         {%- endif -%}
                       </span>
                     </div>
-                    <a class="ft__btn ft__btn--ghost" href="{{ order.customer_url }}">{{ 'sections.faq_tracker.view_order' | t }}</a>
+                    <a class="ft__btn ft__btn--ghost" href="{{ order.customer_url | escape }}">
+                      {{- 'sections.faq_tracker.view_order' | t -}}
+                    </a>
                   </li>
                 {%- endunless -%}
               {%- endfor -%}
@@ -303,145 +378,231 @@
       <p class="ft__carrier-heading">{{ 'sections.faq_tracker.carrier_heading' | t }}</p>
 
       <div class="ft__tabs" role="tablist" aria-label="{{ 'sections.faq_tracker.tabs_label' | t }}">
-        <button class="ft__tab ft__tab--active" data-tab="local" role="tab" aria-selected="true">{{ 'sections.faq_tracker.tab_local' | t }}</button>
-        <button class="ft__tab" data-tab="intl" role="tab" aria-selected="false">{{ 'sections.faq_tracker.tab_intl' | t }}</button>
+        <button
+          id="ft-tab-local-{{ section.id }}"
+          class="ft__tab ft__tab--active"
+          type="button"
+          data-tab="local"
+          role="tab"
+          aria-controls="ft-panel-local-{{ section.id }}"
+          aria-selected="true"
+          tabindex="0"
+        >
+          {{- local_carrier_name | escape -}}
+        </button>
+        <button
+          id="ft-tab-intl-{{ section.id }}"
+          class="ft__tab"
+          type="button"
+          data-tab="intl"
+          role="tab"
+          aria-controls="ft-panel-intl-{{ section.id }}"
+          aria-selected="false"
+          tabindex="-1"
+        >
+          {{- intl_carrier_name | escape -}}
+        </button>
       </div>
 
-      <div class="ft__panel ft__panel--active" data-panel="local" role="tabpanel">
-        <label for="ftLocalRef-{{ section.id }}" class="ft__label">{{ 'sections.faq_tracker.local_label' | t }}</label>
-        <div class="ft__row">
-          <input id="ftLocalRef-{{ section.id }}" type="text" class="ft__input" placeholder="{{ section.settings.local_placeholder }}" enterkeyhint="go">
-          <button class="ft__btn" data-track="quiqup" data-input="ftLocalRef-{{ section.id }}">{{ 'sections.faq_tracker.track_quiqup' | t }}</button>
-        </div>
-        <p class="ft__hint" data-hint="quiqup" data-copied="{{ 'sections.faq_tracker.copied' | t: ref: '__REF__' }}" aria-live="polite">{{ 'sections.faq_tracker.local_hint' | t }}</p>
+      <div
+        id="ft-panel-local-{{ section.id }}"
+        class="ft__panel ft__panel--active"
+        data-panel="local"
+        role="tabpanel"
+        aria-labelledby="ft-tab-local-{{ section.id }}"
+        tabindex="0"
+      >
+        <form
+          data-carrier-form
+          action="{{ local_tracking_url | escape }}"
+          method="get"
+          target="_blank"
+          rel="noopener noreferrer"
+          data-query-parameter="{{ section.settings.local_tracking_parameter | escape }}"
+          data-empty-message="{{ 'sections.faq_tracker.empty_error' | t: carrier: local_carrier_name | escape }}"
+          data-format-message="{{ 'sections.faq_tracker.format_error' | t: carrier: local_carrier_name | escape }}"
+          data-manual-message="{{ 'sections.faq_tracker.manual_entry' | t: carrier: local_carrier_name | escape }}"
+        >
+          <label for="ftLocalRef-{{ section.id }}" class="ft__label">
+            {{- 'sections.faq_tracker.reference_label' | t: carrier: local_carrier_name | escape -}}
+          </label>
+          <div class="ft__row">
+            <input
+              id="ftLocalRef-{{ section.id }}"
+              name="{{ section.settings.local_tracking_parameter | escape }}"
+              type="text"
+              class="ft__input"
+              inputmode="text"
+              autocomplete="off"
+              autocapitalize="characters"
+              spellcheck="false"
+              enterkeyhint="go"
+              required
+              pattern="{{ local_reference_pattern | escape }}"
+              aria-describedby="ft-local-help-{{ section.id }} ft-local-error-{{ section.id }}"
+            >
+            <button class="ft__btn" type="submit">
+              {{- 'sections.faq_tracker.track_with' | t: carrier: local_carrier_name | escape -}}
+            </button>
+          </div>
+          <p id="ft-local-help-{{ section.id }}" class="ft__hint">{{ section.settings.local_placeholder | escape }}</p>
+          <p id="ft-local-error-{{ section.id }}" class="ft__error" data-form-error aria-live="polite"></p>
+          <p class="ft__status" data-form-status role="status" aria-live="polite"></p>
+        </form>
+        <a class="ft__carrier-link" href="{{ local_tracking_url | escape }}" target="_blank" rel="noopener noreferrer">
+          {{- 'sections.faq_tracker.open_carrier' | t: carrier: local_carrier_name | escape -}}
+        </a>
+        <noscript>
+          <p>{{ 'sections.faq_tracker.no_js' | t: carrier: local_carrier_name | escape }}</p>
+        </noscript>
       </div>
 
-      <div class="ft__panel" data-panel="intl" role="tabpanel" hidden>
-        <div class="ft__group">
-          <label for="ftIntlQuiqup-{{ section.id }}" class="ft__label">{{ 'sections.faq_tracker.intl_quiqup_label' | t }}</label>
+      <div
+        id="ft-panel-intl-{{ section.id }}"
+        class="ft__panel"
+        data-panel="intl"
+        role="tabpanel"
+        aria-labelledby="ft-tab-intl-{{ section.id }}"
+        tabindex="0"
+        hidden
+      >
+        <form
+          data-carrier-form
+          action="{{ intl_tracking_url | escape }}"
+          method="get"
+          target="_blank"
+          rel="noopener noreferrer"
+          data-query-parameter="{{ section.settings.intl_tracking_parameter | escape }}"
+          data-empty-message="{{ 'sections.faq_tracker.empty_error' | t: carrier: intl_carrier_name | escape }}"
+          data-format-message="{{ 'sections.faq_tracker.format_error' | t: carrier: intl_carrier_name | escape }}"
+          data-manual-message="{{ 'sections.faq_tracker.manual_entry' | t: carrier: intl_carrier_name | escape }}"
+        >
+          <label for="ftIntlRef-{{ section.id }}" class="ft__label">
+            {{- 'sections.faq_tracker.reference_label' | t: carrier: intl_carrier_name | escape -}}
+          </label>
           <div class="ft__row">
-            <input id="ftIntlQuiqup-{{ section.id }}" type="text" class="ft__input" placeholder="{{ section.settings.local_placeholder }}" enterkeyhint="go">
-            <button class="ft__btn" data-track="quiqup" data-input="ftIntlQuiqup-{{ section.id }}">{{ 'sections.faq_tracker.track_quiqup' | t }}</button>
+            <input
+              id="ftIntlRef-{{ section.id }}"
+              name="{{ section.settings.intl_tracking_parameter | escape }}"
+              type="text"
+              class="ft__input"
+              inputmode="text"
+              autocomplete="off"
+              autocapitalize="characters"
+              spellcheck="false"
+              enterkeyhint="go"
+              required
+              pattern="{{ intl_reference_pattern | escape }}"
+              aria-describedby="ft-intl-help-{{ section.id }} ft-intl-error-{{ section.id }}"
+            >
+            <button class="ft__btn" type="submit">
+              {{- 'sections.faq_tracker.track_with' | t: carrier: intl_carrier_name | escape -}}
+            </button>
           </div>
-          <p class="ft__hint" data-hint="quiqup" data-copied="{{ 'sections.faq_tracker.copied' | t: ref: '__REF__' }}" aria-live="polite">{{ 'sections.faq_tracker.intl_quiqup_hint' | t }}</p>
-        </div>
-        <div class="ft__group">
-          <label for="ftIntlRef-{{ section.id }}" class="ft__label">{{ 'sections.faq_tracker.intl_aramex_label' | t }}</label>
-          <div class="ft__row">
-            <input id="ftIntlRef-{{ section.id }}" type="text" class="ft__input" placeholder="{{ section.settings.intl_placeholder }}" enterkeyhint="go">
-            <button class="ft__btn" data-track="aramex">{{ 'sections.faq_tracker.track_aramex' | t }}</button>
-          </div>
-          <p class="ft__hint">{{ 'sections.faq_tracker.intl_aramex_hint' | t }}</p>
-        </div>
+          <p id="ft-intl-help-{{ section.id }}" class="ft__hint">{{ section.settings.intl_placeholder | escape }}</p>
+          <p id="ft-intl-error-{{ section.id }}" class="ft__error" data-form-error aria-live="polite"></p>
+          <p class="ft__status" data-form-status role="status" aria-live="polite"></p>
+        </form>
+        <a class="ft__carrier-link" href="{{ intl_tracking_url | escape }}" target="_blank" rel="noopener noreferrer">
+          {{- 'sections.faq_tracker.open_carrier' | t: carrier: intl_carrier_name | escape -}}
+        </a>
+        <noscript>
+          <p>{{ 'sections.faq_tracker.no_js' | t: carrier: intl_carrier_name | escape }}</p>
+        </noscript>
       </div>
+
+      <p class="ft__notice">{{ 'sections.faq_tracker.privacy_note' | t }}</p>
+      <p class="ft__support">
+        {{ 'sections.faq_tracker.split_shipments' | t }}
+        <a href="/pages/contact">{{ 'sections.faq_tracker.contact_support' | t }}</a>
+      </p>
     </div>
   </xo-container>
 </section>
 
 <script>
-  (function(){
+  (function() {
     var section = document.querySelector('.xo-section--{{ section.id }}');
-    if (!section) return;
+    if (!section || section.dataset.trackerReady === 'true') return;
+    section.dataset.trackerReady = 'true';
 
-    var tabs = section.querySelectorAll('.ft__tab');
-    var panels = section.querySelectorAll('.ft__panel');
-    var localInput = section.querySelector('#ftLocalRef-{{ section.id }}');
-    var intlQuiqupInput = section.querySelector('#ftIntlQuiqup-{{ section.id }}');
-    var intlInput = section.querySelector('#ftIntlRef-{{ section.id }}');
+    var tabs = Array.prototype.slice.call(section.querySelectorAll('[role="tab"]'));
+    var panels = section.querySelectorAll('[role="tabpanel"]');
 
-    section.querySelectorAll('[data-hint="quiqup"]').forEach(function(hint){
-      hint.setAttribute('data-default', hint.textContent);
-    });
-
-    function selectTab(key){
-      tabs.forEach(function(x){
-        var active = x.getAttribute('data-tab') === key;
-        x.classList.toggle('ft__tab--active', active);
-        x.setAttribute('aria-selected', active);
+    function selectTab(tab, moveFocus) {
+      tabs.forEach(function(item) {
+        var active = item === tab;
+        item.classList.toggle('ft__tab--active', active);
+        item.setAttribute('aria-selected', active ? 'true' : 'false');
+        item.setAttribute('tabindex', active ? '0' : '-1');
       });
-      panels.forEach(function(p){
-        var active = p.getAttribute('data-panel') === key;
-        p.toggleAttribute('hidden', !active);
+      panels.forEach(function(panel) {
+        panel.hidden = panel.id !== tab.getAttribute('aria-controls');
       });
+      if (moveFocus) tab.focus();
     }
 
-    tabs.forEach(function(t){
-      t.addEventListener('click', function(){
-        selectTab(t.getAttribute('data-tab'));
+    tabs.forEach(function(tab, index) {
+      tab.addEventListener('click', function() {
+        selectTab(tab, false);
+      });
+      tab.addEventListener('keydown', function(event) {
+        var targetIndex = index;
+        if (event.key === 'ArrowRight') targetIndex = (index + 1) % tabs.length;
+        if (event.key === 'ArrowLeft') targetIndex = (index - 1 + tabs.length) % tabs.length;
+        if (event.key === 'Home') targetIndex = 0;
+        if (event.key === 'End') targetIndex = tabs.length - 1;
+        if (targetIndex !== index) {
+          event.preventDefault();
+          selectTab(tabs[targetIndex], true);
+        }
       });
     });
 
-    function trackQuiqup(input, hint){
-      var ref = input ? input.value.trim() : '';
-      if (ref && navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(ref).then(function(){
-          if (hint) {
-            var tpl = hint.getAttribute('data-copied') || '';
-            hint.textContent = tpl.replace('__REF__', ref);
-          }
-        }).catch(function(){});
+    section.querySelectorAll('[data-carrier-form]').forEach(function(form) {
+      var input = form.querySelector('.ft__input');
+      var error = form.querySelector('[data-form-error]');
+      var status = form.querySelector('[data-form-status]');
+
+      function clearMessages() {
+        input.setCustomValidity('');
+        input.removeAttribute('aria-invalid');
+        error.textContent = '';
+        status.textContent = '';
       }
-      window.open('https://track-parcel.quiqup.com/', '_blank', 'noopener');
-    }
 
-    function trackAramex(){
-      var id = intlInput ? intlInput.value.trim() : '';
-      if (!id) return;
-      window.open('https://www.aramex.com/track/results?ShipmentNumber=' + encodeURIComponent(id), '_blank', 'noopener');
-    }
+      input.addEventListener('input', clearMessages);
 
-    function resetHint(hint){
-      if (!hint) return;
-      var fallback = hint.getAttribute('data-default') || '';
-      if (hint.textContent !== fallback) hint.textContent = fallback;
-    }
+      form.addEventListener('submit', function(event) {
+        clearMessages();
+        var reference = input.value.trim();
+        var message = '';
+        input.value = reference;
 
-    section.querySelectorAll('[data-track="quiqup"]').forEach(function(btn){
-      btn.addEventListener('click', function(){
-        var input = section.querySelector('#' + btn.getAttribute('data-input'));
-        var wrap = btn.closest('.ft__group') || btn.closest('.ft__panel');
-        var hint = wrap ? wrap.querySelector('[data-hint="quiqup"]') : null;
-        trackQuiqup(input, hint);
+        if (!reference) {
+          message = form.dataset.emptyMessage;
+        } else if (input.validity.patternMismatch) {
+          message = form.dataset.formatMessage;
+        }
+
+        if (message) {
+          event.preventDefault();
+          input.setCustomValidity(message);
+          input.setAttribute('aria-invalid', 'true');
+          error.textContent = message;
+          input.reportValidity();
+          input.focus();
+          return;
+        }
+
+        if (!form.dataset.queryParameter) {
+          event.preventDefault();
+          status.textContent = form.dataset.manualMessage;
+          var directLink = form.closest('[role="tabpanel"]').querySelector('.ft__carrier-link');
+          directLink.click();
+        }
       });
     });
-
-    var aramexBtn = section.querySelector('[data-track="aramex"]');
-    if (aramexBtn) aramexBtn.addEventListener('click', trackAramex);
-
-    function bindQuiqupInput(input){
-      if (!input) return;
-      var wrap = input.closest('.ft__group') || input.closest('.ft__panel');
-      var hint = wrap ? wrap.querySelector('[data-hint="quiqup"]') : null;
-      input.addEventListener('keydown', function(e){
-        if (e.key === 'Enter') { e.preventDefault(); trackQuiqup(input, hint); }
-      });
-      input.addEventListener('input', function(){
-        resetHint(hint);
-      });
-    }
-
-    bindQuiqupInput(localInput);
-    bindQuiqupInput(intlQuiqupInput);
-
-    if (intlInput) {
-      intlInput.addEventListener('keydown', function(e){
-        if (e.key === 'Enter') { e.preventDefault(); trackAramex(); }
-      });
-    }
-
-    var params = new URLSearchParams(window.location.search);
-    var prefill = params.get('ref') || params.get('order') || params.get('track');
-    if (prefill) {
-      prefill = prefill.trim();
-      var isIntl = /^\d{10,12}$/.test(prefill.replace(/\s/g, ''));
-      if (isIntl && intlInput) {
-        selectTab('intl');
-        intlInput.value = prefill;
-      } else if (localInput) {
-        selectTab('local');
-        localInput.value = prefill;
-      }
-    }
   })();
 </script>
 
@@ -451,8 +612,41 @@
   "settings": [
     { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "default" },
     { "type": "text", "id": "heading", "label": "Heading", "default": "Track your delivery" },
-    { "type": "text", "id": "local_placeholder", "label": "Local placeholder", "default": "e.g., Quiqup reference" },
-    { "type": "text", "id": "intl_placeholder", "label": "International placeholder", "default": "e.g., Aramex waybill" },
+    { "type": "header", "content": "First carrier" },
+    { "type": "text", "id": "local_carrier_name", "label": "Carrier name", "default": "Quiqup" },
+    { "type": "url", "id": "local_tracking_url", "label": "Tracking URL" },
+    {
+      "type": "text",
+      "id": "local_tracking_parameter",
+      "label": "Tracking URL parameter",
+      "info": "Leave blank when the carrier does not support references in its URL."
+    },
+    {
+      "type": "text",
+      "id": "local_reference_pattern",
+      "label": "Accepted reference pattern",
+      "default": "[A-Za-z0-9][-A-Za-z0-9 ._/]{2,58}[A-Za-z0-9]",
+      "info": "HTML pattern syntax. The default accepts 4–60 letters, numbers, spaces, periods, underscores, slashes, or hyphens."
+    },
+    { "type": "text", "id": "local_placeholder", "label": "Reference format hint", "default": "Enter the reference exactly as it appears in your shipping message." },
+    { "type": "header", "content": "Second carrier" },
+    { "type": "text", "id": "intl_carrier_name", "label": "Carrier name", "default": "Aramex" },
+    { "type": "url", "id": "intl_tracking_url", "label": "Tracking URL" },
+    {
+      "type": "text",
+      "id": "intl_tracking_parameter",
+      "label": "Tracking URL parameter",
+      "default": "ShipmentNumber",
+      "info": "Leave blank when the carrier does not support references in its URL."
+    },
+    {
+      "type": "text",
+      "id": "intl_reference_pattern",
+      "label": "Accepted reference pattern",
+      "default": "[A-Za-z0-9][-A-Za-z0-9 ._/]{2,58}[A-Za-z0-9]",
+      "info": "HTML pattern syntax. The default accepts 4–60 letters, numbers, spaces, periods, underscores, slashes, or hyphens."
+    },
+    { "type": "text", "id": "intl_placeholder", "label": "Reference format hint", "default": "Enter the reference exactly as it appears in your shipping message." },
     { "type": "range", "id": "padding_top", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding top", "default": 8 },
     { "type": "range", "id": "padding_bottom", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding bottom", "default": 16 }
   ],
