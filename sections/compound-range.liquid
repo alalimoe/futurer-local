@@ -11,7 +11,7 @@
   assign format_powder = false
   assign format_pack = false
   for block in section.blocks
-    if block.type == 'product' and block.settings.product != blank
+    if block.type == 'product' and block.settings.product != blank and block.settings.product.available
       assign product_count = product_count | plus: 1
       if block.settings.form == 'hcl'
         assign form_hcl = true
@@ -129,25 +129,23 @@
 
       <ul class="cg-range__grid" data-cg-grid data-count="{{ product_count }}"{% if section.settings.columns_desktop != blank and section.settings.columns_desktop != '3' %} style="--cg-range-cols: {{ section.settings.columns_desktop }};"{% endif %}>
         {%- for block in section.blocks -%}
-          {%- if block.type == 'product' and block.settings.product != blank -%}
+          {%- if block.type == 'product' and block.settings.product != blank and block.settings.product.available -%}
             {%- assign product = block.settings.product -%}
             <li {{ block.shopify_attributes }}>
-              {%- if product == blank -%}
-                <p class="cg-range__error">{{ 'sections.compound_guide.unavailable_market' | t }}</p>
-              {%- else -%}
-                {% render 'compound-product-card',
-                  product: product,
-                  form: block.settings.form,
-                  format: block.settings.format,
-                  form_label: block.settings.form_label,
-                  format_label: block.settings.format_label,
-                  dose_value: block.settings.dose_value,
-                  dose_unit: block.settings.dose_unit,
-                  amount_label: block.settings.amount_label,
-                  count_label: block.settings.count_label,
-                  show_restock: section.settings.show_restock
-                %}
-              {%- endif -%}
+              {% render 'compound-product-card',
+                product: product,
+                form: block.settings.form,
+                format: block.settings.format,
+                form_label: block.settings.form_label,
+                format_label: block.settings.format_label,
+                dose_value: block.settings.dose_value,
+                dose_unit: block.settings.dose_unit,
+                amount_label: block.settings.amount_label,
+                count_label: block.settings.count_label,
+                show_restock: section.settings.show_restock,
+                instance_id: section.id,
+                block_id: block.id
+              %}
             </li>
           {%- endif -%}
         {%- endfor -%}

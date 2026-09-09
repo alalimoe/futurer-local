@@ -73,7 +73,8 @@
       transition: transform 180ms ease, visibility 180ms ease;
     }
 
-    .xo-section--{{ section.id }}[data-mobile-hidden="true"] {
+    .xo-section--{{ section.id }}[data-mobile-hidden="true"],
+    .xo-section--{{ section.id }}[data-overlay-hidden="true"] {
       visibility: hidden;
       pointer-events: none;
       transform: translateY(110%);
@@ -183,6 +184,7 @@
   aria-label="{{ 'sections.sticky_cta.actions_label' | t }}"
   data-show-after="{{ section.settings.show_after_id | escape }}"
   data-hide-at="{{ section.settings.hide_at_id | escape }}"
+  data-sticky-cta
   {% if section.settings.show_after_id != blank %}data-mobile-hidden="true"{% endif %}
 >
   <div class="sticky-cta__mobile">
@@ -327,26 +329,44 @@
       }
     };
 
+    const onSectionUnload = (event) => {
+      if (event.target && event.target.contains(document.getElementById(barId))) {
+        teardown();
+      }
+    };
+
+    const onSectionLoad = (event) => {
+      if (event.target && event.target.querySelector(`#${barId}`)) bind();
+    };
+
+    const registry = window.__nootropixStickyCta || new Map();
+    window.__nootropixStickyCta = registry;
+
+    const teardown = () => {
+      cleanup();
+      document.removeEventListener('DOMContentLoaded', start);
+      if (mobileQuery.removeEventListener) {
+        mobileQuery.removeEventListener('change', onMediaChange);
+      } else {
+        mobileQuery.removeListener(onMediaChange);
+      }
+      document.removeEventListener('shopify:section:load', onSectionLoad);
+      document.removeEventListener('shopify:section:unload', onSectionUnload);
+      if (registry.get(barId) === teardown) registry.delete(barId);
+    };
+
+    const previous = registry.get(barId);
+    if (previous) previous();
+    registry.set(barId, teardown);
+
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', start, { once: true });
     } else {
       start();
     }
 
-    document.addEventListener('shopify:section:unload', (event) => {
-      if (event.target && event.target.contains(document.getElementById(barId))) {
-        cleanup();
-        if (mobileQuery.removeEventListener) {
-          mobileQuery.removeEventListener('change', onMediaChange);
-        } else {
-          mobileQuery.removeListener(onMediaChange);
-        }
-      }
-    });
-
-    document.addEventListener('shopify:section:load', (event) => {
-      if (event.target && event.target.querySelector(`#${barId}`)) bind();
-    });
+    document.addEventListener('shopify:section:unload', onSectionUnload);
+    document.addEventListener('shopify:section:load', onSectionLoad);
   })();
 </script>
 

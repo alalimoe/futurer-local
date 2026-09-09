@@ -7,6 +7,30 @@ This snippet is a fallback when a compound section is reused on another template
 {% enddoc %}
 
 {%- unless template.suffix == 'phenibut-guide' -%}
-  {{ 'compound-guide.css' | asset_url | stylesheet_tag }}
-  <script src="{{ 'compound-guide.js' | asset_url }}" defer></script>
+  <script>
+    (() => {
+      const stylesheetUrl = {{ 'compound-guide.css' | asset_url | json }};
+      const scriptUrl = {{ 'compound-guide.js' | asset_url | json }};
+      const stylesheetLoaded = Array.from(document.querySelectorAll('link[rel="stylesheet"]'))
+        .some((node) => node.href === new URL(stylesheetUrl, window.location.href).href);
+      const scriptLoaded = Array.from(document.scripts)
+        .some((node) => node.src === new URL(scriptUrl, window.location.href).href);
+
+      if (!stylesheetLoaded) {
+        const stylesheet = document.createElement('link');
+        stylesheet.rel = 'stylesheet';
+        stylesheet.href = stylesheetUrl;
+        stylesheet.dataset.compoundGuideAsset = 'true';
+        document.head.append(stylesheet);
+      }
+
+      if (!scriptLoaded) {
+        const script = document.createElement('script');
+        script.src = scriptUrl;
+        script.defer = true;
+        script.dataset.compoundGuideAsset = 'true';
+        document.head.append(script);
+      }
+    })();
+  </script>
 {%- endunless -%}

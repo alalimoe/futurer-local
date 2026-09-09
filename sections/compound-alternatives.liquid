@@ -4,7 +4,7 @@
   assign cg_anchor = section.settings.anchor_id | default: 'compound-alternatives' | handleize
   assign row_count = 0
   for block in section.blocks
-    if block.type == 'alternative' and block.settings.name != blank and block.settings.product != blank
+    if block.type == 'alternative' and block.settings.product != blank and block.settings.product.available
       assign row_count = row_count | plus: 1
     endif
   endfor
@@ -49,10 +49,10 @@
           </thead>
           <tbody>
             {%- for block in section.blocks -%}
-              {%- if block.type == 'alternative' and block.settings.name != blank and block.settings.product != blank -%}
+              {%- if block.type == 'alternative' and block.settings.product != blank and block.settings.product.available -%}
                 <tr {{ block.shopify_attributes }}>
                   <th scope="row">
-                    <a href="{{ block.settings.product.url }}">{{ block.settings.name | escape }}</a>
+                    <a href="{{ block.settings.product.url }}">{{ block.settings.product.title | escape }}</a>
                   </th>
                   <td>{{ block.settings.evidence | escape }}</td>
                   <td>{{ block.settings.caution | escape }}</td>
@@ -66,9 +66,9 @@
 
       <ul class="cg-alts__cards"{% if section.settings.columns_desktop != blank and section.settings.columns_desktop != '3' %} style="--cg-alts-cols: {{ section.settings.columns_desktop }};"{% endif %}>
         {%- for block in section.blocks -%}
-          {%- if block.type == 'alternative' and block.settings.name != blank and block.settings.product != blank -%}
+          {%- if block.type == 'alternative' and block.settings.product != blank and block.settings.product.available -%}
             <li class="cg-alts__card" {{ block.shopify_attributes }}>
-              <h3><a href="{{ block.settings.product.url }}">{{ block.settings.name | escape }}</a></h3>
+              <h3><a href="{{ block.settings.product.url }}">{{ block.settings.product.title | escape }}</a></h3>
               {%- if block.settings.evidence != blank -%}
                 <p><strong>{{ section.settings.col_evidence | default: 'Evidence' | escape }}:</strong> {{ block.settings.evidence | escape }}</p>
               {%- endif -%}
@@ -144,7 +144,7 @@
       "name": "Alternative",
       "settings": [
         { "type": "product", "id": "product", "label": "Catalogue product", "info": "The row hides if this product is not available in the selected market." },
-        { "type": "text", "id": "name", "label": "Name" },
+        { "type": "text", "id": "name", "label": "Legacy name (not displayed)", "info": "Preserved for template compatibility. The current product title is displayed." },
         { "type": "textarea", "id": "evidence", "label": "Evidence summary", "info": "Do not invent citations, scores or a strongest-option claim." },
         { "type": "textarea", "id": "caution", "label": "Cautions" },
         { "type": "text", "id": "formats", "label": "Available formats" }

@@ -112,6 +112,33 @@
 </section>
 {%- endif -%}
 
+{%- if template.suffix == 'phenibut-guide' and visible_count > 0 -%}
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "@id": {{ canonical_url | append: '#faq' | json }},
+      "mainEntity": [
+        {%- assign structured_question_printed = false -%}
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'qa' and block.settings.question != blank and block.settings.answer != blank -%}
+            {%- if structured_question_printed -%},{%- endif -%}
+            {
+              "@type": "Question",
+              "name": {{ block.settings.question | strip_html | strip | json }},
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": {{ block.settings.answer | strip_html | strip | json }}
+              }
+            }
+            {%- assign structured_question_printed = true -%}
+          {%- endif -%}
+        {%- endfor -%}
+      ]
+    }
+  </script>
+{%- endif -%}
+
 {% schema %}
 {
   "name": "Compound FAQ",

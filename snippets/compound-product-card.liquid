@@ -10,6 +10,8 @@ Renders a compound-range product card with live price and availability.
 @param {string} [form_label]
 @param {string} [format_label]
 @param {boolean} [show_restock] - Render the restock email form on sold-out cards. Defaults to true.
+@param {string} [instance_id] - Section instance ID used to keep form IDs unique.
+@param {string} [block_id] - Block ID used to keep form IDs unique.
 @example
 {% render 'compound-product-card', product: product, form: 'hcl', format: 'capsules', dose_value: '250', dose_unit: 'mg' %}
 {% enddoc %}
@@ -94,7 +96,6 @@ Renders a compound-range product card with live price and availability.
         <a
           class="xo-btn xo-btn--primary"
           href="{{ product.url }}"
-          data-compound-event="product_selection"
         >
           {{ 'sections.compound_guide.view_options' | t }}
         </a>
@@ -102,12 +103,24 @@ Renders a compound-range product card with live price and availability.
     {%- else -%}
       <p class="cg-card__status cg-card__status--out">{{ 'sections.compound_guide.sold_out_notify' | t }}</p>
       {%- if render_restock -%}
-      {%- assign restock_id = 'cg-restock-' | append: product.id -%}
+      {%- liquid
+        assign restock_key = instance_id | append: '-' | append: block_id | append: '-' | append: product.id | handleize
+        assign restock_id = 'cg-restock-' | append: restock_key
+      -%}
       {% form 'contact', id: restock_id, class: 'cg-card__restock' %}
+        <input type="hidden" name="contact[tags]" value="compound-guide, restock-request, product-{{ product.handle | escape }}">
+        <input type="hidden" name="contact[request_type]" value="Product restock request">
+        <input type="hidden" name="contact[product]" value="{{ product.title | escape }}">
         <input type="hidden" name="contact[body]" value="{{ 'sections.compound_guide.restock_message' | t: product: product.title | escape }}">
         {%- if form.posted_successfully? -%}
           <p role="status" data-cg-restock data-posted="true">{{ 'sections.compound_guide.restock_success' | t }}</p>
         {%- else -%}
+          {%- if form.errors -%}
+            <div class="cg-form__errors" id="{{ restock_id }}-errors" role="alert">
+              {{ form.errors | default_errors }}
+            </div>
+          {%- endif -%}
+          <p class="cg-form__notice" id="{{ restock_id }}-notice">This restock request is transactional only and does not subscribe you to marketing.</p>
           <label class="visually-hidden" for="{{ restock_id }}-email">{{ 'sections.compound_guide.restock_email' | t }}</label>
           <input
             id="{{ restock_id }}-email"
@@ -116,6 +129,8 @@ Renders a compound-range product card with live price and availability.
             autocomplete="email"
             required
             placeholder="{{ 'sections.compound_guide.restock_email' | t }}"
+            aria-describedby="{{ restock_id }}-notice{% if form.errors %} {{ restock_id }}-errors{% endif %}"
+            {% if form.errors contains 'email' %}aria-invalid="true"{% endif %}
           >
           <button class="xo-btn xo-btn--secondary" type="submit">{{ 'sections.compound_guide.restock_submit' | t }}</button>
         {%- endif -%}
@@ -125,7 +140,6 @@ Renders a compound-range product card with live price and availability.
         <a
           class="cg__text-link"
           href="{{ product.url }}"
-          data-compound-event="product_selection"
         >
           {{ 'sections.compound_guide.view_product_page' | t }}
         </a>
