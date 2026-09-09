@@ -3,9 +3,21 @@
   assign only_on_page_handle = section.settings.only_on_page_handle | strip
   assign show_visible_faq = section.settings.show_visible_faq
   assign heading = section.settings.heading | strip
+  assign valid_faq_count = 0
+
+  for block in section.blocks
+    assign faq_question = block.settings.question | strip
+    assign faq_answer = block.settings.answer | strip
+    if faq_question != blank and faq_answer != blank
+      assign valid_faq_count = valid_faq_count | plus: 1
+    endif
+  endfor
 
   assign allow_render = true
   if enabled != true
+    assign allow_render = false
+  endif
+  if show_visible_faq != true
     assign allow_render = false
   endif
 
@@ -16,7 +28,7 @@
   endif
 -%}
 
-{%- if allow_render and section.blocks.size > 0 -%}
+{%- if allow_render and valid_faq_count > 0 -%}
   {%- if show_visible_faq -%}
     {%- style -%}
       .xo-section--{{ section.id }} {
@@ -87,6 +99,7 @@
   {
     "@context": "https://schema.org",
     "@type": "FAQPage",
+    "@id": {{ canonical_url | append: '#faq-' | append: section.id | json }},
     "mainEntity": [
       {%- assign first = true -%}
       {%- for block in section.blocks -%}

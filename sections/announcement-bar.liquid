@@ -12,7 +12,12 @@
   assign carousel_speed = section.settings.carousel_speed
   assign marquee_speed = section.settings.marquee_speed
   assign marquee_rtl = section.settings.marquee_rtl
-  assign marquee_stop = section.settings.marquee_stop
+  assign has_motion_control = false
+  if announcement_bar_style == 'marquee'
+    assign has_motion_control = true
+  elsif announcement_bar_style == 'carousel' and carousel_autoplay
+    assign has_motion_control = true
+  endif
 %}
 
 {% if carousel_style == 'vertical' %}
@@ -38,14 +43,22 @@
 {% liquid
   assign show_weekend_promo = false
   if section.settings.enable_weekend_promo
-    if request.page_type == 'index' or request.page_type == 'collection' or request.page_type == 'product' or request.page_type == 'cart'
-      assign show_weekend_promo = true
+    if section.settings.weekend_promo_code != blank and section.settings.weekend_discount_percent != blank
+      if request.page_type == 'index' or request.page_type == 'collection' or request.page_type == 'product' or request.page_type == 'cart'
+        assign show_weekend_promo = true
+      endif
     endif
   endif
 %}
 
-<div class='xo-announcement-bar' id='xo-announcement-bar'>
-  <section {% render 'section-attr' %}>
+<div
+  class='xo-announcement-bar'
+  id='xo-announcement-bar'
+  data-announcement-motion
+  data-carousel-autoplay='{% if carousel_autoplay %}true{% else %}false{% endif %}'
+  data-carousel-speed='{{ carousel_speed }}'
+>
+  <section aria-label="{{ 'sections.header.announcement' | t }}" {% render 'section-attr' %}>
     <xo-animate xo-cascade xo-type='fade-down' class='xo-announcement-bar__body'>
       {% if show_weekend_promo %}
         {% liquid
@@ -59,7 +72,14 @@
       {% if announcement_bar_style == 'carousel' %}
         <div class='xo-announcement-bar__inline'>
           <div class='xo-announcement-bar__inner' style='--carousel-width: {{ carousel_width }}px; order: {{ block_announcement_index }}'>
-            <xo-carousel xo-loop xo-per-view='1' class='xo-announcement-bar__carousel' {{ carousel_style }} {{ carousel_autoplay_time }}>
+            <xo-carousel
+              xo-loop
+              xo-per-view='1'
+              class='xo-announcement-bar__carousel'
+              aria-label="{{ 'sections.slideshow.carousel' | t }}"
+              {{ carousel_style }}
+              {{ carousel_autoplay_time }}
+            >
               <xo-carousel-inner class='xo-announcement-bar__carousel-inner' style='--height-vertical: {{ carousel_height }}px'>
                 <xo-carousel-list>
                   {% for block in section.blocks %}
@@ -73,17 +93,21 @@
                 </xo-carousel-list>
               </xo-carousel-inner>
               <xo-carousel-prev class='xo-announcement-bar__prev'>
-                {% render 'icon', name: 'arrow-left', size: 24 %}
+                <button type='button' class='xo-announcement-bar__nav-button' aria-label="{{ 'accessibility.previous' | t }}">
+                  {% render 'icon', name: 'arrow-left', size: 24 %}
+                </button>
               </xo-carousel-prev>
               <xo-carousel-next class='xo-announcement-bar__next'>
-                {% render 'icon', name: 'arrow-right', size: 24 %}
+                <button type='button' class='xo-announcement-bar__nav-button' aria-label="{{ 'accessibility.next' | t }}">
+                  {% render 'icon', name: 'arrow-right', size: 24 %}
+                </button>
               </xo-carousel-next>
             </xo-carousel>
           </div>
           {% for block in section.blocks %}
             {% case block.type %}
               {% when 'button' %}
-                <div class='xo-announcement-bar__item' style='order: {{ forloop.index }}'>
+                <div class='xo-announcement-bar__item' style='order: {{ forloop.index }}' {{ block.shopify_attributes }}>
                   {% render 'button',
                     text: block.settings.button_text,
                     link: block.settings.button_link,
@@ -94,7 +118,7 @@
                   %}
                 </div>
               {% when 'count-down' %}
-                <div class='xo-announcement-bar__item' style='order: {{ forloop.index }}'>
+                <div class='xo-announcement-bar__item' style='order: {{ forloop.index }}' {{ block.shopify_attributes }}>
                   {% render 'countdown', time: block.settings.time %}
                 </div>
             {% endcase %}
@@ -107,9 +131,7 @@
           {% if marquee_rtl %}
             xo-rtl
           {% endif %}
-          {% if marquee_stop %}
-            xo-pause-on-hover
-          {% endif %}
+          xo-pause-on-hover
         >
           {% for block in section.blocks %}
             {% case block.type %}
@@ -125,7 +147,7 @@
               {% when 'announcement' %}
                 {% render 'announcement-text', block: block, announcement_bar_style: announcement_bar_style %}
               {% when 'button' %}
-                <div class='xo-announcement-bar__item'>
+                <div class='xo-announcement-bar__item' {{ block.shopify_attributes }}>
                   {% render 'button',
                     text: block.settings.button_text,
                     link: block.settings.button_link,
@@ -136,7 +158,7 @@
                   %}
                 </div>
               {% when 'count-down' %}
-                <div class='xo-announcement-bar__item'>
+                <div class='xo-announcement-bar__item' {{ block.shopify_attributes }}>
                   {% render 'countdown', time: block.settings.time %}
                 </div>
             {% endcase %}
@@ -146,16 +168,157 @@
       {% if announcement_bar_style != 'marquee' %}
         </xo-container>
       {% endif %}
+      {% if has_motion_control %}
+        <button
+          type='button'
+          class='xo-announcement-bar__motion-toggle'
+          aria-pressed='false'
+          aria-label="{{ 'accessibility.pause' | t }}"
+          data-announcement-motion-toggle
+          data-label-pause="{{ 'accessibility.pause' | t | escape }}"
+          data-label-play="{{ 'accessibility.play' | t | escape }}"
+        >
+          <span class='xo-announcement-bar__motion-icon xo-announcement-bar__motion-icon--pause' aria-hidden='true'>
+            {% render 'icon', name: 'pause', size: 18 %}
+          </span>
+          <span class='xo-announcement-bar__motion-icon xo-announcement-bar__motion-icon--play' aria-hidden='true'>
+            {% render 'icon', name: 'play', size: 18 %}
+          </span>
+        </button>
+      {% endif %}
       {% if hide_button_close == 'on' %}
-        <div class='xo-announcement-bar__button' id='xo-announcement-bar__button'>
-          <div class='xo-announcement-bar__icon'>
+        <button
+          type='button'
+          class='xo-announcement-bar__button'
+          id='xo-announcement-bar__button'
+          aria-label="{{ 'accessibility.close' | t }}"
+        >
+          <span class='xo-announcement-bar__icon' aria-hidden='true'>
             {% render 'icon', name: 'close', size: 24 %}
-          </div>
-        </div>
+          </span>
+        </button>
       {% endif %}
     </xo-animate>
   </section>
 </div>
+
+<script>
+  (() => {
+    const init = (root) => {
+      if (root.dataset.announcementMotionReady === 'true') return;
+      root.dataset.announcementMotionReady = 'true';
+
+      const carousel = root.querySelector('.xo-announcement-bar__carousel');
+      const marquee = root.querySelector('.xo-announcement-bar__marquee');
+      const control = root.querySelector('[data-announcement-motion-toggle]');
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+      const autoplayEnabled = root.dataset.carouselAutoplay === 'true';
+      const autoplaySpeed = root.dataset.carouselSpeed;
+      let userPaused = reducedMotion.matches;
+      let hoverPaused = false;
+      let focusPaused = false;
+
+      if (reducedMotion.matches) {
+        carousel?.removeAttribute('xo-autoplay');
+        marquee?.setAttribute('xo-paused', '');
+      }
+
+      const getCarouselList = () => carousel?.querySelector('xo-carousel-list');
+      const isPaused = () => userPaused || hoverPaused || focusPaused;
+
+      if (marquee) {
+        new MutationObserver(() => {
+          if (isPaused() && !marquee.hasAttribute('xo-paused')) {
+            marquee.setAttribute('xo-paused', '');
+          }
+        }).observe(marquee, { attributes: true, attributeFilter: ['xo-paused'] });
+      }
+
+      const pause = () => {
+        marquee?.setAttribute('xo-paused', '');
+        if (typeof marquee?.handlePause === 'function') marquee.handlePause();
+        const list = getCarouselList();
+        if (typeof list?.pause === 'function') list.pause();
+      };
+
+      const play = () => {
+        if (marquee) {
+          marquee.removeAttribute('xo-paused');
+          if (typeof marquee.handlePlay === 'function') marquee.handlePlay();
+        }
+        if (carousel && autoplayEnabled) {
+          if (!carousel.hasAttribute('xo-autoplay')) {
+            carousel.setAttribute('xo-autoplay', autoplaySpeed);
+            if (typeof carousel.setOptions === 'function') carousel.setOptions();
+            if (typeof carousel.setOptionsForStore === 'function') carousel.setOptionsForStore();
+            const list = getCarouselList();
+            if (typeof list?.setOptions === 'function') list.setOptions();
+          }
+          const list = getCarouselList();
+          if (typeof list?.play === 'function') list.play();
+        }
+      };
+
+      const sync = () => {
+        const paused = isPaused();
+        if (paused) {
+          pause();
+        } else {
+          play();
+        }
+        if (control) {
+          control.setAttribute('aria-pressed', String(paused));
+          control.setAttribute('aria-label', paused ? control.dataset.labelPlay : control.dataset.labelPause);
+          control.classList.toggle('is-paused', paused);
+        }
+      };
+
+      control?.addEventListener('click', () => {
+        userPaused = !userPaused;
+        sync();
+      });
+
+      root.addEventListener('mouseenter', () => {
+        hoverPaused = true;
+        sync();
+      });
+      root.addEventListener('mouseleave', () => {
+        hoverPaused = false;
+        sync();
+      });
+      root.addEventListener('focusin', () => {
+        focusPaused = true;
+        sync();
+      });
+      root.addEventListener('focusout', (event) => {
+        if (!root.contains(event.relatedTarget)) {
+          focusPaused = false;
+          sync();
+        }
+      });
+
+      reducedMotion.addEventListener('change', (event) => {
+        userPaused = event.matches;
+        sync();
+      });
+
+      Promise.all([
+        customElements.whenDefined('xo-carousel-list'),
+        customElements.whenDefined('xo-marquee')
+      ]).then(sync);
+      sync();
+    };
+
+    document.querySelectorAll('[data-announcement-motion]').forEach(init);
+
+    if (!window.nootropixAnnouncementMotionBound) {
+      window.nootropixAnnouncementMotionBound = true;
+      document.addEventListener('shopify:section:load', (event) => {
+        event.target.querySelectorAll('[data-announcement-motion]').forEach(init);
+      });
+    }
+  })();
+</script>
 
 {% schema %}
 {
@@ -247,7 +410,7 @@
       "type": "checkbox",
       "id": "carousel_autoplay",
       "label": "t:sections.announcement_bar.settings.carousel_autoplay.label",
-      "default": true
+      "default": false
     },
     {
       "type": "number",
@@ -278,7 +441,8 @@
       "type": "checkbox",
       "id": "marquee_stop",
       "label": "t:sections.announcement_bar.settings.marquee_stop.label",
-      "default": false
+      "default": false,
+      "visible_if": "{{ section.settings.announcement_style == 'legacy' }}"
     },
     {
       "type": "header",
@@ -288,19 +452,17 @@
       "type": "checkbox",
       "id": "enable_weekend_promo",
       "label": "Enable weekend promo banner",
-      "default": true
+      "default": false
     },
     {
       "type": "text",
       "id": "weekend_promo_code",
-      "label": "Promo code",
-      "default": "WEEKEND15"
+      "label": "Promo code"
     },
     {
       "type": "text",
       "id": "weekend_discount_percent",
-      "label": "Discount percent",
-      "default": "15"
+      "label": "Discount percent"
     },
     {
       "type": "header",

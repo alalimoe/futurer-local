@@ -516,14 +516,22 @@
         "@context": "https://schema.org",
         "@graph": [
           {
-            "@type": "Article",
-            "headline": {{ section.settings.heading | json }},
+            "@type": "WebPage",
+            "name": {{ section.settings.heading | json }},
             "description": {{ section.settings.seo_description | default: section.settings.heading | json }},
-            "author": { "@type": "Organization", "name": {{ section.settings.author | default: shop.name | json }} },
-            "publisher": { "@type": "Organization", "name": {{ shop.name | json }} },
+            "author": {
+              {%- if section.settings.author == blank or section.settings.author == shop.name -%}
+                "@id": {{ shop.secure_url | append: '#organization' | json }}
+              {%- else -%}
+                "@type": "Person",
+                "name": {{ section.settings.author | json }}
+              {%- endif -%}
+            },
+            "publisher": { "@id": {{ shop.secure_url | append: '#organization' | json }} },
             {%- if section.settings.date_published != blank -%}
               "datePublished": {{ section.settings.date_published | json }},
             {%- endif -%}
+            "dateModified": {{ page.updated_at | date: '%Y-%m-%d' | json }},
             "mainEntityOfPage": {{ request.origin | append: request.path | json }}
           },
           {

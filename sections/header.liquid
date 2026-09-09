@@ -99,12 +99,12 @@
     </div>
     <div class="xo-header__top-right">
       {% if show_language_selector == 'show' %}
-        <div class='xo-header__top-language' tabindex='0'>
+        <div class='xo-header__top-language'>
           {% render 'language-select', selector_position: 'header' %}
         </div>
       {% endif %}
       {% if show_currency_selector == 'show' %}
-        <div class='xo-header__top-currency' tabindex='0'>
+        <div class='xo-header__top-currency'>
           {% render 'currency-select', selector_position: 'header', id: 'header-top' %}
         </div>
       {% endif %}
@@ -162,12 +162,12 @@
             <div class="xo-header__right{% if header_style == 'style-1' or header_style == 'style-2' or header_style == 'style-5' %}{% if logo_position == 'center' and menu_type != "drawer" %} xo-header__right--width{% endif %}{% endif %}{% if header_style == 'style-5' %} xo-header__right--modifier{% endif %}">
               {% if header_style != 'style-5' %}
                 {% if show_language_selector == 'show' %}
-                  <div class="xo-header__right-item xo-header__right-item--language" tabindex="0">
+                  <div class="xo-header__right-item xo-header__right-item--language">
                     {% render 'language-select', selector_position: 'header' %}
                   </div>
                 {% endif %}
                 {% if show_currency_selector == 'show' %}
-                  <div class="xo-header__right-item xo-header__right-item--currency" tabindex="0">
+                  <div class="xo-header__right-item xo-header__right-item--currency">
                     {% render 'currency-select', selector_position: 'header', id: 'header-main' %}
                   </div>
                 {% endif %}
@@ -186,13 +186,16 @@
                 class="tooltip{% if settings.enable_border_radius %} tooltip--radius{% endif %}"
               >
                 <xo-modal-trigger
-                  class="xo-header__right-item xo-header__right-item--search"
                   xo-name="search"
-                  tabindex="0"
-                  role="button"
-                  aria-label="{{ 'general.tooltip.search' | t }}"
                 >
-                  {% render 'icon', name: 'search', size: '1.6rem' %}
+                  <button
+                    type="button"
+                    class="xo-header__right-item xo-header__right-item--search"
+                    aria-label="{{ 'general.tooltip.search' | t }}"
+                    aria-haspopup="dialog"
+                  >
+                    {% render 'icon', name: 'search', size: '1.6rem' %}
+                  </button>
                 </xo-modal-trigger>
               </xo-tooltip>
 
@@ -232,16 +235,19 @@
                   </a>
                 {% else %}
                   <xo-modal-trigger
-                    class="xo-header__right-item xo-header__right-item--cart"
                     xo-name="cart"
-                    tabindex="0"
-                    role="button"
-                    aria-label="{{ 'general.tooltip.cart' | t }}"
                   >
-                    {% render 'icon', name: 'cart', size: '1.6rem' %}
-                    <div>
-                      <xo-cart-size class="xo-header__right-number">{%- if cart.item_count > 0 -%}{{ cart.item_count }}{%- endif -%}</xo-cart-size>
-                    </div>
+                    <button
+                      type="button"
+                      class="xo-header__right-item xo-header__right-item--cart"
+                      aria-label="{{ 'general.tooltip.cart' | t }}"
+                      aria-haspopup="dialog"
+                    >
+                      {% render 'icon', name: 'cart', size: '1.6rem' %}
+                      <span>
+                        <xo-cart-size class="xo-header__right-number">{%- if cart.item_count > 0 -%}{{ cart.item_count }}{%- endif -%}</xo-cart-size>
+                      </span>
+                    </button>
                   </xo-modal-trigger>
                 {% endif %}
               </xo-tooltip>
@@ -342,7 +348,6 @@
     {
       "type": "link_list",
       "id": "secondary_menu",
-      "default": "main-menu",
       "label": "t:sections.header.settings.secondary_menu.label",
       "info": "t:sections.header.settings.secondary_menu.info"
     },
