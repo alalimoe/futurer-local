@@ -1,37 +1,45 @@
 {{ 'section-main-404.css' | asset_url | stylesheet_tag }}
 
 {% liquid
-  assign heading = section.settings.heading
+  assign heading = section.settings.heading | default: 'Page not found'
   assign class = section.settings.font_size_heading
   assign sub_heading = section.settings.sub_heading
   assign content = section.settings.content
   assign button = section.settings
+  assign search_label = section.settings.search_label | default: 'Search the store'
+  assign search_placeholder = section.settings.search_placeholder | default: 'Search products and guides'
+  assign search_button_label = section.settings.search_button_label | default: 'Search'
 %}
 
 <section {% render 'section-attr' %}>
   <div class='xo-404-page'>
     <xo-container class='xo-404-page__container'>
       <div class='xo-404-page__body'>
-        {% if heading %}
-          <xo-animate xo-cascade>
-            <h2 class='xo-404-page__heading {{ class }}'>{{ heading }}</h2>
-          </xo-animate>
-        {% endif %}
+        <h1 class='xo-404-page__heading {{ class }}'>{{ heading | escape }}</h1>
         {% if sub_heading %}
-          <xo-animate xo-cascade>
-            <div class='xo-404-page__sub-heading h5'>
-              {{ sub_heading }}
-            </div>
-          </xo-animate>
+          <p class='xo-404-page__sub-heading h5'>{{ sub_heading | escape }}</p>
         {% endif %}
         {% if content %}
-          <xo-animate xo-cascade>
-            <div class='xo-404-page__content'>
-              {{ content }}
-            </div>
-          </xo-animate>
+          <div class='xo-404-page__content'>
+            {{ content }}
+          </div>
         {% endif %}
-        <xo-animate xo-cascade>
+
+        <form class='xo-404-page__search' action='{{ routes.search_url }}' method='get' role='search'>
+          <label for='NotFoundSearch-{{ section.id }}'>{{ search_label | escape }}</label>
+          <div class='xo-404-page__search-controls'>
+            <input
+              id='NotFoundSearch-{{ section.id }}'
+              type='search'
+              name='q'
+              placeholder='{{ search_placeholder | escape }}'
+            >
+            <input name='options[prefix]' type='hidden' value='last'>
+            <button type='submit'>{{ search_button_label | escape }}</button>
+          </div>
+        </form>
+
+        {% if button.button_text != blank and button.button_link != blank %}
           <div class='xo-404-page__button'>
             {% render 'button',
               text: button.button_text,
@@ -42,7 +50,50 @@
               padding: settings.button_padding
             %}
           </div>
-        </xo-animate>
+        {% endif %}
+
+        {% liquid
+          assign recovery_link_count = 0
+          capture recovery_links
+            assign guides_page = section.settings.guides_page
+            if guides_page != blank and guides_page.url != blank and guides_page.published_at != blank
+              assign recovery_link_count = recovery_link_count | plus: 1
+              assign guides_label = section.settings.guides_label | default: guides_page.title
+              echo '<li><a href="' | append: guides_page.url | append: '">'
+              echo guides_label | escape
+              echo '</a></li>'
+            endif
+
+            assign help_page = section.settings.help_page
+            if help_page != blank and help_page.url != blank and help_page.published_at != blank
+              assign recovery_link_count = recovery_link_count | plus: 1
+              assign help_label = section.settings.help_label | default: help_page.title
+              echo '<li><a href="' | append: help_page.url | append: '">'
+              echo help_label | escape
+              echo '</a></li>'
+            endif
+
+            for block in section.blocks
+              assign selected_collection = block.settings.collection
+              if selected_collection != blank and selected_collection.url != blank and selected_collection.published_at != blank
+                assign recovery_link_count = recovery_link_count | plus: 1
+                assign collection_label = block.settings.label | default: selected_collection.title
+                echo '<li '
+                echo block.shopify_attributes
+                echo '><a href="' | append: selected_collection.url | append: '">'
+                echo collection_label | escape
+                echo '</a></li>'
+              endif
+            endfor
+          endcapture
+        %}
+
+        {% if recovery_link_count > 0 %}
+          <nav class='xo-404-page__links' aria-label='{{ section.settings.links_heading | escape }}'>
+            <h2>{{ section.settings.links_heading | escape }}</h2>
+            <ul>{{ recovery_links }}</ul>
+          </nav>
+        {% endif %}
       </div>
     </xo-container>
   </div>
@@ -102,6 +153,60 @@
       "type": "richtext",
       "id": "content",
       "label": "t:sections.main_404.settings.content.label"
+    },
+    {
+      "type": "header",
+      "content": "Search"
+    },
+    {
+      "type": "text",
+      "id": "search_label",
+      "label": "Search label",
+      "default": "Search the store"
+    },
+    {
+      "type": "text",
+      "id": "search_placeholder",
+      "label": "Search placeholder",
+      "default": "Search products and guides"
+    },
+    {
+      "type": "text",
+      "id": "search_button_label",
+      "label": "Search button label",
+      "default": "Search"
+    },
+    {
+      "type": "header",
+      "content": "Recovery links"
+    },
+    {
+      "type": "page",
+      "id": "guides_page",
+      "label": "Guides page"
+    },
+    {
+      "type": "text",
+      "id": "guides_label",
+      "label": "Guides link label",
+      "default": "Guides"
+    },
+    {
+      "type": "page",
+      "id": "help_page",
+      "label": "Help page"
+    },
+    {
+      "type": "text",
+      "id": "help_label",
+      "label": "Help link label",
+      "default": "Help"
+    },
+    {
+      "type": "text",
+      "id": "links_heading",
+      "label": "Links heading",
+      "default": "Or continue browsing"
     },
     {
       "type": "header",
@@ -207,6 +312,25 @@
       "default": 50
     }
   ],
-  "blocks": []
+  "blocks": [
+    {
+      "type": "collection_link",
+      "name": "Collection link",
+      "settings": [
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Collection"
+        },
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Link label",
+          "info": "Defaults to the selected collection title."
+        }
+      ]
+    }
+  ],
+  "max_blocks": 6
 }
 {% endschema %}

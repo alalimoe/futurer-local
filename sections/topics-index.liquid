@@ -1,9 +1,593 @@
-<section class="topics-index wrapper">
-  {% for record in shop.metaobjects.topic.values %}
-    <a class="topic-tile" href="/pages/{{ record.slug }}">
-      <img src="{{ record.hero_image | image_url: width: 600 }}" alt="{{ record.title }}">
-      <h2>{{ record.title }}</h2>
-      <p>{{ record.promise }}</p>
-    </a>
-  {% endfor %}
+{% liquid
+  assign section_heading = section.settings.heading | default: page.title
+  if section_heading == blank
+    assign section_heading = 'Explore topics'
+  endif
+  assign visible_topic_count = 0
+%}
+
+<section {% render 'section-attr' %}>
+  <div class="topics-index" data-topics-index>
+    <xo-container>
+      <header class="topics-index__header">
+        <h1 class="topics-index__heading">{{ section_heading | escape }}</h1>
+        {% if section.settings.introduction != blank %}
+          <div class="topics-index__introduction rte">{{ section.settings.introduction }}</div>
+        {% endif %}
+      </header>
+
+      <form class="topics-index__search" action="{{ routes.search_url }}" method="get" role="search">
+        <label class="topics-index__search-label" for="TopicsSearch-{{ section.id }}">
+          {{ section.settings.search_label | escape }}
+        </label>
+        <div class="topics-index__search-controls">
+          <input
+            class="topics-index__search-input"
+            id="TopicsSearch-{{ section.id }}"
+            type="search"
+            name="q"
+            placeholder="{{ section.settings.search_placeholder | escape }}"
+            aria-describedby="TopicsSearchHint-{{ section.id }}"
+            data-topics-filter
+          >
+          <input type="hidden" name="type" value="article">
+          <input type="hidden" name="options[prefix]" value="last">
+          <button class="topics-index__search-button" type="submit">
+            {{ section.settings.search_button_label | escape }}
+          </button>
+        </div>
+        <p class="topics-index__search-hint" id="TopicsSearchHint-{{ section.id }}">
+          {{ section.settings.search_hint | escape }}
+        </p>
+      </form>
+
+      {% capture topic_cards %}
+        {% for block in section.blocks %}
+          {% liquid
+            assign source_type = block.settings.source_type
+            assign destination_url = blank
+            assign destination_title = blank
+            assign destination_summary = block.settings.description
+            assign card_image = block.settings.image
+            assign topic_count = blank
+            assign topic_is_visible = false
+
+            case source_type
+              when 'article'
+                assign selected_article = block.settings.article
+                if selected_article != blank and selected_article.url != blank and selected_article.published_at != blank
+                  assign destination_url = selected_article.url
+                  assign destination_title = selected_article.title
+                  if destination_summary == blank
+                    assign destination_summary = selected_article.excerpt_or_content | strip_html | truncatewords: 24
+                  endif
+                  if card_image == blank
+                    assign card_image = selected_article.image
+                  endif
+                  assign topic_count = 1
+                  assign topic_is_visible = true
+                endif
+              when 'page'
+                assign selected_page = block.settings.page
+                if selected_page != blank and selected_page.url != blank and selected_page.published_at != blank
+                  assign destination_url = selected_page.url
+                  assign destination_title = selected_page.title
+                  if destination_summary == blank
+                    assign destination_summary = selected_page.content | strip_html | truncatewords: 24
+                  endif
+                  assign topic_count = 1
+                  assign topic_is_visible = true
+                endif
+              when 'blog_tag'
+                assign selected_blog = block.settings.blog
+                assign selected_tag = block.settings.tag | strip
+                if selected_blog != blank and selected_blog.url != blank
+                  if selected_tag == blank
+                    if selected_blog.articles_count > 0
+                      assign destination_url = selected_blog.url
+                      assign destination_title = selected_blog.title
+                      assign topic_count = selected_blog.articles_count
+                      assign topic_is_visible = true
+                    endif
+                  else
+                    assign selected_tag_handle = selected_tag | handleize
+                    for available_tag in selected_blog.all_tags
+                      assign available_tag_handle = available_tag | handleize
+                      if available_tag_handle == selected_tag_handle
+                        assign destination_url = selected_blog.url | append: '/tagged/' | append: selected_tag_handle
+                        assign destination_title = selected_tag
+                        assign topic_is_visible = true
+                        break
+                      endif
+                    endfor
+                  endif
+                endif
+            endcase
+
+            if block.settings.title != blank
+              assign destination_title = block.settings.title
+            endif
+
+            if destination_title == blank or destination_url == blank
+              assign topic_is_visible = false
+            endif
+          %}
+
+          {% if topic_is_visible %}
+            {% assign visible_topic_count = visible_topic_count | plus: 1 %}
+            {% assign filter_text = destination_title | append: ' ' | append: destination_summary | strip_html | downcase %}
+            <article
+              class="topics-index__card"
+              data-topic-card
+              data-topic-filter-value="{{ filter_text | escape }}"
+              {{ block.shopify_attributes }}
+            >
+              <a class="topics-index__card-link" href="{{ destination_url }}">
+                {% if card_image != blank %}
+                  <div class="topics-index__media">
+                    {{
+                      card_image
+                      | image_url: width: 900
+                      | image_tag:
+                        class: 'topics-index__image',
+                        loading: 'lazy',
+                        widths: '320, 480, 640, 900',
+                        sizes: '(min-width: 990px) 33vw, (min-width: 640px) 50vw, 100vw',
+                        width: card_image.width,
+                        height: card_image.height,
+                        alt: card_image.alt | default: destination_title
+                    }}
+                  </div>
+                {% endif %}
+                <div class="topics-index__card-content">
+                  <h2 class="topics-index__card-heading">{{ destination_title | escape }}</h2>
+                  {% if destination_summary != blank %}
+                    <div class="topics-index__card-description">{{ destination_summary }}</div>
+                  {% endif %}
+                  {% if topic_count != blank %}
+                    <p class="topics-index__count">
+                      {{ topic_count }} {{ topic_count | pluralize: 'resource', 'resources' }}
+                    </p>
+                  {% endif %}
+                </div>
+              </a>
+            </article>
+          {% endif %}
+        {% endfor %}
+      {% endcapture %}
+
+      {% if visible_topic_count > 0 %}
+        <div class="topics-index__grid" data-topics-grid>
+          {{ topic_cards }}
+        </div>
+        <p class="topics-index__filter-empty" data-topics-filter-empty hidden>
+          {{ section.settings.filter_empty_text | escape }}
+        </p>
+        <p class="visually-hidden" role="status" aria-live="polite" data-topics-status></p>
+      {% else %}
+        <div class="topics-index__empty">
+          {% if request.design_mode %}
+            <h2>Add your first topic</h2>
+            <p>Select a live blog, article, or page in a topic block. Unconfigured and unavailable destinations stay hidden on the storefront.</p>
+          {% else %}
+            <h2>{{ section.settings.empty_heading | escape }}</h2>
+            <p>{{ section.settings.empty_text | escape }}</p>
+          {% endif %}
+        </div>
+      {% endif %}
+    </xo-container>
+  </div>
 </section>
+
+{% stylesheet %}
+  .topics-index {
+    color: rgba(var(--color-foreground), 1);
+  }
+
+  .topics-index__header {
+    max-width: 76rem;
+    margin-inline: auto;
+    text-align: center;
+  }
+
+  .topics-index__heading {
+    margin: 0;
+    font-family: var(--font-heading-family);
+    font-weight: var(--font-heading-weight);
+    overflow-wrap: anywhere;
+  }
+
+  .topics-index__introduction {
+    margin-top: 1.6rem;
+    color: rgba(var(--color-foreground), 0.75);
+  }
+
+  .topics-index__search {
+    max-width: 72rem;
+    margin: 3.2rem auto 0;
+  }
+
+  .topics-index__search-label {
+    display: block;
+    margin-bottom: 0.8rem;
+    font-weight: 600;
+  }
+
+  .topics-index__search-controls {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.8rem;
+  }
+
+  .topics-index__search-input,
+  .topics-index__search-button {
+    min-height: 4.8rem;
+    border: 0.1rem solid rgba(var(--color-foreground), 0.25);
+    border-radius: var(--button-radius);
+    font: inherit;
+  }
+
+  .topics-index__search-input {
+    width: 100%;
+    padding: 1.2rem 1.6rem;
+    color: rgba(var(--color-foreground), 1);
+    background: rgba(var(--color-background), 1);
+  }
+
+  .topics-index__search-button {
+    padding: 1.2rem 2rem;
+    border-color: rgba(var(--color-button), 1);
+    color: rgba(var(--color-button-text), 1);
+    background: rgba(var(--color-button), 1);
+    cursor: pointer;
+  }
+
+  .topics-index__search-input:focus-visible,
+  .topics-index__search-button:focus-visible,
+  .topics-index__card-link:focus-visible {
+    outline: 0.2rem solid rgba(var(--color-foreground), 1);
+    outline-offset: 0.3rem;
+  }
+
+  .topics-index__search-hint {
+    margin: 0.8rem 0 0;
+    color: rgba(var(--color-foreground), 0.7);
+    font-size: calc(var(--font-body-scale) * 1.4rem);
+  }
+
+  .topics-index__grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 2.4rem;
+    margin-top: 4rem;
+  }
+
+  .topics-index__card {
+    min-width: 0;
+    border: 0.1rem solid rgba(var(--color-foreground), 0.16);
+    border-radius: var(--product-card-radius);
+    overflow: hidden;
+  }
+
+  .topics-index__card[hidden],
+  .topics-index__filter-empty[hidden] {
+    display: none;
+  }
+
+  .topics-index__card-link {
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    color: inherit;
+    background: rgba(var(--color-background), 1);
+    text-decoration: none;
+  }
+
+  .topics-index__card-link:hover .topics-index__card-heading {
+    text-decoration: underline;
+    text-underline-offset: 0.3rem;
+  }
+
+  .topics-index__media {
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    background: rgba(var(--color-foreground), 0.05);
+  }
+
+  .topics-index__image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .topics-index__card-content {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    padding: 2.4rem;
+  }
+
+  .topics-index__card-heading {
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .topics-index__card-description {
+    margin-top: 1.2rem;
+    color: rgba(var(--color-foreground), 0.75);
+  }
+
+  .topics-index__card-description > :first-child {
+    margin-top: 0;
+  }
+
+  .topics-index__card-description > :last-child {
+    margin-bottom: 0;
+  }
+
+  .topics-index__count {
+    margin: auto 0 0;
+    padding-top: 1.6rem;
+    color: rgba(var(--color-foreground), 0.65);
+    font-size: calc(var(--font-body-scale) * 1.3rem);
+  }
+
+  .topics-index__empty,
+  .topics-index__filter-empty {
+    max-width: 68rem;
+    margin: 4rem auto 0;
+    padding: 3.2rem;
+    border: 0.1rem solid rgba(var(--color-foreground), 0.16);
+    text-align: center;
+  }
+
+  .topics-index__empty > :first-child,
+  .topics-index__filter-empty {
+    margin-top: 0;
+  }
+
+  .topics-index__empty > :last-child,
+  .topics-index__filter-empty {
+    margin-bottom: 0;
+  }
+
+  @media (max-width: 989px) {
+    .topics-index__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 639px) {
+    .topics-index__search-controls,
+    .topics-index__grid {
+      grid-template-columns: 1fr;
+    }
+
+    .topics-index__search-button {
+      width: 100%;
+    }
+  }
+{% endstylesheet %}
+
+{% javascript %}
+  const initializeTopicsIndex = (root) => {
+    if (!root || root.dataset.topicsInitialized === 'true') return;
+
+    const input = root.querySelector('[data-topics-filter]');
+    const cards = Array.from(root.querySelectorAll('[data-topic-card]'));
+    const empty = root.querySelector('[data-topics-filter-empty]');
+    const status = root.querySelector('[data-topics-status]');
+
+    if (!input || cards.length === 0) return;
+
+    root.dataset.topicsInitialized = 'true';
+
+    input.addEventListener('input', () => {
+      const query = input.value.trim().toLocaleLowerCase();
+      let visibleCount = 0;
+
+      cards.forEach((card) => {
+        const matches = query === '' || card.dataset.topicFilterValue.includes(query);
+        card.hidden = !matches;
+        if (matches) visibleCount += 1;
+      });
+
+      if (empty) empty.hidden = visibleCount !== 0;
+      if (status) status.textContent = `${visibleCount} topic${visibleCount === 1 ? '' : 's'} shown`;
+    });
+  };
+
+  const initializeAllTopicsIndexes = (scope = document) => {
+    scope.querySelectorAll('[data-topics-index]').forEach(initializeTopicsIndex);
+  };
+
+  initializeAllTopicsIndexes();
+  document.addEventListener('shopify:section:load', (event) => initializeAllTopicsIndexes(event.target));
+{% endjavascript %}
+
+{% schema %}
+{
+  "name": "Topics index",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "info": "Defaults to the page title."
+    },
+    {
+      "type": "richtext",
+      "id": "introduction",
+      "label": "Introduction"
+    },
+    {
+      "type": "header",
+      "content": "Search"
+    },
+    {
+      "type": "text",
+      "id": "search_label",
+      "label": "Search label",
+      "default": "Search learning resources"
+    },
+    {
+      "type": "text",
+      "id": "search_placeholder",
+      "label": "Search placeholder",
+      "default": "Search articles and filter topics"
+    },
+    {
+      "type": "text",
+      "id": "search_button_label",
+      "label": "Search button label",
+      "default": "Search articles"
+    },
+    {
+      "type": "text",
+      "id": "search_hint",
+      "label": "Search hint",
+      "default": "Type to filter the topics below, or submit to search all published articles."
+    },
+    {
+      "type": "text",
+      "id": "filter_empty_text",
+      "label": "No matching topics text",
+      "default": "No configured topics match that filter. Submit your search to look through all published articles."
+    },
+    {
+      "type": "header",
+      "content": "Empty state"
+    },
+    {
+      "type": "text",
+      "id": "empty_heading",
+      "label": "Empty state heading",
+      "default": "Topics are being curated"
+    },
+    {
+      "type": "textarea",
+      "id": "empty_text",
+      "label": "Empty state text",
+      "default": "Use the search above to find published learning resources."
+    },
+    {
+      "type": "header",
+      "content": "Appearance"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color"
+    },
+    {
+      "type": "color_background",
+      "id": "background_gradient",
+      "label": "Background gradient"
+    },
+    {
+      "type": "number",
+      "id": "padding_top_desktop",
+      "label": "Padding top desktop",
+      "default": 64
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_desktop",
+      "label": "Padding bottom desktop",
+      "default": 64
+    },
+    {
+      "type": "number",
+      "id": "padding_top_mobile",
+      "label": "Padding top mobile",
+      "default": 40
+    },
+    {
+      "type": "number",
+      "id": "padding_bottom_mobile",
+      "label": "Padding bottom mobile",
+      "default": 40
+    }
+  ],
+  "blocks": [
+    {
+      "type": "topic",
+      "name": "Topic",
+      "settings": [
+        {
+          "type": "select",
+          "id": "source_type",
+          "label": "Destination type",
+          "options": [
+            {
+              "value": "blog_tag",
+              "label": "Blog or blog tag"
+            },
+            {
+              "value": "article",
+              "label": "Article"
+            },
+            {
+              "value": "page",
+              "label": "Page"
+            }
+          ],
+          "default": "blog_tag"
+        },
+        {
+          "type": "blog",
+          "id": "blog",
+          "label": "Blog"
+        },
+        {
+          "type": "text",
+          "id": "tag",
+          "label": "Blog tag",
+          "info": "Optional. The topic stays hidden if the selected blog does not contain this tag."
+        },
+        {
+          "type": "article",
+          "id": "article",
+          "label": "Article"
+        },
+        {
+          "type": "page",
+          "id": "page",
+          "label": "Page"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Custom title",
+          "info": "Optional. Defaults to the selected resource title or tag."
+        },
+        {
+          "type": "richtext",
+          "id": "description",
+          "label": "Description"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Custom image",
+          "info": "Optional. Overrides an article image."
+        }
+      ]
+    }
+  ],
+  "max_blocks": 24,
+  "presets": [
+    {
+      "name": "Topics index"
+    }
+  ]
+}
+{% endschema %}

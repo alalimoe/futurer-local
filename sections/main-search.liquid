@@ -9,69 +9,135 @@
 {{ 'filters-search-content.css' | asset_url | stylesheet_tag }}
 {{ 'article-card.css' | asset_url | stylesheet_tag }}
 {{ 'transform-pill.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'main-search-suggestions.js' | asset_url }}" defer="defer"></script>
 
 {% liquid
   assign color_schema_header = section.settings.color_schema_header
   assign enable_filtering = section.settings.enable_filtering
   assign enable_sorting = section.settings.enable_sorting
   assign filter_type = section.settings.filter_type
+  assign search_label = 'general.search.search' | t
+  assign search_value = search.terms | escape
 %}
 
 <section {% render 'section-attr' %}>
   <xo-filters-top></xo-filters-top>
   <xo-filters xo-section-id='{{ section.id }}' xo-money-format='{{ 100 | money }}' class='xo-filters-main-search'>
     <div class='main-search'>
-      <xo-animate xo-cascade>
-        <div class='main-search__header {% if color_schema_header %} color-{{ color_schema_header }} {% endif %}'>
-          <xo-container>
-            <div class='main-search__search'>
-              <form action='{{ routes.search_url }}' method='get' role='search' class='search'>
-                {% liquid
-                  assign value = search.terms | escape
-                  if search.performed
-                    assign label = 'templates.search.title' | t
-                  else
-                    assign label = 'general.search.search' | t
-                  endif
-                  render 'predictive-search', value: value, label: label, placeholder: label
-                %}
-              </form>
-              <xo-animate xo-cascade>
-                <div class='main-search__tag'>
-                  {% render 'transform-pill', title_pill: settings.pill %}
-                </div>
-              </xo-animate>
+      <header class='main-search__header{% if color_schema_header != blank %} color-{{ color_schema_header }}{% endif %}'>
+        <xo-container>
+          <div class='main-search__search'>
+            <h1 class='main-search__heading'>{{ 'templates.search.title' | t }}</h1>
+            <form
+              action='{{ routes.search_url }}'
+              method='get'
+              role='search'
+              class='main-search__form'
+              data-main-search-form
+            >
+              <label class='main-search__label' for='MainSearchInput-{{ section.id }}'>{{ search_label }}</label>
+              <div class='main-search__field'>
+                <input
+                  class='main-search__input'
+                  id='MainSearchInput-{{ section.id }}'
+                  type='search'
+                  name='q'
+                  value='{{ search_value }}'
+                  placeholder='{{ search_label | escape }}'
+                  autocomplete='off'
+                  aria-controls='MainSearchSuggestions-{{ section.id }}'
+                  aria-expanded='false'
+                  data-main-search-input
+                >
+                <input name='options[prefix]' type='hidden' value='last'>
+                <button class='main-search__submit' type='submit'>
+                  {% render 'icon', name: 'search-1', size: '2.4rem' %}
+                  <span>{{ search_label }}</span>
+                </button>
+              </div>
+              <div
+                class='main-search__suggestions'
+                id='MainSearchSuggestions-{{ section.id }}'
+                data-main-search-suggestions
+                hidden
+              >
+                <p class='main-search__suggestions-heading'>{{ section.settings.suggestions_heading | escape }}</p>
+                <ul class='main-search__suggestions-list' data-main-search-suggestions-list></ul>
+                <p class='visually-hidden' role='status' aria-live='polite' data-main-search-suggestions-status></p>
+              </div>
+            </form>
+            <div class='main-search__tag'>
+              {% render 'transform-pill', title_pill: settings.pill %}
             </div>
-          </xo-container>
-        </div>
-      </xo-animate>
+          </div>
+        </xo-container>
+      </header>
       <xo-animate xo-cascade>
         <xo-container class='main-search__result{% if search.results_count == 0 and search.filters == empty %} main-search__result--modifier{% endif %}'>
           {%- if search.performed -%}
-            {%- if enable_filtering or enable_sorting -%}
-              {%- if search.results_count > 0 -%}
-                {%- assign text = 'templates.search.text' | t -%}
-                <div class='main-search__result-text'>
-                  <p>
-                    {{ search.results_count -}}
-                    <span>{{ text }}</span>
-                    "{{ search.terms }}"
-                  </p>
-                </div>
-              {%- endif -%}
+            {%- if search.results_count > 0 -%}
+              {%- assign text = 'templates.search.text' | t -%}
+              <div class='main-search__result-text' role='status'>
+                <p>
+                  {{ search.results_count -}}
+                  <span>{{ text }}</span>
+                  <strong>"{{ search.terms | escape }}"</strong>
+                </p>
+              </div>
             {%- endif -%}
             {%- if search.results_count == 0 and search.filters == empty -%}
               <div class='main-search__result-empty'>
-                <div class='main-search__icon-empty'>
+                <div class='main-search__icon-empty' aria-hidden='true'>
                   {% render 'icon', name: 'result-empty', size: '12.8rem' %}
                 </div>
                 <div class='main-search__text-empty'>
-                  <h5 class='main-search__empty-heading'>{{ 'templates.search.result_not_found' | t }}</h5>
+                  <h2 class='main-search__empty-heading'>
+                    {% if section.settings.zero_results_heading != blank %}
+                      {{ section.settings.zero_results_heading | escape }}
+                    {% else %}
+                      {{ 'templates.search.result_not_found' | t }}
+                    {% endif %}
+                  </h2>
                   <div class='main-search__empty-description'>
                     {{ 'templates.search.no_results_1' | t }}
-                    <span role='status'>{{ search.terms }}</span>
+                    <span>{{ search.terms | escape }}</span>
                     {{ 'templates.search.no_results_2' | t }}
                   </div>
+                  {% if section.settings.zero_results_tips != blank %}
+                    <div class='main-search__empty-tips rte'>{{ section.settings.zero_results_tips }}</div>
+                  {% endif %}
+
+                  {% liquid
+                    assign destination_count = 0
+                    capture destination_links
+                      for block in section.blocks
+                        assign destination = blank
+                        case block.type
+                          when 'popular_collection'
+                            assign destination = block.settings.collection
+                          when 'help_page'
+                            assign destination = block.settings.page
+                        endcase
+
+                        if destination != blank and destination.url != blank and destination.published_at != blank
+                          assign destination_count = destination_count | plus: 1
+                          assign destination_label = block.settings.label | default: destination.title
+                          echo '<li '
+                          echo block.shopify_attributes
+                          echo '><a href="' | append: destination.url | append: '">'
+                          echo destination_label | escape
+                          echo '</a></li>'
+                        endif
+                      endfor
+                    endcapture
+                  %}
+
+                  {% if destination_count > 0 %}
+                    <nav class='main-search__destinations' aria-label='{{ section.settings.destinations_heading | escape }}'>
+                      <h3>{{ section.settings.destinations_heading | escape }}</h3>
+                      <ul>{{ destination_links }}</ul>
+                    </nav>
+                  {% endif %}
                 </div>
               </div>
             {%- endif -%}
@@ -121,6 +187,34 @@
       "type": "color_scheme",
       "id": "color_schema_header",
       "label": "t:sections.main_search.settings.color_schema_header.label"
+    },
+    {
+      "type": "text",
+      "id": "suggestions_heading",
+      "label": "Predictive suggestions heading",
+      "default": "Suggested searches"
+    },
+    {
+      "type": "header",
+      "content": "Zero results"
+    },
+    {
+      "type": "text",
+      "id": "zero_results_heading",
+      "label": "Heading",
+      "default": "No matching results"
+    },
+    {
+      "type": "richtext",
+      "id": "zero_results_tips",
+      "label": "Search tips",
+      "default": "<p>Check the spelling, try fewer words, or search for a product name, topic, or guide.</p>"
+    },
+    {
+      "type": "text",
+      "id": "destinations_heading",
+      "label": "Destination links heading",
+      "default": "Popular destinations"
     },
     {
       "type": "range",
@@ -248,7 +342,7 @@
     {
       "type": "checkbox",
       "id": "article_card_show_excerpt",
-      "default": false,
+      "default": true,
       "label": "t:sections.all.article_card_show_excerpt.label"
     },
     {
@@ -345,6 +439,48 @@
       "id": "padding_bottom_mobile",
       "label": "Padding bottom mobile",
       "default": 50
+    }
+  ],
+  "blocks": [
+    {
+      "type": "popular_collection",
+      "name": "Zero-result collection",
+      "settings": [
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Collection"
+        },
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Link label",
+          "info": "Defaults to the collection title."
+        }
+      ]
+    },
+    {
+      "type": "help_page",
+      "name": "Zero-result page",
+      "settings": [
+        {
+          "type": "page",
+          "id": "page",
+          "label": "Page"
+        },
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Link label",
+          "info": "Defaults to the page title."
+        }
+      ]
+    }
+  ],
+  "max_blocks": 8,
+  "presets": [
+    {
+      "name": "Main search"
     }
   ]
 }
