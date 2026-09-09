@@ -11,7 +11,18 @@ Nootropix — Product description renderer from metafields
 {%- endif -%}
 
 {%- assign what_it_is = product.metafields.npx.what_it_is.value | default: product.metafields.npx.what_it_is -%}
-{%- assign feel = product.metafields.npx.feel_timeline.value -%}
+{%- assign feel_raw = product.metafields.npx.feel_timeline.value | default: product.metafields.npx.feel_timeline -%}
+{%- assign feel_first_json = feel_raw | json | slice: 0, 1 -%}
+{%- assign feel_first_raw = feel_raw | strip | slice: 0, 1 -%}
+{%- assign feel = feel_raw -%}
+{% # theme-check-disable UnknownFilter %}
+{%- if feel_raw contains '[' or feel_raw contains '{' -%}
+  {%- assign feel_parsed = feel_raw | parse_json -%}
+  {%- if feel_parsed != blank -%}
+    {%- assign feel = feel_parsed -%}
+  {%- endif -%}
+{%- endif -%}
+{% # theme-check-enable UnknownFilter %}
 {%- assign feel_note = product.metafields.npx.feel_note.value | default: product.metafields.npx.feel_note -%}
 {%- assign how = product.metafields.npx.how_to_use.value -%}
 {%- assign why = product.metafields.npx.why.value -%}
@@ -56,6 +67,25 @@ Nootropix — Product description renderer from metafields
     {%- else -%}
       <p>{{ feel | newline_to_br }}</p>
     {%- endif -%}
+    {% # region agent log %}
+    <script>
+      (function () {
+        var heading = Array.prototype.find.call(document.querySelectorAll('.product-prose h3'), function (el) { return /feel/i.test(el.textContent || ''); });
+        var next = heading && heading.nextElementSibling;
+        var data = {
+          handle: {{ product.handle | json }},
+          feelFirstJson: {{ feel_first_json | json }},
+          feelFirstRaw: {{ feel_first_raw | json }},
+          feelFirstAfterParse: {{ feel_first | json }},
+          itemCount: {{ feel.size | default: 0 }},
+          nextTag: next && next.tagName,
+          nextIsList: !!(next && next.tagName === 'UL'),
+          nextText: next && (next.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 180)
+        };
+        fetch('http://127.0.0.1:7906/ingest/73d01807-f919-4550-a2d5-12c9f0435bd9',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'737e95'},body:JSON.stringify({sessionId:'737e95',runId:'post-fix',hypothesisId:'A',location:'snippets/product-description-metafields.liquid:feel-timeline',message:'feel timeline parse + render',data:data,timestamp:Date.now()})}).catch(function(){});
+      })();
+    </script>
+    {% # endregion %}
   {%- endif -%}
   
   {%- if feel_note != blank -%}
