@@ -8,6 +8,16 @@
     assign faq_list = product.metafields.pdp.faq.value
   endif
 
+  assign faq_list_has_content = false
+  if faq_list != blank
+    for faq_item in faq_list
+      if faq_item.question != blank and faq_item.answer != blank
+        assign faq_list_has_content = true
+        break
+      endif
+    endfor
+  endif
+
   assign faq_block_has_content = false
   if section.blocks.size > 0
     for block in section.blocks
@@ -17,6 +27,16 @@
       endif
     endfor
   endif
+
+  assign faq_legacy_has_content = false
+  for i in (1..6)
+    assign legacy_question_key = 'q' | append: i
+    assign legacy_answer_key = 'a' | append: i
+    if section.settings[legacy_question_key] != blank and section.settings[legacy_answer_key] != blank
+      assign faq_legacy_has_content = true
+      break
+    endif
+  endfor
 -%}
 
 {%- style -%}
@@ -120,12 +140,14 @@
     <h2 class="pfq__title">{{ section.settings.heading | default: 'Frequently Asked Questions' }}</h2>
 
     <div class="pfq__acc">
-      {% if faq_list and faq_list.size > 0 %}
+      {% if faq_list_has_content %}
         {% for f in faq_list %}
-          <details {% if forloop.first %}open{% endif %}>
-            <summary><span>{{ f.question }}</span></summary>
-            <div class="pfq__ans">{{ f.answer | metafield_tag }}</div>
-          </details>
+          {% if f.question != blank and f.answer != blank %}
+            <details {% if forloop.first %}open{% endif %}>
+              <summary><span>{{ f.question }}</span></summary>
+              <div class="pfq__ans">{{ f.answer | metafield_tag }}</div>
+            </details>
+          {% endif %}
         {% endfor %}
       {% elsif faq_block_has_content %}
         {%- assign faq_block_opened = false -%}
@@ -162,9 +184,14 @@
 
 {%- capture faq_json -%}
 [
-  {%- if faq_list and faq_list.size > 0 -%}
+  {%- if faq_list_has_content -%}
+    {%- assign faq_first = true -%}
     {%- for f in faq_list -%}
-      {"@type":"Question","name":{{ f.question | strip | json }},"acceptedAnswer":{"@type":"Answer","text":{{ f.answer | metafield_tag | strip | json }}}}{% unless forloop.last %},{% endunless %}
+      {%- if f.question != blank and f.answer != blank -%}
+        {%- unless faq_first -%},{%- endunless -%}
+        {"@type":"Question","name":{{ f.question | strip_html | strip | json }},"acceptedAnswer":{"@type":"Answer","text":{{ f.answer | metafield_tag | strip_html | strip | json }}}}
+        {%- assign faq_first = false -%}
+      {%- endif -%}
     {%- endfor -%}
   {%- elsif faq_block_has_content -%}
     {%- assign jf = true -%}
@@ -174,7 +201,7 @@
         {%- assign ba = block.settings.answer -%}
         {%- if bq != blank and ba != blank -%}
           {%- if jf == false -%},{%- endif -%}
-          {"@type":"Question","name":{{ bq | strip | json }},"acceptedAnswer":{"@type":"Answer","text":{{ ba | strip | json }}}}
+          {"@type":"Question","name":{{ bq | strip_html | strip | json }},"acceptedAnswer":{"@type":"Answer","text":{{ ba | strip_html | strip | json }}}}
           {%- assign jf = false -%}
         {%- endif -%}
       {%- endif -%}
@@ -195,9 +222,11 @@
   {%- endif -%}
 ]
 {%- endcapture -%}
-<script type="application/ld+json">
-{ "@context":"https://schema.org", "@type":"FAQPage", "mainEntity": {{ faq_json | strip }} }
-</script>
+{%- if faq_list_has_content or faq_block_has_content or faq_legacy_has_content -%}
+  <script type="application/ld+json">
+  { "@context":"https://schema.org", "@type":"FAQPage", "@id": {{ canonical_url | append: '#faq' | json }}, "mainEntity": {{ faq_json | strip }} }
+  </script>
+{%- endif -%}
 
 {% schema %}
 {

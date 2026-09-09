@@ -66,21 +66,17 @@
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "Article",
-  "headline": {{ article_headline | json }},
+  "@type": "WebPage",
+  "name": {{ article_headline | json }},
   "description": {{ article_desc | json }},
-  "author": { "@type": "Organization", "name": "Nootropix" },
+  "author": { "@id": {{ shop.secure_url | append: '#organization' | json }} },
   "publisher": {
-    "@type": "Organization",
-    "name": "Nootropix",
-    "url": {{ shop.url | json }},
-    "logo": {
-      "@type": "ImageObject",
-      "url": {{ shop.url | append: '/cdn/shop/files/nootropix-logo.png' | json }}
-    }
+    "@id": {{ shop.secure_url | append: '#organization' | json }}
   },
-  "datePublished": {{ s.date_published | default: "2025-01-15" | json }},
-  "dateModified": {{ page.updated_at | date: "%Y-%m-%d" | default: "2025-01-15" | json }},
+  {%- if s.date_published != blank -%}
+    "datePublished": {{ s.date_published | json }},
+  {%- endif -%}
+  "dateModified": {{ page.updated_at | date: "%Y-%m-%d" | json }},
   "mainEntityOfPage": {{ canonical_url | json }}
 }
 </script>

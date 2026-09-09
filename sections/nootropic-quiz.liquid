@@ -11,13 +11,15 @@
 <script src="{{ 'quiz-engine.js' | asset_url }}" defer></script>
 <script src="{{ 'nootropic-quiz.js' | asset_url }}" defer></script>
 
+{%- assign quiz_privacy_url = section.settings.privacy_link | default: shop.privacy_policy.url -%}
+
 <section id="nqQuiz" {% render 'section-attr' %}>
   <div class="nq-wrapper">
     <div class="nq-inner">
 
       {%- comment -%} ── Quiz header (always visible) ── {%- endcomment -%}
       <div class="nq-header">
-        <span class="nq-header__eyebrow">Find Your Stack</span>
+        <span class="nq-header__eyebrow">{{ 'sections.nootropic_quiz.eyebrow' | t }}</span>
         <h1 class="nq-header__title">{{ section.settings.quiz_title }}</h1>
         {%- if section.settings.quiz_subtitle != blank -%}
           <p class="nq-header__subtitle">{{ section.settings.quiz_subtitle }}</p>
@@ -62,27 +64,20 @@
                   <p class="nq-capture__sub">{{ section.settings.gate_subtitle }}</p>
                 {%- endif -%}
               </div>
-              <form class="nq-capture__form" data-nq-gate-form novalidate>
-                <label class="nq-capture__label" for="nqGateEmail">Email address</label>
-                <div class="nq-capture__row">
-                  <input class="nq-capture__input" id="nqGateEmail" name="email" type="email" inputmode="email"
-                    autocomplete="email" placeholder="{{ section.settings.capture_placeholder | default: 'you@email.com' }}"
-                    aria-describedby="nqGateStatus" required>
-                  <button class="nq-capture__btn" type="submit" data-nq-gate-submit>
-                    <span class="nq-capture__btn-label">{{ section.settings.gate_button }} →</span>
-                    <span class="nq-capture__btn-spinner" aria-hidden="true"></span>
-                  </button>
-                </div>
-                {%- if section.settings.capture_fineprint != blank -%}
-                  <div class="nq-capture__fineprint">{{ section.settings.capture_fineprint }}</div>
-                {%- endif -%}
-                <p class="nq-capture__status" id="nqGateStatus" role="status" aria-live="polite" data-nq-gate-status></p>
-              </form>
-              {%- if section.settings.allow_skip -%}
-                <button class="nq-gate__skip" type="button" data-nq-gate-skip>
-                  {{ section.settings.skip_label }}
-                </button>
+              {%- if section.settings.answer_use_disclosure != blank -%}
+                <div class="nq-gate__disclosure">{{ section.settings.answer_use_disclosure }}</div>
               {%- endif -%}
+              {%- if quiz_privacy_url != blank and section.settings.privacy_link_label != blank -%}
+                <p class="nq-gate__privacy">
+                  <a href="{{ quiz_privacy_url }}">{{ section.settings.privacy_link_label | escape }}</a>
+                </p>
+              {%- endif -%}
+              <button class="nq-gate__start" type="button" data-nq-gate-skip>
+                <span>{{ section.settings.gate_button | escape }}</span>
+                {%- if section.settings.allow_skip and section.settings.skip_label != blank -%}
+                  <small>{{ section.settings.skip_label | escape }}</small>
+                {%- endif -%}
+              </button>
             </div>
             <div class="nq-gate__preview" aria-hidden="true">
               <span></span><span></span><span></span><span></span><span></span>
@@ -109,7 +104,7 @@
         <span class="nq-progress__seg"></span>
         <span class="nq-progress__seg"></span>
       </div>
-      <p class="nq-progress__label" id="nqProgressLabel" aria-live="polite">Step 1 of 5</p>
+      <p class="nq-progress__label" id="nqProgressLabel" aria-live="polite">{{ 'sections.nootropic_quiz.progress' | t: current: 1, total: 5 }}</p>
 
       <div class="nq-steps">
       {%- comment -%} ════════════════════════════════════════
@@ -119,55 +114,55 @@
       ════════════════════════════════════════ {%- endcomment -%}
       <div class="nq-step" data-step="0">
         <div class="nq-step__header">
-          <span class="nq-step__eyebrow">Step 1 of 5 · Your Goal</span>
-          <h2 class="nq-step__question">What's your primary goal?</h2>
-          <p class="nq-step__sub">Pick the outcome that matters most to you right now.</p>
+          <span class="nq-step__eyebrow">{{ 'sections.nootropic_quiz.step_1_eyebrow' | t }}</span>
+          <h2 class="nq-step__question">{{ 'sections.nootropic_quiz.step_1_question' | t }}</h2>
+          <p class="nq-step__sub">{{ 'sections.nootropic_quiz.step_1_subtitle' | t }}</p>
         </div>
-        <div class="nq-options nq-options--grid" role="group" aria-label="Primary goal">
+        <div class="nq-options nq-options--grid" role="group" aria-label="{{ 'sections.nootropic_quiz.step_1_group' | t }}">
 
           <button type="button" class="nq-option nq-option--icon" data-value="focus" tabindex="0">
             <span class="nq-option__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="0.8" fill="currentColor"/></svg></span>
             <span class="nq-option__text">
-              <span class="nq-option__label">Focus &amp; Cognition</span>
-              <span class="nq-option__desc">Deep work, mental clarity, sustained concentration</span>
+              <span class="nq-option__label">{{ 'sections.nootropic_quiz.focus_label' | t }}</span>
+              <span class="nq-option__desc">{{ 'sections.nootropic_quiz.focus_description' | t }}</span>
             </span>
           </button>
 
           <button type="button" class="nq-option nq-option--icon" data-value="mood" tabindex="0">
             <span class="nq-option__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21.2l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></span>
             <span class="nq-option__text">
-              <span class="nq-option__label">Mood &amp; Anxiety Relief</span>
-              <span class="nq-option__desc">Calm, stress resilience, emotional baseline</span>
+              <span class="nq-option__label">{{ 'sections.nootropic_quiz.mood_label' | t }}</span>
+              <span class="nq-option__desc">{{ 'sections.nootropic_quiz.mood_description' | t }}</span>
             </span>
           </button>
 
           <button type="button" class="nq-option nq-option--icon" data-value="energy" tabindex="0">
             <span class="nq-option__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></span>
             <span class="nq-option__text">
-              <span class="nq-option__label">Energy &amp; Motivation</span>
-              <span class="nq-option__desc">Drive, clean energy, get-up-and-go</span>
+              <span class="nq-option__label">{{ 'sections.nootropic_quiz.energy_label' | t }}</span>
+              <span class="nq-option__desc">{{ 'sections.nootropic_quiz.energy_description' | t }}</span>
             </span>
           </button>
 
           <button type="button" class="nq-option nq-option--icon" data-value="memory" tabindex="0">
             <span class="nq-option__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.4 1 2.3h6c0-.9.4-1.8 1-2.3A7 7 0 0 0 12 2z"/><path d="M9 20h6"/><path d="M10 22h4"/></svg></span>
             <span class="nq-option__text">
-              <span class="nq-option__label">Memory &amp; Learning</span>
-              <span class="nq-option__desc">Retention, recall, study performance</span>
+              <span class="nq-option__label">{{ 'sections.nootropic_quiz.memory_label' | t }}</span>
+              <span class="nq-option__desc">{{ 'sections.nootropic_quiz.memory_description' | t }}</span>
             </span>
           </button>
 
           <button type="button" class="nq-option nq-option--icon nq-option--span" data-value="sleep" tabindex="0">
             <span class="nq-option__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></span>
             <span class="nq-option__text">
-              <span class="nq-option__label">Sleep &amp; Recovery</span>
-              <span class="nq-option__desc">Quality rest, faster wind-down, restoration</span>
+              <span class="nq-option__label">{{ 'sections.nootropic_quiz.sleep_label' | t }}</span>
+              <span class="nq-option__desc">{{ 'sections.nootropic_quiz.sleep_description' | t }}</span>
             </span>
           </button>
 
         </div>
         <div class="nq-nav">
-          <button type="button" class="nq-back-btn" id="nqBackBtn" aria-label="Go back">← Back</button>
+          <button type="button" class="nq-back-btn" id="nqBackBtn" aria-label="{{ 'sections.nootropic_quiz.back' | t }}">← {{ 'sections.nootropic_quiz.back' | t }}</button>
         </div>
       </div>
 
@@ -177,47 +172,47 @@
       ════════════════════════════════════════ {%- endcomment -%}
       <div class="nq-step" data-step="1">
         <div class="nq-step__header">
-          <span class="nq-step__eyebrow">Step 2 of 5 · Your Experience</span>
-          <h2 class="nq-step__question">How familiar are you with nootropics?</h2>
-          <p class="nq-step__sub">Honest answers get you the most appropriate stack.</p>
+          <span class="nq-step__eyebrow">{{ 'sections.nootropic_quiz.step_2_eyebrow' | t }}</span>
+          <h2 class="nq-step__question">{{ 'sections.nootropic_quiz.step_2_question' | t }}</h2>
+          <p class="nq-step__sub">{{ 'sections.nootropic_quiz.step_2_subtitle' | t }}</p>
         </div>
-        <div class="nq-options" role="group" aria-label="Experience level">
+        <div class="nq-options" role="group" aria-label="{{ 'sections.nootropic_quiz.step_2_group' | t }}">
 
           <button type="button" class="nq-option" data-value="beginner" tabindex="0">
             <span class="nq-option__dot" aria-hidden="true"></span>
             <span class="nq-option__text">
-              <span class="nq-option__label">Complete beginner</span>
-              <span class="nq-option__desc">Haven't tried nootropics before</span>
+              <span class="nq-option__label">{{ 'sections.nootropic_quiz.beginner_label' | t }}</span>
+              <span class="nq-option__desc">{{ 'sections.nootropic_quiz.beginner_description' | t }}</span>
             </span>
           </button>
 
           <button type="button" class="nq-option" data-value="some" tabindex="0">
             <span class="nq-option__dot" aria-hidden="true"></span>
             <span class="nq-option__text">
-              <span class="nq-option__label">Some experience</span>
-              <span class="nq-option__desc">Tried caffeine, L-theanine, or similar basics</span>
+              <span class="nq-option__label">{{ 'sections.nootropic_quiz.some_label' | t }}</span>
+              <span class="nq-option__desc">{{ 'sections.nootropic_quiz.some_description' | t }}</span>
             </span>
           </button>
 
           <button type="button" class="nq-option" data-value="intermediate" tabindex="0">
             <span class="nq-option__dot" aria-hidden="true"></span>
             <span class="nq-option__text">
-              <span class="nq-option__label">Intermediate</span>
-              <span class="nq-option__desc">Tried racetams or adaptogens</span>
+              <span class="nq-option__label">{{ 'sections.nootropic_quiz.intermediate_label' | t }}</span>
+              <span class="nq-option__desc">{{ 'sections.nootropic_quiz.intermediate_description' | t }}</span>
             </span>
           </button>
 
           <button type="button" class="nq-option" data-value="advanced" tabindex="0">
             <span class="nq-option__dot" aria-hidden="true"></span>
             <span class="nq-option__text">
-              <span class="nq-option__label">Advanced</span>
-              <span class="nq-option__desc">Comfortable building and cycling multi-compound stacks</span>
+              <span class="nq-option__label">{{ 'sections.nootropic_quiz.advanced_label' | t }}</span>
+              <span class="nq-option__desc">{{ 'sections.nootropic_quiz.advanced_description' | t }}</span>
             </span>
           </button>
 
         </div>
         <div class="nq-nav">
-          <button type="button" class="nq-back-btn" aria-label="Go back">← Back</button>
+          <button type="button" class="nq-back-btn" aria-label="{{ 'sections.nootropic_quiz.back' | t }}">← {{ 'sections.nootropic_quiz.back' | t }}</button>
         </div>
       </div>
 
@@ -227,47 +222,47 @@
       ════════════════════════════════════════ {%- endcomment -%}
       <div class="nq-step" data-step="2">
         <div class="nq-step__header">
-          <span class="nq-step__eyebrow">Step 3 of 5 · Your Context</span>
-          <h2 class="nq-step__question">What best describes your situation?</h2>
-          <p class="nq-step__sub">This helps us match compounds to real-world demands.</p>
+          <span class="nq-step__eyebrow">{{ 'sections.nootropic_quiz.step_3_eyebrow' | t }}</span>
+          <h2 class="nq-step__question">{{ 'sections.nootropic_quiz.step_3_question' | t }}</h2>
+          <p class="nq-step__sub">{{ 'sections.nootropic_quiz.step_3_subtitle' | t }}</p>
         </div>
-        <div class="nq-options" role="group" aria-label="Lifestyle context">
+        <div class="nq-options" role="group" aria-label="{{ 'sections.nootropic_quiz.step_3_group' | t }}">
 
           <button type="button" class="nq-option" data-value="student" tabindex="0">
             <span class="nq-option__dot" aria-hidden="true"></span>
             <span class="nq-option__text">
-              <span class="nq-option__label">Student / Studying</span>
-              <span class="nq-option__desc">Exams, reading, long study sessions, retention</span>
+              <span class="nq-option__label">{{ 'sections.nootropic_quiz.student_label' | t }}</span>
+              <span class="nq-option__desc">{{ 'sections.nootropic_quiz.student_description' | t }}</span>
             </span>
           </button>
 
           <button type="button" class="nq-option" data-value="professional" tabindex="0">
             <span class="nq-option__dot" aria-hidden="true"></span>
             <span class="nq-option__text">
-              <span class="nq-option__label">Professional / Work</span>
-              <span class="nq-option__desc">Deadlines, decisions, deep work, output</span>
+              <span class="nq-option__label">{{ 'sections.nootropic_quiz.professional_label' | t }}</span>
+              <span class="nq-option__desc">{{ 'sections.nootropic_quiz.professional_description' | t }}</span>
             </span>
           </button>
 
           <button type="button" class="nq-option" data-value="athletic" tabindex="0">
             <span class="nq-option__dot" aria-hidden="true"></span>
             <span class="nq-option__text">
-              <span class="nq-option__label">Athletic Performance</span>
-              <span class="nq-option__desc">Training, recovery, mind-muscle focus</span>
+              <span class="nq-option__label">{{ 'sections.nootropic_quiz.athletic_label' | t }}</span>
+              <span class="nq-option__desc">{{ 'sections.nootropic_quiz.athletic_description' | t }}</span>
             </span>
           </button>
 
           <button type="button" class="nq-option" data-value="wellness" tabindex="0">
             <span class="nq-option__dot" aria-hidden="true"></span>
             <span class="nq-option__text">
-              <span class="nq-option__label">General Wellness</span>
-              <span class="nq-option__desc">Long-term cognitive health and resilience</span>
+              <span class="nq-option__label">{{ 'sections.nootropic_quiz.wellness_label' | t }}</span>
+              <span class="nq-option__desc">{{ 'sections.nootropic_quiz.wellness_description' | t }}</span>
             </span>
           </button>
 
         </div>
         <div class="nq-nav">
-          <button type="button" class="nq-back-btn" aria-label="Go back">← Back</button>
+          <button type="button" class="nq-back-btn" aria-label="{{ 'sections.nootropic_quiz.back' | t }}">← {{ 'sections.nootropic_quiz.back' | t }}</button>
         </div>
       </div>
 
@@ -277,47 +272,47 @@
       ════════════════════════════════════════ {%- endcomment -%}
       <div class="nq-step" data-step="3">
         <div class="nq-step__header">
-          <span class="nq-step__eyebrow">Step 4 of 5 · Your Preferences</span>
-          <h2 class="nq-step__question">Any sensitivities or preferences?</h2>
-          <p class="nq-step__sub">We'll filter out anything that doesn't fit your profile.</p>
+          <span class="nq-step__eyebrow">{{ 'sections.nootropic_quiz.step_4_eyebrow' | t }}</span>
+          <h2 class="nq-step__question">{{ 'sections.nootropic_quiz.step_4_question' | t }}</h2>
+          <p class="nq-step__sub">{{ 'sections.nootropic_quiz.step_4_subtitle' | t }}</p>
         </div>
-        <div class="nq-options" role="group" aria-label="Sensitivities and preferences">
+        <div class="nq-options" role="group" aria-label="{{ 'sections.nootropic_quiz.step_4_group' | t }}">
 
           <button type="button" class="nq-option" data-value="stimulant-sensitive" tabindex="0">
             <span class="nq-option__dot" aria-hidden="true"></span>
             <span class="nq-option__text">
-              <span class="nq-option__label">Stimulant-sensitive</span>
-              <span class="nq-option__desc">No jitteriness, racing heart, or sleep disruption</span>
+              <span class="nq-option__label">{{ 'sections.nootropic_quiz.sensitive_label' | t }}</span>
+              <span class="nq-option__desc">{{ 'sections.nootropic_quiz.sensitive_description' | t }}</span>
             </span>
           </button>
 
           <button type="button" class="nq-option" data-value="natural" tabindex="0">
             <span class="nq-option__dot" aria-hidden="true"></span>
             <span class="nq-option__text">
-              <span class="nq-option__label">Prefer natural / herbal</span>
-              <span class="nq-option__desc">Plant-based, adaptogenic, and well-studied options</span>
+              <span class="nq-option__label">{{ 'sections.nootropic_quiz.natural_label' | t }}</span>
+              <span class="nq-option__desc">{{ 'sections.nootropic_quiz.natural_description' | t }}</span>
             </span>
           </button>
 
           <button type="button" class="nq-option" data-value="synthetics" tabindex="0">
             <span class="nq-option__dot" aria-hidden="true"></span>
             <span class="nq-option__text">
-              <span class="nq-option__label">Open to synthetics</span>
-              <span class="nq-option__desc">Research-backed synthetic compounds are fine</span>
+              <span class="nq-option__label">{{ 'sections.nootropic_quiz.synthetics_label' | t }}</span>
+              <span class="nq-option__desc">{{ 'sections.nootropic_quiz.synthetics_description' | t }}</span>
             </span>
           </button>
 
           <button type="button" class="nq-option" data-value="dependency" tabindex="0">
             <span class="nq-option__dot" aria-hidden="true"></span>
             <span class="nq-option__text">
-              <span class="nq-option__label">Concerned about dependency</span>
-              <span class="nq-option__desc">Low tolerance-build risk is a priority</span>
+              <span class="nq-option__label">{{ 'sections.nootropic_quiz.dependency_label' | t }}</span>
+              <span class="nq-option__desc">{{ 'sections.nootropic_quiz.dependency_description' | t }}</span>
             </span>
           </button>
 
         </div>
         <div class="nq-nav">
-          <button type="button" class="nq-back-btn" aria-label="Go back">← Back</button>
+          <button type="button" class="nq-back-btn" aria-label="{{ 'sections.nootropic_quiz.back' | t }}">← {{ 'sections.nootropic_quiz.back' | t }}</button>
         </div>
       </div>
 
@@ -327,40 +322,40 @@
       ════════════════════════════════════════ {%- endcomment -%}
       <div class="nq-step" data-step="4">
         <div class="nq-step__header">
-          <span class="nq-step__eyebrow">Step 5 of 5 · Your Stack Size</span>
-          <h2 class="nq-step__question">How many compounds do you want to start with?</h2>
-          <p class="nq-step__sub">Simpler stacks are easier to track and adjust. You can always layer more later.</p>
+          <span class="nq-step__eyebrow">{{ 'sections.nootropic_quiz.step_5_eyebrow' | t }}</span>
+          <h2 class="nq-step__question">{{ 'sections.nootropic_quiz.step_5_question' | t }}</h2>
+          <p class="nq-step__sub">{{ 'sections.nootropic_quiz.step_5_subtitle' | t }}</p>
         </div>
-        <div class="nq-options" role="group" aria-label="Stack size preference">
+        <div class="nq-options" role="group" aria-label="{{ 'sections.nootropic_quiz.step_5_group' | t }}">
 
           <button type="button" class="nq-option" data-value="simple" tabindex="0">
             <span class="nq-option__dot" aria-hidden="true"></span>
             <span class="nq-option__text">
-              <span class="nq-option__label">Start simple: 1 to 2 compounds</span>
-              <span class="nq-option__desc">Low commitment. Easy to track what's working.</span>
+              <span class="nq-option__label">{{ 'sections.nootropic_quiz.simple_label' | t }}</span>
+              <span class="nq-option__desc">{{ 'sections.nootropic_quiz.simple_description' | t }}</span>
             </span>
           </button>
 
           <button type="button" class="nq-option" data-value="moderate" tabindex="0">
             <span class="nq-option__dot" aria-hidden="true"></span>
             <span class="nq-option__text">
-              <span class="nq-option__label">Moderate stack: 3 to 4 compounds</span>
-              <span class="nq-option__desc">Good balance of depth and manageability.</span>
+              <span class="nq-option__label">{{ 'sections.nootropic_quiz.moderate_label' | t }}</span>
+              <span class="nq-option__desc">{{ 'sections.nootropic_quiz.moderate_description' | t }}</span>
             </span>
           </button>
 
           <button type="button" class="nq-option" data-value="full" tabindex="0">
             <span class="nq-option__dot" aria-hidden="true"></span>
             <span class="nq-option__text">
-              <span class="nq-option__label">Full stack: 5 or more</span>
-              <span class="nq-option__desc">Maximise synergy. Best for experienced users.</span>
+              <span class="nq-option__label">{{ 'sections.nootropic_quiz.full_label' | t }}</span>
+              <span class="nq-option__desc">{{ 'sections.nootropic_quiz.full_description' | t }}</span>
             </span>
           </button>
 
         </div>
         <div class="nq-nav">
-          <button type="button" class="nq-back-btn" aria-label="Go back">← Back</button>
-          <button type="button" id="nqNextBtn">Build My Stack →</button>
+          <button type="button" class="nq-back-btn" aria-label="{{ 'sections.nootropic_quiz.back' | t }}">← {{ 'sections.nootropic_quiz.back' | t }}</button>
+          <button type="button" id="nqNextBtn">{{ 'sections.nootropic_quiz.build_stack' | t }} →</button>
         </div>
       </div>
       </div><!-- /.nq-steps -->
@@ -426,6 +421,7 @@
       {%- comment -%} ── Klaviyo + lead-capture config (read by JS) ── {%- endcomment -%}
       <script type="application/json" id="nq-config">
       {
+        "language": {{ localization.language.iso_code | json }},
         "klaviyo": {
           "publicKey": {{ section.settings.public_api_key | json }},
           "listId": {{ section.settings.list_id | json }},
@@ -439,8 +435,48 @@
           "placeholder": {{ section.settings.capture_placeholder | json }},
           "button": {{ section.settings.capture_button | json }},
           "fineprint": {{ section.settings.capture_fineprint | json }},
+        "consentLabel": {{ section.settings.marketing_consent_label | json }},
+        "answerUseDisclosure": {{ section.settings.marketing_answer_use_disclosure | json }},
+        "privacyUrl": {{ quiz_privacy_url | json }},
+        "privacyLinkLabel": {{ section.settings.privacy_link_label | json }},
+        "consentVersion": {{ section.settings.consent_version | json }},
+        "emailInvalidMessage": {{ section.settings.email_invalid_message | json }},
+        "consentRequiredMessage": {{ section.settings.consent_required_message | json }},
+        "unavailableMessage": {{ section.settings.capture_unavailable_message | json }},
+        "privacyBlockedMessage": {{ section.settings.privacy_blocked_message | json }},
+        "failureMessage": {{ section.settings.capture_failure_message | json }},
           "successTitle": {{ section.settings.capture_success_title | json }},
           "successMessage": {{ section.settings.capture_success_message | json }}
+        },
+        "locale": {
+          "progress": {{ 'sections.nootropic_quiz.progress' | t: current: '__CURRENT__', total: 5 | json }},
+          "progressStart": {{ 'sections.nootropic_quiz.progress_start' | t | json }},
+          "complete": {{ 'sections.nootropic_quiz.complete' | t | json }},
+          "emailLabel": {{ 'sections.nootropic_quiz.email_label' | t | json }},
+          "inStock": {{ 'sections.nootropic_quiz.in_stock' | t | json }},
+          "addToStack": {{ 'sections.nootropic_quiz.add_to_stack' | t | json }},
+          "soldOut": {{ 'sections.nootropic_quiz.sold_out' | t | json }},
+          "captureTitle": {{ 'sections.nootropic_quiz.capture_default_title' | t | json }},
+          "captureButton": {{ 'sections.nootropic_quiz.capture_default_button' | t | json }},
+          "captureSuccess": {{ 'sections.nootropic_quiz.capture_success' | t | json }},
+          "sentTo": {{ 'sections.nootropic_quiz.sent_to' | t: email: '__EMAIL__' | json }},
+          "invalidEmail": {{ 'sections.nootropic_quiz.invalid_email' | t | json }},
+          "captureUnavailable": {{ 'sections.nootropic_quiz.capture_unavailable' | t | json }},
+          "requestError": {{ 'sections.nootropic_quiz.request_error' | t | json }},
+          "answersLabel": {{ 'sections.nootropic_quiz.answers_label' | t | json }},
+          "loadingMatch": {{ 'sections.nootropic_quiz.loading_match' | t | json }},
+          "loadingFilter": {{ 'sections.nootropic_quiz.loading_filter' | t | json }},
+          "loadingStock": {{ 'sections.nootropic_quiz.loading_stock' | t | json }},
+          "loadingAlmost": {{ 'sections.nootropic_quiz.loading_almost' | t | json }},
+          "stackTitle": {{ 'sections.nootropic_quiz.stack_title' | t | json }},
+          "addToStackTotal": {{ 'sections.nootropic_quiz.add_to_stack_total' | t: total: '__TOTAL__' | json }},
+          "addAllToStackTotal": {{ 'sections.nootropic_quiz.add_all_to_stack_total' | t: count: '__COUNT__', total: '__TOTAL__' | json }},
+          "recommendedBadge": {{ 'sections.nootropic_quiz.recommended_badge' | t | json }},
+          "productsComing": {{ 'sections.nootropic_quiz.products_coming' | t | json }},
+          "retake": {{ 'sections.nootropic_quiz.retake' | t | json }},
+          "adding": {{ 'sections.nootropic_quiz.adding' | t | json }},
+          "added": {{ 'sections.nootropic_quiz.added' | t | json }},
+          "tryAgain": {{ 'sections.nootropic_quiz.try_again' | t | json }}
         },
         "minInStock": {{ section.settings.min_in_stock | json }}
       }
@@ -475,37 +511,55 @@
     },
     {
       "type": "header",
-      "content": "Email gate"
+      "content": "Quiz start"
     },
     {
       "type": "text",
       "id": "gate_title",
-      "label": "Gate heading",
-      "default": "Find your stack in 60 seconds"
+      "label": "Start heading",
+      "default": "Start without subscribing"
     },
     {
       "type": "text",
       "id": "gate_subtitle",
-      "label": "Gate subtext",
-      "default": "Enter your email for a copy of your shortlist plus the current 10% first-order offer, or continue without email."
+      "label": "Start introduction",
+      "default": "You do not need to provide an email address to take the quiz or see your results."
     },
     {
       "type": "text",
       "id": "gate_button",
-      "label": "Gate button label",
+      "label": "Start button label",
       "default": "Start the quiz"
     },
     {
       "type": "checkbox",
       "id": "allow_skip",
-      "label": "Allow quiz without email",
+      "label": "Show no-email helper text",
       "default": true
     },
     {
       "type": "text",
       "id": "skip_label",
-      "label": "Continue without email label",
+      "label": "No-email helper text",
       "default": "Continue without email"
+    },
+    {
+      "type": "richtext",
+      "id": "answer_use_disclosure",
+      "label": "Quiz answer-use disclosure",
+      "default": "<p>Your answers are used in this browser to apply fixed catalog rules and show a shortlist. They are not sent to Klaviyo unless you later choose to subscribe.</p>"
+    },
+    {
+      "type": "url",
+      "id": "privacy_link",
+      "label": "Privacy link",
+      "info": "Optional override. The store privacy policy is used when this is blank."
+    },
+    {
+      "type": "text",
+      "id": "privacy_link_label",
+      "label": "Privacy link label",
+      "default": "Read the privacy policy"
     },
     {
       "type": "header",
@@ -538,12 +592,12 @@
     },
     {
       "type": "header",
-      "content": "Lead capture (Klaviyo)"
+      "content": "Marketing subscription (Klaviyo)"
     },
     {
       "type": "checkbox",
       "id": "capture_enabled",
-      "label": "Show email capture on results",
+      "label": "Show optional subscription on results",
       "default": true
     },
     {
@@ -583,7 +637,7 @@
       "type": "text",
       "id": "capture_subtitle",
       "label": "Capture subtitle",
-      "default": "We'll send your personalised stack and a one-time discount code."
+      "default": "Choose whether to subscribe after reviewing your shortlist."
     },
     {
       "type": "text",
@@ -595,13 +649,66 @@
       "type": "text",
       "id": "capture_button",
       "label": "Capture button label",
-      "default": "Send my stack"
+      "default": "Subscribe and email my shortlist"
     },
     {
       "type": "richtext",
       "id": "capture_fineprint",
       "label": "Capture fine print",
-      "default": "<p>By subscribing you agree to receive marketing emails from Nootropix. Unsubscribe anytime.</p>"
+      "default": "<p>Email frequency varies with product and editorial updates. Offers are subject to the eligibility and redemption terms shown in the email. You can unsubscribe using the link in any message.</p>"
+    },
+    {
+      "type": "text",
+      "id": "marketing_consent_label",
+      "label": "Explicit marketing consent label",
+      "default": "I choose to receive marketing emails from Nootropix."
+    },
+    {
+      "type": "richtext",
+      "id": "marketing_answer_use_disclosure",
+      "label": "Marketing answer-use disclosure",
+      "default": "<p>If you subscribe, your email, quiz answers, and shortlist are sent to Klaviyo and used to deliver and tailor marketing emails.</p>"
+    },
+    {
+      "type": "text",
+      "id": "consent_version",
+      "label": "Consent version",
+      "info": "Operational identifier recorded with the subscription event and profile.",
+      "default": "quiz-marketing-v1"
+    },
+    {
+      "type": "header",
+      "content": "Subscription messages"
+    },
+    {
+      "type": "text",
+      "id": "email_invalid_message",
+      "label": "Invalid email message",
+      "default": "Enter a valid email address."
+    },
+    {
+      "type": "text",
+      "id": "consent_required_message",
+      "label": "Consent required message",
+      "default": "Select the marketing consent checkbox to subscribe."
+    },
+    {
+      "type": "text",
+      "id": "capture_unavailable_message",
+      "label": "Unavailable message",
+      "default": "Email subscription is temporarily unavailable. Your quiz results remain available."
+    },
+    {
+      "type": "text",
+      "id": "privacy_blocked_message",
+      "label": "Privacy choices message",
+      "default": "Your current Shopify privacy choices do not allow the processing needed for this Klaviyo subscription. Review your privacy choices, then try again. Your quiz results remain available."
+    },
+    {
+      "type": "text",
+      "id": "capture_failure_message",
+      "label": "Submission failure message",
+      "default": "We could not complete the subscription. Try again later; your quiz results remain available."
     },
     {
       "type": "text",

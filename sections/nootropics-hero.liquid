@@ -425,7 +425,7 @@ document.addEventListener('DOMContentLoaded', function(){
               {% endif %}
             >
               {% if section.settings.show_breadcrumbs %}
-                {% render 'breadcrumbs' %}
+                {% render 'breadcrumbs', emit_schema: false %}
               {% endif %}
               {% render 'product-info-content', product_media_style: product_media_style, columns_mobile: columns_mobile %}
               {%- comment -%} Nootropics Quick Facts + Compliance {%- endcomment -%}
@@ -488,44 +488,6 @@ document.addEventListener('DOMContentLoaded', function(){
 
         {% render 'product-data', product: product %}
       </xo-product>
-
-      {%- comment -%}
-      Keep the theme's product JSON-LD to avoid SEO regressions.
-      {%- endcomment -%}
-      {% render 'product-jsonld', emit_breadcrumb: false %}
-      {% # theme-check-disable UnknownFilter %}
-      {%- liquid
-  assign benefit  = product.metafields.supp.primary_benefit
-  assign serving  = product.metafields.supp.serving_size
-  assign servings = product.metafields.supp.servings_per_container
-  assign caps     = product.metafields.supp.capsule_count
-  assign extras = '' | split: ','
-
-  if benefit and benefit != blank
-    assign extras = extras | push: '{"@type":"PropertyValue","name":"Primary benefit","value":' | append: benefit | json | append: '}'
-  endif
-  if serving and serving != blank
-    assign extras = extras | push: '{"@type":"PropertyValue","name":"Serving size","value":' | append: serving | json | append: '}'
-  endif
-  if servings and servings != blank
-    assign extras = extras | push: '{"@type":"PropertyValue","name":"Servings per container","value":' | append: servings | json | append: '}'
-  endif
-  if caps and caps != blank
-    assign extras = extras | push: '{"@type":"PropertyValue","name":"Capsules","value":' | append: caps | json | append: '}'
-  endif
--%}
-{%- if extras.size > 0 -%}
-<script type="application/ld+json">
-{
-  "@context":"https://schema.org",
-  "@type":"Product",
-  "sku": {{ product.selected_or_first_available_variant.sku | json }},
-  "name": {{ product.title | json }},
-  "additionalProperty": [{{ extras | join: ',' }}]
-}
-</script>
-{%- endif -%}
-      {% # theme-check-enable UnknownFilter %}
 
     </div>
   </div>

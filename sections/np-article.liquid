@@ -486,16 +486,16 @@
         </aside>
       {% endif %}
 
-      <article class="np-content" itemscope itemtype="https://schema.org/BlogPosting">
+      <article class="np-content">
 
         <header class="np-header">
-          <h1 class="np-title" itemprop="headline">{{ article.title | escape }}</h1>
+          <h1 class="np-title">{{ article.title | escape }}</h1>
 
           <div class="np-meta-container">
             <div class="np-meta">
               {% if section.settings.show_author and article_author != blank %}
-                <span class="np-meta__item" itemprop="author" itemscope itemtype="https://schema.org/Person">
-                  <span itemprop="name">{{ article_author | escape }}</span>
+                <span class="np-meta__item">
+                  <span>{{ article_author | escape }}</span>
                   {% if author_credentials != blank %}
                     <span>, {{ author_credentials | escape }}</span>
                   {% endif %}
@@ -504,7 +504,7 @@
 
               {% if section.settings.show_date %}
                 {% if section.settings.show_author and article_author != blank %}<span class="np-meta__dot">&middot;</span>{% endif %}
-                <time class="np-meta__item" datetime="{{ article.published_at | date: '%Y-%m-%d' }}" itemprop="datePublished">
+                <time class="np-meta__item" datetime="{{ article.published_at | date: '%Y-%m-%d' }}">
                   {{ article.published_at | date: "%B %e, %Y" }}
                 </time>
               {% endif %}
@@ -553,12 +553,12 @@
           {% endif %}
 
           {% if article.excerpt != blank and section.settings.show_excerpt %}
-            <p class="np-excerpt" itemprop="description">{{ article.excerpt | strip_html | escape }}</p>
+            <p class="np-excerpt">{{ article.excerpt | strip_html | escape }}</p>
           {% endif %}
         </header>
 
         {% if section.settings.show_featured_image and article.image %}
-          <figure class="np-hero" itemprop="image" itemscope itemtype="https://schema.org/ImageObject">
+          <figure class="np-hero">
             {%- assign hero_alt = article.image.alt | default: article.title | escape -%}
             {{ article.image | image_url: width: 2000 | image_tag: 
               loading: 'eager', 
@@ -568,11 +568,10 @@
               alt: hero_alt, 
               class: 'np-hero-img' 
             }}
-            <meta itemprop="url" content="{{ article.image | image_url: width: 2000 }}">
           </figure>
         {% endif %}
 
-        <div class="np-body rte" id="np-body-{{ section.id }}" itemprop="articleBody">
+        <div class="np-body rte" id="np-body-{{ section.id }}">
           {{ article.content }}
         </div>
 
@@ -702,33 +701,6 @@
     </div>
   </xo-container>
 </section>
-
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "BreadcrumbList",
-  "itemListElement": [
-    {
-      "@type": "ListItem",
-      "position": 1,
-      "name": "Home",
-      "item": "{{ shop.url }}"
-    },
-    {
-      "@type": "ListItem",
-      "position": 2,
-      "name": {{ blog.title | json }},
-      "item": "{{ shop.url }}{{ blog.url }}"
-    },
-    {
-      "@type": "ListItem",
-      "position": 3,
-      "name": {{ article.title | json }},
-      "item": "{{ shop.url }}{{ article.url }}"
-    }
-  ]
-}
-</script>
 
 <script>
   (function() {

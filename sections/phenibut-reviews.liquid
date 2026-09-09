@@ -1,41 +1,17 @@
 {% comment %}
   Reviews — XO theme design system
-  - Blockquote semantics, AggregateRating + Review JSON-LD, reduced-motion
+  - Blockquote semantics and reduced-motion support
 {% endcomment %}
 
-{%- comment -%} ── JSON-LD: AggregateRating + Reviews ── {%- endcomment -%}
 {%- assign review_blocks = section.blocks | where: 'type', 'review' -%}
-{% if review_blocks.size > 0 %}
-  {%- assign total_rating = 0 -%}
-  {%- for block in review_blocks -%}
-    {%- assign total_rating = total_rating | plus: block.settings.rating -%}
-  {%- endfor -%}
+{%- assign total_rating = 0 -%}
+{%- for block in review_blocks -%}
+  {%- assign total_rating = total_rating | plus: block.settings.rating -%}
+{%- endfor -%}
+{%- assign avg_rating = 0 -%}
+{%- if review_blocks.size > 0 -%}
   {%- assign avg_rating = total_rating | times: 1.0 | divided_by: review_blocks.size -%}
-  {%- assign jsonld_product_name = section.settings.product_name | default: page.title -%}
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "Product",
-  "name": {{ jsonld_product_name | json }},
-  "aggregateRating": {
-    "@type": "AggregateRating",
-    "ratingValue": "{{ avg_rating | round: 1 }}",
-    "reviewCount": "{{ review_blocks.size }}",
-    "bestRating": "5"
-  },
-  "review": [
-    {%- for block in review_blocks -%}
-      {
-        "@type": "Review",
-        "reviewRating": { "@type": "Rating", "ratingValue": "{{ block.settings.rating }}", "bestRating": "5" },
-        "author": { "@type": "Person", "name": {{ block.settings.author | json }} },
-        "reviewBody": {{ block.settings.text | json }}
-      }{%- unless forloop.last -%},{%- endunless -%}
-    {%- endfor -%}
-  ]
-}
-</script>
-{% endif %}
+{%- endif -%}
 
 {%- style -%}
 .xo-section--{{ section.id }} xo-animate { display: block; }

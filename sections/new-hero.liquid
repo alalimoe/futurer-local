@@ -6,7 +6,15 @@
   - Now supports a separate mobile background image
 {% endcomment %}
 
-{% assign hero_id = section.id | replace: '_', '' | downcase %}
+{% liquid
+  assign hero_id = section.id | replace: '_', '' | downcase
+  assign hero_is_lcp = false
+  assign hero_loading = 'lazy'
+  if section.location == 'template' and section.index == 1
+    assign hero_is_lcp = true
+    assign hero_loading = 'eager'
+  endif
+%}
 
 {% style %}
   /* === CSS custom properties for fluid scaling === */
@@ -456,10 +464,15 @@
 
 {%- comment -%} LCP preload: hero background (picture element; image_tag preload not suitable for responsive sources) {%- endcomment -%}
 {% comment %}theme-check-disable AssetPreload{% endcomment %}
-{%- if section.settings.background_image != blank -%}
-  <link rel="preload" as="image" href="{{ section.settings.background_image | image_url: width: 1920 }}" imagesrcset="{{ section.settings.background_image | image_url: width: 800 }} 800w, {{ section.settings.background_image | image_url: width: 1200 }} 1200w, {{ section.settings.background_image | image_url: width: 1920 }} 1920w" imagesizes="100vw">
-{%- elsif section.settings.background_image_mobile != blank -%}
-  <link rel="preload" as="image" href="{{ section.settings.background_image_mobile | image_url: width: 828 }}" imagesrcset="{{ section.settings.background_image_mobile | image_url: width: 414 }} 414w, {{ section.settings.background_image_mobile | image_url: width: 828 }} 828w" imagesizes="100vw">
+{%- if hero_is_lcp -%}
+  {%- if section.settings.background_image != blank and section.settings.background_image_mobile != blank -%}
+    <link rel="preload" as="image" media="(max-width: 768px)" href="{{ section.settings.background_image_mobile | image_url: width: 828 }}" imagesrcset="{{ section.settings.background_image_mobile | image_url: width: 414 }} 414w, {{ section.settings.background_image_mobile | image_url: width: 828 }} 828w, {{ section.settings.background_image_mobile | image_url: width: 1242 }} 1242w" imagesizes="100vw">
+    <link rel="preload" as="image" media="(min-width: 769px)" href="{{ section.settings.background_image | image_url: width: 1920 }}" imagesrcset="{{ section.settings.background_image | image_url: width: 800 }} 800w, {{ section.settings.background_image | image_url: width: 1200 }} 1200w, {{ section.settings.background_image | image_url: width: 1920 }} 1920w, {{ section.settings.background_image | image_url: width: 2400 }} 2400w" imagesizes="100vw">
+  {%- elsif section.settings.background_image != blank -%}
+    <link rel="preload" as="image" href="{{ section.settings.background_image | image_url: width: 1920 }}" imagesrcset="{{ section.settings.background_image | image_url: width: 800 }} 800w, {{ section.settings.background_image | image_url: width: 1200 }} 1200w, {{ section.settings.background_image | image_url: width: 1920 }} 1920w, {{ section.settings.background_image | image_url: width: 2400 }} 2400w" imagesizes="100vw">
+  {%- elsif section.settings.background_image_mobile != blank -%}
+    <link rel="preload" as="image" href="{{ section.settings.background_image_mobile | image_url: width: 828 }}" imagesrcset="{{ section.settings.background_image_mobile | image_url: width: 414 }} 414w, {{ section.settings.background_image_mobile | image_url: width: 828 }} 828w, {{ section.settings.background_image_mobile | image_url: width: 1242 }} 1242w" imagesizes="100vw">
+  {%- endif -%}
 {%- endif -%}
 {% comment %}theme-check-enable AssetPreload{% endcomment %}
 
@@ -468,16 +481,15 @@
     {% if section.settings.background_image or section.settings.background_image_mobile %}
       {% if section.settings.background_image and section.settings.background_image_mobile %}
         <picture>
-          <source media="(max-width: 768px)" srcset="{{ section.settings.background_image_mobile | image_url: width: 414 }} 414w, {{ section.settings.background_image_mobile | image_url: width: 828 }} 828w, {{ section.settings.background_image_mobile | image_url: width: 1242 }} 1242w" sizes="100vw">
-          <source media="(min-width: 769px)" srcset="{{ section.settings.background_image | image_url: width: 800 }} 800w, {{ section.settings.background_image | image_url: width: 1200 }} 1200w, {{ section.settings.background_image | image_url: width: 1920 }} 1920w, {{ section.settings.background_image | image_url: width: 2400 }} 2400w" sizes="100vw">
+          <source media="(max-width: 768px)" srcset="{{ section.settings.background_image_mobile | image_url: width: 414 }} 414w, {{ section.settings.background_image_mobile | image_url: width: 828 }} 828w, {{ section.settings.background_image_mobile | image_url: width: 1242 }} 1242w" sizes="100vw" width="{{ section.settings.background_image_mobile.width }}" height="{{ section.settings.background_image_mobile.height }}">
+          <source media="(min-width: 769px)" srcset="{{ section.settings.background_image | image_url: width: 800 }} 800w, {{ section.settings.background_image | image_url: width: 1200 }} 1200w, {{ section.settings.background_image | image_url: width: 1920 }} 1920w, {{ section.settings.background_image | image_url: width: 2400 }} 2400w" sizes="100vw" width="{{ section.settings.background_image.width }}" height="{{ section.settings.background_image.height }}">
           <img
             class="ai-hero-bg-desktop-{{ hero_id }} ai-hero-bg-mobile-{{ hero_id }}"
             src="{{ section.settings.background_image | image_url: width: 1920 }}"
             srcset="{{ section.settings.background_image | image_url: width: 800 }} 800w, {{ section.settings.background_image | image_url: width: 1200 }} 1200w, {{ section.settings.background_image | image_url: width: 1920 }} 1920w, {{ section.settings.background_image | image_url: width: 2400 }} 2400w"
             sizes="100vw"
             alt="{{ section.settings.background_image.alt | default: section.settings.headline | escape }}"
-            loading="eager"
-            fetchpriority="high"
+            loading="{{ hero_loading }}"
             width="{{ section.settings.background_image.width }}"
             height="{{ section.settings.background_image.height }}"
             decoding="async"
@@ -490,8 +502,7 @@
           srcset="{{ section.settings.background_image | image_url: width: 800 }} 800w, {{ section.settings.background_image | image_url: width: 1200 }} 1200w, {{ section.settings.background_image | image_url: width: 1920 }} 1920w, {{ section.settings.background_image | image_url: width: 2400 }} 2400w"
           sizes="100vw"
           alt="{{ section.settings.background_image.alt | default: section.settings.headline | escape }}"
-          loading="eager"
-          fetchpriority="high"
+          loading="{{ hero_loading }}"
           width="{{ section.settings.background_image.width }}"
           height="{{ section.settings.background_image.height }}"
           decoding="async"
@@ -503,8 +514,7 @@
           srcset="{{ section.settings.background_image_mobile | image_url: width: 414 }} 414w, {{ section.settings.background_image_mobile | image_url: width: 828 }} 828w, {{ section.settings.background_image_mobile | image_url: width: 1242 }} 1242w"
           sizes="100vw"
           alt="{{ section.settings.background_image_mobile.alt | default: section.settings.headline | escape }}"
-          loading="eager"
-          fetchpriority="high"
+          loading="{{ hero_loading }}"
           width="{{ section.settings.background_image_mobile.width }}"
           height="{{ section.settings.background_image_mobile.height }}"
           decoding="async"
