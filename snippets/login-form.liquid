@@ -20,18 +20,43 @@
         {% render 'space', spacing_dt: 8, spacing_mb: 6 %}
         <div class='login-form__item'>
           <div class='login-form__item-input'>
-            {% assign password_input_id = 'passwordField' %}
+            {% assign password_input_id = 'passwordField--' | append: section.id %}
             {% assign password_label = 'customer.login_page.password' | t %}
+            {% assign show_password_key = 'customer.login_page.show_password' %}
+            {% assign hide_password_key = 'customer.login_page.hide_password' %}
+            {% assign show_password_label = show_password_key | t %}
+            {% assign hide_password_label = hide_password_key | t %}
+            {% assign password_toggle_language = '' %}
+            {% if show_password_label contains 'translation missing' %}
+              {% assign show_password_label = 'Show password' %}
+              {% assign password_toggle_language = 'en' %}
+            {% endif %}
+            {% if hide_password_label contains 'translation missing' %}
+              {% assign hide_password_label = 'Hide password' %}
+              {% assign password_toggle_language = 'en' %}
+            {% endif %}
             {% render 'field-input', type: 'password', name: 'customer[password]', value: '', label: password_label, id: password_input_id, required: 'required' %}
           </div>
-          <div class='login-form__item-icon' id='togglePassword'>
-            <div class='login-form__icon-hide'>
+          <button
+            type='button'
+            class='login-form__item-icon'
+            data-password-toggle
+            aria-controls='{{ password_input_id }}'
+            aria-label='{{ show_password_label | escape }}'
+            aria-pressed='false'
+            {% if password_toggle_language != blank %}
+              lang='{{ password_toggle_language }}'
+            {% endif %}
+            data-label-show='{{ show_password_label | escape }}'
+            data-label-hide='{{ hide_password_label | escape }}'
+          >
+            <span class='login-form__icon-hide' aria-hidden='true'>
               {% render 'icon', name: 'eye-hide', size: '2.4rem' %}
-            </div>
-            <div class='login-form__icon-open'>
+            </span>
+            <span class='login-form__icon-open' aria-hidden='true'>
               {% render 'icon', name: 'eye', size: '2.4rem' %}
-            </div>
-          </div>
+            </span>
+          </button>
         </div>
       </xo-animate>
       <xo-animate xo-cascade>
@@ -61,23 +86,31 @@
 </div>
 
 <script>
-  document.addEventListener('DOMContentLoaded', function () {
-    console.log('DOM is loaded');
-    const togglePassword = document.getElementById('togglePassword');
-    const passwordField = document.getElementById('passwordField');
-    const eyeOpenPassword = document.querySelector('.login-form__icon-open');
-    const eyeHidePassword = document.querySelector('.login-form__icon-hide');
+  (() => {
+    const init = (togglePassword) => {
+      if (togglePassword.dataset.passwordToggleReady === 'true') return;
+      togglePassword.dataset.passwordToggleReady = 'true';
+      const passwordField = document.getElementById(togglePassword.getAttribute('aria-controls'));
+      const eyeOpenPassword = togglePassword.querySelector('.login-form__icon-open');
+      const eyeHidePassword = togglePassword.querySelector('.login-form__icon-hide');
+      if (!passwordField) return;
 
-    togglePassword.addEventListener('click', function () {
-      if (passwordField.type === 'password') {
-        passwordField.type = 'text';
-        eyeOpenPassword.classList.add('active');
-        eyeHidePassword.classList.add('active');
-      } else {
-        passwordField.type = 'password';
-        eyeHidePassword.classList.remove('active');
-        eyeOpenPassword.classList.remove('active');
-      }
-    });
-  });
+      togglePassword.addEventListener('click', () => {
+        const isVisible = passwordField.type === 'text';
+        passwordField.type = isVisible ? 'password' : 'text';
+        togglePassword.setAttribute('aria-pressed', String(!isVisible));
+        togglePassword.setAttribute('aria-label', isVisible ? togglePassword.dataset.labelShow : togglePassword.dataset.labelHide);
+        eyeOpenPassword?.classList.toggle('active', !isVisible);
+        eyeHidePassword?.classList.toggle('active', !isVisible);
+      });
+    };
+
+    document.querySelectorAll('[data-password-toggle]').forEach(init);
+    if (!window.nootropixPasswordToggleBound) {
+      window.nootropixPasswordToggleBound = true;
+      document.addEventListener('shopify:section:load', (event) => {
+        event.target.querySelectorAll('[data-password-toggle]').forEach(init);
+      });
+    }
+  })();
 </script>

@@ -15,8 +15,9 @@
   endunless
 
   assign bubble_blocks = blocks | where: 'type', 'bubble'
+  assign menu_label = 'sections.header.menu' | t
 
-  assign container_class = 'xo-menu-horizontal list-unstyled'
+  assign container_class = 'xo-menu-horizontal xo-menu-horizontal--disclosure list-unstyled'
   assign item_class = 'xo-menu-horizontal__item'
 
   if settings.enable_border_radius
@@ -24,10 +25,10 @@
   endif
 
   if event_type == 'hover'
-    assign container_class = container_class | append: ' xo-menu-horizontal--hover'
+    assign container_class = container_class | append: ' xo-menu-horizontal--hover xo-menu-horizontal--disclosure-hover'
     assign item_class = item_class | append: ' xo-menu-horizontal__item--hover'
   else
-    assign container_class = container_class | append: ' xo-menu-horizontal--click'
+    assign container_class = container_class | append: ' xo-menu-horizontal--disclosure-click'
     assign item_class = item_class | append: ' xo-menu-horizontal__item--click'
   endif
   if menu.links.size > 8
@@ -36,10 +37,13 @@
 %}
 
 {% if menu != blank %}
-  <ul class="{{ container_class }}">
+  <ul class="{{ container_class }}" data-menu-disclosure data-menu-event="{{ event_type }}">
     {% for link in menu.links %}
       {% liquid
         assign link_index = forloop.index
+        assign item_id = section.id | append: '-' | append: forloop.index
+        assign mega_panel_id = 'menu-mega-' | append: item_id
+        assign sub_panel_id = 'menu-submenu-' | append: item_id
         assign current_item_class = item_class | append: ' xo-menu-horizontal__item--first'
         if link.current
           assign current_item_class = current_item_class | append: ' xo-menu-horizontal__item--current'
@@ -56,15 +60,6 @@
           <span class="xo-menu-horizontal__label">
             {{ link.title }}
           </span>
-          {% if link.links != blank %}
-            <span class="xo-menu-horizontal__arrow xo-menu-horizontal__arrow--first">
-              {% render 'icon', name: 'arrow-down', size: '1.6rem' %}
-            </span>
-          {% else %}
-            <span class="xo-menu-horizontal__arrow xo-menu-horizontal__arrow--mega-menu">
-              {% render 'icon', name: 'arrow-down', size: '1.6rem' %}
-            </span>
-          {% endif %}
           {% for bubble in bubble_blocks %}
             {% assign bind_to_main_menu = bubble.settings.bind_to_main_menu | plus: 0 %}
             {% if bind_to_main_menu == link_index %}
@@ -78,11 +73,37 @@
             {% endif %}
           {% endfor %}
         </a>
-        <xo-mega-menu class="xo-menu-horizontal__mega-menu" xo-name="header-mega-menu" xo-index="{{ forloop.index0 }}"></xo-mega-menu>
+        <button
+          type="button"
+          class="xo-menu-horizontal__disclosure"
+          aria-expanded="false"
+          aria-haspopup="true"
+          aria-controls="{{ mega_panel_id }}{% if link.links != blank %} {{ sub_panel_id }}{% endif %}"
+          aria-label="{{ link.title | escape }} — {{ menu_label | escape }}"
+          data-menu-toggle
+          data-menu-mega-id="{{ mega_panel_id }}"
+          {% if link.links != blank %}
+            data-has-submenu
+          {% else %}
+            hidden
+          {% endif %}
+        >
+          <span class="xo-menu-horizontal__arrow xo-menu-horizontal__arrow--first" aria-hidden="true">
+            {% render 'icon', name: 'arrow-down', size: '1.6rem' %}
+          </span>
+        </button>
+        <xo-mega-menu
+          id="{{ mega_panel_id }}"
+          class="xo-menu-horizontal__mega-menu"
+          xo-name="header-mega-menu"
+          xo-index="{{ forloop.index0 }}"
+        ></xo-mega-menu>
         {% if link.links != blank %}
-          <ul class="xo-menu-horizontal__sub-menu xo-menu-horizontal__sub-menu--second list-unstyled">
+          <ul id="{{ sub_panel_id }}" class="xo-menu-horizontal__sub-menu xo-menu-horizontal__sub-menu--second list-unstyled">
             {% for childlink in link.links %}
               {% liquid
+                assign child_item_id = item_id | append: '-' | append: forloop.index
+                assign grand_panel_id = 'menu-submenu-' | append: child_item_id
                 assign child_item_class = item_class | append: ' xo-menu-horizontal__item--sub xo-menu-horizontal__item--sub-second'
                 if childlink.current
                   assign child_item_class = child_item_class | append: ' xo-menu-horizontal__item--current'
@@ -99,8 +120,18 @@
                   <span class="xo-menu-horizontal__label">
                     {{ childlink.title }}
                   </span>
-                  {% if childlink.links != blank %}
-                    <span class="xo-menu-horizontal__icon">
+                </a>
+                {% if childlink.links != blank %}
+                  <button
+                    type="button"
+                    class="xo-menu-horizontal__disclosure xo-menu-horizontal__disclosure--sub"
+                    aria-expanded="false"
+                    aria-haspopup="true"
+                    aria-controls="{{ grand_panel_id }}"
+                    aria-label="{{ childlink.title | escape }} — {{ menu_label | escape }}"
+                    data-menu-toggle
+                  >
+                    <span class="xo-menu-horizontal__icon" aria-hidden="true">
                       <span class="xo-menu-horizontal__arrow xo-menu-horizontal__arrow--before">
                         {% render 'icon', name: 'chevron-right', size: '1.6rem' %}
                       </span>
@@ -108,10 +139,8 @@
                         {% render 'icon', name: 'chevron-right', size: '1.6rem' %}
                       </span>
                     </span>
-                  {% endif %}
-                </a>
-                {% if childlink.links != blank %}
-                  <div class="xo-menu-horizontal__sub-menu xo-menu-horizontal__sub-menu--third list-unstyled">
+                  </button>
+                  <div id="{{ grand_panel_id }}" class="xo-menu-horizontal__sub-menu xo-menu-horizontal__sub-menu--third list-unstyled">
                     <ul class="xo-menu-horizontal__sub-menu-last">
                       {% for grandchildlink in childlink.links %}
                         {% liquid
@@ -151,3 +180,217 @@
     {% endfor %}
   </ul>
 {% endif %}
+
+<script>
+  (() => {
+    const rootSelector = '[data-menu-disclosure]';
+    const toggleSelector = '[data-menu-toggle]';
+    const itemSelector = '.xo-menu-horizontal__item';
+    const openClass = 'xo-menu-horizontal__item--open';
+    const focusableSelector = 'a[href], button:not([hidden]):not([disabled])';
+
+    const controlledPanels = (button) =>
+      (button.getAttribute('aria-controls') || '')
+        .split(/\s+/)
+        .filter(Boolean)
+        .map((id) => document.getElementById(id))
+        .filter(Boolean);
+
+    const visibleFocusables = (container) =>
+      Array.from(container.querySelectorAll(focusableSelector)).filter(
+        (element) => getComputedStyle(element).visibility !== 'hidden' && !element.closest('[hidden]')
+      );
+
+    const setExpanded = (button, expanded) => {
+      const item = button.closest(itemSelector);
+      if (!item) return;
+      button.setAttribute('aria-expanded', String(expanded));
+      item.classList.toggle(openClass, expanded);
+      item.toggleAttribute('data-disclosure-open', expanded);
+      if (!expanded) {
+        item.querySelectorAll(toggleSelector).forEach((childButton) => {
+          if (childButton !== button) {
+            childButton.setAttribute('aria-expanded', 'false');
+            childButton.closest(itemSelector)?.classList.remove(openClass);
+            childButton.closest(itemSelector)?.removeAttribute('data-disclosure-open');
+          }
+        });
+      }
+    };
+
+    const closeSiblings = (button) => {
+      const item = button.closest(itemSelector);
+      const list = item?.parentElement;
+      if (!item || !list) return;
+      Array.from(list.children).forEach((sibling) => {
+        if (sibling !== item) {
+          const siblingButton = sibling.querySelector(`:scope > ${toggleSelector}`);
+          if (siblingButton) setExpanded(siblingButton, false);
+        }
+      });
+    };
+
+    const panelFocusables = (button) =>
+      controlledPanels(button).flatMap(visibleFocusables);
+
+    const openAndFocus = (button, last = false) => {
+      closeSiblings(button);
+      setExpanded(button, true);
+      const focusables = panelFocusables(button);
+      const target = last ? focusables.at(-1) : focusables[0];
+      target?.focus();
+    };
+
+    const closeAll = (root, restoreFocus = false) => {
+      const expanded = Array.from(root.querySelectorAll(`${toggleSelector}[aria-expanded="true"]`));
+      const restoreTarget = expanded[0];
+      expanded.reverse().forEach((button) => setExpanded(button, false));
+      if (restoreFocus && restoreTarget) restoreTarget.focus();
+    };
+
+    const syncMegaButtons = (root) => {
+      root.querySelectorAll('[data-menu-mega-id]').forEach((button) => {
+        const mega = document.getElementById(button.dataset.menuMegaId);
+        const hasMega = Boolean(
+          mega &&
+            (mega.children.length > 0 || mega.shadowRoot || mega.hasAttribute('xo-section-id'))
+        );
+        button.hidden = !button.hasAttribute('data-has-submenu') && !hasMega;
+      });
+    };
+
+    const init = (root) => {
+      if (root.dataset.menuDisclosureReady === 'true') return;
+      root.dataset.menuDisclosureReady = 'true';
+      syncMegaButtons(root);
+
+      const observer = new MutationObserver(() => syncMegaButtons(root));
+      root.querySelectorAll('.xo-menu-horizontal__mega-menu').forEach((mega) => {
+        observer.observe(mega, {
+          childList: true,
+          subtree: true,
+          attributes: true,
+          attributeFilter: ['xo-section-id']
+        });
+      });
+
+      root.addEventListener('click', (event) => {
+        const button = event.target.closest(toggleSelector);
+        if (!button || !root.contains(button)) return;
+        const willOpen = button.getAttribute('aria-expanded') !== 'true';
+        closeSiblings(button);
+        setExpanded(button, willOpen);
+      });
+
+      root.addEventListener('keydown', (event) => {
+        const target = event.target.closest(focusableSelector);
+        if (!target || !root.contains(target)) return;
+        const button = target.matches(toggleSelector)
+          ? target
+          : target.closest(itemSelector)?.querySelector(`:scope > ${toggleSelector}`);
+        const rtl = document.documentElement.dir === 'rtl';
+        const forwardKey = rtl ? 'ArrowLeft' : 'ArrowRight';
+        const backwardKey = rtl ? 'ArrowRight' : 'ArrowLeft';
+
+        if (event.key === 'Escape') {
+          const openItem = target.closest(`${itemSelector}.${openClass}`);
+          const openButton = openItem?.querySelector(`:scope > ${toggleSelector}`);
+          if (openButton) {
+            event.preventDefault();
+            setExpanded(openButton, false);
+            openButton.focus();
+          } else {
+            closeAll(root, true);
+          }
+          return;
+        }
+
+        if (button && target === button && (event.key === 'ArrowDown' || event.key === 'ArrowUp')) {
+          event.preventDefault();
+          openAndFocus(button, event.key === 'ArrowUp');
+          return;
+        }
+
+        const panel = target.closest('.xo-menu-horizontal__sub-menu');
+        if (panel && (event.key === 'ArrowDown' || event.key === 'ArrowUp')) {
+          const focusables = visibleFocusables(panel);
+          const index = focusables.indexOf(target);
+          if (index >= 0) {
+            event.preventDefault();
+            const offset = event.key === 'ArrowDown' ? 1 : -1;
+            focusables[(index + offset + focusables.length) % focusables.length]?.focus();
+          }
+          return;
+        }
+
+        if (panel && event.key === forwardKey && button) {
+          event.preventDefault();
+          openAndFocus(button);
+          return;
+        }
+
+        if (panel && event.key === backwardKey) {
+          const parentItem = panel.closest(itemSelector);
+          const parentButton = parentItem?.querySelector(`:scope > ${toggleSelector}`);
+          if (parentButton) {
+            event.preventDefault();
+            setExpanded(parentButton, false);
+            parentButton.focus();
+          }
+          return;
+        }
+
+        if (!panel && (event.key === 'ArrowLeft' || event.key === 'ArrowRight')) {
+          const items = Array.from(root.querySelectorAll(':scope > .xo-menu-horizontal__item'));
+          const item = target.closest(itemSelector);
+          if (item?.parentElement !== root) return;
+          const index = items.indexOf(item);
+          if (index >= 0) {
+            event.preventDefault();
+            const visualForward = event.key === forwardKey;
+            const nextItem = items[(index + (visualForward ? 1 : -1) + items.length) % items.length];
+            nextItem.querySelector(focusableSelector)?.focus();
+          }
+        }
+      });
+
+      if (root.dataset.menuEvent === 'hover') {
+        root.addEventListener('pointerover', (event) => {
+          if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+          const item = event.target.closest(itemSelector);
+          if (!item || !root.contains(item) || item.contains(event.relatedTarget)) return;
+          const button = item.querySelector(`:scope > ${toggleSelector}`);
+          if (button && !button.hidden) {
+            closeSiblings(button);
+            setExpanded(button, true);
+          }
+        });
+        root.addEventListener('pointerout', (event) => {
+          const item = event.target.closest(itemSelector);
+          if (!item || item.contains(event.relatedTarget) || item.contains(document.activeElement)) return;
+          const button = item.querySelector(`:scope > ${toggleSelector}`);
+          if (button) setExpanded(button, false);
+        });
+      }
+    };
+
+    document.querySelectorAll(rootSelector).forEach(init);
+
+    if (!window.nootropixMenuDisclosureBound) {
+      window.nootropixMenuDisclosureBound = true;
+      document.addEventListener('pointerdown', (event) => {
+        document.querySelectorAll(rootSelector).forEach((root) => {
+          if (!root.contains(event.target)) closeAll(root, root.contains(document.activeElement));
+        });
+      });
+      document.addEventListener('focusin', (event) => {
+        document.querySelectorAll(rootSelector).forEach((root) => {
+          if (!root.contains(event.target)) closeAll(root);
+        });
+      });
+      document.addEventListener('shopify:section:load', (event) => {
+        event.target.querySelectorAll(rootSelector).forEach(init);
+      });
+    }
+  })();
+</script>
