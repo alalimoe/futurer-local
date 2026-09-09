@@ -1,11 +1,17 @@
 {% doc %}
   @prompt
-    generate a premium, visual "Products Mentioned in This Article" carousel that displays the products from the metafield blog.mentioned 
+    generate a premium, visual "Products Mentioned in This Article" carousel
 {% enddoc %}
 {% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
-{% assign mentioned_products = article.metafields.blog.mentioned.value %}
+{% liquid
+  assign mentioned_products = article.metafields.custom.featured_products.value
+  if mentioned_products == blank
+    assign mentioned_products = article.metafields.blog.mentioned.value
+  endif
+  assign available_products = mentioned_products | where: 'available', true
+%}
 
-{% if mentioned_products != blank and mentioned_products.size > 0 %}
+{% if available_products != blank and available_products.size > 0 %}
 {%- style -%}
   .ai-mentioned-products-{{ ai_gen_id }} {
     display: block;
@@ -188,8 +194,8 @@
     background-color: rgba(var(--color-background));
     color: rgba(var(--color-foreground));
     border: none;
-    width: 44px;
-    height: 44px;
+    width: 48px;
+    height: 48px;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -247,6 +253,23 @@
       display: none;
     }
   }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ai-mentioned-products__carousel-{{ ai_gen_id }} {
+      scroll-behavior: auto;
+    }
+
+    .ai-mentioned-products__product-{{ ai_gen_id }}:hover,
+    .ai-mentioned-products__button-{{ ai_gen_id }}:hover {
+      transform: none;
+    }
+
+    .ai-mentioned-products__product-{{ ai_gen_id }},
+    .ai-mentioned-products__button-{{ ai_gen_id }},
+    .ai-mentioned-products__nav-{{ ai_gen_id }} {
+      transition: none;
+    }
+  }
 {%- endstyle -%}
 
 <mentioned-products-carousel-{{ ai_gen_id }}
@@ -272,13 +295,13 @@
         </button>
 
         <div class="ai-mentioned-products__carousel-{{ ai_gen_id }}" data-carousel>
-          {% for product in mentioned_products %}
+          {% for product in available_products %}
             <div class="ai-mentioned-products__product-{{ ai_gen_id }}">
               <a href="{{ product.url }}" class="ai-mentioned-products__image-wrapper-{{ ai_gen_id }}">
                 {% if product.featured_image %}
                   <img
                     src="{{ product.featured_image | image_url: width: 600 }}"
-                    alt="{{ product.featured_image.alt | escape }}"
+                    alt="{{ product.featured_image.alt | default: product.title | escape }}"
                     class="ai-mentioned-products__image-{{ ai_gen_id }}"
                     loading="lazy"
                     width="600"
@@ -290,9 +313,7 @@
                   </div>
                 {% endif %}
 
-                {% if product.available == false %}
-                  <span class="ai-mentioned-products__badge-{{ ai_gen_id }}">Sold Out</span>
-                {% elsif product.compare_at_price > product.price %}
+                {% if product.compare_at_price > product.price %}
                   <span class="ai-mentioned-products__badge-{{ ai_gen_id }}">Sale</span>
                 {% endif %}
               </a>
@@ -377,16 +398,17 @@
       scroll(direction) {
         const scrollAmount = this.carousel.offsetWidth * 0.8;
         const currentScroll = this.carousel.scrollLeft;
+        const behavior = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
 
         if (direction === 'next') {
           this.carousel.scrollTo({
             left: currentScroll + scrollAmount,
-            behavior: 'smooth'
+            behavior
           });
         } else {
           this.carousel.scrollTo({
             left: currentScroll - scrollAmount,
-            behavior: 'smooth'
+            behavior
           });
         }
       }
@@ -405,12 +427,14 @@
       }
     }
 
-    customElements.define('mentioned-products-carousel-{{ ai_gen_id }}', MentionedProductsCarousel{{ ai_gen_id }});
+    if (!customElements.get('mentioned-products-carousel-{{ ai_gen_id }}')) {
+      customElements.define('mentioned-products-carousel-{{ ai_gen_id }}', MentionedProductsCarousel{{ ai_gen_id }});
+    }
   })();
 </script>
 {% elsif request.design_mode %}
   <div class="ai-mentioned-products-{{ ai_gen_id }}" {{ block.shopify_attributes }} style="padding: 40px var(--page-gutter); text-align: center; color: color-mix(in srgb, rgba(var(--color-foreground)) 55%, transparent);">
-    <p>Products mentioned — assign products to the <code>blog.mentioned</code> metafield to preview this carousel.</p>
+    <p>Products mentioned — assign available products to <code>custom.featured_products</code> to preview this carousel. The legacy <code>blog.mentioned</code> field remains a compatibility fallback.</p>
   </div>
 {% endif %}
 

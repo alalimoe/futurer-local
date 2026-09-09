@@ -2,6 +2,12 @@
 {%- assign return_policy_id = return_policy_url | append: "#policy" -%}
 {%- assign shipping_policy_url = shop.secure_url | append: "/pages/shipping-and-returns" -%}
 {%- assign shipping_policy_id = shipping_policy_url | append: "#policy" -%}
+{%- assign structured_logo_url = logo_url -%}
+{%- if structured_logo_url == blank and settings.logo != blank -%}
+  {%- assign structured_logo_url = settings.logo | image_url: width: 600 | prepend: 'https:' -%}
+{%- elsif structured_logo_url == blank -%}
+  {%- assign structured_logo_url = 'bimi-logo-clean.svg' | asset_url | prepend: 'https:' -%}
+{%- endif -%}
 
 <script type="application/ld+json">
   {
@@ -11,13 +17,8 @@
     "url": "https://{{ shop.domain }}",
     "telephone": "{{ shop.phone }}",
     "description": {{ shop.description | json }},
-    {%- unless logo_url == blank -%}
-      "image": "{{ logo_url | remove: '\' }}",
-      "logo": "{{ logo_url | remove: '\' }}",
-    {%- else -%}
-      "image": "https:{{ 'logo.png' | asset_url }}",
-      "logo": "https:{{ 'logo.png' | asset_url }}",
-    {%- endunless -%}
+    "image": {{ structured_logo_url | remove: '\' | json }},
+    "logo": {{ structured_logo_url | remove: '\' | json }},
     "hasMerchantReturnPolicy": {
       "@type": "MerchantReturnPolicy",
       "@id": {{ return_policy_id | json }},
@@ -70,7 +71,11 @@
 </script>
 {%- endif -%}
 
-{%- if request.page_type == 'product' -%}
+{%- comment -%}
+  Product JSON-LD is owned by product-jsonld.liquid on product sections.
+  Keep this legacy branch disabled to avoid emitting a second Product entity.
+{%- endcomment -%}
+{%- if request.page_type == 'product' and false -%}
 {%- assign product_desc = product.description | strip_html | strip -%}
 {%- if product_desc == blank -%}{%- assign product_desc = product.title -%}{%- endif -%}
 
@@ -85,10 +90,9 @@
     "description": {{ product_desc | json }},
     "url": "{{ shop.secure_url }}{{ product.url }}",
     {%- if product.featured_image -%}
-    {%- assign image_size = product.featured_image.width | append: 'x' -%}
-    "image": "https:{{ product.featured_image.src | img_url: image_size }}",
+    "image": "https:{{ product.featured_image | image_url: width: product.featured_image.width }}",
     {%- else -%}
-    "image": "https:{{ product.images[0].src | img_url }}",
+    "image": "https:{{ product.images[0] | image_url }}",
     {%- endif -%}
     "itemCondition": "https://schema.org/NewCondition",
     "offers": [
@@ -262,19 +266,19 @@
       {% endif %}
     
     {%- elsif prs == 'judgeme' -%}
-      {%- assign reviewRating = product.metafields.judgeme.badge | split: "data-average-rating='" | last | split: "'" |first | plus: 0 -%}
-      {%- assign reviewCount = product.metafields.judgeme.badge | split: "data-number-of-reviews='" | last | split: "'" |first | plus: 0 -%}
-      {% if reviewCount > 0 %}
+      {%- assign review_rating = product.metafields.judgeme.badge | split: "data-average-rating='" | last | split: "'" |first | plus: 0 -%}
+      {%- assign review_count = product.metafields.judgeme.badge | split: "data-number-of-reviews='" | last | split: "'" |first | plus: 0 -%}
+      {% if review_count > 0 %}
         ,"aggregateRating": {
         "@type": "AggregateRating",
-        "ratingCount": {{ reviewCount }},
-        "ratingValue": {{ reviewRating }}
+        "ratingCount": {{ review_count }},
+        "ratingValue": {{ review_rating }}
         },
         "review": {
         "@type": "Review",
         "reviewRating": {
           "@type": "Rating",
-          "ratingValue": {{ reviewRating }},
+          "ratingValue": {{ review_rating }},
           "bestRating": 5,
         }
       }
@@ -378,12 +382,12 @@
     "name": {{ article.title | json }},
     "publisher": {
       "@type": "Organization",
-      "logo": {"@type": "ImageObject","url": "https:{{ 'logo.png' | asset_url }}"},
+      "logo": {"@type": "ImageObject","url": {{ structured_logo_url | json }}},
       "name": {{ shop.name | json }}
     },
     "headline": {{ article.title | json }},
     {%- if article.image -%}
-      "image": {"@type": "ImageObject","width": 1024,"height": 1024,"url": "https:{{ article | img_url: '1024x1024' }}"},
+      "image": {"@type": "ImageObject","width": 1024,"height": 1024,"url": "https:{{ article.image | image_url: width: 1024, height: 1024 }}"},
     {%- else -%}
       "image": {"@type": "ImageObject","width": 1024,"height": 1024,"url": "https://cdn.shopify.com/s/images/admin/no-image-grande.gif"},
     {%- endif -%}

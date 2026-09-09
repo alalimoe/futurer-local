@@ -1,9 +1,9 @@
-{% doc %}
-  @name Collection Chips Only
-  @desc Horizontal filter chip rows for collection pages. Supports up to 2 configurable filter rows, pinned "In stock" chip, active filter summary, scroll chevrons, sticky positioning, and scroll-to-grid on filter click. JS retained for scroll/chevron/sticky behaviors (no theme web component equivalent).
-{% enddoc %}
+{% comment %}
+  Collection chips only: optional horizontal navigation to selected collections.
+  Shopify facets remain the filtering authority.
+{% endcomment %}
 
-{% if request.page_type == 'collection' %}
+{% if request.page_type == 'collection' and section.settings.navigation_collections != blank %}
 
 {%- style -%}
   .xo-section--{{ section.id }} {
@@ -216,6 +216,10 @@
     .xo-section--{{ section.id }} .chips__scroll-btn {
       transition: none;
     }
+
+    .xo-section--{{ section.id }} .chips__chip:active {
+      transform: none;
+    }
   }
 
   .xo-section--{{ section.id }} .chips__debug {
@@ -230,15 +234,12 @@
   }
 {%- endstyle -%}
 
-<a id="np-chipbar-anchor"></a>
+<span id="np-chipbar-anchor" hidden></span>
 <section {% render 'section-attr' %}>
   <xo-container>
     <div class="chips__inner">
 
       {% assign has_active = false %}
-      {% for f in collection.filters %}
-        {% if f.active_values.size > 0 %}{% assign has_active = true %}{% break %}{% endif %}
-      {% endfor %}
 
       {%- if section.settings.show_active and has_active -%}
         <div class="chips__row chips__row--active" role="region" aria-label="Active filters">
@@ -267,6 +268,7 @@
       {%- endif -%}
 
       {%- liquid
+        assign navigation_collections = section.settings.navigation_collections
         assign show_counts = section.settings.show_counts
         assign max_chips = section.settings.limit | default: 16 | plus: 0
         assign filter1_label = section.settings.filter_1_label | strip
@@ -275,7 +277,36 @@
         assign filter2_label_norm = filter2_label | downcase
       -%}
 
-      {% if section.settings.pin_in_stock %}
+      {% if navigation_collections != blank %}
+        <div class="chips__wrap" data-scroll-wrap>
+          {% if section.settings.enable_chevrons %}
+            <button class="chips__scroll-btn chips__scroll-btn--left" type="button" data-scroll-left aria-label="Scroll collection links left" hidden>‹</button>
+          {% endif %}
+          <nav class="chips__row" aria-label="Browse related collections" data-chiprow>
+            {% for nav_collection in navigation_collections limit: max_chips %}
+              {%- assign is_current_collection = false -%}
+              {%- if nav_collection.handle == collection.handle and section.settings.show_active -%}
+                {%- assign is_current_collection = true -%}
+              {%- endif -%}
+              <a
+                class="chips__chip{% if is_current_collection %} is-active{% endif %}"
+                href="{{ nav_collection.url }}"
+                {% if is_current_collection %}aria-current="page"{% endif %}
+              >
+                {{ nav_collection.title }}
+                {% if show_counts %}
+                  <span class="chips__count">{{ nav_collection.all_products_count }}</span>
+                {% endif %}
+              </a>
+            {% endfor %}
+          </nav>
+          {% if section.settings.enable_chevrons %}
+            <button class="chips__scroll-btn chips__scroll-btn--right" type="button" data-scroll-right aria-label="Scroll collection links right" hidden>›</button>
+          {% endif %}
+        </div>
+      {% endif %}
+
+      {% if false and section.settings.pin_in_stock %}
         {% assign availability_label_norm = 'availability' %}
         {% assign avail_filter = blank %}
         {% for f in collection.filters %}
@@ -316,7 +347,7 @@
         {% endif %}
       {% endif %}
 
-      {% if filter1_label_norm != blank %}
+      {% if false and filter1_label_norm != blank %}
         {% assign chip_filter = blank %}
         {% for f in collection.filters %}
           {% assign flabel_norm = f.label | strip | downcase %}
@@ -355,7 +386,7 @@
         {% endif %}
       {% endif %}
 
-      {% if section.settings.enable_filter_2 and filter2_label_norm != blank %}
+      {% if false and section.settings.enable_filter_2 and filter2_label_norm != blank %}
         {% assign chip_filter2 = blank %}
         {% for f in collection.filters %}
           {% assign flabel_norm = f.label | strip | downcase %}
@@ -395,8 +426,8 @@
       {% endif %}
 
       {%- if section.settings.debug -%}
-        <div class="chips__debug"><small>Filter labels detected:
-          {% for f in collection.filters %}<code>{{ f.label }}</code>{% unless forloop.last %}, {% endunless %}{% endfor %}
+        <div class="chips__debug"><small>Navigation collections:
+          {% for nav_collection in navigation_collections %}<code>{{ nav_collection.handle }}</code>{% unless forloop.last %}, {% endunless %}{% endfor %}
         </small></div>
       {%- endif -%}
 
@@ -409,15 +440,7 @@
 (function(){
   var root = document.querySelector('.xo-section--{{ section.id }}');
   if (!root) return;
-
-  root.querySelectorAll('.chips__row').forEach(function(row) {
-    row.addEventListener('wheel', function(e) {
-      if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
-        row.scrollLeft += e.deltaY;
-        e.preventDefault();
-      }
-    }, { passive: false });
-  });
+  var reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   function setupWrap(wrap) {
     var row = wrap.querySelector('[data-chiprow]');
@@ -432,10 +455,10 @@
       left.hidden = !overflow || row.scrollLeft <= 0;
       right.hidden = !overflow || row.scrollLeft >= max;
     }
-    left.addEventListener('click', function() { row.scrollBy({ left: -Math.max(160, row.clientWidth * 0.66), behavior: 'smooth' }); });
-    right.addEventListener('click', function() { row.scrollBy({ left: Math.max(160, row.clientWidth * 0.66), behavior: 'smooth' }); });
+    left.addEventListener('click', function() { row.scrollBy({ left: -Math.max(160, row.clientWidth * 0.66), behavior: reducedMotion ? 'auto' : 'smooth' }); });
+    right.addEventListener('click', function() { row.scrollBy({ left: Math.max(160, row.clientWidth * 0.66), behavior: reducedMotion ? 'auto' : 'smooth' }); });
     row.addEventListener('scroll', update, { passive: true });
-    new ResizeObserver(update).observe(row);
+    if (typeof ResizeObserver !== 'undefined') new ResizeObserver(update).observe(row);
     update();
   }
   root.querySelectorAll('[data-scroll-wrap]').forEach(setupWrap);
@@ -446,28 +469,12 @@
     window.addEventListener('scroll', onScroll, { passive: true });
   {% endif %}
 
-  var chipLinks = root.querySelectorAll('a[data-np-chip]');
-  chipLinks.forEach(function(a) {
-    a.addEventListener('click', function() {
-      try { sessionStorage.setItem('np-scroll-grid', '1'); } catch (e) {}
-    });
-  });
-
-  try {
-    if (sessionStorage.getItem('np-scroll-grid') === '1') {
-      sessionStorage.removeItem('np-scroll-grid');
-      var grid = document.getElementById('product-grid') ||
-                 document.querySelector('[data-products]') ||
-                 document.querySelector('.collection, main');
-      if (grid) { grid.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
-    }
-  } catch (e) {}
 })();
 </script>
 
 {% schema %}
 {
-  "name": "Collection chips",
+  "name": "Collection navigation",
   "tag": "section",
   "class": "section",
   "settings": [
@@ -476,6 +483,11 @@
       "id": "color_scheme",
       "label": "Color scheme",
       "default": "background-1"
+    },
+    {
+      "type": "collection_list",
+      "id": "navigation_collections",
+      "label": "Collections"
     },
     {
       "type": "checkbox",
@@ -491,7 +503,7 @@
     },
     {
       "type": "header",
-      "content": "Chip rows (choose filter labels)"
+      "content": "Legacy filter settings"
     },
     {
       "type": "text",

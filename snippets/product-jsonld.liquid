@@ -24,6 +24,10 @@
   assign rating_mf = p.metafields.reviews.rating
   assign rating_val = rating_mf.value | default: rating_mf | plus: 0
   assign rating_cnt = p.metafields.reviews.rating_count | plus: 0
+  assign has_product_coa_source = false
+  if p.metafields.pdp.coa_url != blank or p.metafields.pep.coa_pdf != blank
+    assign has_product_coa_source = true
+  endif
 
   assign jsonld_min = p.price_min
   assign jsonld_max = p.price_max
@@ -83,7 +87,7 @@
   {"@type":"PropertyValue","name":"Molecular Formula","value":{{ p.metafields.peptide.molecular_formula | json }}}
   {%- assign prop_printed = true -%}
 {%- endif -%}
-{%- if p.metafields.peptide.purity != blank -%}
+{%- if p.metafields.peptide.purity != blank and has_product_coa_source -%}
   {%- if prop_printed -%},{%- endif -%}
   {"@type":"PropertyValue","name":"Purity","value":{{ p.metafields.peptide.purity | json }},"unitText":"%"}
   {%- assign prop_printed = true -%}
@@ -134,43 +138,6 @@
         "offerCount": {{ jsonld_count }},
         "availability": "https://schema.org/{% if p.available %}InStock{% else %}OutOfStock{% endif %}",
         "url": {{ canonical_url | json }},
-        "priceValidUntil": {{ 'now' | date: '%s' | plus: 2592000 | date: '%Y-%m-%d' | json }},
-        "shippingDetails": {
-          "@type": "OfferShippingDetails",
-          "shippingDestination": {
-            "@type": "DefinedRegion",
-            "addressCountry": "AE"
-          },
-          "shippingRate": {
-            "@type": "MonetaryAmount",
-            "value": "0",
-            "currency": "AED"
-          },
-          "deliveryTime": {
-            "@type": "ShippingDeliveryTime",
-            "handlingTime": {
-              "@type": "QuantitativeValue",
-              "minValue": 0,
-              "maxValue": 0,
-              "unitCode": "DAY"
-            },
-            "transitTime": {
-              "@type": "QuantitativeValue",
-              "minValue": 0,
-              "maxValue": 1,
-              "unitCode": "DAY"
-            }
-          }
-        },
-        "hasMerchantReturnPolicy": {
-          "@type": "MerchantReturnPolicy",
-          "applicableCountry": "AE",
-          "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
-          "merchantReturnDays": 30,
-          "returnMethod": "https://schema.org/ReturnByMail",
-          "returnFees": "https://schema.org/FreeReturn",
-          "merchantReturnLink": "https://nootropix.shop/pages/shipping-and-returns"
-        },
         "seller": {
           "@type": "Organization",
           "name": {{ shop.name | json }}

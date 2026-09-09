@@ -29,9 +29,14 @@ Nootropix — Product description renderer from metafields
 
   {%- if tldr != blank -%}
     <h3>TL;DR</h3>
-    <ul>
-      {%- for item in tldr -%}<li>{{ item }}</li>{%- endfor -%}
-    </ul>
+    {%- assign tldr_first = tldr | json | slice: 0, 1 -%}
+    {%- if tldr_first == '[' -%}
+      <ul>
+        {%- for item in tldr -%}<li>{{ item }}</li>{%- endfor -%}
+      </ul>
+    {%- else -%}
+      <p>{{ tldr | newline_to_br }}</p>
+    {%- endif -%}
   {%- endif -%}
 
   {%- if what_it_is != blank -%}
@@ -41,11 +46,16 @@ Nootropix — Product description renderer from metafields
 
   {%- if feel != blank -%}
     <h3>What you’ll feel (and when)</h3>
-    <ul>
-      {%- for f in feel -%}
-        <li>{% if f.label %}<strong>{{ f.label }}:</strong> {% endif %}{{ f.description }}</li>
-      {%- endfor -%}
-    </ul>
+    {%- assign feel_first = feel | json | slice: 0, 1 -%}
+    {%- if feel_first == '[' -%}
+      <ul>
+        {%- for f in feel -%}
+          <li>{% if f.label %}<strong>{{ f.label }}:</strong> {% endif %}{{ f.description | default: f.text | default: f }}</li>
+        {%- endfor -%}
+      </ul>
+    {%- else -%}
+      <p>{{ feel | newline_to_br }}</p>
+    {%- endif -%}
   {%- endif -%}
   
   {%- if feel_note != blank -%}
@@ -61,11 +71,16 @@ Nootropix — Product description renderer from metafields
 
   {%- if how != blank -%}
     <h3>How to use</h3>
-    <ul>
-      {%- for h in how -%}
-        <li>{% if h.label %}<strong>{{ h.label }}:</strong> {% endif %}{{ h.text }}</li>
-      {%- endfor -%}
-    </ul>
+    {%- assign how_first = how | json | slice: 0, 1 -%}
+    {%- if how_first == '[' -%}
+      <ul>
+        {%- for h in how -%}
+          <li>{% if h.label %}<strong>{{ h.label }}:</strong> {% endif %}{{ h.text | default: h.description | default: h }}</li>
+        {%- endfor -%}
+      </ul>
+    {%- else -%}
+      <p>{{ how | newline_to_br }}</p>
+    {%- endif -%}
     {%- assign dg_page = pages['dosing-guide'] -%}
     {%- if dg_page != empty -%}
       {%- assign dg_hub_url = dg_page.url -%}
@@ -77,9 +92,14 @@ Nootropix — Product description renderer from metafields
 
   {%- if why != blank -%}
     <h3>Why {{ form_label }}?</h3>
-    <ul>
-      {%- for w in why -%}<li>{{ w }}</li>{%- endfor -%}
-    </ul>
+    {%- assign why_first = why | json | slice: 0, 1 -%}
+    {%- if why_first == '[' -%}
+      <ul>
+        {%- for w in why -%}<li>{{ w }}</li>{%- endfor -%}
+      </ul>
+    {%- else -%}
+      <p>{{ why | newline_to_br }}</p>
+    {%- endif -%}
   {%- endif -%}
 
   {%- if safety_important != blank or safety_general != blank or disclaimer != blank -%}
@@ -100,16 +120,21 @@ Nootropix — Product description renderer from metafields
 
   {%- if faq != blank -%}
     <h3>FAQ</h3>
-    {%- for i in faq -%}
-      <p><strong>{{ forloop.index }}. {{ i.q }}</strong><br>{{ i.a }}</p>
-    {%- endfor -%}
+    {%- assign faq_first = faq | json | slice: 0, 1 -%}
+    {%- if faq_first == '[' -%}
+      {%- for i in faq -%}
+        <p><strong>{{ forloop.index }}. {{ i.q | default: i.question | default: i.title }}</strong><br>{{ i.a | default: i.answer | default: i.text }}</p>
+      {%- endfor -%}
+    {%- else -%}
+      <p>{{ faq | newline_to_br }}</p>
+    {%- endif -%}
   {%- endif -%}
 
   {%- comment -%}
   Fallback to Body HTML only if *everything* above is missing.
   (No parentheses – Liquid evaluates left-to-right.)
   {%- endcomment -%}
-  {%- if tldr == blank and what_it_is == blank and feel == blank and how_it_works_text == blank and how == blank and why == blank and safety_important == blank and safety_general == blank and disclaimer == blank and faq == blank -%}
+  {%- if tldr == blank and what_it_is == blank and feel == blank and feel_note == blank and how_it_works_text == blank and how == blank and why == blank and safety_important == blank and safety_general == blank and disclaimer == blank and faq == blank -%}
     {{ product.description }}
   {%- endif -%}
 </div>

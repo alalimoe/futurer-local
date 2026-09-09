@@ -10,6 +10,8 @@
   {% render 'collection-list-6', collection_list: collection_list, autoplay: autoplay, autoplay_speed: autoplay_speed, product_per_view: product_per_view %}
 {% endcomment %}
 
+{% assign carousel_id = 'collection-list-carousel-' | append: section.id %}
+
 <div class="collection-list-6{% if heading != blank %} collection-list-6__content--modifier{% endif %}">
   {% if heading != blank %}
     <div class="collection-list-6__head">
@@ -18,7 +20,9 @@
   {% endif %}
   <xo-animate xo-cascade class="collection-list-6__body">
     <xo-carousel
+      id="{{ carousel_id }}"
       class="collection-list-6__carousel"
+      aria-label="{{ heading | default: 'Collections' | escape }}"
       xo-per-view="{{ product_per_view }}"
       {% if autoplay == 'on' %}
         xo-autoplay="{{ autoplay_speed }}"
@@ -88,6 +92,35 @@
           {% endif %}
         </xo-carousel-list>
       </xo-carousel-inner>
+      <div class="collection-list-6__navigation" aria-label="Collection carousel controls">
+        <xo-carousel-prev
+          class="collection-list-6__button collection-list-6__button--prev"
+          role="button"
+          tabindex="0"
+          aria-controls="{{ carousel_id }}"
+          aria-label="Previous collections"
+        >
+          {% render 'button-slide', icon: 'arrow-left', icon_size: '2.4rem', size: '4.4rem', direction: 'left', style: 'gray' %}
+        </xo-carousel-prev>
+        <xo-carousel-next
+          class="collection-list-6__button collection-list-6__button--next"
+          role="button"
+          tabindex="0"
+          aria-controls="{{ carousel_id }}"
+          aria-label="Next collections"
+        >
+          {% render 'button-slide', icon: 'arrow-right', icon_size: '2.4rem', size: '4.4rem', direction: 'right', style: 'gray' %}
+        </xo-carousel-next>
+      </div>
     </xo-carousel>
   </xo-animate>
 </div>
+
+<script>
+  (function () {
+    var carousel = document.getElementById({{ carousel_id | json }});
+    if (!carousel || !window.matchMedia || !window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    carousel.removeAttribute('xo-autoplay');
+    carousel.removeAttribute('xo-loop');
+  })();
+</script>

@@ -13,9 +13,30 @@
 
 {%- assign has_content = false -%}
 {%- if use_list and snapshots.size > 0 -%}
-  {%- assign has_content = true -%}
+  {%- for candidate_snapshot in snapshots -%}
+    {%- assign candidate_claims = candidate_snapshot.claims_list.value | default: candidate_snapshot.claims_list -%}
+    {%- for candidate_claim in candidate_claims -%}
+      {%- assign candidate_headline = candidate_claim.headline.value | default: candidate_claim.headline -%}
+      {%- assign candidate_source = candidate_claim.sources.value | default: candidate_claim.sources -%}
+      {%- assign candidate_url = candidate_source.pubmed_url.value | default: candidate_source.pubmed_url -%}
+      {%- if candidate_headline != blank and candidate_url != blank -%}
+        {%- assign has_content = true -%}
+        {%- break -%}
+      {%- endif -%}
+    {%- endfor -%}
+    {%- if has_content -%}{%- break -%}{%- endif -%}
+  {%- endfor -%}
 {%- elsif snapshot -%}
-  {%- assign has_content = true -%}
+  {%- assign candidate_claims = snapshot.claims_list.value | default: snapshot.claims_list -%}
+  {%- for candidate_claim in candidate_claims -%}
+    {%- assign candidate_headline = candidate_claim.headline.value | default: candidate_claim.headline -%}
+    {%- assign candidate_source = candidate_claim.sources.value | default: candidate_claim.sources -%}
+    {%- assign candidate_url = candidate_source.pubmed_url.value | default: candidate_source.pubmed_url -%}
+    {%- if candidate_headline != blank and candidate_url != blank -%}
+      {%- assign has_content = true -%}
+      {%- break -%}
+    {%- endif -%}
+  {%- endfor -%}
 {%- endif -%}
 
 {%- if has_content -%}
@@ -262,25 +283,38 @@
 <section {% render 'section-attr' %}>
   <xo-container>
     {%- if use_list -%}
+      {%- assign rendered_snapshot_count = 0 -%}
       {%- for snapshot in snapshots -%}
         {%- assign claims = snapshot.claims_list.value | default: snapshot.claims_list -%}
-        {%- if claims and claims.size > 0 -%}
+        {%- assign snapshot_has_sources = false -%}
+        {%- for source_check_claim in claims -%}
+          {%- assign source_check_headline = source_check_claim.headline.value | default: source_check_claim.headline -%}
+          {%- assign source_check_source = source_check_claim.sources.value | default: source_check_claim.sources -%}
+          {%- assign source_check_url = source_check_source.pubmed_url.value | default: source_check_source.pubmed_url -%}
+          {%- if source_check_headline != blank and source_check_url != blank -%}
+            {%- assign snapshot_has_sources = true -%}
+            {%- break -%}
+          {%- endif -%}
+        {%- endfor -%}
+        {%- if claims and claims.size > 0 and snapshot_has_sources -%}
+          {%- assign rendered_snapshot_count = rendered_snapshot_count | plus: 1 -%}
           {%- assign wrap_id = '' -%}
-          {%- if forloop.first -%}{%- assign wrap_id = 'evidence-snapshot' -%}{%- endif -%}
-    <div class="es__wrap" role="region"{% if wrap_id != '' %} id="{{ wrap_id }}"{% endif %} aria-label="Clinical evidence snapshot">
+          {%- if rendered_snapshot_count == 1 -%}{%- assign wrap_id = 'evidence-snapshot' -%}{%- endif -%}
+    <div class="es__wrap" role="region"{% if wrap_id != '' %} id="{{ wrap_id }}"{% endif %} aria-label="Product evidence snapshot">
       <xo-animate xo-animation="fade-up">
         <header class="es__header">
           <div class="es__eyebrow">{{ section.settings.eyebrow_text }}</div>
           <h3 class="es__title">
             {{ snapshot.title.value | default: snapshot.title | default: section.settings.heading_text }}
           </h3>
-          {%- if forloop.first -%}
+          {%- if rendered_snapshot_count == 1 -%}
           <div class="es__hint">{{ section.settings.hint_text }}</div>
           {%- endif -%}
         </header>
       </xo-animate>
       <xo-animate xo-animation="fade-up" xo-cascade>
         <ul class="es__grid" role="list">
+          {%- assign rendered_claim_count = 0 -%}
           {%- for claim in claims -%}
             {%- assign headline = claim.headline.value | default: claim.headline -%}
             {%- assign source = claim.sources.value | default: claim.sources -%}
@@ -290,11 +324,14 @@
               {%- assign lbl = source.label.value | default: source.label -%}
               {%- assign url = source.pubmed_url.value | default: source.pubmed_url -%}
             {%- endif -%}
+            {%- if headline == blank or url == blank -%}{%- continue -%}{%- endif -%}
+            {%- if lbl == blank -%}{%- assign lbl = 'View source' -%}{%- endif -%}
+            {%- assign rendered_claim_count = rendered_claim_count | plus: 1 -%}
             {%- assign notes_html = claim.notes | metafield_tag -%}
             <li>
               <details class="es-claim" name="evidence-claims-{{ section.id }}-{{ forloop.parentloop.index }}" open>
                 <summary>
-                  <span class="es-claim__num" aria-hidden="true">{{ forloop.index }}</span>
+                  <span class="es-claim__num" aria-hidden="true">{{ rendered_claim_count }}</span>
                   <span class="es-claim__headline">{{ headline }}</span>
                   <span class="es-claim__chev" aria-hidden="true">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
@@ -324,8 +361,8 @@
       {%- endfor -%}
     {%- else -%}
       {%- assign claims = snapshot.claims_list.value | default: snapshot.claims_list -%}
-      {%- if claims and claims.size > 0 -%}
-    <div class="es__wrap" role="region" id="evidence-snapshot" aria-label="Clinical evidence snapshot">
+      {%- if claims and claims.size > 0 and has_content -%}
+    <div class="es__wrap" role="region" id="evidence-snapshot" aria-label="Product evidence snapshot">
       <xo-animate xo-animation="fade-up">
         <header class="es__header">
           <div class="es__eyebrow">{{ section.settings.eyebrow_text }}</div>
@@ -337,6 +374,7 @@
       </xo-animate>
       <xo-animate xo-animation="fade-up" xo-cascade>
         <ul class="es__grid" role="list">
+          {%- assign rendered_claim_count = 0 -%}
           {%- for claim in claims -%}
             {%- assign headline = claim.headline.value | default: claim.headline -%}
             {%- assign source = claim.sources.value | default: claim.sources -%}
@@ -346,11 +384,14 @@
               {%- assign lbl = source.label.value | default: source.label -%}
               {%- assign url = source.pubmed_url.value | default: source.pubmed_url -%}
             {%- endif -%}
+            {%- if headline == blank or url == blank -%}{%- continue -%}{%- endif -%}
+            {%- if lbl == blank -%}{%- assign lbl = 'View source' -%}{%- endif -%}
+            {%- assign rendered_claim_count = rendered_claim_count | plus: 1 -%}
             {%- assign notes_html = claim.notes | metafield_tag -%}
             <li>
               <details class="es-claim" name="evidence-claims-{{ section.id }}" open>
                 <summary>
-                  <span class="es-claim__num" aria-hidden="true">{{ forloop.index }}</span>
+                  <span class="es-claim__num" aria-hidden="true">{{ rendered_claim_count }}</span>
                   <span class="es-claim__headline">{{ headline }}</span>
                   <span class="es-claim__chev" aria-hidden="true">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
@@ -384,7 +425,8 @@
 <script>
 (function () {
   var MQ = window.matchMedia('(min-width: 768px)');
-  var section = document.querySelector('.evidence-snapshot-section');
+  var section = document.getElementById('shopify-section-{{ section.id }}') ||
+    document.querySelector('.xo-section--{{ section.id }}');
   if (!section) return;
   var items = Array.from(section.querySelectorAll('details.es-claim'));
   if (!items.length) return;

@@ -708,6 +708,7 @@
         this.activeMode = 'cumulative';
         this.clickScroll = false;
         this.scrollToOffset = 0;
+        this.reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         this._ticking = false;
 
         this.onScroll = this.onScroll.bind(this);
@@ -745,7 +746,7 @@
         if (!el) return;
 
         const top = el.getBoundingClientRect().top + window.scrollY - this.scrollToOffset;
-        window.scrollTo({ top, behavior: 'smooth' });
+        window.scrollTo({ top, behavior: this.reducedMotion ? 'auto' : 'smooth' });
       }
 
       onScroll() {
@@ -765,11 +766,16 @@
           }
 
           this.items.forEach((item, idx) => {
+            const isActive = this.activeMode === 'single'
+              ? idx === activeIndex
+              : idx <= activeIndex && activeIndex >= 0;
             if (this.activeMode === 'single') {
-              item.classList.toggle('is-active', idx === activeIndex);
+              item.classList.toggle('is-active', isActive);
             } else {
-              item.classList.toggle('is-active', idx <= activeIndex && activeIndex >= 0);
+              item.classList.toggle('is-active', isActive);
             }
+            const button = item.querySelector('[data-scrollto]');
+            if (button) button.setAttribute('aria-current', idx === activeIndex ? 'step' : 'false');
           });
 
           let progress = 0;

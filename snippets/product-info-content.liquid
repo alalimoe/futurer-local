@@ -37,7 +37,7 @@
 
           <!-- custom liquid -->
         {% when 'custom_liquid' %}
-          <xo-animate xo-cascade>
+          <xo-animate xo-cascade {{ block.shopify_attributes }}>
             {% if block.settings.custom_liquid contains 'name="properties[' or block.settings.custom_liquid contains "name='properties[" %}
               <xo-product-property>{{ block.settings.custom_liquid }}</xo-product-property>
             {% else %}
@@ -68,11 +68,13 @@
 
           <!-- description -->
         {% when 'description' %}
-          <xo-animate xo-cascade>
-            <div class="xo-product-info-content__description xo-table xo-content" {{ block.shopify_attributes }}>
-              {{ product.description }}
-            </div>
-          </xo-animate>
+          {% if product.description != blank %}
+            <xo-animate xo-cascade>
+              <div class="xo-product-info-content__description xo-table xo-content" {{ block.shopify_attributes }}>
+                {{ product.description }}
+              </div>
+            </xo-animate>
+          {% endif %}
 
           <!-- price -->
         {% when 'price' %}
