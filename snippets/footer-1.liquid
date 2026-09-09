@@ -42,6 +42,7 @@
 {% liquid
   assign link_list_blocks = blocks | where: 'type', 'link_list'
   assign information_blocks = blocks | where: 'type', 'information'
+  assign footer_logo_alt = logo.alt | default: shop.name
 
   assign logo_class = 'xo-footer-1__grid-logo'
   assign logo_style = ''
@@ -64,10 +65,10 @@
             <a href="{{ routes.root_url }}" class="xo-footer-1__logo">
               {% if logo != blank %}
                 <div class="xo-footer-1__logo-image" style="--width_dt: {{ width_dt }}px; --width_md: {{ width_mb }}px;">
-                  {% render 'image', image: logo %}
+                  {% render 'image', image: logo, alt: footer_logo_alt %}
                 </div>
               {% elsif logo == blank %}
-                <h4 class="xo-footer-1__logo-name h4">{{ shop.name }}</h4>
+                <span class="xo-footer-1__logo-name h4">{{ shop.name }}</span>
               {% endif %}
             </a>
             {% comment %} description {% endcomment %}
@@ -97,11 +98,11 @@
             {% for block in blocks %}
               {% case block.type %}
                 {% when 'link_list' %}
-                  <xo-animate xo-cascade>
+                  <xo-animate xo-cascade {{ block.shopify_attributes }}>
                     {% render 'footer-nav', footer_menu: block.settings.footer_menu, heading: block.settings.heading %}
                   </xo-animate>
                 {% when 'information' %}
-                  <xo-animate xo-cascade>
+                  <xo-animate xo-cascade {{ block.shopify_attributes }}>
                     {% render 'information-footer', list_info: block.settings.list_info %}
                   </xo-animate>
               {% endcase %}
@@ -124,7 +125,6 @@
                 aria-required='true'
                 autocorrect='off'
               {% if form.errors %}
-                autofocus
                 aria-invalid='true'
                 aria-describedby='ContactFooter-error'
               {% elsif form.posted_successfully? %}
@@ -144,12 +144,12 @@
             </button>
           </div>
           {% comment %} submit error {% endcomment %}
-          <div class="xo-footer-1__form-message xo-footer-1__form-message--error xo-footer-1__form-error h6" id="xo-footer-form-message" style="display: none;">
+          <div class="xo-footer-1__form-message xo-footer-1__form-message--error xo-footer-1__form-error h6" id="xo-footer-form-message" style="display: none;" role="alert">
             {% render 'icon', name: 'error' %}
             <p class="xo-footer-1__message">{{ 'customer.subscribe.error_text' | t }}</p>
           </div>
           {%- if form.errors -%}
-            <div class="xo-footer-1__form-message xo-footer-1__form-message--error h6" id="ContactFooter-error">
+            <div class="xo-footer-1__form-message xo-footer-1__form-message--error h6" id="ContactFooter-error" role="alert">
               {% render 'form-error', form: form %}
             </div>
           {%- endif -%}
@@ -159,7 +159,7 @@
               class="xo-footer-1__form-message xo-footer-1__form-message--success h6"
               id="ContactFooter-success"
               tabindex="-1"
-              autofocus
+              role="status"
             >
               {% render 'icon-success', size: '3rem' -%}
               {{- 'newsletter.success' | t }}
@@ -203,7 +203,7 @@
     </div>
     <div class="xo-footer-1__bottom-right">
       {% if show_payment == 'show' %}
-        <div class="xo-footer-1__payment">
+        <div class="xo-footer-1__payment" role="group" aria-label="{{ 'sections.footer.payment' | t }}">
           <ul class="xo-footer-1__list-payment" role="list">
             {% for type in shop.enabled_payment_types %}
               <li class="xo-footer-1__payment-item">

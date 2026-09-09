@@ -9,21 +9,26 @@
   {% render 'footer-nav', footer_menu: footer_menu, heading: heading %}
 {% endcomment %}
 
-<div class="xo-footer-nav">
-  <div class="xo-footer-nav__title">
-    {% if heading != blank %}
-      {{ heading }}
-    {% else %}
-      {{ footer_menu.title }}
-    {% endif %}
-  </div>
-  <ul class="xo-footer-nav__list">
-    {%- for link in footer_menu.links -%}
-      <li class="xo-footer-nav__item">
-        <a href="{{ link.url }}" class="xo-footer-nav__link" xo-animate-text-normal-hover>
-          {% render 'animate-text-normal', text: link.title, effect: 'underline-in' %}
-        </a>
-      </li>
-    {%- endfor -%}
-  </ul>
-</div>
+{% liquid
+  assign nav_heading = heading
+  if nav_heading == blank
+    assign nav_heading = footer_menu.title
+  endif
+%}
+
+{% if footer_menu != blank %}
+  <nav class="xo-footer-nav" aria-label="{{ nav_heading | strip_html | escape }}">
+    <h2 class="xo-footer-nav__title">
+      {{ nav_heading }}
+    </h2>
+    <ul class="xo-footer-nav__list">
+      {%- for link in footer_menu.links -%}
+        <li class="xo-footer-nav__item">
+          <a href="{{ link.url }}" class="xo-footer-nav__link" xo-animate-text-normal-hover>
+            {% render 'animate-text-normal', text: link.title, effect: 'underline-in' %}
+          </a>
+        </li>
+      {%- endfor -%}
+    </ul>
+  </nav>
+{% endif %}
