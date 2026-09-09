@@ -11,38 +11,95 @@
 <section {% render 'section-attr' %}>
   <div class='xo-main-blog'>
     <xo-container class='xo-main-blog__container'>
+      {%- if section.settings.show_topic_navigation or section.settings.show_article_search -%}
+        <nav class="xo-main-blog__navigation" aria-labelledby="BlogNavigation-{{ section.id }}">
+          <h2 class="visually-hidden" id="BlogNavigation-{{ section.id }}">{{ section.settings.navigation_heading | escape }}</h2>
+          {%- if section.settings.show_topic_navigation and blog.all_tags.size > 0 -%}
+            <div class="xo-main-blog__topics" aria-label="{{ section.settings.navigation_heading | escape }}">
+              <a href="{{ blog.url }}"{% if current_tags == blank %} aria-current="page"{% endif %}>
+                {{- section.settings.all_topics_label | escape -}}
+              </a>
+              {%- for tag in blog.all_tags -%}
+                <a
+                  href="{{ blog.url }}/tagged/{{ tag | handleize }}"
+                  {% if current_tags contains tag %}aria-current="page"{% endif %}
+                >
+                  {{- tag | escape -}}
+                </a>
+              {%- endfor -%}
+            </div>
+          {%- endif -%}
+
+          {%- if section.settings.show_article_search -%}
+            <form class="xo-main-blog__search" action="{{ routes.search_url }}" method="get" role="search">
+              <label for="BlogSearch-{{ section.id }}">{{ section.settings.search_label | escape }}</label>
+              <div class="xo-main-blog__search-row">
+                <input
+                  id="BlogSearch-{{ section.id }}"
+                  type="search"
+                  name="q"
+                  value=""
+                  placeholder="{{ section.settings.search_placeholder | escape }}"
+                >
+                <input type="hidden" name="type" value="article">
+                <button type="submit">{{ section.settings.search_button_label | escape }}</button>
+              </div>
+            </form>
+          {%- endif -%}
+        </nav>
+      {%- endif -%}
+
       <div class='xo-main-blog__content'>
         {%- paginate blog.articles by limit -%}
-          <div class='xo-main-blog__article'>
-            <xo-grid class='xo-main-blog__grid' style='--lg: {{ column_desktop }}; --md: 2; --xs: 1; --col-gap: {{ column_gap }}px; --row-gap: {{ row_gap }}px;'>
-              {%- for article in blog.articles -%}
-                {%- assign placeholder_image_index = forloop.index0 | modulo: 4 | plus: 1 -%}
-                {%- assign placeholder_image = 'product-apparel-' | append: placeholder_image_index -%}
-                {%- assign lazyload = true -%}
-                {% if forloop.index0 < 3 %}
-                  {%- assign lazyload = false -%}
-                {% endif %}
-                {% render 'article-card',
-                  article: article,
-                  media_aspect_ratio: section.settings.article_card_media_aspect_ratio,
-                  show_image: section.settings.article_card_show_image,
-                  show_date: section.settings.article_card_show_date,
-                  show_author: section.settings.article_card_show_author,
-                  show_blog: section.settings.article_card_show_blog,
-                  show_excerpt: section.settings.article_card_show_excerpt,
-                  show_tags: section.settings.article_card_show_tags,
-                  color_scheme: section.settings.card_color_scheme,
-                  placeholder_image: placeholder_image,
-                  lazyload: lazyload
-                %}
-              {%- endfor -%}
-            </xo-grid>
-          </div>
-          <xo-animate xo-cascade>
-            <div class='xo-main-blog__pagination'>
-              {% render 'pagination', paginate: paginate, anchor: '' %}
+          {%- if blog.articles.size > 0 -%}
+            <div class='xo-main-blog__article'>
+              <xo-grid class='xo-main-blog__grid' style='--lg: {{ column_desktop }}; --md: 2; --xs: 1; --col-gap: {{ column_gap }}px; --row-gap: {{ row_gap }}px;'>
+                {%- for article in blog.articles -%}
+                  {%- liquid
+                    assign placeholder_image_index = forloop.index0 | modulo: 4 | plus: 1
+                    assign placeholder_image = 'product-apparel-' | append: placeholder_image_index
+                    assign lazyload = true
+                    assign image_fetchpriority = 'auto'
+                    if forloop.first and paginate.current_page == 1
+                      assign lazyload = false
+                      assign image_fetchpriority = 'high'
+                    endif
+                  -%}
+                  {% render 'article-card',
+                    article: article,
+                    blog: blog,
+                    heading_level: 2,
+                    media_aspect_ratio: section.settings.article_card_media_aspect_ratio,
+                    show_image: section.settings.article_card_show_image,
+                    show_date: section.settings.article_card_show_date,
+                    show_author: section.settings.article_card_show_author,
+                    show_blog: section.settings.article_card_show_blog,
+                    show_excerpt: section.settings.article_card_show_excerpt,
+                    show_tags: section.settings.article_card_show_tags,
+                    color_scheme: section.settings.card_color_scheme,
+                    placeholder_image: placeholder_image,
+                    lazyload: lazyload,
+                    fetchpriority: image_fetchpriority
+                  %}
+                {%- endfor -%}
+              </xo-grid>
             </div>
-          </xo-animate>
+            {%- if paginate.pages > 1 -%}
+              <xo-animate xo-cascade>
+                <div class='xo-main-blog__pagination'>
+                  {% render 'pagination', paginate: paginate, anchor: '' %}
+                </div>
+              </xo-animate>
+            {%- endif -%}
+          {%- else -%}
+            <div class="xo-main-blog__empty" role="status">
+              <h2>{{ section.settings.empty_heading | escape }}</h2>
+              <p>{{ section.settings.empty_text | escape }}</p>
+              {%- if current_tags != blank -%}
+                <a href="{{ blog.url }}">{{ section.settings.clear_filter_label | escape }}</a>
+              {%- endif -%}
+            </div>
+          {%- endif -%}
         {%- endpaginate -%}
       </div>
     </xo-container>
@@ -88,6 +145,70 @@
     {
       "type": "header",
       "content": "t:sections.all.article_card_header.content"
+    },
+    {
+      "type": "header",
+      "content": "Blog navigation"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_topic_navigation",
+      "label": "Show topic navigation",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_article_search",
+      "label": "Show article search",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "navigation_heading",
+      "label": "Navigation label",
+      "default": "Browse articles"
+    },
+    {
+      "type": "text",
+      "id": "all_topics_label",
+      "label": "All topics label",
+      "default": "All topics"
+    },
+    {
+      "type": "text",
+      "id": "search_label",
+      "label": "Search label",
+      "default": "Search articles"
+    },
+    {
+      "type": "text",
+      "id": "search_placeholder",
+      "label": "Search placeholder",
+      "default": "Search by topic or title"
+    },
+    {
+      "type": "text",
+      "id": "search_button_label",
+      "label": "Search button label",
+      "default": "Search"
+    },
+    {
+      "type": "text",
+      "id": "empty_heading",
+      "label": "Empty-state heading",
+      "default": "No articles found"
+    },
+    {
+      "type": "textarea",
+      "id": "empty_text",
+      "label": "Empty-state message",
+      "default": "There are no published articles in this view yet."
+    },
+    {
+      "type": "text",
+      "id": "clear_filter_label",
+      "label": "Clear topic label",
+      "default": "View all articles"
     },
     {
       "type": "checkbox",

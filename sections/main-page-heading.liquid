@@ -3,11 +3,27 @@
   assign heading = section.settings.heading
   assign sub_heading = section.settings.sub_heading
   assign align = section.settings.align
+  assign heading_tag = 'h2'
+
+  if template.name == 'blog'
+    assign heading = blog.title
+    assign heading_tag = 'h1'
+    assign blog_subtitle = blog.metafields.custom.subtitle
+    if blog_subtitle != blank
+      assign sub_heading = blog_subtitle | metafield_tag
+    endif
+  endif
 %}
 
 <section {% render 'section-attr' %}>
   <xo-container class='main-page__heading'>
-    {% render 'page-heading', class: class, heading: heading, description: sub_heading, align: align %}
+    {% render 'page-heading',
+      class: class,
+      heading: heading,
+      heading_tag: heading_tag,
+      description: sub_heading,
+      align: align
+    %}
   </xo-container>
 </section>
 
@@ -66,7 +82,7 @@
       "type": "richtext",
       "id": "sub_heading",
       "label": "t:sections.main_page_heading.settings.sub_heading.label",
-      "default": "<p>Subheading</p>"
+      "default": "<p>Articles, updates, and reference material from Nootropix.</p>"
     },
     {
       "type": "select",

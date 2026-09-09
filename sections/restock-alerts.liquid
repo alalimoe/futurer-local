@@ -1,0 +1,255 @@
+{{ 'restock-alerts.css' | asset_url | stylesheet_tag }}
+
+{% liquid
+  assign s = section.settings
+  assign sold_out_count = 0
+
+  for block in section.blocks
+    if block.type == 'product' and block.settings.product != blank and block.settings.product.available == false
+      assign unavailable_variants = block.settings.product.variants | where: 'available', false
+      if unavailable_variants.size > 0
+        assign sold_out_count = sold_out_count | plus: 1
+      endif
+    endif
+  endfor
+%}
+
+<section
+  {% render 'section-attr' %}
+  aria-labelledby="restock-title-{{ section.id }}"
+  data-restock-alerts
+  data-company-id="{{ s.klaviyo_company_id | escape }}"
+>
+  <xo-container>
+    <div class="npr">
+      <header class="npr__header">
+        {%- if s.eyebrow != blank -%}<p class="npr__eyebrow">{{ s.eyebrow | escape }}</p>{%- endif -%}
+        <h1 id="restock-title-{{ section.id }}">{{ s.heading | default: page.title | escape }}</h1>
+        {%- if s.intro != blank -%}<div class="npr__intro">{{ s.intro }}</div>{%- endif -%}
+      </header>
+
+      {%- if sold_out_count > 0 -%}
+        <div class="npr__layout">
+          <form class="npr__form" data-restock-form>
+            <div class="npr__field">
+              <label for="RestockCategory-{{ section.id }}">{{ s.category_label | escape }}</label>
+              <select id="RestockCategory-{{ section.id }}" data-restock-category>
+                <option value="">{{ s.all_categories_label | escape }}</option>
+                {%- assign rendered_categories = '|' -%}
+                {%- for block in section.blocks -%}
+                  {%- if block.type == 'product' and block.settings.product != blank and block.settings.product.available == false -%}
+                    {%- assign unavailable_variants = block.settings.product.variants | where: 'available', false -%}
+                    {%- if unavailable_variants.size > 0 -%}
+                      {%- assign category_label = block.settings.category | default: s.default_category -%}
+                      {%- assign category_value = category_label | handleize -%}
+                      {%- capture category_marker -%}|{{ category_value }}|{%- endcapture -%}
+                      {%- unless rendered_categories contains category_marker -%}
+                        <option value="{{ category_value }}">{{ category_label | escape }}</option>
+                        {%- assign rendered_categories = rendered_categories | append: category_value | append: '|' -%}
+                      {%- endunless -%}
+                    {%- endif -%}
+                  {%- endif -%}
+                {%- endfor -%}
+              </select>
+            </div>
+
+            <div class="npr__field">
+              <label for="RestockProduct-{{ section.id }}">{{ s.product_label | escape }} <span aria-hidden="true">*</span></label>
+              <select id="RestockProduct-{{ section.id }}" data-restock-product required>
+                <option value="">{{ s.product_placeholder | escape }}</option>
+                {%- for block in section.blocks -%}
+                  {%- if block.type == 'product' and block.settings.product != blank and block.settings.product.available == false -%}
+                    {%- assign selected_product = block.settings.product -%}
+                    {%- assign unavailable_variants = selected_product.variants | where: 'available', false -%}
+                    {%- if unavailable_variants.size > 0 -%}
+                      {%- assign category_label = block.settings.category | default: s.default_category -%}
+                      <option
+                        value="{{ selected_product.id }}"
+                        data-category="{{ category_label | handleize }}"
+                        data-url="{{ selected_product.url }}"
+                        {{ block.shopify_attributes }}
+                      >
+                        {{- block.settings.label | default: selected_product.title | escape -}}
+                      </option>
+                    {%- endif -%}
+                  {%- endif -%}
+                {%- endfor -%}
+              </select>
+            </div>
+
+            <div class="npr__field">
+              <label for="RestockVariant-{{ section.id }}">{{ s.variant_label | escape }} <span aria-hidden="true">*</span></label>
+              <select id="RestockVariant-{{ section.id }}" data-restock-variant required disabled>
+                <option value="">{{ s.variant_placeholder | escape }}</option>
+                {%- for block in section.blocks -%}
+                  {%- if block.type == 'product' and block.settings.product != blank and block.settings.product.available == false -%}
+                    {%- assign selected_product = block.settings.product -%}
+                    {%- for variant in selected_product.variants -%}
+                      {%- unless variant.available -%}
+                        <option
+                          value="{{ variant.id }}"
+                          data-product-id="{{ selected_product.id }}"
+                          data-product-url="{{ selected_product.url }}?variant={{ variant.id }}"
+                          disabled
+                          hidden
+                        >
+                          {{- variant.title | escape -}}
+                        </option>
+                      {%- endunless -%}
+                    {%- endfor -%}
+                  {%- endif -%}
+                {%- endfor -%}
+              </select>
+            </div>
+
+            <div class="npr__field">
+              <label for="RestockEmail-{{ section.id }}">{{ s.email_label | escape }} <span aria-hidden="true">*</span></label>
+              <input
+                id="RestockEmail-{{ section.id }}"
+                type="email"
+                name="email"
+                autocomplete="email"
+                inputmode="email"
+                required
+              >
+            </div>
+
+            <div class="npr__consent">
+              {{ s.transactional_copy }}
+              {%- if shop.privacy_policy.url != blank and s.privacy_link_label != blank -%}
+                <a href="{{ shop.privacy_policy.url }}">{{ s.privacy_link_label | escape }}</a>
+              {%- endif -%}
+            </div>
+
+            <button class="npr__submit" type="submit" data-restock-submit disabled>
+              {{- s.submit_label | escape -}}
+            </button>
+
+            <div class="npr__status" aria-live="polite" aria-atomic="true">
+              <p data-restock-state="loading">{{ s.loading_message | escape }}</p>
+              <p data-restock-state="ready" hidden>{{ s.ready_message | escape }}</p>
+              <p data-restock-state="submitting" hidden>{{ s.submitting_message | escape }}</p>
+              <p data-restock-state="success" hidden tabindex="-1">{{ s.success_message | escape }}</p>
+              <p data-restock-state="duplicate" hidden tabindex="-1">{{ s.duplicate_message | escape }}</p>
+              <p data-restock-state="failure" hidden tabindex="-1">{{ s.failure_message | escape }}</p>
+              <p data-restock-state="blocked" hidden tabindex="-1">{{ s.blocked_message | escape }}</p>
+            </div>
+
+            <p class="npr__fallback" data-restock-fallback hidden>
+              <a href="#" data-restock-product-link>{{ s.product_fallback_label | escape }}</a>
+            </p>
+          </form>
+
+          <aside class="npr__aside">
+            <h2>{{ s.how_it_works_heading | escape }}</h2>
+            <div class="npr__aside-copy">{{ s.how_it_works_copy }}</div>
+          </aside>
+        </div>
+
+        <noscript>
+          <div class="npr__noscript">
+            <h2>{{ s.noscript_heading | escape }}</h2>
+            <p>{{ s.noscript_message | escape }}</p>
+            <ul>
+              {%- for block in section.blocks -%}
+                {%- if block.type == 'product' and block.settings.product != blank and block.settings.product.available == false -%}
+                  <li>
+                    <a href="{{ block.settings.product.url }}">
+                      {{- block.settings.label | default: block.settings.product.title | escape -}}
+                    </a>
+                  </li>
+                {%- endif -%}
+              {%- endfor -%}
+            </ul>
+          </div>
+        </noscript>
+      {%- else -%}
+        <div class="npr__empty" role="status">
+          <h2>{{ s.empty_heading | escape }}</h2>
+          <p>{{ s.empty_message | escape }}</p>
+          {%- if request.design_mode -%}
+            <p>Add product blocks. Products are published here only while every variant is unavailable in the selected market.</p>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+
+      {%- for block in section.blocks -%}
+        {%- if block.type == '@app' -%}
+          <div class="npr__app" {{ block.shopify_attributes }}>{% render block %}</div>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+  </xo-container>
+</section>
+
+<script src="{{ 'restock-alerts.js' | asset_url }}" defer="defer"></script>
+
+{% style %}
+  .xo-section--{{ section.id }} {
+    padding-top: {{ s.padding_top }}px;
+    padding-bottom: {{ s.padding_bottom }}px;
+  }
+{% endstyle %}
+
+{% schema %}
+{
+  "name": "Klaviyo restock alerts",
+  "tag": "section",
+  "class": "section-restock-alerts",
+  "enabled_on": { "templates": ["page"] },
+  "settings": [
+    { "type": "header", "content": "Klaviyo client API" },
+    { "type": "text", "id": "klaviyo_company_id", "label": "Klaviyo public company ID", "info": "Public client API company_id only. Never enter a private API key.", "default": "Y8iBzf" },
+    { "type": "header", "content": "Content" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Product availability" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Restock alerts" },
+    { "type": "richtext", "id": "intro", "label": "Introduction", "default": "<p>Choose a currently sold-out product and variant to request an email when that specific item is available again.</p>" },
+    { "type": "text", "id": "category_label", "label": "Category label", "default": "Filter by category" },
+    { "type": "text", "id": "all_categories_label", "label": "All categories label", "default": "All sold-out products" },
+    { "type": "text", "id": "default_category", "label": "Default category", "default": "Other" },
+    { "type": "text", "id": "product_label", "label": "Product label", "default": "Sold-out product" },
+    { "type": "text", "id": "product_placeholder", "label": "Product placeholder", "default": "Choose a product" },
+    { "type": "text", "id": "variant_label", "label": "Variant label", "default": "Sold-out variant" },
+    { "type": "text", "id": "variant_placeholder", "label": "Variant placeholder", "default": "Choose a variant" },
+    { "type": "text", "id": "email_label", "label": "Email label", "default": "Email address" },
+    { "type": "richtext", "id": "transactional_copy", "label": "Transactional consent notice", "default": "<p>This request is for a restock notification about the selected variant only. It does not subscribe you to general marketing.</p>" },
+    { "type": "text", "id": "privacy_link_label", "label": "Privacy link label", "default": "Read the privacy policy." },
+    { "type": "text", "id": "submit_label", "label": "Submit label", "default": "Request restock alert" },
+    { "type": "header", "content": "Service states" },
+    { "type": "text", "id": "loading_message", "label": "Loading message", "default": "Loading the restock service…" },
+    { "type": "text", "id": "ready_message", "label": "Ready message", "default": "Choose a sold-out product and variant, then enter your email." },
+    { "type": "text", "id": "submitting_message", "label": "Submitting message", "default": "Submitting your restock request…" },
+    { "type": "textarea", "id": "success_message", "label": "Success message", "default": "Your request was accepted. Klaviyo will send an email if this selected variant becomes available." },
+    { "type": "textarea", "id": "duplicate_message", "label": "Duplicate message", "default": "This email has already requested an alert for the selected variant in this browser session." },
+    { "type": "textarea", "id": "failure_message", "label": "Failure message", "default": "The restock request could not be completed. Check the email and selected variant, then try again or use the product-page option." },
+    { "type": "textarea", "id": "blocked_message", "label": "Blocked-service message", "default": "The Klaviyo restock service appears to be blocked or unavailable. Open the product page and use its Notify me option, or try again after adjusting content-blocking settings." },
+    { "type": "text", "id": "product_fallback_label", "label": "Product fallback label", "default": "Open the selected product page" },
+    { "type": "header", "content": "Supporting content" },
+    { "type": "text", "id": "how_it_works_heading", "label": "Supporting heading", "default": "How restock alerts work" },
+    { "type": "richtext", "id": "how_it_works_copy", "label": "Supporting copy", "default": "<p>The request is attached to one Shopify variant in Klaviyo. An alert is sent only if the configured back-in-stock flow is active and Klaviyo detects that variant as available again.</p>" },
+    { "type": "text", "id": "noscript_heading", "label": "No-JavaScript heading", "default": "Use the product page" },
+    { "type": "textarea", "id": "noscript_message", "label": "No-JavaScript message", "default": "JavaScript is required for this chooser. Open a sold-out product page and use the existing Klaviyo Notify me option." },
+    { "type": "text", "id": "empty_heading", "label": "Empty-state heading", "default": "No selected products are currently sold out" },
+    { "type": "textarea", "id": "empty_message", "label": "Empty-state message", "default": "Restock choices appear here only for merchant-selected products whose variants are currently unavailable." },
+    { "type": "header", "content": "Section style" },
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme" },
+    { "type": "range", "id": "padding_top", "min": 0, "max": 160, "step": 4, "unit": "px", "label": "Padding top", "default": 64 },
+    { "type": "range", "id": "padding_bottom", "min": 0, "max": 160, "step": 4, "unit": "px", "label": "Padding bottom", "default": 64 }
+  ],
+  "blocks": [
+    {
+      "type": "product",
+      "name": "Sold-out product",
+      "settings": [
+        { "type": "product", "id": "product", "label": "Product", "info": "Shown only when the selected product and all of its variants are unavailable in the active market." },
+        { "type": "text", "id": "category", "label": "Chooser category", "default": "Other" },
+        { "type": "text", "id": "label", "label": "Optional display label" }
+      ]
+    },
+    { "type": "@app" }
+  ],
+  "presets": [
+    { "name": "Klaviyo restock alerts" }
+  ]
+}
+{% endschema %}

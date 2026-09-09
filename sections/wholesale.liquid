@@ -1,404 +1,321 @@
-{% comment %}
-  Nootropix — Wholesale / Large-Volume Orders (universal language + improved UX)
-  Enhancements:
-  • XO theme design system compliant — scoped CSS, theme tokens, flat design
-  • SEO/CRO: concise intro with intent keywords, internal links, FAQPage JSON-LD
-  • A11y: labels, aria attributes, focus states, reduced-motion
-{% endcomment %}
+{{ 'wholesale.css' | asset_url | stylesheet_tag }}
 
-{%- style -%}
-  .xo-section--{{ section.id }} {
-    padding-top: {{ section.settings.padding_top }}px;
-    padding-bottom: {{ section.settings.padding_bottom }}px;
-  }
+{% liquid
+  assign s = section.settings
+  assign heading = s.heading | default: page.title
+  assign catalogue_count = 0
+  assign tier_count = 0
+  assign faq_count = 0
 
-  .xo-section--{{ section.id }} .npw-wrap {
-    color: rgba(var(--color-foreground));
-  }
+  for block in section.blocks
+    case block.type
+      when 'product'
+        if block.settings.product != blank and block.settings.product.available
+          assign catalogue_count = catalogue_count | plus: 1
+        endif
+      when 'collection'
+        if block.settings.collection != blank
+          assign available_collection_products = block.settings.collection.products | where: 'available', true
+          if available_collection_products.size > 0
+            assign catalogue_count = catalogue_count | plus: 1
+          endif
+        endif
+      when 'tier'
+        if block.settings.reviewed and block.settings.label != blank and block.settings.order_size != blank and block.settings.terms != blank
+          assign tier_count = tier_count | plus: 1
+        endif
+      when 'faq'
+        if block.settings.visible and block.settings.question != blank and block.settings.answer != blank
+          assign faq_count = faq_count | plus: 1
+        endif
+    endcase
+  endfor
+%}
 
-  .xo-section--{{ section.id }} h1 {
-    font-size: clamp(26px, 4vw, 40px);
-    margin: 0 0 8px;
-    font-weight: 600;
-    letter-spacing: -0.01em;
-    color: rgba(var(--color-foreground));
-  }
-
-  .xo-section--{{ section.id }} h2 {
-    font-size: clamp(18px, 2.6vw, 22px);
-    margin: 0 0 10px;
-    font-weight: 600;
-    color: rgba(var(--color-foreground));
-  }
-
-  .xo-section--{{ section.id }} p {
-    margin: 0 0 10px;
-  }
-
-  .xo-section--{{ section.id }} .npw-lead {
-    font-size: clamp(16px, 2.6vw, 18px);
-    color: color-mix(in srgb, rgba(var(--color-foreground)) 60%, transparent);
-    margin-bottom: 14px;
-  }
-
-  .xo-section--{{ section.id }} .npw-lead a {
-    color: rgba(var(--color-accent));
-    text-decoration: underline;
-    text-underline-offset: 2px;
-  }
-
-  .xo-section--{{ section.id }} .npw-muted {
-    color: color-mix(in srgb, rgba(var(--color-foreground)) 60%, transparent);
-    font-size: 13px;
-  }
-
-  .xo-section--{{ section.id }} .npw-btns {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin: 14px 0 0;
-  }
-
-  .xo-section--{{ section.id }} .npw-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 10px 16px;
-    border-radius: var(--button-radius);
-    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
-    text-decoration: none;
-    font-weight: 600;
-    transition: opacity 0.2s var(--out-soft, ease);
-  }
-
-  .xo-section--{{ section.id }} .npw-btn--primary {
-    background: rgba(var(--color-accent));
-    color: rgba(var(--color-foreground));
-    border-color: rgba(var(--color-accent));
-  }
-
-  .xo-section--{{ section.id }} .npw-btn--ghost {
-    background: transparent;
-    color: rgba(var(--color-foreground));
-  }
-
-  .xo-section--{{ section.id }} .npw-grid {
-    display: grid;
-    gap: 28px;
-    grid-template-columns: 1fr;
-    margin-top: 28px;
-  }
-
-  @media (min-width: 768px) {
-    .xo-section--{{ section.id }} .npw-grid {
-      grid-template-columns: 1.1fr 0.9fr;
-    }
-  }
-
-  .xo-section--{{ section.id }} .npw-card {
-    background: rgba(var(--color-background-2));
-    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
-    border-radius: var(--general-radius-3, 2rem);
-    padding: 18px;
-    margin-bottom: 28px;
-  }
-
-  .xo-section--{{ section.id }} .npw-card + .npw-card {
-    margin-top: 28px;
-  }
-
-  .xo-section--{{ section.id }} .npw-hr {
-    height: 1px;
-    background: color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
-    margin: 18px 0;
-  }
-
-  .xo-section--{{ section.id }} table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 6px 0;
-  }
-
-  .xo-section--{{ section.id }} th,
-  .xo-section--{{ section.id }} td {
-    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
-    padding: 10px 12px;
-    text-align: left;
-    font-size: 14px;
-    vertical-align: middle;
-  }
-
-  .xo-section--{{ section.id }} th {
-    background: rgba(var(--color-background));
-    font-weight: 600;
-  }
-
-  .xo-section--{{ section.id }} .npw-ok {
-    color: rgba(var(--color-success, 16, 167, 31));
-    font-weight: 600;
-  }
-
-  .xo-section--{{ section.id }} .npw-kpis {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-    margin: 12px 0 2px;
-  }
-
-  .xo-section--{{ section.id }} .npw-k {
-    background: rgba(var(--color-background));
-    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
-    border-radius: var(--general-radius-1, 1rem);
-    padding: 10px;
-    text-align: center;
-  }
-
-  .xo-section--{{ section.id }} .npw-k .t {
-    font-size: 12px;
-    color: color-mix(in srgb, rgba(var(--color-foreground)) 60%, transparent);
-  }
-
-  .xo-section--{{ section.id }} .npw-k .v {
-    font-weight: 600;
-    color: rgba(var(--color-foreground));
-  }
-
-  .xo-section--{{ section.id }} .npw-form label {
-    display: block;
-    font-size: 13px;
-    margin: 8px 0 6px;
-    color: rgba(var(--color-foreground));
-  }
-
-  .xo-section--{{ section.id }} .npw-form .req::after {
-    content: " *";
-    color: rgba(var(--color-error, 218, 30, 40));
-  }
-
-  .xo-section--{{ section.id }} .npw-form input,
-  .xo-section--{{ section.id }} .npw-form select,
-  .xo-section--{{ section.id }} .npw-form textarea {
-    width: 100%;
-    padding: 12px 14px;
-    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
-    border-radius: var(--general-radius-1, 1rem);
-    background: rgba(var(--color-background));
-    font-size: 15px;
-    line-height: 1.3;
-    min-height: 44px;
-    color: rgba(var(--color-foreground));
-    transition: border-color 0.2s var(--out-soft, ease);
-  }
-
-  .xo-section--{{ section.id }} .npw-form input:focus,
-  .xo-section--{{ section.id }} .npw-form select:focus,
-  .xo-section--{{ section.id }} .npw-form textarea:focus {
-    outline: 2px solid rgba(var(--color-accent));
-    outline-offset: 2px;
-  }
-
-  .xo-section--{{ section.id }} .npw-form .row {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-
-  @media (min-width: 768px) {
-    .xo-section--{{ section.id }} .npw-form .row {
-      grid-template-columns: 1fr 1fr;
-    }
-  }
-
-  .xo-section--{{ section.id }} .npw-form .help {
-    font-size: 12px;
-    color: color-mix(in srgb, rgba(var(--color-foreground)) 60%, transparent);
-    margin-top: 4px;
-  }
-
-  .xo-section--{{ section.id }} .npw-form .npw-btn {
-    width: 100%;
-    margin-top: 10px;
-  }
-
-  .xo-section--{{ section.id }} .npw-faq dt {
-    font-weight: 600;
-    margin-top: 14px;
-    color: rgba(var(--color-foreground));
-  }
-
-  .xo-section--{{ section.id }} .npw-faq dd {
-    margin: 6px 0 18px;
-    color: color-mix(in srgb, rgba(var(--color-foreground)) 60%, transparent);
-    padding-left: 2px;
-  }
-
-  .xo-section--{{ section.id }} :focus-visible {
-    outline: 2px solid rgba(var(--color-accent));
-    outline-offset: 2px;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .xo-section--{{ section.id }} *,
-    .xo-section--{{ section.id }} *::before,
-    .xo-section--{{ section.id }} *::after {
-      animation-duration: 0.01ms !important;
-      transition-duration: 0.01ms !important;
-    }
-  }
-{%- endstyle -%}
-
-<section id="np-wholesale" {% render 'section-attr' %}>
+<section id="np-wholesale" {% render 'section-attr' %} aria-labelledby="npw-title-{{ section.id }}">
   <xo-container>
-    <div class="npw-wrap">
-      <header>
-        <h1>Wholesale &amp; Large-Volume Orders</h1>
-        <p class="npw-lead">
-          Better prices for bigger orders. Clear tiers. Fast replies (within 1 business day).
-          Bulk examples: <a href="/products/phenibut-500mg-capsules">Phenibut HCL 500&nbsp;mg</a>,
-          <a href="/products/phenibut-250mg-capsules">Phenibut HCL 250&nbsp;mg</a>,
-          <a href="/products/phenibut-faa-300mg-capsules">Phenibut FAA 300&nbsp;mg</a>.
-        </p>
-        <div class="npw-btns">
-          <a class="npw-btn npw-btn--primary" href="#apply" aria-label="Apply for wholesale">Apply for wholesale</a>
-          <a class="npw-btn npw-btn--ghost" href="#tiers" aria-label="See pricing tiers">See pricing tiers</a>
+    <div class="npw">
+      <header class="npw__header">
+        {%- if s.eyebrow != blank -%}<p class="npw__eyebrow">{{ s.eyebrow | escape }}</p>{%- endif -%}
+        <h1 id="npw-title-{{ section.id }}">{{ heading | escape }}</h1>
+        {%- if s.intro != blank -%}<div class="npw__lead">{{ s.intro }}</div>{%- endif -%}
+        <div class="npw__actions">
+          <a class="npw__button npw__button--primary" href="#apply">{{ s.primary_cta_label | escape }}</a>
+          {%- if catalogue_count > 0 -%}
+            <a class="npw__button npw__button--secondary" href="#catalogue">{{ s.catalogue_cta_label | escape }}</a>
+          {%- endif -%}
         </div>
       </header>
 
-      <div class="npw-grid">
-        <div>
-          <div id="tiers" class="npw-card" aria-labelledby="tiers-title">
-            <h2 id="tiers-title">Pricing tiers</h2>
-            <table aria-label="Wholesale pricing tiers">
-              <thead>
-                <tr><th>Tier</th><th>Order size</th><th>Discount</th></tr>
-              </thead>
-              <tbody>
-                <tr><td>Tier 1</td><td>12+ items</td><td class="npw-ok">30% off our normal price</td></tr>
-                <tr><td>Tier 2</td><td>24+ items</td><td class="npw-ok">35% off our normal price</td></tr>
-                <tr><td>Tier 3</td><td>48+ items</td><td class="npw-ok">40% off our normal price</td></tr>
-              </tbody>
-            </table>
-            <p class="npw-muted">We keep prices fair and safe. Very large orders may have limits. Quotes are valid for 7 days.</p>
+      <div class="npw__layout">
+        <div class="npw__content">
+          {%- if catalogue_count > 0 -%}
+            <section id="catalogue" class="npw__panel" aria-labelledby="npw-catalogue-{{ section.id }}">
+              <h2 id="npw-catalogue-{{ section.id }}">{{ s.catalogue_heading | escape }}</h2>
+              {%- if s.catalogue_intro != blank -%}<div class="npw__muted">{{ s.catalogue_intro }}</div>{%- endif -%}
+              <ul class="npw__catalogue" role="list">
+                {%- for block in section.blocks -%}
+                  {%- case block.type -%}
+                    {%- when 'product' -%}
+                      {%- assign selected_product = block.settings.product -%}
+                      {%- if selected_product != blank and selected_product.available -%}
+                        <li class="npw__catalogue-item" {{ block.shopify_attributes }}>
+                          <h3>
+                            <a href="{{ selected_product.url }}">
+                              {{- block.settings.label | default: selected_product.title | escape -}}
+                            </a>
+                          </h3>
+                          {%- if block.settings.note != blank -%}<p>{{ block.settings.note | escape }}</p>{%- endif -%}
+                          <span class="npw__availability">{{ s.available_label | escape }}</span>
+                        </li>
+                      {%- endif -%}
+                    {%- when 'collection' -%}
+                      {%- assign selected_collection = block.settings.collection -%}
+                      {%- if selected_collection != blank -%}
+                        {%- assign available_collection_products = selected_collection.products | where: 'available', true -%}
+                        {%- if available_collection_products.size > 0 -%}
+                          <li class="npw__catalogue-item" {{ block.shopify_attributes }}>
+                            <h3>
+                              <a href="{{ selected_collection.url }}">
+                                {{- block.settings.label | default: selected_collection.title | escape -}}
+                              </a>
+                            </h3>
+                            {%- if block.settings.note != blank -%}<p>{{ block.settings.note | escape }}</p>{%- endif -%}
+                            <span class="npw__availability">{{ s.available_collection_label | escape }}</span>
+                          </li>
+                        {%- endif -%}
+                      {%- endif -%}
+                  {%- endcase -%}
+                {%- endfor -%}
+              </ul>
+            </section>
+          {%- elsif request.design_mode -%}
+            <div class="npw__editor-note">Add available product or collection blocks to publish the wholesale catalogue.</div>
+          {%- endif -%}
 
-            <div class="npw-kpis" aria-label="Wholesale benefits">
-              <div class="npw-k"><div class="v">Priority</div><div class="t">Stock allocation</div></div>
-              <div class="npw-k"><div class="v">COAs</div><div class="t">On file for SKUs</div></div>
-              <div class="npw-k"><div class="v">Support</div><div class="t">Dedicated rep</div></div>
-            </div>
-          </div>
+          {%- if tier_count > 0 -%}
+            <section id="tiers" class="npw__panel" aria-labelledby="npw-tiers-{{ section.id }}">
+              <h2 id="npw-tiers-{{ section.id }}">{{ s.tiers_heading | escape }}</h2>
+              <div class="npw__table-wrap" tabindex="0">
+                <table>
+                  <caption class="visually-hidden">{{ s.tiers_heading | escape }}</caption>
+                  <thead>
+                    <tr>
+                      <th scope="col">{{ s.tier_label_heading | escape }}</th>
+                      <th scope="col">{{ s.tier_size_heading | escape }}</th>
+                      <th scope="col">{{ s.tier_terms_heading | escape }}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {%- for block in section.blocks -%}
+                      {%- if block.type == 'tier' and block.settings.reviewed and block.settings.label != blank and block.settings.order_size != blank and block.settings.terms != blank -%}
+                        <tr {{ block.shopify_attributes }}>
+                          <th scope="row">{{ block.settings.label | escape }}</th>
+                          <td>{{ block.settings.order_size | escape }}</td>
+                          <td>
+                            {{ block.settings.terms | escape }}
+                            {%- if block.settings.note != blank -%}<span class="npw__table-note">{{ block.settings.note | escape }}</span>{%- endif -%}
+                          </td>
+                        </tr>
+                      {%- endif -%}
+                    {%- endfor -%}
+                  </tbody>
+                </table>
+              </div>
+              {%- if s.tiers_note != blank -%}<p class="npw__muted">{{ s.tiers_note | escape }}</p>{%- endif -%}
+            </section>
+          {%- endif -%}
 
-          <div class="npw-card" aria-labelledby="how-title">
-            <h2 id="how-title">How it works</h2>
-            <ol>
-              <li>Send the form with your company, items, and quantity.</li>
-              <li>We check stock and email your price list.</li>
-              <li>Pay by card or bank transfer. We confirm and ship fast.</li>
-              <li>You get tracking for each box.</li>
-            </ol>
-          </div>
+          {%- if s.process_reviewed and s.process_copy != blank -%}
+            <section class="npw__panel" aria-labelledby="npw-process-{{ section.id }}">
+              <h2 id="npw-process-{{ section.id }}">{{ s.process_heading | escape }}</h2>
+              <div class="npw__rte">{{ s.process_copy }}</div>
+            </section>
+          {%- endif -%}
 
-          <div class="npw-card" aria-labelledby="faq-title">
-            <h2 id="faq-title">Questions</h2>
-            <dl class="npw-faq">
-              <dt>Can I pay in instalments (Tabby/Tamara) for bulk?</dt>
-              <dd>Instalments may work for smaller orders. Big orders often need card or bank transfer. We'll guide you.</dd>
+          {%- if s.show_policy_summaries -%}
+            <section class="npw__panel" aria-labelledby="npw-policies-{{ section.id }}">
+              <h2 id="npw-policies-{{ section.id }}">{{ s.policy_heading | escape }}</h2>
+              <div class="npw__policy-grid">
+                <div>
+                  <h3>{{ s.delivery_heading | escape }}</h3>
+                  {% render 'policy-delivery-summary', show_trust_stat: true %}
+                </div>
+                <div>
+                  <h3>{{ s.returns_heading | escape }}</h3>
+                  {% render 'policy-returns-summary', policy_url: shop.shipping_policy.url %}
+                </div>
+              </div>
+            </section>
+          {%- endif -%}
 
-              <dt>Which products can I order in bulk?</dt>
-              <dd>Right now: Phenibut HCL 250&nbsp;mg, Phenibut HCL 500&nbsp;mg, and Phenibut FAA 300&nbsp;mg.</dd>
-
-              <dt>Do you ship internationally?</dt>
-              <dd>Yes. Same shipping policy applies. If delivery fails due to our error, we issue a full refund. International customs/seizure is buyer import risk. We may split into several boxes to make customs smoother.</dd>
-
-              <dt>How long will it take?</dt>
-              <dd>It depends on the quantity, but we prepare orders quickly. We'll confirm timing in our reply.</dd>
-
-              <dt>Do you offer private label?</dt>
-              <dd>Not now. We're exploring it. Tell us your idea so we can keep you updated.</dd>
-            </dl>
-          </div>
+          {%- if faq_count > 0 -%}
+            <section class="npw__panel" aria-labelledby="npw-faq-{{ section.id }}">
+              <h2 id="npw-faq-{{ section.id }}">{{ s.faq_heading | escape }}</h2>
+              <div class="npw__faq">
+                {%- for block in section.blocks -%}
+                  {%- if block.type == 'faq' and block.settings.visible and block.settings.question != blank and block.settings.answer != blank -%}
+                    <details {{ block.shopify_attributes }}>
+                      <summary>{{ block.settings.question | escape }}</summary>
+                      <div class="npw__rte">{{ block.settings.answer }}</div>
+                    </details>
+                  {%- endif -%}
+                {%- endfor -%}
+              </div>
+            </section>
+          {%- endif -%}
         </div>
 
-        <div id="apply" class="npw-card">
-          <h2>Apply for wholesale</h2>
+        <aside id="apply" class="npw__panel npw__application" aria-labelledby="npw-form-title-{{ section.id }}">
+          <h2 id="npw-form-title-{{ section.id }}">{{ s.form_heading | escape }}</h2>
+          <p id="npw-form-help-{{ section.id }}" class="npw__muted">{{ s.form_help | escape }}</p>
 
-          {% form 'contact', id: 'WholesaleForm', class: 'npw-form' %}
-            {% if form.posted_successfully? %}
-              <p class="npw-ok" role="status">Thank you — we'll reply within 1 business day.</p>
-            {% else %}
-              {% if form.errors %}<p class="npw-muted" role="alert">Please check the fields marked in red.</p>{% endif %}
-              <input type="hidden" name="contact[tags]" value="wholesale, lead">
+          <div class="npw__restricted">
+            <h3>{{ s.restricted_heading | escape }}</h3>
+            <p>
+              {{- s.restricted_copy | escape }}
+              <a href="/pages/peptide-wholesale-research-supply">{{ s.restricted_link_label | escape }}</a>
+            </p>
+          </div>
 
-              <label class="req">Company
-                <input type="text" name="contact[Company]" autocomplete="organization" required>
-              </label>
+          {% form 'contact',
+            id: 'WholesaleForm',
+            class: 'npw__form',
+            aria-labelledby: 'npw-form-title-' | append: section.id,
+            aria-describedby: 'npw-form-help-' | append: section.id
+          %}
+            {%- if form.posted_successfully? -%}
+              <p class="npw__success" role="status">{{ s.success_message | escape }}</p>
+            {%- else -%}
+              {%- if form.errors -%}
+                <div id="npw-errors-{{ section.id }}" class="npw__errors" role="alert" tabindex="-1" data-npw-error-summary>
+                  <h3>{{ s.error_heading | escape }}</h3>
+                  {{ form.errors | default_errors }}
+                </div>
+                <script>
+                  window.requestAnimationFrame(function () {
+                    var summary = document.getElementById('npw-errors-{{ section.id }}');
+                    if (summary) summary.focus();
+                  });
+                </script>
+              {%- endif -%}
 
-              <div class="row">
-                <label class="req">Contact name
-                  <input type="text" name="contact[Name]" autocomplete="name" required>
-                </label>
-                <label class="req">Email
-                  <input type="email" name="contact[email]" autocomplete="email" required>
+              <input type="hidden" name="contact[tags]" value="wholesale, qualified-lead">
+
+              <div class="npw__field npw__field--full">
+                <label for="npw-company-{{ section.id }}">{{ s.company_label | escape }} <span aria-hidden="true">*</span></label>
+                <input id="npw-company-{{ section.id }}" type="text" name="contact[organization]" autocomplete="organization" required>
+              </div>
+
+              <div class="npw__field">
+                <label for="npw-name-{{ section.id }}">{{ s.name_label | escape }} <span aria-hidden="true">*</span></label>
+                <input id="npw-name-{{ section.id }}" type="text" name="contact[name]" value="{{ form.name }}" autocomplete="name" required>
+              </div>
+
+              <div class="npw__field">
+                <label for="npw-email-{{ section.id }}">{{ s.email_label | escape }} <span aria-hidden="true">*</span></label>
+                <input
+                  id="npw-email-{{ section.id }}"
+                  type="email"
+                  name="contact[email]"
+                  value="{{ form.email }}"
+                  autocomplete="email"
+                  required
+                  {% if form.errors contains 'email' %}aria-invalid="true" aria-describedby="npw-email-error-{{ section.id }}"{% endif %}
+                >
+                {%- if form.errors contains 'email' -%}
+                  <span id="npw-email-error-{{ section.id }}" class="npw__field-error">
+                    {{- form.errors.translated_fields.email | capitalize }} {{ form.errors.messages.email -}}
+                  </span>
+                {%- endif -%}
+              </div>
+
+              <div class="npw__field">
+                <label for="npw-country-{{ section.id }}">{{ s.country_label | escape }} <span aria-hidden="true">*</span></label>
+                <input id="npw-country-{{ section.id }}" type="text" name="contact[destination_country]" autocomplete="country-name" required>
+              </div>
+
+              <div class="npw__field">
+                <label for="npw-category-{{ section.id }}">{{ s.category_label | escape }} <span aria-hidden="true">*</span></label>
+                <select id="npw-category-{{ section.id }}" name="contact[business_category]" required>
+                  <option value="">{{ s.category_placeholder | escape }}</option>
+                  <option value="Retailer or distributor">{{ s.category_retail | escape }}</option>
+                  <option value="Health or wellness business">{{ s.category_wellness | escape }}</option>
+                  <option value="Hospitality or corporate purchasing">{{ s.category_corporate | escape }}</option>
+                  <option value="Other eligible organization">{{ s.category_other | escape }}</option>
+                </select>
+              </div>
+
+              <div class="npw__field npw__field--full">
+                <label for="npw-products-{{ section.id }}">{{ s.products_label | escape }} <span aria-hidden="true">*</span></label>
+                <textarea id="npw-products-{{ section.id }}" name="contact[products_of_interest]" rows="3" required></textarea>
+              </div>
+
+              <div class="npw__field">
+                <label for="npw-quantity-{{ section.id }}">{{ s.quantity_label | escape }} <span aria-hidden="true">*</span></label>
+                <input id="npw-quantity-{{ section.id }}" type="text" name="contact[quantity_estimate]" required>
+              </div>
+
+              <div class="npw__field">
+                <label for="npw-website-{{ section.id }}">{{ s.website_label | escape }}</label>
+                <input id="npw-website-{{ section.id }}" type="url" name="contact[organization_website]" inputmode="url" placeholder="https://">
+              </div>
+
+              <div class="npw__field npw__field--full">
+                <label for="npw-message-{{ section.id }}">{{ s.message_label | escape }}</label>
+                <textarea id="npw-message-{{ section.id }}" name="contact[body]" rows="4">{{ form.body }}</textarea>
+              </div>
+
+              <div class="npw__check npw__field--full">
+                <input id="npw-privacy-{{ section.id }}" type="checkbox" name="contact[privacy_acknowledgement]" value="Acknowledged" required>
+                <label for="npw-privacy-{{ section.id }}">
+                  {{- s.privacy_notice | escape -}}
+                  {%- if shop.privacy_policy.url != blank -%}
+                    <a href="{{ shop.privacy_policy.url }}">{{ s.privacy_link_label | escape }}</a>
+                  {%- endif -%}
+                  <span aria-hidden="true">*</span>
                 </label>
               </div>
 
-              <label>Quantity (estimate)
-                <input type="text" name="contact[Quantity estimate]" placeholder="e.g., 48 bottles / 10 × 500 g">
-                <div class="help">Any unit is fine. Rough numbers are OK.</div>
-              </label>
-
-              <label>Products of interest
-                <textarea name="contact[Products of interest]" rows="3" placeholder="e.g., Phenibut HCL 500 mg; Phenibut FAA 300 mg"></textarea>
-              </label>
-
-              <label>Message
-                <textarea name="contact[Body]" rows="4" placeholder="Tell us your use case or timeline"></textarea>
-              </label>
-
-              <button type="submit" class="npw-btn npw-btn--primary">Send</button>
-              <p class="npw-muted">Prefer email? <a href="mailto:wholesale@nootropix.shop">wholesale@nootropix.shop</a> or <a href="mailto:orders@nootropix.shop">orders@nootropix.shop</a>.</p>
-            {% endif %}
+              <button type="submit" class="npw__button npw__button--primary npw__submit">{{ s.submit_label | escape }}</button>
+            {%- endif -%}
           {% endform %}
-        </div>
+        </aside>
       </div>
+
+      {%- for block in section.blocks -%}
+        {%- if block.type == '@app' -%}
+          <div class="npw__app" {{ block.shopify_attributes }}>{% render block %}</div>
+        {%- endif -%}
+      {%- endfor -%}
     </div>
   </xo-container>
-
-  {%- comment -%} SEO: FAQ schema to support Rich Results {%- endcomment -%}
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    "mainEntity": [
-      {
-        "@type": "Question",
-        "name": "Can I pay in instalments (Tabby/Tamara) for bulk?",
-        "acceptedAnswer": { "@type": "Answer", "text": "Instalments may work for smaller orders. Big orders often need card or bank transfer. We'll guide you." }
-      },
-      {
-        "@type": "Question",
-        "name": "Which products can I order in bulk?",
-        "acceptedAnswer": { "@type": "Answer", "text": "Right now: Phenibut HCL 250 mg, Phenibut HCL 500 mg, and Phenibut FAA 300 mg." }
-      },
-      {
-        "@type": "Question",
-        "name": "Do you ship internationally?",
-        "acceptedAnswer": { "@type": "Answer", "text": "Yes. Same shipping policy applies. If delivery fails due to our error, we issue a full refund. International customs/seizure is buyer import risk. We may split into several boxes to make customs smoother." }
-      },
-      {
-        "@type": "Question",
-        "name": "How long will it take?",
-        "acceptedAnswer": { "@type": "Answer", "text": "It depends on the quantity, but we prepare orders quickly. We'll confirm timing in our reply." }
-      },
-      {
-        "@type": "Question",
-        "name": "Do you offer private label?",
-        "acceptedAnswer": { "@type": "Answer", "text": "Not now. We're exploring it. Tell us your idea so we can keep you updated." }
-      }
-    ]
-  }
-  </script>
 </section>
+
+{%- if faq_count > 0 -%}
+  {%- capture faq_json -%}
+    [
+      {%- assign first_faq = true -%}
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'faq' and block.settings.visible and block.settings.question != blank and block.settings.answer != blank -%}
+          {%- unless first_faq -%},{%- endunless -%}
+          {"@type":"Question","name":{{ block.settings.question | strip | json }},"acceptedAnswer":{"@type":"Answer","text":{{ block.settings.answer | strip_html | strip | json }}}}
+          {%- assign first_faq = false -%}
+        {%- endif -%}
+      {%- endfor -%}
+    ]
+  {%- endcapture -%}
+  <script type="application/ld+json">
+    {"@context":"https://schema.org","@type":"FAQPage","@id":{{ canonical_url | append: '#wholesale-faq' | json }},"mainEntity":{{ faq_json | strip }}}
+  </script>
+{%- endif -%}
+
+{% style %}
+  .xo-section--{{ section.id }} {
+    padding-top: {{ s.padding_top }}px;
+    padding-bottom: {{ s.padding_bottom }}px;
+  }
+{% endstyle %}
 
 {% schema %}
 {
@@ -407,6 +324,58 @@
   "class": "section-wholesale",
   "settings": [
     { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme" },
+    { "type": "header", "content": "Introduction" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Organization enquiries" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Wholesale and large-volume enquiries" },
+    { "type": "richtext", "id": "intro", "label": "Introduction", "default": "<p>Submit an organization enquiry for currently available catalogue products. Eligibility, quantities, pricing, documentation, payment, and fulfilment terms are confirmed only in a reviewed quotation.</p>" },
+    { "type": "text", "id": "primary_cta_label", "label": "Primary action label", "default": "Submit an enquiry" },
+    { "type": "text", "id": "catalogue_cta_label", "label": "Catalogue action label", "default": "View eligible catalogue" },
+    { "type": "header", "content": "Available catalogue" },
+    { "type": "text", "id": "catalogue_heading", "label": "Catalogue heading", "default": "Available wholesale catalogue" },
+    { "type": "richtext", "id": "catalogue_intro", "label": "Catalogue introduction", "default": "<p>Only merchant-selected products and collections with currently available items are shown.</p>" },
+    { "type": "text", "id": "available_label", "label": "Available product label", "default": "Currently available" },
+    { "type": "text", "id": "available_collection_label", "label": "Available collection label", "default": "Contains available products" },
+    { "type": "header", "content": "Reviewed tiers" },
+    { "type": "text", "id": "tiers_heading", "label": "Tiers heading", "default": "Reviewed wholesale tiers" },
+    { "type": "text", "id": "tier_label_heading", "label": "Tier column heading", "default": "Tier" },
+    { "type": "text", "id": "tier_size_heading", "label": "Order-size column heading", "default": "Order size" },
+    { "type": "text", "id": "tier_terms_heading", "label": "Terms column heading", "default": "Reviewed terms" },
+    { "type": "textarea", "id": "tiers_note", "label": "Tier note", "info": "Optional reviewed qualification note. Do not publish unapproved pricing, discount, MOQ, or validity claims." },
+    { "type": "header", "content": "Reviewed process" },
+    { "type": "checkbox", "id": "process_reviewed", "label": "Process copy has been reviewed", "default": false },
+    { "type": "text", "id": "process_heading", "label": "Process heading", "default": "Qualification process" },
+    { "type": "richtext", "id": "process_copy", "label": "Reviewed process copy", "info": "Leave blank until response times, documentation, payment, shipping, and quotation wording have been approved." },
+    { "type": "header", "content": "Canonical policies" },
+    { "type": "checkbox", "id": "show_policy_summaries", "label": "Show canonical shipping and returns summaries", "default": true },
+    { "type": "text", "id": "policy_heading", "label": "Policy heading", "default": "Current policy information" },
+    { "type": "text", "id": "delivery_heading", "label": "Delivery heading", "default": "Delivery and customs" },
+    { "type": "text", "id": "returns_heading", "label": "Returns heading", "default": "Returns" },
+    { "type": "header", "content": "Application form" },
+    { "type": "text", "id": "form_heading", "label": "Form heading", "default": "Submit a wholesale enquiry" },
+    { "type": "textarea", "id": "form_help", "label": "Form help", "default": "Fields marked required help us assess organization, destination, category, quantity, and catalogue fit. Do not include customer, patient, or health information." },
+    { "type": "text", "id": "restricted_heading", "label": "Restricted-route heading", "default": "Peptide or restricted research supply" },
+    { "type": "textarea", "id": "restricted_copy", "label": "Restricted-route copy", "default": "Do not use this general wholesale form for peptide or restricted research-supply requests." },
+    { "type": "text", "id": "restricted_link_label", "label": "Restricted-route link label", "default": "Use the dedicated organization qualification form." },
+    { "type": "text", "id": "company_label", "label": "Organization label", "default": "Organization legal name" },
+    { "type": "text", "id": "name_label", "label": "Contact label", "default": "Authorized contact name" },
+    { "type": "text", "id": "email_label", "label": "Email label", "default": "Organization email" },
+    { "type": "text", "id": "country_label", "label": "Destination label", "default": "Destination country or jurisdiction" },
+    { "type": "text", "id": "category_label", "label": "Category label", "default": "Organization category" },
+    { "type": "text", "id": "category_placeholder", "label": "Category placeholder", "default": "Select a category" },
+    { "type": "text", "id": "category_retail", "label": "Retail category", "default": "Retailer or distributor" },
+    { "type": "text", "id": "category_wellness", "label": "Wellness category", "default": "Health or wellness business" },
+    { "type": "text", "id": "category_corporate", "label": "Corporate category", "default": "Hospitality or corporate purchasing" },
+    { "type": "text", "id": "category_other", "label": "Other category", "default": "Other eligible organization" },
+    { "type": "text", "id": "products_label", "label": "Products label", "default": "Available products or collections of interest" },
+    { "type": "text", "id": "quantity_label", "label": "Quantity label", "default": "Estimated quantity and format" },
+    { "type": "text", "id": "website_label", "label": "Website label", "default": "Organization website or registry URL" },
+    { "type": "text", "id": "message_label", "label": "Message label", "default": "Additional organization or purchasing information" },
+    { "type": "textarea", "id": "privacy_notice", "label": "Privacy notice", "default": "I understand this information will be used to assess and respond to this organization enquiry." },
+    { "type": "text", "id": "privacy_link_label", "label": "Privacy link label", "default": "Read the privacy policy." },
+    { "type": "text", "id": "submit_label", "label": "Submit label", "default": "Submit for review" },
+    { "type": "text", "id": "success_message", "label": "Success message", "default": "Thank you. Your enquiry was received for review; this is not a confirmation of eligibility, stock, price, or fulfilment." },
+    { "type": "text", "id": "error_heading", "label": "Error summary heading", "default": "Please correct the following" },
+    { "type": "text", "id": "faq_heading", "label": "FAQ heading", "default": "Wholesale questions" },
     {
       "type": "range",
       "id": "padding_top",
@@ -429,6 +398,44 @@
     }
   ],
   "blocks": [
+    {
+      "type": "product",
+      "name": "Available product",
+      "settings": [
+        { "type": "product", "id": "product", "label": "Product", "info": "The item hides automatically when unavailable in the selected market." },
+        { "type": "text", "id": "label", "label": "Optional display label" },
+        { "type": "textarea", "id": "note", "label": "Reviewed note" }
+      ]
+    },
+    {
+      "type": "collection",
+      "name": "Available collection",
+      "settings": [
+        { "type": "collection", "id": "collection", "label": "Collection", "info": "The collection hides when it has no available products in the selected market." },
+        { "type": "text", "id": "label", "label": "Optional display label" },
+        { "type": "textarea", "id": "note", "label": "Reviewed note" }
+      ]
+    },
+    {
+      "type": "tier",
+      "name": "Reviewed tier",
+      "settings": [
+        { "type": "checkbox", "id": "reviewed", "label": "Terms have been reviewed", "default": false },
+        { "type": "text", "id": "label", "label": "Tier label" },
+        { "type": "text", "id": "order_size", "label": "Order size or MOQ" },
+        { "type": "text", "id": "terms", "label": "Pricing or discount terms" },
+        { "type": "textarea", "id": "note", "label": "Optional qualification note" }
+      ]
+    },
+    {
+      "type": "faq",
+      "name": "Visible reviewed FAQ",
+      "settings": [
+        { "type": "checkbox", "id": "visible", "label": "Show this reviewed FAQ", "default": false },
+        { "type": "text", "id": "question", "label": "Question" },
+        { "type": "richtext", "id": "answer", "label": "Answer" }
+      ]
+    },
     { "type": "@app" }
   ],
   "presets": [

@@ -12,15 +12,27 @@
 {%- liquid
   assign s = section.settings
   assign title_id = 'np-nl-title-' | append: section.id
+  assign accessible_label = s.section_label | default: 'Newsletter signup'
   assign has_image = false
+  assign has_heading = false
   if s.background_image != blank
     assign has_image = true
+  endif
+  if s.show_heading and s.heading != blank
+    assign has_heading = true
+  endif
+  assign image_loading = 'lazy'
+  assign image_fetchpriority = 'auto'
+  if s.layout == 'hero' and section.index == 1
+    assign image_loading = 'eager'
+    assign image_fetchpriority = 'high'
   endif
 -%}
 
 <section
   {% render 'section-attr' %}
-  aria-labelledby="{{ title_id }}"
+  {% if has_heading %}aria-labelledby="{{ title_id }}"{% else %}aria-label="{{ accessible_label | escape }}"{% endif %}
+  data-np-newsletter
 >
   <xo-container>
     <div class="np-nl np-nl--{{ s.layout }}{% if has_image %} np-nl--has-image{% endif %}">
@@ -31,7 +43,8 @@
             srcset="{{ s.background_image | image_url: width: 800 }} 800w, {{ s.background_image | image_url: width: 1400 }} 1400w, {{ s.background_image | image_url: width: 2000 }} 2000w"
             sizes="100vw"
             alt=""
-            loading="lazy"
+            loading="{{ image_loading }}"
+            fetchpriority="{{ image_fetchpriority }}"
             decoding="async"
             width="{{ s.background_image.width }}"
             height="{{ s.background_image.height }}"
@@ -51,18 +64,65 @@
             </span>
           {%- endif -%}
 
-          {%- if s.show_heading and s.heading != blank -%}
-            <h2 class="np-nl__title {{ s.heading_size }}" id="{{ title_id }}">{{ s.heading }}</h2>
+          {%- if has_heading -%}
+            {%- if s.layout == 'hero' -%}
+              <h1 class="np-nl__title {{ s.heading_size }}" id="{{ title_id }}">{{ s.heading | escape }}</h1>
+            {%- else -%}
+              <h2 class="np-nl__title {{ s.heading_size }}" id="{{ title_id }}">{{ s.heading | escape }}</h2>
+            {%- endif -%}
           {%- endif -%}
 
           {%- if s.show_subheading and s.subheading != blank -%}
             <div class="np-nl__subtitle">{{ s.subheading }}</div>
           {%- endif -%}
 
-          {%- if s.klaviyo_form_id != blank -%}
-            <div class="np-nl__embed klaviyo-form-{{ s.klaviyo_form_id }}"></div>
-          {%- elsif request.design_mode -%}
-            <p class="np-nl__embed-missing">Add your Klaviyo embed form ID in the section settings.</p>
+          <div class="np-nl__form-shell" data-np-newsletter-shell data-timeout="{{ s.load_timeout | times: 1000 }}">
+            {%- if s.klaviyo_form_id != blank -%}
+              <p class="np-nl__status" role="status" data-np-newsletter-loading>
+                {{- s.loading_message | escape -}}
+              </p>
+              <div
+                class="np-nl__embed klaviyo-form-{{ s.klaviyo_form_id }}"
+                data-np-newsletter-embed
+                aria-busy="true"
+              ></div>
+              <div class="np-nl__fallback" role="alert" data-np-newsletter-fallback hidden>
+                <p>{{ s.failure_message | escape }}</p>
+                {%- if s.direct_signup_url != blank and s.direct_signup_label != blank -%}
+                  <a class="np-nl__fallback-link" href="{{ s.direct_signup_url }}">
+                    {{- s.direct_signup_label | escape -}}
+                  </a>
+                {%- endif -%}
+              </div>
+              <noscript>
+                <div class="np-nl__fallback">
+                  <p>{{ s.javascript_message | escape }}</p>
+                  {%- if s.direct_signup_url != blank and s.direct_signup_label != blank -%}
+                    <a class="np-nl__fallback-link" href="{{ s.direct_signup_url }}">
+                      {{- s.direct_signup_label | escape -}}
+                    </a>
+                  {%- endif -%}
+                </div>
+              </noscript>
+            {%- elsif request.design_mode -%}
+              <p class="np-nl__embed-missing">Add the existing Klaviyo embed form ID in the section settings.</p>
+            {%- endif -%}
+          </div>
+
+          {%- if s.eligibility_copy != blank or s.frequency_copy != blank or s.consent_copy != blank or s.privacy_copy != blank -%}
+            <div class="np-nl__terms">
+              {%- if s.eligibility_copy != blank -%}<div>{{ s.eligibility_copy }}</div>{%- endif -%}
+              {%- if s.frequency_copy != blank -%}<div>{{ s.frequency_copy }}</div>{%- endif -%}
+              {%- if s.consent_copy != blank -%}<div>{{ s.consent_copy }}</div>{%- endif -%}
+              {%- if s.privacy_copy != blank -%}
+                <div>
+                  {{ s.privacy_copy }}
+                  {%- if shop.privacy_policy.url != blank and s.privacy_link_label != blank -%}
+                    <a href="{{ shop.privacy_policy.url }}">{{ s.privacy_link_label | escape }}</a>
+                  {%- endif -%}
+                </div>
+              {%- endif -%}
+            </div>
           {%- endif -%}
 
           {%- assign benefit_count = 0 -%}
@@ -85,12 +145,14 @@
 
         {%- assign proof_count = 0 -%}
         {%- for block in section.blocks -%}
-          {%- if block.type == 'proof' -%}{%- assign proof_count = proof_count | plus: 1 -%}{%- endif -%}
+          {%- if block.type == 'proof' and block.settings.value != blank and block.settings.label != blank -%}
+            {%- assign proof_count = proof_count | plus: 1 -%}
+          {%- endif -%}
         {%- endfor -%}
         {%- if s.show_proof and proof_count > 0 -%}
           <ul class="np-nl__proof" role="list">
             {%- for block in section.blocks -%}
-              {%- if block.type == 'proof' -%}
+              {%- if block.type == 'proof' and block.settings.value != blank and block.settings.label != blank -%}
                 <li class="np-nl__proof-item" {{ block.shopify_attributes }}>
                   <span class="np-nl__proof-value">{{ block.settings.value }}</span>
                   <span class="np-nl__proof-label">{{ block.settings.label }}</span>
@@ -103,6 +165,8 @@
     </div>
   </xo-container>
 </section>
+
+<script src="{{ 'np-newsletter-signup.js' | asset_url }}" defer="defer"></script>
 
 {%- style -%}
   .xo-section--{{ section.id }} {
@@ -147,6 +211,17 @@
       "info": "The ID in <div class=\"klaviyo-form-XXXX\">. Build and style the form (and its welcome/coupon flow) in Klaviyo.",
       "default": "RdVLYF"
     },
+    {
+      "type": "url",
+      "id": "direct_signup_url",
+      "label": "Direct Klaviyo signup URL",
+      "info": "Optional hosted Klaviyo URL using the same list and consent language as the embedded form."
+    },
+    { "type": "range", "id": "load_timeout", "min": 4, "max": 20, "step": 1, "unit": "s", "label": "Blocked-form timeout", "default": 10 },
+    { "type": "text", "id": "loading_message", "label": "Loading message", "default": "Loading the secure signup form…" },
+    { "type": "textarea", "id": "failure_message", "label": "Blocked or failed message", "default": "The signup form could not load. Check content-blocking settings or use the direct Klaviyo signup link if one is shown." },
+    { "type": "textarea", "id": "javascript_message", "label": "No-JavaScript message", "default": "JavaScript is required for the Klaviyo signup form. Use the direct Klaviyo signup link if one is shown." },
+    { "type": "text", "id": "direct_signup_label", "label": "Direct signup link label", "default": "Open the direct signup form" },
     { "type": "header", "content": "Visible elements" },
     { "type": "checkbox", "id": "show_eyebrow", "label": "Show eyebrow", "default": true },
     { "type": "checkbox", "id": "show_heading", "label": "Show heading", "default": true },
@@ -156,7 +231,8 @@
     { "type": "header", "content": "Content" },
     { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Nootropix Newsletter" },
     { "type": "text", "id": "eyebrow_icon", "label": "Eyebrow icon name", "info": "Theme icon name, e.g. mail, discount, star.", "default": "mail" },
-    { "type": "text", "id": "heading", "label": "Heading", "default": "Get 10% off your first order" },
+    { "type": "text", "id": "section_label", "label": "Accessible section label", "default": "Newsletter signup" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "News and product updates" },
     {
       "type": "select",
       "id": "heading_size",
@@ -174,8 +250,14 @@
       "type": "richtext",
       "id": "subheading",
       "label": "Subheading",
-      "default": "<p>Join the list for science-backed stacking tips, restock alerts, and first access to every flash sale.</p>"
+      "default": "<p>Choose whether to receive editorial updates, product news, and eligible offers by email.</p>"
     },
+    { "type": "header", "content": "Consent and expectations" },
+    { "type": "richtext", "id": "eligibility_copy", "label": "Offer eligibility", "default": "<p>Any welcome offer is subject to the eligibility and redemption terms shown in the signup form and email.</p>" },
+    { "type": "richtext", "id": "frequency_copy", "label": "Expected frequency", "default": "<p>Email frequency varies with editorial and product updates.</p>" },
+    { "type": "richtext", "id": "consent_copy", "label": "Consent notice", "default": "<p>Submitting the Klaviyo form requests marketing email consent. Consent is optional and can be withdrawn using the unsubscribe link in any message.</p>" },
+    { "type": "richtext", "id": "privacy_copy", "label": "Privacy notice", "default": "<p>Your details are handled according to our privacy policy.</p>" },
+    { "type": "text", "id": "privacy_link_label", "label": "Privacy policy link label", "default": "Read the privacy policy" },
     { "type": "header", "content": "Background (hero)" },
     { "type": "image_picker", "id": "background_image", "label": "Background image" },
     { "type": "range", "id": "overlay_opacity", "min": 0, "max": 100, "step": 5, "unit": "%", "label": "Background scrim opacity", "default": 70 },
@@ -192,15 +274,15 @@
       "name": "Benefit",
       "settings": [
         { "type": "text", "id": "icon", "label": "Icon name", "info": "Theme icon name, e.g. check, discount, shipping-fast.", "default": "check" },
-        { "type": "text", "id": "text", "label": "Text", "default": "10% off your first order" }
+        { "type": "text", "id": "text", "label": "Text", "default": "Editorial and product updates" }
       ]
     },
     {
       "type": "proof",
       "name": "Proof stat",
       "settings": [
-        { "type": "text", "id": "value", "label": "Value", "default": "12k+" },
-        { "type": "text", "id": "label", "label": "Label", "default": "Subscribers" }
+        { "type": "text", "id": "value", "label": "Reviewed value", "info": "Shown only when both fields are populated. Use verified merchant data." },
+        { "type": "text", "id": "label", "label": "Reviewed label" }
       ]
     }
   ],
@@ -208,9 +290,9 @@
     {
       "name": "NP • Newsletter Signup",
       "blocks": [
-        { "type": "benefit", "settings": { "icon": "discount", "text": "10% off your first order" } },
-        { "type": "benefit", "settings": { "icon": "shipping-fast", "text": "Restock & flash-sale alerts" } },
-        { "type": "benefit", "settings": { "icon": "star", "text": "Science-backed stacking tips" } }
+        { "type": "benefit", "settings": { "icon": "mail", "text": "Editorial updates" } },
+        { "type": "benefit", "settings": { "icon": "shipping-fast", "text": "Product and restock news" } },
+        { "type": "benefit", "settings": { "icon": "star", "text": "Eligible offers when available" } }
       ]
     }
   ]
