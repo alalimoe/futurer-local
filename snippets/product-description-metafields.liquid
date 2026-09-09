@@ -97,6 +97,19 @@ Nootropix — Product description renderer from metafields
         };
         fetch('http://127.0.0.1:7906/ingest/73d01807-f919-4550-a2d5-12c9f0435bd9',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'737e95'},body:JSON.stringify({sessionId:'737e95',runId:'post-fix',hypothesisId:'A',location:'snippets/product-description-metafields.liquid:feel-timeline',message:'feel timeline parse + render',data:data,timestamp:Date.now()})}).catch(function(){});
         fetch('http://127.0.0.1:7906/ingest/73d01807-f919-4550-a2d5-12c9f0435bd9',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'737e95'},body:JSON.stringify({sessionId:'737e95',runId:'post-fix',hypothesisId:'F',location:'snippets/product-description-metafields.liquid:feel-timeline-fallback',message:'string JSON split fallback',data:{usedSplitFallback: data.feelFirstAfterParse !== '[', nextIsList: data.nextIsList, nextText: data.nextText},timestamp:Date.now()})}).catch(function(){});
+        function styleSnapshot(el) {
+          if (!el) return null;
+          var cs = window.getComputedStyle(el);
+          return { tag: el.tagName, color: cs.color, fontSize: cs.fontSize, lineHeight: cs.lineHeight, fontWeight: cs.fontWeight, marginTop: cs.marginTop, marginBottom: cs.marginBottom };
+        }
+        var buyBox = document.querySelector('.xo-product-info-content .product-prose');
+        var buyP = buyBox && buyBox.querySelector('p, li');
+        var buyH = buyBox && buyBox.querySelector('h3');
+        var vts = document.querySelector('.vts__item.is-active .vts__text .product-prose') || document.querySelector('.vts__text .product-prose');
+        var vtsP = vts && vts.querySelector('p, li, .metafield-rich_text_field p');
+        var htmlFs = window.getComputedStyle(document.documentElement).fontSize;
+        var bodyFs = window.getComputedStyle(document.body).fontSize;
+        fetch('http://127.0.0.1:7906/ingest/73d01807-f919-4550-a2d5-12c9f0435bd9',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'737e95'},body:JSON.stringify({sessionId:'737e95',runId:'prose-style',hypothesisId:'B',location:'snippets/product-description-metafields.liquid:prose-compare',message:'buy-box vs VTS computed styles',data:{htmlFontSize:htmlFs,bodyFontSize:bodyFs,buyBox:styleSnapshot(buyBox),buyP:styleSnapshot(buyP),buyH:styleSnapshot(buyH),vts:styleSnapshot(vts),vtsP:styleSnapshot(vtsP)},timestamp:Date.now()})}).catch(function(){});
       })();
     </script>
     {% # endregion %}
