@@ -540,22 +540,15 @@
             {%- for block in stack_blocks -%}
               {%- liquid
                 assign prod = block.settings.product
-                assign card_url = block.settings.link
-                if prod != blank
-                  assign card_url = prod.url
-                endif
                 assign protocol_num = forloop.index | prepend: '0'
                 assign protocol_num = protocol_num | slice: -2, 2
               -%}
+              {%- if prod != blank and prod.available -%}
               <article class="bgs-protocol" {{ block.shopify_attributes }}>
                 <span class="bgs-protocol__num" aria-hidden="true">{{ protocol_num }}</span>
                 <div class="bgs-protocol__body">
                   <h3 class="bgs-protocol__title">
-                    {%- if card_url != blank -%}
-                      <a href="{{ card_url }}">{{ block.settings.title | default: prod.title | escape }}</a>
-                    {%- else -%}
-                      {{ block.settings.title | default: prod.title | escape }}
-                    {%- endif -%}
+                    <a href="{{ prod.url }}">{{ prod.title | escape }}</a>
                   </h3>
                   {%- if block.settings.compounds != blank -%}
                     <p class="bgs-protocol__compounds">{{ block.settings.compounds | escape }}</p>
@@ -564,31 +557,23 @@
                     {%- if block.settings.learn_url != blank -%}
                       <a class="bgs-protocol__learn" href="{{ block.settings.learn_url }}">Learn</a>
                     {%- endif -%}
-                    {%- if prod != blank -%}
-                      {% render 'button',
-                        text: 'Shop',
-                        link: prod.url,
-                        style: 'primary',
-                        size: 'sm'
-                      %}
-                    {%- elsif card_url != blank -%}
-                      {%- assign protocol_cta = block.settings.cta_label | default: 'View stack' -%}
-                      {% render 'button',
-                        text: protocol_cta,
-                        link: card_url,
-                        style: 'primary',
-                        size: 'sm'
-                      %}
-                    {%- endif -%}
+                    {% render 'button',
+                      text: 'Review product label',
+                      link: prod.url,
+                      style: 'primary',
+                      size: 'sm'
+                    %}
                   </div>
                 </div>
               </article>
+              {%- endif -%}
             {%- endfor -%}
           </div>
         {%- else -%}
         <div class="bgs-stacks__grid">
           {%- if bgs_has_collection -%}
             {%- for product in bgs_coll.products limit: section.settings.products_limit -%}
+              {%- if product.available -%}
               <article class="bgs-card">
                 <div class="bgs-card__img-wrap">
                   <a href="{{ product.url }}">
@@ -612,6 +597,7 @@
                   </xo-cart-add>
                 </div>
               </article>
+              {%- endif -%}
             {%- endfor -%}
 
           {%- elsif bgs_coll != blank and bgs_coll.products.size == 0 -%}
@@ -619,31 +605,20 @@
 
           {%- else -%}
             {%- for block in stack_blocks -%}
-              {%- liquid
-                assign prod = block.settings.product
-                assign card_url = block.settings.link
-                if prod != blank
-                  assign card_url = prod.url
-                endif
-              -%}
+              {%- assign prod = block.settings.product -%}
+              {%- if prod != blank and prod.available -%}
               <article class="bgs-card" {{ block.shopify_attributes }}>
-                {%- if prod != blank -%}
-                  <div class="bgs-card__img-wrap">
-                    {%- if card_url != blank -%}<a href="{{ card_url }}">{%- endif -%}
+                <div class="bgs-card__img-wrap">
+                    <a href="{{ prod.url }}">
                     <img class="bgs-card__img" src="{{ prod.featured_image | image_url: width: 600 }}" alt="{{ prod.featured_image.alt | default: prod.title | escape }}" width="600" height="600" loading="lazy" decoding="async">
-                    {%- if card_url != blank -%}</a>{%- endif -%}
+                    </a>
                     {%- if block.settings.savings_tag != blank -%}
                       <span class="bgs-card__savings">{{ block.settings.savings_tag }}</span>
                     {%- endif -%}
-                  </div>
-                {%- endif -%}
+                </div>
                 <div class="bgs-card__body">
                   <h3 class="bgs-card__title">
-                    {%- if card_url != blank -%}
-                      <a href="{{ card_url }}">{{ block.settings.title | default: prod.title }}</a>
-                    {%- else -%}
-                      {{ block.settings.title | default: prod.title }}
-                    {%- endif -%}
+                    <a href="{{ prod.url }}">{{ prod.title }}</a>
                   </h3>
                   {%- if block.settings.compounds != blank -%}
                     {%- assign items = block.settings.compounds | split: ',' -%}
@@ -656,25 +631,17 @@
                       {%- endfor -%}
                     </ul>
                   {%- endif -%}
-                  {%- if prod != blank -%}
-                    <div class="bgs-card__price">
-                      {%- if prod.compare_at_price > prod.price -%}<s>{{ prod.compare_at_price | money }}</s>{%- endif -%}
-                      {{ prod.price | money }}
-                    </div>
-                    <xo-cart-add {% if prod.selected_or_first_available_variant.available == false %}xo-disabled{% endif %}>
-                      <button type="button" class="bgs-card__cta" {% if prod.selected_or_first_available_variant.available == false %}disabled{% endif %} aria-label="Add {{ block.settings.title | default: prod.title | escape }} to cart">
-                        {%- if prod.selected_or_first_available_variant.available -%}Add Stack to Cart{%- else -%}Sold Out{%- endif -%}
-                      </button>
-                      <input type="hidden" name="id" value="{{ prod.selected_or_first_available_variant.id }}">
-                    </xo-cart-add>
-                  {%- elsif card_url != blank -%}
-                    <a href="{{ card_url }}" class="bgs-card__cta">{{ block.settings.cta_label | default: 'View stack' }}</a>
-                  {%- endif -%}
+                  <div class="bgs-card__price">
+                    {%- if prod.compare_at_price > prod.price -%}<s>{{ prod.compare_at_price | money }}</s>{%- endif -%}
+                    {{ prod.price | money }}
+                  </div>
+                  <a href="{{ prod.url }}" class="bgs-card__cta">Review product label</a>
                   {%- if block.settings.learn_url != blank -%}
                     <a href="{{ block.settings.learn_url }}" class="bgs-card__learn">Learn the why</a>
                   {%- endif -%}
                 </div>
               </article>
+              {%- endif -%}
             {%- endfor -%}
           {%- endif -%}
         </div>
@@ -738,11 +705,11 @@
     { "type": "checkbox", "id": "show_disclaimer", "label": "Show disclaimer", "default": true },
     { "type": "header", "content": "Hero" },
     { "type": "text", "id": "heading", "label": "Heading", "default": "Beginner Nootropic Stacks" },
-    { "type": "richtext", "id": "subheading", "label": "Value proposition", "default": "<p>New to cognitive enhancement? Our beginner stacks combine synergistic compounds at clinically studied dosages — so you get meaningful results without the guesswork.</p><p>Our stacks are third-party tested for purity, with Certificates of Analysis published for new batches. Start low, go slow, and build the foundation for long-term cognitive performance.</p>" },
+    { "type": "richtext", "id": "subheading", "label": "Value proposition", "default": "<p>This section does not prescribe combinations. Merchant-selected product references appear only when currently available; read the current label and check interaction risks.</p>" },
     { "type": "image_picker", "id": "hero_image", "label": "Hero image" },
-    { "type": "text", "id": "badge_1_text", "label": "Badge 1", "default": "3rd-Party Tested" },
-    { "type": "text", "id": "badge_2_text", "label": "Badge 2", "default": "Pre-Calculated Dosages" },
-    { "type": "text", "id": "badge_3_text", "label": "Badge 3", "default": "Synergy Optimized" },
+    { "type": "text", "id": "badge_1_text", "label": "Badge 1", "default": "Read the label" },
+    { "type": "text", "id": "badge_2_text", "label": "Badge 2", "default": "Check interactions" },
+    { "type": "text", "id": "badge_3_text", "label": "Badge 3", "default": "Evidence varies" },
     { "type": "header", "content": "Stacks Grid" },
     { "type": "select", "id": "layout", "label": "Layout", "options": [
       { "value": "cards", "label": "Cards" },
@@ -750,13 +717,13 @@
     ], "default": "cards" },
     { "type": "collection", "id": "collection", "label": "Collection" },
     { "type": "range", "id": "products_limit", "min": 2, "max": 12, "step": 1, "default": 6, "label": "Max products" },
-    { "type": "text", "id": "global_savings_tag", "label": "Savings badge (all cards)", "default": "Bundle Savings: 10% Off", "info": "Leave blank to hide. Only used when rendering from a collection." },
-    { "type": "text", "id": "stacks_heading", "label": "Section heading", "default": "Choose Your Stack" },
-    { "type": "text", "id": "stacks_subheading", "label": "Section subheading", "default": "Curated combinations designed for specific cognitive goals." },
+    { "type": "text", "id": "global_savings_tag", "label": "Savings badge (all cards)", "info": "Leave blank unless the current collection terms substantiate it." },
+    { "type": "text", "id": "stacks_heading", "label": "Section heading", "default": "Available product references" },
+    { "type": "text", "id": "stacks_subheading", "label": "Section subheading", "default": "Products appear only when selected and currently available." },
     { "type": "header", "content": "FAQ" },
-    { "type": "text", "id": "faq_heading", "label": "FAQ heading", "default": "How to Stack" },
+    { "type": "text", "id": "faq_heading", "label": "FAQ heading", "default": "Beginner product questions" },
     { "type": "header", "content": "Disclaimer" },
-    { "type": "textarea", "id": "disclaimer", "label": "YMYL disclaimer", "default": "These statements have not been evaluated by the Food and Drug Administration or any equivalent regulatory body. These products are intended for research and educational purposes only and are not intended to diagnose, treat, cure, or prevent any disease. Consult a qualified healthcare professional before starting any new supplement regimen." },
+    { "type": "textarea", "id": "disclaimer", "label": "YMYL disclaimer", "default": "Educational information only. Not medical advice and not intended to diagnose, treat, cure, or prevent disease. Current product labels and qualified professional guidance take precedence." },
     { "type": "header", "content": "Section Padding" },
     { "type": "range", "id": "padding_top", "min": 0, "max": 120, "step": 4, "unit": "px", "label": "Padding top", "default": 0 },
     { "type": "range", "id": "padding_bottom", "min": 0, "max": 120, "step": 4, "unit": "px", "label": "Padding bottom", "default": 56 }
@@ -768,10 +735,10 @@
       "settings": [
         { "type": "product", "id": "product", "label": "Product" },
         { "type": "text", "id": "title", "label": "Stack title (overrides product title)" },
-        { "type": "textarea", "id": "compounds", "label": "Includes (comma-separated)", "default": "Compound A, Compound B, Compound C" },
-        { "type": "text", "id": "savings_tag", "label": "Savings badge", "default": "Bundle Savings: 10% Off" },
+        { "type": "textarea", "id": "compounds", "label": "Ingredients summary (from current label only)" },
+        { "type": "text", "id": "savings_tag", "label": "Savings badge" },
         { "type": "url", "id": "link", "label": "Card link (when no product)" },
-        { "type": "text", "id": "cta_label", "label": "Link button label", "default": "View stack" },
+        { "type": "text", "id": "cta_label", "label": "Legacy link button label", "default": "Review product" },
         { "type": "url", "id": "learn_url", "label": "Learn the why URL" }
       ]
     },
@@ -788,12 +755,8 @@
     {
       "name": "Beginner Stacks",
       "blocks": [
-        { "type": "stack", "settings": { "title": "Focus & Clarity Stack", "compounds": "Caffeine + L-Theanine, Alpha-GPC, Lion's Mane", "savings_tag": "Bundle Savings: 10% Off" } },
-        { "type": "stack", "settings": { "title": "Memory & Learning Stack", "compounds": "Bacopa Monnieri, Alpha-GPC, Omega-3 DHA", "savings_tag": "Bundle Savings: 10% Off" } },
-        { "type": "stack", "settings": { "title": "Calm Energy Stack", "compounds": "L-Theanine, Ashwagandha KSM-66, Rhodiola Rosea", "savings_tag": "Bundle Savings: 10% Off" } },
-        { "type": "faq", "settings": { "question": "What is a nootropic stack and why should I use one?", "answer": "<p>A nootropic stack is a combination of two or more cognitive-enhancing compounds taken together for synergistic effects. Well-designed stacks target complementary pathways in the brain — for example, pairing a cholinergic with a racetam — so the combined benefit exceeds what each compound delivers alone. Beginner stacks use conservative dosages and well-researched compounds to minimise risk while maximising results.</p>" } },
-        { "type": "faq", "settings": { "question": "How should I dose and cycle a beginner stack?", "answer": "<p>Start with the lowest effective dose listed on each product and take the stack at the same time each day, ideally with a meal containing healthy fats for better absorption. After 4–6 weeks of consistent use, take a 1-week break (\"off-cycle\") to prevent tolerance build-up. Track your focus, mood, and sleep in a simple journal so you can objectively assess what's working before adjusting dosages.</p>" } },
-        { "type": "faq", "settings": { "question": "Are there any interactions I should be aware of?", "answer": "<p>Our beginner stacks are formulated with widely-studied compounds that have established safety profiles at recommended dosages. However, if you are taking prescription medications — especially SSRIs, blood thinners, or stimulants — consult your physician before adding any supplement. Pregnant or nursing individuals should avoid nootropic supplementation unless explicitly cleared by a healthcare provider.</p>" } }
+        { "type": "faq", "settings": { "question": "Should a beginner start with a stack?", "answer": "<p>No universal stack is appropriate for every person. Starting with several products makes interactions and unwanted effects harder to assess.</p>" } },
+        { "type": "faq", "settings": { "question": "Does this section provide a dose or cycle?", "answer": "<p>No. Follow the current product label and ask a qualified healthcare professional when medication, a health condition, pregnancy or nursing, age, or another contraindication is relevant.</p>" } }
       ]
     }
   ]

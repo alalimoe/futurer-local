@@ -168,51 +168,19 @@
   }
 {%- endstyle -%}
 
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "Article",
-      "headline": {{ section.settings.heading | json }},
-      "description": {{ section.settings.subheading | json }},
-      "mainEntityOfPage": "{{ request.origin }}{{ request.path }}",
-      "author": { "@type": "Organization", "name": "Nootropix" },
-      "publisher": { "@type": "Organization", "name": "Nootropix", "url": "{{ shop.url }}" },
-      "datePublished": {{ section.settings.date_published | json }},
-      "dateModified": "{{ 'now' | date: '%Y-%m-%d' }}"
-    },
-    {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
-        { "@type": "ListItem", "position": 1, "name": "Home", "item": "{{ shop.url }}" },
-        { "@type": "ListItem", "position": 2, "name": "Guides", "item": "{{ shop.url }}/pages/guides" },
-        { "@type": "ListItem", "position": 3, "name": {{ section.settings.heading | json }}, "item": "{{ request.origin }}{{ request.path }}" }
-      ]
-    }
-  ]
-}
-</script>
-
 <div class="bgh-progress" aria-hidden="true"><div class="bgh-progress__bar" data-bgh-bar></div></div>
 
 <section {% render 'section-attr' %}>
   <xo-container>
     <div class="bgh-inner">
-      <div class="bgh-meta">
-        {% if section.settings.author_name != blank %}
-          <span class="bgh-meta-item">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-            {{ section.settings.author_name }}
-          </span>
-        {% endif %}
-        {% if section.settings.read_time != blank %}
+      {% if section.settings.read_time != blank %}
+        <div class="bgh-meta">
           <span class="bgh-meta-item">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             {{ section.settings.read_time }}
           </span>
-        {% endif %}
-      </div>
+        </div>
+      {% endif %}
 
       <h1 class="bgh-title">{{ section.settings.heading }}</h1>
 
@@ -239,6 +207,7 @@
         </div>
       {% endif %}
     </div>
+    {% render 'guide-editorial-review' %}
   </xo-container>
 </section>
 
@@ -269,18 +238,18 @@
     { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "default" },
     { "type": "header", "content": "Content" },
     { "type": "text", "id": "heading", "label": "Heading", "default": "Beginner's Guide to Nootropics" },
-    { "type": "textarea", "id": "subheading", "label": "Subheading", "default": "Start smarter — not stronger. Learn the basics, personalize a safe starting stack, and feel more focused with fewer unknowns." },
-    { "type": "text", "id": "author_name", "label": "Author Name", "default": "Nootropix Research Team" },
+    { "type": "textarea", "id": "subheading", "label": "Subheading", "default": "A conservative, education-first path for understanding labels, evidence limits, contraindications, and when to ask a healthcare professional." },
+    { "type": "text", "id": "author_name", "label": "Legacy author (not displayed)", "info": "Use page metafield custom.author for a real named author or reviewer." },
     { "type": "text", "id": "read_time", "label": "Reading Time", "default": "12 min read" },
-    { "type": "text", "id": "date_published", "label": "Date Published (YYYY-MM-DD)", "default": "2025-08-23" },
+    { "type": "text", "id": "date_published", "label": "Legacy published date (not displayed)", "info": "Use page metafield custom.last_reviewed for a genuine review date." },
     { "type": "header", "content": "Trust Signals" },
-    { "type": "text", "id": "trust_1", "label": "Trust Signal 1", "default": "5,763+ orders shipped" },
-    { "type": "text", "id": "trust_2", "label": "Trust Signal 2", "default": "Evidence-Based Protocols" },
-    { "type": "text", "id": "trust_3", "label": "Trust Signal 3", "default": "3rd-Party Lab Tested" },
+    { "type": "text", "id": "trust_1", "label": "Trust Signal 1", "default": "Education before products" },
+    { "type": "text", "id": "trust_2", "label": "Trust Signal 2", "default": "One decision at a time" },
+    { "type": "text", "id": "trust_3", "label": "Trust Signal 3", "default": "Labels take precedence" },
     { "type": "header", "content": "Call to Action" },
-    { "type": "text", "id": "cta_primary_text", "label": "Primary CTA Text", "default": "Build My Starter Stack" },
+    { "type": "text", "id": "cta_primary_text", "label": "Primary CTA Text", "default": "Start with the basics" },
     { "type": "url", "id": "cta_primary_url", "label": "Primary CTA URL" },
-    { "type": "text", "id": "cta_secondary_text", "label": "Secondary CTA Text", "default": "See the 60-Second Summary" },
+    { "type": "text", "id": "cta_secondary_text", "label": "Secondary CTA Text", "default": "Review safety cues" },
     { "type": "url", "id": "cta_secondary_url", "label": "Secondary CTA URL" },
     { "type": "header", "content": "Section Padding" },
     { "type": "range", "id": "padding_top", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding top", "default": 80 },

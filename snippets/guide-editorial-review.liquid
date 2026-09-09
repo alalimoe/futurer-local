@@ -1,0 +1,103 @@
+{%- comment -%}
+  Editorial status and source presentation for the P1 guide templates only.
+  Values are merchant-owned page metafields; no names or dates are inferred.
+{%- endcomment -%}
+{%- liquid
+  assign guide_meta = page.metafields.custom
+  assign guide_author = guide_meta.author.value
+  assign guide_reviewer = guide_meta.reviewed_by.value
+  assign guide_reviewed = guide_meta.last_reviewed.value
+  assign guide_review_status = guide_meta.review_status.value
+  assign guide_sources = guide_meta.citations.value
+  assign guide_source_field = guide_meta.citations
+  if guide_sources == blank
+    assign guide_sources = guide_meta.evidence.value
+    assign guide_source_field = guide_meta.evidence
+  endif
+  if guide_sources == blank
+    assign guide_sources = guide_meta.references.value
+    assign guide_source_field = guide_meta.references
+  endif
+-%}
+
+<aside class="guide-review" aria-label="Editorial review and sources">
+  <div class="guide-review__status">
+    <strong>Editorial status</strong>
+    {%- if guide_author != blank -%}
+      <span>Written by {{ guide_author | escape }}</span>
+    {%- endif -%}
+    {%- if guide_review_status == 'reviewed' and guide_reviewer != blank and guide_reviewed != blank -%}
+      <span>
+        Reviewed by {{ guide_reviewer | escape }} ·
+        <time datetime="{{ guide_reviewed | date: '%Y-%m-%d' }}">{{ guide_reviewed | date: '%-d %b %Y' }}</time>
+      </span>
+    {%- elsif guide_review_status == 'needs_revision' -%}
+      <span>Editorial revision is required before this guide is treated as reviewed.</span>
+    {%- else -%}
+      <span>Editorial review is pending; reviewer and review date have not been published.</span>
+    {%- endif -%}
+  </div>
+
+  <div class="guide-review__sources">
+    <strong>Sources and evidence</strong>
+    {%- if guide_sources != blank -%}
+      {%- if guide_source_field.type == 'json' -%}
+        <ol class="guide-review__source-list">
+          {%- for citation in guide_sources -%}
+            {%- liquid
+              assign citation_title = citation.title | default: citation.source | default: citation.publisher | default: citation.url
+              assign citation_source = citation.source | default: citation.publisher
+            -%}
+            {%- if citation_title != blank -%}
+              <li>
+                {%- if citation.url != blank -%}
+                  <a href="{{ citation.url | escape }}">{{ citation_title | escape }}</a>
+                {%- else -%}
+                  {{ citation_title | escape }}
+                {%- endif -%}
+                {%- if citation_source != blank and citation_source != citation_title -%}
+                  <span> — {{ citation_source | escape }}</span>
+                {%- endif -%}
+                {%- if citation.published_date != blank -%}
+                  <span> ({{ citation.published_date | date: '%Y' }})</span>
+                {%- endif -%}
+                {%- if citation.evidence_tier != blank -%}
+                  <span> · {{ citation.evidence_tier | escape }}</span>
+                {%- endif -%}
+              </li>
+            {%- endif -%}
+          {%- endfor -%}
+        </ol>
+      {%- else -%}
+        <div class="rte">{{ guide_source_field | metafield_tag }}</div>
+      {%- endif -%}
+    {%- else -%}
+      <span>No page-specific source list has been published. Treat claims as general editorial context and check product labels and primary sources.</span>
+    {%- endif -%}
+  </div>
+</aside>
+
+<style>
+  .guide-review {
+    display: grid;
+    gap: 1rem;
+    padding: 1rem;
+    margin: 1.5rem 0;
+    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 14%, transparent);
+    border-radius: var(--general-radius-1, 1rem);
+    background: rgba(var(--color-background-2));
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 72%, transparent);
+    font-size: 0.95em;
+    line-height: 1.6;
+  }
+  .guide-review__status,
+  .guide-review__sources { display: grid; gap: 0.25rem; }
+  .guide-review strong { color: rgba(var(--color-foreground)); }
+  .guide-review__source-list { margin: 0; padding-inline-start: 1.25rem; }
+  .guide-review__source-list li + li { margin-top: 0.4rem; }
+  .guide-review .rte > :first-child { margin-top: 0; }
+  .guide-review .rte > :last-child { margin-bottom: 0; }
+  @media (min-width: 750px) {
+    .guide-review { grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); }
+  }
+</style>

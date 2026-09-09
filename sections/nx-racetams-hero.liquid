@@ -173,29 +173,29 @@
 
 <section id="nx-hero-{{ sid }}" aria-label="Racetams 101 guide introduction">
   <div class="nx-hero__top">
-    <h1>{{ s.heading | default: 'Racetams 101: Understand, Compare & Build Your Stack' }}</h1>
-    <p class="nx-sub">{{ s.subheading | default: 'A clean, shopper-friendly guide to Aniracetam, Fasoracetam, Phenylpiracetam Hydrazide, and Pramiracetam—plus powder options in stock.' }}</p>
+    <h1>{{ s.heading | default: 'Racetams 101: Evidence, Safety & Product Context' }}</h1>
+    <p class="nx-sub">{{ s.subheading | default: 'An educational comparison of terminology, evidence limitations, contraindication cues, local-status questions, and current product labels.' }}</p>
 
     <div class="nx-hero__chips">
-      <span class="nx-chip">Same/Next-Day UAE</span>
-      <span class="nx-chip">Tracked Aramex from AED 90</span>
-      <span class="nx-chip">Sourced from leading manufacturers</span>
+      <span class="nx-chip">Evidence varies by compound</span>
+      <span class="nx-chip">No universal stack or cycle</span>
+      <span class="nx-chip">Current labels take precedence</span>
     </div>
 
     <div class="nx-hero__btns">
       {% if collection_url != blank %}
-        <a class="nx-btn primary" href="{{ collection_url }}">Shop Racetams</a>
+        <a class="nx-btn primary" href="{{ collection_url }}">Browse current collection</a>
       {% endif %}
-      {% if a_caps != blank %}<a class="nx-btn" href="{{ a_caps.url }}">Aniracetam</a>{% endif %}
-      {% if f_caps != blank %}<a class="nx-btn" href="{{ f_caps.url }}">Fasoracetam</a>{% endif %}
-      {% if ph_caps != blank %}<a class="nx-btn" href="{{ ph_caps.url }}">Phenylpiracetam Hydrazide</a>{% endif %}
-      {% if pr_caps != blank %}<a class="nx-btn" href="{{ pr_caps.url }}">Pramiracetam</a>{% endif %}
+      {% if a_caps != blank and a_caps.available %}<a class="nx-btn" href="{{ a_caps.url }}">{{ a_caps.title }}</a>{% endif %}
+      {% if f_caps != blank and f_caps.available %}<a class="nx-btn" href="{{ f_caps.url }}">{{ f_caps.title }}</a>{% endif %}
+      {% if ph_caps != blank and ph_caps.available %}<a class="nx-btn" href="{{ ph_caps.url }}">{{ ph_caps.title }}</a>{% endif %}
+      {% if pr_caps != blank and pr_caps.available %}<a class="nx-btn" href="{{ pr_caps.url }}">{{ pr_caps.title }}</a>{% endif %}
     </div>
 
     <div class="nx-links">
-      {% if a_pow != blank %}<a class="nx-fastlink" href="{{ a_pow.url }}">Aniracetam Powder</a>{% endif %}
-      {% if ph_pow != blank %}<a class="nx-fastlink" href="{{ ph_pow.url }}">Phenylpiracetam Hydrazide Powder</a>{% endif %}
-      {% if pr_pow != blank %}<a class="nx-fastlink" href="{{ pr_pow.url }}">Pramiracetam Powder</a>{% endif %}
+      {% if a_pow != blank and a_pow.available %}<a class="nx-fastlink" href="{{ a_pow.url }}">{{ a_pow.title }}</a>{% endif %}
+      {% if ph_pow != blank and ph_pow.available %}<a class="nx-fastlink" href="{{ ph_pow.url }}">{{ ph_pow.title }}</a>{% endif %}
+      {% if pr_pow != blank and pr_pow.available %}<a class="nx-fastlink" href="{{ pr_pow.url }}">{{ pr_pow.title }}</a>{% endif %}
       <a class="nx-fastlink" href="#quick-comparison">See Quick Comparison</a>
     </div>
   </div>
@@ -205,32 +205,8 @@
     <img src="{{ s.hero_image | image_url: width: 1600 }}" alt="{{ s.hero_alt | escape }}" loading="eager" fetchpriority="high" width="{{ s.hero_image.width }}" height="{{ s.hero_image.height }}">
   </div>
   {% endif %}
+  {% render 'guide-editorial-review' %}
 </section>
-
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "Article",
-      "headline": {{ s.heading | default: 'Racetams 101' | json }},
-      "description": {{ s.subheading | default: 'A guide to Aniracetam, Fasoracetam, Phenylpiracetam Hydrazide, and Pramiracetam.' | json }},
-      "author": { "@type": "Organization", "name": "Nootropix" },
-      "publisher": { "@type": "Organization", "name": "Nootropix", "url": {{ shop.url | json }} },
-      "datePublished": {{ s.date_published | default: "2025-06-01" | json }},
-      "dateModified": {{ page.updated_at | date: "%Y-%m-%d" | json }},
-      "mainEntityOfPage": {{ canonical_url | json }}
-    },
-    {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
-        { "@type": "ListItem", "position": 1, "name": "Home", "item": {{ shop.url | json }} },
-        { "@type": "ListItem", "position": 2, "name": {{ s.heading | default: 'Racetams 101' | json }}, "item": {{ canonical_url | json }} }
-      ]
-    }
-  ]
-}
-</script>
 
 {% schema %}
 {
@@ -259,7 +235,7 @@
     { "type": "range", "id": "padding_y", "min": 16, "max": 120, "step": 4, "default": 32, "label": "Vertical padding (px)" },
 
     { "type": "header", "content": "SEO" },
-    { "type": "text", "id": "date_published", "label": "Date published (YYYY-MM-DD)", "default": "2025-06-01" }
+    { "type": "text", "id": "date_published", "label": "Legacy date (not displayed)", "info": "Use page custom.last_reviewed for a genuine review date." }
   ],
   "presets": [{ "name": "NX — Racetams 101 Hero" }]
 }

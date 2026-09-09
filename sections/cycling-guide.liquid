@@ -1,1092 +1,139 @@
-{%- liquid
-  assign cg_id = section.id
-  assign cg_paths_id = 'guide-paths-' | append: cg_id
-  assign cg_related_id = 'guide-related-' | append: cg_id
-  assign cg_finder_id = 'cg-search-' | append: cg_id
-  assign cg_coa_page = pages['quality-coa-library']
-  if cg_coa_page == empty
-    assign cg_coa_page = pages['coa-library']
-  endif
-  if cg_coa_page != empty
-    assign cg_coa_href = cg_coa_page.url
-  else
-    assign cg_coa_href = '/pages/quality-coa-library'
-  endif
-  assign cg_contact_page = pages['contact']
-  if cg_contact_page != empty
-    assign cg_contact_href = cg_contact_page.url
-  else
-    assign cg_contact_href = '/pages/contact'
-  endif
--%}
-{%- capture cg_t1_html -%}
-  {%- for block in section.blocks -%}
-    {%- if block.type == 'tier1_row' -%}{{ block.settings.compound }} {%- endif -%}
-  {%- endfor -%}
-{%- endcapture -%}
-{%- capture cg_t2_html -%}
-  {%- for block in section.blocks -%}
-    {%- if block.type == 'tier2_row' -%}{{ block.settings.compound }} {%- endif -%}
-  {%- endfor -%}
-{%- endcapture -%}
-{%- capture cg_t3_html -%}{{ section.settings.tier3_list }}{%- endcapture -%}
-{%- capture cg_play_html -%}
-  {%- for block in section.blocks -%}
-    {%- if block.type == 'playbook_card' -%}{{ block.settings.title }} {{ block.settings.body }} {%- endif -%}
-  {%- endfor -%}
-{%- endcapture -%}
-{%- capture cg_t1_keys -%}{% render 'guide-cycle-keys', html: cg_t1_html %}{%- endcapture -%}
-{%- capture cg_t2_keys -%}{% render 'guide-cycle-keys', html: cg_t2_html %}{%- endcapture -%}
-{%- capture cg_t3_keys -%}{% render 'guide-cycle-keys', html: cg_t3_html %}{%- endcapture -%}
+{%- assign faq_blocks = section.blocks | where: 'type', 'faq' -%}
+{%- assign rule_blocks = section.blocks | where: 'type', 'rule' -%}
 
 {%- style -%}
-  .xo-section--{{ cg_id }} {
+  .xo-section--{{ section.id }} {
     padding-top: {{ section.settings.padding_top }}px;
     padding-bottom: {{ section.settings.padding_bottom }}px;
     color: rgba(var(--color-foreground));
   }
-  .xo-section--{{ cg_id }} .cg__wrap {
-    max-width: min(1140px, 100%);
+  .xo-section--{{ section.id }} .cg-wrap {
+    max-width: 960px;
     margin: 0 auto;
   }
-
-  /* Breadcrumbs */
-  .xo-section--{{ cg_id }} .rg-breadcrumbs {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 6px 8px;
-    margin-bottom: clamp(16px, 3vw, 24px);
-    font-size: calc(var(--font-body-scale, 1) * 1.3rem);
-    color: color-mix(in srgb, rgba(var(--color-foreground)) 55%, transparent);
-  }
-  .xo-section--{{ cg_id }} .rg-breadcrumbs__link {
-    color: color-mix(in srgb, rgba(var(--color-foreground)) 65%, transparent);
-    text-decoration: none;
-  }
-  .xo-section--{{ cg_id }} .rg-breadcrumbs__link:hover {
-    color: rgba(var(--color-foreground));
-    text-decoration: underline;
-    text-underline-offset: 2px;
-  }
-  .xo-section--{{ cg_id }} .rg-breadcrumbs__current {
-    color: rgba(var(--color-foreground));
-    font-weight: 600;
-  }
-  .xo-section--{{ cg_id }} .rg-breadcrumbs__sep {
-    opacity: 0.45;
-    user-select: none;
-  }
-  .xo-section--{{ cg_id }} .cg-layout {
-    display: grid;
-    grid-template-columns: 260px minmax(0, 1fr);
-    gap: clamp(32px, 4vw, 56px);
-    align-items: start;
-  }
-  .xo-section--{{ cg_id }} .cg-main { min-width: 0; }
-
-  /* Safety */
-  .xo-section--{{ cg_id }} .cg-safety {
-    margin-bottom: clamp(24px, 4vw, 36px);
-    padding: 18px 20px;
-    background: rgba(var(--color-background-2));
-    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 8%, transparent);
-    border-radius: var(--general-radius-1, 1rem);
-    font-size: calc(var(--font-body-scale, 1) * 1.45rem);
-    line-height: 1.65;
-    color: color-mix(in srgb, rgba(var(--color-foreground)) 75%, transparent);
-    max-width: 72ch;
-  }
-  .xo-section--{{ cg_id }} .cg-safety p { margin: 0; }
-
-  /* Hero */
-  .xo-section--{{ cg_id }} .cg-hero {
-    padding: clamp(8px, 2vw, 16px) 0 clamp(12px, 2vw, 20px);
-  }
-  .xo-section--{{ cg_id }} .cg-hero__eyebrow {
-    display: inline-block;
-    font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
-    color: rgba(var(--color-accent)); margin-bottom: 12px;
-  }
-  .xo-section--{{ cg_id }} .cg-hero__h1 {
-    font-family: var(--font-heading-family, sans-serif);
-    font-size: clamp(1.75rem, 4vw, 2.5rem);
-    font-weight: 600; letter-spacing: -0.03em; line-height: 1.15;
-    margin: 0 0 12px;
-  }
-  .xo-section--{{ cg_id }} .cg-hero__sub {
-    font-size: clamp(0.95rem, 1.2vw, 1.1rem); line-height: 1.7;
-    color: color-mix(in srgb, rgba(var(--color-foreground)) 60%, transparent);
-    margin: 0 0 20px;
-    max-width: 65ch;
-  }
-  .xo-section--{{ cg_id }} .cg-hero__sub p { margin: 0; }
-  .xo-section--{{ cg_id }} .cg-hero__badges {
-    display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;
-  }
-  .xo-section--{{ cg_id }} .cg-hero__badge {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 7px 13px;
-    border-radius: var(--button-radius, 10rem);
-    background: color-mix(in srgb, rgba(var(--color-accent)) 10%, transparent);
-    font-size: 0.75rem; font-weight: 600; letter-spacing: 0.03em; text-transform: uppercase;
-    white-space: nowrap;
-  }
-  .xo-section--{{ cg_id }} .cg-hero__badge-icon {
-    width: 15px; height: 15px; flex-shrink: 0; color: rgba(var(--color-accent));
-  }
-  .xo-section--{{ cg_id }} .cg-hero__meta {
-    display: flex; flex-wrap: wrap; gap: 8px 20px;
-    font-size: 0.82rem;
-    color: color-mix(in srgb, rgba(var(--color-foreground)) 55%, transparent);
-    padding-top: 16px;
-    border-top: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 6%, transparent);
-  }
-  .xo-section--{{ cg_id }} .cg-hero__meta-item { display: inline-flex; align-items: center; gap: 5px; }
-  .xo-section--{{ cg_id }} .cg-hero__meta-icon { width: 14px; height: 14px; flex-shrink: 0; opacity: 0.55; }
-
-  /* TOC */
-  .xo-section--{{ cg_id }} .cg-toc {
-    position: sticky; top: 80px; align-self: start;
+  .xo-section--{{ section.id }} .cg-hero,
+  .xo-section--{{ section.id }} .cg-panel {
+    padding: clamp(1.25rem, 4vw, 2.5rem);
+    margin-bottom: 1.5rem;
     border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 12%, transparent);
-    border-radius: var(--general-radius-3, 2rem);
-    padding: 20px;
-    max-height: calc(100vh - 120px);
-    overflow-y: auto;
-  }
-  .xo-section--{{ cg_id }} .cg-toc__title {
-    font-weight: 600; font-size: 0.75rem; text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: color-mix(in srgb, rgba(var(--color-foreground)) 55%, transparent);
-    margin-bottom: 12px;
-  }
-  .xo-section--{{ cg_id }} .cg-toc__link {
-    padding: 8px 12px;
-    font-size: calc(var(--font-body-scale, 1) * 1.35rem);
-    line-height: 1.4;
-    color: color-mix(in srgb, rgba(var(--color-foreground)) 55%, transparent);
-    text-decoration: none;
-    border-radius: 8px;
-    transition: color 0.2s ease, background 0.2s ease;
-    min-height: 44px;
-    display: flex;
-    align-items: center;
-  }
-  .xo-section--{{ cg_id }} .cg-toc__link:hover {
-    color: rgba(var(--color-foreground));
-    background: color-mix(in srgb, rgba(var(--color-foreground)) 4%, transparent);
-  }
-  .xo-section--{{ cg_id }} .cg-toc__link--active {
-    color: rgba(var(--color-foreground));
-    background: color-mix(in srgb, rgba(var(--color-accent)) 10%, transparent);
-    font-weight: 600;
-  }
-  .xo-section--{{ cg_id }} .cg-toc--mobile {
-    display: none;
-    position: sticky; top: 64px; z-index: 4;
-    margin: 0 -2px 28px;
-    padding: 12px 0;
-    background: color-mix(in srgb, rgba(var(--color-background)) 92%, transparent);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border-bottom: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 8%, transparent);
-  }
-  .xo-section--{{ cg_id }} .cg-toc--mobile .cg-toc__nav {
-    display: flex; gap: 8px;
-    overflow-x: auto; -webkit-overflow-scrolling: touch;
-    scroll-snap-type: x proximity;
-    padding: 0 2px 4px;
-    scrollbar-width: none;
-  }
-  .xo-section--{{ cg_id }} .cg-toc--mobile .cg-toc__nav::-webkit-scrollbar { display: none; }
-  .xo-section--{{ cg_id }} .cg-toc--mobile .cg-toc__link {
-    flex: 0 0 auto; scroll-snap-align: start;
-    white-space: nowrap; min-height: 44px;
-    padding: 10px 16px;
-    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 12%, transparent);
-    border-radius: var(--button-radius, 10rem);
-    font-size: 0.82rem;
-  }
-
-  /* Zones */
-  .xo-section--{{ cg_id }} .cg-zone {
-    margin-bottom: clamp(48px, 10vw, 88px);
-  }
-  .xo-section--{{ cg_id }} .cg-zone__h2 {
-    font-family: var(--font-heading-family, sans-serif);
-    font-size: clamp(1.4rem, 2.6vw, 1.9rem);
-    font-weight: 600; letter-spacing: -0.025em; line-height: 1.15;
-    margin: 0 0 20px; scroll-margin-top: 84px;
-  }
-  .xo-section--{{ cg_id }} .cg-zone > .cg-prose {
-    max-width: 72ch;
-  }
-  .xo-section--{{ cg_id }} .cg-zone__h3 {
-    font-family: var(--font-heading-family, sans-serif);
-    font-size: clamp(1.1rem, 2vw, 1.35rem);
-    font-weight: 600; margin: 28px 0 14px;
-  }
-  .xo-section--{{ cg_id }} .cg-prose {
-    font-size: calc(var(--font-body-scale, 1) * 1.5rem);
-    line-height: 1.75;
-    color: color-mix(in srgb, rgba(var(--color-foreground)) calc(var(--font-body-color-opacity, 0.75) * 100%), transparent);
-  }
-  .xo-section--{{ cg_id }} .cg-prose p { margin: 0 0 14px; }
-  .xo-section--{{ cg_id }} .cg-prose p:last-child { margin-bottom: 0; }
-  .xo-section--{{ cg_id }} .cg-prose ul { margin: 0 0 14px; padding-left: 1.25em; }
-  .xo-section--{{ cg_id }} .cg-prose li { margin-bottom: 6px; }
-  .xo-section--{{ cg_id }} .cg-prose a { color: rgba(var(--color-foreground)); text-decoration: underline; text-underline-offset: 2px; }
-
-  /* Rules grid */
-  .xo-section--{{ cg_id }} .cg-rules {
-    display: grid; grid-template-columns: 1fr; gap: 14px;
-  }
-  @media (min-width: 640px) {
-    .xo-section--{{ cg_id }} .cg-rules { grid-template-columns: 1fr 1fr; }
-  }
-  .xo-section--{{ cg_id }} .cg-rule {
-    display: flex; gap: 14px; align-items: flex-start;
-    background: rgba(var(--color-background));
-    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 8%, transparent);
     border-radius: var(--general-radius-1, 1rem);
-    padding: 20px;
   }
-  .xo-section--{{ cg_id }} .cg-rule__num {
-    flex-shrink: 0; width: 30px; height: 30px;
-    display: flex; align-items: center; justify-content: center;
-    border-radius: 50%;
-    background: rgba(var(--color-accent));
-    color: rgba(var(--color-foreground));
-    font-family: var(--font-heading-family, sans-serif);
-    font-size: 0.85rem; font-weight: 700;
-  }
-  .xo-section--{{ cg_id }} .cg-rule__title {
-    font-family: var(--font-heading-family, sans-serif);
-    font-size: calc(var(--font-body-scale, 1) * 1.5rem);
-    font-weight: 600; line-height: 1.3; margin: 0 0 6px;
-  }
-  .xo-section--{{ cg_id }} .cg-rule__text {
-    font-size: calc(var(--font-body-scale, 1) * 1.4rem);
-    line-height: 1.65; margin: 0;
-    color: color-mix(in srgb, rgba(var(--color-foreground)) 65%, transparent);
-  }
-
-  /* Tier sections */
-  .xo-section--{{ cg_id }} .cg-tier {
-    border-radius: var(--general-radius-1, 1rem);
-    padding: clamp(20px, 3vw, 28px);
-    margin-top: 8px;
-  }
-  .xo-section--{{ cg_id }} .cg-tier--strict {
-    background: color-mix(in srgb, rgba(var(--color-background-2)) 60%, transparent);
-    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 8%, transparent);
-    border-left: 4px solid rgba(var(--color-accent));
-  }
-  .xo-section--{{ cg_id }} .cg-tier--periodic {
-    background: rgba(var(--color-background));
-    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 8%, transparent);
-  }
-  .xo-section--{{ cg_id }} .cg-tier--daily {
-    background: rgba(var(--color-background));
-    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 8%, transparent);
-  }
-
-  /* Tables */
-  .xo-section--{{ cg_id }} .cg-table-wrap {
-    overflow-x: auto; -webkit-overflow-scrolling: touch;
-    margin: 16px 0 0;
-  }
-  .xo-section--{{ cg_id }} .cg-table {
-    width: 100%; border-collapse: collapse;
-    font-size: calc(var(--font-body-scale, 1) * 1.4rem);
-    min-width: 520px;
-  }
-  .xo-section--{{ cg_id }} .cg-table th,
-  .xo-section--{{ cg_id }} .cg-table td {
-    padding: 14px 16px; text-align: left; vertical-align: top;
-    overflow-wrap: break-word;
-    border-bottom: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 8%, transparent);
-  }
-  .xo-section--{{ cg_id }} .cg-table th {
-    font-size: calc(var(--font-body-scale, 1) * 1.15rem);
+  .xo-section--{{ section.id }} .cg-hero { background: rgba(var(--color-background-2)); }
+  .xo-section--{{ section.id }} .cg-eyebrow {
+    display: block;
+    margin-bottom: 0.5rem;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: color-mix(in srgb, rgba(var(--color-foreground)) 55%, transparent);
-    background: color-mix(in srgb, rgba(var(--color-foreground)) 3%, transparent);
+    letter-spacing: 0.08em;
+    font-size: 0.8rem;
   }
-  .xo-section--{{ cg_id }} .cg-table-cards { display: none; gap: 12px; margin-top: 16px; }
-  .xo-section--{{ cg_id }} .cg-table-card {
-    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
-    border-radius: var(--general-radius-1, 1rem);
-    padding: 16px;
-    background: rgba(var(--color-background));
+  .xo-section--{{ section.id }} h1 {
+    margin: 0 0 0.75rem;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    line-height: 1.1;
   }
-  .xo-section--{{ cg_id }} .cg-table-card__label {
-    font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: color-mix(in srgb, rgba(var(--color-foreground)) 50%, transparent);
-    margin: 10px 0 4px;
+  .xo-section--{{ section.id }} h2 { margin: 0 0 0.75rem; }
+  .xo-section--{{ section.id }} p,
+  .xo-section--{{ section.id }} li { line-height: 1.7; }
+  .xo-section--{{ section.id }} .cg-muted {
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 68%, transparent);
   }
-  .xo-section--{{ cg_id }} .cg-table-card__label:first-child { margin-top: 0; }
-  .xo-section--{{ cg_id }} .cg-table-card__value {
-    font-size: calc(var(--font-body-scale, 1) * 1.4rem);
-    line-height: 1.55;
-    overflow-wrap: break-word;
-    color: color-mix(in srgb, rgba(var(--color-foreground)) 78%, transparent);
+  .xo-section--{{ section.id }} .cg-rules {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 1rem;
   }
-  .xo-section--{{ cg_id }} .cg-zone[hidden] { display: none !important; }
-  @media (max-width: 639px) {
-    .xo-section--{{ cg_id }} .cg-table-wrap { display: none; }
-    .xo-section--{{ cg_id }} .cg-table-cards { display: flex; flex-direction: column; }
-  }
-
-  /* Phenibut callout */
-  .xo-section--{{ cg_id }} .cg-caution {
-    margin-top: 24px;
-    padding: 20px;
-    border-radius: var(--general-radius-1, 1rem);
-    border: 1px solid color-mix(in srgb, rgba(var(--color-error)) 25%, transparent);
-    background: color-mix(in srgb, rgba(var(--color-error)) 4%, transparent);
-  }
-  .xo-section--{{ cg_id }} .cg-caution__title {
-    font-family: var(--font-heading-family, sans-serif);
-    font-size: calc(var(--font-body-scale, 1) * 1.65rem);
-    font-weight: 600;
-    margin: 0 0 12px;
-  }
-
-  /* Note card */
-  .xo-section--{{ cg_id }} .cg-note {
-    margin-top: 20px; padding: 18px 20px;
-    background: color-mix(in srgb, rgba(var(--color-accent)) 8%, transparent);
-    border: 1px solid color-mix(in srgb, rgba(var(--color-accent)) 20%, transparent);
-    border-radius: var(--general-radius-1, 1rem);
-    font-size: calc(var(--font-body-scale, 1) * 1.45rem);
-    line-height: 1.65;
-  }
-
-  /* Callout paragraphs */
-  .xo-section--{{ cg_id }} .cg-callout {
-    padding: 18px 20px; margin: 16px 0;
-    background: rgba(var(--color-background-2));
-    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 8%, transparent);
-    border-radius: var(--general-radius-1, 1rem);
-    font-size: calc(var(--font-body-scale, 1) * 1.45rem);
-    line-height: 1.65;
-    max-width: 72ch;
-  }
-
-  /* Dot grid */
-  .xo-section--{{ cg_id }} .cg-dotgrid {
-    display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start;
-    margin: 24px 0;
-    padding: 24px;
-    background: rgba(var(--color-background-2));
-    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 8%, transparent);
+  .xo-section--{{ section.id }} .cg-rule {
+    padding: 1rem;
+    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 12%, transparent);
     border-radius: var(--general-radius-1, 1rem);
   }
-  .xo-section--{{ cg_id }} .cg-dotgrid__week {
-    display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+  .xo-section--{{ section.id }} details {
+    border-top: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 12%, transparent);
+    padding: 0.8rem 0;
   }
-  .xo-section--{{ cg_id }} .cg-dotgrid__day {
-    display: flex; flex-direction: column; align-items: center; gap: 6px;
-    min-width: 36px;
-  }
-  .xo-section--{{ cg_id }} .cg-dotgrid__circle {
-    width: 28px; height: 28px; border-radius: 50%;
-    border: 2px solid color-mix(in srgb, rgba(var(--color-foreground)) 25%, transparent);
-  }
-  .xo-section--{{ cg_id }} .cg-dotgrid__circle--on {
-    background: rgba(var(--color-accent));
-    border-color: rgba(var(--color-accent));
-  }
-  .xo-section--{{ cg_id }} .cg-dotgrid__label {
-    font-size: 0.7rem; font-weight: 600;
-    color: color-mix(in srgb, rgba(var(--color-foreground)) 55%, transparent);
-  }
-  .xo-section--{{ cg_id }} .cg-dotgrid__legend {
-    font-size: 0.82rem; line-height: 1.6;
-    color: color-mix(in srgb, rgba(var(--color-foreground)) 65%, transparent);
-  }
-  .xo-section--{{ cg_id }} .cg-dotgrid__legend span {
-    display: inline-flex; align-items: center; gap: 6px; margin-right: 16px;
-  }
-  .xo-section--{{ cg_id }} .cg-dotgrid__legend-dot {
-    width: 12px; height: 12px; border-radius: 50%; display: inline-block;
-    border: 2px solid color-mix(in srgb, rgba(var(--color-foreground)) 25%, transparent);
-  }
-  .xo-section--{{ cg_id }} .cg-dotgrid__legend-dot--on {
-    background: rgba(var(--color-accent)); border-color: rgba(var(--color-accent));
-  }
-  .xo-section--{{ cg_id }} .cg-prose ol { margin: 20px 0 0; padding-left: 1.25em; }
-  .xo-section--{{ cg_id }} .cg-prose ol li {
-    margin-bottom: 10px;
-    line-height: 1.65;
-    font-size: inherit;
-  }
-
-  /* Playbook cards */
-  .xo-section--{{ cg_id }} .cg-playbook {
-    display: grid; grid-template-columns: 1fr; gap: 14px; margin-top: 16px;
-  }
-  @media (min-width: 640px) {
-    .xo-section--{{ cg_id }} .cg-playbook { grid-template-columns: repeat(3, 1fr); }
-  }
-  .xo-section--{{ cg_id }} .cg-playbook-card {
-    padding: 20px;
-    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 8%, transparent);
-    border-radius: var(--general-radius-1, 1rem);
-    background: rgba(var(--color-background));
-  }
-  .xo-section--{{ cg_id }} .cg-playbook-card__link {
-    margin-top: 12px;
-    margin-bottom: 0;
-  }
-  .xo-section--{{ cg_id }} .cg-prose--spaced {
-    margin-top: 20px;
-  }
-  .xo-section--{{ cg_id }} .cg-playbook-card__title {
-    font-family: var(--font-heading-family, sans-serif);
-    font-size: calc(var(--font-body-scale, 1) * 1.5rem);
-    font-weight: 600;
-    margin: 0 0 10px;
-  }
-
-  /* FAQ */
-  .xo-section--{{ cg_id }} .cg-faq { display: flex; flex-direction: column; gap: 10px; }
-  .xo-section--{{ cg_id }} .cg-faq__item {
-    border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 8%, transparent);
-    border-radius: var(--general-radius-1, 1rem);
-    overflow: hidden;
-    background: rgba(var(--color-background));
-  }
-  .xo-section--{{ cg_id }} .cg-faq__summary {
-    padding: 16px 20px; cursor: pointer; list-style: none;
-    font-family: var(--font-heading-family, sans-serif);
-    font-size: calc(var(--font-body-scale, 1) * 1.5rem);
-    font-weight: 600; line-height: 1.4;
-    display: flex; align-items: center; justify-content: space-between; gap: 12px;
-    min-height: 44px;
-  }
-  .xo-section--{{ cg_id }} .cg-faq__summary::-webkit-details-marker { display: none; }
-  .xo-section--{{ cg_id }} .cg-faq__summary::after {
-    content: '+'; font-size: 1.2rem; font-weight: 400; flex-shrink: 0;
-    color: color-mix(in srgb, rgba(var(--color-foreground)) 45%, transparent);
-  }
-  .xo-section--{{ cg_id }} .cg-faq__item[open] .cg-faq__summary::after { content: '−'; }
-  .xo-section--{{ cg_id }} .cg-faq__answer {
-    padding: 0 20px 18px;
-    font-size: calc(var(--font-body-scale, 1) * 1.45rem);
-    line-height: 1.7;
-    color: color-mix(in srgb, rgba(var(--color-foreground)) calc(var(--font-body-color-opacity, 0.75) * 100%), transparent);
-  }
-  .xo-section--{{ cg_id }} .cg-faq__answer p { margin: 0 0 10px; }
-  .xo-section--{{ cg_id }} .cg-faq__answer p:last-child { margin-bottom: 0; }
-
-  /* Disclaimer */
-  .xo-section--{{ cg_id }} .cg-disclaimer {
-    background: color-mix(in srgb, rgba(var(--color-error)) 6%, transparent);
-    border: 1px solid color-mix(in srgb, rgba(var(--color-error)) 18%, transparent);
-    border-left: 4px solid rgba(var(--color-error));
-    border-radius: 0 var(--general-radius-1, 1rem) var(--general-radius-1, 1rem) 0;
-    padding: 16px 20px; margin-top: clamp(32px, 5vw, 48px);
-  }
-  .xo-section--{{ cg_id }} .cg-disclaimer__body {
-    font-size: clamp(0.78rem, 1vw, 0.85rem); line-height: 1.65;
-    color: rgba(var(--color-error));
-  }
-  .xo-section--{{ cg_id }} .cg-disclaimer__body p { margin: 0 0 6px; }
-  .xo-section--{{ cg_id }} .cg-crosslink {
-    margin-top: 24px;
-    font-size: calc(var(--font-body-scale, 1) * 1.45rem);
-    line-height: 1.6;
-    color: color-mix(in srgb, rgba(var(--color-foreground)) 70%, transparent);
-    max-width: 72ch;
-  }
-
-  @media (min-width: 768px) {
-    .xo-section--{{ cg_id }} .cg-safety {
-      padding: 22px 28px;
-      margin-bottom: clamp(28px, 4vw, 44px);
-    }
-    .xo-section--{{ cg_id }} .cg-hero {
-      padding: clamp(40px, 6vw, 80px) 0 clamp(32px, 4vw, 56px);
-    }
-    .xo-section--{{ cg_id }} .cg-hero__sub {
-      font-size: clamp(1.05rem, 1.35vw, 1.22rem);
-      line-height: 1.75;
-    }
-    .xo-section--{{ cg_id }} .cg-hero__meta {
-      font-size: calc(var(--font-body-scale, 1) * 1.35rem);
-      gap: 10px 24px;
-    }
-    .xo-section--{{ cg_id }} .cg-hero__badge {
-      font-size: calc(var(--font-body-scale, 1) * 1.2rem);
-      padding: 8px 16px;
-    }
-    .xo-section--{{ cg_id }} .cg-toc--sidebar {
-      padding: 24px;
-    }
-    .xo-section--{{ cg_id }} .cg-toc__title {
-      font-size: calc(var(--font-body-scale, 1) * 1.2rem);
-      margin-bottom: 14px;
-    }
-    .xo-section--{{ cg_id }} .cg-zone {
-      margin-bottom: clamp(56px, 8vw, 96px);
-    }
-    .xo-section--{{ cg_id }} .cg-zone__h2 {
-      font-size: clamp(1.65rem, 2.4vw, 2.15rem);
-      margin-bottom: 24px;
-      padding-bottom: 12px;
-      border-bottom: 2px solid color-mix(in srgb, rgba(var(--color-foreground)) 8%, transparent);
-    }
-    .xo-section--{{ cg_id }} .cg-prose {
-      font-size: calc(var(--font-body-scale, 1) * 1.6rem);
-      line-height: 1.8;
-    }
-    .xo-section--{{ cg_id }} .cg-rules {
-      gap: 18px;
-    }
-    .xo-section--{{ cg_id }} .cg-rule {
-      padding: 24px;
-      gap: 16px;
-    }
-    .xo-section--{{ cg_id }} .cg-rule__num {
-      width: 36px;
-      height: 36px;
-      font-size: calc(var(--font-body-scale, 1) * 1.35rem);
-    }
-    .xo-section--{{ cg_id }} .cg-rule__title {
-      font-size: calc(var(--font-body-scale, 1) * 1.55rem);
-    }
-    .xo-section--{{ cg_id }} .cg-rule__text {
-      font-size: calc(var(--font-body-scale, 1) * 1.45rem);
-    }
-    .xo-section--{{ cg_id }} .cg-tier {
-      padding: clamp(24px, 3vw, 32px);
-      margin-top: 12px;
-    }
-    .xo-section--{{ cg_id }} .cg-table th,
-    .xo-section--{{ cg_id }} .cg-table td {
-      padding: 16px 20px;
-    }
-    .xo-section--{{ cg_id }} .cg-table {
-      font-size: calc(var(--font-body-scale, 1) * 1.45rem);
-    }
-    .xo-section--{{ cg_id }} .cg-caution {
-      padding: 24px 28px;
-      margin-top: 28px;
-    }
-    .xo-section--{{ cg_id }} .cg-dotgrid {
-      padding: 28px 32px;
-      gap: 32px;
-    }
-    .xo-section--{{ cg_id }} .cg-dotgrid__circle {
-      width: 36px;
-      height: 36px;
-    }
-    .xo-section--{{ cg_id }} .cg-dotgrid__week {
-      gap: 14px;
-    }
-    .xo-section--{{ cg_id }} .cg-dotgrid__label {
-      font-size: calc(var(--font-body-scale, 1) * 1.2rem);
-    }
-    .xo-section--{{ cg_id }} .cg-dotgrid__legend {
-      font-size: calc(var(--font-body-scale, 1) * 1.35rem);
-    }
-    .xo-section--{{ cg_id }} .cg-playbook {
-      gap: 18px;
-      margin-top: 20px;
-    }
-    .xo-section--{{ cg_id }} .cg-playbook-card {
-      padding: 24px;
-    }
-    .xo-section--{{ cg_id }} .cg-faq {
-      gap: 12px;
-    }
-    .xo-section--{{ cg_id }} .cg-faq__summary {
-      padding: 18px 24px;
-    }
-    .xo-section--{{ cg_id }} .cg-faq__answer {
-      padding: 0 24px 22px;
-      font-size: calc(var(--font-body-scale, 1) * 1.5rem);
-    }
-    .xo-section--{{ cg_id }} .cg-disclaimer {
-      padding: 20px 24px;
-    }
-    .xo-section--{{ cg_id }} .cg-disclaimer__body {
-      font-size: calc(var(--font-body-scale, 1) * 1.3rem);
-    }
-  }
-
-  @media (min-width: 992px) {
-    .xo-section--{{ cg_id }} .cg__wrap {
-      max-width: min(1200px, 100%);
-    }
-    .xo-section--{{ cg_id }} .cg-layout {
-      grid-template-columns: 272px minmax(0, 1fr);
-      gap: 64px;
-    }
-  }
-
-  @media (max-width: 767px) {
-    .xo-section--{{ cg_id }} .cg-layout { grid-template-columns: 1fr; gap: 0; }
-    .xo-section--{{ cg_id }} .cg-toc--sidebar { display: none; }
-    .xo-section--{{ cg_id }} .cg-toc--mobile { display: block; }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .xo-section--{{ cg_id }} .cg-toc__link { transition: none; }
+  .xo-section--{{ section.id }} summary { cursor: pointer; font-weight: 600; }
+  .xo-section--{{ section.id }} :focus-visible {
+    outline: 2px solid rgba(var(--color-accent));
+    outline-offset: 2px;
   }
 {%- endstyle -%}
 
-<section {% render 'section-attr' %} data-cycling-guide data-guide-page="cycling">
-  {% render 'guide-system' %}
+<section {% render 'section-attr' %} data-cycling-guide>
   <xo-container>
-    <div class="cg__wrap" data-guide-root data-guide-search-url="{{ routes.search_url }}" data-guide-noun="sections">
-
-      {% render 'reference-guide-breadcrumbs',
-        parent_label: section.settings.breadcrumb_parent_label,
-        parent_url: section.settings.breadcrumb_parent_url,
-        current_label: section.settings.heading
-      %}
-
-      {% render 'guide-switcher', current: 'cycling' %}
-
-      {%- if section.settings.safety_text != blank -%}
-        <div class="cg-safety rte">{{ section.settings.safety_text }}</div>
-      {%- endif -%}
-
+    <div class="cg-wrap">
       <header class="cg-hero">
-        {%- if section.settings.eyebrow != blank -%}
-          <span class="cg-hero__eyebrow">{{ section.settings.eyebrow }}</span>
-        {%- endif -%}
-        <h1 class="cg-hero__h1">{{ section.settings.heading }}</h1>
-        {%- if section.settings.subtitle != blank -%}
-          <div class="cg-hero__sub rte">{{ section.settings.subtitle }}</div>
-        {%- endif -%}
-        {%- if section.settings.badge_1_text != blank or section.settings.badge_2_text != blank or section.settings.badge_3_text != blank -%}
-          <div class="cg-hero__badges" role="list">
-            {%- if section.settings.badge_1_text != blank -%}
-              <span class="cg-hero__badge" role="listitem">
-                <svg class="cg-hero__badge-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>
-                {{ section.settings.badge_1_text }}
-              </span>
-            {%- endif -%}
-            {%- if section.settings.badge_2_text != blank -%}
-              <span class="cg-hero__badge" role="listitem">
-                <svg class="cg-hero__badge-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
-                {{ section.settings.badge_2_text }}
-              </span>
-            {%- endif -%}
-            {%- if section.settings.badge_3_text != blank -%}
-              <span class="cg-hero__badge" role="listitem">
-                <svg class="cg-hero__badge-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M12 6v12M6 12h12"/></svg>
-                {{ section.settings.badge_3_text }}
-              </span>
-            {%- endif -%}
-          </div>
-        {%- endif -%}
-        {%- if section.settings.author != blank or section.settings.date_published != blank or section.settings.read_time != blank -%}
-          <div class="cg-hero__meta">
-            {%- if section.settings.author != blank -%}
-              <span class="cg-hero__meta-item">{{ section.settings.author }}</span>
-            {%- endif -%}
-            {%- if section.settings.date_published != blank -%}
-              <time class="cg-hero__meta-item" datetime="{{ section.settings.date_published }}">{{ section.settings.date_published | date: '%B %d, %Y' }}</time>
-            {%- endif -%}
-            {%- if section.settings.read_time != blank -%}
-              <span class="cg-hero__meta-item">{{ section.settings.read_time }}</span>
-            {%- endif -%}
-          </div>
-        {%- endif -%}
+        {%- if section.settings.eyebrow != blank -%}<span class="cg-eyebrow">{{ section.settings.eyebrow }}</span>{%- endif -%}
+        <h1>{{ section.settings.heading | default: 'Cycling Claims: An Evidence & Safety Guide' }}</h1>
+        {%- if section.settings.subtitle != blank -%}<div class="cg-muted rte">{{ section.settings.subtitle }}</div>{%- endif -%}
       </header>
 
-      {% render 'guide-orientation',
-        answers: section.settings.answers_text,
-        does_not: section.settings.does_not_text,
-        note: section.settings.orientation_note
-      %}
+      {% render 'guide-editorial-review' %}
 
-      {% render 'guide-finder',
-        input_id: cg_finder_id,
-        label: 'Find a compound in this guide',
-        placeholder: 'Search names in this guide',
-        controls: 'why-cycling'
-      %}
-      <div class="guide-rail" data-guide-rail role="toolbar" aria-label="Browse cycling sections">
-        <button type="button" class="guide-rail__btn" data-guide-cat="" aria-pressed="true">
-          <svg class="guide-rail__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
-          All sections
-        </button>
-        <button type="button" class="guide-rail__btn" data-guide-cat="tier-1" aria-pressed="false">
-          <svg class="guide-rail__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
-          Strict-cycle
-        </button>
-        <button type="button" class="guide-rail__btn" data-guide-cat="tier-2" aria-pressed="false">
-          <svg class="guide-rail__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 12h16M12 4v16"/></svg>
-          Periodic-break
-        </button>
-        <button type="button" class="guide-rail__btn" data-guide-cat="tier-3" aria-pressed="false">
-          <svg class="guide-rail__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M5 12h14"/></svg>
-          Daily-friendly
-        </button>
-        <button type="button" class="guide-rail__btn" data-guide-cat="track" aria-pressed="false">
-          <svg class="guide-rail__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="6" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="18" cy="12" r="2"/></svg>
-          How to track
-        </button>
-        <button type="button" class="guide-rail__clear" data-guide-rail-clear hidden>Clear filter</button>
-      </div>
-      <p class="guide-empty" data-guide-empty hidden>No section in this guide matches that name. Try a compound listed in the tables below, or open the Dosing Guide.</p>
+      <section class="cg-panel" aria-labelledby="cycling-scope-{{ section.id }}">
+        <h2 id="cycling-scope-{{ section.id }}">What this guide does</h2>
+        <p>This page explains why “cycling” claims need product-specific evidence and professional context. It does not set on-days, off-days, break lengths, taper instructions, replacement products, or a universal schedule.</p>
+        <p><strong>Follow the current product label.</strong> If a label does not provide cycling directions, do not invent a schedule from a generic table or another product.</p>
+      </section>
 
-      {% render 'guide-pathways',
-        heading: section.settings.pathways_heading,
-        heading_id: cg_paths_id,
-        p1_title: section.settings.p1_title,
-        p1_for: section.settings.p1_for,
-        p1_answers: section.settings.p1_answers,
-        p1_learn: section.settings.p1_learn,
-        p1_leads: section.settings.p1_leads,
-        p1_limit: section.settings.p1_limit,
-        p1_href: section.settings.p1_href,
-        p2_title: section.settings.p2_title,
-        p2_for: section.settings.p2_for,
-        p2_answers: section.settings.p2_answers,
-        p2_learn: section.settings.p2_learn,
-        p2_leads: section.settings.p2_leads,
-        p2_limit: section.settings.p2_limit,
-        p2_href: section.settings.p2_href,
-        p3_title: section.settings.p3_title,
-        p3_for: section.settings.p3_for,
-        p3_answers: section.settings.p3_answers,
-        p3_learn: section.settings.p3_learn,
-        p3_leads: section.settings.p3_leads,
-        p3_limit: section.settings.p3_limit,
-        p3_href: section.settings.p3_href,
-        p4_title: section.settings.p4_title,
-        p4_for: section.settings.p4_for,
-        p4_answers: section.settings.p4_answers,
-        p4_learn: section.settings.p4_learn,
-        p4_leads: section.settings.p4_leads,
-        p4_limit: section.settings.p4_limit,
-        p4_href: section.settings.p4_href
-      %}
+      <section class="cg-panel" aria-labelledby="cycling-evidence-{{ section.id }}">
+        <h2 id="cycling-evidence-{{ section.id }}">Evidence limits</h2>
+        <ul>
+          <li>Tolerance, dependence, withdrawal, and discontinuation risk differ by compound, exposure, duration, health history, and concurrent substances.</li>
+          <li>Anecdotes and retailer experience do not establish a safe cycle.</li>
+          <li>Evidence for one ingredient cannot be transferred automatically to a related ingredient, formulation, or stack.</li>
+          <li>Some products may have no validated “cycle” at all; a break schedule is not a substitute for evidence of safety or benefit.</li>
+        </ul>
+      </section>
 
-      <div class="cg-toc cg-toc--mobile" aria-label="On this page">
-        <nav class="cg-toc__nav">
-          {%- for block in section.blocks -%}
-            {%- if block.type == 'jump_link' -%}
-              <a class="cg-toc__link" href="#{{ block.settings.anchor }}" data-cg-toc-link {{ block.shopify_attributes }}>{{ block.settings.label }}</a>
-            {%- endif -%}
-          {%- endfor -%}
-        </nav>
-      </div>
-
-      <div class="cg-layout">
-        <aside class="cg-toc cg-toc--sidebar" aria-label="On this page">
-          <div class="cg-toc__title">On this page</div>
-          <nav>
-            {%- for block in section.blocks -%}
-              {%- if block.type == 'jump_link' -%}
-                <a class="cg-toc__link" href="#{{ block.settings.anchor }}" data-cg-toc-link {{ block.shopify_attributes }}>{{ block.settings.label }}</a>
-              {%- endif -%}
+      {%- if rule_blocks.size > 0 -%}
+        <section class="cg-panel" aria-labelledby="cycling-rules-{{ section.id }}">
+          <h2 id="cycling-rules-{{ section.id }}">Conservative decision rules</h2>
+          <div class="cg-rules">
+            {%- for block in rule_blocks -%}
+              <article class="cg-rule" {{ block.shopify_attributes }}>
+                <h3>{{ block.settings.title }}</h3>
+                <p>{{ block.settings.body }}</p>
+              </article>
             {%- endfor -%}
-          </nav>
-        </aside>
-
-        <div class="cg-main">
-
-          {%- comment -%} Why cycling {%- endcomment -%}
-          <div class="cg-zone" id="why-cycling" data-guide-static>
-            <h2 class="cg-zone__h2">Why cycling exists</h2>
-            {%- if section.settings.why_cycling != blank -%}
-              <div class="cg-prose rte">{{ section.settings.why_cycling }}</div>
-            {%- endif -%}
           </div>
+        </section>
+      {%- endif -%}
 
-          {%- comment -%} Universal rules {%- endcomment -%}
-          <div class="cg-zone" id="universal-rules" data-guide-static>
-            <h2 class="cg-zone__h2">The universal rules</h2>
-            <div class="cg-rules">
-              {%- assign rule_num = 0 -%}
-              {%- for block in section.blocks -%}
-                {%- if block.type == 'rule' -%}
-                  {%- assign rule_num = rule_num | plus: 1 -%}
-                  <div class="cg-rule" {{ block.shopify_attributes }}>
-                    <div class="cg-rule__num" aria-hidden="true">{{ rule_num }}</div>
-                    <div>
-                      {%- if block.settings.title != blank -%}
-                        <h3 class="cg-rule__title">{{ block.settings.title }}</h3>
-                      {%- endif -%}
-                      {%- if block.settings.body != blank -%}
-                        <p class="cg-rule__text">{{ block.settings.body }}</p>
-                      {%- endif -%}
-                    </div>
-                  </div>
-                {%- endif -%}
-              {%- endfor -%}
-            </div>
-          </div>
+      <section class="cg-panel" aria-labelledby="cycling-escalate-{{ section.id }}">
+        <h2 id="cycling-escalate-{{ section.id }}">When not to self-manage</h2>
+        <p>Do not use a generic cycling page to manage dependence, withdrawal, escalating use, or persistent adverse effects. Ask a qualified healthcare professional for individualized advice. Abrupt discontinuation may be unsafe for some substances and patterns of use.</p>
+        <p>Medication use, pregnancy or nursing, age under 18, health conditions, alcohol or sedative use, multiple stimulants, and competitive-sport rules all require additional caution.</p>
+      </section>
 
-          {%- comment -%} Tier 1 {%- endcomment -%}
-          <div class="cg-zone" id="tier-1" data-guide-item data-guide-cats="tier-1" data-guide-name="{{ cg_t1_html | strip_html | strip | escape }}" data-cycle-keys="{{ cg_t1_keys | strip | escape }}">
-            {% render 'guide-cycle-anchors', html: cg_t1_html %}
-            <h2 class="cg-zone__h2">Tier 1: Strict-cycle compounds</h2>
-            {%- if section.settings.tier1_intro != blank -%}
-              <div class="cg-prose rte">{{ section.settings.tier1_intro }}</div>
-            {%- endif -%}
-            <div class="cg-tier cg-tier--strict">
-              <div class="cg-table-wrap" role="region" aria-label="Tier 1 strict-cycle compounds" tabindex="0">
-                <table class="cg-table">
-                  <thead>
-                    <tr>
-                      <th scope="col">Compound</th>
-                      <th scope="col">Suggested on-days</th>
-                      <th scope="col">Break pattern</th>
-                      <th scope="col">Off-day pairing</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {%- for block in section.blocks -%}
-                      {%- if block.type == 'tier1_row' -%}
-                        <tr {{ block.shopify_attributes }}>
-                          <td>
-                            {% if block.settings.compound != blank %}<div class="rte">{{ block.settings.compound }}</div>{% endif %}
-                            {% render 'guide-dosing-exits', html: block.settings.compound %}
-                          </td>
-                          <td>{{ block.settings.on_days }}</td>
-                          <td>{{ block.settings.break_pattern }}</td>
-                          <td>{{ block.settings.off_day_pairing }}</td>
-                        </tr>
-                      {%- endif -%}
-                    {%- endfor -%}
-                  </tbody>
-                </table>
-              </div>
-              <div class="cg-table-cards">
-                {%- for block in section.blocks -%}
-                  {%- if block.type == 'tier1_row' -%}
-                    <div class="cg-table-card" {{ block.shopify_attributes }}>
-                      <div class="cg-table-card__label">Compound</div>
-                      <div class="cg-table-card__value rte">{% if block.settings.compound != blank %}{{ block.settings.compound }}{% endif %}</div>
-                      <div class="cg-table-card__label">Suggested on-days</div>
-                      <div class="cg-table-card__value">{{ block.settings.on_days }}</div>
-                      <div class="cg-table-card__label">Break pattern</div>
-                      <div class="cg-table-card__value">{{ block.settings.break_pattern }}</div>
-                      <div class="cg-table-card__label">Off-day pairing</div>
-                      <div class="cg-table-card__value">{{ block.settings.off_day_pairing }}</div>
-                      {% render 'guide-dosing-exits', html: block.settings.compound %}
-                    </div>
-                  {%- endif -%}
-                {%- endfor -%}
-              </div>
+      <section class="cg-panel" aria-labelledby="cycling-label-{{ section.id }}">
+        <h2 id="cycling-label-{{ section.id }}">A label-first review</h2>
+        <ol>
+          <li>Confirm the exact product and ingredient; similar names are not interchangeable.</li>
+          <li>Read the current directions, warnings, contraindications, and storage information.</li>
+          <li>Check medications, supplements, alcohol, caffeine, and other exposures with a pharmacist or clinician.</li>
+          <li>If unwanted effects, escalating use, or difficulty stopping occur, seek qualified care rather than changing the schedule yourself.</li>
+        </ol>
+      </section>
 
-              {%- if section.settings.phenibut_title != blank or section.settings.phenibut_body != blank -%}
-                <div class="cg-caution">
-                  {%- if section.settings.phenibut_title != blank -%}
-                    <h3 class="cg-caution__title">{{ section.settings.phenibut_title }}</h3>
-                  {%- endif -%}
-                  {%- if section.settings.phenibut_body != blank -%}
-                    <div class="cg-prose rte">{{ section.settings.phenibut_body }}</div>
-                  {%- endif -%}
-                  {%- if section.settings.phenibut_signs != blank -%}
-                    <div class="cg-prose rte">{{ section.settings.phenibut_signs }}</div>
-                  {%- endif -%}
-                  {%- if section.settings.phenibut_taper != blank -%}
-                    <div class="cg-prose rte">{{ section.settings.phenibut_taper }}</div>
-                  {%- endif -%}
-                </div>
-              {%- endif -%}
-            </div>
-          </div>
+      {%- if faq_blocks.size > 0 -%}
+        <section class="cg-panel" aria-labelledby="cycling-faq-{{ section.id }}">
+          <h2 id="cycling-faq-{{ section.id }}">Frequently asked questions</h2>
+          {%- for block in faq_blocks -%}
+            <details {{ block.shopify_attributes }}>
+              <summary>{{ block.settings.question }}</summary>
+              <div class="rte">{{ block.settings.answer }}</div>
+            </details>
+          {%- endfor -%}
+        </section>
+      {%- endif -%}
 
-          {%- comment -%} Tier 2 {%- endcomment -%}
-          <div class="cg-zone" id="tier-2" data-guide-item data-guide-cats="tier-2" data-guide-name="{{ cg_t2_html | strip_html | strip | escape }}" data-cycle-keys="{{ cg_t2_keys | strip | escape }}">
-            {% render 'guide-cycle-anchors', html: cg_t2_html %}
-            <h2 class="cg-zone__h2">Tier 2: Periodic-break compounds</h2>
-            {%- if section.settings.tier2_intro != blank -%}
-              <div class="cg-prose rte">{{ section.settings.tier2_intro }}</div>
-            {%- endif -%}
-            <div class="cg-tier cg-tier--periodic">
-              <div class="cg-table-wrap" role="region" aria-label="Tier 2 periodic-break compounds" tabindex="0">
-                <table class="cg-table">
-                  <thead>
-                    <tr>
-                      <th scope="col">Compound</th>
-                      <th scope="col">Suggested pattern</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {%- for block in section.blocks -%}
-                      {%- if block.type == 'tier2_row' -%}
-                        <tr {{ block.shopify_attributes }}>
-                          <td>
-                            {{ block.settings.compound }}
-                            {% render 'guide-dosing-exits', html: block.settings.compound %}
-                          </td>
-                          <td>{{ block.settings.pattern }}</td>
-                        </tr>
-                      {%- endif -%}
-                    {%- endfor -%}
-                  </tbody>
-                </table>
-              </div>
-              <div class="cg-table-cards">
-                {%- for block in section.blocks -%}
-                  {%- if block.type == 'tier2_row' -%}
-                    <div class="cg-table-card" {{ block.shopify_attributes }}>
-                      <div class="cg-table-card__label">Compound</div>
-                      <div class="cg-table-card__value">{{ block.settings.compound }}</div>
-                      <div class="cg-table-card__label">Suggested pattern</div>
-                      <div class="cg-table-card__value">{{ block.settings.pattern }}</div>
-                      {% render 'guide-dosing-exits', html: block.settings.compound %}
-                    </div>
-                  {%- endif -%}
-                {%- endfor -%}
-              </div>
-            </div>
-          </div>
-
-          {%- comment -%} Tier 3 {%- endcomment -%}
-          <div class="cg-zone" id="tier-3" data-guide-item data-guide-cats="tier-3" data-guide-name="{{ cg_t3_html | strip_html | strip | escape }}" data-cycle-keys="{{ cg_t3_keys | strip | escape }}">
-            {% render 'guide-cycle-anchors', html: cg_t3_html %}
-            <h2 class="cg-zone__h2">Tier 3: Daily-friendly compounds</h2>
-            {%- if section.settings.tier3_intro != blank -%}
-              <div class="cg-prose rte">{{ section.settings.tier3_intro }}</div>
-            {%- endif -%}
-            <div class="cg-tier cg-tier--daily">
-              {%- if section.settings.tier3_list != blank -%}
-                <div class="cg-prose rte">{{ section.settings.tier3_list }}</div>
-              {%- endif -%}
-              {%- if section.settings.tier3_note != blank -%}
-                <div class="cg-note rte">{{ section.settings.tier3_note }}</div>
-              {%- endif -%}
-            </div>
-            {%- if section.settings.stacks_note != blank -%}
-              <div class="cg-callout rte">{{ section.settings.stacks_note }}</div>
-            {%- endif -%}
-            {%- if section.settings.peptides_note != blank -%}
-              <div class="cg-callout rte">{{ section.settings.peptides_note }}</div>
-            {%- endif -%}
-          </div>
-
-          {%- comment -%} Dot grid {%- endcomment -%}
-          <div class="cg-zone" id="dot-grid" data-guide-item data-guide-cats="track" data-guide-name="dot-grid tracker weekly calendar">
-            <h2 class="cg-zone__h2">The weekly dot-grid method</h2>
-            {%- if section.settings.dot_grid_intro != blank -%}
-              <div class="cg-prose rte">{{ section.settings.dot_grid_intro }}</div>
-            {%- endif -%}
-            <div class="cg-dotgrid" aria-hidden="true">
-              <div class="cg-dotgrid__week">
-                {%- assign days = 'M,T,W,T,F,S,S' | split: ',' -%}
-                {%- assign on_days = '1,0,1,0,1,0,0' | split: ',' -%}
-                {%- for day in days -%}
-                  {%- assign idx = forloop.index0 -%}
-                  <div class="cg-dotgrid__day">
-                    <span class="cg-dotgrid__circle{% if on_days[idx] == '1' %} cg-dotgrid__circle--on{% endif %}"></span>
-                    <span class="cg-dotgrid__label">{{ day }}</span>
-                  </div>
-                {%- endfor -%}
-              </div>
-              <div class="cg-dotgrid__legend">
-                <span><i class="cg-dotgrid__legend-dot cg-dotgrid__legend-dot--on"></i> On-day</span>
-                <span><i class="cg-dotgrid__legend-dot"></i> Off-day</span>
-              </div>
-            </div>
-            {%- if section.settings.dot_grid_steps != blank -%}
-              <div class="cg-prose rte">{{ section.settings.dot_grid_steps }}</div>
-            {%- endif -%}
-          </div>
-
-          {%- comment -%} Off-day playbook {%- endcomment -%}
-          <div class="cg-zone" id="off-day-playbook" data-guide-item data-guide-cats="tier-3 track" data-guide-name="{{ cg_play_html | strip_html | strip | escape }}">
-            <h2 class="cg-zone__h2">The off-day playbook</h2>
-            {%- if section.settings.playbook_intro != blank -%}
-              <div class="cg-prose rte">{{ section.settings.playbook_intro }}</div>
-            {%- endif -%}
-            <div class="cg-playbook">
-              {%- for block in section.blocks -%}
-                {%- if block.type == 'playbook_card' -%}
-                  <div class="cg-playbook-card" {{ block.shopify_attributes }}>
-                    {%- if block.settings.title != blank -%}
-                      <h3 class="cg-playbook-card__title">{{ block.settings.title }}</h3>
-                    {%- endif -%}
-                    {%- if block.settings.body != blank -%}
-                      <div class="cg-prose rte">{{ block.settings.body }}</div>
-                    {%- endif -%}
-                    {%- if block.settings.product != blank -%}
-                      <p class="cg-prose cg-playbook-card__link">
-                        <a href="{{ block.settings.product.url }}">View {{ block.settings.product.title }}</a>
-                      </p>
-                    {%- endif -%}
-                  </div>
-                {%- endif -%}
-              {%- endfor -%}
-            </div>
-            {%- if section.settings.playbook_outro != blank -%}
-              <div class="cg-prose cg-prose--spaced rte">{{ section.settings.playbook_outro }}</div>
-            {%- endif -%}
-          </div>
-
-          {%- comment -%} Bottle math {%- endcomment -%}
-          <div class="cg-zone" id="bottle-math" data-guide-item data-guide-cats="track" data-guide-name="bottle math count reorder">
-            <h2 class="cg-zone__h2">Bottle math: what your count says about your cycle</h2>
-            {%- if section.settings.bottle_math != blank -%}
-              <div class="cg-prose rte">{{ section.settings.bottle_math }}</div>
-            {%- endif -%}
-          </div>
-
-          {%- comment -%} FAQ {%- endcomment -%}
-          <div class="cg-zone" id="faq" data-guide-static>
-            <h2 class="cg-zone__h2">Frequently asked questions</h2>
-            <div class="cg-faq">
-              {%- for block in section.blocks -%}
-                {%- if block.type == 'faq' -%}
-                  <details class="cg-faq__item" {{ block.shopify_attributes }}>
-                    <summary class="cg-faq__summary">{{ block.settings.question }}</summary>
-                    <div class="cg-faq__answer rte">{{ block.settings.answer }}</div>
-                  </details>
-                {%- endif -%}
-              {%- endfor -%}
-            </div>
-          </div>
-
-          {%- if section.settings.cross_link != blank -%}
-            <div class="cg-crosslink rte" data-guide-static>{{ section.settings.cross_link }}</div>
-          {%- endif -%}
-
-          {%- liquid
-            assign cg_dosing_page = pages['dosing-guide']
-            if cg_dosing_page != empty
-              assign cg_dosing_href = cg_dosing_page.url
-            else
-              assign cg_dosing_href = '/pages/dosing-guide'
-            endif
-          -%}
-          {% render 'guide-related',
-            heading: section.settings.related_heading,
-            heading_id: cg_related_id,
-            body: section.settings.related_body,
-            href: cg_dosing_href,
-            cta: section.settings.related_cta,
-            coa_href: cg_coa_href,
-            contact_href: cg_contact_href
-          %}
-
-          {%- if section.settings.disclaimer != blank -%}
-            <div class="cg-disclaimer">
-              <div class="cg-disclaimer__body rte">{{ section.settings.disclaimer }}</div>
-            </div>
-          {%- endif -%}
-
-        </div>
-      </div>
+      {%- if section.settings.disclaimer != blank -%}
+        <div class="cg-panel cg-muted rte">{{ section.settings.disclaimer }}</div>
+      {%- endif -%}
     </div>
   </xo-container>
 </section>
-
-{% render 'reference-guide-jsonld', section: section %}
 
 {% schema %}
 {
@@ -1096,208 +143,99 @@
   "settings": [
     { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "background-1" },
     { "type": "header", "content": "Safety" },
-    {
-      "type": "richtext",
-      "id": "safety_text",
-      "label": "Safety callout",
-      "default": "<p><strong>Safety first:</strong> nootropics are not for everyone. Not for use by anyone under 18, or during pregnancy or nursing. If you take medication or have a health condition, talk to a qualified clinician before starting anything on this page. This guide covers scheduling, not medical advice.</p>"
-    },
+    { "type": "richtext", "id": "safety_text", "label": "Legacy safety callout (not displayed)" },
     { "type": "header", "content": "Orientation" },
-    { "type": "text", "id": "answers_text", "label": "This page answers", "default": "Which listed compounds have off-days, periodic breaks, or daily use, and how to track a planned schedule." },
-    { "type": "text", "id": "does_not_text", "label": "It does not", "default": "Give one cycle for every product, cover peptides, or replace clinician advice for tapering." },
-    { "type": "text", "id": "orientation_note", "label": "Educational note", "default": "Educational scheduling reference only. It is not personalized medical advice." },
-    { "type": "header", "content": "Pathways" },
-    { "type": "text", "id": "pathways_heading", "label": "Pathways heading", "default": "Choose how you want to start" },
-    { "type": "text", "id": "p1_title", "label": "Pathway 1 title", "default": "Find a compound's tier" },
-    { "type": "text", "id": "p1_for", "label": "Pathway 1 for", "default": "You already know the name." },
-    { "type": "text", "id": "p1_answers", "label": "Pathway 1 question", "default": "Is it listed as strict-cycle, periodic-break, or daily-friendly?" },
-    { "type": "text", "id": "p1_learn", "label": "Pathway 1 you will find", "default": "The matching table in this guide, when the name appears." },
-    { "type": "text", "id": "p1_leads", "label": "Pathway 1 leads to", "default": "The finder above." },
-    { "type": "text", "id": "p1_limit", "label": "Pathway 1 limitation", "default": "Names not listed here have no cycling schedule on this page." },
-    { "type": "text", "id": "p1_href", "label": "Pathway 1 URL", "default": "#tier-1" },
-    { "type": "text", "id": "p2_title", "label": "Pathway 2 title", "default": "Why off-days exist" },
-    { "type": "text", "id": "p2_for", "label": "Pathway 2 for", "default": "You want the idea before the tables." },
-    { "type": "text", "id": "p2_answers", "label": "Pathway 2 question", "default": "What problem cycling is meant to address in this guide?" },
-    { "type": "text", "id": "p2_learn", "label": "Pathway 2 you will find", "default": "The existing explanation and universal rules." },
-    { "type": "text", "id": "p2_leads", "label": "Pathway 2 leads to", "default": "Why cycling exists." },
-    { "type": "text", "id": "p2_limit", "label": "Pathway 2 limitation", "default": "Not every compound needs cycling." },
-    { "type": "text", "id": "p2_href", "label": "Pathway 2 URL", "default": "#why-cycling" },
-    { "type": "text", "id": "p3_title", "label": "Pathway 3 title", "default": "How to track a week" },
-    { "type": "text", "id": "p3_for", "label": "Pathway 3 for", "default": "You want a simple on-day / off-day record." },
-    { "type": "text", "id": "p3_answers", "label": "Pathway 3 question", "default": "How do I keep the schedule honest?" },
-    { "type": "text", "id": "p3_learn", "label": "Pathway 3 you will find", "default": "The weekly dot-grid method already on this page." },
-    { "type": "text", "id": "p3_leads", "label": "Pathway 3 leads to", "default": "The weekly dot-grid method." },
-    { "type": "text", "id": "p3_limit", "label": "Pathway 3 limitation", "default": "It is a tracker, not a medical taper." },
-    { "type": "text", "id": "p3_href", "label": "Pathway 3 URL", "default": "#dot-grid" },
-    { "type": "text", "id": "p4_title", "label": "Pathway 4 title", "default": "Off-day options already listed" },
-    { "type": "text", "id": "p4_for", "label": "Pathway 4 for", "default": "You want a daily-friendly option on a planned off-day." },
-    { "type": "text", "id": "p4_answers", "label": "Pathway 4 question", "default": "What does this guide suggest instead of an empty off-day?" },
-    { "type": "text", "id": "p4_learn", "label": "Pathway 4 you will find", "default": "The off-day playbook cards already on this page." },
-    { "type": "text", "id": "p4_leads", "label": "Pathway 4 leads to", "default": "The off-day playbook." },
-    { "type": "text", "id": "p4_limit", "label": "Pathway 4 limitation", "default": "These options do not replicate a strict-cycle compound." },
-    { "type": "text", "id": "p4_href", "label": "Pathway 4 URL", "default": "#off-day-playbook" },
-    { "type": "header", "content": "Related guide" },
-    { "type": "text", "id": "related_heading", "label": "Related heading", "default": "Need dose, timing, or food notes?" },
-    { "type": "text", "id": "related_body", "label": "Related body", "default": "Cycling sets which days are on-days. The Dosing Guide lists dose and timing for products that have those notes stored." },
-    { "type": "text", "id": "related_cta", "label": "Related CTA", "default": "See dosing guidance" },
+    { "type": "text", "id": "answers_text", "label": "Legacy answer text (not displayed)" },
+    { "type": "text", "id": "does_not_text", "label": "Legacy limitation text (not displayed)" },
+    { "type": "text", "id": "orientation_note", "label": "Legacy note (not displayed)" },
+    { "type": "header", "content": "Legacy pathways" },
+    { "type": "text", "id": "pathways_heading", "label": "Legacy pathways heading (not displayed)" },
+    { "type": "text", "id": "p1_title", "label": "Legacy pathway 1 title" },
+    { "type": "text", "id": "p1_for", "label": "Legacy pathway 1 audience" },
+    { "type": "text", "id": "p1_answers", "label": "Legacy pathway 1 question" },
+    { "type": "text", "id": "p1_learn", "label": "Legacy pathway 1 description" },
+    { "type": "text", "id": "p1_leads", "label": "Legacy pathway 1 destination" },
+    { "type": "text", "id": "p1_limit", "label": "Legacy pathway 1 limitation" },
+    { "type": "text", "id": "p1_href", "label": "Legacy pathway 1 URL" },
+    { "type": "text", "id": "p2_title", "label": "Legacy pathway 2 title" },
+    { "type": "text", "id": "p2_for", "label": "Legacy pathway 2 audience" },
+    { "type": "text", "id": "p2_answers", "label": "Legacy pathway 2 question" },
+    { "type": "text", "id": "p2_learn", "label": "Legacy pathway 2 description" },
+    { "type": "text", "id": "p2_leads", "label": "Legacy pathway 2 destination" },
+    { "type": "text", "id": "p2_limit", "label": "Legacy pathway 2 limitation" },
+    { "type": "text", "id": "p2_href", "label": "Legacy pathway 2 URL" },
+    { "type": "text", "id": "p3_title", "label": "Legacy pathway 3 title" },
+    { "type": "text", "id": "p3_for", "label": "Legacy pathway 3 audience" },
+    { "type": "text", "id": "p3_answers", "label": "Legacy pathway 3 question" },
+    { "type": "text", "id": "p3_learn", "label": "Legacy pathway 3 description" },
+    { "type": "text", "id": "p3_leads", "label": "Legacy pathway 3 destination" },
+    { "type": "text", "id": "p3_limit", "label": "Legacy pathway 3 limitation" },
+    { "type": "text", "id": "p3_href", "label": "Legacy pathway 3 URL" },
+    { "type": "text", "id": "p4_title", "label": "Legacy pathway 4 title" },
+    { "type": "text", "id": "p4_for", "label": "Legacy pathway 4 audience" },
+    { "type": "text", "id": "p4_answers", "label": "Legacy pathway 4 question" },
+    { "type": "text", "id": "p4_learn", "label": "Legacy pathway 4 description" },
+    { "type": "text", "id": "p4_leads", "label": "Legacy pathway 4 destination" },
+    { "type": "text", "id": "p4_limit", "label": "Legacy pathway 4 limitation" },
+    { "type": "text", "id": "p4_href", "label": "Legacy pathway 4 URL" },
+    { "type": "header", "content": "Legacy related guide" },
+    { "type": "text", "id": "related_heading", "label": "Legacy related heading" },
+    { "type": "text", "id": "related_body", "label": "Legacy related body" },
+    { "type": "text", "id": "related_cta", "label": "Legacy related CTA" },
     { "type": "header", "content": "Hero" },
-    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Reference Guide" },
-    { "type": "text", "id": "heading", "label": "Page heading (H1)", "default": "Cycling Guide" },
-    {
-      "type": "richtext",
-      "id": "subtitle",
-      "label": "Subtitle",
-      "default": "<p>Know which compounds need off-days, which need periodic breaks, and which are fine daily — plus a simple tracker to keep your schedule honest.</p>"
-    },
-    { "type": "text", "id": "author", "label": "Author", "default": "Nootropix Research" },
-    { "type": "text", "id": "date_published", "label": "Published date (YYYY-MM-DD)", "default": "2026-07-17" },
-    { "type": "text", "id": "read_time", "label": "Read time", "default": "14 min read" },
-    { "type": "header", "content": "Trust badges" },
-    { "type": "text", "id": "badge_1_text", "label": "Badge 1", "default": "Scheduling, not medical advice" },
-    { "type": "text", "id": "badge_2_text", "label": "Badge 2", "default": "Tier-based" },
-    { "type": "text", "id": "badge_3_text", "label": "Badge 3", "default": "Pairs with Dosing Guide" },
-    { "type": "header", "content": "Why cycling" },
-    {
-      "type": "richtext",
-      "id": "why_cycling",
-      "label": "Why cycling exists",
-      "default": "<p>Cycling means scheduling planned off-days or off-weeks instead of taking a compound continuously. The reason is tolerance. With repeated daily exposure to certain compounds, your nervous system adapts: receptors become less responsive, and the same dose produces less effect. The usual reaction is to take more. That accelerates the adaptation and, for some compounds, raises the stakes considerably.</p><p>Off-days give that adaptation time to reverse. A well-planned cycle may help you maintain response at the same dose over months instead of weeks. In our experience, the most common reason people say a nootropic stopped working is not the compound or the batch. It is the schedule.</p><p>Not everything needs cycling. Part of using nootropics well is knowing which tier each compound sits in. That is what this guide is for.</p>"
-    },
-    { "type": "header", "content": "Tier intros" },
-    {
-      "type": "richtext",
-      "id": "tier1_intro",
-      "label": "Tier 1 intro",
-      "default": "<p>These build tolerance quickly with frequent use. The schedule is not optional. If you only apply this guide to one tier, make it this one.</p>"
-    },
-    {
-      "type": "richtext",
-      "id": "tier2_intro",
-      "label": "Tier 2 intro",
-      "default": "<p>Slower tolerance curves. These reward run-and-rest blocks rather than strict weekly limits.</p>"
-    },
-    {
-      "type": "richtext",
-      "id": "tier3_intro",
-      "label": "Tier 3 intro",
-      "default": "<p>These do not need cycling. Some actively work better with consistent daily use.</p>"
-    },
-    {
-      "type": "richtext",
-      "id": "tier3_list",
-      "label": "Tier 3 compound list",
-      "default": "<p>L-Theanine, Lion's Mane, Cordyceps, Bacopa Monnieri, Ashwagandha KSM-66, choline sources (Alpha-GPC, CDP-Choline, Choline Bitartrate), ALCAR, N-Acetyl L-Tyrosine, Taurine, GABA, Agmatine, Magnesium, Vitamin D3 + K2, and phosphatidylserine.</p>"
-    },
-    {
-      "type": "richtext",
-      "id": "tier3_note",
-      "label": "Tier 3 note (Bacopa / Lion's Mane)",
-      "default": "<p><em>Two of these deserve a special note:</em> Bacopa and Lion's Mane build their effects over weeks of daily use. Cycling them is counterproductive. If a compound belongs in this tier, taking days off does not protect anything; it just delays the benefit.</p>"
-    },
-    {
-      "type": "richtext",
-      "id": "stacks_note",
-      "label": "Stacks note",
-      "default": "<p><strong>Stacks and bundles:</strong> a stack inherits the strictest cycling rule of any compound inside it. If a stack contains a Tier 1 compound, the whole stack follows Tier 1 scheduling.</p>"
-    },
-    {
-      "type": "richtext",
-      "id": "peptides_note",
-      "label": "Peptides note",
-      "default": "<p>Peptides are not covered here. Research peptides follow different protocols and constraints entirely and are outside the scope of this guide.</p>"
-    },
-    { "type": "header", "content": "Phenibut deep-dive" },
-    { "type": "text", "id": "phenibut_title", "label": "Title", "default": "Phenibut, specifically" },
-    {
-      "type": "richtext",
-      "id": "phenibut_body",
-      "label": "Body",
-      "default": "<p>Phenibut is our most popular compound and the one where scheduling matters most. It acts on GABA-B signaling, and the nervous system adapts to that kind of input quickly when it arrives daily. Held to 2-3 non-consecutive days per week, most people report a consistent response over long stretches. Used daily, tolerance can build within weeks, and stopping abruptly after extended daily use can be genuinely unpleasant.</p>"
-    },
-    {
-      "type": "richtext",
-      "id": "phenibut_signs",
-      "label": "Reset signs list",
-      "default": "<p><strong>Signs your schedule needs a reset:</strong></p><ul><li>The dose that used to work no longer does</li><li>You find yourself using it more days per week than you planned</li><li>Off-days feel noticeably rough rather than simply ordinary</li><li>You are using it to feel normal rather than to support a specific day</li></ul>"
-    },
-    {
-      "type": "richtext",
-      "id": "phenibut_taper",
-      "label": "Taper note",
-      "default": "<p>If any of these apply, the answer is a longer break, not a higher dose. If you have been using Phenibut daily for an extended period, do not stop abruptly on your own. Talk to a clinician about tapering. That is outside the scope of a scheduling guide, and it matters.</p>"
-    },
-    { "type": "header", "content": "Dot-grid method" },
-    {
-      "type": "richtext",
-      "id": "dot_grid_intro",
-      "label": "Dot-grid intro",
-      "default": "<p>The simplest cycling tracker we know. One row per week, one dot per day:</p>"
-    },
-    {
-      "type": "richtext",
-      "id": "dot_grid_steps",
-      "label": "Dot-grid steps",
-      "default": "<ol><li>Draw seven circles in a row, Monday through Sunday</li><li>Before the week starts, mark your planned on-days for each strict-cycle compound. Filled dot = on-day, empty dot = off-day</li><li>At the end of each day, check reality against the plan</li><li>At the end of the week, count. If your filled dots exceed your plan two weeks running, your schedule has drifted and it is time for a reset break</li></ol><p>The point of planning on-days in advance is that it turns should I take it today? from an in-the-moment decision into a calendar fact. Decisions made in advance are easier to keep.</p>"
-    },
-    { "type": "header", "content": "Off-day playbook" },
-    {
-      "type": "richtext",
-      "id": "playbook_intro",
-      "label": "Playbook intro",
-      "default": "<p>Off-days work better when they are not empty. These daily-friendly options cover the most common reasons people reach for a Tier 1 compound:</p>"
-    },
-    {
-      "type": "richtext",
-      "id": "playbook_outro",
-      "label": "Playbook outro",
-      "default": "<p>None of these replicate a Tier 1 compound, and that is the point. The off-day is doing its own job.</p>"
-    },
-    {
-      "type": "richtext",
-      "id": "bottle_math",
-      "label": "Bottle math",
-      "default": "<p>Your bottle is a cycling audit you already own.</p><ul><li>At 2-3 days per week and one capsule per on-day, a 30ct bottle covers roughly 10-15 weeks and a 60ct covers roughly 20-30 weeks</li><li>If a bottle that should last months is emptying monthly, you are not cycling; you are dosing daily. Recount your dots before you reorder</li></ul><p>Higher per-day doses change the math, but the principle holds: the reorder date tells the truth about the schedule.</p><p>This is also why we suggest sizing your order to your protocol rather than defaulting to the biggest bottle. The right count for a cycled compound is the one that runs out on schedule.</p>"
-    },
-    {
-      "type": "richtext",
-      "id": "cross_link",
-      "label": "Cross-link to Dosing Guide",
-      "default": "<p>For per-compound dose ranges, see our <a href=\"/pages/dosing-guide\">Dosing Guide</a>.</p>"
-    },
-    { "type": "header", "content": "Structured data" },
-    { "type": "checkbox", "id": "emit_breadcrumb_schema", "label": "Emit breadcrumb schema", "default": true },
-    { "type": "checkbox", "id": "emit_faq_schema", "label": "Emit FAQ schema (visible FAQ blocks only)", "default": true },
-    { "type": "text", "id": "breadcrumb_parent_label", "label": "Breadcrumb parent label", "default": "Guides" },
-    { "type": "text", "id": "breadcrumb_parent_url", "label": "Breadcrumb parent URL", "default": "/pages/guides" },
-    { "type": "image_picker", "id": "og_image", "label": "Article image (optional)", "info": "Used in Article JSON-LD when set." },
-    {
-      "type": "textarea",
-      "id": "seo_description",
-      "label": "SEO description",
-      "default": "The Nootropix cycling guide — tier-based scheduling for strict-cycle, periodic-break, and daily-friendly compounds, plus the dot-grid method and off-day playbook."
-    },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Educational guide" },
+    { "type": "text", "id": "heading", "label": "Page heading", "default": "Cycling Claims: An Evidence & Safety Guide" },
+    { "type": "richtext", "id": "subtitle", "label": "Subtitle", "default": "<p>Understand the limits of generic cycling advice and the questions to review before considering any product-specific schedule.</p>" },
+    { "type": "text", "id": "author", "label": "Legacy author (not displayed)", "info": "Use page custom.author for real metadata." },
+    { "type": "text", "id": "date_published", "label": "Legacy date (not displayed)", "info": "Use page custom.last_reviewed for a genuine date." },
+    { "type": "text", "id": "read_time", "label": "Read time", "default": "8 min read" },
+    { "type": "header", "content": "Legacy badges" },
+    { "type": "text", "id": "badge_1_text", "label": "Legacy badge 1" },
+    { "type": "text", "id": "badge_2_text", "label": "Legacy badge 2" },
+    { "type": "text", "id": "badge_3_text", "label": "Legacy badge 3" },
+    { "type": "header", "content": "Legacy body fields" },
+    { "type": "richtext", "id": "why_cycling", "label": "Legacy why-cycling text (not displayed)" },
+    { "type": "richtext", "id": "tier1_intro", "label": "Legacy tier 1 text (not displayed)" },
+    { "type": "richtext", "id": "tier2_intro", "label": "Legacy tier 2 text (not displayed)" },
+    { "type": "richtext", "id": "tier3_intro", "label": "Legacy tier 3 text (not displayed)" },
+    { "type": "richtext", "id": "tier3_list", "label": "Legacy tier list (not displayed)" },
+    { "type": "richtext", "id": "tier3_note", "label": "Legacy tier note (not displayed)" },
+    { "type": "richtext", "id": "stacks_note", "label": "Legacy stack note (not displayed)" },
+    { "type": "richtext", "id": "peptides_note", "label": "Legacy peptide note (not displayed)" },
+    { "type": "text", "id": "phenibut_title", "label": "Legacy compound title (not displayed)" },
+    { "type": "richtext", "id": "phenibut_body", "label": "Legacy compound body (not displayed)" },
+    { "type": "richtext", "id": "phenibut_signs", "label": "Legacy signs text (not displayed)" },
+    { "type": "richtext", "id": "phenibut_taper", "label": "Legacy taper text (not displayed)" },
+    { "type": "richtext", "id": "dot_grid_intro", "label": "Legacy tracker intro (not displayed)" },
+    { "type": "richtext", "id": "dot_grid_steps", "label": "Legacy tracker steps (not displayed)" },
+    { "type": "richtext", "id": "playbook_intro", "label": "Legacy playbook intro (not displayed)" },
+    { "type": "richtext", "id": "playbook_outro", "label": "Legacy playbook outro (not displayed)" },
+    { "type": "richtext", "id": "bottle_math", "label": "Legacy bottle math (not displayed)" },
+    { "type": "richtext", "id": "cross_link", "label": "Legacy dosing link (not displayed)" },
+    { "type": "header", "content": "Legacy structured data" },
+    { "type": "checkbox", "id": "emit_breadcrumb_schema", "label": "Legacy breadcrumb schema flag (not used)", "default": false },
+    { "type": "checkbox", "id": "emit_faq_schema", "label": "Legacy FAQ schema flag (not used)", "default": false },
+    { "type": "text", "id": "breadcrumb_parent_label", "label": "Legacy breadcrumb label" },
+    { "type": "text", "id": "breadcrumb_parent_url", "label": "Legacy breadcrumb URL" },
+    { "type": "image_picker", "id": "og_image", "label": "Legacy article image (not used)" },
+    { "type": "textarea", "id": "seo_description", "label": "SEO description", "default": "An evidence-aware guide to evaluating cycling claims without prescribing a universal product schedule." },
     { "type": "header", "content": "Disclaimer" },
-    {
-      "type": "richtext",
-      "id": "disclaimer",
-      "label": "Disclaimer",
-      "default": "<p>These statements have not been evaluated by regulatory authorities and are not intended to diagnose, treat, cure, or prevent any disease. This guide is educational and is not a substitute for professional medical advice; consult a qualified healthcare professional before use, especially if you are taking medication or managing a health condition. Not for use by anyone under 18, or during pregnancy or nursing. Results vary by individual and goal.</p>"
-    },
+    { "type": "richtext", "id": "disclaimer", "label": "Disclaimer", "default": "<p>Educational information only. This guide does not prescribe a dose, cycle, taper, or replacement product and is not a substitute for qualified medical advice.</p>" },
     { "type": "range", "id": "padding_top", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding top", "default": 0 },
     { "type": "range", "id": "padding_bottom", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding bottom", "default": 48 }
   ],
   "blocks": [
     {
       "type": "jump_link",
-      "name": "Jump link",
+      "name": "Legacy jump link",
       "settings": [
         { "type": "text", "id": "label", "label": "Label" },
-        { "type": "text", "id": "anchor", "label": "Anchor ID (without #)" }
+        { "type": "text", "id": "anchor", "label": "Anchor" }
       ]
     },
     {
       "type": "rule",
-      "name": "Universal rule",
+      "name": "Decision rule",
       "settings": [
         { "type": "text", "id": "title", "label": "Title" },
         { "type": "textarea", "id": "body", "label": "Body" }
@@ -1305,29 +243,29 @@
     },
     {
       "type": "tier1_row",
-      "name": "Tier 1 row",
+      "name": "Legacy tier 1 row",
       "settings": [
         { "type": "richtext", "id": "compound", "label": "Compound" },
-        { "type": "text", "id": "on_days", "label": "Suggested on-days" },
-        { "type": "text", "id": "break_pattern", "label": "Break pattern" },
-        { "type": "text", "id": "off_day_pairing", "label": "Off-day pairing" }
+        { "type": "text", "id": "on_days", "label": "Legacy on-days" },
+        { "type": "text", "id": "break_pattern", "label": "Legacy break pattern" },
+        { "type": "text", "id": "off_day_pairing", "label": "Legacy pairing" }
       ]
     },
     {
       "type": "tier2_row",
-      "name": "Tier 2 row",
+      "name": "Legacy tier 2 row",
       "settings": [
         { "type": "text", "id": "compound", "label": "Compound" },
-        { "type": "text", "id": "pattern", "label": "Suggested pattern" }
+        { "type": "text", "id": "pattern", "label": "Legacy pattern" }
       ]
     },
     {
       "type": "playbook_card",
-      "name": "Playbook card",
+      "name": "Legacy playbook card",
       "settings": [
         { "type": "text", "id": "title", "label": "Title" },
         { "type": "richtext", "id": "body", "label": "Body" },
-        { "type": "product", "id": "product", "label": "Optional product link" }
+        { "type": "product", "id": "product", "label": "Product" }
       ]
     },
     {
