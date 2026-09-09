@@ -12,7 +12,6 @@ Nootropix — Product description renderer from metafields
 
 {%- assign what_it_is = product.metafields.npx.what_it_is.value | default: product.metafields.npx.what_it_is -%}
 {%- assign feel_raw = product.metafields.npx.feel_timeline.value | default: product.metafields.npx.feel_timeline -%}
-{%- assign feel_first_json = feel_raw | json | slice: 0, 1 -%}
 {%- assign feel_first_raw = feel_raw | strip | slice: 0, 1 -%}
 {%- assign feel = feel_raw -%}
 {%- assign feel_note = product.metafields.npx.feel_note.value | default: product.metafields.npx.feel_note -%}
@@ -80,46 +79,6 @@ Nootropix — Product description renderer from metafields
     {%- else -%}
       <p>{{ feel | newline_to_br }}</p>
     {%- endif -%}
-    {% # region agent log %}
-    <script>
-      (function () {
-        var heading = Array.prototype.find.call(document.querySelectorAll('.product-prose h3'), function (el) { return /feel/i.test(el.textContent || ''); });
-        var next = heading && heading.nextElementSibling;
-        var data = {
-          handle: {{ product.handle | json }},
-          feelFirstJson: {{ feel_first_json | json }},
-          feelFirstRaw: {{ feel_first_raw | json }},
-          feelFirstAfterParse: {{ feel_first | json }},
-          itemCount: {{ feel.size | default: 0 }},
-          nextTag: next && next.tagName,
-          nextIsList: !!(next && next.tagName === 'UL'),
-          nextText: next && (next.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 180)
-        };
-        fetch('http://127.0.0.1:7906/ingest/73d01807-f919-4550-a2d5-12c9f0435bd9',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'737e95'},body:JSON.stringify({sessionId:'737e95',runId:'post-fix',hypothesisId:'A',location:'snippets/product-description-metafields.liquid:feel-timeline',message:'feel timeline parse + render',data:data,timestamp:Date.now()})}).catch(function(){});
-        fetch('http://127.0.0.1:7906/ingest/73d01807-f919-4550-a2d5-12c9f0435bd9',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'737e95'},body:JSON.stringify({sessionId:'737e95',runId:'post-fix',hypothesisId:'F',location:'snippets/product-description-metafields.liquid:feel-timeline-fallback',message:'string JSON split fallback',data:{usedSplitFallback: data.feelFirstAfterParse !== '[', nextIsList: data.nextIsList, nextText: data.nextText},timestamp:Date.now()})}).catch(function(){});
-        function styleSnapshot(el) {
-          if (!el) return null;
-          var cs = window.getComputedStyle(el);
-          return { tag: el.tagName, color: cs.color, fontSize: cs.fontSize, lineHeight: cs.lineHeight, fontWeight: cs.fontWeight, marginTop: cs.marginTop, marginBottom: cs.marginBottom };
-        }
-        function logProseCompare() {
-          var buyBox = document.querySelector('.xo-product-info-content .product-prose');
-          var buyP = buyBox && buyBox.querySelector('p, li');
-          var buyH = buyBox && buyBox.querySelector('h3');
-          var vts = document.querySelector('.vts__text .product-prose');
-          var vtsP = vts && vts.querySelector('p, li, .metafield-rich_text_field p');
-          var htmlFs = window.getComputedStyle(document.documentElement).fontSize;
-          var bodyFs = window.getComputedStyle(document.body).fontSize;
-          fetch('http://127.0.0.1:7906/ingest/73d01807-f919-4550-a2d5-12c9f0435bd9',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'737e95'},body:JSON.stringify({sessionId:'737e95',runId:'prose-style-14',hypothesisId:'D',location:'snippets/product-description-metafields.liquid:prose-compare',message:'buy-box vs VTS computed styles',data:{htmlFontSize:htmlFs,bodyFontSize:bodyFs,buyBox:styleSnapshot(buyBox),buyP:styleSnapshot(buyP),buyH:styleSnapshot(buyH),vts:styleSnapshot(vts),vtsP:styleSnapshot(vtsP)},timestamp:Date.now()})}).catch(function(){});
-        }
-        if (document.readyState === 'loading') {
-          document.addEventListener('DOMContentLoaded', logProseCompare);
-        } else {
-          logProseCompare();
-        }
-      })();
-    </script>
-    {% # endregion %}
   {%- endif -%}
   
   {%- if feel_note != blank -%}

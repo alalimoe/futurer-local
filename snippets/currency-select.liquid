@@ -90,23 +90,5 @@
         {%- endfor -%}
       </xo-popover>
     {%- endform -%}
-    {% if instance_key == 'header-main' %}
-      {% # region agent log %}
-      <script>
-        (function () {
-          var trigger = document.querySelector('.xo-header__right-item--currency .xo-currency-select__trigger');
-          var img = trigger && trigger.querySelector('img');
-          var data = {
-            localizationCountry: {{ localization.country.iso_code | json }},
-            currencyCode: {{ currency_code | json }},
-            flagCountry: {{ flag_country.iso_code | json }},
-            flagSrc: img && img.src,
-            triggerText: trigger && (trigger.innerText || '').replace(/\s+/g, ' ').trim()
-          };
-          fetch('http://127.0.0.1:7906/ingest/73d01807-f919-4550-a2d5-12c9f0435bd9',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'737e95'},body:JSON.stringify({sessionId:'737e95',runId:'post-fix',hypothesisId:'A',location:'snippets/currency-select.liquid:trigger',message:'currency trigger flag vs country',data:data,timestamp:Date.now()})}).catch(function(){});
-        })();
-      </script>
-      {% # endregion %}
-    {% endif %}
   {% endif %}
 </xo-currency-select>
