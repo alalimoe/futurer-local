@@ -1,32 +1,77 @@
 {% liquid
   assign instance_key = id | default: selector_position | default: 'currency'
   assign form_id = 'localization-form-' | append: section.id | append: '-' | append: instance_key | handleize
+  assign currency_code = localization.country.currency.iso_code
+  assign flag_country = localization.country
+  assign currency_home = ''
+  if currency_code == 'AED'
+    assign currency_home = 'AE'
+  elsif currency_code == 'SAR'
+    assign currency_home = 'SA'
+  endif
+  if currency_home != blank
+    for country in localization.available_countries
+      if country.iso_code == currency_home
+        assign flag_country = country
+        break
+      endif
+    endfor
+  endif
+  assign selected_flag_url = flag_country | image_url: width: 32 | replace: 'http://', 'https://'
+  unless selected_flag_url contains '://'
+    assign selected_flag_url = 'https:' | append: selected_flag_url
+  endunless
 %}
 
 <xo-currency-select class='xo-currency-select'>
   {% if localization.available_countries.size > 1 %}
     {%- form 'localization', id: form_id, class: 'xo-currency-select__form' -%}
-      <xo-popover-trigger xo-name='{{ form_id }}' class='xo-currency-select__trigger' tabindex='0' role='button'>
-        <div class='xo-currency-select__trigger-name'>
-          <span>{{ localization.country.name -}}</span>
-          <span>|</span>
-          <span>
-            {{- localization.country.currency.iso_code }}
-            {{ localization.country.currency.symbol }}
-          </span>
-        </div>
-        {% render 'icon', name: 'arrow-down', size: '20' %}
+      <style>
+        #{{ form_id }} .xo-currency-select__trigger {
+          border: 0;
+          background: transparent;
+          color: inherit;
+          font: inherit;
+          padding: 0;
+        }
+        #{{ form_id }} .xo-currency-select__input {
+          display: block;
+          position: absolute;
+          width: 1px;
+          height: 1px;
+          padding: 0;
+          margin: -1px;
+          overflow: hidden;
+          clip-path: inset(50%);
+          white-space: nowrap;
+          border: 0;
+        }
+        #{{ form_id }} .xo-currency-select__input:focus-visible + .xo-currency-select__name {
+          outline: 0.2rem solid currentColor;
+          outline-offset: -0.2rem;
+        }
+        #{{ form_id }} xo-popover-trigger[xo-active] .xo-currency-select__trigger svg {
+          transform: rotate(180deg);
+        }
+      </style>
+      <xo-popover-trigger xo-name='{{ form_id }}'>
+        <button
+          type='button'
+          class='xo-currency-select__trigger'
+          aria-controls='{{ form_id }}-options'
+          aria-label='{{ currency_code }}'
+        >
+          <img src='{{ selected_flag_url }}' width='16' height='12' alt='' decoding='async'>
+          <span class='xo-currency-select__trigger-name'>{{ currency_code }}</span>
+          {% render 'icon', name: 'arrow-down', size: '20' %}
+        </button>
       </xo-popover-trigger>
-      <xo-popover xo-name='{{ form_id }}' xo-placement='{% if selector_position == 'footer' %}top-center{% else %}bottom-center{% endif %}' class='xo-currency-select__content'>
+      <xo-popover id='{{ form_id }}-options' xo-name='{{ form_id }}' xo-placement='{% if selector_position == 'footer' %}top-center{% else %}bottom-center{% endif %}' class='xo-currency-select__content'>
         {%- for country in localization.available_countries -%}
           {% liquid
             assign input_id = 'Country--' | append: country.iso_code | append: '-' | append: form_id
-            assign flag_url = country | image_url: width: 16 | replace: 'http://', 'https://'
-            unless flag_url contains '://'
-              assign flag_url = 'https:' | append: flag_url
-            endunless
           %}
-          <label class='xo-currency-select__item' tabindex='0' role='button' for='{{ input_id }}'>
+          <label class='xo-currency-select__item' for='{{ input_id }}'>
             <input
               class='xo-currency-select__input'
               type='radio'
@@ -38,7 +83,6 @@
               {% endif %}
             >
             <span class='xo-currency-select__name'>
-              <img src='{{ flag_url }}' width='16' height='12' alt='{{ country.name | escape }}' loading='lazy'>
               {{ country.name }} | {{ country.currency.iso_code }}
               {{ country.currency.symbol }}
             </span>
@@ -46,5 +90,23 @@
         {%- endfor -%}
       </xo-popover>
     {%- endform -%}
+    {% if instance_key == 'header-main' %}
+      {% # region agent log %}
+      <script>
+        (function () {
+          var trigger = document.querySelector('.xo-header__right-item--currency .xo-currency-select__trigger');
+          var img = trigger && trigger.querySelector('img');
+          var data = {
+            localizationCountry: {{ localization.country.iso_code | json }},
+            currencyCode: {{ currency_code | json }},
+            flagCountry: {{ flag_country.iso_code | json }},
+            flagSrc: img && img.src,
+            triggerText: trigger && (trigger.innerText || '').replace(/\s+/g, ' ').trim()
+          };
+          fetch('http://127.0.0.1:7906/ingest/73d01807-f919-4550-a2d5-12c9f0435bd9',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'737e95'},body:JSON.stringify({sessionId:'737e95',runId:'post-fix',hypothesisId:'A',location:'snippets/currency-select.liquid:trigger',message:'currency trigger flag vs country',data:data,timestamp:Date.now()})}).catch(function(){});
+        })();
+      </script>
+      {% # endregion %}
+    {% endif %}
   {% endif %}
 </xo-currency-select>
