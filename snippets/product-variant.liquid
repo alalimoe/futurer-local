@@ -117,6 +117,7 @@
     {% liquid
       assign show_pill_price = false
       assign baseline_unit = 0
+      assign baseline_count = 0
       if product.options.size == 1
         assign show_pill_price = true
         for value in option.values
@@ -128,11 +129,23 @@
             endif
           endif
           unless skip_value
-            if value.variant.available and value.variant.price != blank
-              assign count = value_label | replace: 'ct', '' | replace: ' ', '' | plus: 0
+            if value.variant.price != blank
+              assign count_src = value_label | split: '(' | first | strip
+              assign count = 0
+              if count_src contains 'x'
+                assign count_parts = count_src | split: 'x'
+                assign pack_qty = count_parts.first | strip | plus: 0
+                assign pack_each = count_parts.last | replace: 'ct', '' | strip | plus: 0
+                if pack_qty > 0 and pack_each > 0
+                  assign count = pack_qty | times: pack_each
+                endif
+              else
+                assign count = count_src | replace: 'ct', '' | replace: ' ', '' | plus: 0
+              endif
               if count > 0
                 assign unit = value.variant.price | times: 1.0 | divided_by: count
-                if baseline_unit == 0 or unit > baseline_unit
+                if baseline_count == 0 or count < baseline_count
+                  assign baseline_count = count
                   assign baseline_unit = unit
                 endif
               endif
@@ -164,8 +177,19 @@
               else
                 assign pill_price = value.variant.price | money
               endif
-              assign count = value_label | replace: 'ct', '' | replace: ' ', '' | plus: 0
-              if count > 0 and baseline_unit > 0 and value.variant.available
+              assign count_src = value_label | split: '(' | first | strip
+              assign count = 0
+              if count_src contains 'x'
+                assign count_parts = count_src | split: 'x'
+                assign pack_qty = count_parts.first | strip | plus: 0
+                assign pack_each = count_parts.last | replace: 'ct', '' | strip | plus: 0
+                if pack_qty > 0 and pack_each > 0
+                  assign count = pack_qty | times: pack_each
+                endif
+              else
+                assign count = count_src | replace: 'ct', '' | replace: ' ', '' | plus: 0
+              endif
+              if count > baseline_count and baseline_unit > 0
                 assign unit = value.variant.price | times: 1.0 | divided_by: count
                 assign diff = baseline_unit | minus: unit
                 assign pct = diff | times: 100.0 | divided_by: baseline_unit | round
@@ -179,6 +203,52 @@
             {% render 'field-radio', style: style, option: option, name: option.name, value: value, label: value, checked: value.selected, use_with: 'product-variant', price: pill_price, save_label: save_label %}
           {% endunless %}
         {% endfor %}
+        {% # region agent log %}
+        <script>
+          (function () {
+            var data = {
+              handle: {{ product.handle | json }},
+              optionsSize: {{ product.options.size }},
+              showPillPrice: {{ show_pill_price | json }},
+              baselineUnit: {{ baseline_unit | json }},
+              rows: [
+                {%- for value in option.values -%}
+                  {%- liquid
+                    assign dbg_label = value.name | default: value | append: '' | downcase | strip
+                    assign dbg_stripped = dbg_label | replace: 'ct', '' | replace: ' ', ''
+                    assign dbg_count = dbg_stripped | plus: 0
+                    assign dbg_price = value.variant.price | default: 0
+                    assign dbg_available = value.variant.available
+                    assign dbg_unit = 0
+                    assign dbg_pct = 0
+                    if dbg_count > 0 and dbg_price != blank
+                      assign dbg_unit = dbg_price | times: 1.0 | divided_by: dbg_count
+                    endif
+                    if dbg_count > 0 and baseline_unit > 0 and dbg_available
+                      assign dbg_diff = baseline_unit | minus: dbg_unit
+                      assign dbg_pct = dbg_diff | times: 100.0 | divided_by: baseline_unit | round
+                    endif
+                  -%}
+                  {
+                    rawName: {{ value.name | json }},
+                    label: {{ dbg_label | json }},
+                    stripped: {{ dbg_stripped | json }},
+                    count: {{ dbg_count | json }},
+                    price: {{ dbg_price | json }},
+                    available: {{ dbg_available | json }},
+                    unit: {{ dbg_unit | json }},
+                    pct: {{ dbg_pct | json }},
+                    winsBaseline: {% if dbg_available and dbg_count > 0 and dbg_unit == baseline_unit %}true{% else %}false{% endif %}
+                  }{%- unless forloop.last -%},{%- endunless -%}
+                {%- endfor -%}
+              ]
+            };
+            fetch('http://127.0.0.1:7906/ingest/73d01807-f919-4550-a2d5-12c9f0435bd9',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'737e95'},body:JSON.stringify({sessionId:'737e95',runId:'pre-fix',hypothesisId:'A-E',location:'snippets/product-variant.liquid:save-percent',message:'variant unit-price baseline',data:data,timestamp:Date.now()})}).catch(function(){});
+            var displayed = Array.prototype.map.call(document.querySelectorAll('.xo-product-variant__inner-value label'), function (el) { return el.innerText.replace(/\s+/g, ' ').trim(); });
+            fetch('http://127.0.0.1:7906/ingest/73d01807-f919-4550-a2d5-12c9f0435bd9',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'737e95'},body:JSON.stringify({sessionId:'737e95',runId:'post-fix',hypothesisId:'A-B',location:'snippets/product-variant.liquid:save-percent-displayed',message:'rendered save labels after parse fix',data:{handle:data.handle,baselineUnit:data.baselineUnit,baselineCount:{{ baseline_count | json }},displayed:displayed},timestamp:Date.now()})}).catch(function(){});
+          })();
+        </script>
+        {% # endregion %}
       </div>
     </div>
   {% endif %}
