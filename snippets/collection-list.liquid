@@ -18,45 +18,43 @@
 {% liquid
   assign aspect_ratio_dt = aspect_ratio_dt | default: '3/2'
   assign aspect_ratio_mb = aspect_ratio_mb | default: '3/4'
+  assign collection_alt = collection_image.alt | default: collection_name
 %}
 
-<xo-animate xo-cascade>
-  <div class="collection-list{% if settings.enable_border_radius %} collection-list--radius{% endif %}{% if color_scheme_collection %} color-{{ color_scheme_collection }} {% endif %}">
-    <a
-      {% if collection_link == blank %}
-        role="link"
-        aria-disabled="true"
-      {% else %}
-        href="{{ collection_link }}"
-      {% endif %}
-      class="collection-list__link"
-      title="Collection link"
+<div class="collection-list{% if settings.enable_border_radius %} collection-list--radius{% endif %}{% if color_scheme_collection %} color-{{ color_scheme_collection }}{% endif %}">
+  <a
+    {% if collection_link == blank %}
+      role="link"
+      aria-disabled="true"
+    {% else %}
+      href="{{ collection_link }}"
+    {% endif %}
+    class="collection-list__link"
+  >
+    <div
+      class="collection-list__content"
+      style="--opacity: {{ background_overlay }}; --collection-ratio-desktop: {{ aspect_ratio_dt }}; --collection-ratio-mobile: {{ aspect_ratio_mb }};"
     >
-      <div class="collection-list__content" style="--opacity: {{ background_overlay }}">
-        {% if collection_image == blank %}
-          <div class="collection-list__image collection-list__image--desktop">
-            {% render 'image', image: image, placeholder: placeholder, aspect_ratio: aspect_ratio_dt, alt: collection_name %}
-          </div>
-          <div class="collection-list__image collection-list__image--mobile">
-            {% render 'image', image: image, placeholder: placeholder, aspect_ratio: aspect_ratio_mb, alt: collection_name %}
-          </div>
-        {%- else -%}
-          <div class="collection-list__image collection-list__image--desktop">
-            {% render 'image', image: collection_image, aspect_ratio: aspect_ratio_dt, alt: collection_name %}
-          </div>
-          <div class="collection-list__image collection-list__image--mobile">
-            {% render 'image', image: collection_image, aspect_ratio: aspect_ratio_mb, alt: collection_name %}
-          </div>
+      <div class="collection-list__image">
+        {% if collection_image != blank %}
+          {{
+            collection_image
+            | image_url: width: 1400
+            | image_tag:
+              widths: '320, 480, 640, 900, 1200, 1400',
+              sizes: '(min-width: 990px) 33vw, (min-width: 768px) 50vw, 100vw',
+              loading: 'lazy',
+              decoding: 'async',
+              alt: collection_alt
+          }}
+        {% else %}
+          {{ placeholder | default: 'collection-1' | placeholder_svg_tag: 'placeholder-svg' }}
         {% endif %}
-        <div class="collection-list__text">
-          <div class="collection-list__heading">
-            {% render 'text', class: class, text: collection_name, tag_name: tag_name, effect: 'split', duration: 1000 %}
-          </div>
-          <div class="collection-list__button">
-            {% render 'button', text: 'Shop all', style: 'primary', size: 'sm' %}
-          </div>
-        </div>
       </div>
-    </a>
-  </div>
-</xo-animate>
+      <div class="collection-list__text">
+        <h2 class="collection-list__heading">{{ collection_name | escape }}</h2>
+        <span class="collection-list__button" aria-hidden="true">Shop collection</span>
+      </div>
+    </div>
+  </a>
+</div>

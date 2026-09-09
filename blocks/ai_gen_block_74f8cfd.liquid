@@ -171,6 +171,12 @@
     line-height: 1.5;
   }
 
+  .ai-shop-by-goal-card-count-{{ ai_gen_id }} {
+    margin: 8px 0 0;
+    font-size: 13px;
+    color: color-mix(in srgb, rgba(var(--color-foreground)) 65%, transparent);
+  }
+
   .ai-shop-by-goal-empty-state-{{ ai_gen_id }} {
     text-align: center;
     padding: 60px 20px;
@@ -183,7 +189,7 @@
   }
 {%- endstyle -%}
 
-<shop-by-goal-{{ ai_gen_id }}
+<div
   class="ai-shop-by-goal-{{ ai_gen_id }} color-{{ block.settings.color_scheme }}"
   {{ block.shopify_attributes }}
 >
@@ -209,89 +215,112 @@
     </div>
 
     {% liquid
-      assign has_collections = false
-      for i in (1..8)
-        assign collection_key = 'collection_' | append: i
-        assign collection = block.settings[collection_key]
-        if collection != blank
-          assign has_collections = true
-          break
+      assign goal_count = 0
+      assign goal_seen = '|'
+      assign canonical_goal_handles = '|goal-focus-deep-work|goal-memory-learning|goal-mood-stress|goal-energy-wakefulness|goal-sleep-recovery|goal-neuroprotection-longevity|'
+      assign goal_image_class = 'ai-shop-by-goal-card-image-' | append: ai_gen_id
+
+      capture goal_cards
+        if block.settings.goal_menu != blank
+          for goal_link in block.settings.goal_menu.links
+            assign goal_collection = goal_link.object
+            assign goal_handle_token = '|' | append: goal_collection.handle | append: '|'
+            if goal_link.type == 'collection_link' and goal_collection != blank and canonical_goal_handles contains goal_handle_token and goal_collection.published_at != blank and goal_collection.all_products_count > 0
+              unless goal_seen contains goal_handle_token
+                assign goal_seen = goal_seen | append: goal_collection.handle | append: '|'
+                assign goal_count = goal_count | plus: 1
+                assign goal_image = goal_collection.featured_image | default: goal_collection.image
+                assign goal_image_alt = goal_image.alt | default: goal_collection.title
+                assign goal_loading = 'lazy'
+                assign goal_priority = 'auto'
+                if goal_count == 1
+                  assign goal_loading = 'eager'
+                  assign goal_priority = 'high'
+                endif
+                echo '<article class="ai-shop-by-goal-card-' | append: ai_gen_id | append: '"><a href="' | append: goal_collection.url | append: '" class="ai-shop-by-goal-card-link-' | append: ai_gen_id | append: '">'
+                echo '<div class="ai-shop-by-goal-card-image-wrapper-' | append: ai_gen_id | append: '">'
+                if goal_image != blank
+                  echo goal_image | image_url: width: 1200 | image_tag: widths: '320, 480, 640, 800, 1000, 1200', sizes: '(min-width: 990px) 33vw, 50vw', loading: goal_loading, fetchpriority: goal_priority, decoding: 'async', class: goal_image_class, alt: goal_image_alt
+                else
+                  echo '<div class="ai-shop-by-goal-card-image-placeholder-' | append: ai_gen_id | append: '">'
+                  echo 'collection-1' | placeholder_svg_tag
+                  echo '</div>'
+                endif
+                echo '<div class="ai-shop-by-goal-card-overlay-' | append: ai_gen_id | append: '"></div></div>'
+                echo '<div class="ai-shop-by-goal-card-content-' | append: ai_gen_id | append: '"><h2 class="ai-shop-by-goal-card-title-' | append: ai_gen_id | append: '">'
+                echo goal_collection.title | escape
+                echo '</h2>'
+                if block.settings.show_collection_description and goal_collection.description != blank
+                  echo '<p class="ai-shop-by-goal-card-description-' | append: ai_gen_id | append: '">'
+                  echo goal_collection.description | strip_html | truncatewords: 18 | escape
+                  echo '</p>'
+                endif
+                echo '<p class="ai-shop-by-goal-card-count-' | append: ai_gen_id | append: '">'
+                echo goal_collection.all_products_count
+                echo ' '
+                echo goal_collection.all_products_count | pluralize: 'product', 'products'
+                echo '</p></div></a></article>'
+              endunless
+            endif
+          endfor
         endif
-      endfor
+
+        for i in (1..8)
+          assign collection_key = 'collection_' | append: i
+          assign goal_collection = block.settings[collection_key]
+          assign goal_handle_token = '|' | append: goal_collection.handle | append: '|'
+          if goal_collection != blank and canonical_goal_handles contains goal_handle_token and goal_collection.published_at != blank and goal_collection.all_products_count > 0
+            unless goal_seen contains goal_handle_token
+              assign goal_seen = goal_seen | append: goal_collection.handle | append: '|'
+              assign goal_count = goal_count | plus: 1
+              assign goal_image = goal_collection.featured_image | default: goal_collection.image
+              assign goal_image_alt = goal_image.alt | default: goal_collection.title
+              assign goal_loading = 'lazy'
+              assign goal_priority = 'auto'
+              if goal_count == 1
+                assign goal_loading = 'eager'
+                assign goal_priority = 'high'
+              endif
+              echo '<article class="ai-shop-by-goal-card-' | append: ai_gen_id | append: '"><a href="' | append: goal_collection.url | append: '" class="ai-shop-by-goal-card-link-' | append: ai_gen_id | append: '">'
+              echo '<div class="ai-shop-by-goal-card-image-wrapper-' | append: ai_gen_id | append: '">'
+              if goal_image != blank
+                echo goal_image | image_url: width: 1200 | image_tag: widths: '320, 480, 640, 800, 1000, 1200', sizes: '(min-width: 990px) 33vw, 50vw', loading: goal_loading, fetchpriority: goal_priority, decoding: 'async', class: goal_image_class, alt: goal_image_alt
+              else
+                echo '<div class="ai-shop-by-goal-card-image-placeholder-' | append: ai_gen_id | append: '">'
+                echo 'collection-1' | placeholder_svg_tag
+                echo '</div>'
+              endif
+              echo '<div class="ai-shop-by-goal-card-overlay-' | append: ai_gen_id | append: '"></div></div>'
+              echo '<div class="ai-shop-by-goal-card-content-' | append: ai_gen_id | append: '"><h2 class="ai-shop-by-goal-card-title-' | append: ai_gen_id | append: '">'
+              echo goal_collection.title | escape
+              echo '</h2>'
+              if block.settings.show_collection_description and goal_collection.description != blank
+                echo '<p class="ai-shop-by-goal-card-description-' | append: ai_gen_id | append: '">'
+                echo goal_collection.description | strip_html | truncatewords: 18 | escape
+                echo '</p>'
+              endif
+              echo '<p class="ai-shop-by-goal-card-count-' | append: ai_gen_id | append: '">'
+              echo goal_collection.all_products_count
+              echo ' '
+              echo goal_collection.all_products_count | pluralize: 'product', 'products'
+              echo '</p></div></a></article>'
+            endunless
+          endif
+        endfor
+      endcapture
     %}
 
-    {% if has_collections %}
+    {% if goal_count > 0 %}
       <div class="ai-shop-by-goal-grid-{{ ai_gen_id }}">
-        {% for i in (1..8) %}
-          {% liquid
-            assign collection_key = 'collection_' | append: i
-            assign collection = block.settings[collection_key]
-          %}
-
-          {% if collection != blank %}
-            <div class="ai-shop-by-goal-card-{{ ai_gen_id }}">
-              <a href="{{ collection.url }}" class="ai-shop-by-goal-card-link-{{ ai_gen_id }}">
-                <div class="ai-shop-by-goal-card-image-wrapper-{{ ai_gen_id }}">
-                  {% if collection.featured_image %}
-                    <img
-                      src="{{ collection.featured_image | image_url: width: 800 }}"
-                      alt="{{ collection.featured_image.alt | escape }}"
-                      class="ai-shop-by-goal-card-image-{{ ai_gen_id }}"
-                      loading="lazy"
-                      width="800"
-                      height="{{ 800 | times: block.settings.image_aspect_ratio | divided_by: 100 }}"
-                    >
-                  {% else %}
-                    <div class="ai-shop-by-goal-card-image-placeholder-{{ ai_gen_id }}">
-                      {{ 'collection-1' | placeholder_svg_tag }}
-                    </div>
-                  {% endif %}
-                  <div class="ai-shop-by-goal-card-overlay-{{ ai_gen_id }}"></div>
-                </div>
-
-                <div class="ai-shop-by-goal-card-content-{{ ai_gen_id }}">
-                  <h3 class="ai-shop-by-goal-card-title-{{ ai_gen_id }}">{{ collection.title }}</h3>
-                  {% if block.settings.show_collection_description and collection.description != blank %}
-                    <div class="ai-shop-by-goal-card-description-{{ ai_gen_id }}">
-                      {{ collection.description | strip_html | truncate: 120 }}
-                    </div>
-                  {% endif %}
-                </div>
-              </a>
-            </div>
-          {% endif %}
-        {% endfor %}
+        {{ goal_cards }}
       </div>
     {% else %}
       <div class="ai-shop-by-goal-empty-state-{{ ai_gen_id }}">
-        <p>Select collections to display in the block settings</p>
+        <p>No live goal collections are configured.</p>
       </div>
     {% endif %}
   </div>
-</shop-by-goal-{{ ai_gen_id }}>
-
-<script>
-  (function() {
-    class ShopByGoal{{ ai_gen_id }} extends HTMLElement {
-      constructor() {
-        super();
-      }
-
-      connectedCallback() {
-        this.init();
-      }
-
-      init() {
-        const cards = this.querySelectorAll('.ai-shop-by-goal-card-{{ ai_gen_id }}');
-        cards.forEach((card, index) => {
-          card.style.animationDelay = `${index * 0.1}s`;
-        });
-      }
-    }
-
-    customElements.define('shop-by-goal-{{ ai_gen_id }}', ShopByGoal{{ ai_gen_id }});
-  })();
-</script>
+</div>
 
 {% schema %}
 {
@@ -348,6 +377,12 @@
     {
       "type": "header",
       "content": "Collections"
+    },
+    {
+      "type": "link_list",
+      "id": "goal_menu",
+      "label": "Shop-by-goal menu",
+      "info": "Expected to contain the six canonical goal collections. Legacy collection pickers fill any missing goals."
     },
     {
       "type": "collection",

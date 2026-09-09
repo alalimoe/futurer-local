@@ -4,8 +4,9 @@
 {% endcomment %}
 
 {%- liquid
-  assign ci_collection = section.settings.collection | default: collections.all
+  assign ci_collection = section.settings.collection
   assign ci_alphabet = 'A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z' | split: ','
+  assign ci_page_size = section.settings.products_per_page | default: 24
 -%}
 
 {%- style -%}
@@ -35,7 +36,9 @@
 }
 
 .xo-section--{{ section.id }} .ci-count {
-  display: inline-block;
+  display: block;
+  width: fit-content;
+  margin: 0 auto 1.6rem;
   padding: 0.6rem 1.6rem;
   border-radius: 1.6rem;
   font-size: 1.3rem;
@@ -157,6 +160,35 @@
   transition: background-color 0.2s ease;
 }
 
+.xo-section--{{ section.id }} .ci-item-row {
+  display: flex;
+  align-items: stretch;
+  gap: 0.8rem;
+}
+
+.xo-section--{{ section.id }} .ci-item-link {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.xo-section--{{ section.id }} .ci-item-glossary {
+  display: inline-flex;
+  flex: 0 0 auto;
+  min-height: 4.4rem;
+  align-items: center;
+  align-self: center;
+  padding: 0.8rem;
+  border-radius: 0.6rem;
+  color: rgba(var(--color-foreground));
+  text-decoration: underline;
+  text-underline-offset: 0.3rem;
+}
+
+.xo-section--{{ section.id }} .ci-item-glossary:focus-visible {
+  outline: 2px solid rgba(var(--color-accent));
+  outline-offset: 2px;
+}
+
 .xo-section--{{ section.id }} .ci-item-link:hover {
   background: color-mix(in srgb, rgba(var(--color-accent)) 10%, transparent);
 }
@@ -234,26 +266,26 @@
   font-size: 1.3rem;
   color: color-mix(in srgb, rgba(var(--color-foreground)) 75%, transparent);
 }
+
+.xo-section--{{ section.id }} .ci-empty {
+  padding: 3.2rem 2rem;
+  border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 12%, transparent);
+  border-radius: 1.5rem;
+  text-align: center;
+}
+
+.xo-section--{{ section.id }} .ci-empty h2 {
+  margin-top: 0;
+}
+
+.xo-section--{{ section.id }} .ci-empty p {
+  margin-bottom: 0;
+}
+
+.xo-section--{{ section.id }} .ci-pagination {
+  margin-top: 3.2rem;
+}
 {%- endstyle -%}
-
-{%- paginate ci_collection.products by 250 -%}
-{%- liquid
-  assign ci_products = ci_collection.products | sort_natural: 'title'
-
-  assign ci_letters = ''
-  for product in ci_products
-    assign ci_fl = product.title | slice: 0 | upcase
-    unless ci_alphabet contains ci_fl
-      assign ci_fl = '#'
-    endunless
-    unless ci_letters contains ci_fl
-      assign ci_letters = ci_letters | append: ci_fl
-    endunless
-  endfor
-
-  assign ci_hash = '#' | split: ','
-  assign ci_groups = ci_hash | concat: ci_alphabet
--%}
 
 <section {% render 'section-attr' %}>
   <xo-container>
@@ -265,65 +297,145 @@
         {% if section.settings.subtitle != blank %}
           <p class="ci-subtitle">{{ section.settings.subtitle }}</p>
         {% endif %}
-        <span class="ci-count">{{ ci_products.size }} compound{% if ci_products.size != 1 %}s{% endif %}</span>
       </header>
 
-      <nav class="ci-alpha-bar" aria-label="Alphabet navigation">
-        <div class="ci-alpha-inner">
-          {%- for letter in ci_groups -%}
-            {%- if ci_letters contains letter -%}
-              <a href="#ci-letter-{{ letter | url_encode }}" class="ci-alpha-link">{{ letter }}</a>
-            {%- else -%}
-              <span class="ci-alpha-link ci-alpha-link--disabled" aria-disabled="true">{{ letter }}</span>
-            {%- endif -%}
-          {%- endfor -%}
+      {% if ci_collection == blank %}
+        <div class="ci-empty">
+          {% if request.design_mode %}
+            <h2>Select a source collection</h2>
+            <p>Choose the reviewed collection whose enabled products should appear in this directory.</p>
+          {% else %}
+            <h2>Directory unavailable</h2>
+            <p>No source collection is currently configured.</p>
+          {% endif %}
         </div>
-      </nav>
+      {% else %}
+        {%- paginate ci_collection.products by ci_page_size -%}
+          {% liquid
+            assign ci_entry_count = 0
+            assign ci_letters = '|'
+            assign ci_current_letter = blank
 
-      <div class="ci-groups">
-        {%- for letter in ci_groups -%}
-          {%- if ci_letters contains letter -%}
-            <div class="ci-letter-group">
-              <h2 class="ci-letter-heading" id="ci-letter-{{ letter | url_encode }}">{{ letter }}</h2>
-              <ul class="ci-list" role="list">
-                {%- for product in ci_products -%}
-                  {%- liquid
-                    assign ci_fl = product.title | slice: 0 | upcase
-                    unless ci_alphabet contains ci_fl
-                      assign ci_fl = '#'
-                    endunless
-                  -%}
-                  {%- if ci_fl == letter -%}
-                    <li class="ci-item">
-                      <a href="{{ product.url }}" class="ci-item-link">
-                        <span class="ci-item-body">
-                          <span class="ci-item-title">{{ product.title }}</span>
-                          {%- if section.settings.show_goals -%}
-                            {%- assign ci_goals = product.metafields.custom.cognitive_goals.value -%}
-                            {%- if ci_goals -%}
-                              <span class="ci-item-goals">
-                                {%- for goal in ci_goals -%}
-                                  {{- goal | replace: '-', ' ' | capitalize -}}
-                                  {%- unless forloop.last %} &middot; {% endunless -%}
-                                {%- endfor -%}
-                              </span>
-                            {%- endif -%}
-                          {%- endif -%}
-                        </span>
-                        <span class="ci-item-price">
-                          {%- unless product.available %}<span class="ci-item-soldout">Sold out</span>{% endunless -%}
-                          {{ product.price | money }}
-                        </span>
-                      </a>
-                    </li>
+            assign ci_products = ci_collection.products | sort: 'title'
+
+            capture ci_directory
+              for product in ci_products
+                assign ci_enabled = product.metafields.custom.compound_directory_enabled.value
+                assign ci_product_type = product.type | handleize
+                assign ci_product_tags = product.tags | join: '|' | downcase
+                assign ci_excluded = false
+                if product.gift_card? or ci_product_type == 'gift-card' or ci_product_type == 'accessory' or ci_product_type == 'accessories' or ci_product_tags contains 'accessory'
+                  assign ci_excluded = true
+                endif
+
+                if ci_enabled == true and ci_excluded == false
+                  assign ci_label = product.metafields.custom.compound_directory_label.value | default: product.title | strip
+                  assign ci_letter = product.metafields.custom.compound_directory_letter.value | default: ci_label | slice: 0 | upcase
+                  assign ci_letter = ci_letter | slice: 0 | upcase
+                  unless ci_alphabet contains ci_letter
+                    assign ci_letter = '#'
+                  endunless
+
+                  assign ci_letter_anchor = ci_letter
+                  if ci_letter == '#'
+                    assign ci_letter_anchor = 'other'
+                  endif
+                  assign ci_letter_token = '|' | append: ci_letter | append: '|'
+                  unless ci_letters contains ci_letter_token
+                    assign ci_letters = ci_letters | append: ci_letter | append: '|'
+                  endunless
+
+                  if ci_current_letter != ci_letter
+                    if ci_current_letter != blank
+                        echo '</ul><a class="ci-top-link" href="#ci-top-' | append: section.id | append: '">Back to top ↑</a></div>'
+                    endif
+                    echo '<div class="ci-letter-group"><h2 class="ci-letter-heading" id="ci-letter-' | append: section.id | append: '-' | append: ci_letter_anchor | append: '">'
+                    echo ci_letter
+                    echo '</h2><ul class="ci-list" role="list">'
+                    assign ci_current_letter = ci_letter
+                  endif
+
+                  assign ci_entry_count = ci_entry_count | plus: 1
+                  assign ci_goals = product.metafields.custom.compound_directory_goals.value
+                  if ci_goals == blank
+                    assign ci_legacy_goals_metafield = product.metafields.custom.cognitive_goals
+                    if ci_legacy_goals_metafield.type == 'list.single_line_text_field'
+                      assign ci_goals = ci_legacy_goals_metafield.value
+                    endif
+                  endif
+                  assign ci_glossary_url = product.metafields.custom.compound_directory_glossary_url.value
+                  assign ci_glossary_href = ci_glossary_url | escape
+
+                  echo '<li class="ci-item"><div class="ci-item-row"><a href="' | append: product.url | append: '" class="ci-item-link"><span class="ci-item-body"><span class="ci-item-title">'
+                  echo ci_label | escape
+                  echo '</span>'
+                  if section.settings.show_goals and ci_goals != blank
+                    echo '<span class="ci-item-goals">'
+                    for goal in ci_goals
+                      echo goal | escape
+                      unless forloop.last
+                        echo ' · '
+                      endunless
+                    endfor
+                    echo '</span>'
+                  endif
+                  echo '</span><span class="ci-item-price">'
+                  unless product.available
+                    echo '<span class="ci-item-soldout">Sold out</span>'
+                  endunless
+                  echo product.price | money
+                  echo '</span></a>'
+                  if ci_glossary_url != blank
+                    echo '<a class="ci-item-glossary" href="' | append: ci_glossary_href | append: '">Glossary</a>'
+                  endif
+                  echo '</div></li>'
+                endif
+              endfor
+
+              if ci_current_letter != blank
+                echo '</ul><a class="ci-top-link" href="#ci-top-' | append: section.id | append: '">Back to top ↑</a></div>'
+              endif
+            endcapture
+
+            assign ci_hash = '#' | split: ','
+            assign ci_groups = ci_hash | concat: ci_alphabet
+          %}
+
+          {% if ci_entry_count > 0 %}
+            <p class="ci-count" role="status">
+              {{ ci_entry_count }} {{ ci_entry_count | pluralize: 'entry', 'entries' }} on this page
+            </p>
+            <nav class="ci-alpha-bar" aria-label="Alphabet navigation">
+              <div class="ci-alpha-inner">
+                {%- for letter in ci_groups -%}
+                  {%- assign ci_nav_token = '|' | append: letter | append: '|' -%}
+                  {%- assign ci_nav_anchor = letter -%}
+                  {%- if letter == '#' -%}{%- assign ci_nav_anchor = 'other' -%}{%- endif -%}
+                  {%- if ci_letters contains ci_nav_token -%}
+                    <a href="#ci-letter-{{ section.id }}-{{ ci_nav_anchor }}" class="ci-alpha-link">{{ letter }}</a>
+                  {%- else -%}
+                    <span class="ci-alpha-link ci-alpha-link--disabled" aria-disabled="true">{{ letter }}</span>
                   {%- endif -%}
                 {%- endfor -%}
-              </ul>
-              <a class="ci-top-link" href="#ci-top-{{ section.id }}">Back to top ↑</a>
+              </div>
+            </nav>
+
+            <div class="ci-groups">{{ ci_directory }}</div>
+          {% else %}
+            <div class="ci-empty">
+              <h2>No directory entries on this page</h2>
+              <p>Products remain hidden until the directory fields are reviewed and enabled.</p>
             </div>
-          {%- endif -%}
-        {%- endfor -%}
-      </div>
+          {% endif %}
+
+          {% if paginate.pages > 1 %}
+            {% assign ci_pagination_anchor = '#ci-top-' | append: section.id %}
+            <nav class="ci-pagination" aria-label="Compound directory pages">
+              {% render 'pagination', paginate: paginate, anchor: ci_pagination_anchor %}
+            </nav>
+          {% endif %}
+        {%- endpaginate -%}
+      {% endif %}
 
       {% if section.settings.disclaimer != blank %}
         <footer class="ci-disclaimer">
@@ -333,7 +445,6 @@
     </div>
   </xo-container>
 </section>
-{%- endpaginate -%}
 
 {% schema %}
 {
@@ -351,13 +462,22 @@
       "type": "textarea",
       "id": "subtitle",
       "label": "Subtitle",
-      "default": "Every compound we carry, A to Z. Know what you're looking for? Jump straight to it."
+      "default": "Browse reviewed catalogue entries by compound name, availability, and goal."
     },
     {
       "type": "collection",
       "id": "collection",
       "label": "Source collection",
-      "info": "Products to list. Defaults to all products when empty."
+      "info": "Use a manually sorted collection ordered by directory letter, then label."
+    },
+    {
+      "type": "range",
+      "id": "products_per_page",
+      "label": "Source products per page",
+      "min": 12,
+      "max": 48,
+      "step": 4,
+      "default": 48
     },
     {
       "type": "checkbox",
@@ -374,7 +494,7 @@
       "type": "text",
       "id": "disclaimer",
       "label": "Disclaimer Text",
-      "default": "This index is for educational purposes only and is not medical advice. Always consult a qualified healthcare professional before beginning any new supplement protocol."
+      "default": "Only products explicitly enabled for this directory are shown. Availability and prices come from the live catalogue."
     }
   ],
   "presets": [

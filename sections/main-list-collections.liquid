@@ -16,6 +16,8 @@
   if aspect_ratio_mb == 'custom'
     assign aspect_ratio_mb = section.settings.aspect_ratio_mb_width | append: '/' | append: section.settings.aspect_ratio_mb_height
   endif
+  assign excluded_handles = section.settings.excluded_handles | default: 'all,frontpage,restricted,restock-watch,restock-blitz,coa-library' | remove: ' ' | replace: ',', '|' | prepend: '|' | append: '|'
+  assign canonical_goal_handles = '|goal-focus-deep-work|goal-memory-learning|goal-mood-stress|goal-energy-wakefulness|goal-sleep-recovery|goal-neuroprotection-longevity|'
 %}
 
 {% liquid
@@ -31,6 +33,60 @@
   endif
 %}
 
+{% paginate collections by 48 %}
+{% liquid
+  assign goal_count = 0
+  assign goal_seen = '|'
+  capture goal_links
+    if section.settings.goal_menu != blank
+      for goal_link in section.settings.goal_menu.links
+        assign goal_collection = goal_link.object
+        assign goal_handle_token = '|' | append: goal_collection.handle | append: '|'
+        if goal_link.type == 'collection_link' and goal_collection != blank and canonical_goal_handles contains goal_handle_token and goal_collection.published_at != blank and goal_collection.all_products_count > 0
+          unless goal_seen contains goal_handle_token
+            assign goal_seen = goal_seen | append: goal_collection.handle | append: '|'
+            assign goal_count = goal_count | plus: 1
+            echo '<li><a href="' | append: goal_collection.url | append: '">'
+            echo goal_collection.title | escape
+            echo '</a></li>'
+          endunless
+        endif
+      endfor
+    endif
+
+    assign canonical_goal_list = 'goal-focus-deep-work,goal-memory-learning,goal-mood-stress,goal-energy-wakefulness,goal-sleep-recovery,goal-neuroprotection-longevity' | split: ','
+    for goal_handle in canonical_goal_list
+      assign goal_collection = collections[goal_handle]
+      assign goal_handle_token = '|' | append: goal_handle | append: '|'
+      if goal_collection != blank and goal_collection.published_at != blank and goal_collection.all_products_count > 0
+        unless goal_seen contains goal_handle_token
+          assign goal_seen = goal_seen | append: goal_handle | append: '|'
+          assign goal_count = goal_count | plus: 1
+          echo '<li><a href="' | append: goal_collection.url | append: '">'
+          echo goal_collection.title | escape
+          echo '</a></li>'
+        endunless
+      endif
+    endfor
+  endcapture
+
+  assign catalogue_count = 0
+  capture catalogue_cards
+    for collection in collections
+      assign collection_handle_token = '|' | append: collection.handle | append: '|'
+      if collection.published_at != blank and collection.all_products_count > 0
+        unless excluded_handles contains collection_handle_token
+          assign catalogue_count = catalogue_count | plus: 1
+          assign collection_image = collection.featured_image | default: collection.image
+          echo '<div class="main-list-collections__item">'
+          render 'collection-list', collection_image: collection_image, collection_name: collection.title, collection_link: collection.url, aspect_ratio_dt: aspect_ratio_dt, aspect_ratio_mb: aspect_ratio_mb, color_scheme_collection: color_scheme_collection, background_overlay: background_overlay
+          echo '</div>'
+        endunless
+      endif
+    endfor
+  endcapture
+%}
+
 <section {% render 'section-attr' %}>
   <div class="main-list-collections">
     <xo-container class="main-list-collections__container">
@@ -39,30 +95,38 @@
           {% render 'breadcrumb' %}
         </div>
       {% endif %}
-      <xo-grid class="main-list-collections__grid" style="--lg: {{ column_desktop }}; --md: {{ column_mobile }}; --xs: {{ column_mobile }};">
-        {%- for collection in collections -%}
-          {% liquid
-            assign collection_image = collection.featured_image
-            assign collection_name = collection.title
-            assign collection_link = collection.url
-          %}
-          <div class="main-list-collections__item">
-            {% render 'collection-list',
-              collection_image: collection_image,
-              collection_name: collection_name,
-              collection_link: collection_link,
-              button_link: collection_link,
-              aspect_ratio_dt: aspect_ratio_dt,
-              aspect_ratio_mb: aspect_ratio_mb,
-              color_scheme_collection: color_scheme_collection,
-              background_overlay: background_overlay
-            %}
-          </div>
-        {%- endfor -%}
-      </xo-grid>
+      {% if goal_count > 0 %}
+        <nav class="main-list-collections__goals" aria-labelledby="CatalogueGoals-{{ section.id }}">
+          <h2 id="CatalogueGoals-{{ section.id }}">{{ section.settings.goal_menu_heading | escape }}</h2>
+          <ul>{{ goal_links }}</ul>
+        </nav>
+      {% endif %}
+
+      {% if catalogue_count > 0 %}
+        <p class="main-list-collections__summary">
+          {{ catalogue_count }} {{ catalogue_count | pluralize: 'collection', 'collections' }} on this page
+        </p>
+        <div
+          class="main-list-collections__grid"
+          style="--catalogue-columns-desktop: {{ column_desktop }}; --catalogue-columns-mobile: {{ column_mobile }};"
+        >
+          {{ catalogue_cards }}
+        </div>
+        {% if paginate.pages > 1 %}
+          <nav class="main-list-collections__pagination" aria-label="Collection pages">
+            {% render 'pagination', paginate: paginate, anchor: '' %}
+          </nav>
+        {% endif %}
+      {% elsif request.design_mode %}
+        <div class="main-list-collections__empty">
+          <h2>No visible collections</h2>
+          <p>Add products to published collections or update the internal handle exclusions.</p>
+        </div>
+      {% endif %}
     </xo-container>
   </div>
 </section>
+{% endpaginate %}
 
 {% schema %}
 {
@@ -83,6 +147,25 @@
         }
       ],
       "default": "hidden"
+    },
+    {
+      "type": "link_list",
+      "id": "goal_menu",
+      "label": "Shop-by-goal menu",
+      "info": "Expected to contain the six canonical goal collections."
+    },
+    {
+      "type": "text",
+      "id": "goal_menu_heading",
+      "label": "Goal menu heading",
+      "default": "Shop by goal"
+    },
+    {
+      "type": "text",
+      "id": "excluded_handles",
+      "label": "Internal collection handles",
+      "info": "Comma-separated handles hidden from the catalogue.",
+      "default": "all,frontpage,restricted,restock-watch,restock-blitz,coa-library"
     },
     {
       "type": "select",
