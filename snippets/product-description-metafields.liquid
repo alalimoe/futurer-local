@@ -15,14 +15,6 @@ Nootropix — Product description renderer from metafields
 {%- assign feel_first_json = feel_raw | json | slice: 0, 1 -%}
 {%- assign feel_first_raw = feel_raw | strip | slice: 0, 1 -%}
 {%- assign feel = feel_raw -%}
-{% # theme-check-disable UnknownFilter %}
-{%- if feel_raw contains '[' or feel_raw contains '{' -%}
-  {%- assign feel_parsed = feel_raw | parse_json -%}
-  {%- if feel_parsed != blank -%}
-    {%- assign feel = feel_parsed -%}
-  {%- endif -%}
-{%- endif -%}
-{% # theme-check-enable UnknownFilter %}
 {%- assign feel_note = product.metafields.npx.feel_note.value | default: product.metafields.npx.feel_note -%}
 {%- assign how = product.metafields.npx.how_to_use.value -%}
 {%- assign why = product.metafields.npx.why.value -%}
@@ -64,6 +56,27 @@ Nootropix — Product description renderer from metafields
           <li>{% if f.label %}<strong>{{ f.label }}:</strong> {% endif %}{{ f.description | default: f.text | default: f }}</li>
         {%- endfor -%}
       </ul>
+    {%- elsif feel_first_raw == '[' -%}
+      <ul>
+        {%- assign feel_chunks = feel_raw | append: '' | split: '"label":"' -%}
+        {%- for chunk in feel_chunks -%}
+          {%- unless forloop.first -%}
+            {%- assign f_label = chunk | split: '"' | first -%}
+            {%- assign desc_split = chunk | split: '"description":"' -%}
+            {%- assign f_desc = '' -%}
+            {%- if desc_split.size > 1 -%}
+              {%- assign f_desc = desc_split.last | split: '"' | first -%}
+            {%- endif -%}
+            {%- if f_desc == blank -%}
+              {%- assign text_split = chunk | split: '"text":"' -%}
+              {%- if text_split.size > 1 -%}
+                {%- assign f_desc = text_split.last | split: '"' | first -%}
+              {%- endif -%}
+            {%- endif -%}
+            <li>{% if f_label != blank %}<strong>{{ f_label }}:</strong> {% endif %}{{ f_desc }}</li>
+          {%- endunless -%}
+        {%- endfor -%}
+      </ul>
     {%- else -%}
       <p>{{ feel | newline_to_br }}</p>
     {%- endif -%}
@@ -83,6 +96,7 @@ Nootropix — Product description renderer from metafields
           nextText: next && (next.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 180)
         };
         fetch('http://127.0.0.1:7906/ingest/73d01807-f919-4550-a2d5-12c9f0435bd9',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'737e95'},body:JSON.stringify({sessionId:'737e95',runId:'post-fix',hypothesisId:'A',location:'snippets/product-description-metafields.liquid:feel-timeline',message:'feel timeline parse + render',data:data,timestamp:Date.now()})}).catch(function(){});
+        fetch('http://127.0.0.1:7906/ingest/73d01807-f919-4550-a2d5-12c9f0435bd9',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'737e95'},body:JSON.stringify({sessionId:'737e95',runId:'post-fix',hypothesisId:'F',location:'snippets/product-description-metafields.liquid:feel-timeline-fallback',message:'string JSON split fallback',data:{usedSplitFallback: data.feelFirstAfterParse !== '[', nextIsList: data.nextIsList, nextText: data.nextText},timestamp:Date.now()})}).catch(function(){});
       })();
     </script>
     {% # endregion %}
