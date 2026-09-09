@@ -13,11 +13,14 @@
                 assign sub_heading = section.settings.sub_heading
               %}
               {% if page.title != blank %}
-                <h3 class='xo-contact__heading {{ class }}'>{{ page.title }}</h3>
+                <h1 class='xo-contact__heading {{ class }}'>{{ page.title }}</h1>
               {% else %}
                 {% if heading != blank %}
-                  <h3 class='xo-contact__heading {{ class }}'>{{ heading }}</h3>
+                  <h1 class='xo-contact__heading {{ class }}'>{{ heading }}</h1>
                 {% endif %}
+              {% endif %}
+              {% if section.settings.form_heading != blank %}
+                <h2 class='xo-contact__route-heading'>{{ section.settings.form_heading }}</h2>
               {% endif %}
               {% if page.content != blank %}
                 <div class='xo-contact__sub-heading'>
@@ -72,8 +75,18 @@
               <div class='xo-contact__subject'>
                 <div class='xo-contact__subject-input'>
                   {% assign subject_id = 'subject--' | append: section.id %}
-                  {% assign subject_label = 'templates.contact.form.inquiry' | t %}
-                  {% render 'field-input', type: 'text', name: 'contact[inquiry]', value: form.body, label: subject_label, id: subject_id %}
+                  {% assign subject_help_id = 'subject-help--' | append: section.id %}
+                  <label class='xo-contact__select-label' for='{{ subject_id }}'>{{ 'templates.contact.form.subject' | t }}</label>
+                  <select class='xo-contact__select' id='{{ subject_id }}' name='contact[subject]' required aria-describedby='{{ subject_help_id }}'>
+                    <option value=''>{{ 'templates.contact.form.subject_placeholder' | t }}</option>
+                    <option value='General enquiry'>{{ 'templates.contact.form.subject_general' | t }}</option>
+                    <option value='Business or wholesale enquiry'>{{ 'templates.contact.form.subject_business' | t }}</option>
+                    <option value='Product information enquiry'>{{ 'templates.contact.form.subject_product' | t }}</option>
+                    <option value='Partnership or media enquiry'>{{ 'templates.contact.form.subject_partnership' | t }}</option>
+                  </select>
+                  <p id='{{ subject_help_id }}' class='xo-contact__route-help'>
+                    {{ 'templates.contact.form.order_support_html' | t: link: '#order-support' }}
+                  </p>
                 </div>
               </div>
             </xo-animate>
@@ -151,6 +164,12 @@
       "id": "heading",
       "label": "t:sections.contact_form.settings.heading.label",
       "default": "Contact us"
+    },
+    {
+      "type": "text",
+      "id": "form_heading",
+      "label": "Native form heading",
+      "default": "General and business enquiries"
     },
     {
       "type": "richtext",

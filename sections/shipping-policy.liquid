@@ -1,3 +1,19 @@
+{%- liquid
+  assign delivery_policy = shop.metafields.custom.delivery_policy.value
+  assign delivery_rules = delivery_policy.rules.value | default: delivery_policy.rules
+  if delivery_rules == blank
+    assign delivery_rules = delivery_policy.regions
+  endif
+  assign policy_last_reviewed = delivery_policy.last_reviewed.value | default: delivery_policy.last_reviewed
+  assign policy_review_status = delivery_policy.review_status.value | default: delivery_policy.review_status
+  assign policy_reviewed = false
+  if delivery_policy != blank and policy_last_reviewed != blank
+    if delivery_policy.reviewed.value == true or delivery_policy.reviewed == true or policy_review_status == 'reviewed'
+      assign policy_reviewed = true
+    endif
+  endif
+-%}
+
 {%- style -%}
   .xo-section--{{ section.id }} .sp-wrap {
     max-width: 88rem;
@@ -91,7 +107,8 @@
   }
 
   .xo-section--{{ section.id }} .sp-table-wrap {
-    overflow: hidden;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
     border: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 12%, transparent);
     border-radius: 2rem;
   }
@@ -156,43 +173,95 @@
       gap: var(--grid-mobile-vertical-spacing, 1.2rem);
     }
 
-    .xo-section--{{ section.id }} .sp-table thead {
-      display: none;
-    }
-
-    .xo-section--{{ section.id }} .sp-table tbody tr {
-      display: block;
-      padding: 1.6rem 1.8rem;
-    }
-
-    .xo-section--{{ section.id }} .sp-table tbody tr + tr {
-      border-top: 1px solid color-mix(in srgb, rgba(var(--color-foreground)) 10%, transparent);
-    }
-
-    .xo-section--{{ section.id }} .sp-table td {
-      display: block;
-      padding: 0.3rem 0;
-      border-top: none;
-    }
-
-    .xo-section--{{ section.id }} .sp-table td::before {
-      content: attr(data-label) ": ";
-      font-weight: 600;
-      color: rgba(var(--color-foreground));
+    .xo-section--{{ section.id }} .sp-table {
+      min-width: 72rem;
     }
   }
 {%- endstyle -%}
+
+{{ 'policy-canonical.css' | asset_url | stylesheet_tag }}
 
 <section {% render 'section-attr', section: section %} aria-labelledby="sp-title-{{ section.id }}">
   <xo-container>
     <div class="sp-wrap">
       <header class="sp-header">
         <h1 id="sp-title-{{ section.id }}" class="sp-title">{{ section.settings.heading }}</h1>
-        {%- if section.settings.intro != blank -%}
+        {%- if policy_reviewed and delivery_policy.delivery_summary != blank -%}
+          <div class="sp-intro policy-canonical__content">
+            {%- if delivery_policy.delivery_summary.type != blank -%}
+              {{ delivery_policy.delivery_summary | metafield_tag }}
+            {%- else -%}
+              {{ delivery_policy.delivery_summary | escape | newline_to_br }}
+            {%- endif -%}
+          </div>
+        {%- elsif section.settings.intro != blank -%}
           <div class="sp-intro">{{ section.settings.intro }}</div>
+        {%- endif -%}
+        {%- if policy_reviewed and policy_last_reviewed != blank -%}
+          <p class="policy-canonical__status">
+            {{ 'policies.canonical.last_reviewed' | t }}
+            <time datetime="{{ policy_last_reviewed | escape }}">
+              {{- policy_last_reviewed | date: '%B %d, %Y' -}}
+            </time>
+          </p>
         {%- endif -%}
       </header>
 
+      {%- if policy_reviewed and delivery_rules != blank -%}
+        <div class="sp-block">
+          <span class="sp-kicker">{{ section.settings.intl_kicker }}</span>
+          <h2 class="sp-heading">{{ 'policies.canonical.current_options' | t }}</h2>
+          <div class="sp-table-wrap" tabindex="0" role="region" aria-label="{{ 'policies.canonical.delivery_table_label' | t }}">
+            <table class="sp-table">
+              <thead>
+                <tr>
+                  <th scope="col">{{ section.settings.col_region }}</th>
+                  <th scope="col">{{ section.settings.col_checkout }}</th>
+                  <th scope="col">{{ section.settings.col_rate }}</th>
+                  <th scope="col">{{ section.settings.col_free }}</th>
+                  <th scope="col">{{ section.settings.col_transit }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {%- for rule in delivery_rules -%}
+                  {%- liquid
+                    assign rule_active = false
+                    if rule.active.value == true or rule.active == true
+                      assign rule_active = true
+                    endif
+                    assign rule_destination = rule.destination.value | default: rule.destination
+                    assign rule_checkout = rule.checkout_name.value | default: rule.checkout_name
+                    assign rule_rate = rule.rate.value | default: rule.rate
+                    assign rule_free = rule.free_threshold.value | default: rule.free_threshold
+                    assign rule_transit = rule.transit_estimate.value | default: rule.transit_estimate
+                    assign rule_detail = rule.detail.value | default: rule.detail
+                  -%}
+                  {%- if rule_active -%}
+                    <tr>
+                      <th scope="row">{{ rule_destination | escape }}</th>
+                      <td>{{ rule_checkout | escape }}</td>
+                      <td>{{ rule_rate | escape }}</td>
+                      <td>{{ rule_free | escape }}</td>
+                      <td>{{ rule_transit | escape }}</td>
+                    </tr>
+                    {%- if rule_detail != blank -%}
+                      <tr>
+                        <td colspan="5" class="sp-card-text">
+                          {%- if rule.detail.type != blank -%}
+                            {{ rule.detail | metafield_tag }}
+                          {%- else -%}
+                            {{ rule_detail | escape | newline_to_br }}
+                          {%- endif -%}
+                        </td>
+                      </tr>
+                    {%- endif -%}
+                  {%- endif -%}
+                {%- endfor -%}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      {%- else -%}
       <div class="sp-block">
         <span class="sp-kicker">{{ section.settings.uae_kicker }}</span>
         <h2 class="sp-heading">{{ section.settings.uae_heading }}</h2>
@@ -256,11 +325,49 @@
           <p class="sp-note">{{ section.settings.intl_note }}</p>
         {%- endif -%}
       </div>
+      {%- endif -%}
 
-      {%- if section.settings.customs_body != blank -%}
+      {%- if policy_reviewed and delivery_policy.checkout_caveat != blank -%}
+        <div class="sp-customs">
+          <h2 class="sp-heading">{{ 'policies.canonical.checkout_conditions' | t }}</h2>
+          <div class="sp-customs-body">
+            {%- if delivery_policy.checkout_caveat.type != blank -%}
+              {{ delivery_policy.checkout_caveat | metafield_tag }}
+            {%- else -%}
+              {{ delivery_policy.checkout_caveat | escape | newline_to_br }}
+            {%- endif -%}
+          </div>
+        </div>
+      {%- endif -%}
+
+      {%- if policy_reviewed and delivery_policy.customs_caveat != blank -%}
+        <div class="sp-customs">
+          <h2 class="sp-heading">{{ section.settings.customs_heading }}</h2>
+          <div class="sp-customs-body">
+            {%- if delivery_policy.customs_caveat.type != blank -%}
+              {{ delivery_policy.customs_caveat | metafield_tag }}
+            {%- else -%}
+              {{ delivery_policy.customs_caveat | escape | newline_to_br }}
+            {%- endif -%}
+          </div>
+        </div>
+      {%- elsif section.settings.customs_body != blank -%}
         <div class="sp-customs">
           <h2 class="sp-heading">{{ section.settings.customs_heading }}</h2>
           <div class="sp-customs-body">{{ section.settings.customs_body }}</div>
+        </div>
+      {%- endif -%}
+
+      {%- if policy_reviewed and delivery_policy.returns_summary != blank -%}
+        <div class="sp-customs">
+          <h2 class="sp-heading">{{ 'policies.canonical.returns_heading' | t }}</h2>
+          <div class="sp-customs-body">
+            {%- if delivery_policy.returns_summary.type != blank -%}
+              {{ delivery_policy.returns_summary | metafield_tag }}
+            {%- else -%}
+              {{ delivery_policy.returns_summary | escape | newline_to_br }}
+            {%- endif -%}
+          </div>
         </div>
       {%- endif -%}
     </div>

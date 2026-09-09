@@ -10,6 +10,19 @@
 {%- assign s = section.settings -%}
 {%- assign sid = section.id -%}
 {%- assign faq_blocks = section.blocks | where: 'type', 'faq' -%}
+{%- liquid
+  assign delivery_policy = shop.metafields.custom.delivery_policy.value
+  assign delivery_rules = delivery_policy.rules.value
+  assign delivery_policy_url = shop.shipping_policy.url | default: '/pages/shipping-and-returns'
+  assign policy_reviewed = false
+  if delivery_policy != blank
+    if delivery_policy.reviewed.value == true
+      assign policy_reviewed = true
+    elsif delivery_policy.review_status.value == 'reviewed'
+      assign policy_reviewed = true
+    endif
+  endif
+-%}
 
 {%- comment -%} ── JSON-LD: FAQPage (dynamic from blocks) ── {%- endcomment -%}
 {% if faq_blocks.size > 0 %}
@@ -43,7 +56,7 @@
     "addressCountry": "AE"
   },
   "areaServed": ["Dubai", "Abu Dhabi", "Sharjah", "UAE"],
-  "description": "Same-day nootropics delivery in Dubai. 4-hour courier within city limits, next-day across the UAE."
+  "description": "Current delivery information for orders shipping from Dubai, with services and charges confirmed at checkout."
 }
 </script>
 
@@ -65,8 +78,8 @@
     {%- comment -%} ── HERO ── {%- endcomment -%}
     <header class="ds-hero"{% if s.hero_image != blank %} style="background-image:url({{ s.hero_image | image_url: width: 1600 }});"{% endif %}>
       <div class="ds-hero-overlay">
-        <h1 id="ds-title-{{ sid }}" class="ds-hero-title">{{ s.hero_title | default: "Delivered in 4 Hours — Order by 6 PM" }}</h1>
-        <p class="ds-hero-sub">{{ s.hero_subtitle | default: "Every SKU ships from our Dubai warehouse. Same-day delivery — often within four hours." }}</p>
+        <h1 id="ds-title-{{ sid }}" class="ds-hero-title">{{ s.hero_title | default: "Dubai Shipping and Delivery" }}</h1>
+        <p class="ds-hero-sub">{{ s.hero_subtitle | default: "Orders ship from Dubai. Confirm current services, estimates and charges at checkout." }}</p>
         <div class="ds-hero-actions">
           <a href="{{ s.cta_link | default: routes.all_products_collection_url }}" class="ds-btn ds-btn--primary">Browse All</a>
           <a href="#ds-zones" class="ds-btn ds-btn--ghost">See Shipping Zones</a>
@@ -76,72 +89,62 @@
 
     {%- comment -%} ── INTRO ── {%- endcomment -%}
     <div class="ds-intro" aria-label="Introduction">
-      <p class="ds-intro-text">{{ s.intro_text | default: "Forget shipping delays and week-long waits. Because every SKU ships from our Dubai warehouse, you'll get your stack the <strong>same day</strong> — often within four hours. Below you'll find exact cut-off times and costs for Dubai, the rest of the UAE, and international Aramex delivery." }}</p>
+      <div class="ds-intro-text">{{ s.intro_text | default: "<p>Use this page to understand delivery zones, tracking and checkout conditions. Current services and charges depend on the destination and selected checkout option.</p>" }}</div>
+      {% render 'policy-delivery-summary', show_trust_stat: true %}
     </div>
 
     {%- comment -%} ── COVERAGE MAP ── {%- endcomment -%}
-    <section aria-label="4-Hour Courier Coverage Map">
+    <section aria-label="Dubai courier coverage map">
       <span class="ds-kicker">Delivery Zones</span>
-      <h2 class="ds-heading">4-Hour Courier Coverage Map</h2>
+      <h2 class="ds-heading">Dubai Courier Coverage Map</h2>
       <div class="ds-map-wrap">
         <iframe
           src="{{ s.map_embed_url | default: 'https://www.google.com/maps/d/embed?mid=1g60YiIEmniUuLZMj5sC1J_IRca6qK-w&ehbc=2E312F' }}"
           loading="lazy"
           allowfullscreen
-          title="Dubai same-day delivery coverage map"
+          title="Dubai courier delivery coverage map"
         ></iframe>
       </div>
     </section>
 
     {%- comment -%} ── SHIPPING RATES TABLE ── {%- endcomment -%}
     <section id="ds-zones" aria-label="Shipping rates">
-      <span class="ds-kicker">Rates &amp; Cut-offs</span>
+      <span class="ds-kicker">Current Policy</span>
       <h2 class="ds-heading">Shipping at a Glance</h2>
-      <div class="ds-table-wrap">
-        <table class="ds-table" aria-label="Shipping rates by destination">
-          <thead>
-            <tr>
-              <th scope="col">Destination</th>
-              <th scope="col">Cut-off</th>
-              <th scope="col">Transit</th>
-              <th scope="col">Cost</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td data-label="Destination"><strong>Dubai</strong></td>
-              <td data-label="Cut-off">6 PM</td>
-              <td data-label="Transit">4 hours</td>
-              <td data-label="Cost">Free</td>
-            </tr>
-            <tr>
-              <td data-label="Destination"><strong>Rest of the UAE</strong></td>
-              <td data-label="Cut-off">6 PM</td>
-              <td data-label="Transit">Next day</td>
-              <td data-label="Cost">Free</td>
-            </tr>
-            <tr>
-              <td data-label="Destination"><strong>GCC (Saudi Arabia, Kuwait, Bahrain, Qatar, Oman)</strong></td>
-              <td data-label="Cut-off">Prepaid</td>
-              <td data-label="Transit">3–7 business days</td>
-              <td data-label="Cost">AED 90; free from AED 750</td>
-            </tr>
-            <tr>
-              <td data-label="Destination"><strong>International (most countries)</strong></td>
-              <td data-label="Cut-off">Prepaid</td>
-              <td data-label="Transit">8–15 business days</td>
-              <td data-label="Cost">AED 150; free from AED 1,200</td>
-            </tr>
-            <tr>
-              <td data-label="Destination"><strong>Canada and North Macedonia</strong></td>
-              <td data-label="Cut-off">Prepaid</td>
-              <td data-label="Transit">7–12 business days</td>
-              <td data-label="Cost">AED 260; free from AED 1,500</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <p class="ds-table-note">UAE shipping is always free. International orders ship with Aramex and must be prepaid. Transit estimates begin after dispatch and are not guarantees.</p>
+      {%- if policy_reviewed and delivery_rules != blank -%}
+        <div class="ds-table-wrap" tabindex="0" role="region" aria-label="Current shipping options by destination">
+          <table class="ds-table">
+            <thead>
+              <tr>
+                <th scope="col">Destination</th>
+                <th scope="col">Checkout name</th>
+                <th scope="col">Estimate</th>
+                <th scope="col">Charge</th>
+              </tr>
+            </thead>
+            <tbody>
+              {%- for rule in delivery_rules -%}
+                {%- if rule.active.value == true -%}
+                  <tr>
+                    <th scope="row">{{ rule.destination.value | escape }}</th>
+                    <td>{{ rule.checkout_name.value | escape }}</td>
+                    <td>{{ rule.transit_estimate.value | escape }}</td>
+                    <td>
+                      {{ rule.rate.value | escape }}
+                      {%- if rule.free_threshold.value != blank -%}
+                        · {{ rule.free_threshold.value | escape }}
+                      {%- endif -%}
+                    </td>
+                  </tr>
+                {%- endif -%}
+              {%- endfor -%}
+            </tbody>
+          </table>
+        </div>
+      {%- else -%}
+        <p class="ds-table-note">Enter your delivery address at checkout to see current services, estimates and charges.</p>
+      {%- endif -%}
+      <p class="ds-table-note"><a href="{{ delivery_policy_url }}">Review the current shipping policy</a> for delivery and customs conditions.</p>
     </section>
 
     {%- comment -%} ── TRUST ICONS ── {%- endcomment -%}
@@ -151,19 +154,19 @@
       <div class="ds-trust-grid">
         <div class="ds-trust-card">
           {% if s.icon_1_image != blank %}
-            <div class="ds-trust-icon"><img src="{{ s.icon_1_image | image_url: width: 120 }}" alt="{{ s.icon_1_title | default: '4-Hour Courier' }}" loading="lazy" width="60" height="60"></div>
+            <div class="ds-trust-icon"><img src="{{ s.icon_1_image | image_url: width: 120 }}" alt="{{ s.icon_1_title | default: 'Checkout Options' }}" loading="lazy" width="60" height="60"></div>
           {% else %}
             <span class="ds-trust-emoji" aria-hidden="true">&#9889;</span>
           {% endif %}
-          <span class="ds-trust-label">{{ s.icon_1_title | default: "4-Hour Courier" }}</span>
+          <span class="ds-trust-label">{{ s.icon_1_title | default: "Checkout Options" }}</span>
         </div>
         <div class="ds-trust-card">
           {% if s.icon_2_image != blank %}
-            <div class="ds-trust-icon"><img src="{{ s.icon_2_image | image_url: width: 120 }}" alt="{{ s.icon_2_title | default: 'Legal & Tested' }}" loading="lazy" width="60" height="60"></div>
+            <div class="ds-trust-icon"><img src="{{ s.icon_2_image | image_url: width: 120 }}" alt="{{ s.icon_2_title | default: 'Policy Details' }}" loading="lazy" width="60" height="60"></div>
           {% else %}
             <span class="ds-trust-emoji" aria-hidden="true">&#128737;</span>
           {% endif %}
-          <span class="ds-trust-label">{{ s.icon_2_title | default: "Legal & Tested" }}</span>
+          <span class="ds-trust-label">{{ s.icon_2_title | default: "Policy Details" }}</span>
         </div>
         <div class="ds-trust-card">
           {% if s.icon_3_image != blank %}
@@ -199,11 +202,11 @@
       {% else %}
         <details class="ds-faq">
           <summary class="ds-faq-q">How fast is delivery inside Dubai?<span class="ds-faq-chevron" aria-hidden="true"></span></summary>
-          <div class="ds-faq-answer"><div class="ds-faq-inner"><p>Place your order before 6 PM and our Quiqup courier will reach Dubai addresses within four hours. Orders placed after 6 PM will be delivered next-day.</p></div></div>
+          <div class="ds-faq-answer"><div class="ds-faq-inner"><p>Enter your Dubai address at checkout to see the current service and estimate.</p></div></div>
         </details>
         <details class="ds-faq">
           <summary class="ds-faq-q">What counts as Dubai coverage?<span class="ds-faq-chevron" aria-hidden="true"></span></summary>
-          <div class="ds-faq-answer"><div class="ds-faq-inner"><p>4-Hour Dubai Delivery covers Dubai only. The rest of the UAE is Next-Day UAE Delivery.</p></div></div>
+          <div class="ds-faq-answer"><div class="ds-faq-inner"><p>Coverage depends on the delivery address and options available at checkout.</p></div></div>
         </details>
       {% endif %}
     </section>
@@ -211,7 +214,7 @@
     {%- comment -%} ── FINAL CTA ── {%- endcomment -%}
     <section class="ds-final-cta" aria-label="Get started">
       <h2 class="ds-heading">Ready to order?</h2>
-      <p class="ds-body-muted">Place your order now and get it delivered to your door — same day in Dubai, next day across the UAE.</p>
+      <p class="ds-body-muted">Confirm current delivery availability, estimates and charges at checkout before placing your order.</p>
       <a class="ds-btn ds-btn--primary" href="{{ s.cta_link | default: routes.all_products_collection_url }}">{{ s.cta_text | default: "Shop All Nootropics" }}</a>
     </section>
 
@@ -426,7 +429,8 @@
    ═══════════════════════════════════════════════════════ */
 #dubai-shipping-{{ sid }} .ds-table-wrap {
   border-radius: var(--ds-radius);
-  overflow: hidden;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
   box-shadow: var(--ds-shadow-rest);
   margin-top: 12px;
 }
@@ -464,23 +468,7 @@
   margin-top: 10px;
 }
 @media (max-width: 640px) {
-  #dubai-shipping-{{ sid }} .ds-table thead { display: none; }
-  #dubai-shipping-{{ sid }} .ds-table tbody tr {
-    display: block;
-    padding: 14px;
-    border-top: 1px solid rgba(0, 0, 0, 0.04);
-  }
-  #dubai-shipping-{{ sid }} .ds-table tbody tr:first-child { border-top: none; }
-  #dubai-shipping-{{ sid }} .ds-table td {
-    display: block;
-    padding: 3px 0;
-    border-top: none;
-  }
-  #dubai-shipping-{{ sid }} .ds-table td::before {
-    content: attr(data-label) ": ";
-    font-weight: 700;
-    color: var(--ds-text);
-  }
+  #dubai-shipping-{{ sid }} .ds-table { min-width: 680px; }
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -661,14 +649,14 @@
       "type": "header",
       "content": "Hero"
     },
-        { "type": "text", "id": "hero_title", "label": "Hero title", "default": "Delivered in 4 Hours — Order by 6 PM" },
-        { "type": "textarea", "id": "hero_subtitle", "label": "Hero subtitle", "default": "Every SKU ships from our Dubai warehouse. Same-day delivery — often within four hours." },
+        { "type": "text", "id": "hero_title", "label": "Hero title", "default": "Dubai Shipping and Delivery" },
+        { "type": "textarea", "id": "hero_subtitle", "label": "Hero subtitle", "default": "Orders ship from Dubai. Confirm current services, estimates and charges at checkout." },
     { "type": "image_picker", "id": "hero_image", "label": "Hero background image (optional)" },
     {
       "type": "header",
       "content": "Intro"
     },
-    { "type": "richtext", "id": "intro_text", "label": "Intro paragraph", "default": "<p>Forget shipping delays and week-long waits. Because every SKU ships from our Dubai warehouse, you'll get your stack the <strong>same day</strong> — often within four hours. Below you'll find exact cut-off times and costs for Dubai, the rest of the UAE, and international Aramex delivery.</p>" },
+    { "type": "richtext", "id": "intro_text", "label": "Intro paragraph", "default": "<p>Use this page to understand delivery zones, tracking and checkout conditions. Current services and charges depend on the destination and selected checkout option.</p>" },
     {
       "type": "header",
       "content": "Coverage Map"
@@ -679,9 +667,9 @@
       "content": "Trust Icons"
     },
     { "type": "image_picker", "id": "icon_1_image", "label": "Icon 1 image" },
-    { "type": "text", "id": "icon_1_title", "label": "Icon 1 title", "default": "4-Hour Courier" },
+    { "type": "text", "id": "icon_1_title", "label": "Icon 1 title", "default": "Checkout Options" },
     { "type": "image_picker", "id": "icon_2_image", "label": "Icon 2 image" },
-    { "type": "text", "id": "icon_2_title", "label": "Icon 2 title", "default": "Legal & Tested" },
+    { "type": "text", "id": "icon_2_title", "label": "Icon 2 title", "default": "Policy Details" },
     { "type": "image_picker", "id": "icon_3_image", "label": "Icon 3 image" },
     { "type": "text", "id": "icon_3_title", "label": "Icon 3 title", "default": "Local Fulfillment" },
     { "type": "image_picker", "id": "icon_4_image", "label": "Icon 4 image" },
@@ -727,7 +715,7 @@
       "name": "FAQ",
       "settings": [
         { "type": "text", "id": "q", "label": "Question", "default": "How fast is delivery inside Dubai?" },
-        { "type": "textarea", "id": "a", "label": "Answer", "default": "Place your order before 6 PM and our Quiqup courier will reach Dubai addresses within four hours. Orders placed after 6 PM will be delivered next-day." }
+        { "type": "textarea", "id": "a", "label": "Answer", "default": "Enter your Dubai address at checkout to see the current service and estimate." }
       ]
     }
   ],
