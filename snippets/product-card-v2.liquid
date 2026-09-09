@@ -16,6 +16,7 @@
   if image_size == 'lg'
     assign gap = 13
   endif
+  assign product_image_alt = product.featured_image.alt | default: product.title
 %}
 
 <xo-animate xo-cascade style="height: 100%">
@@ -31,7 +32,7 @@
     <a href="{%- render 'product-card-variant-url', product: product -%}" class="product-card-v2__link">
       <div class="product-card-v2__wrapper" style="--gap: {{ gap }}px">
         <div class="product-card-v2__image{% if image_size %} product-card-v2__image--{{ image_size }}{% endif %}">
-          {% render 'image', image: product.featured_image, aspect_ratio: aspect_ratio, alt: product.featured_image.alt | default: product.title %}
+          {% render 'image', image: product.featured_image, aspect_ratio: aspect_ratio, alt: product_image_alt %}
         </div>
         {% if product and product != empty %}
           <h3 class="product-card-v2__title">{{ product.title }}</h3>

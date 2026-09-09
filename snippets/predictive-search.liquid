@@ -17,6 +17,10 @@
   assign collections = 'templates.search.collections' | t
   assign products = 'templates.search.products' | t
   assign articles = 'templates.search.articles' | t
+  assign no_results = 'templates.search.result_not_found' | t
+  assign one_result = 'templates.search.results_with_count.one' | t: count: '__COUNT__'
+  assign other_results = 'templates.search.results_with_count.other' | t: count: '__COUNT__'
+  assign loading_results = 'accessibility.loading' | t
 %}
 
 <form action='{{ routes.search_url }}' method='get' role='search'>
@@ -24,20 +28,31 @@
     class='xo-predictive-search'
     data-locales='
       {
-        pages: "{{ pages }}",
-        collections: "{{ collections }}",
-        products: "{{ products }}",
-        articles: "{{ articles }}"
+        "pages": {{ pages | json }},
+        "collections": {{ collections | json }},
+        "products": {{ products | json }},
+        "articles": {{ articles | json }},
+        "noResults": {{ no_results | json }},
+        "oneResult": {{ one_result | json }},
+        "otherResults": {{ other_results | json }},
+        "loading": {{ loading_results | json }}
       }
     '
   >
     <div class='xo-predictive-search__input'>
       {% render 'field-input', value: value, name: 'q', label: label, type: 'search', attr: "id='predictive-search' data-predictive-search-input='header'", block: true, id: 'search-input-header', placeholder: placeholder %}
-      <div class='xo-predictive-search__clear' data-predictive-search-reset='header'>
+      <button
+        type='button'
+        class='xo-predictive-search__clear'
+        data-predictive-search-reset='header'
+        aria-label="{{ 'products.facets.clear' | t }}"
+      >
         {% render 'icon', name: 'close', size: '3.2rem' %}
-      </div>
+      </button>
       <div class='xo-predictive-search__search'>
-        {% render 'button', type: 'submit', icon: 'search-1', icon_size: '3rem', style: 'link' %}
+        <button type='submit' class='xo-predictive-search__search-button' aria-label="{{ 'general.tooltip.search' | t }}">
+          {% render 'icon', name: 'search-1', size: '3rem' %}
+        </button>
       </div>
       <div class="xo-predictive-search__line">
         <div class="xo-predictive-search__line-anim{% if settings.enable_border_radius %} xo-predictive-search__line-anim--radius{% endif %}"></div>
@@ -49,40 +64,78 @@
   </div>
 </form>
 
+<style>
+  .xo-predictive-search__clear,
+  .xo-predictive-search__search-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+  }
+
+  .xo-predictive-search__clear {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .xo-predictive-search__clear.predictive-search__clear-button--visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .xo-predictive-search__clear:focus-visible,
+  .xo-predictive-search__search-button:focus-visible {
+    outline: 2px solid rgba(var(--color-accent));
+    outline-offset: 2px;
+    border-radius: 0.4rem;
+  }
+</style>
+
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const _inputChange = document.querySelector('.xo-field-input__input');
-    const _iconSearch = document.querySelector('.xo-predictive-search__search');
-    const _iconClear = document.querySelector('.xo-predictive-search__clear');
+  (() => {
+    const init = (root) => {
+      if (root.dataset.predictiveControlsReady === 'true') return;
+      root.dataset.predictiveControlsReady = 'true';
+      const input = root.querySelector('[data-predictive-search-input]');
+      const clear = root.querySelector('[data-predictive-search-reset]');
+      const search = root.querySelector('.xo-predictive-search__search');
+      if (!input || !clear || !search) return;
 
-    function handleInputChange() {
-      if (_inputChange.value.trim() !== '') {
-        _iconSearch.classList.add('active');
-      } else {
-        _iconSearch.classList.remove('active');
-      }
-    }
+      const sync = () => {
+        const hasValue = input.value.trim() !== '';
+        search.classList.toggle('active', hasValue);
+        clear.classList.toggle('predictive-search__clear-button--visible', hasValue);
+      };
 
-    function handleClearIconClick() {
-      _inputChange.value = '';
-      _iconSearch.classList.remove('active');
-    }
+      input.addEventListener('input', sync);
+      clear.addEventListener('click', () => {
+        input.value = '';
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        input.focus();
+      });
+      sync();
+    };
 
-    _inputChange.addEventListener('input', handleInputChange);
-    _iconClear.addEventListener('click', handleClearIconClick);
+    document.querySelectorAll('.xo-predictive-search').forEach(init);
 
-    // handleInputChange();
-
-    const _popularEls = document.querySelectorAll('.xo-main-predictive-search__item-popular');
-
-    _popularEls.forEach((item) => {
-      item.addEventListener('click', () => {
-        if (_inputChange) {
-          _inputChange.value = item.textContent.trim();
-          _inputChange.focus();
-          handleInputChange();
+    if (!window.nootropixPredictiveSearchControlsBound) {
+      window.nootropixPredictiveSearchControlsBound = true;
+      document.addEventListener('click', (event) => {
+        const item = event.target.closest('.xo-main-predictive-search__item-popular');
+        if (!item) return;
+        const input = document.querySelector('[data-predictive-search-input="header"]');
+        if (input) {
+          input.value = item.textContent.trim();
+          input.dispatchEvent(new Event('input', { bubbles: true }));
+          input.focus();
         }
       });
-    });
-  });
+      document.addEventListener('shopify:section:load', (event) => {
+        event.target.querySelectorAll('.xo-predictive-search').forEach(init);
+      });
+    }
+  })();
 </script>
