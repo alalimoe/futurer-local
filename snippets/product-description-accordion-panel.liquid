@@ -1,0 +1,40 @@
+{% doc %}
+  Renders one product-description accordion panel.
+
+  @param {number} index - 1-based panel index
+  @param {string} headline - Panel title
+  @param {string} content - Panel body HTML
+  @param {string} [tag] - Optional label beside the headline
+  @param {boolean} [open] - Whether the panel starts open
+
+  @example
+  {% render 'product-description-accordion-panel', index: 1, headline: headline, content: body, open: true %}
+{% enddoc %}
+
+{%- liquid
+  assign panel_index = index | prepend: '00' | slice: -2, 2
+-%}
+<details class="npx-desc-acc__item"{% if open %} open{% endif %}>
+  <summary class="npx-desc-acc__summary">
+    <span class="npx-desc-acc__lead">
+      <span class="npx-desc-acc__index" dir="ltr">{{ panel_index }}</span>
+      <span class="npx-desc-acc__headline">
+        {{ headline }}
+        {%- if tag != blank -%}
+          <span class="npx-desc-acc__tag">{{ tag }}</span>
+        {%- endif -%}
+      </span>
+    </span>
+    <span class="npx-desc-acc__icon" aria-hidden="true">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" focusable="false">
+        <line x1="7" y1="0" x2="7" y2="14" stroke="currentColor" stroke-width="1.5"></line>
+        <line x1="0" y1="7" x2="14" y2="7" stroke="currentColor" stroke-width="1.5"></line>
+      </svg>
+    </span>
+  </summary>
+  <div class="npx-desc-acc__panel">
+    <div class="npx-desc-acc__body">
+      {{ content }}
+    </div>
+  </div>
+</details>

@@ -1,163 +1,420 @@
-{%- comment -%}
-Nootropix — Product description renderer from metafields
-{%- endcomment -%}
+{% doc %}
+  Renders product description metafields as stacked prose, or as numbered accordion panels when accordion is true.
 
-{%- assign tldr_src = product.metafields.npx.tl_dr | default: product.metafields.npx.tldr -%}
-{%- assign tldr = nil -%}
-{%- if tldr_src and tldr_src.value -%}
-  {%- assign tldr = tldr_src.value -%}
-{%- elsif tldr_src -%}
-  {%- assign tldr = tldr_src -%}
-{%- endif -%}
+  @param {boolean} [accordion] - Render the buy-column accordion instead of stacked headings
+  @param {object} [section] - Section identity for a unique accordion group
+  @param {object} [block] - Block identity for a unique accordion group
 
-{%- assign what_it_is = product.metafields.npx.what_it_is.value | default: product.metafields.npx.what_it_is -%}
-{%- assign feel_raw = product.metafields.npx.feel_timeline.value | default: product.metafields.npx.feel_timeline -%}
-{%- assign feel_first_raw = feel_raw | strip | slice: 0, 1 -%}
-{%- assign feel = feel_raw -%}
-{%- assign feel_note = product.metafields.npx.feel_note.value | default: product.metafields.npx.feel_note -%}
-{%- assign how = product.metafields.npx.how_to_use.value -%}
-{%- assign why = product.metafields.npx.why.value -%}
-{%- assign safety_important = product.metafields.npx.safety_important.value | default: product.metafields.npx.safety_important -%}
-{%- assign safety_general = product.metafields.npx.safety_general.value | default: product.metafields.npx.safety_general -%}
-{%- assign disclaimer = product.metafields.npx.disclaimer.value | default: product.metafields.npx.disclaimer -%}
-{%- assign faq = product.metafields.npx.faq.value -%}
-{%- assign how_it_works_text = product.metafields.npx.how_it_works.value | default: product.metafields.npx.how_it_works -%}
+  @example
+  {% render 'product-description-metafields' %}
+  {% render 'product-description-metafields', accordion: true, section: section, block: block %}
+{% enddoc %}
 
-{%- comment -%} friendly heading for “Why … ?” {%- endcomment -%}
-{%- assign form_label = 'capsules' -%}
-{%- if product.title contains 'Powder' -%}{% assign form_label = 'powder' %}{%- endif -%}
+{%- liquid
+  assign tldr_src = product.metafields.npx.tl_dr | default: product.metafields.npx.tldr
+  assign tldr = nil
+  if tldr_src and tldr_src.value
+    assign tldr = tldr_src.value
+  elsif tldr_src
+    assign tldr = tldr_src
+  endif
 
-<div class="product-prose">
+  assign what_it_is = product.metafields.npx.what_it_is.value | default: product.metafields.npx.what_it_is
+  assign feel_raw = product.metafields.npx.feel_timeline.value | default: product.metafields.npx.feel_timeline
+  assign feel_first_raw = feel_raw | strip | slice: 0, 1
+  assign feel = feel_raw
+  assign feel_note = product.metafields.npx.feel_note.value | default: product.metafields.npx.feel_note
+  assign how = product.metafields.npx.how_to_use.value
+  assign why = product.metafields.npx.why.value
+  assign safety_important = product.metafields.npx.safety_important.value | default: product.metafields.npx.safety_important
+  assign safety_general = product.metafields.npx.safety_general.value | default: product.metafields.npx.safety_general
+  assign disclaimer = product.metafields.npx.disclaimer.value | default: product.metafields.npx.disclaimer
+  assign faq = product.metafields.npx.faq.value
+  assign how_it_works_text = product.metafields.npx.how_it_works.value | default: product.metafields.npx.how_it_works
 
-  {%- if tldr != blank -%}
-    <h3>TL;DR</h3>
-    {%- assign tldr_first = tldr | json | slice: 0, 1 -%}
-    {%- if tldr_first == '[' -%}
-      <ul>
-        {%- for item in tldr -%}<li>{{ item }}</li>{%- endfor -%}
-      </ul>
-    {%- else -%}
-      <p>{{ tldr | newline_to_br }}</p>
-    {%- endif -%}
-  {%- endif -%}
+  assign form_label = 'capsules'
+  if product.title contains 'Powder'
+    assign form_label = 'powder'
+  endif
 
-  {%- if what_it_is != blank -%}
-    <h3>What it is</h3>
-    <p>{{ what_it_is }}</p>
-  {%- endif -%}
+  assign dg_page = pages['dosing-guide']
+  assign dg_href = ''
+  if dg_page != empty
+    assign dg_href = dg_page.url
+    if product.metafields.custom.dose != blank
+      assign dg_href = dg_page.url | append: '#dose-' | append: product.handle
+    elsif product.metafields.custom.timing != blank
+      assign dg_href = dg_page.url | append: '#dose-' | append: product.handle
+    endif
+  endif
 
-  {%- if feel != blank -%}
-    <h3>What you’ll feel (and when)</h3>
-    {%- assign feel_first = feel | json | slice: 0, 1 -%}
-    {%- if feel_first == '[' -%}
-      <ul>
-        {%- for f in feel -%}
-          <li>{% if f.label %}<strong>{{ f.label }}:</strong> {% endif %}{{ f.description | default: f.text | default: f }}</li>
-        {%- endfor -%}
-      </ul>
-    {%- elsif feel_first_raw == '[' -%}
-      <ul>
-        {%- assign feel_chunks = feel_raw | append: '' | split: '"label":"' -%}
-        {%- for chunk in feel_chunks -%}
-          {%- unless forloop.first -%}
-            {%- assign f_label = chunk | split: '"' | first -%}
-            {%- assign desc_split = chunk | split: '"description":"' -%}
-            {%- assign f_desc = '' -%}
-            {%- if desc_split.size > 1 -%}
-              {%- assign f_desc = desc_split.last | split: '"' | first -%}
+  assign acc_on = false
+  if accordion == true
+    assign acc_on = true
+  endif
+
+  assign acc_group = 'npx-pdp-desc'
+  if section != blank
+    assign acc_group = acc_group | append: '-' | append: section.id
+  endif
+  if block != blank
+    assign acc_group = acc_group | append: '-' | append: block.id
+  endif
+  assign acc_group = acc_group | append: '-' | append: product.id
+
+  assign has_expect = false
+  if feel != blank
+    assign has_expect = true
+  endif
+  if feel_note != blank
+    assign has_expect = true
+  endif
+
+  assign has_safety = false
+  if safety_important != blank
+    assign has_safety = true
+  endif
+  if safety_general != blank
+    assign has_safety = true
+  endif
+  if disclaimer != blank
+    assign has_safety = true
+  endif
+
+  assign has_metafields = false
+  if tldr != blank
+    assign has_metafields = true
+  endif
+  if what_it_is != blank
+    assign has_metafields = true
+  endif
+  if has_expect
+    assign has_metafields = true
+  endif
+  if how_it_works_text != blank
+    assign has_metafields = true
+  endif
+  if how != blank
+    assign has_metafields = true
+  endif
+  if why != blank
+    assign has_metafields = true
+  endif
+  if has_safety
+    assign has_metafields = true
+  endif
+  if faq != blank
+    assign has_metafields = true
+  endif
+-%}
+
+{%- if acc_on and has_metafields -%}
+  {{ 'product-description-accordion.css' | asset_url | stylesheet_tag }}
+  <script src="{{ 'product-description-accordion.js' | asset_url }}" defer></script>
+
+  <npx-desc-accordion class="npx-desc-acc" data-acc-group="{{ acc_group | escape }}">
+    <div class="npx-desc-acc__divider">
+      <span class="npx-desc-acc__divider-line"></span>
+      <span class="npx-desc-acc__divider-label">{{ 'products.product.description_accordion.details' | t }}</span>
+      <span class="npx-desc-acc__divider-line"></span>
+    </div>
+
+    <div class="npx-desc-acc__list">
+      {%- assign acc_i = 0 -%}
+      {%- assign acc_tag = '' -%}
+
+      {%- if tldr != blank -%}
+        {%- assign acc_i = acc_i | plus: 1 -%}
+        {%- assign acc_headline = 'products.product.description_accordion.at_a_glance' | t -%}
+        {%- capture acc_body -%}
+          {%- assign tldr_first = tldr | json | slice: 0, 1 -%}
+          {%- if tldr_first == '[' -%}
+            <ul class="npx-desc-acc__dots">
+              {%- for item in tldr -%}<li>{{ item }}</li>{%- endfor -%}
+            </ul>
+          {%- else -%}
+            <p>{{ tldr | newline_to_br }}</p>
+          {%- endif -%}
+        {%- endcapture -%}
+        {%- render 'product-description-accordion-panel', index: acc_i, headline: acc_headline, content: acc_body -%}
+      {%- endif -%}
+
+      {%- if what_it_is != blank -%}
+        {%- assign acc_i = acc_i | plus: 1 -%}
+        {%- assign acc_headline = 'products.product.description_accordion.what_it_is' | t -%}
+        {%- capture acc_body -%}
+          <p>{{ what_it_is }}</p>
+        {%- endcapture -%}
+        {%- render 'product-description-accordion-panel', index: acc_i, headline: acc_headline, content: acc_body -%}
+      {%- endif -%}
+
+      {%- if has_expect -%}
+        {%- assign acc_i = acc_i | plus: 1 -%}
+        {%- assign acc_headline = 'products.product.description_accordion.what_to_expect' | t -%}
+        {%- capture acc_body -%}
+          {%- if feel != blank -%}
+            {%- assign feel_first = feel | json | slice: 0, 1 -%}
+            {%- if feel_first == '[' -%}
+              <div class="npx-desc-acc__rows">
+                {%- for f in feel -%}
+                  <div class="npx-desc-acc__row">
+                    {%- if f.label != blank -%}
+                      <span class="npx-desc-acc__row-label">{{ f.label }}</span>
+                    {%- endif -%}
+                    <span>{{ f.description | default: f.text | default: f }}</span>
+                  </div>
+                {%- endfor -%}
+              </div>
+            {%- elsif feel_first_raw == '[' -%}
+              <div class="npx-desc-acc__rows">
+                {%- assign feel_chunks = feel_raw | append: '' | split: '"label":"' -%}
+                {%- for chunk in feel_chunks -%}
+                  {%- unless forloop.first -%}
+                    {%- assign f_label = chunk | split: '"' | first -%}
+                    {%- assign desc_split = chunk | split: '"description":"' -%}
+                    {%- assign f_desc = '' -%}
+                    {%- if desc_split.size > 1 -%}
+                      {%- assign f_desc = desc_split.last | split: '"' | first -%}
+                    {%- endif -%}
+                    {%- if f_desc == blank -%}
+                      {%- assign text_split = chunk | split: '"text":"' -%}
+                      {%- if text_split.size > 1 -%}
+                        {%- assign f_desc = text_split.last | split: '"' | first -%}
+                      {%- endif -%}
+                    {%- endif -%}
+                    <div class="npx-desc-acc__row">
+                      {%- if f_label != blank -%}
+                        <span class="npx-desc-acc__row-label">{{ f_label }}</span>
+                      {%- endif -%}
+                      <span>{{ f_desc }}</span>
+                    </div>
+                  {%- endunless -%}
+                {%- endfor -%}
+              </div>
+            {%- else -%}
+              <p>{{ feel | newline_to_br }}</p>
             {%- endif -%}
-            {%- if f_desc == blank -%}
-              {%- assign text_split = chunk | split: '"text":"' -%}
-              {%- if text_split.size > 1 -%}
-                {%- assign f_desc = text_split.last | split: '"' | first -%}
+          {%- endif -%}
+          {%- if feel_note != blank -%}
+            <p class="npx-desc-acc__note">{{ feel_note }}</p>
+          {%- endif -%}
+        {%- endcapture -%}
+        {%- render 'product-description-accordion-panel', index: acc_i, headline: acc_headline, content: acc_body -%}
+      {%- endif -%}
+
+      {%- if product.metafields.npx.how_it_works != blank -%}
+        {%- assign acc_i = acc_i | plus: 1 -%}
+        {%- assign acc_headline = 'products.product.description_accordion.how_it_works' | t -%}
+        {%- capture acc_body -%}
+          {{ product.metafields.npx.how_it_works | metafield_tag }}
+        {%- endcapture -%}
+        {%- render 'product-description-accordion-panel', index: acc_i, headline: acc_headline, content: acc_body -%}
+      {%- endif -%}
+
+      {%- if how != blank -%}
+        {%- assign acc_i = acc_i | plus: 1 -%}
+        {%- assign acc_headline = 'products.product.description_accordion.how_to_use' | t -%}
+        {%- capture acc_body -%}
+          {%- assign how_first = how | json | slice: 0, 1 -%}
+          {%- if how_first == '[' -%}
+            <div class="npx-desc-acc__rows">
+              {%- for h in how -%}
+                <div class="npx-desc-acc__row">
+                  {%- if h.label != blank -%}
+                    <span class="npx-desc-acc__row-label">{{ h.label }}</span>
+                  {%- endif -%}
+                  <span>{{ h.text | default: h.description | default: h }}</span>
+                </div>
+              {%- endfor -%}
+            </div>
+          {%- else -%}
+            <p>{{ how | newline_to_br }}</p>
+          {%- endif -%}
+          {%- if dg_href != blank -%}
+            <a class="npx-desc-acc__link" href="{{ dg_href }}">{{ 'products.product.description_accordion.dosing_guide' | t }}</a>
+          {%- endif -%}
+        {%- endcapture -%}
+        {%- render 'product-description-accordion-panel', index: acc_i, headline: acc_headline, content: acc_body -%}
+      {%- endif -%}
+
+      {%- if why != blank -%}
+        {%- assign acc_i = acc_i | plus: 1 -%}
+        {%- assign acc_headline = 'products.product.description_accordion.why_choose' | t -%}
+        {%- capture acc_body -%}
+          {%- assign why_first = why | json | slice: 0, 1 -%}
+          {%- if why_first == '[' -%}
+            <ul class="npx-desc-acc__dots">
+              {%- for w in why -%}<li>{{ w }}</li>{%- endfor -%}
+            </ul>
+          {%- else -%}
+            <p>{{ why | newline_to_br }}</p>
+          {%- endif -%}
+        {%- endcapture -%}
+        {%- render 'product-description-accordion-panel', index: acc_i, headline: acc_headline, content: acc_body -%}
+      {%- endif -%}
+
+      {%- if has_safety -%}
+        {%- assign acc_i = acc_i | plus: 1 -%}
+        {%- assign acc_headline = 'products.product.description_accordion.safety' | t -%}
+        {%- assign acc_tag = 'products.product.description_accordion.important' | t -%}
+        {%- capture acc_body -%}
+          {%- if safety_important != blank -%}
+            <p class="npx-desc-acc__lead-copy">
+              <strong>{{ 'products.product.description_accordion.important' | t }}:</strong>
+              {{ safety_important }}
+            </p>
+          {%- endif -%}
+          {%- if safety_general != blank -%}
+            <p class="npx-desc-acc__subhead">{{ 'products.product.description_accordion.general_safety' | t }}</p>
+            <p>{{ safety_general }}</p>
+          {%- endif -%}
+          {%- if disclaimer != blank -%}
+            <p class="npx-desc-acc__disclaimer">{{ disclaimer }}</p>
+          {%- endif -%}
+        {%- endcapture -%}
+        {%- render 'product-description-accordion-panel', index: acc_i, headline: acc_headline, tag: acc_tag, content: acc_body -%}
+      {%- endif -%}
+
+      {%- if faq != blank -%}
+        {%- assign acc_i = acc_i | plus: 1 -%}
+        {%- assign acc_headline = 'products.product.description_accordion.questions' | t -%}
+        {%- capture acc_body -%}
+          {%- assign faq_first = faq | json | slice: 0, 1 -%}
+          {%- if faq_first == '[' -%}
+            {%- for i in faq -%}
+              <div class="npx-desc-acc__faq">
+                <p class="npx-desc-acc__faq-q">{{ i.q | default: i.question | default: i.title }}</p>
+                <p class="npx-desc-acc__faq-a">{{ i.a | default: i.answer | default: i.text }}</p>
+              </div>
+            {%- endfor -%}
+          {%- else -%}
+            <p>{{ faq | newline_to_br }}</p>
+          {%- endif -%}
+        {%- endcapture -%}
+        {%- render 'product-description-accordion-panel', index: acc_i, headline: acc_headline, content: acc_body -%}
+      {%- endif -%}
+    </div>
+  </npx-desc-accordion>
+
+{%- else -%}
+  <div class="product-prose">
+    {%- if tldr != blank -%}
+      <h3>TL;DR</h3>
+      {%- assign tldr_first = tldr | json | slice: 0, 1 -%}
+      {%- if tldr_first == '[' -%}
+        <ul>
+          {%- for item in tldr -%}<li>{{ item }}</li>{%- endfor -%}
+        </ul>
+      {%- else -%}
+        <p>{{ tldr | newline_to_br }}</p>
+      {%- endif -%}
+    {%- endif -%}
+
+    {%- if what_it_is != blank -%}
+      <h3>What it is</h3>
+      <p>{{ what_it_is }}</p>
+    {%- endif -%}
+
+    {%- if feel != blank -%}
+      <h3>What you’ll feel (and when)</h3>
+      {%- assign feel_first = feel | json | slice: 0, 1 -%}
+      {%- if feel_first == '[' -%}
+        <ul>
+          {%- for f in feel -%}
+            <li>{% if f.label %}<strong>{{ f.label }}:</strong> {% endif %}{{ f.description | default: f.text | default: f }}</li>
+          {%- endfor -%}
+        </ul>
+      {%- elsif feel_first_raw == '[' -%}
+        <ul>
+          {%- assign feel_chunks = feel_raw | append: '' | split: '"label":"' -%}
+          {%- for chunk in feel_chunks -%}
+            {%- unless forloop.first -%}
+              {%- assign f_label = chunk | split: '"' | first -%}
+              {%- assign desc_split = chunk | split: '"description":"' -%}
+              {%- assign f_desc = '' -%}
+              {%- if desc_split.size > 1 -%}
+                {%- assign f_desc = desc_split.last | split: '"' | first -%}
               {%- endif -%}
-            {%- endif -%}
-            <li>{% if f_label != blank %}<strong>{{ f_label }}:</strong> {% endif %}{{ f_desc }}</li>
-          {%- endunless -%}
+              {%- if f_desc == blank -%}
+                {%- assign text_split = chunk | split: '"text":"' -%}
+                {%- if text_split.size > 1 -%}
+                  {%- assign f_desc = text_split.last | split: '"' | first -%}
+                {%- endif -%}
+              {%- endif -%}
+              <li>{% if f_label != blank %}<strong>{{ f_label }}:</strong> {% endif %}{{ f_desc }}</li>
+            {%- endunless -%}
+          {%- endfor -%}
+        </ul>
+      {%- else -%}
+        <p>{{ feel | newline_to_br }}</p>
+      {%- endif -%}
+    {%- endif -%}
+
+    {%- if feel_note != blank -%}
+      <aside class="npx-note">{{ feel_note }}</aside>
+    {%- endif -%}
+
+    {%- if product.metafields.npx.how_it_works != blank -%}
+      <h3>How it works (the simple science)</h3>
+      {{ product.metafields.npx.how_it_works | metafield_tag }}
+    {%- endif -%}
+
+    {%- if how != blank -%}
+      <h3>How to use</h3>
+      {%- assign how_first = how | json | slice: 0, 1 -%}
+      {%- if how_first == '[' -%}
+        <ul>
+          {%- for h in how -%}
+            <li>{% if h.label %}<strong>{{ h.label }}:</strong> {% endif %}{{ h.text | default: h.description | default: h }}</li>
+          {%- endfor -%}
+        </ul>
+      {%- else -%}
+        <p>{{ how | newline_to_br }}</p>
+      {%- endif -%}
+      {%- if dg_href != blank -%}
+        <p><a href="{{ dg_href }}">Open the Dosing Guide for this product</a></p>
+      {%- endif -%}
+    {%- endif -%}
+
+    {%- if why != blank -%}
+      <h3>Why {{ form_label }}?</h3>
+      {%- assign why_first = why | json | slice: 0, 1 -%}
+      {%- if why_first == '[' -%}
+        <ul>
+          {%- for w in why -%}<li>{{ w }}</li>{%- endfor -%}
+        </ul>
+      {%- else -%}
+        <p>{{ why | newline_to_br }}</p>
+      {%- endif -%}
+    {%- endif -%}
+
+    {%- if has_safety -%}
+      <h3>Safety &amp; interactions</h3>
+      {%- if safety_important != blank -%}
+        <aside class="npx-important"><strong>Important:</strong> {{ safety_important }}</aside>
+      {%- endif -%}
+      {%- if safety_general != blank -%}
+        <p><strong>General safety:</strong> {{ safety_general }}</p>
+      {%- endif -%}
+      {%- if disclaimer != blank -%}
+        <aside class="npx-disclaimer"><strong>Disclaimer:</strong> {{ disclaimer }}</aside>
+      {%- endif -%}
+    {%- endif -%}
+
+    {%- if faq != blank -%}
+      <h3>FAQ</h3>
+      {%- assign faq_first = faq | json | slice: 0, 1 -%}
+      {%- if faq_first == '[' -%}
+        {%- for i in faq -%}
+          <p><strong>{{ forloop.index }}. {{ i.q | default: i.question | default: i.title }}</strong><br>{{ i.a | default: i.answer | default: i.text }}</p>
         {%- endfor -%}
-      </ul>
-    {%- else -%}
-      <p>{{ feel | newline_to_br }}</p>
+      {%- else -%}
+        <p>{{ faq | newline_to_br }}</p>
+      {%- endif -%}
     {%- endif -%}
-  {%- endif -%}
-  
-  {%- if feel_note != blank -%}
-  <aside class="npx-note">{{ feel_note }}</aside>
+
+    {%- unless has_metafields -%}
+      {{ product.description }}
+    {%- endunless -%}
+  </div>
 {%- endif -%}
-
-
-  {%- if product.metafields.npx.how_it_works != blank -%}
-  <h3>How it works (the simple science)</h3>
-  {{ product.metafields.npx.how_it_works | metafield_tag }}
-{%- endif -%}
-
-
-  {%- if how != blank -%}
-    <h3>How to use</h3>
-    {%- assign how_first = how | json | slice: 0, 1 -%}
-    {%- if how_first == '[' -%}
-      <ul>
-        {%- for h in how -%}
-          <li>{% if h.label %}<strong>{{ h.label }}:</strong> {% endif %}{{ h.text | default: h.description | default: h }}</li>
-        {%- endfor -%}
-      </ul>
-    {%- else -%}
-      <p>{{ how | newline_to_br }}</p>
-    {%- endif -%}
-    {%- assign dg_page = pages['dosing-guide'] -%}
-    {%- if dg_page != empty -%}
-      {%- assign dg_hub_url = dg_page.url -%}
-    {%- else -%}
-      {%- assign dg_hub_url = '/pages/dosing-guide' -%}
-    {%- endif -%}
-    <p><a href="{{ dg_hub_url }}#dose-{{ product.handle }}">Open the Dosing Guide for this product</a></p>
-  {%- endif -%}
-
-  {%- if why != blank -%}
-    <h3>Why {{ form_label }}?</h3>
-    {%- assign why_first = why | json | slice: 0, 1 -%}
-    {%- if why_first == '[' -%}
-      <ul>
-        {%- for w in why -%}<li>{{ w }}</li>{%- endfor -%}
-      </ul>
-    {%- else -%}
-      <p>{{ why | newline_to_br }}</p>
-    {%- endif -%}
-  {%- endif -%}
-
-  {%- if safety_important != blank or safety_general != blank or disclaimer != blank -%}
-    <h3>Safety &amp; interactions</h3>
-    {%- if safety_important != blank -%}
-  <aside class="npx-important"><strong>Important:</strong> {{ safety_important }}</aside>
-{%- endif -%}
-
-    {%- if safety_general != blank -%}
-      <p><strong>General safety:</strong> {{ safety_general }}</p>
-    {%- endif -%}
-    
-    {%- if disclaimer != blank -%}
-  <aside class="npx-disclaimer"><strong>Disclaimer:</strong> {{ disclaimer }}</aside>
-{%- endif -%}
-
-  {%- endif -%}
-
-  {%- if faq != blank -%}
-    <h3>FAQ</h3>
-    {%- assign faq_first = faq | json | slice: 0, 1 -%}
-    {%- if faq_first == '[' -%}
-      {%- for i in faq -%}
-        <p><strong>{{ forloop.index }}. {{ i.q | default: i.question | default: i.title }}</strong><br>{{ i.a | default: i.answer | default: i.text }}</p>
-      {%- endfor -%}
-    {%- else -%}
-      <p>{{ faq | newline_to_br }}</p>
-    {%- endif -%}
-  {%- endif -%}
-
-  {%- comment -%}
-  Fallback to Body HTML only if *everything* above is missing.
-  (No parentheses – Liquid evaluates left-to-right.)
-  {%- endcomment -%}
-  {%- if tldr == blank and what_it_is == blank and feel == blank and feel_note == blank and how_it_works_text == blank and how == blank and why == blank and safety_important == blank and safety_general == blank and disclaimer == blank and faq == blank -%}
-    {{ product.description }}
-  {%- endif -%}
-</div>
