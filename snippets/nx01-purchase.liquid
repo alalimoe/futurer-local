@@ -1,14 +1,13 @@
 {% doc %}
-  Compact NX-01 purchase selector. Price and delivery render only here.
+  Compact NX-01 purchase selector. Price and add to cart render only here.
 
   @param {product} product - Product to add
   @param {string} instance_id - Unique instance key
   @param {string} [form_id] - Form element id
   @param {string} [cta_label] - Add to cart label
-  @param {boolean} [show_policy] - Render shipping and returns summary
 
   @example
-  {% render 'nx01-purchase', product: product, instance_id: 'hero', show_policy: true %}
+  {% render 'nx01-purchase', product: product, instance_id: 'hero' %}
 {% enddoc %}
 
 {%- liquid
@@ -43,10 +42,6 @@
   assign choose_label = 'sections.nx01_launch_purchase.choose_options' | t
   assign unavailable_label = 'products.product.unavailable' | t
   assign restock_submit_label = 'sections.nx01_launch_buy.restock_submit' | t
-  assign show_shipping = true
-  if show_policy == false
-    assign show_shipping = false
-  endif
   assign unit_one = variant.price
   assign unit_two = variant.price
   if variant != blank
@@ -202,14 +197,11 @@
     {% endform %}
   {%- endif -%}
 
-  {%- if show_shipping -%}
-    <div class="nx01-purchase__policy">
-      {%- if variant_available -%}
-        <div class="pdp-buy-captions">
-          {% render 'ships-today-bar', context: 'product', show_stock_fallback: true %}
-        </div>
-      {%- endif -%}
-      {% render 'shipping-policy-microcopy', class_prefix: 'nx01-purchase' %}
+  {%- if variant_available -%}
+    <div class="nx01-purchase__stock">
+      <div class="pdp-buy-captions">
+        {% render 'ships-today-bar', context: 'product', show_stock_fallback: true %}
+      </div>
     </div>
   {%- endif -%}
 </div>
