@@ -248,62 +248,6 @@
 {% if section.settings.structured_data %}
   <script type="application/ld+json">{{ nx_product | structured_data }}</script>
 {% endif %}
-<script>
-  // #region agent log
-  (function () {
-    var send = function (hypothesisId, message, data) {
-      fetch('http://127.0.0.1:7906/ingest/73d01807-f919-4550-a2d5-12c9f0435bd9', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': '70de97' },
-        body: JSON.stringify({
-          sessionId: '70de97',
-          runId: data.assetHref ? 'post-fix' : 'pre-fix',
-          hypothesisId: hypothesisId,
-          location: 'npx-nx01-hero.liquid:inline',
-          message: message,
-          data: data,
-          timestamp: Date.now()
-        })
-      }).catch(function () {});
-    };
-    var report = function () {
-      var hero = document.querySelector('.npx-hero');
-      var photo = document.querySelector('.npx-hero__photo');
-      var cs = hero ? getComputedStyle(hero) : null;
-      var photoCs = photo ? getComputedStyle(photo) : null;
-      var sheetsWithHero = 0;
-      var assetHref = null;
-      var compiledHref = null;
-      for (var i = 0; i < document.styleSheets.length; i++) {
-        var sheet = document.styleSheets[i];
-        var href = sheet.href || '';
-        if (href.indexOf('npx-nx01-hero.css') !== -1) assetHref = href;
-        if (href.indexOf('compiled_assets/styles.css') !== -1) compiledHref = href;
-        try {
-          var rules = sheet.cssRules || [];
-          for (var j = 0; j < rules.length; j++) {
-            if ((rules[j].cssText || '').indexOf('.npx-hero') !== -1) sheetsWithHero += 1;
-          }
-        } catch (e) {}
-      }
-      send('A', 'hero style attachment', {
-        host: location.host,
-        heroDisplay: cs ? cs.display : null,
-        heroPadding: cs ? cs.padding : null,
-        photoPosition: photoCs ? photoCs.position : null,
-        photoH: photo ? photo.clientHeight : null,
-        sheetsWithHero: sheetsWithHero,
-        assetHref: assetHref,
-        compiledHref: compiledHref,
-        viewport: window.innerWidth,
-        mobileMq: window.matchMedia('(max-width: 749px)').matches
-      });
-    };
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', report);
-    else report();
-  })();
-  // #endregion
-</script>
 {% elsif request.design_mode %}
   <p>{{ 'sections.npx_nx01_hero.wrong_product' | t }}</p>
 {% endif %}
