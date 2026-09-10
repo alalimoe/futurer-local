@@ -1,0 +1,639 @@
+{%- liquid
+  assign heading_id = 'npx-faq-heading-' | append: section.id
+  assign list_id = 'npx-faq-list-' | append: section.id
+  assign initial_count = section.settings.initial_count | default: 8
+  assign single_open = section.settings.single_open
+  assign contact_email = section.settings.contact_email | strip
+  assign item_count = 0
+  for block in section.blocks
+    if block.type == 'question'
+      if block.settings.question != blank and block.settings.answer != blank
+        assign item_count = item_count | plus: 1
+      endif
+    endif
+  endfor
+-%}
+
+<npx-nx01-faq
+  class="npx-faq"
+  id="nx01-faqs-{{ section.id }}"
+  data-initial-count="{{ initial_count }}"
+  data-single-open="{% if single_open %}true{% else %}false{% endif %}"
+  style="--npx-faq-bg: {{ section.settings.background_color }}; --npx-faq-title: {{ section.settings.heading_color }}; --npx-faq-text: {{ section.settings.text_color }}; --npx-faq-accent: {{ section.settings.accent_color }}; --npx-faq-border: {{ section.settings.border_color }}; --npx-faq-width: 900px; --npx-faq-top: {{ section.settings.padding_top }}px; --npx-faq-bottom: {{ section.settings.padding_bottom }}px; --npx-faq-heading-size: 38px;"
+  role="region"
+  aria-labelledby="{{ heading_id }}"
+>
+  <div class="npx-faq__inner">
+    <header class="npx-faq__header">
+      {%- if section.settings.eyebrow != blank -%}
+        <p class="npx-faq__eyebrow">{{ section.settings.eyebrow | escape }}</p>
+      {%- endif -%}
+      {%- if section.settings.heading != blank -%}
+        <h2 class="npx-faq__heading" id="{{ heading_id }}">{{ section.settings.heading | escape }}</h2>
+      {%- else -%}
+        <h2 class="npx-faq__heading xo-visually-hidden" id="{{ heading_id }}">
+          {{ 'sections.nx01_faqs.region_label' | t }}
+        </h2>
+      {%- endif -%}
+      {%- if section.settings.intro != blank -%}
+        <div class="npx-faq__intro">{{ section.settings.intro }}</div>
+      {%- endif -%}
+    </header>
+
+    {%- if item_count > 0 -%}
+      <div class="npx-faq__list" id="{{ list_id }}">
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'question' -%}
+            {%- if block.settings.question != blank and block.settings.answer != blank -%}
+              <details
+                class="npx-faq__item"
+                id="npx-faq-{{ section.id }}-{{ block.id }}"
+                {{ block.shopify_attributes }}
+                {% if block.settings.open_by_default %}
+                  open
+                {% endif %}
+              >
+                <summary class="npx-faq__summary">
+                  <span class="npx-faq__question">{{ block.settings.question | escape }}</span>
+                  <svg class="npx-faq__chevron" viewBox="0 0 24 24" width="24" height="24" fill="none" aria-hidden="true" focusable="false">
+                    <path d="m5 9 7 7 7-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </summary>
+                <div class="npx-faq__answer">{{ block.settings.answer }}</div>
+              </details>
+            {%- endif -%}
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+
+    {%- if item_count > initial_count -%}
+      <div class="npx-faq__more-wrap">
+        <button
+          class="npx-faq__more"
+          type="button"
+          aria-expanded="false"
+          aria-controls="{{ list_id }}"
+          hidden
+        >
+          <span data-more-label>{{ 'sections.nx01_faqs.show_more' | t }}</span>
+          <span data-less-label hidden>{{ 'sections.nx01_faqs.show_fewer' | t }}</span>
+          <svg class="npx-faq__more-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" aria-hidden="true" focusable="false">
+            <path d="M12 4v16m-6-6 6 6 6-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+    {%- endif -%}
+
+    {%- if section.settings.contact_label != blank or contact_email != blank -%}
+      <p class="npx-faq__contact">
+        {%- if section.settings.contact_label != blank -%}
+          {{ section.settings.contact_label | escape }}
+        {%- endif -%}
+        {%- if contact_email != blank -%}
+          <a dir="ltr" href="mailto:{{ contact_email | escape }}">{{ contact_email | escape }}</a>
+        {%- endif -%}
+      </p>
+    {%- endif -%}
+  </div>
+</npx-nx01-faq>
+
+{% stylesheet %}
+  .npx-faq {
+    display: block;
+    padding-block: var(--npx-faq-top) var(--npx-faq-bottom);
+    padding-inline: 28px;
+    background: var(--npx-faq-bg);
+    color: var(--npx-faq-text);
+    font-family: var(--font-body-family, Arial, sans-serif);
+    font-size: 16px;
+    line-height: 1.7;
+  }
+
+  .npx-faq *,
+  .npx-faq *::before,
+  .npx-faq *::after {
+    box-sizing: border-box;
+  }
+
+  .npx-faq [hidden] {
+    display: none !important;
+  }
+
+  .npx-faq .npx-faq__inner {
+    max-width: var(--npx-faq-width);
+    margin-inline: auto;
+  }
+
+  .npx-faq .npx-faq__header {
+    margin: 0 auto 32px;
+    text-align: center;
+  }
+
+  .npx-faq .npx-faq__eyebrow {
+    margin: 0 0 12px;
+    color: var(--npx-faq-accent);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    line-height: 1.5;
+  }
+
+  .npx-faq .npx-faq__heading {
+    margin: 0;
+    color: var(--npx-faq-title);
+    font-family: var(--font-heading-family, var(--font-body-family, Arial, sans-serif));
+    font-size: clamp(28px, 3.2vw, var(--npx-faq-heading-size));
+    font-style: normal;
+    font-weight: 600;
+    letter-spacing: -0.035em;
+    line-height: 1.2;
+    text-transform: none;
+    overflow-wrap: anywhere;
+  }
+
+  .npx-faq .npx-faq__intro {
+    margin: 16px auto 0;
+    max-width: 600px;
+    font-size: 16px;
+  }
+
+  .npx-faq .npx-faq__intro p {
+    margin: 0;
+  }
+
+  .npx-faq .npx-faq__item {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-block-end: 1px solid var(--npx-faq-border);
+    background: transparent;
+    border-radius: 0;
+  }
+
+  .npx-faq .npx-faq__summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    min-height: 80px;
+    margin: 0;
+    padding: 24px 16px;
+    color: var(--npx-faq-title);
+    cursor: pointer;
+    list-style: none;
+    text-align: start;
+  }
+
+  .npx-faq .npx-faq__summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .npx-faq .npx-faq__summary::marker {
+    content: '';
+  }
+
+  .npx-faq .npx-faq__question {
+    font-family: var(--font-heading-family, var(--font-body-family, Arial, sans-serif));
+    font-size: 18px;
+    font-weight: 500;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+  }
+
+  .npx-faq .npx-faq__chevron {
+    flex: 0 0 22px;
+    width: 22px;
+    height: 22px;
+    transition: transform 180ms ease;
+  }
+
+  .npx-faq .npx-faq__item[open] > .npx-faq__summary .npx-faq__chevron {
+    transform: rotate(180deg);
+  }
+
+  .npx-faq .npx-faq__item[open] > .npx-faq__summary {
+    color: var(--npx-faq-accent);
+  }
+
+  .npx-faq .npx-faq__answer {
+    padding: 0 16px 26px;
+    padding-inline: 16px 62px;
+    font-size: 16px;
+    line-height: 1.8;
+    overflow-wrap: anywhere;
+  }
+
+  .npx-faq .npx-faq__answer p {
+    margin: 0;
+  }
+
+  .npx-faq .npx-faq__answer p + p {
+    margin-block-start: 12px;
+  }
+
+  .npx-faq .npx-faq__answer ul,
+  .npx-faq .npx-faq__answer ol {
+    margin-block: 12px;
+    padding-inline-start: 22px;
+  }
+
+  .npx-faq .npx-faq__answer a,
+  .npx-faq .npx-faq__contact a,
+  .npx-faq .npx-faq__intro a {
+    color: var(--npx-faq-accent);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .npx-faq .npx-faq__more-wrap {
+    text-align: center;
+  }
+
+  .npx-faq .npx-faq__more {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    min-height: 50px;
+    max-width: 100%;
+    margin: 32px 0 0;
+    padding: 12px 26px;
+    border: 1px solid var(--npx-faq-title);
+    border-radius: 4px;
+    background: transparent;
+    color: var(--npx-faq-title);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.5;
+    letter-spacing: 0.06em;
+    text-transform: none;
+    box-shadow: none;
+  }
+
+  .npx-faq .npx-faq__more-icon {
+    flex: 0 0 20px;
+    transition: transform 180ms ease;
+  }
+
+  .npx-faq .npx-faq__more[aria-expanded='true'] .npx-faq__more-icon {
+    transform: rotate(180deg);
+  }
+
+  .npx-faq .npx-faq__contact {
+    margin: 24px 0 0;
+    text-align: center;
+    font-size: 13px;
+    line-height: 1.8;
+    overflow-wrap: anywhere;
+  }
+
+  .npx-faq .npx-faq__contact a {
+    display: inline-block;
+  }
+
+  .npx-faq a:focus-visible,
+  .npx-faq summary:focus-visible,
+  .npx-faq button:focus-visible {
+    outline: 2px solid var(--npx-faq-accent);
+    outline-offset: 3px;
+    border-radius: 3px;
+  }
+
+  @media (hover: hover) {
+    .npx-faq .npx-faq__summary:hover,
+    .npx-faq .npx-faq__more:hover {
+      color: var(--npx-faq-accent);
+    }
+  }
+
+  @media (max-width: 600px) {
+    .npx-faq {
+      padding-inline: 20px;
+      padding-block: min(var(--npx-faq-top), 48px) min(var(--npx-faq-bottom), 40px);
+    }
+
+    .npx-faq .npx-faq__header {
+      margin-bottom: 22px;
+    }
+
+    .npx-faq .npx-faq__heading {
+      font-size: min(var(--npx-faq-heading-size), 30px);
+    }
+
+    .npx-faq .npx-faq__intro {
+      margin-top: 12px;
+      font-size: 14px;
+    }
+
+    .npx-faq .npx-faq__summary {
+      min-height: 70px;
+      gap: 16px;
+      padding: 20px 4px;
+    }
+
+    .npx-faq .npx-faq__question {
+      font-size: 16px;
+    }
+
+    .npx-faq .npx-faq__answer {
+      padding-inline: 4px 22px;
+      padding-bottom: 22px;
+      font-size: 14px;
+    }
+
+    .npx-faq .npx-faq__chevron {
+      flex-basis: 20px;
+      width: 20px;
+      height: 20px;
+    }
+
+    .npx-faq .npx-faq__more {
+      margin-top: 26px;
+      font-size: 12px;
+    }
+
+    .npx-faq .npx-faq__contact {
+      font-size: 12px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .npx-faq .npx-faq__chevron,
+    .npx-faq .npx-faq__more-icon {
+      transition: none;
+    }
+  }
+{% endstylesheet %}
+
+{% javascript %}
+  if (!customElements.get('npx-nx01-faq')) {
+    customElements.define(
+      'npx-nx01-faq',
+      class extends HTMLElement {
+        connectedCallback() {
+          queueMicrotask(() => {
+            if (!this.isConnected || this.controller) return;
+            this.controller = new AbortController();
+            const signal = this.controller.signal;
+            this.items = Array.from(this.querySelectorAll('.npx-faq__item'));
+            this.limit = Math.max(1, Number(this.dataset.initialCount) || 8);
+            this.extra = this.items.slice(this.limit);
+            this.button = this.querySelector('.npx-faq__more');
+            this.expanded = false;
+            if (this.button && this.extra.length) {
+              this.setExpanded(false);
+              this.button.hidden = false;
+              this.button.addEventListener(
+                'click',
+                () => {
+                  const opening = !this.expanded;
+                  this.setExpanded(opening);
+                  if (opening) {
+                    const firstExtra = this.extra[0].querySelector('summary');
+                    if (firstExtra) firstExtra.focus({ preventScroll: true });
+                  }
+                },
+                { signal }
+              );
+            }
+            this.addEventListener(
+              'click',
+              (event) => {
+                const summary = event.target.closest('.npx-faq__summary');
+                const active = summary && summary.parentElement;
+                if (active && this.items.includes(active) && !active.open) this.closeOthers(active);
+              },
+              { signal }
+            );
+            this.addEventListener(
+              'toggle',
+              (event) => {
+                const active = event.target;
+                if (!this.items.includes(active) || !active.open) return;
+                this.closeOthers(active);
+              },
+              { capture: true, signal }
+            );
+            this.addEventListener(
+              'shopify:block:select',
+              (event) => {
+                const active = event.target.closest('.npx-faq__item');
+                if (!active || !this.items.includes(active)) return;
+                if (active.hidden) this.setExpanded(true);
+                this.closeOthers(active);
+                active.open = true;
+              },
+              { signal }
+            );
+          });
+        }
+
+        closeOthers(active) {
+          if (this.dataset.singleOpen !== 'true') return;
+          this.items.forEach((item) => {
+            if (item !== active) item.open = false;
+          });
+        }
+
+        setExpanded(expanded) {
+          this.expanded = expanded;
+          this.extra.forEach((item) => {
+            if (!expanded) item.open = false;
+            item.hidden = !expanded;
+          });
+          if (!this.button) return;
+          this.button.setAttribute('aria-expanded', String(expanded));
+          const moreLabel = this.button.querySelector('[data-more-label]');
+          const lessLabel = this.button.querySelector('[data-less-label]');
+          if (moreLabel) moreLabel.hidden = expanded;
+          if (lessLabel) lessLabel.hidden = !expanded;
+        }
+
+        disconnectedCallback() {
+          if (this.controller) this.controller.abort();
+          this.controller = null;
+          if (this.items) this.items.forEach((item) => { item.hidden = false; });
+          if (this.button) this.button.hidden = true;
+        }
+      }
+    );
+  }
+{% endjavascript %}
+
+{% schema %}
+{
+  "name": "NX-01 FAQs",
+  "tag": "div",
+  "class": "section-nx01-faqs",
+  "enabled_on": {
+    "templates": ["product", "page"]
+  },
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "NX-01 BASELINE"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Frequently asked questions."
+    },
+    {
+      "type": "richtext",
+      "id": "intro",
+      "label": "Introduction"
+    },
+    {
+      "type": "text",
+      "id": "contact_label",
+      "label": "Contact line",
+      "default": "Still have a question?"
+    },
+    {
+      "type": "text",
+      "id": "contact_email",
+      "label": "Contact email",
+      "default": "support@nootropix.shop"
+    },
+    {
+      "type": "header",
+      "content": "Behavior"
+    },
+    {
+      "type": "range",
+      "id": "initial_count",
+      "min": 3,
+      "max": 12,
+      "step": 1,
+      "label": "Questions shown first",
+      "default": 8
+    },
+    {
+      "type": "checkbox",
+      "id": "single_open",
+      "label": "Keep only one question open",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Style"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background",
+      "default": "#F7F7F9"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading color",
+      "default": "#142342"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#4D5A70"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent color",
+      "default": "#243F95"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Border color",
+      "default": "#D5D9E1"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 24,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding top",
+      "default": 64
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 24,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding bottom",
+      "default": 56
+    }
+  ],
+  "blocks": [
+    {
+      "type": "question",
+      "name": "Question",
+      "settings": [
+        {
+          "type": "text",
+          "id": "question",
+          "label": "Question"
+        },
+        {
+          "type": "richtext",
+          "id": "answer",
+          "label": "Answer"
+        },
+        {
+          "type": "checkbox",
+          "id": "open_by_default",
+          "label": "Open by default",
+          "default": false
+        }
+      ]
+    }
+  ],
+  "max_blocks": 20,
+  "presets": [
+    {
+      "name": "NX-01 FAQs",
+      "blocks": [
+        {
+          "type": "question",
+          "settings": {
+            "question": "What is NX-01 Baseline?",
+            "answer": "<p>NX-01 is Nootropix’s caffeine-free daily supplement for adults. It combines nine ingredients in one formula: ALCAR, citicoline, NMN, L-theanine, Rhodiola, CoQ10, vitamin B6, vitamin B12 and folate.</p>"
+          }
+        },
+        {
+          "type": "question",
+          "settings": {
+            "question": "How do I take it?",
+            "answer": "<p>The labelled daily serving is <strong>3 capsules</strong>. Follow the directions and precautions on your bottle, and do not exceed the stated serving.</p>"
+          }
+        },
+        {
+          "type": "question",
+          "settings": {
+            "question": "How long will one bottle last?",
+            "answer": "<p>Each bottle contains <strong>90 capsules — 30 daily servings</strong> at 3 capsules per serving.</p>"
+          }
+        },
+        {
+          "type": "question",
+          "settings": {
+            "question": "Does NX-01 contain caffeine?",
+            "answer": "<p>No. NX-01 is a caffeine-free formula.</p>"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -81,7 +81,15 @@
     assign has_safety = true
   endif
 
+  assign nx01_pdp = false
+  if template.suffix == 'nx-01'
+    assign nx01_pdp = true
+  endif
+
   assign has_metafields = false
+  if nx01_pdp
+    assign has_metafields = true
+  endif
   if tldr != blank
     assign has_metafields = true
   endif
@@ -123,7 +131,16 @@
       {%- assign acc_i = 0 -%}
       {%- assign acc_tag = '' -%}
 
-      {%- if tldr != blank -%}
+      {%- if nx01_pdp -%}
+        {%- assign acc_i = acc_i | plus: 1 -%}
+        {%- assign acc_headline = 'products.product.description_accordion.ingredients_at_a_glance' | t -%}
+        {%- capture acc_body -%}
+          {% render 'nx01-ingredients-table' %}
+        {%- endcapture -%}
+        {%- render 'product-description-accordion-panel', index: acc_i, headline: acc_headline, content: acc_body, open: true -%}
+      {%- endif -%}
+
+      {%- if tldr != blank and nx01_pdp == false -%}
         {%- assign acc_i = acc_i | plus: 1 -%}
         {%- assign acc_headline = 'products.product.description_accordion.at_a_glance' | t -%}
         {%- capture acc_body -%}
