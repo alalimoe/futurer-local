@@ -1,0 +1,637 @@
+{{ 'sticky-cart.css' | asset_url | stylesheet_tag }}
+{{ 'sticky-variant-modal.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign nx_product = product
+  assign nx_variant = nx_product.selected_or_first_available_variant
+  assign form_id = 'npx-nx01-form-' | append: section.id
+  assign heading_id = 'npx-nx01-heading-' | append: section.id
+  assign image = nx_variant.featured_image | default: nx_product.featured_image
+  assign label_image = section.settings.label_image | default: nx_product.images[1]
+  assign daily_price = nx_variant.price | times: 1.0 | divided_by: section.settings.servings | round
+  assign currency_code = cart.currency.iso_code | default: shop.currency
+  assign initial_quantity = nx_variant.quantity_rule.min | default: 1
+  assign photo_alt = image.alt | default: nx_product.title
+-%}
+{%- if nx_product != blank and nx_product.handle == 'nx-01-baseline' -%}
+<xo-product
+  xo-selected-or-first-available-variant-id="{{ nx_variant.id }}"
+  xo-product-information
+  xo-product-id="{{ nx_product.id }}"
+  xo-section-id="{{ section.id }}"
+  class="npx-hero-product"
+>
+  <npx-nx01-hero
+    class="npx-hero"
+    data-total-label="{{ 'sections.npx_nx01_hero.total' | t | escape }}"
+    data-currency="{{ currency_code | escape }}"
+    data-locale="{{ request.locale.iso_code | escape }}"
+    data-servings="{{ section.settings.servings }}"
+    data-add-label="{{ 'sections.npx_nx01_hero.add' | t | escape }}"
+    data-adding-label="{{ 'sections.npx_nx01_hero.adding' | t | escape }}"
+    data-sold-label="{{ 'sections.npx_nx01_hero.sold_out' | t | escape }}"
+    style="--npx-hero-bg: {{ section.settings.background }}; --npx-hero-media: {{ section.settings.media_background }}; --npx-hero-ink: {{ section.settings.ink }}; --npx-hero-text: {{ section.settings.text }}; --npx-hero-accent: {{ section.settings.accent }}; --npx-hero-button-text: {{ section.settings.button_text }}; --npx-hero-width: {{ section.settings.max_width }}px; --npx-hero-top: {{ section.settings.padding_top }}px; --npx-hero-bottom: {{ section.settings.padding_bottom }}px; --npx-hero-zoom: {{ section.settings.image_zoom | divided_by: 100.0 }};"
+  >
+    <div class="npx-hero__inner">
+      <nav class="npx-hero__breadcrumb" aria-label="{{ 'sections.npx_nx01_hero.home' | t | escape }}">
+        <a href="{{ routes.root_url }}">{{ 'sections.npx_nx01_hero.home' | t }}</a>
+        <span aria-hidden="true">/</span>
+        <a href="{{ routes.all_products_collection_url }}">{{ 'sections.npx_nx01_hero.shop' | t }}</a>
+        <span aria-hidden="true">/</span>
+        <span aria-current="page">{{ nx_product.title | escape }}</span>
+      </nav>
+      <div class="npx-hero__layout">
+        <header class="npx-hero__intro">
+          <p class="npx-hero__eyebrow">{{ 'sections.npx_nx01_hero.eyebrow' | t }}</p>
+          <h1 class="npx-hero__title" id="{{ heading_id }}">{{ nx_product.title | escape }}</h1>
+          {% if section.settings.tagline != blank %}
+            <p class="npx-hero__tagline">{{ section.settings.tagline | escape }}</p>
+          {% endif %}
+          {% if section.settings.intro != blank %}
+            <div class="npx-hero__description">{{ section.settings.intro }}</div>
+          {% endif %}
+          {% if section.blocks.size > 0 %}
+            <div class="npx-hero__apps">
+              {% for block in section.blocks %}
+                <div class="npx-hero__app" {{ block.shopify_attributes }}>{% render block %}</div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </header>
+        <div class="npx-hero__gallery" aria-label="{{ 'sections.npx_nx01_hero.gallery' | t | escape }}">
+          <div class="npx-hero__stage">
+            <span class="npx-hero__badge"><span aria-hidden="true"></span>{{ 'sections.npx_nx01_hero.caffeine_free' | t }}</span>
+            {% if image != blank %}
+              <a class="npx-hero__photo-link" data-main-link href="{{ image | image_url: width: 2400 }}" target="_blank" rel="noopener" aria-label="{{ 'sections.npx_nx01_hero.enlarge' | t | escape }}">
+                {{ image | image_url: width: 1400 | image_tag: class: 'npx-hero__photo', loading: 'eager', fetchpriority: 'high', widths: '480, 700, 1000, 1400', sizes: '(max-width: 749px) 440px, (max-width: 1000px) 65vw, 800px', alt: photo_alt }}
+                <span class="npx-hero__zoom" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="6"/><path d="m15 15 5 5M7 10h6m-3-3v6"/></svg></span>
+              </a>
+            {% else %}
+              <div class="npx-hero__image-empty">{{ 'sections.npx_nx01_hero.image_empty' | t }}</div>
+            {% endif %}
+          </div>
+          <div class="npx-hero__gallery-footer">
+            <div class="npx-hero__thumbs">
+              {% for photo in nx_product.images limit: 6 %}
+                <a
+                  class="npx-hero__thumb"
+                  data-thumb
+                  href="{{ photo | image_url: width: 2400 }}"
+                  data-src="{{ photo | image_url: width: 1400 }}"
+                  data-alt="{{ photo.alt | default: nx_product.title | escape }}"
+                  {% if photo.id == image.id %}aria-current="true"{% endif %}
+                  aria-label="{{ 'sections.npx_nx01_hero.image' | t | escape }} {{ forloop.index }}"
+                >
+                  {{ photo | image_url: width: 160 | image_tag: class: 'npx-hero__thumb-image', loading: 'lazy', alt: '' }}
+                </a>
+              {% endfor %}
+            </div>
+            {% if label_image != blank %}
+              <a class="npx-hero__label-link" href="{{ label_image | image_url: width: 2400 }}" target="_blank" rel="noopener">
+                {{ 'sections.npx_nx01_hero.label' | t }}<span aria-hidden="true">↗</span>
+              </a>
+            {% endif %}
+          </div>
+        </div>
+        <div class="npx-hero__buy">
+          <div class="npx-hero__facts">
+            <div>
+              <strong>{{ section.settings.capsules }}</strong>
+              <span>{{ 'sections.npx_nx01_hero.capsules' | t }}</span>
+            </div>
+            <div>
+              <strong>{{ section.settings.servings }}</strong>
+              <span>{{ 'sections.npx_nx01_hero.servings' | t }}</span>
+            </div>
+            <div>
+              <strong>{{ section.settings.daily_capsules }}</strong>
+              <span>{{ 'sections.npx_nx01_hero.daily' | t }}</span>
+            </div>
+          </div>
+          {% form 'product', nx_product, id: form_id, class: 'npx-hero__form', data-type: 'add-to-cart-form' %}
+            {{ form.errors | default_errors }}
+            {% if nx_product.has_only_default_variant %}
+              <input
+                type="hidden"
+                name="id"
+                value="{{ nx_variant.id }}"
+                data-variant
+                data-price="{{ nx_variant.price }}"
+                data-available="{{ nx_variant.available }}"
+                data-min="{{ initial_quantity }}"
+                data-step="{{ nx_variant.quantity_rule.increment | default: 1 }}"
+                data-max="{{ nx_variant.quantity_rule.max }}"
+              >
+            {% else %}
+              <label class="npx-hero__option-label" for="npx-option-{{ section.id }}">{{ 'sections.npx_nx01_hero.option' | t }}</label>
+              <select class="npx-hero__option" name="id" id="npx-option-{{ section.id }}" data-variant>
+                {% for variant in nx_product.variants %}
+                  <option
+                    value="{{ variant.id }}"
+                    data-price="{{ variant.price }}"
+                    data-available="{{ variant.available }}"
+                    data-min="{{ variant.quantity_rule.min | default: 1 }}"
+                    data-step="{{ variant.quantity_rule.increment | default: 1 }}"
+                    data-max="{{ variant.quantity_rule.max }}"
+                    {% if variant.id == nx_variant.id %}selected{% endif %}
+                  >
+                    {{ variant.title | escape }} — {{ variant.price | money_with_currency }}
+                    {% unless variant.available %} — {{ 'sections.npx_nx01_hero.sold_out' | t }}{% endunless %}
+                  </option>
+                {% endfor %}
+              </select>
+              <noscript><p class="npx-hero__fine">{{ 'sections.npx_nx01_hero.selection_note' | t }}</p></noscript>
+            {% endif %}
+            <div class="npx-hero__price-row">
+              <div>
+                <span class="npx-hero__price-label" data-price-label>{{ 'sections.npx_nx01_hero.per_bottle' | t }}</span>
+                <strong class="npx-hero__price" data-total>{{ nx_variant.price | money_with_currency }}</strong>
+              </div>
+              <p class="npx-hero__daily">
+                <span data-daily>{{ daily_price | money_with_currency }}</span>
+                <span>{{ 'sections.npx_nx01_hero.per_day' | t }}</span>
+              </p>
+            </div>
+            <div class="npx-hero__bnpl">
+              {% render 'bnpl-box' %}
+            </div>
+            <div class="npx-hero__purchase-row">
+              <div class="npx-hero__quantity-block">
+                <label for="npx-quantity-{{ section.id }}">{{ 'sections.npx_nx01_hero.quantity' | t }}</label>
+                <div class="npx-hero__quantity">
+                  <button type="button" data-quantity-change="-1" aria-label="{{ 'sections.npx_nx01_hero.decrease' | t | escape }}" hidden>−</button>
+                  <xo-cart-quantity>
+                    <input
+                      id="npx-quantity-{{ section.id }}"
+                      type="number"
+                      name="quantity"
+                      inputmode="numeric"
+                      min="{{ initial_quantity }}"
+                      step="{{ nx_variant.quantity_rule.increment | default: 1 }}"
+                      {% if nx_variant.quantity_rule.max != blank %}max="{{ nx_variant.quantity_rule.max }}"{% endif %}
+                      value="{{ initial_quantity }}"
+                      required
+                      data-quantity
+                    >
+                  </xo-cart-quantity>
+                  <button type="button" data-quantity-change="1" aria-label="{{ 'sections.npx_nx01_hero.increase' | t | escape }}" hidden>+</button>
+                </div>
+              </div>
+              <p class="npx-hero__supply">
+                <strong data-supply>{{ section.settings.servings }}</strong>
+                {{ 'sections.npx_nx01_hero.supply' | t }}
+                <span data-per-bottle> · {{ 'sections.npx_nx01_hero.per_bottle' | t }}</span>
+              </p>
+            </div>
+            <xo-cart-add
+              class="npx-hero__cart-add"
+              xo-product-id="{{ nx_product.id }}"
+              xo-variant-id="{{ nx_variant.id }}"
+              xo-section-id="{{ section.id }}"
+              data-cart-add
+              {% unless nx_variant.available %}xo-disabled{% endunless %}
+              {% if settings.cart_type == 'page' %}xo-cart-redirection{% endif %}
+            >
+              <button type="submit" name="add" class="npx-hero__add" {% unless nx_variant.available %}disabled{% endunless %} data-add>
+                <span data-add-text>
+                  {% if nx_variant.available %}
+                    {{ 'sections.npx_nx01_hero.add' | t }}
+                  {% else %}
+                    {{ 'sections.npx_nx01_hero.sold_out' | t }}
+                  {% endif %}
+                </span>
+                <svg aria-hidden="true" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M5 8h14l1 13H4L5 8Zm4 0V6a3 3 0 0 1 6 0v2"/>
+                </svg>
+              </button>
+            </xo-cart-add>
+            <p class="npx-hero__status" role="status" aria-live="polite" data-status></p>
+            {% if section.settings.show_payment_terms %}
+              <div class="npx-hero__payment-terms">{{ form | payment_terms }}</div>
+            {% endif %}
+          {% endform %}
+          <p class="npx-hero__delivery">
+            {% if cart.taxes_included %}{{ 'sections.npx_nx01_hero.tax_included' | t }} {% endif %}
+            {{ 'sections.npx_nx01_hero.shipping' | t }}
+            {% if section.settings.shipping_link != blank %}
+              <a href="{{ section.settings.shipping_link }}">{{ 'sections.npx_nx01_hero.shipping_link' | t }}</a>
+            {% endif %}
+          </p>
+          {% if section.settings.show_payment_icons and shop.enabled_payment_types.size > 0 %}
+            <div class="npx-hero__payments">
+              <span>
+                <svg aria-hidden="true" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.2">
+                  <rect x="3" y="7" width="10" height="7" rx="1"/>
+                  <path d="M5 7V5a3 3 0 0 1 6 0v2"/>
+                </svg>
+                {{ 'sections.npx_nx01_hero.secure' | t }}
+              </span>
+              <ul aria-label="{{ 'sections.npx_nx01_hero.payments' | t | escape }}">
+                {% for payment in shop.enabled_payment_types %}
+                  <li>{{ payment | payment_type_svg_tag: class: 'npx-hero__payment-icon' }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+          {% endif %}
+          <p class="npx-hero__fine npx-hero__precautions">{{ 'sections.npx_nx01_hero.footer_note' | t }}</p>
+        </div>
+      </div>
+      <div class="npx-hero__details">
+        {% render 'product-description-metafields', accordion: true, section: section %}
+      </div>
+    </div>
+  </npx-nx01-hero>
+  {% render 'sticky-cart', product: nx_product %}
+  {% render 'product-data', product: nx_product %}
+</xo-product>
+{% if section.settings.structured_data %}
+  <script type="application/ld+json">{{ nx_product | structured_data }}</script>
+{% endif %}
+{% elsif request.design_mode %}
+  <p>{{ 'sections.npx_nx01_hero.wrong_product' | t }}</p>
+{% endif %}
+
+{% stylesheet %}
+.npx-hero{display:block;background:var(--npx-hero-bg);color:var(--npx-hero-text);font:15px/1.6 var(--font-body-family,Arial,sans-serif);padding:var(--npx-hero-top) 32px var(--npx-hero-bottom)}
+.npx-hero *,.npx-hero *::before,.npx-hero *::after{box-sizing:border-box}.npx-hero [hidden]{display:none!important}
+.npx-hero .npx-hero__inner{max-width:var(--npx-hero-width);margin-inline:auto}
+.npx-hero .npx-hero__breadcrumb{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:0 0 28px;font-size:11px;color:var(--npx-hero-text)}
+.npx-hero .npx-hero__breadcrumb a{color:inherit;text-decoration:none}.npx-hero .npx-hero__breadcrumb [aria-current]{color:var(--npx-hero-ink)}
+.npx-hero .npx-hero__layout{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);grid-template-rows:auto 1fr;column-gap:64px;align-items:start}
+.npx-hero .npx-hero__intro{grid-column:2;grid-row:1;min-width:0}
+.npx-hero .npx-hero__eyebrow{margin:0 0 12px;font-size:10px;font-weight:500;letter-spacing:.16em;color:var(--npx-hero-accent)}
+.npx-hero .npx-hero__title{margin:0;color:var(--npx-hero-ink);font:500 clamp(30px,3.3vw,44px)/1.12 var(--font-heading-family,var(--font-body-family,Arial,sans-serif));letter-spacing:-.045em;text-transform:none;overflow-wrap:anywhere}
+.npx-hero .npx-hero__tagline{margin:13px 0 0;color:var(--npx-hero-ink);font-size:21px;line-height:1.4;letter-spacing:-.025em}
+.npx-hero .npx-hero__description{margin:14px 0 12px;max-width:510px;font-size:14px;line-height:1.75}.npx-hero .npx-hero__description p{margin:0}
+.npx-hero .npx-hero__apps{margin:0 0 8px;min-width:0}
+.npx-hero .npx-hero__app{min-width:0;overflow:hidden}
+.npx-hero .npx-hero__gallery{grid-column:1;grid-row:1 / span 2;min-width:0}
+.npx-hero .npx-hero__stage{position:relative;overflow:hidden;isolation:isolate;aspect-ratio:1/1.02;border-radius:18px;background:var(--npx-hero-media)}
+.npx-hero .npx-hero__photo-link{position:absolute;inset:0;display:block;overflow:hidden;border-radius:inherit}
+.npx-hero .npx-hero__photo{position:absolute;display:block;width:100%;height:100%;max-width:none;inset:0;object-fit:contain;transform:scale(var(--npx-hero-zoom));mix-blend-mode:multiply}
+.npx-hero .npx-hero__badge{position:absolute;z-index:1;inset-block-start:20px;inset-inline-start:20px;display:flex;align-items:center;gap:7px;padding:7px 11px;border-radius:999px;background:#fff;color:var(--npx-hero-ink);font-size:10px;pointer-events:none}
+.npx-hero .npx-hero__badge span{width:5px;height:5px;border-radius:50%;background:var(--npx-hero-accent)}
+.npx-hero .npx-hero__zoom{position:absolute;inset-block-end:16px;inset-inline-end:16px;display:grid;place-items:center;width:38px;height:38px;border-radius:50%;background:#fff;color:var(--npx-hero-ink)}
+.npx-hero .npx-hero__gallery-footer{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:14px}
+.npx-hero .npx-hero__thumbs{display:flex;flex-wrap:wrap;gap:9px;min-width:0}
+.npx-hero .npx-hero__thumb{display:block;position:relative;overflow:hidden;width:54px;height:58px;border:1px solid #dde3ed;border-radius:7px;background:#fff;flex:0 0 auto}
+.npx-hero .npx-hero__thumb[aria-current=true]{border-color:var(--npx-hero-accent);box-shadow:0 0 0 1px var(--npx-hero-accent)}
+.npx-hero .npx-hero__thumb-image{display:block;width:100%;height:100%;object-fit:cover;transform:scale(1.3)}
+.npx-hero .npx-hero__label-link{display:inline-flex;align-items:center;gap:8px;min-height:44px;font-size:11px;line-height:1.5;color:var(--npx-hero-accent);text-decoration:underline;text-underline-offset:4px;text-align:end}
+.npx-hero .npx-hero__buy{grid-column:2;grid-row:2;min-width:0}
+.npx-hero .npx-hero__facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-block:1px solid #e3e7ed;padding:15px 0;margin-bottom:22px}
+.npx-hero .npx-hero__facts>div{display:flex;flex-direction:column;gap:1px;padding-inline:17px;border-inline-start:1px solid #e3e7ed}.npx-hero .npx-hero__facts>div:first-child{padding-inline-start:0;border:0}
+.npx-hero .npx-hero__facts strong{color:var(--npx-hero-ink);font-size:23px;line-height:1.25;font-weight:500}.npx-hero .npx-hero__facts span{font-size:11px}
+.npx-hero .npx-hero__form{margin:0}.npx-hero .npx-hero__price-row{display:flex;justify-content:space-between;gap:20px;align-items:center;margin-bottom:12px}
+.npx-hero .npx-hero__price-label{display:block;font-size:10px;margin-bottom:3px}.npx-hero .npx-hero__price{display:block;color:var(--npx-hero-ink);font-size:29px;letter-spacing:-.035em;font-weight:500;line-height:1.3;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.npx-hero .npx-hero__daily{margin:0;display:flex;flex-direction:column;align-items:flex-end;font-size:11px;line-height:1.65;text-align:end;flex-shrink:0}.npx-hero .npx-hero__daily [data-daily]{color:var(--npx-hero-ink);font-size:13px;font-variant-numeric:tabular-nums}
+.npx-hero .npx-hero__bnpl{margin:0 0 17px}
+.npx-hero .npx-hero__bnpl .premium-bnpl-box{position:relative;margin:0;padding:0;border:none;background:none;box-shadow:none}
+.npx-hero .npx-hero__bnpl .premium-bnpl-box__caption{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0;font-size:13px;line-height:1.5;color:var(--npx-hero-text)}
+.npx-hero .npx-hero__bnpl .premium-bnpl-box__logos{display:inline-flex;align-items:center;gap:6px;flex-shrink:0}
+.npx-hero .npx-hero__bnpl .premium-bnpl-box__logo{display:block;height:18px;width:auto}
+.npx-hero .npx-hero__bnpl .premium-bnpl-box__widgets,.npx-hero .npx-hero__bnpl #TabbyPromo,.npx-hero .npx-hero__bnpl tamara-widget{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+.npx-hero .npx-hero__purchase-row{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:17px}
+.npx-hero .npx-hero__quantity-block>label{display:block;margin-bottom:6px;font-size:11px;color:var(--npx-hero-ink)}
+.npx-hero .npx-hero__quantity{display:flex;align-items:center;border:1px solid #d6dce6;border-radius:6px;min-height:45px;overflow:visible;background:#fff}
+.npx-hero .npx-hero__quantity xo-cart-quantity{display:contents}
+.npx-hero .npx-hero__quantity button{display:grid;place-items:center;appearance:none;width:44px;height:44px;min-width:0;padding:0;border:0;background:transparent;color:var(--npx-hero-ink);font:20px/1 var(--font-body-family,Arial,sans-serif);cursor:pointer}
+.npx-hero .npx-hero__quantity input{appearance:textfield;-moz-appearance:textfield;display:block;border:0;border-radius:0;width:46px;min-width:0;height:44px;margin:0;padding:4px;text-align:center;font:14px/1 var(--font-body-family,Arial,sans-serif);color:var(--npx-hero-ink);background:transparent;box-shadow:none}
+.npx-hero .npx-hero__quantity input::-webkit-inner-spin-button,.npx-hero .npx-hero__quantity input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.npx-hero .npx-hero__quantity button:disabled{opacity:.3;cursor:default}.npx-hero .npx-hero__supply{margin:0 0 12px;font-size:12px}.npx-hero .npx-hero__supply strong{font-weight:500;color:var(--npx-hero-ink)}
+.npx-hero .npx-hero__cart-add{display:block;width:100%}
+.npx-hero .npx-hero__add{appearance:none;display:flex;justify-content:center;align-items:center;gap:12px;width:100%;min-height:54px;margin:0;border:1px solid var(--npx-hero-accent);border-radius:6px;padding:14px 20px;background:var(--npx-hero-accent);color:var(--npx-hero-button-text);font:500 15px/1.5 var(--font-body-family,Arial,sans-serif);text-transform:none;letter-spacing:.01em;cursor:pointer;transition:filter .18s ease}
+.npx-hero .npx-hero__add:hover{filter:brightness(.9)}.npx-hero .npx-hero__add:disabled{opacity:.6;cursor:default}
+.npx-hero .npx-hero__status{margin:10px 0 0;font-size:12px}.npx-hero .npx-hero__status:empty,.npx-hero .npx-hero__payment-terms:empty{display:none}
+.npx-hero .npx-hero__payment-terms{font-size:12px;margin-top:12px}
+.npx-hero .npx-hero__delivery{margin:14px 0 0;font-size:10px;line-height:1.8;text-align:center}.npx-hero .npx-hero__delivery a{color:inherit;text-decoration:underline;text-underline-offset:3px;white-space:nowrap}
+.npx-hero .npx-hero__payments{margin-top:17px;padding-top:16px;border-top:1px solid #e3e7ed;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.npx-hero .npx-hero__payments>span{display:flex;align-items:center;gap:6px;font-size:10px}.npx-hero .npx-hero__payments ul{list-style:none;display:flex;flex-wrap:wrap;gap:5px;padding:0;margin:0}.npx-hero .npx-hero__payments li{display:block;line-height:0}.npx-hero .npx-hero__payment-icon{width:32px;height:21px}
+.npx-hero .npx-hero__fine{font-size:10px;line-height:1.6;margin:10px 0 0}.npx-hero .npx-hero__precautions{text-align:center;margin-top:15px}
+.npx-hero .npx-hero__details{margin-top:40px;min-width:0}
+.npx-hero .npx-hero__option-label{display:block;font-size:12px;margin:0 0 6px}.npx-hero .npx-hero__option{width:100%;min-height:46px;padding:8px;margin-bottom:16px;border:1px solid #d6dce6;border-radius:6px;font:14px var(--font-body-family,Arial,sans-serif);color:var(--npx-hero-ink);background:var(--npx-hero-bg)}
+.npx-hero :is(a,button,input,select):focus-visible{outline:2px solid var(--npx-hero-accent);outline-offset:4px}.npx-hero .npx-hero__photo-link:focus-visible{outline-offset:-4px}
+.npx-hero .npx-hero__image-empty{display:grid;place-items:center;height:100%;font-size:13px}
+@media(max-width:1000px){.npx-hero .npx-hero__layout{column-gap:32px}.npx-hero .npx-hero__title{font-size:34px}.npx-hero .npx-hero__stage{aspect-ratio:1/1.2}.npx-hero .npx-hero__tagline{font-size:19px}.npx-hero .npx-hero__description{font-size:13px}.npx-hero .npx-hero__gallery-footer{align-items:flex-start;flex-wrap:wrap;gap:4px}}
+@media(max-width:749px){
+.npx-hero{padding:18px 20px 32px}.npx-hero .npx-hero__breadcrumb{display:none}.npx-hero .npx-hero__layout{display:flex;flex-direction:column;gap:0}.npx-hero .npx-hero__intro,.npx-hero .npx-hero__gallery,.npx-hero .npx-hero__buy{width:100%}
+.npx-hero .npx-hero__eyebrow{font-size:9px;margin-bottom:9px}.npx-hero .npx-hero__title{font-size:32px}.npx-hero .npx-hero__tagline{font-size:17px;margin-top:8px}.npx-hero .npx-hero__description{font-size:12px;margin:8px 0 12px;line-height:1.7;max-width:none}
+.npx-hero .npx-hero__stage{height:212px;aspect-ratio:auto;border-radius:12px}.npx-hero .npx-hero__photo{width:100%;height:100%}.npx-hero .npx-hero__badge{inset-block-start:12px;inset-inline-start:12px;font-size:9px;padding:6px 8px}.npx-hero .npx-hero__zoom{width:32px;height:32px;inset-block-end:12px;inset-inline-end:12px}
+.npx-hero .npx-hero__gallery-footer{flex-wrap:nowrap;align-items:center;margin-top:10px;margin-bottom:17px;gap:14px}.npx-hero .npx-hero__thumb{width:40px;height:44px}.npx-hero .npx-hero__thumbs{gap:8px}.npx-hero .npx-hero__label-link{font-size:10px}
+.npx-hero .npx-hero__facts{padding:11px 0;margin-bottom:17px}.npx-hero .npx-hero__facts strong{font-size:20px}.npx-hero .npx-hero__facts span{font-size:10px}.npx-hero .npx-hero__facts>div{padding-inline:13px}
+.npx-hero .npx-hero__price-row{margin-bottom:10px}.npx-hero .npx-hero__price{font-size:27px}.npx-hero .npx-hero__daily{font-size:10px}.npx-hero .npx-hero__daily [data-daily]{font-size:12px}.npx-hero .npx-hero__purchase-row{margin-bottom:14px}.npx-hero .npx-hero__quantity input{font-size:16px}.npx-hero .npx-hero__supply{font-size:11px}.npx-hero .npx-hero__delivery{font-size:10px}.npx-hero .npx-hero__add{min-height:52px;font-size:14px}
+.npx-hero .npx-hero__details{margin-top:28px}
+}
+@media(prefers-reduced-motion:reduce){.npx-hero .npx-hero__add{transition:none}}
+{% endstylesheet %}
+
+{% javascript %}
+if (!customElements.get('npx-nx01-hero')) {
+  customElements.define('npx-nx01-hero', class extends HTMLElement {
+    connectedCallback() {
+      if (this.controller) return;
+      this.controller = new AbortController();
+      const options = { signal: this.controller.signal };
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => this.initialize(), { ...options, once: true });
+      else this.initialize();
+    }
+    initialize() {
+      if (!this.isConnected || !this.controller || this.initialized) return;
+      this.initialized = true;
+      const options = { signal: this.controller.signal };
+      this.form = this.querySelector('.npx-hero__form');
+      this.variant = this.querySelector('[data-variant]');
+      this.quantity = this.querySelector('[data-quantity]');
+      this.add = this.querySelector('[data-add]');
+      this.cartAdd = this.querySelector('[data-cart-add]');
+      if (!this.form || !this.variant || !this.quantity) return;
+      try { this.money = new Intl.NumberFormat(this.dataset.locale || 'en', { style: 'currency', currency: this.dataset.currency || 'AED' }); }
+      catch (_) { this.money = new Intl.NumberFormat('en', { style: 'currency', currency: 'AED' }); }
+      this.querySelectorAll('[data-quantity-change]').forEach((button) => { button.hidden = false; });
+      this.addEventListener('click', (event) => this.onClick(event), options);
+      this.variant.addEventListener('change', () => this.update(true), options);
+      this.quantity.addEventListener('input', () => this.update(false), options);
+      this.quantity.addEventListener('change', () => this.update(false), options);
+      this.form.addEventListener('submit', (event) => {
+        if (!this.cartAdd || typeof customElements.get('xo-cart-add') === 'undefined') {
+          if (this.pending || !this.form.checkValidity() || this.selection().available !== 'true') {
+            event.preventDefault();
+            return;
+          }
+          this.pending = true;
+          if (this.add) {
+            this.add.disabled = true;
+            this.add.setAttribute('aria-busy', 'true');
+          }
+          const addText = this.querySelector('[data-add-text]');
+          const status = this.querySelector('[data-status]');
+          if (addText) addText.textContent = this.dataset.addingLabel;
+          if (status) status.textContent = this.dataset.addingLabel;
+          return;
+        }
+        event.preventDefault();
+        if (!this.form.checkValidity() || this.selection().available !== 'true') return;
+        this.add?.click();
+      }, options);
+      window.addEventListener('pageshow', () => this.reset(), options);
+      this.reset();
+    }
+    disconnectedCallback() {
+      this.controller?.abort();
+      this.controller = null;
+      this.initialized = false;
+    }
+    selection() {
+      return this.variant.tagName === 'SELECT' ? this.variant.selectedOptions[0].dataset : this.variant.dataset;
+    }
+    reset() {
+      this.pending = false;
+      this.add?.removeAttribute('aria-busy');
+      const status = this.querySelector('[data-status]');
+      if (status) status.textContent = '';
+      this.update(false);
+    }
+    syncCartAdd(selected) {
+      if (!this.cartAdd) return;
+      this.cartAdd.setAttribute('xo-variant-id', this.variant.value);
+      if (selected.available === 'true') this.cartAdd.removeAttribute('xo-disabled');
+      else this.cartAdd.setAttribute('xo-disabled', '');
+    }
+    update(variantChanged) {
+      if (this.pending) return;
+      const selected = this.selection();
+      if (variantChanged) {
+        this.quantity.min = selected.min || '1';
+        this.quantity.step = selected.step || '1';
+        if (selected.max) this.quantity.max = selected.max;
+        else this.quantity.removeAttribute('max');
+        this.quantity.value = selected.min || '1';
+      }
+      const valid = this.quantity.checkValidity();
+      const amount = Number(this.quantity.value);
+      if (valid) {
+        const priceLabel = this.querySelector('[data-price-label]');
+        const perBottle = this.querySelector('[data-per-bottle]');
+        const total = this.querySelector('[data-total]');
+        const daily = this.querySelector('[data-daily]');
+        const supply = this.querySelector('[data-supply]');
+        if (priceLabel) priceLabel.textContent = this.dataset.totalLabel;
+        if (perBottle) perBottle.hidden = true;
+        if (total) total.textContent = this.money.format(Number(selected.price) * amount / 100);
+        if (daily) daily.textContent = this.money.format(Number(selected.price) / 100 / Number(this.dataset.servings));
+        if (supply) supply.textContent = String(amount * Number(this.dataset.servings));
+      }
+      if (this.add) {
+        this.add.disabled = selected.available !== 'true';
+        const addText = this.querySelector('[data-add-text]');
+        if (addText) addText.textContent = this.add.disabled ? this.dataset.soldLabel : this.dataset.addLabel;
+      }
+      this.syncCartAdd(selected);
+      const minus = this.querySelector('[data-quantity-change="-1"]');
+      const plus = this.querySelector('[data-quantity-change="1"]');
+      if (minus) minus.disabled = valid && amount <= Number(this.quantity.min || 1);
+      if (plus) plus.disabled = valid && !!this.quantity.max && amount >= Number(this.quantity.max);
+    }
+    onClick(event) {
+      const quantityButton = event.target.closest('[data-quantity-change]');
+      if (quantityButton && !this.pending) {
+        if (Number(quantityButton.dataset.quantityChange) > 0) this.quantity.stepUp();
+        else this.quantity.stepDown();
+        this.quantity.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+      const thumbnail = event.target.closest('[data-thumb]');
+      if (!thumbnail || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button > 0) return;
+      const main = this.querySelector('.npx-hero__photo');
+      if (!main) return;
+      event.preventDefault();
+      main.removeAttribute('srcset');
+      main.removeAttribute('sizes');
+      main.src = thumbnail.dataset.src;
+      main.alt = thumbnail.dataset.alt;
+      const mainLink = this.querySelector('[data-main-link]');
+      if (mainLink) mainLink.href = thumbnail.href;
+      this.querySelectorAll('[data-thumb]').forEach((link) => link.removeAttribute('aria-current'));
+      thumbnail.setAttribute('aria-current', 'true');
+    }
+  });
+}
+{% endjavascript %}
+
+{% schema %}
+{
+  "name": "NX-01 product opening",
+  "tag": "section",
+  "class": "npx-nx01-hero-section",
+  "enabled_on": {
+    "templates": ["product"]
+  },
+  "limit": 1,
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Use on a dedicated NX-01 Baseline product template. Reads current product price, availability and images automatically."
+    },
+    {
+      "type": "text",
+      "id": "tagline",
+      "label": "Main benefit",
+      "default": "Your daily stack, simplified."
+    },
+    {
+      "type": "richtext",
+      "id": "intro",
+      "label": "Short introduction",
+      "default": "<p>A caffeine-free daily formula with nine ingredients, including ALCAR, citicoline and NMN.</p>"
+    },
+    {
+      "type": "range",
+      "id": "capsules",
+      "label": "Capsules per bottle",
+      "min": 30,
+      "max": 180,
+      "step": 30,
+      "default": 90
+    },
+    {
+      "type": "range",
+      "id": "servings",
+      "label": "Daily servings per bottle",
+      "min": 1,
+      "max": 90,
+      "step": 1,
+      "default": 30,
+      "info": "Used to calculate price per day and supply. Match the current approved label."
+    },
+    {
+      "type": "range",
+      "id": "daily_capsules",
+      "label": "Capsules per daily serving",
+      "min": 1,
+      "max": 6,
+      "step": 1,
+      "default": 3
+    },
+    {
+      "type": "image_picker",
+      "id": "label_image",
+      "label": "Ingredients / label image",
+      "info": "Defaults to the second product image. Select an approved, legible label image."
+    },
+    {
+      "type": "url",
+      "id": "shipping_link",
+      "label": "Delivery and returns page"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_payment_terms",
+      "label": "Show Shopify payment terms",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_payment_icons",
+      "label": "Show enabled payment methods",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "structured_data",
+      "label": "Include product structured data",
+      "default": false,
+      "info": "Leave off. Product structured data is already output by the theme."
+    },
+    {
+      "type": "header",
+      "content": "Appearance"
+    },
+    {
+      "type": "color",
+      "id": "background",
+      "label": "Section background",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "media_background",
+      "label": "Image background",
+      "default": "#F3F6FC"
+    },
+    {
+      "type": "color",
+      "id": "ink",
+      "label": "Headings",
+      "default": "#142342"
+    },
+    {
+      "type": "color",
+      "id": "text",
+      "label": "Body text",
+      "default": "#536076"
+    },
+    {
+      "type": "color",
+      "id": "accent",
+      "label": "Accent and button",
+      "default": "#243F95"
+    },
+    {
+      "type": "color",
+      "id": "button_text",
+      "label": "Button text",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "range",
+      "id": "image_zoom",
+      "label": "Bottle photo scale",
+      "min": 100,
+      "max": 160,
+      "step": 5,
+      "unit": "%",
+      "default": 140,
+      "info": "140% removes whitespace from current product photos. Use 100% for tightly cropped photos."
+    },
+    {
+      "type": "range",
+      "id": "max_width",
+      "label": "Content width",
+      "min": 1000,
+      "max": 1440,
+      "step": 20,
+      "unit": "px",
+      "default": 1240
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Top spacing",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom spacing",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 48
+    }
+  ],
+  "blocks": [
+    {
+      "type": "@app"
+    }
+  ],
+  "presets": [
+    {
+      "name": "NX-01 product opening"
+    }
+  ]
+}
+{% endschema %}

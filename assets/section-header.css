@@ -5,6 +5,17 @@
   transition: background-color 0.35s cubic-bezier(0.31, 0.41, 0.38, 0.96);
 }
 
+/* Page headings are not visual heroes. Keep the header in flow so breadcrumbs
+   and titles cannot paint through the nav on collection templates. */
+.shopify-section.section-header:has(~ #xo-main-content > .shopify-section:first-child .main-page-heading-style-2) .xo-header,
+.shopify-section.section-header:has(~ #xo-main-content > .shopify-section:first-child .main-page-heading-style-2) .xo-header--style-1,
+.shopify-section.section-header:has(~ #xo-main-content > .shopify-section:first-child .main-page-heading-style-2) .xo-header--style-1:not(:has(xo-sticky[xo-is-sticky])) {
+  position: relative;
+  top: auto;
+  left: auto;
+  right: auto;
+}
+
 .shopify-section.section-header:has(~ #xo-main-content > .shopify-section.section-hero:first-child) .xo-header--style-1,
 .shopify-section.section-header:has(~ #xo-main-content > .shopify-section.section-hero:first-child) .xo-header--style-2,
 .shopify-section.section-header:has(~ #xo-main-content > .shopify-section.section-hero:first-child) .xo-header--style-3,
@@ -297,6 +308,11 @@
   justify-content: center;
   color: color-mix(in srgb, rgba(var(--color-foreground)) calc(1 * 100%), transparent);
 }
+button.xo-header__right-item {
+  border: 0;
+  background: transparent;
+  font: inherit;
+}
 .xo-header__right-item svg {
   transition: color 0.2s ease, transform 0.2s ease;
 }
@@ -460,13 +476,104 @@
 .xo-header__right-item:focus-visible,
 .xo-header__left a:focus-visible,
 .xo-menu-horizontal__link:focus-visible,
-.xo-menu-hamburger__trigger:focus-visible,
-.xo-menu-hamburger__search-trigger:focus-visible,
-.xo-menu-hamburger__link:focus-visible,
+.xo-menu-horizontal__disclosure:focus-visible,
+.xo-menu-hamburger__native-button:focus-visible,
 .xo-header__link:focus-visible {
   outline: 2px solid rgba(var(--color-accent));
   outline-offset: 2px;
   border-radius: 4px;
+}
+
+.xo-menu-horizontal__item {
+  position: relative;
+}
+
+.xo-menu-horizontal__item--first {
+  display: flex;
+  align-items: center;
+}
+
+.xo-menu-horizontal__disclosure {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  min-width: 2.8rem;
+  min-height: 2.8rem;
+  margin-inline-start: -0.8rem;
+  padding: 0.4rem;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.xo-menu-horizontal__disclosure[hidden] {
+  display: none;
+}
+
+.xo-menu-horizontal__disclosure--sub {
+  position: absolute;
+  z-index: 2;
+  inset-inline-end: 0.8rem;
+  top: 50%;
+  min-width: 3.2rem;
+  min-height: 3.2rem;
+  margin: 0;
+  transform: translateY(-50%);
+}
+
+.xo-menu-horizontal__disclosure[aria-expanded="true"] > .xo-menu-horizontal__arrow--first {
+  transform: rotate(180deg);
+}
+
+[dir="rtl"] .xo-menu-horizontal__disclosure--sub .xo-menu-horizontal__icon {
+  transform: scaleX(-1);
+}
+
+.xo-menu-horizontal__item--open > .xo-menu-horizontal__sub-menu,
+.xo-menu-horizontal__item:focus-within > .xo-menu-horizontal__sub-menu,
+.xo-menu-horizontal__item--open > .xo-menu-horizontal__mega-menu,
+.xo-menu-horizontal__item:focus-within > .xo-menu-horizontal__mega-menu {
+  display: block;
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.xo-menu-horizontal__item--open > .xo-menu-horizontal__sub-menu--third,
+.xo-menu-horizontal__item:focus-within > .xo-menu-horizontal__sub-menu--third {
+  transform: translateY(0);
+}
+
+.xo-menu-hamburger__native-button {
+  box-sizing: border-box;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.xo-menu-hamburger__native-button--icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  min-width: 4.4rem;
+  min-height: 4.4rem;
+  padding: 0.8rem;
+}
+
+.xo-menu-hamburger__native-button--link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 4.4rem;
+  padding: 0;
+  text-align: start;
 }
 
 /* ── Active page indicator: gold underline on current nav item ── */
