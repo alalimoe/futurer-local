@@ -1,16 +1,24 @@
 {%- liquid
-  assign show_cta = false
-  if section.settings.cta_label != blank and section.settings.cta_href != blank
-    assign show_cta = true
-  endif
   assign nx01_anchor = section.settings.anchor_id | default: 'nx01-facts' | handleize
   assign nx01_intro_class = 'nx01__intro'
   if section.settings.heading_alignment == 'center'
     assign nx01_intro_class = 'nx01__intro nx01__intro--center'
   endif
+  assign ingredient_count = 0
+  for block in section.blocks
+    if block.type == 'ingredient'
+      if block.settings.name != blank or block.settings.amount != blank
+        assign ingredient_count = ingredient_count | plus: 1
+      endif
+    endif
+  endfor
 -%}
 
 {% render 'nx01-launch-css' %}
+
+{%- if nx01_anchor != 'nx01-formula' -%}
+  <span id="nx01-formula" class="nx01-facts__alias"></span>
+{%- endif -%}
 
 <section
   id="{{ nx01_anchor }}"
@@ -36,30 +44,45 @@
 
     <div class="nx01-facts__grid">
       <div class="nx01-facts__table-wrap">
-        <table class="nx01-facts__table">
-          <caption class="xo-visually-hidden">{{ section.settings.heading | escape }}</caption>
-          <thead>
-            <tr>
-              <th scope="col">{{ 'sections.nx01_launch_facts.col_ingredient' | t }}</th>
-              <th scope="col">{{ 'sections.nx01_launch_facts.col_amount' | t }}</th>
-              <th scope="col">{{ 'sections.nx01_launch_facts.col_system' | t }}</th>
-            </tr>
-          </thead>
-          <tbody>
+        {%- if ingredient_count > 0 -%}
+          <ul class="nx01-facts__list">
             {%- for block in section.blocks -%}
               {%- if block.type == 'ingredient' -%}
-                {%- if block.settings.name != blank or block.settings.amount != blank or block.settings.system != blank -%}
-                  <tr {{ block.shopify_attributes }}>
-                    <th scope="row">{{ block.settings.name | escape }}</th>
-                    <td data-label="{{ 'sections.nx01_launch_facts.col_amount' | t }}">{{ block.settings.amount | escape }}</td>
-                    <td data-label="{{ 'sections.nx01_launch_facts.col_system' | t }}">{{ block.settings.system | escape }}</td>
-                  </tr>
+                {%- if block.settings.name != blank or block.settings.amount != blank -%}
+                  <li class="nx01-facts__item" {{ block.shopify_attributes }}>
+                    {%- if block.settings.explanation != blank -%}
+                      <details>
+                        <summary class="nx01-facts__summary">
+                          <span class="nx01-facts__name">{{ block.settings.name | escape }}</span>
+                          <span class="nx01-facts__amount">{{ block.settings.amount | escape }}</span>
+                          {%- if block.settings.system != blank -%}
+                            <p class="nx01-facts__form">{{ block.settings.system | escape }}</p>
+                          {%- endif -%}
+                          <span class="xo-visually-hidden">{{ 'sections.nx01_launch_facts.details_label' | t }}</span>
+                        </summary>
+                        <div class="nx01-facts__explain">{{ block.settings.explanation }}</div>
+                      </details>
+                    {%- else -%}
+                      <div class="nx01-facts__summary">
+                        <span class="nx01-facts__name">{{ block.settings.name | escape }}</span>
+                        <span class="nx01-facts__amount">{{ block.settings.amount | escape }}</span>
+                        {%- if block.settings.system != blank -%}
+                          <p class="nx01-facts__form">{{ block.settings.system | escape }}</p>
+                        {%- endif -%}
+                      </div>
+                    {%- endif -%}
+                  </li>
                 {%- endif -%}
               {%- endif -%}
             {%- endfor -%}
-          </tbody>
-        </table>
-        {%- if show_cta -%}
+          </ul>
+        {%- endif -%}
+
+        {%- if section.settings.evidence_note != blank -%}
+          <p class="nx01-facts__note">{{ section.settings.evidence_note | escape }}</p>
+        {%- endif -%}
+
+        {%- if section.settings.cta_label != blank and section.settings.cta_href != blank -%}
           <a class="nx01__text-link" href="{{ section.settings.cta_href | escape }}">{{ section.settings.cta_label | escape }}</a>
         {%- endif -%}
       </div>
@@ -73,7 +96,7 @@
             <p class="nx01-facts__panel-meta">{{ section.settings.panel_meta | escape }}</p>
           {%- endif -%}
           <div class="nx01-facts__panel-rule" aria-hidden="true"></div>
-          <ul class="nx01-facts__panel-list" aria-hidden="true">
+          <ul class="nx01-facts__panel-list">
             {%- for block in section.blocks -%}
               {%- if block.type == 'ingredient' -%}
                 {%- if block.settings.name != blank or block.settings.amount != blank -%}
@@ -95,6 +118,16 @@
 </section>
 
 {% style %}
+  .nx01-facts,
+  .nx01-facts__alias {
+    scroll-margin-top: var(--nx01-scroll-margin);
+  }
+
+  .nx01-facts__alias {
+    display: block;
+    height: 0;
+  }
+
   .nx01-facts__grid {
     display: grid;
     grid-template-columns: 1fr;
@@ -102,48 +135,13 @@
     align-items: start;
   }
 
-  .nx01-facts__table {
-    width: 100%;
-    border-collapse: collapse;
+  .nx01-facts__summary {
+    list-style: none;
   }
 
-  .nx01-facts__table th,
-  .nx01-facts__table td {
-    padding: 2rem 0;
-    text-align: start;
-    border-bottom: 0.1rem solid #3a3737;
-    vertical-align: top;
-  }
-
-  .nx01-facts__table thead th {
-    padding-bottom: 1.6rem;
-    font-size: 1.1rem;
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: rgb(var(--nx01-body));
-  }
-
-  .nx01-facts__table tbody th {
-    font-size: 1.4rem;
-    font-weight: 500;
-  }
-
-  .nx01-facts__table td {
-    font-size: 1.4rem;
-  }
-
-  .nx01-facts__table tbody td:last-child {
-    font-size: 1.3rem;
-    font-weight: 600;
-    color: rgb(var(--nx01-navy-deep));
-    text-align: end;
-  }
-
-  .nx01-facts__table thead th:nth-child(2),
-  .nx01-facts__table thead th:nth-child(3),
-  .nx01-facts__table td:nth-child(2) {
-    text-align: end;
+  .nx01-facts__summary:focus-visible {
+    outline: 0.2rem solid rgb(var(--nx01-navy));
+    outline-offset: 0.4rem;
   }
 
   .nx01-facts__panel {
@@ -198,64 +196,6 @@
   }
 
   @media screen and (max-width: 767px) {
-    .nx01-facts__table,
-    .nx01-facts__table tbody,
-    .nx01-facts__table tr,
-    .nx01-facts__table th,
-    .nx01-facts__table td {
-      display: block;
-      width: 100%;
-    }
-
-    .nx01-facts__table thead {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      overflow: hidden;
-      clip: rect(0 0 0 0);
-      clip-path: inset(50%);
-      white-space: nowrap;
-    }
-
-    .nx01-facts__table tr {
-      margin-bottom: 1.2rem;
-      padding: 1.6rem;
-      border: 0.1rem solid rgb(var(--nx01-line));
-      background: rgb(var(--nx01-surface));
-    }
-
-    .nx01-facts__table th,
-    .nx01-facts__table td {
-      padding: 0;
-      border: 0;
-      text-align: start;
-    }
-
-    .nx01-facts__table tbody th {
-      margin-bottom: 1.2rem;
-      font-size: 1.5rem;
-    }
-
-    .nx01-facts__table td {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-      gap: 1.6rem;
-      padding-top: 0.8rem;
-      color: rgb(var(--nx01-body));
-    }
-
-    .nx01-facts__table td::before {
-      content: attr(data-label);
-      font-size: 1.1rem;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-    }
-
-    .nx01-facts__table tbody td:last-child {
-      text-align: start;
-    }
-
     .nx01-facts__panel {
       padding: 2.4rem;
     }
@@ -297,23 +237,25 @@
     ], "default": "left" },
     { "type": "range", "id": "padding_top", "min": 24, "max": 120, "step": 8, "unit": "px", "label": "Padding top", "default": 48 },
     { "type": "range", "id": "padding_bottom", "min": 24, "max": 120, "step": 8, "unit": "px", "label": "Padding bottom", "default": 48 },
-    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "05 · Formula Composition" },
-    { "type": "text", "id": "heading", "label": "Heading", "default": "The complete daily serving." },
-    { "type": "textarea", "id": "subheading", "label": "Subheading", "default": "9 highly bioavailable active ingredients consolidated into exactly 3 plant-based capsules. Zero trade secret blends or hidden binders." },
-    { "type": "text", "id": "cta_label", "label": "Text link label", "default": "View Supplement Facts Panel →" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Ingredients" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "What’s inside, and why." },
+    { "type": "textarea", "id": "subheading", "label": "Subheading", "default": "Nine listed actives in one 3-capsule serving. Open a row for the intended role." },
+    { "type": "text", "id": "cta_label", "label": "Text link label" },
     { "type": "text", "id": "cta_href", "label": "Text link" },
+    { "type": "textarea", "id": "evidence_note", "label": "Evidence note", "default": "Research on individual ingredients describes those compounds. It does not establish that the finished NX-01 formula produces a specific result." },
     { "type": "text", "id": "panel_heading", "label": "Panel heading", "default": "Supplement Facts" },
     { "type": "text", "id": "panel_meta", "label": "Panel meta", "default": "Serving Size: 3 Capsules | Servings Per Container: 30" },
-    { "type": "textarea", "id": "panel_note", "label": "Panel note", "default": "* Daily Value (DV) not established. Other ingredients: Hypromellose (vegetable capsule), leucine." }
+    { "type": "textarea", "id": "panel_note", "label": "Panel note", "default": "* Daily Value (DV) not established for remaining ingredients. Other ingredients: vegetable cellulose (capsule), silicon dioxide." }
   ],
   "blocks": [
     {
       "type": "ingredient",
       "name": "Ingredient",
       "settings": [
-        { "type": "text", "id": "name", "label": "Name", "default": "Acetyl-L-Carnitine (ALCAR)" },
+        { "type": "text", "id": "name", "label": "Name", "default": "Acetyl-L-Carnitine" },
         { "type": "text", "id": "amount", "label": "Amount", "default": "500 mg" },
-        { "type": "text", "id": "system", "label": "System", "default": "Cellular Energy" }
+        { "type": "text", "id": "system", "label": "Form", "default": "Acetyl-L-Carnitine" },
+        { "type": "richtext", "id": "explanation", "label": "Explanation" }
       ]
     }
   ],
@@ -322,15 +264,15 @@
     {
       "name": "NX-01 launch facts",
       "blocks": [
-        { "type": "ingredient", "settings": { "name": "Acetyl-L-Carnitine (ALCAR)", "amount": "500 mg", "system": "Cellular Energy" } },
-        { "type": "ingredient", "settings": { "name": "CDP-Choline (Citicoline)", "amount": "250 mg", "system": "Cholinergic Support" } },
-        { "type": "ingredient", "settings": { "name": "Nicotinamide Mononucleotide (NMN)", "amount": "250 mg", "system": "Cellular Energy" } },
-        { "type": "ingredient", "settings": { "name": "L-Theanine", "amount": "200 mg", "system": "Calm Focus" } },
-        { "type": "ingredient", "settings": { "name": "Rhodiola rosea extract (3% Salidroside)", "amount": "200 mg", "system": "Calm Focus" } },
-        { "type": "ingredient", "settings": { "name": "Ubiquinol CoQ10", "amount": "100 mg", "system": "Cellular Energy" } },
-        { "type": "ingredient", "settings": { "name": "Pyridoxal-5-Phosphate (P-5-P)", "amount": "5 mg", "system": "Active Cofactors" } },
-        { "type": "ingredient", "settings": { "name": "Methyl B12 (Methylcobalamin)", "amount": "500 mcg", "system": "Active Cofactors" } },
-        { "type": "ingredient", "settings": { "name": "5-MTHF (Active Folate)", "amount": "400 mcg DFE", "system": "Active Cofactors" } }
+        { "type": "ingredient", "settings": { "name": "Acetyl-L-Carnitine", "amount": "500 mg", "system": "Acetyl-L-Carnitine" } },
+        { "type": "ingredient", "settings": { "name": "CDP-Choline (Citicoline)", "amount": "250 mg", "system": "Citicoline" } },
+        { "type": "ingredient", "settings": { "name": "NMN", "amount": "250 mg", "system": "Nicotinamide mononucleotide" } },
+        { "type": "ingredient", "settings": { "name": "L-Theanine", "amount": "200 mg", "system": "L-Theanine" } },
+        { "type": "ingredient", "settings": { "name": "Rhodiola rosea extract", "amount": "200 mg", "system": "Rhodiola rosea extract" } },
+        { "type": "ingredient", "settings": { "name": "CoQ10", "amount": "100 mg", "system": "CoQ10" } },
+        { "type": "ingredient", "settings": { "name": "Vitamin B6", "amount": "5 mg (294% DV)", "system": "Pyridoxal-5-Phosphate" } },
+        { "type": "ingredient", "settings": { "name": "Vitamin B12", "amount": "500 mcg (20833% DV)", "system": "Methylcobalamin" } },
+        { "type": "ingredient", "settings": { "name": "Folate", "amount": "400 mcg DFE (100% DV)", "system": "L-5-MTHF" } }
       ]
     }
   ]

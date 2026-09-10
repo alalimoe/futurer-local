@@ -8,42 +8,22 @@
   if variant != blank and variant.available
     assign product_available = true
   endif
-  assign primary_label = section.settings.primary_label
-  assign primary_href = section.settings.primary_href
-  assign meta = section.settings.meta
-  if variant != blank
-    assign bottle_price = variant.price | divided_by: 100
-    assign daily_price = variant.price | divided_by: 30 | divided_by: 100
-    assign meta = 'sections.nx01_launch_hero.dynamic_meta' | t: price: bottle_price, daily_price: daily_price
+  assign product_name = section.settings.product_name | strip
+  if product_name == blank and product != blank
+    assign product_name = product.title
   endif
-  if product != blank and product_available == false
-    assign primary_label = 'sections.nx01_launch_hero.restock_cta' | t
-    assign primary_href = '#nx01-buy'
+  if product_name == blank
+    assign product_name = 'NX-01 Baseline'
   endif
+  assign supply = section.settings.supply_line | strip
   assign bottle = section.settings.bottle_image
   assign bottle_mobile = section.settings.bottle_image_mobile
   assign bottle_alt = section.settings.bottle_alt | strip
-  assign show_primary = false
-  if primary_label != blank and primary_href != blank
-    assign show_primary = true
-  endif
-  assign show_secondary = false
-  if section.settings.secondary_label != blank and section.settings.secondary_href != blank
-    assign show_secondary = true
-  endif
-  assign show_ctas = false
-  if show_primary or show_secondary
-    assign show_ctas = true
-  endif
-  assign show_scroll = false
-  if section.settings.scroll_label != blank and section.settings.scroll_href != blank
-    assign show_scroll = true
-  endif
-  assign fact_count = 0
+  assign reason_count = 0
   for block in section.blocks
-    if block.type == 'fact'
-      if block.settings.value != blank or block.settings.label != blank
-        assign fact_count = fact_count | plus: 1
+    if block.type == 'reason'
+      if block.settings.title != blank or block.settings.body != blank
+        assign reason_count = reason_count | plus: 1
       endif
     endif
   endfor
@@ -52,19 +32,20 @@
   else
     assign nx01_anchor = 'nx01-hero-' | append: section.id
   endif
+  assign form_id = 'nx01-purchase-hero-' | append: section.id
 -%}
 
 {% render 'nx01-launch-css' %}
 
 <section
   id="{{ nx01_anchor }}"
-  class="nx01 nx01-launch-hero xo-section xo-section--{{ section.id }}{% if section.settings.color_scheme != blank %} color-{{ section.settings.color_scheme }}{% endif %}{% if section.settings.full_viewport %} nx01-launch-hero--viewport{% endif %}"
+  class="nx01 nx01-launch-hero xo-section xo-section--{{ section.id }}{% if section.settings.color_scheme != blank %} color-{{ section.settings.color_scheme }}{% endif %}"
   style="{% if section.settings.padding_top != blank %}--nx01-pad-block-start: {{ section.settings.padding_top }}px;{% endif %}{% if section.settings.padding_bottom != blank %} --nx01-pad-block-end: {{ section.settings.padding_bottom }}px;{% endif %}"
   aria-labelledby="nx01-hero-heading-{{ section.id }}"
 >
   <div class="nx01__inner nx01-launch-hero__inner">
-    <div class="nx01-launch-hero__stage">
-      <div class="nx01-launch-hero__copy">
+    <div class="nx01-launch-hero__layout">
+      <div class="nx01-launch-hero__intro">
         {%- if section.settings.eyebrow != blank -%}
           <p class="nx01__label">
             <span class="nx01__label-rule" aria-hidden="true"></span>
@@ -72,33 +53,20 @@
           </p>
         {%- endif -%}
 
-        {%- if section.settings.heading != blank -%}
-          <h1 class="nx01__heading nx01-launch-hero__heading" id="nx01-hero-heading-{{ section.id }}">
-            {{ section.settings.heading | escape }}
-          </h1>
-        {%- endif -%}
-
-        {%- if meta != blank -%}
-          <p class="nx01-launch-hero__meta">{{ meta | escape }}</p>
-        {%- endif -%}
-
-        {%- if product != blank and product_available == false -%}
-          <p class="nx01-launch-hero__availability" role="status">{{ 'sections.nx01_launch_hero.sold_out' | t }}</p>
-        {%- endif -%}
+        <h1 class="nx01__heading nx01-launch-hero__heading" id="nx01-hero-heading-{{ section.id }}">
+          {{ product_name | escape }}
+        </h1>
 
         {%- if section.settings.subheading != blank -%}
           <div class="nx01__sub nx01-launch-hero__sub">{{ section.settings.subheading }}</div>
         {%- endif -%}
 
-        {%- if show_ctas -%}
-          <div class="nx01-launch-hero__ctas">
-            {%- if show_primary -%}
-              {% render 'button', style: 'primary', text: primary_label, link: primary_href %}
-            {%- endif -%}
-            {%- if show_secondary -%}
-              {% render 'button', style: 'secondary', text: section.settings.secondary_label, link: section.settings.secondary_href %}
-            {%- endif -%}
-          </div>
+        {%- if section.settings.heading != blank -%}
+          <p class="nx01-launch-hero__tagline">{{ section.settings.heading | escape }}</p>
+        {%- endif -%}
+
+        {%- if product != blank and product_available == false -%}
+          <p class="nx01-launch-hero__availability" role="status">{{ 'sections.nx01_launch_hero.sold_out' | t }}</p>
         {%- endif -%}
       </div>
 
@@ -126,7 +94,7 @@
                 loading: 'eager',
                 fetchpriority: 'high',
                 widths: '280, 360, 480, 720, 960, 1200, 1400',
-                sizes: '(max-width: 767px) min(280px, 90vw), min(536px, 48vw)',
+                sizes: '(max-width: 767px) min(280px, 90vw), min(420px, 40vw)',
                 alt: bottle_alt,
                 width: bottle.width,
                 height: bottle.height,
@@ -135,94 +103,115 @@
           </picture>
         </div>
       {%- endif -%}
-    </div>
 
-    {%- if fact_count > 0 -%}
-      <ul class="nx01-launch-hero__facts" aria-label="{{ 'sections.nx01_launch_hero.facts_label' | t }}">
-        {%- for block in section.blocks -%}
-          {%- if block.type == 'fact' -%}
-            {%- if block.settings.value != blank or block.settings.label != blank -%}
-              <li class="nx01-launch-hero__fact" {{ block.shopify_attributes }}>
-                {%- if block.settings.value != blank -%}
-                  <span class="nx01-launch-hero__fact-value">{{ block.settings.value | escape }}</span>
-                {%- endif -%}
-                {%- if block.settings.label != blank -%}
-                  <span class="nx01-launch-hero__fact-label">{{ block.settings.label | escape }}</span>
-                {%- endif -%}
-              </li>
+      {%- if supply != blank -%}
+        <p class="nx01-launch-hero__supply">{{ supply | escape }}</p>
+      {%- endif -%}
+
+      <div class="nx01-launch-hero__buy" id="nx01-buy">
+        {% render 'nx01-purchase', product: product, instance_id: 'hero', form_id: form_id, show_policy: true %}
+      </div>
+
+      {%- if reason_count > 0 -%}
+        <ul class="nx01-launch-hero__reasons" aria-label="{{ 'sections.nx01_launch_hero.facts_label' | t }}">
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'reason' -%}
+              {%- if block.settings.title != blank or block.settings.body != blank -%}
+                <li class="nx01-launch-hero__reason" {{ block.shopify_attributes }}>
+                  {%- if block.settings.title != blank -%}
+                    <p class="nx01-launch-hero__reason-title">{{ block.settings.title | escape }}</p>
+                  {%- endif -%}
+                  {%- if block.settings.body != blank -%}
+                    <p class="nx01-launch-hero__reason-body">{{ block.settings.body | escape }}</p>
+                  {%- endif -%}
+                </li>
+              {%- endif -%}
             {%- endif -%}
-          {%- endif -%}
-        {%- endfor -%}
-      </ul>
-    {%- endif -%}
+          {%- endfor -%}
+        </ul>
+      {%- endif -%}
 
-    {%- if show_scroll -%}
-      <a class="nx01-launch-hero__scroll" href="{{ section.settings.scroll_href | escape }}">
-        <span>{{ section.settings.scroll_label | escape }}</span>
-        <span class="nx01-launch-hero__scroll-icon" aria-hidden="true">
-          {% render 'icon', name: 'arrow-down', size: '1.6rem' %}
-        </span>
-      </a>
-    {%- endif -%}
+      {%- if section.settings.ingredients_label != blank and section.settings.ingredients_href != blank -%}
+        <a class="nx01__text-link nx01-launch-hero__link" href="{{ section.settings.ingredients_href | escape }}">
+          {{ section.settings.ingredients_label | escape }}
+        </a>
+      {%- endif -%}
+    </div>
   </div>
 </section>
 
 {% style %}
   .nx01-launch-hero {
-    --nx01-chrome: 12.8rem;
     position: relative;
     isolation: isolate;
-    overflow: hidden;
   }
 
   .nx01-launch-hero__inner {
-    display: flex;
-    flex-direction: column;
-    gap: 4.8rem;
+    padding-block: 2.4rem;
   }
 
-  .nx01-launch-hero__stage {
+  .nx01-launch-hero__layout {
     display: grid;
-    grid-template-columns: 1fr;
-    align-items: center;
-    gap: 3.2rem;
+    grid-template-areas:
+      'intro'
+      'media'
+      'supply'
+      'buy'
+      'reasons'
+      'link';
+    gap: 2rem;
   }
 
-  .nx01-launch-hero__copy {
+  .nx01-launch-hero__intro {
+    grid-area: intro;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 1.6rem;
-    max-width: 64rem;
+    gap: 1.2rem;
   }
 
   .nx01-launch-hero__media {
-    position: relative;
+    grid-area: media;
     display: flex;
     justify-content: center;
-    align-items: flex-end;
-    min-height: 0;
   }
 
-  .nx01-launch-hero__ctas {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1.6rem;
-    margin-top: 2.4rem;
+  .nx01-launch-hero__supply {
+    grid-area: supply;
+    margin: 0;
+    font-size: 1.4rem;
+    font-weight: 500;
+  }
+
+  .nx01-launch-hero__buy {
+    grid-area: buy;
+    scroll-margin-top: var(--nx01-scroll-margin);
+  }
+
+  .nx01-launch-hero__reasons {
+    grid-area: reasons;
+    display: grid;
+    gap: 1.2rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .nx01-launch-hero__link {
+    grid-area: link;
   }
 
   .nx01-launch-hero__heading {
-    font-size: clamp(3.6rem, 7vw, 5.6rem);
+    font-size: clamp(3.2rem, 6vw, 4.8rem);
     letter-spacing: -0.035em;
     line-height: 1.14;
   }
 
-  .nx01-launch-hero__meta {
+  .nx01-launch-hero__tagline {
     margin: 0;
-    font-size: 1.4rem;
+    font-size: 1.8rem;
     font-weight: 500;
-    line-height: 1.5;
-    color: rgb(var(--nx01-ink));
+    line-height: 1.4;
   }
 
   .nx01-launch-hero__availability {
@@ -240,7 +229,7 @@
 
   .nx01-launch-hero__sub {
     max-width: 64rem;
-    font-size: 1.8rem;
+    font-size: 1.6rem;
     line-height: 1.55;
   }
 
@@ -256,8 +245,6 @@
   }
 
   .nx01-launch-hero__img {
-    position: relative;
-    z-index: 1;
     max-height: 28rem;
     width: auto;
     max-width: 100%;
@@ -265,103 +252,38 @@
     object-fit: contain;
   }
 
-  .nx01-launch-hero__ctas .xo-btn {
-    width: 100%;
-    justify-content: center;
+  .nx01-launch-hero__reason {
+    padding: 0;
   }
 
-  .nx01-launch-hero__facts {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2.4rem 1.6rem;
-    margin: 0;
-    padding: 2.4rem 3.2rem;
-    list-style: none;
-    border: 0.1rem solid rgb(var(--nx01-rule));
-    border-radius: var(--nx01-radius);
-    background: rgb(var(--nx01-field));
-  }
-
-  .nx01-launch-hero__fact {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.6rem;
-    text-align: center;
-  }
-
-  .nx01-launch-hero__fact-value {
-    font-family: var(--font-heading-family);
-    font-size: 3.2rem;
+  .nx01-launch-hero__reason-title {
+    margin: 0 0 0.4rem;
+    font-size: 1.4rem;
     font-weight: 600;
-    letter-spacing: -0.03em;
-    line-height: 1.2;
-    color: rgb(var(--nx01-navy));
   }
 
-  .nx01-launch-hero__fact-label {
-    font-size: 1.1rem;
-    font-weight: 400;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: rgb(var(--nx01-navy));
-  }
-
-  .nx01-launch-hero__scroll {
-    display: inline-flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    align-self: center;
-    gap: 1.2rem;
-    min-height: 4.8rem;
-    min-width: 4.8rem;
-    padding: 0.8rem 1.2rem;
-    font-size: 1.1rem;
-    font-weight: 400;
-    letter-spacing: 0.25em;
-    text-transform: uppercase;
-    text-decoration: none;
-    color: rgb(var(--nx01-navy));
-  }
-
-  .nx01-launch-hero__scroll:hover,
-  .nx01-launch-hero__scroll:focus-visible {
-    color: rgb(var(--nx01-ink));
-  }
-
-  .nx01-launch-hero__scroll:focus-visible {
-    outline: 0.2rem solid rgb(var(--nx01-navy));
-    outline-offset: 0.4rem;
-  }
-
-  .nx01-launch-hero__scroll-icon {
-    display: flex;
-  }
-
-  @media screen and (min-width: 768px) {
-    .nx01-launch-hero--viewport .nx01-launch-hero__inner {
-      min-height: calc(100svh - var(--nx01-chrome));
-      justify-content: center;
-    }
-
-    .nx01-launch-hero__ctas .xo-btn {
-      width: auto;
-    }
-
-    .nx01-launch-hero__facts {
-      grid-template-columns: repeat(4, 1fr);
-    }
+  .nx01-launch-hero__reason-body {
+    margin: 0;
+    font-size: 1.4rem;
+    line-height: 1.5;
+    color: rgb(var(--nx01-body));
   }
 
   @media screen and (min-width: 990px) {
-    .nx01-launch-hero__stage {
-      grid-template-columns: minmax(0, 0.5fr) minmax(0, 0.5fr);
+    .nx01-launch-hero__layout {
+      grid-template-columns: minmax(0, 0.4fr) minmax(0, 0.6fr);
+      grid-template-areas:
+        'media intro'
+        'media supply'
+        'media buy'
+        'media reasons'
+        'media link';
       column-gap: 4.8rem;
+      align-items: start;
     }
 
     .nx01-launch-hero__img {
-      max-height: min(70.3rem, 70vh);
+      max-height: 42rem;
     }
   }
 {% endstyle %}
@@ -383,18 +305,24 @@
     },
     { "type": "header", "content": "Reuse" },
     { "type": "text", "id": "anchor_id", "label": "Anchor ID", "info": "Optional in-page link target. Leave blank to keep the default hero ID." },
-    { "type": "range", "id": "padding_top", "min": 24, "max": 120, "step": 8, "unit": "px", "label": "Padding top", "default": 48 },
-    { "type": "range", "id": "padding_bottom", "min": 24, "max": 120, "step": 8, "unit": "px", "label": "Padding bottom", "default": 48 },
+    { "type": "range", "id": "padding_top", "min": 24, "max": 120, "step": 8, "unit": "px", "label": "Padding top", "default": 32 },
+    { "type": "range", "id": "padding_bottom", "min": 24, "max": 120, "step": 8, "unit": "px", "label": "Padding bottom", "default": 32 },
     {
       "type": "checkbox",
       "id": "full_viewport",
       "label": "t:sections.nx01_launch_hero.settings.full_viewport",
-      "default": true
+      "default": false
     },
     {
       "type": "product",
       "id": "product",
       "label": "Product used for live price and availability"
+    },
+    {
+      "type": "text",
+      "id": "product_name",
+      "label": "Product name",
+      "default": "NX-01 Baseline"
     },
     {
       "type": "text",
@@ -406,50 +334,66 @@
       "type": "text",
       "id": "heading",
       "label": "t:sections.nx01_launch_hero.settings.heading",
-      "default": "We finally built our own nootropic."
+      "default": "Your daily nootropic stack, simplified."
+    },
+    {
+      "type": "text",
+      "id": "supply_line",
+      "label": "Supply line",
+      "default": "90 capsules · 30 servings · 3 capsules per serving"
     },
     {
       "type": "text",
       "id": "meta",
       "label": "Meta line",
-      "info": "Short product facts shown between the heading and description."
+      "info": "Unused when the purchase module is shown. Kept for existing templates."
     },
     {
       "type": "richtext",
       "id": "subheading",
       "label": "t:sections.nx01_launch_hero.settings.subheading",
-      "default": "<p>A caffeine-free daily cognitive foundation built from 9 complementary actives — in 3 capsules.</p>"
+      "default": "<p>A caffeine-free daily combination of nine listed ingredients in one 3-capsule serving.</p>"
     },
     {
       "type": "text",
       "id": "primary_label",
       "label": "t:sections.nx01_launch_hero.settings.primary_label",
-      "default": "Shop NX-01"
+      "default": "Add to cart"
     },
     {
       "type": "text",
       "id": "primary_href",
       "label": "t:sections.nx01_launch_hero.settings.primary_href",
-      "default": "#nx01-buy",
-      "info": "t:sections.nx01_launch_hero.settings.href_info"
+      "default": "#nx01-buy"
     },
     {
       "type": "text",
       "id": "secondary_label",
       "label": "t:sections.nx01_launch_hero.settings.secondary_label",
-      "default": "Explore the Formula"
+      "default": "Ingredients & amounts"
     },
     {
       "type": "text",
       "id": "secondary_href",
       "label": "t:sections.nx01_launch_hero.settings.secondary_href",
-      "default": "#nx01-formula"
+      "default": "#nx01-facts"
+    },
+    {
+      "type": "text",
+      "id": "ingredients_label",
+      "label": "Ingredients link label",
+      "default": "Ingredients & amounts"
+    },
+    {
+      "type": "text",
+      "id": "ingredients_href",
+      "label": "Ingredients link",
+      "default": "#nx01-facts"
     },
     {
       "type": "image_picker",
       "id": "bottle_image",
-      "label": "t:sections.nx01_launch_hero.settings.bottle_image",
-      "info": "t:sections.nx01_launch_hero.settings.bottle_image_info"
+      "label": "t:sections.nx01_launch_hero.settings.bottle_image"
     },
     {
       "type": "image_picker",
@@ -459,20 +403,18 @@
     {
       "type": "text",
       "id": "bottle_alt",
-      "label": "t:sections.nx01_launch_hero.settings.bottle_alt",
-      "info": "t:sections.nx01_launch_hero.settings.bottle_alt_info"
+      "label": "t:sections.nx01_launch_hero.settings.bottle_alt"
     },
     {
       "type": "text",
       "id": "scroll_label",
-      "label": "t:sections.nx01_launch_hero.settings.scroll_label",
-      "default": "Why we built it"
+      "label": "t:sections.nx01_launch_hero.settings.scroll_label"
     },
     {
       "type": "text",
       "id": "scroll_href",
       "label": "t:sections.nx01_launch_hero.settings.scroll_href",
-      "default": "#nx01-why"
+      "default": "#nx01-audience"
     }
   ],
   "blocks": [
@@ -493,41 +435,24 @@
           "default": "Actives"
         }
       ]
+    },
+    {
+      "type": "reason",
+      "name": "Reason",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Title", "default": "Listed daily serving" },
+        { "type": "textarea", "id": "body", "label": "Body", "default": "Nine actives, with forms and amounts on the label." }
+      ]
     }
   ],
-  "max_blocks": 4,
+  "max_blocks": 8,
   "presets": [
     {
       "name": "t:sections.nx01_launch_hero.presets.name",
       "blocks": [
-        {
-          "type": "fact",
-          "settings": {
-            "value": "9",
-            "label": "Actives"
-          }
-        },
-        {
-          "type": "fact",
-          "settings": {
-            "value": "3",
-            "label": "Capsules daily"
-          }
-        },
-        {
-          "type": "fact",
-          "settings": {
-            "value": "30-day",
-            "label": "Bottle"
-          }
-        },
-        {
-          "type": "fact",
-          "settings": {
-            "value": "0 mg",
-            "label": "Caffeine"
-          }
-        }
+        { "type": "reason", "settings": { "title": "Listed daily serving", "body": "Nine actives, with forms and amounts on the label." } },
+        { "type": "reason", "settings": { "title": "0 mg caffeine", "body": "Caffeine is not listed in the formula." } },
+        { "type": "reason", "settings": { "title": "Fixed combination", "body": "For people who already want these listed amounts in one serving." } }
       ]
     }
   ]

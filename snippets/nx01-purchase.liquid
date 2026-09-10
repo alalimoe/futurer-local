@@ -1,0 +1,212 @@
+{% doc %}
+  Compact NX-01 purchase selector. Price and delivery render only here.
+
+  @param {product} product - Product to add
+  @param {string} instance_id - Unique instance key
+  @param {string} [form_id] - Form element id
+  @param {string} [cta_label] - Add to cart label
+  @param {boolean} [show_policy] - Render shipping and returns summary
+
+  @example
+  {% render 'nx01-purchase', product: product, instance_id: 'hero', show_policy: true %}
+{% enddoc %}
+
+{%- liquid
+  assign purchase_product = product
+  if purchase_product == blank
+    assign purchase_product = all_products['nx-01-baseline']
+  endif
+  assign variant = purchase_product.selected_or_first_available_variant
+  assign sold_out = false
+  if purchase_product == blank
+    assign sold_out = true
+  elsif variant == blank or variant.available == false
+    assign sold_out = true
+  endif
+  assign has_multiple_variants = false
+  if purchase_product != blank and purchase_product.has_only_default_variant == false
+    assign has_multiple_variants = true
+  endif
+  assign first_selling_plan = blank
+  assign first_selling_price = blank
+  if variant != blank and variant.selling_plan_allocations.size > 0
+    assign first_selling_plan = variant.selling_plan_allocations.first.selling_plan
+    assign first_selling_price = variant.selling_plan_allocations.first.price
+  endif
+  assign instance = instance_id | default: 'buy' | handleize
+  assign form_dom_id = form_id | default: 'nx01-purchase-' | append: instance
+  assign restock_form_id = 'nx01-restock-' | append: instance
+  assign add_label = cta_label | default: 'sections.nx01_launch_purchase.add_to_cart' | t
+  assign choose_label = 'sections.nx01_launch_purchase.choose_options' | t
+  assign unavailable_label = 'products.product.unavailable' | t
+  assign restock_submit_label = 'sections.nx01_launch_buy.restock_submit' | t
+  assign show_shipping = true
+  if show_policy == false
+    assign show_shipping = false
+  endif
+  assign unit_one = variant.price
+  assign unit_two = variant.price
+  if variant != blank
+    for price_break in variant.quantity_price_breaks
+      if 2 >= price_break.minimum_quantity
+        assign unit_two = price_break.price
+      endif
+    endfor
+  endif
+  assign line_one = unit_one
+  assign line_two = unit_two | times: 2
+  assign daily_one = unit_one | divided_by: 30 | money | strip_html
+  assign daily_two = unit_two | divided_by: 30 | money | strip_html
+  assign price_one_text = line_one | money | strip_html
+  assign price_two_text = line_two | money | strip_html
+  assign variant_available = false
+  if variant != blank and variant.available
+    assign variant_available = true
+  endif
+-%}
+
+<div
+  class="nx01-purchase"
+  data-nx01-purchase="{{ instance | escape }}"
+>
+  {%- if purchase_product == blank -%}
+    <div class="nx01-purchase__availability" role="status">
+      <h3>{{ 'sections.nx01_launch_buy.unavailable_heading' | t }}</h3>
+      <p>{{ 'sections.nx01_launch_buy.unavailable_body' | t }}</p>
+    </div>
+  {%- elsif sold_out -%}
+    <div class="nx01-purchase__availability">
+      <p class="nx01-purchase__status">{{ 'products.product.sold_out' | t }}</p>
+      <h3>{{ 'sections.nx01_launch_buy.sold_out_heading' | t: product: purchase_product.title }}</h3>
+      <p>{{ 'sections.nx01_launch_buy.sold_out_body' | t }}</p>
+      {% form 'contact', id: restock_form_id, class: 'nx01-purchase__restock' %}
+        <input
+          type="hidden"
+          name="contact[body]"
+          value="{{ 'sections.nx01_launch_buy.restock_message' | t: product: purchase_product.title | escape }}"
+        >
+        {%- if form.posted_successfully? -%}
+          <p class="nx01-purchase__success" role="status" tabindex="-1">
+            {{ 'sections.nx01_launch_buy.restock_success' | t }}
+          </p>
+        {%- else -%}
+          {%- if form.errors -%}
+            <div class="nx01-purchase__errors" role="alert">{{ form.errors | default_errors }}</div>
+          {%- endif -%}
+          <label class="nx01-purchase__restock-label" for="{{ restock_form_id }}-email">
+            {{ 'sections.nx01_launch_buy.restock_email' | t }}
+          </label>
+          <div class="nx01-purchase__restock-row">
+            <input
+              class="nx01-purchase__restock-input"
+              id="{{ restock_form_id }}-email"
+              type="email"
+              name="contact[email]"
+              value="{{ form.email | escape }}"
+              autocomplete="email"
+              inputmode="email"
+              required
+            >
+            {% render 'button', style: 'primary', text: restock_submit_label, type: 'submit' %}
+          </div>
+        {%- endif -%}
+      {% endform %}
+    </div>
+  {%- elsif has_multiple_variants -%}
+    <p class="nx01-purchase__price" data-nx01-price-label>{{ line_one | money }}</p>
+    <p class="nx01-purchase__daily" data-nx01-daily-label>{{ 'sections.nx01_launch_buy.per_day' | t: price: daily_one }}</p>
+    {% render 'button', style: 'primary', text: choose_label, link: purchase_product.url, block: true %}
+  {%- else -%}
+    <p class="nx01-purchase__price" data-nx01-price-label>{{ line_one | money }}</p>
+    <p class="nx01-purchase__daily" data-nx01-daily-label>{{ 'sections.nx01_launch_buy.per_day' | t: price: daily_one }}</p>
+
+    <fieldset class="nx01-purchase__options">
+      <legend class="nx01-purchase__legend">{{ 'sections.nx01_launch_purchase.options_label' | t }}</legend>
+
+      <label class="nx01-purchase__option">
+        <input
+          type="radio"
+          name="nx01-tier-{{ instance }}"
+          value="1"
+          data-nx01-tier="1"
+          data-nx01-qty="1"
+          data-nx01-plan=""
+          data-nx01-price-html="{{ line_one | money | escape }}"
+          data-nx01-price-text="{{ price_one_text | escape }}"
+          data-nx01-daily="{{ 'sections.nx01_launch_buy.per_day' | t: price: daily_one | escape }}"
+          checked
+        >
+        <span class="nx01-purchase__option-copy">
+          <span class="nx01-purchase__option-title">{{ 'sections.nx01_launch_purchase.bottle_one' | t }}</span>
+          <span class="nx01-purchase__option-meta">{{ 'sections.nx01_launch_purchase.days_30' | t }} · {{ price_one_text }}</span>
+        </span>
+      </label>
+
+      <label class="nx01-purchase__option">
+        <input
+          type="radio"
+          name="nx01-tier-{{ instance }}"
+          value="2"
+          data-nx01-tier="2"
+          data-nx01-qty="2"
+          data-nx01-plan=""
+          data-nx01-price-html="{{ line_two | money | escape }}"
+          data-nx01-price-text="{{ price_two_text | escape }}"
+          data-nx01-daily="{{ 'sections.nx01_launch_buy.per_day' | t: price: daily_two | escape }}"
+        >
+        <span class="nx01-purchase__option-copy">
+          <span class="nx01-purchase__option-title">{{ 'sections.nx01_launch_purchase.bottle_two' | t }}</span>
+          <span class="nx01-purchase__option-meta">{{ 'sections.nx01_launch_purchase.days_60' | t }} · {{ price_two_text }}</span>
+        </span>
+      </label>
+
+      {%- if first_selling_plan != blank -%}
+        {%- assign sub_unit = first_selling_price | money | strip_html -%}
+        <label class="nx01-purchase__option">
+          <input
+            type="radio"
+            name="nx01-tier-{{ instance }}"
+            value="sub"
+            data-nx01-tier="sub"
+            data-nx01-qty="1"
+            data-nx01-plan="{{ first_selling_plan.id }}"
+            data-nx01-price-html="{{ first_selling_price | money | escape }}"
+            data-nx01-price-text="{{ first_selling_price | money | strip_html | escape }}"
+            data-nx01-daily="{{ 'sections.nx01_launch_buy.per_delivery' | t: price: sub_unit | escape }}"
+          >
+          <span class="nx01-purchase__option-copy">
+            <span class="nx01-purchase__option-title">{{ 'sections.nx01_launch_purchase.subscribe' | t }}</span>
+            <span class="nx01-purchase__option-meta">{{ first_selling_plan.name | escape }} · {{ sub_unit }}</span>
+          </span>
+        </label>
+      {%- endif -%}
+    </fieldset>
+
+    {% form 'product', purchase_product, id: form_dom_id, data-type: 'add-to-cart-form', class: 'nx01-purchase__form' %}
+      <input type="hidden" name="id" value="{{ variant.id }}">
+      <input type="hidden" name="quantity" value="1" data-nx01-quantity>
+      <input type="hidden" name="selling_plan" value="" data-nx01-selling-plan>
+      <xo-cart-add
+        xo-product-id="{{ purchase_product.id }}"
+        xo-variant-id="{{ variant.id }}"
+        xo-product-quantity="1"
+        xo-section-id="{{ instance }}"
+        data-nx01-cart-add
+        {% if settings.cart_type == 'page' %}xo-cart-redirection{% endif %}
+      >
+        {% render 'button', style: 'primary', text: add_label, type: 'submit', block: true, text_unavailable: unavailable_label %}
+      </xo-cart-add>
+    {% endform %}
+  {%- endif -%}
+
+  {%- if show_shipping -%}
+    <div class="nx01-purchase__policy">
+      {%- if variant_available -%}
+        <div class="pdp-buy-captions">
+          {% render 'ships-today-bar', context: 'product', show_stock_fallback: true %}
+        </div>
+      {%- endif -%}
+      {% render 'shipping-policy-microcopy', class_prefix: 'nx01-purchase' %}
+    </div>
+  {%- endif -%}
+</div>

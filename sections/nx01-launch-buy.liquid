@@ -3,39 +3,15 @@
   if product == blank
     assign product = all_products['nx-01-baseline']
   endif
-  assign variant = product.selected_or_first_available_variant
-  assign sold_out = false
-  if product != blank
-    if variant == blank or variant.available == false
-      assign sold_out = true
-    endif
-  endif
-  assign has_multiple_variants = false
-  if product != blank and product.has_only_default_variant == false
-    assign has_multiple_variants = true
-  endif
-  assign first_selling_plan = blank
-  assign first_selling_price = blank
-  if variant != blank and variant.selling_plan_allocations.size > 0
-    assign first_selling_plan = variant.selling_plan_allocations.first.selling_plan
-    assign first_selling_price = variant.selling_plan_allocations.first.price
-  endif
-  assign restock_form_id = 'nx01-restock-' | append: section.id
-  assign restock_submit_label = 'sections.nx01_launch_buy.restock_submit' | t
-  assign choose_options_label = 'products.product.choose_options' | t
   assign heading = section.settings.heading
   assign subheading = section.settings.subheading
-  if product == blank
-    assign sold_out = true
-  elsif sold_out
-    assign heading = 'sections.nx01_launch_buy.sold_out_intro_heading' | t
-    assign subheading = 'sections.nx01_launch_buy.sold_out_intro_body' | t
-  endif
-  assign nx01_anchor = section.settings.anchor_id | default: 'nx01-buy' | handleize
+  assign nx01_anchor = section.settings.anchor_id | default: 'nx01-buy-close' | handleize
   assign nx01_intro_class = 'nx01__intro'
   if section.settings.heading_alignment == 'center'
     assign nx01_intro_class = 'nx01__intro nx01__intro--center'
   endif
+  assign form_id = 'nx01-purchase-close-' | append: section.id
+  assign cta_label = section.settings.cta_label
 -%}
 
 {% render 'nx01-launch-css' %}
@@ -62,156 +38,9 @@
       {%- endif -%}
     </div>
 
-    {%- if product == blank -%}
-      <div class="nx01-buy__availability" role="status">
-        <h3>{{ 'sections.nx01_launch_buy.unavailable_heading' | t }}</h3>
-        <p>{{ 'sections.nx01_launch_buy.unavailable_body' | t }}</p>
-      </div>
-    {%- elsif sold_out -%}
-      <div class="nx01-buy__availability">
-        <p class="nx01-buy__status">{{ 'products.product.sold_out' | t }}</p>
-        <h3>{{ 'sections.nx01_launch_buy.sold_out_heading' | t: product: product.title }}</h3>
-        <p>{{ 'sections.nx01_launch_buy.sold_out_body' | t }}</p>
-
-        {% form 'contact', id: restock_form_id, class: 'nx01-buy__restock-form' %}
-          <input
-            type="hidden"
-            name="contact[body]"
-            value="{{ 'sections.nx01_launch_buy.restock_message' | t: product: product.title | escape }}"
-          >
-          {%- if form.posted_successfully? -%}
-            <p class="nx01-buy__success" role="status" tabindex="-1">
-              {{ 'sections.nx01_launch_buy.restock_success' | t }}
-            </p>
-          {%- else -%}
-            {%- if form.errors -%}
-              <div class="nx01-buy__errors" role="alert">{{ form.errors | default_errors }}</div>
-            {%- endif -%}
-            <label class="nx01-buy__restock-label" for="{{ restock_form_id }}-email">
-              {{ 'sections.nx01_launch_buy.restock_email' | t }}
-            </label>
-            <div class="nx01-buy__restock-row">
-              <input
-                class="nx01-buy__restock-input"
-                id="{{ restock_form_id }}-email"
-                type="email"
-                name="contact[email]"
-                value="{{ form.email | escape }}"
-                autocomplete="email"
-                inputmode="email"
-                required
-              >
-              {% render 'button', style: 'primary', text: restock_submit_label, type: 'submit' %}
-            </div>
-          {%- endif -%}
-        {% endform %}
-      </div>
-    {%- else -%}
-      <div class="nx01-buy__grid">
-        {%- for block in section.blocks -%}
-          {%- if block.type == 'tier' -%}
-            {%- assign qty = block.settings.quantity | plus: 0 -%}
-            {%- if qty >= 1 -%}
-            {%- liquid
-              assign is_subscribe = block.settings.subscribe
-              assign selling_plan = blank
-              assign selling_plan_name = ''
-              assign tier_unit_price = variant.price
-              if is_subscribe and first_selling_plan != blank
-                assign selling_plan = first_selling_plan
-                assign selling_plan_name = first_selling_plan.name
-                assign tier_unit_price = first_selling_price
-              else
-                for price_break in variant.quantity_price_breaks
-                  if qty >= price_break.minimum_quantity
-                    assign tier_unit_price = price_break.price
-                  endif
-                endfor
-              endif
-              assign line_price = tier_unit_price | times: qty
-              assign unit_price = tier_unit_price | money | strip_html
-              assign daily_price = tier_unit_price | divided_by: 30 | money | strip_html
-              assign form_id = 'nx01-buy-' | append: section.id | append: '-' | append: block.id
-              assign cta_label = block.settings.cta_label | default: section.settings.cta_label
-              assign unavailable_label = 'products.product.unavailable' | t
-              assign send_to_pdp = false
-              if has_multiple_variants
-                assign send_to_pdp = true
-              endif
-              if is_subscribe and selling_plan == blank
-                assign send_to_pdp = true
-              endif
-            -%}
-            <article
-              class="nx01-buy__card{% if block.settings.featured %} nx01-buy__card--featured{% endif %}"
-              {{ block.shopify_attributes }}
-            >
-              <div class="nx01-buy__card-body">
-                <header class="nx01-buy__card-head">
-                  <div>
-                    {%- if block.settings.title != blank -%}
-                      <h3 class="nx01-buy__title">{{ block.settings.title | escape }}</h3>
-                    {%- endif -%}
-                    {%- if block.settings.days_label != blank -%}
-                      <p class="nx01-buy__days">{{ block.settings.days_label | escape }}</p>
-                    {%- endif -%}
-                  </div>
-                  {%- if block.settings.label != blank -%}
-                    <p class="nx01-buy__badge">{{ block.settings.label | escape }}</p>
-                  {%- endif -%}
-                </header>
-
-                {%- if block.settings.description != blank -%}
-                  <p class="nx01-buy__desc">{{ block.settings.description | escape }}</p>
-                {%- endif -%}
-
-                <p class="nx01-buy__price">{{ line_price | money }}</p>
-                {%- if is_subscribe -%}
-                  <p class="nx01-buy__unit">{{ 'sections.nx01_launch_buy.per_delivery' | t: price: unit_price }}</p>
-                  {%- if selling_plan_name != blank -%}
-                    <p class="nx01-buy__unit">{{ selling_plan_name | escape }}</p>
-                  {%- endif -%}
-                {%- else -%}
-                  <p class="nx01-buy__unit">{{ 'sections.nx01_launch_buy.per_bottle' | t: price: unit_price }}</p>
-                {%- endif -%}
-                <p class="nx01-buy__unit">{{ 'sections.nx01_launch_buy.per_day' | t: price: daily_price }}</p>
-                {%- if block.settings.saving != blank -%}
-                  <p class="nx01-buy__saving">{{ block.settings.saving | escape }}</p>
-                {%- endif -%}
-              </div>
-
-              {%- if send_to_pdp -%}
-                {%- liquid
-                  assign pdp_label = choose_options_label
-                  if is_subscribe and cta_label != blank
-                    assign pdp_label = cta_label
-                  endif
-                -%}
-                {% render 'button', style: 'primary', text: pdp_label, link: product.url, block: true %}
-              {%- else -%}
-                {% form 'product', product, id: form_id, data-type: 'add-to-cart-form' %}
-                  <input type="hidden" name="id" value="{{ variant.id }}">
-                  <input type="hidden" name="quantity" value="{{ qty }}">
-                  {%- if selling_plan != blank -%}
-                    <input type="hidden" name="selling_plan" value="{{ selling_plan.id }}">
-                  {%- endif -%}
-                  <xo-cart-add
-                    xo-product-id="{{ product.id }}"
-                    xo-variant-id="{{ variant.id }}"
-                    xo-product-quantity="{{ qty }}"
-                    xo-section-id="{{ section.id }}-{{ block.id }}"
-                    {% if settings.cart_type == 'page' %}xo-cart-redirection{% endif %}
-                  >
-                    {% render 'button', style: 'primary', text: cta_label, type: 'submit', block: true, text_unavailable: unavailable_label %}
-                  </xo-cart-add>
-                {% endform %}
-              {%- endif -%}
-            </article>
-            {%- endif -%}
-          {%- endif -%}
-        {%- endfor -%}
-      </div>
-    {%- endif -%}
+    <div class="nx01-buy__purchase">
+      {% render 'nx01-purchase', product: product, instance_id: 'close', form_id: form_id, cta_label: cta_label, show_policy: true %}
+    </div>
 
     {%- assign trust_count = 0 -%}
     {%- for block in section.blocks -%}
@@ -229,7 +58,7 @@
                 <span class="nx01-buy__trust-icon" aria-hidden="true">{% render 'icon', name: block.settings.icon, size: '1.6rem' %}</span>
               {%- endif -%}
               {%- if block.settings.link != blank -%}
-                <a href="{{ block.settings.link | escape }}">{{ block.settings.label | escape }}</a>
+                <a href="{{ block.settings.link }}">{{ block.settings.label | escape }}</a>
               {%- else -%}
                 <span>{{ block.settings.label | escape }}</span>
               {%- endif -%}
@@ -246,171 +75,8 @@
     scroll-margin-top: var(--nx01-scroll-margin);
   }
 
-  .nx01-buy__grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 2.4rem;
-    align-items: stretch;
-  }
-
-  .nx01-buy__availability {
-    max-width: 72rem;
-    padding: 3.2rem;
-    border: 0.1rem solid rgb(var(--nx01-line));
-    border-radius: var(--nx01-radius);
-    background: rgb(var(--nx01-surface));
-  }
-
-  .nx01-buy__availability h3,
-  .nx01-buy__availability p {
-    margin: 0;
-  }
-
-  .nx01-buy__availability h3 {
-    margin-top: 1.2rem;
-    font-size: clamp(2.4rem, 4vw, 3.2rem);
-    line-height: 1.2;
-  }
-
-  .nx01-buy__availability h3 + p {
-    margin-top: 1.2rem;
-    color: rgb(var(--nx01-body));
-  }
-
-  .nx01-buy__status {
-    font-size: 1.1rem;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: rgb(var(--nx01-navy-deep));
-  }
-
-  .nx01-buy__restock-form {
-    margin-top: 2.4rem;
-  }
-
-  .nx01-buy__restock-label {
-    display: block;
-    margin-bottom: 0.8rem;
-    font-size: 1.3rem;
-    font-weight: 600;
-  }
-
-  .nx01-buy__restock-row {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1.2rem;
-  }
-
-  .nx01-buy__restock-input {
-    width: 100%;
-    min-height: 4.8rem;
-    padding: 0 1.4rem;
-    border: 0.1rem solid rgb(var(--nx01-rule));
-    border-radius: var(--nx01-radius);
-    background: rgb(var(--nx01-field));
-    color: rgb(var(--nx01-ink));
-    font: inherit;
-  }
-
-  .nx01-buy__restock-input:focus-visible {
-    outline: 0.2rem solid rgb(var(--nx01-navy));
-    outline-offset: 0.2rem;
-  }
-
-  .nx01-buy__success,
-  .nx01-buy__errors {
-    margin-top: 2.4rem;
-  }
-
-  .nx01-buy__card {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    min-width: 0;
-    padding: 2.4rem;
-    background: rgb(var(--nx01-surface));
-    border: 0.1rem solid rgb(var(--nx01-line));
-    border-radius: var(--nx01-radius);
-    overflow-wrap: anywhere;
-  }
-
-  .nx01-buy__card--featured {
-    border-width: 0.2rem;
-    border-color: rgb(var(--nx01-navy));
-  }
-
-  .nx01-buy__card-body {
-    display: flex;
-    flex-direction: column;
-    gap: 1.2rem;
-    margin-bottom: 2.4rem;
-  }
-
-  .nx01-buy__card-head {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 1.2rem;
-  }
-
-  .nx01-buy__title {
-    margin: 0;
-    font-size: 2rem;
-    font-weight: 600;
-    color: rgb(var(--nx01-ink));
-  }
-
-  .nx01-buy__days {
-    margin: 0.4rem 0 0;
-    font-size: 1.2rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: rgb(var(--nx01-body));
-  }
-
-  .nx01-buy__badge {
-    margin: 0;
-    max-width: 100%;
-    padding: 0.4rem 1rem;
-    border: 0.1rem solid rgb(var(--nx01-navy-deep));
-    border-radius: 10rem;
-    font-size: 1rem;
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    white-space: normal;
-    overflow-wrap: anywhere;
-    color: rgb(var(--nx01-navy-deep));
-  }
-
-  .nx01-buy__desc {
-    margin: 0;
-    font-size: 1.4rem;
-    line-height: 1.5;
-    color: rgb(var(--nx01-body));
-  }
-
-  .nx01-buy__price {
-    margin: 1.2rem 0 0;
-    padding-top: 2.4rem;
-    border-top: 0.1rem solid rgb(var(--nx01-line));
-    font-size: 3.2rem;
-    font-weight: 600;
-    line-height: 1.2;
-  }
-
-  .nx01-buy__unit,
-  .nx01-buy__saving {
-    margin: 0;
-    font-size: 1.3rem;
-    color: rgb(var(--nx01-body));
-  }
-
-  .nx01-buy__saving {
-    font-weight: 600;
-    color: rgb(var(--nx01-navy-deep));
+  .nx01-buy__purchase {
+    max-width: 44rem;
   }
 
   .nx01-buy__trust {
@@ -444,25 +110,9 @@
     text-underline-offset: 0.3rem;
   }
 
-  @media screen and (min-width: 768px) {
-    .nx01-buy__card {
-      padding: 3.2rem;
-    }
-  }
-
   @media screen and (min-width: 1100px) {
-    .nx01-buy__grid {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-
     .nx01-buy__trust {
       justify-content: space-between;
-    }
-  }
-
-  @media screen and (min-width: 600px) {
-    .nx01-buy__restock-row {
-      grid-template-columns: minmax(0, 1fr) auto;
     }
   }
 {% endstyle %}
@@ -478,7 +128,7 @@
   "settings": [
     { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "background-1" },
     { "type": "header", "content": "Reuse" },
-    { "type": "text", "id": "anchor_id", "label": "Anchor ID", "info": "Optional in-page link target. Leave blank to keep nx01-buy." },
+    { "type": "text", "id": "anchor_id", "label": "Anchor ID", "info": "Optional in-page link target. Leave blank to keep nx01-buy-close." },
     { "type": "select", "id": "heading_alignment", "label": "Heading alignment", "options": [
       { "value": "left", "label": "Left" },
       { "value": "center", "label": "Center" }
@@ -486,10 +136,10 @@
     { "type": "range", "id": "padding_top", "min": 24, "max": 120, "step": 8, "unit": "px", "label": "Padding top", "default": 48 },
     { "type": "range", "id": "padding_bottom", "min": 24, "max": 120, "step": 8, "unit": "px", "label": "Padding bottom", "default": 48 },
     { "type": "product", "id": "product", "label": "Product" },
-    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Offer Structure" },
-    { "type": "text", "id": "heading", "label": "Heading", "default": "Start with your baseline." },
-    { "type": "textarea", "id": "subheading", "label": "Subheading", "default": "Available in single or bundled configurations. Simple recurring replacements without commitment." },
-    { "type": "text", "id": "cta_label", "label": "Default button label", "default": "Add to Cart" }
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "NX-01" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Add NX-01 to your routine" },
+    { "type": "textarea", "id": "subheading", "label": "Subheading", "default": "Choose 1 or 2 bottles. The same selection is used at the top of the page." },
+    { "type": "text", "id": "cta_label", "label": "Default button label", "default": "Add to cart" }
   ],
   "blocks": [
     {
@@ -518,7 +168,7 @@
           { "value": "return", "label": "Returns" },
           { "value": "none", "label": "None" }
         ], "default": "shipping-fast" },
-        { "type": "text", "id": "label", "label": "Label", "default": "Fast UAE Delivery (2-4 Days)" },
+        { "type": "text", "id": "label", "label": "Label", "default": "See current delivery estimates" },
         { "type": "url", "id": "link", "label": "Link" }
       ]
     }
@@ -528,13 +178,10 @@
     {
       "name": "NX-01 launch buy",
       "blocks": [
-        { "type": "tier", "settings": { "title": "1 Bottle", "quantity": 1, "days_label": "30 Day Supply", "label": "Starter", "description": "Best for testing biological compatibility and establishing immediate routine compliance." } },
-        { "type": "tier", "settings": { "title": "2 Bottles", "quantity": 2, "days_label": "60 Day Supply", "label": "Recommended", "description": "Optimized daily dosage cycle. Allows complete biochemical baseline stabilization.", "featured": true } },
-        { "type": "tier", "settings": { "title": "3 Bottles", "quantity": 3, "days_label": "90 Day Supply", "label": "Best Value", "description": "Full cellular saturation protocol. Perfect for long-term cognitive foundation maintenance." } },
-        { "type": "trust", "settings": { "icon": "shipping-fast", "label": "Fast UAE Delivery (2-4 Days)" } },
-        { "type": "trust", "settings": { "icon": "padlock", "label": "Secure SSL Encrypted Checkout" } },
-        { "type": "trust", "settings": { "icon": "verified-user", "label": "Dedicated Nootropix Support" } },
-        { "type": "trust", "settings": { "icon": "return", "label": "Hassle-Free Return Policy" } }
+        { "type": "trust", "settings": { "icon": "shipping-fast", "label": "See current delivery estimates" } },
+        { "type": "trust", "settings": { "icon": "padlock", "label": "Secure checkout" } },
+        { "type": "trust", "settings": { "icon": "verified-user", "label": "Questions? Ask the Nootropix team" } },
+        { "type": "trust", "settings": { "icon": "return", "label": "Unopened returns: see eligibility and terms" } }
       ]
     }
   ]

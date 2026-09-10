@@ -7,13 +7,32 @@
   assign product = section.settings.product
   assign primary_label = section.settings.primary_label
   assign primary_href = section.settings.primary_href
+  assign variant = blank
+  assign purchase_available = false
+  assign purchase_price = ''
   if product != blank
     assign variant = product.selected_or_first_available_variant
+    if variant != blank and variant.available
+      assign purchase_available = true
+      assign purchase_price = variant.price | money | strip_html
+    endif
     if variant == blank or variant.available == false
       assign primary_label = section.settings.sold_out_label
       if primary_label == blank
         assign primary_label = 'products.product.sold_out' | t
       endif
+    endif
+  endif
+  assign purchase_mode = section.settings.purchase_mode
+  assign add_label = 'sections.nx01_launch_purchase.add_to_cart' | t
+  assign sticky_action_label = primary_label
+  assign sticky_action_href = primary_href
+  if purchase_mode
+    if purchase_available
+      assign sticky_action_label = add_label
+    endif
+    if sticky_action_href == blank
+      assign sticky_action_href = '#nx01-buy'
     endif
   endif
 -%}
@@ -28,7 +47,8 @@
     position: fixed;
     left: 0;
     right: 0;
-    bottom: 0;
+    --sticky-cta-cookie: 0px;
+    bottom: var(--sticky-cta-cookie);
     z-index: 50;
     gap: 1rem;
     padding: max(1rem, var(--sticky-cta-pad-top)) var(--sticky-cta-gap) calc(max(1rem, var(--sticky-cta-pad-bottom)) + env(safe-area-inset-bottom));
@@ -51,6 +71,19 @@
     height: auto;
     border-radius: 2px;
     white-space: normal;
+  }
+
+  .xo-section--{{ section.id }} .sticky-cta__price {
+    margin: 0;
+    min-width: 7.2rem;
+    color: rgb(var(--color-background));
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  .xo-section--{{ section.id }} .sticky-cta__mobile--purchase {
+    display: contents;
   }
 
   .xo-section--{{ section.id }} .xo-btn--secondary {
@@ -82,7 +115,13 @@
 
     {% if section.settings.reserve_space_mobile %}
     body:has(.xo-section--{{ section.id }}) {
-      padding-bottom: calc(var(--sticky-cta-reserve) + env(safe-area-inset-bottom));
+      padding-bottom: calc(var(--sticky-cta-reserve) + var(--sticky-cta-cookie, 0px) + env(safe-area-inset-bottom));
+    }
+    {% endif %}
+
+    {% if section.settings.purchase_mode %}
+    .xo-section--{{ section.id }} {
+      padding-inline-end: calc(var(--sticky-cta-gap) + 7.2rem);
     }
     {% endif %}
   }
@@ -187,9 +226,16 @@
   data-sticky-cta
   {% if section.settings.show_after_id != blank %}data-mobile-hidden="true"{% endif %}
 >
-  <div class="sticky-cta__mobile">
-    {% render 'button', style: 'primary', text: primary_label, link: primary_href %}
-    {% render 'button', style: 'secondary', text: section.settings.secondary_label, link: section.settings.secondary_href %}
+  <div class="sticky-cta__mobile{% if purchase_mode %} sticky-cta__mobile--purchase{% endif %}">
+    {%- if purchase_mode and purchase_available -%}
+      <p class="sticky-cta__price" data-nx01-sticky-price>{{ purchase_price }}</p>
+      {% render 'button', style: 'primary', text: sticky_action_label, link: sticky_action_href, attrs: 'data-nx01-sticky-submit' %}
+    {%- else -%}
+      {% render 'button', style: 'primary', text: primary_label, link: primary_href %}
+      {%- unless purchase_mode -%}
+        {% render 'button', style: 'secondary', text: section.settings.secondary_label, link: section.settings.secondary_href %}
+      {%- endunless -%}
+    {%- endif -%}
   </div>
 
   {%- if section.settings.desktop_navigation -%}
@@ -206,7 +252,11 @@
           {%- endfor -%}
         </ul>
       </nav>
-      {% render 'button', style: 'primary', text: primary_label, link: primary_href %}
+      {%- if purchase_mode and purchase_available -%}
+        {% render 'button', style: 'primary', text: sticky_action_label, link: sticky_action_href, attrs: 'data-nx01-sticky-submit' %}
+      {%- else -%}
+        {% render 'button', style: 'primary', text: primary_label, link: primary_href %}
+      {%- endif -%}
     </div>
   {%- endif -%}
 
@@ -247,11 +297,21 @@
       document.documentElement.style.setProperty('--sticky-header-offset', `${Math.max(0, Math.round(bottom))}px`);
     };
 
+    const measureCookieOffset = (bar) => {
+      const cookie = document.querySelector('#shopify-pc-banner, .shopify-pc__banner');
+      const visible = Boolean(cookie && cookie.getClientRects().length);
+      const height = visible ? Math.ceil(cookie.getBoundingClientRect().height) : 0;
+      bar.style.setProperty('--sticky-cta-cookie', `${height}px`);
+      document.documentElement.style.setProperty('--sticky-cta-cookie', `${height}px`);
+    };
+
     const measureReserve = (bar) => {
+      measureCookieOffset(bar);
       if (!mobileQuery.matches || bar.dataset.mobileHidden === 'true') return;
       const height = Math.ceil(bar.getBoundingClientRect().height);
       if (height > 0) {
         bar.style.setProperty('--sticky-cta-reserve', `${height}px`);
+        document.documentElement.style.setProperty('--sticky-cta-reserve', `${height}px`);
       }
     };
 
@@ -388,6 +448,7 @@
     { "type": "checkbox", "id": "desktop_navigation", "label": "Show desktop jump navigation", "default": false },
     { "type": "text", "id": "show_after_id", "label": "Show mobile bar after element ID", "info": "Enter an element ID without #. Leave blank to show immediately." },
     { "type": "text", "id": "hide_at_id", "label": "Hide mobile bar once element ID is reached", "info": "Enter an element ID without #. The bar stays hidden after that section reaches the viewport." },
+    { "type": "checkbox", "id": "purchase_mode", "label": "Purchase mode", "info": "Shows selected price and Add to cart. Leave off for link-only bars.", "default": false },
     { "type": "header", "content": "Spacing" },
     { "type": "range", "id": "padding_top", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding top", "default": 0 },
     { "type": "range", "id": "padding_bottom", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding bottom", "default": 0 }

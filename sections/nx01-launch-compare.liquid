@@ -28,6 +28,10 @@
   assign left_stat_label = section.settings.left_stat_label | default: 'separate bottles'
   assign right_stat = section.settings.right_stat | default: '1'
   assign right_stat_label = section.settings.right_stat_label | default: 'daily formula'
+  assign show_stats = true
+  if section.settings.show_stats == false
+    assign show_stats = false
+  endif
 -%}
 
 {% render 'nx01-launch-css' %}
@@ -58,7 +62,7 @@
 
     <div class="nx01-compare__board" aria-label="{{ 'sections.nx01_launch_compare.board_label' | t }}">
       <article class="nx01-compare__pane nx01-compare__pane--many">
-        {%- if compound_count > 0 -%}
+        {%- if show_stats and compound_count > 0 -%}
           <p class="nx01-compare__stat">
             <span class="nx01-compare__stat-value">{{ compound_count }}</span>
             <span class="nx01-compare__stat-label">{{ left_stat_label | escape }}</span>
@@ -123,10 +127,12 @@
       <p class="nx01-compare__vs">{{ vs_label | escape }}</p>
 
       <article class="nx01-compare__pane nx01-compare__pane--nx">
-        <p class="nx01-compare__stat">
-          <span class="nx01-compare__stat-value">{{ right_stat | escape }}</span>
-          <span class="nx01-compare__stat-label">{{ right_stat_label | escape }}</span>
-        </p>
+        {%- if show_stats -%}
+          <p class="nx01-compare__stat">
+            <span class="nx01-compare__stat-value">{{ right_stat | escape }}</span>
+            <span class="nx01-compare__stat-label">{{ right_stat_label | escape }}</span>
+          </p>
+        {%- endif -%}
         <header class="nx01-compare__pane-head">
           <div class="nx01-compare__pane-row">
             {%- if section.settings.right_kicker != blank -%}
@@ -191,9 +197,9 @@
           <p class="nx01-compare__highlight">{{ section.settings.highlight | escape }}</p>
         {%- endif -%}
         {%- if show_cta -%}
-          <div class="nx01-compare__cta">
-            {% render 'button', style: 'primary', text: section.settings.cta_label, link: section.settings.cta_href %}
-          </div>
+          <a class="nx01__text-link nx01-compare__cta-link" href="{{ section.settings.cta_href | escape }}">
+            {{ section.settings.cta_label | escape }}
+          </a>
         {%- endif -%}
       </div>
     {%- endif -%}
@@ -439,6 +445,7 @@
     { "type": "text", "id": "left_stat_label", "label": "Left count label", "default": "separate bottles" },
     { "type": "text", "id": "right_stat", "label": "Right count", "default": "1" },
     { "type": "text", "id": "right_stat_label", "label": "Right count label", "default": "daily formula" },
+    { "type": "checkbox", "id": "show_stats", "label": "Show large counts", "default": true },
     {
       "type": "text",
       "id": "eyebrow",
