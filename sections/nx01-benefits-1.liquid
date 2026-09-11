@@ -1,0 +1,499 @@
+{%- liquid
+  assign heading_id = 'nx01-orbit-heading-' | append: section.id
+  assign bottle_image = section.settings.image | default: product.featured_image
+  assign image_alt = section.settings.image_alt | strip
+  if image_alt == blank
+    assign image_alt = bottle_image.alt | default: product.title
+  endif
+  if image_alt == blank
+    assign image_alt = 'sections.nx01-benefits.image_alt' | t
+  endif
+  assign has_image = false
+  if section.settings.show_image
+    if bottle_image != blank or request.design_mode
+      assign has_image = true
+    endif
+  endif
+  assign point_count = 0
+  for block in section.blocks
+    if block.type == 'benefit'
+      if block.settings.title != blank or block.settings.description != blank
+        assign point_count = point_count | plus: 1
+      endif
+    endif
+  endfor
+  assign use_orbit = false
+  if has_image and point_count == 6
+    assign use_orbit = true
+  endif
+  assign image_loading = 'lazy'
+  if section.index != blank and section.index <= 2
+    assign image_loading = 'eager'
+  endif
+-%}
+
+<section
+  id="nx01-benefits-{{ section.id }}"
+  class="nx01-orbit"
+  style="--nx01-bg: {{ section.settings.background_color }}; --nx01-heading: {{ section.settings.heading_color }}; --nx01-text: {{ section.settings.text_color }}; --nx01-accent: {{ section.settings.accent_color }}; --nx01-badge: {{ section.settings.icon_color }}; --nx01-top: {{ section.settings.padding_top }}px; --nx01-bottom: {{ section.settings.padding_bottom }}px; --nx01-image-height: {{ section.settings.image_height }}px;"
+  aria-labelledby="{{ heading_id }}"
+>
+  <div class="nx01-orbit__inner">
+    <header class="nx01-orbit__header">
+      {%- if section.settings.eyebrow != blank -%}
+        <p class="nx01-orbit__eyebrow">{{ section.settings.eyebrow | escape }}</p>
+      {%- endif -%}
+      <h2 id="{{ heading_id }}" class="nx01-orbit__heading{% if section.settings.heading == blank %} nx01-orbit__visually-hidden{% endif %}">
+        {%- if section.settings.heading != blank -%}
+          {{ section.settings.heading | escape }}
+        {%- else -%}
+          {{ 'sections.nx01-benefits.region_label' | t }}
+        {%- endif -%}
+      </h2>
+      {%- if section.settings.intro != blank -%}
+        <div class="nx01-orbit__intro">{{ section.settings.intro }}</div>
+      {%- endif -%}
+    </header>
+
+    {%- if has_image or point_count > 0 -%}
+      <div class="nx01-orbit__layout{% if use_orbit %} nx01-orbit__layout--moon{% endif %}">
+        {%- assign point_i = 0 -%}
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'benefit' -%}
+            {%- if block.settings.title != blank or block.settings.description != blank -%}
+              {%- assign point_i = point_i | plus: 1 -%}
+              <article class="nx01-orbit__card nx01-orbit__card--{{ point_i }}" {{ block.shopify_attributes }}>
+                <div class="nx01-orbit__card-heading">
+                  <span class="nx01-orbit__number" aria-hidden="true">{{ point_i | prepend: '0' }}</span>
+                  {%- if block.settings.title != blank -%}
+                    <h3 class="nx01-orbit__ingredient">{{ block.settings.title | escape }}</h3>
+                  {%- endif -%}
+                </div>
+                {%- if block.settings.description != blank -%}
+                  <div class="nx01-orbit__effect">{{ block.settings.description }}</div>
+                {%- endif -%}
+                {%- if block.settings.study_note != blank -%}
+                  <p class="nx01-orbit__study-note">{{ block.settings.study_note | escape }}</p>
+                {%- endif -%}
+                {%- if block.settings.pubmed_url != blank -%}
+                  <a class="nx01-orbit__link" href="{{ block.settings.pubmed_url | escape }}">
+                    {{ 'sections.nx01-benefits.pubmed_label' | t }}
+                    <span class="nx01-orbit__visually-hidden"> — {{ block.settings.title | escape }}</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true" focusable="false"><path d="M5 19 19 5M5 5h14v14"/></svg>
+                  </a>
+                {%- endif -%}
+              </article>
+            {%- endif -%}
+          {%- endif -%}
+        {%- endfor -%}
+
+        {%- if has_image -%}
+          <figure class="nx01-orbit__figure{% if section.settings.blend_image %} nx01-orbit__figure--blend{% endif %}">
+            {%- if bottle_image != blank -%}
+              {{
+                bottle_image
+                | image_url: width: 1000
+                | image_tag:
+                  class: 'nx01-orbit__image',
+                  loading: image_loading,
+                  widths: '280, 360, 480, 640, 800, 1000',
+                  sizes: '(min-width: 1100px) 510px, (min-width: 600px) 380px, 280px',
+                  alt: image_alt,
+                  width: bottle_image.width,
+                  height: bottle_image.height,
+                  decoding: 'async'
+              }}
+            {%- else -%}
+              <div class="nx01-orbit__placeholder">
+                <svg width="104" height="168" viewBox="0 0 104 168" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><rect x="27" y="7" width="50" height="24" rx="5"/><path d="M29 31v13L15 58v87a15 15 0 0 0 15 15h44a15 15 0 0 0 15-15V58L75 44V31"/><path d="M15 78h74M15 130h74"/></svg>
+                <p>{{ 'sections.nx01-benefits.image_placeholder' | t }}</p>
+              </div>
+            {%- endif -%}
+          </figure>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    {%- if section.settings.research_note != blank -%}
+      <div class="nx01-orbit__research-note">{{ section.settings.research_note }}</div>
+    {%- endif -%}
+  </div>
+</section>
+
+{% stylesheet %}
+  .nx01-orbit {
+    background: var(--nx01-bg, #f3f7fc);
+    color: var(--nx01-text, #4d5a70);
+    padding: var(--nx01-top, 64px) 24px var(--nx01-bottom, 48px);
+    container: nx01-ingredients / inline-size;
+    isolation: isolate;
+  }
+
+  .nx01-orbit *,
+  .nx01-orbit *::before,
+  .nx01-orbit *::after {
+    box-sizing: border-box;
+  }
+
+  .nx01-orbit__inner {
+    max-width: 1220px;
+    margin-inline: auto;
+  }
+
+  .nx01-orbit__header {
+    max-width: 780px;
+    margin: 0 auto 36px;
+    text-align: center;
+  }
+
+  .nx01-orbit__eyebrow {
+    margin: 0 0 12px;
+    color: var(--nx01-accent);
+    font-size: 12px;
+    font-weight: 650;
+    line-height: 1.5;
+    letter-spacing: 0.14em;
+  }
+
+  .nx01-orbit__heading {
+    margin: 0;
+    color: var(--nx01-heading);
+    font-size: clamp(28px, 3.3vw, 42px);
+    line-height: 1.15;
+    letter-spacing: -0.035em;
+    text-wrap: balance;
+  }
+
+  .nx01-orbit__intro {
+    max-width: 660px;
+    margin: 16px auto 0;
+    font-size: 16px;
+    line-height: 1.65;
+  }
+
+  .nx01-orbit__intro > :first-child,
+  .nx01-orbit__effect > :first-child,
+  .nx01-orbit__research-note > :first-child {
+    margin-top: 0;
+  }
+
+  .nx01-orbit__intro > :last-child,
+  .nx01-orbit__effect > :last-child,
+  .nx01-orbit__research-note > :last-child {
+    margin-bottom: 0;
+  }
+
+  .nx01-orbit__layout {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    position: relative;
+  }
+
+  .nx01-orbit__card {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    padding: 20px 22px 12px;
+    border: 1px solid rgba(36, 63, 149, 0.13);
+    border-radius: 18px;
+    background: #fff;
+    box-shadow: 0 8px 24px rgba(20, 35, 66, 0.035);
+    overflow-wrap: anywhere;
+  }
+
+  .nx01-orbit__card-heading {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .nx01-orbit__number {
+    display: grid;
+    place-items: center;
+    flex: 0 0 29px;
+    height: 29px;
+    border-radius: 50%;
+    background: var(--nx01-accent);
+    color: var(--nx01-badge);
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .nx01-orbit__ingredient {
+    margin: 0;
+    color: var(--nx01-heading);
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+  }
+
+  .nx01-orbit__effect {
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .nx01-orbit__effect strong {
+    color: var(--nx01-heading);
+    font-weight: 600;
+  }
+
+  .nx01-orbit__study-note {
+    margin: 10px 0 0;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  .nx01-orbit__link {
+    display: inline-flex;
+    align-items: center;
+    align-self: flex-start;
+    gap: 9px;
+    min-height: 44px;
+    margin-top: auto;
+    padding-block: 10px;
+    color: var(--nx01-accent);
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.4;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    text-decoration-thickness: 1px;
+  }
+
+  .nx01-orbit__link svg {
+    flex: 0 0 16px;
+  }
+
+  .nx01-orbit__link:hover {
+    text-decoration-thickness: 2px;
+  }
+
+  .nx01-orbit a:focus-visible {
+    outline: 2px solid var(--nx01-accent);
+    outline-offset: 5px;
+    border-radius: 2px;
+  }
+
+  .nx01-orbit__figure {
+    grid-column: 1 / -1;
+    position: relative;
+    z-index: 0;
+    width: min(100%, 380px);
+    height: min(var(--nx01-image-height, 520px), 440px);
+    margin: 16px auto 0;
+    align-self: end;
+  }
+
+  .nx01-orbit__figure::before {
+    content: '';
+    position: absolute;
+    inset: 14% -8% 0;
+    z-index: -1;
+    border-radius: 50%;
+    background: radial-gradient(ellipse, rgba(36, 63, 149, 0.08), transparent 68%);
+    pointer-events: none;
+  }
+
+  .nx01-orbit__image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center bottom;
+  }
+
+  .nx01-orbit__figure--blend .nx01-orbit__image {
+    mix-blend-mode: multiply;
+  }
+
+  .nx01-orbit__placeholder {
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    height: 100%;
+    padding: 24px;
+    border: 1px dashed currentColor;
+    border-radius: 20px;
+    color: var(--nx01-text);
+    text-align: center;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .nx01-orbit__research-note {
+    max-width: 720px;
+    margin: 32px auto 0;
+    text-align: center;
+    font-size: 12px;
+    line-height: 1.7;
+  }
+
+  .nx01-orbit__visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  @container nx01-ingredients (min-width: 1052px) {
+    .nx01-orbit__layout--moon {
+      grid-template-columns: repeat(14, minmax(0, 1fr));
+      grid-template-rows: auto minmax(190px, auto) minmax(190px, auto);
+      column-gap: 16px;
+      row-gap: 24px;
+      align-items: start;
+    }
+
+    .nx01-orbit__layout--moon::before {
+      content: '';
+      position: absolute;
+      inset: 72px 9% 60px;
+      border: 1px solid rgba(36, 63, 149, 0.16);
+      border-bottom: 0;
+      border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+      pointer-events: none;
+    }
+
+    .nx01-orbit__layout--moon .nx01-orbit__card--1 {
+      grid-column: 12 / span 3;
+      grid-row: 3;
+      align-self: end;
+    }
+
+    .nx01-orbit__layout--moon .nx01-orbit__card--2 {
+      grid-column: 11 / span 3;
+      grid-row: 2;
+    }
+
+    .nx01-orbit__layout--moon .nx01-orbit__card--3 {
+      grid-column: 8 / span 3;
+      grid-row: 1;
+    }
+
+    .nx01-orbit__layout--moon .nx01-orbit__card--4 {
+      grid-column: 5 / span 3;
+      grid-row: 1;
+    }
+
+    .nx01-orbit__layout--moon .nx01-orbit__card--5 {
+      grid-column: 2 / span 3;
+      grid-row: 2;
+    }
+
+    .nx01-orbit__layout--moon .nx01-orbit__card--6 {
+      grid-column: 1 / span 3;
+      grid-row: 3;
+      align-self: end;
+    }
+
+    .nx01-orbit__layout--moon .nx01-orbit__figure {
+      grid-column: 5 / 11;
+      grid-row: 2 / 4;
+      width: 100%;
+      height: var(--nx01-image-height, 520px);
+      margin: 0;
+    }
+  }
+
+  @container nx01-ingredients (max-width: 551px) {
+    .nx01-orbit__layout {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 12px;
+    }
+
+    .nx01-orbit__card {
+      padding: 18px 20px 10px;
+    }
+
+    .nx01-orbit__figure {
+      width: min(100%, 280px);
+      height: min(var(--nx01-image-height, 520px), 360px);
+    }
+  }
+
+  @media (max-width: 599px) {
+    .nx01-orbit {
+      padding-inline: 20px;
+    }
+
+    .nx01-orbit__header {
+      margin-bottom: 28px;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "NX-01 benefits",
+  "tag": "div",
+  "class": "section-nx01-benefits",
+  "enabled_on": { "templates": ["product", "page"] },
+  "settings": [
+    { "type": "paragraph", "content": "Add six ingredient blocks for the moon layout. Block 1 starts at the lower right; block 6 ends at the lower left. Smaller screens use a readable grid or list." },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "INSIDE NX-01 BASELINE" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Six key ingredients. Defined roles." },
+    { "type": "richtext", "id": "intro", "label": "Introduction", "default": "<p>Explore the roles of six key ingredients, with links to the research behind them.</p>" },
+    { "type": "richtext", "id": "research_note", "label": "Research note", "default": "<p>Research is on individual ingredients. Results depend on the dose and study population and do not confirm the effects of NX-01 or an added benefit from combining ingredients.</p>" },
+    { "type": "header", "content": "Image" },
+    { "type": "checkbox", "id": "show_image", "label": "Show bottle image", "default": true },
+    { "type": "image_picker", "id": "image", "label": "Bottle image", "info": "Choose the NX-01 bottle. If empty on a product page, the current product's featured image is used. Use a tightly cropped transparent or white-background image." },
+    { "type": "text", "id": "image_alt", "label": "Image alt text" },
+    { "type": "checkbox", "id": "blend_image", "label": "Blend white image background", "default": true },
+    { "type": "range", "id": "image_height", "min": 280, "max": 640, "step": 10, "unit": "px", "label": "Desktop image height", "default": 420 },
+    { "type": "header", "content": "Style" },
+    { "type": "color", "id": "background_color", "label": "Background", "default": "#F3F7FC" },
+    { "type": "color", "id": "heading_color", "label": "Heading color", "default": "#142342" },
+    { "type": "color", "id": "text_color", "label": "Text color", "default": "#4D5A70" },
+    { "type": "color", "id": "accent_color", "label": "Accent color", "default": "#243F95" },
+    { "type": "color", "id": "icon_color", "label": "Number color", "default": "#FFFFFF" },
+    { "type": "range", "id": "padding_top", "min": 24, "max": 120, "step": 4, "unit": "px", "label": "Padding top", "default": 64 },
+    { "type": "range", "id": "padding_bottom", "min": 24, "max": 120, "step": 4, "unit": "px", "label": "Padding bottom", "default": 48 }
+  ],
+  "blocks": [
+    {
+      "type": "benefit",
+      "name": "Ingredient",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Ingredient" },
+        { "type": "richtext", "id": "description", "label": "Short effect or role", "info": "Keep to one short sentence. Describe research or biological roles without promising a medical outcome." },
+        { "type": "text", "id": "study_note", "label": "Study context (optional)", "info": "Use for a relevant dose, population or limitation." },
+        { "type": "url", "id": "pubmed_url", "label": "PubMed study URL", "info": "Link directly to the matching study on pubmed.ncbi.nlm.nih.gov." }
+      ]
+    }
+  ],
+  "max_blocks": 6,
+  "presets": [
+    {
+      "name": "NX-01 benefits",
+      "blocks": [
+        { "type": "benefit", "settings": { "title": "ALCAR", "description": "<p><strong>Mental energy.</strong> Studied for mental fatigue; involved in cellular energy metabolism.</p>", "study_note": "Study in older adults with fatigue.", "pubmed_url": "https://pubmed.ncbi.nlm.nih.gov/17658628/" } },
+        { "type": "benefit", "settings": { "title": "Citicoline", "description": "<p><strong>Attention support.</strong> Supplies choline and has been studied for focus and attention.</p>", "study_note": "Small study in healthy adolescents.", "pubmed_url": "https://pubmed.ncbi.nlm.nih.gov/26179181/" } },
+        { "type": "benefit", "settings": { "title": "NMN", "description": "<p><strong>NAD+ support.</strong> Helps supply a molecule involved in cellular energy.</p>", "study_note": "Linked study did not test cognition.", "pubmed_url": "https://pubmed.ncbi.nlm.nih.gov/35215405/" } },
+        { "type": "benefit", "settings": { "title": "L-Theanine", "description": "<p><strong>Calm &amp; focus.</strong> May support relaxation and aspects of attention.</p>", "study_note": "Small study; cognitive results limited.", "pubmed_url": "https://pubmed.ncbi.nlm.nih.gov/31623400/" } },
+        { "type": "benefit", "settings": { "title": "Rhodiola rosea", "description": "<p><strong>Mental stamina.</strong> Studied for concentration during stress-related fatigue.</p>", "study_note": "Specific extract studied at 576 mg/day.", "pubmed_url": "https://pubmed.ncbi.nlm.nih.gov/19016404/" } },
+        { "type": "benefit", "settings": { "title": "CoQ10", "description": "<p><strong>Cellular energy.</strong> Helps cells produce energy; cognitive benefits remain unproven.</p>", "study_note": "Linked trial found no cognitive benefit.", "pubmed_url": "https://pubmed.ncbi.nlm.nih.gov/42510537/" } }
+      ]
+    }
+  ],
+  "locales": {
+    "en": {
+      "region_label": "NX-01 ingredients and research",
+      "image_alt": "Nootropix NX-01 Baseline supplement bottle",
+      "image_placeholder": "Choose a bottle image in this section's settings.",
+      "pubmed_label": "PubMed study"
+    }
+  }
+}
+{% endschema %}
