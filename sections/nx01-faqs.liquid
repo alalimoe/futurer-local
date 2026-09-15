@@ -1,6 +1,10 @@
 {{ 'nx01-faqs.css' | asset_url | stylesheet_tag }}
 
 {%- liquid
+  assign show_more_text = 'sections.nx01_faqs.show_more' | t
+  assign show_more_text = section.settings.show_more | default: show_more_text
+  assign show_fewer_text = 'sections.nx01_faqs.show_fewer' | t
+  assign show_fewer_text = section.settings.show_fewer | default: show_fewer_text
   assign heading_id = 'npx-faq-heading-' | append: section.id
   assign list_id = 'npx-faq-list-' | append: section.id
   assign initial_count = section.settings.initial_count | default: 8
@@ -78,8 +82,8 @@
           aria-controls="{{ list_id }}"
           hidden
         >
-          <span data-more-label>{{ 'sections.nx01_faqs.show_more' | t }}</span>
-          <span data-less-label hidden>{{ 'sections.nx01_faqs.show_fewer' | t }}</span>
+          <span data-more-label>{{ show_more_text | escape }}</span>
+          <span data-less-label hidden>{{ show_fewer_text | escape }}</span>
           <svg class="npx-faq__more-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" aria-hidden="true" focusable="false">
             <path d="M12 4v16m-6-6 6 6 6-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
@@ -201,7 +205,10 @@
   "tag": "div",
   "class": "section-nx01-faqs",
   "enabled_on": {
-    "templates": ["product", "page"]
+    "templates": [
+      "product",
+      "page"
+    ]
   },
   "settings": [
     {
@@ -243,6 +250,16 @@
       "step": 1,
       "label": "Questions shown first",
       "default": 8
+    },
+    {
+      "type": "text",
+      "id": "show_fewer",
+      "label": "Show fewer button text"
+    },
+    {
+      "type": "text",
+      "id": "show_more",
+      "label": "Show more button text"
     },
     {
       "type": "checkbox",
