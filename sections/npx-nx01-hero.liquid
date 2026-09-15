@@ -4,6 +4,9 @@
 
 {%- liquid
   assign nx_product = product
+  assign nx_labels = section.blocks | where: 'type', 'labels' | first
+  assign nx_apps = section.blocks | where: 'type', '@app'
+  assign display_title = section.settings.display_title | default: nx_product.title
   assign nx_variant = nx_product.selected_or_first_available_variant
   assign form_id = 'npx-nx01-form-' | append: section.id
   assign heading_id = 'npx-nx01-heading-' | append: section.id
@@ -11,6 +14,134 @@
   assign label_image = section.settings.label_image | default: nx_product.images[1]
   assign daily_price = nx_variant.price | times: 1.0 | divided_by: section.settings.servings | round
   assign currency_code = cart.currency.iso_code | default: shop.currency
+  assign text_total = 'sections.npx_nx01_hero.total' | t
+  if nx_labels != blank
+    assign text_total = nx_labels.settings.total
+  endif
+  assign text_add = 'sections.npx_nx01_hero.add' | t
+  if nx_labels != blank
+    assign text_add = nx_labels.settings.add
+  endif
+  assign text_adding = 'sections.npx_nx01_hero.adding' | t
+  if nx_labels != blank
+    assign text_adding = nx_labels.settings.adding
+  endif
+  assign text_sold_out = 'sections.npx_nx01_hero.sold_out' | t
+  if nx_labels != blank
+    assign text_sold_out = nx_labels.settings.sold_out
+  endif
+  assign text_home = 'sections.npx_nx01_hero.home' | t
+  if nx_labels != blank
+    assign text_home = nx_labels.settings.home
+  endif
+  assign text_shop = 'sections.npx_nx01_hero.shop' | t
+  if nx_labels != blank
+    assign text_shop = nx_labels.settings.shop
+  endif
+  assign text_eyebrow = 'sections.npx_nx01_hero.eyebrow' | t
+  if nx_labels != blank
+    assign text_eyebrow = nx_labels.settings.eyebrow
+  endif
+  assign text_gallery = 'sections.npx_nx01_hero.gallery' | t
+  if nx_labels != blank
+    assign text_gallery = nx_labels.settings.gallery
+  endif
+  assign text_caffeine_free = 'sections.npx_nx01_hero.caffeine_free' | t
+  if nx_labels != blank
+    assign text_caffeine_free = nx_labels.settings.caffeine_free
+  endif
+  assign text_enlarge = 'sections.npx_nx01_hero.enlarge' | t
+  if nx_labels != blank
+    assign text_enlarge = nx_labels.settings.enlarge
+  endif
+  assign text_image_empty = 'sections.npx_nx01_hero.image_empty' | t
+  if nx_labels != blank
+    assign text_image_empty = nx_labels.settings.image_empty
+  endif
+  assign text_image = 'sections.npx_nx01_hero.image' | t
+  if nx_labels != blank
+    assign text_image = nx_labels.settings.image
+  endif
+  assign text_label = 'sections.npx_nx01_hero.label' | t
+  if nx_labels != blank
+    assign text_label = nx_labels.settings.label
+  endif
+  assign text_capsules = 'sections.npx_nx01_hero.capsules' | t
+  if nx_labels != blank
+    assign text_capsules = nx_labels.settings.capsules
+  endif
+  assign text_servings = 'sections.npx_nx01_hero.servings' | t
+  if nx_labels != blank
+    assign text_servings = nx_labels.settings.servings
+  endif
+  assign text_daily = 'sections.npx_nx01_hero.daily' | t
+  if nx_labels != blank
+    assign text_daily = nx_labels.settings.daily
+  endif
+  assign text_option = 'sections.npx_nx01_hero.option' | t
+  if nx_labels != blank
+    assign text_option = nx_labels.settings.option
+  endif
+  assign text_selection_note = 'sections.npx_nx01_hero.selection_note' | t
+  if nx_labels != blank
+    assign text_selection_note = nx_labels.settings.selection_note
+  endif
+  assign text_per_bottle = 'sections.npx_nx01_hero.per_bottle' | t
+  if nx_labels != blank
+    assign text_per_bottle = nx_labels.settings.per_bottle
+  endif
+  assign text_per_day = 'sections.npx_nx01_hero.per_day' | t
+  if nx_labels != blank
+    assign text_per_day = nx_labels.settings.per_day
+  endif
+  assign text_quantity = 'sections.npx_nx01_hero.quantity' | t
+  if nx_labels != blank
+    assign text_quantity = nx_labels.settings.quantity
+  endif
+  assign text_decrease = 'sections.npx_nx01_hero.decrease' | t
+  if nx_labels != blank
+    assign text_decrease = nx_labels.settings.decrease
+  endif
+  assign text_increase = 'sections.npx_nx01_hero.increase' | t
+  if nx_labels != blank
+    assign text_increase = nx_labels.settings.increase
+  endif
+  assign text_supply = 'sections.npx_nx01_hero.supply' | t
+  if nx_labels != blank
+    assign text_supply = nx_labels.settings.supply
+  endif
+  assign text_trust = 'sections.npx_nx01_hero.trust' | t
+  if nx_labels != blank
+    assign text_trust = nx_labels.settings.trust
+  endif
+  assign text_tax_included = 'sections.npx_nx01_hero.tax_included' | t
+  if nx_labels != blank
+    assign text_tax_included = nx_labels.settings.tax_included
+  endif
+  assign text_shipping = 'sections.npx_nx01_hero.shipping' | t
+  if nx_labels != blank
+    assign text_shipping = nx_labels.settings.shipping
+  endif
+  assign text_shipping_link = 'sections.npx_nx01_hero.shipping_link' | t
+  if nx_labels != blank
+    assign text_shipping_link = nx_labels.settings.shipping_link
+  endif
+  assign text_secure = 'sections.npx_nx01_hero.secure' | t
+  if nx_labels != blank
+    assign text_secure = nx_labels.settings.secure
+  endif
+  assign text_payments = 'sections.npx_nx01_hero.payments' | t
+  if nx_labels != blank
+    assign text_payments = nx_labels.settings.payments
+  endif
+  assign text_footer_note = 'sections.npx_nx01_hero.footer_note' | t
+  if nx_labels != blank
+    assign text_footer_note = nx_labels.settings.footer_note
+  endif
+  assign text_wrong_product = 'sections.npx_nx01_hero.wrong_product' | t
+  if nx_labels != blank
+    assign text_wrong_product = nx_labels.settings.wrong_product
+  endif
   assign initial_quantity = nx_variant.quantity_rule.min | default: 1
   assign photo_alt = image.alt | default: nx_product.title
 -%}
@@ -25,50 +156,50 @@
 >
   <npx-nx01-hero
     class="npx-hero"
-    data-total-label="{{ 'sections.npx_nx01_hero.total' | t | escape }}"
+    data-total-label="{{ text_total | escape }}"
     data-currency="{{ currency_code | escape }}"
     data-locale="{{ request.locale.iso_code | escape }}"
     data-servings="{{ section.settings.servings }}"
-    data-add-label="{{ 'sections.npx_nx01_hero.add' | t | escape }}"
-    data-adding-label="{{ 'sections.npx_nx01_hero.adding' | t | escape }}"
-    data-sold-label="{{ 'sections.npx_nx01_hero.sold_out' | t | escape }}"
+    data-add-label="{{ text_add | escape }}"
+    data-adding-label="{{ text_adding | escape }}"
+    data-sold-label="{{ text_sold_out | escape }}"
   >
     <div class="npx-hero__inner">
-      <nav class="npx-hero__breadcrumb" aria-label="{{ 'sections.npx_nx01_hero.home' | t | escape }}">
-        <a href="{{ routes.root_url }}">{{ 'sections.npx_nx01_hero.home' | t }}</a>
+      <nav class="npx-hero__breadcrumb" aria-label="{{ text_home | escape }}">
+        <a href="{{ routes.root_url }}">{{ text_home | escape }}</a>
         <span aria-hidden="true">/</span>
-        <a href="{{ routes.all_products_collection_url }}">{{ 'sections.npx_nx01_hero.shop' | t }}</a>
+        <a href="{{ routes.all_products_collection_url }}">{{ text_shop | escape }}</a>
         <span aria-hidden="true">/</span>
         <span aria-current="page">{{ nx_product.title | escape }}</span>
       </nav>
       <div class="npx-hero__layout">
-        <header class="npx-hero__intro">
-          <p class="npx-hero__eyebrow">{{ 'sections.npx_nx01_hero.eyebrow' | t }}</p>
-          <h1 class="npx-hero__title" id="{{ heading_id }}">{{ nx_product.title | escape }}</h1>
+        <header class="npx-hero__intro" {{ nx_labels.shopify_attributes }}>
+          <p class="npx-hero__eyebrow">{{ text_eyebrow | escape }}</p>
+          <h1 class="npx-hero__title" id="{{ heading_id }}">{{ display_title | escape }}</h1>
           {% if section.settings.tagline != blank %}
             <p class="npx-hero__tagline">{{ section.settings.tagline | escape }}</p>
           {% endif %}
           {% if section.settings.intro != blank %}
             <div class="npx-hero__description">{{ section.settings.intro }}</div>
           {% endif %}
-          {% if section.blocks.size > 0 %}
+          {% if nx_apps.size > 0 %}
             <div class="npx-hero__apps">
-              {% for block in section.blocks %}
+              {% for block in nx_apps %}
                 <div class="npx-hero__app" {{ block.shopify_attributes }}>{% render block %}</div>
               {% endfor %}
             </div>
           {% endif %}
         </header>
-        <div class="npx-hero__gallery" aria-label="{{ 'sections.npx_nx01_hero.gallery' | t | escape }}">
+        <div class="npx-hero__gallery" aria-label="{{ text_gallery | escape }}">
           <div class="npx-hero__stage">
-            <span class="npx-hero__badge"><span aria-hidden="true"></span>{{ 'sections.npx_nx01_hero.caffeine_free' | t }}</span>
+            <span class="npx-hero__badge"><span aria-hidden="true"></span>{{ text_caffeine_free | escape }}</span>
             {% if image != blank %}
-              <a class="npx-hero__photo-link" data-main-link href="{{ image | image_url: width: 2400 }}" target="_blank" rel="noopener" aria-label="{{ 'sections.npx_nx01_hero.enlarge' | t | escape }}">
+              <a class="npx-hero__photo-link" data-main-link href="{{ image | image_url: width: 2400 }}" target="_blank" rel="noopener" aria-label="{{ text_enlarge | escape }}">
                 {{ image | image_url: width: 1400 | image_tag: class: 'npx-hero__photo', loading: 'eager', fetchpriority: 'high', widths: '480, 700, 1000, 1400', sizes: '(max-width: 749px) 440px, (max-width: 1000px) 65vw, 800px', alt: photo_alt }}
                 <span class="npx-hero__zoom" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="6"/><path d="m15 15 5 5M7 10h6m-3-3v6"/></svg></span>
               </a>
             {% else %}
-              <div class="npx-hero__image-empty">{{ 'sections.npx_nx01_hero.image_empty' | t }}</div>
+              <div class="npx-hero__image-empty">{{ text_image_empty | escape }}</div>
             {% endif %}
           </div>
           <div class="npx-hero__gallery-footer">
@@ -81,7 +212,7 @@
                   data-src="{{ photo | image_url: width: 1400 }}"
                   data-alt="{{ photo.alt | default: nx_product.title | escape }}"
                   {% if photo.id == image.id %}aria-current="true"{% endif %}
-                  aria-label="{{ 'sections.npx_nx01_hero.image' | t | escape }} {{ forloop.index }}"
+                  aria-label="{{ text_image | escape }} {{ forloop.index }}"
                 >
                   {{ photo | image_url: width: 160 | image_tag: class: 'npx-hero__thumb-image', loading: 'lazy', alt: '' }}
                 </a>
@@ -89,7 +220,7 @@
             </div>
             {% if label_image != blank %}
               <a class="npx-hero__label-link" href="{{ label_image | image_url: width: 2400 }}" target="_blank" rel="noopener">
-                {{ 'sections.npx_nx01_hero.label' | t }}<span aria-hidden="true">↗</span>
+                {{ text_label | escape }}<span aria-hidden="true">↗</span>
               </a>
             {% endif %}
           </div>
@@ -98,15 +229,15 @@
           <div class="npx-hero__facts">
             <div>
               <strong>{{ section.settings.capsules }}</strong>
-              <span>{{ 'sections.npx_nx01_hero.capsules' | t }}</span>
+              <span>{{ text_capsules | escape }}</span>
             </div>
             <div>
               <strong>{{ section.settings.servings }}</strong>
-              <span>{{ 'sections.npx_nx01_hero.servings' | t }}</span>
+              <span>{{ text_servings | escape }}</span>
             </div>
             <div>
               <strong>{{ section.settings.daily_capsules }}</strong>
-              <span>{{ 'sections.npx_nx01_hero.daily' | t }}</span>
+              <span>{{ text_daily | escape }}</span>
             </div>
           </div>
           {% form 'product', nx_product, id: form_id, class: 'npx-hero__form', data-type: 'add-to-cart-form' %}
@@ -124,7 +255,7 @@
                 data-max="{{ nx_variant.quantity_rule.max }}"
               >
             {% else %}
-              <label class="npx-hero__option-label" for="npx-option-{{ section.id }}">{{ 'sections.npx_nx01_hero.option' | t }}</label>
+              <label class="npx-hero__option-label" for="npx-option-{{ section.id }}">{{ text_option | escape }}</label>
               <select class="npx-hero__option" name="id" id="npx-option-{{ section.id }}" data-variant>
                 {% for variant in nx_product.variants %}
                   <option
@@ -137,20 +268,20 @@
                     {% if variant.id == nx_variant.id %}selected{% endif %}
                   >
                     {{ variant.title | escape }} — {{ variant.price | money_with_currency }}
-                    {% unless variant.available %} — {{ 'sections.npx_nx01_hero.sold_out' | t }}{% endunless %}
+                    {% unless variant.available %} — {{ text_sold_out | escape }}{% endunless %}
                   </option>
                 {% endfor %}
               </select>
-              <noscript><p class="npx-hero__fine">{{ 'sections.npx_nx01_hero.selection_note' | t }}</p></noscript>
+              <noscript><p class="npx-hero__fine">{{ text_selection_note | escape }}</p></noscript>
             {% endif %}
             <div class="npx-hero__price-row">
               <div>
-                <span class="npx-hero__price-label" data-price-label>{{ 'sections.npx_nx01_hero.per_bottle' | t }}</span>
+                <span class="npx-hero__price-label" data-price-label>{{ text_per_bottle | escape }}</span>
                 <strong class="npx-hero__price" data-total>{{ nx_variant.price | money_with_currency }}</strong>
               </div>
               <p class="npx-hero__daily">
                 <span data-daily>{{ daily_price | money_with_currency }}</span>
-                <span>{{ 'sections.npx_nx01_hero.per_day' | t }}</span>
+                <span>{{ text_per_day | escape }}</span>
               </p>
             </div>
             <div class="npx-hero__bnpl">
@@ -158,9 +289,9 @@
             </div>
             <div class="npx-hero__purchase-row">
               <div class="npx-hero__quantity-block">
-                <label for="npx-quantity-{{ section.id }}">{{ 'sections.npx_nx01_hero.quantity' | t }}</label>
+                <label for="npx-quantity-{{ section.id }}">{{ text_quantity | escape }}</label>
                 <div class="npx-hero__quantity">
-                  <button type="button" data-quantity-change="-1" aria-label="{{ 'sections.npx_nx01_hero.decrease' | t | escape }}" hidden>−</button>
+                  <button type="button" data-quantity-change="-1" aria-label="{{ text_decrease | escape }}" hidden>−</button>
                   <xo-cart-quantity>
                     <input
                       id="npx-quantity-{{ section.id }}"
@@ -175,13 +306,13 @@
                       data-quantity
                     >
                   </xo-cart-quantity>
-                  <button type="button" data-quantity-change="1" aria-label="{{ 'sections.npx_nx01_hero.increase' | t | escape }}" hidden>+</button>
+                  <button type="button" data-quantity-change="1" aria-label="{{ text_increase | escape }}" hidden>+</button>
                 </div>
               </div>
               <p class="npx-hero__supply">
                 <strong data-supply>{{ section.settings.servings }}</strong>
-                {{ 'sections.npx_nx01_hero.supply' | t }}
-                <span data-per-bottle> · {{ 'sections.npx_nx01_hero.per_bottle' | t }}</span>
+                {{ text_supply | escape }}
+                <span data-per-bottle> · {{ text_per_bottle | escape }}</span>
               </p>
             </div>
             <xo-cart-add
@@ -196,9 +327,9 @@
               <button type="submit" name="add" class="npx-hero__add" {% unless nx_variant.available %}disabled{% endunless %} data-add>
                 <span data-add-text>
                   {% if nx_variant.available %}
-                    {{ 'sections.npx_nx01_hero.add' | t }}
+                    {{ text_add | escape }}
                   {% else %}
-                    {{ 'sections.npx_nx01_hero.sold_out' | t }}
+                    {{ text_sold_out | escape }}
                   {% endif %}
                 </span>
                 <svg aria-hidden="true" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -211,12 +342,12 @@
               <div class="npx-hero__payment-terms">{{ form | payment_terms }}</div>
             {% endif %}
           {% endform %}
-          <p class="npx-hero__trust">{{ 'sections.npx_nx01_hero.trust' | t }}</p>
+          <p class="npx-hero__trust">{{ text_trust | escape }}</p>
           <p class="npx-hero__delivery">
-            {% if cart.taxes_included %}{{ 'sections.npx_nx01_hero.tax_included' | t }} {% endif %}
-            {{ 'sections.npx_nx01_hero.shipping' | t }}
+            {% if cart.taxes_included %}{{ text_tax_included | escape }} {% endif %}
+            {{ text_shipping | escape }}
             {% if section.settings.shipping_link != blank %}
-              <a href="{{ section.settings.shipping_link }}">{{ 'sections.npx_nx01_hero.shipping_link' | t }}</a>
+              <a href="{{ section.settings.shipping_link }}">{{ text_shipping_link | escape }}</a>
             {% endif %}
           </p>
           {% if section.settings.show_payment_icons and shop.enabled_payment_types.size > 0 %}
@@ -226,20 +357,24 @@
                   <rect x="3" y="7" width="10" height="7" rx="1"/>
                   <path d="M5 7V5a3 3 0 0 1 6 0v2"/>
                 </svg>
-                {{ 'sections.npx_nx01_hero.secure' | t }}
+                {{ text_secure | escape }}
               </span>
-              <ul aria-label="{{ 'sections.npx_nx01_hero.payments' | t | escape }}">
+              <ul aria-label="{{ text_payments | escape }}">
                 {% for payment in shop.enabled_payment_types %}
                   <li>{{ payment | payment_type_svg_tag: class: 'npx-hero__payment-icon' }}</li>
                 {% endfor %}
               </ul>
             </div>
           {% endif %}
-          <p class="npx-hero__fine npx-hero__precautions">{{ 'sections.npx_nx01_hero.footer_note' | t }}</p>
+          <p class="npx-hero__fine npx-hero__precautions">{{ text_footer_note | escape }}</p>
         </div>
       </div>
       <div class="npx-hero__details">
-        {% render 'product-description-metafields', accordion: true, section: section %}
+        {% if section.settings.editor_details %}
+          {% render 'nx01-editor-details', section: section %}
+        {% else %}
+          {% render 'product-description-metafields', accordion: true, section: section %}
+        {% endif %}
       </div>
     </div>
   </npx-nx01-hero>
@@ -250,7 +385,7 @@
   <script type="application/ld+json">{{ nx_product | structured_data }}</script>
 {% endif %}
 {% elsif request.design_mode %}
-  <p>{{ 'sections.npx_nx01_hero.wrong_product' | t }}</p>
+  <p>{{ text_wrong_product | escape }}</p>
 {% endif %}
 
 {% javascript %}
@@ -267,6 +402,10 @@ if (!customElements.get('npx-nx01-hero')) {
       if (!this.isConnected || !this.controller || this.initialized) return;
       this.initialized = true;
       const options = { signal: this.controller.signal };
+      this.addEventListener('shopify:block:select', (event) => {
+        const panel = event.target.closest('.npx-desc-acc__item');
+        if (panel && this.contains(panel) && !panel.open) panel.querySelector('summary')?.click();
+      }, options);
       this.form = this.querySelector('.npx-hero__form');
       this.variant = this.querySelector('[data-variant]');
       this.quantity = this.querySelector('[data-quantity]');
@@ -391,25 +530,33 @@ if (!customElements.get('npx-nx01-hero')) {
   "tag": "section",
   "class": "npx-nx01-hero-section",
   "enabled_on": {
-    "templates": ["product"]
+    "templates": [
+      "product"
+    ]
   },
   "limit": 1,
   "settings": [
     {
       "type": "paragraph",
-      "content": "Use on a dedicated NX-01 Baseline product template. Reads current product price, availability and images automatically."
+      "content": "Edit the opening here. Expand the blocks below for labels, formula rows and product details. Prices, stock and product photos update from the product automatically."
+    },
+    {
+      "type": "text",
+      "id": "display_title",
+      "label": "Product heading",
+      "info": "Leave blank to use the product name."
     },
     {
       "type": "text",
       "id": "tagline",
       "label": "Main benefit",
-      "default": "Daily cognitive and cellular energy."
+      "default": "Daily Cognitive Formula"
     },
     {
       "type": "richtext",
       "id": "intro",
       "label": "Short introduction",
-      "default": "<p>Nine listed actives with complementary roles — including citicoline, NMN, ubiquinol CoQ10 and Rhodiola — in one 3-capsule serving.</p>"
+      "default": "<p>9 carefully chosen nootropics. Including Citicoline, NMN, CoQ10, and Rhodiola Rosea, working together in just 3 capsules to support your brain, energy, and focus.</p>"
     },
     {
       "type": "range",
@@ -468,6 +615,23 @@ if (!customElements.get('npx-nx01-hero')) {
       "label": "Include product structured data",
       "default": false,
       "info": "Leave off. Product structured data is already output by the theme."
+    },
+    {
+      "type": "header",
+      "content": "Expandable product details"
+    },
+    {
+      "type": "checkbox",
+      "id": "editor_details",
+      "label": "Edit product details here",
+      "info": "When enabled, the detail blocks below provide the text. When disabled, the original product fields provide the text.",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "details_heading",
+      "label": "Details divider heading",
+      "default": "The formula"
     },
     {
       "type": "header",
@@ -554,12 +718,683 @@ if (!customElements.get('npx-nx01-hero')) {
   "blocks": [
     {
       "type": "@app"
+    },
+    {
+      "type": "labels",
+      "name": "Labels and buttons",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "Labels for this NX-01 opening only. Keep button and accessibility labels descriptive. The numbers come from the opening section settings."
+        },
+        {
+          "type": "header",
+          "content": "Opening and bottle facts"
+        },
+        {
+          "type": "text",
+          "id": "eyebrow",
+          "label": "Small heading above product name",
+          "default": "NOOTROPIX · DAILY FORMULA"
+        },
+        {
+          "type": "text",
+          "id": "caffeine_free",
+          "label": "Caffeine badge",
+          "default": "Caffeine-free"
+        },
+        {
+          "type": "text",
+          "id": "capsules",
+          "label": "Bottle capsule label",
+          "default": "capsules"
+        },
+        {
+          "type": "text",
+          "id": "servings",
+          "label": "Bottle serving label",
+          "default": "servings"
+        },
+        {
+          "type": "text",
+          "id": "daily",
+          "label": "Daily capsule label",
+          "default": "capsules daily"
+        },
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Ingredients image link",
+          "default": "View ingredients & label"
+        },
+        {
+          "type": "header",
+          "content": "Price and buying buttons"
+        },
+        {
+          "type": "text",
+          "id": "per_day",
+          "label": "Daily price label",
+          "default": "per day"
+        },
+        {
+          "type": "text",
+          "id": "per_bottle",
+          "label": "Bottle price label",
+          "default": "per bottle"
+        },
+        {
+          "type": "text",
+          "id": "quantity",
+          "label": "Quantity label",
+          "default": "Bottles"
+        },
+        {
+          "type": "text",
+          "id": "supply",
+          "label": "Supply label",
+          "default": "day supply"
+        },
+        {
+          "type": "text",
+          "id": "total",
+          "label": "Total price label",
+          "default": "Total"
+        },
+        {
+          "type": "text",
+          "id": "option",
+          "label": "Variant menu label",
+          "default": "Choose an option"
+        },
+        {
+          "type": "text",
+          "id": "add",
+          "label": "Add to cart button",
+          "default": "Add to cart"
+        },
+        {
+          "type": "text",
+          "id": "adding",
+          "label": "Adding to cart message",
+          "default": "Adding…"
+        },
+        {
+          "type": "text",
+          "id": "sold_out",
+          "label": "Sold out message",
+          "default": "Sold out"
+        },
+        {
+          "type": "text",
+          "id": "selection_note",
+          "label": "Variant price note",
+          "default": "Option prices are shown in the menu. Your cart confirms the total."
+        },
+        {
+          "type": "header",
+          "content": "Delivery and reassurance"
+        },
+        {
+          "type": "text",
+          "id": "trust",
+          "label": "Ingredient and quality reassurance",
+          "default": "Precise ingredient amounts · 0 mg caffeine · Manufactured in a cGMP facility."
+        },
+        {
+          "type": "text",
+          "id": "shipping",
+          "label": "Delivery message",
+          "default": "Same-Day Shipping Worldwide."
+        },
+        {
+          "type": "text",
+          "id": "shipping_link",
+          "label": "Delivery and returns link text",
+          "default": "Delivery & returns"
+        },
+        {
+          "type": "text",
+          "id": "tax_included",
+          "label": "Tax message",
+          "default": "Taxes included."
+        },
+        {
+          "type": "text",
+          "id": "secure",
+          "label": "Payment reassurance",
+          "default": "Secure checkout"
+        },
+        {
+          "type": "text",
+          "id": "footer_note",
+          "label": "Precaution note",
+          "default": "For adults. Use as directed. See label for precautions."
+        },
+        {
+          "type": "header",
+          "content": "Navigation and accessibility"
+        },
+        {
+          "type": "text",
+          "id": "home",
+          "label": "Home link",
+          "default": "Home"
+        },
+        {
+          "type": "text",
+          "id": "shop",
+          "label": "Shop link",
+          "default": "Shop"
+        },
+        {
+          "type": "text",
+          "id": "enlarge",
+          "label": "Image enlargement label",
+          "default": "Enlarge product image"
+        },
+        {
+          "type": "text",
+          "id": "image",
+          "label": "Thumbnail label",
+          "default": "Product image"
+        },
+        {
+          "type": "text",
+          "id": "gallery",
+          "label": "Gallery label",
+          "default": "Product images"
+        },
+        {
+          "type": "text",
+          "id": "decrease",
+          "label": "Decrease quantity label",
+          "default": "Decrease quantity"
+        },
+        {
+          "type": "text",
+          "id": "increase",
+          "label": "Increase quantity label",
+          "default": "Increase quantity"
+        },
+        {
+          "type": "text",
+          "id": "payments",
+          "label": "Payment icons label",
+          "default": "Available payment options"
+        },
+        {
+          "type": "text",
+          "id": "image_empty",
+          "label": "Missing image message",
+          "default": "Product image coming soon"
+        },
+        {
+          "type": "text",
+          "id": "wrong_product",
+          "label": "Wrong template message",
+          "default": "Add this section to the NX-01 product template."
+        }
+      ]
+    },
+    {
+      "type": "formula_table",
+      "name": "Ingredients at a glance",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "Ingredient rows are separate Formula ingredient blocks. Serving numbers use the opening section settings."
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Heading",
+          "default": "Ingredients at a glance"
+        },
+        {
+          "type": "checkbox",
+          "id": "open_by_default",
+          "label": "Open by default",
+          "default": false
+        },
+        {
+          "type": "text",
+          "id": "table_caption",
+          "label": "Table description for screen readers",
+          "default": "NX-01 Baseline listed ingredients and amounts per serving"
+        },
+        {
+          "type": "text",
+          "id": "serving_size_label",
+          "label": "Serving size label",
+          "default": "Serving Size:"
+        },
+        {
+          "type": "text",
+          "id": "capsules_label",
+          "label": "Capsule unit label",
+          "default": "capsules"
+        },
+        {
+          "type": "text",
+          "id": "servings_label",
+          "label": "Servings per bottle label",
+          "default": "Servings per container:"
+        },
+        {
+          "type": "text",
+          "id": "amount_heading",
+          "label": "Amount column heading",
+          "default": "Amount Per Serving"
+        },
+        {
+          "type": "text",
+          "id": "dv_heading",
+          "label": "Daily value column heading",
+          "default": "% DV"
+        },
+        {
+          "type": "text",
+          "id": "dv_legend",
+          "label": "Daily value explanation",
+          "default": "DV = Daily Value"
+        },
+        {
+          "type": "text",
+          "id": "dv_na",
+          "label": "Daily value footnote",
+          "default": "† % DV not established"
+        },
+        {
+          "type": "text",
+          "id": "other_ingredients",
+          "label": "Other ingredients",
+          "default": "Other ingredients: vegetable cellulose (capsule), silicon dioxide."
+        }
+      ]
+    },
+    {
+      "type": "formula_ingredient",
+      "name": "Formula ingredient",
+      "settings": [
+        {
+          "type": "text",
+          "id": "name",
+          "label": "Ingredient name",
+          "default": "Ingredient"
+        },
+        {
+          "type": "text",
+          "id": "form",
+          "label": "Form or standardization",
+          "info": "Include the parentheses if you want them displayed."
+        },
+        {
+          "type": "text",
+          "id": "amount",
+          "label": "Amount per serving"
+        },
+        {
+          "type": "text",
+          "id": "daily_value",
+          "label": "Daily value",
+          "default": "†"
+        },
+        {
+          "type": "paragraph",
+          "content": "If the formula changes, update the matching ingredient card and approved product label too."
+        }
+      ]
+    },
+    {
+      "type": "detail",
+      "name": "Product detail",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Heading",
+          "default": "Product details"
+        },
+        {
+          "type": "richtext",
+          "id": "content",
+          "label": "Text"
+        },
+        {
+          "type": "richtext",
+          "id": "note",
+          "label": "Additional note"
+        },
+        {
+          "type": "checkbox",
+          "id": "open_by_default",
+          "label": "Open by default",
+          "default": false
+        }
+      ]
+    },
+    {
+      "type": "directions",
+      "name": "How to use",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Heading",
+          "default": "How to use"
+        },
+        {
+          "type": "checkbox",
+          "id": "open_by_default",
+          "label": "Open by default",
+          "default": false
+        },
+        {
+          "type": "header",
+          "content": "Direction 1"
+        },
+        {
+          "type": "text",
+          "id": "label_1",
+          "label": "Label"
+        },
+        {
+          "type": "textarea",
+          "id": "text_1",
+          "label": "Text"
+        },
+        {
+          "type": "header",
+          "content": "Direction 2"
+        },
+        {
+          "type": "text",
+          "id": "label_2",
+          "label": "Label"
+        },
+        {
+          "type": "textarea",
+          "id": "text_2",
+          "label": "Text"
+        },
+        {
+          "type": "header",
+          "content": "Direction 3"
+        },
+        {
+          "type": "text",
+          "id": "label_3",
+          "label": "Label"
+        },
+        {
+          "type": "textarea",
+          "id": "text_3",
+          "label": "Text"
+        },
+        {
+          "type": "header",
+          "content": "Guide link"
+        },
+        {
+          "type": "text",
+          "id": "link_label",
+          "label": "Link text",
+          "default": "Dosing guide"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link destination"
+        }
+      ]
+    },
+    {
+      "type": "safety",
+      "name": "Safety and precautions",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Heading",
+          "default": "Safety & precautions"
+        },
+        {
+          "type": "text",
+          "id": "tag",
+          "label": "Heading badge",
+          "default": "Important"
+        },
+        {
+          "type": "checkbox",
+          "id": "open_by_default",
+          "label": "Open by default",
+          "default": false
+        },
+        {
+          "type": "text",
+          "id": "important_label",
+          "label": "Important text label",
+          "default": "Important"
+        },
+        {
+          "type": "textarea",
+          "id": "important",
+          "label": "Important text"
+        },
+        {
+          "type": "text",
+          "id": "general_label",
+          "label": "General safety label",
+          "default": "General safety"
+        },
+        {
+          "type": "textarea",
+          "id": "general",
+          "label": "General safety text"
+        },
+        {
+          "type": "textarea",
+          "id": "disclaimer",
+          "label": "Disclaimer"
+        }
+      ]
     }
   ],
   "presets": [
     {
-      "name": "NX-01 product opening"
+      "name": "NX-01 product opening",
+      "settings": {
+        "editor_details": true,
+        "details_heading": "The formula"
+      },
+      "blocks": [
+        {
+          "type": "labels",
+          "settings": {
+            "total": "Total",
+            "add": "Add to cart",
+            "adding": "Adding…",
+            "sold_out": "Sold out",
+            "home": "Home",
+            "shop": "Shop",
+            "eyebrow": "NOOTROPIX · DAILY FORMULA",
+            "gallery": "Product images",
+            "caffeine_free": "Caffeine-free",
+            "enlarge": "Enlarge product image",
+            "image_empty": "Product image coming soon",
+            "image": "Product image",
+            "label": "View ingredients & label",
+            "capsules": "capsules",
+            "servings": "servings",
+            "daily": "capsules daily",
+            "option": "Choose an option",
+            "selection_note": "Option prices are shown in the menu. Your cart confirms the total.",
+            "per_bottle": "per bottle",
+            "per_day": "per day",
+            "quantity": "Bottles",
+            "decrease": "Decrease quantity",
+            "increase": "Increase quantity",
+            "supply": "day supply",
+            "trust": "Precise ingredient amounts · 0 mg caffeine · Manufactured in a cGMP facility.",
+            "tax_included": "Taxes included.",
+            "shipping": "Same-Day Shipping Worldwide.",
+            "shipping_link": "Delivery & returns",
+            "secure": "Secure checkout",
+            "payments": "Available payment options",
+            "footer_note": "For adults. Use as directed. See label for precautions.",
+            "wrong_product": "Add this section to the NX-01 product template."
+          }
+        },
+        {
+          "type": "formula_table",
+          "settings": {
+            "title": "Ingredients at a glance",
+            "open_by_default": false,
+            "table_caption": "NX-01 Baseline listed ingredients and amounts per serving",
+            "serving_size_label": "Serving Size:",
+            "capsules_label": "capsules",
+            "servings_label": "Servings per container:",
+            "amount_heading": "Amount Per Serving",
+            "dv_heading": "% DV",
+            "dv_legend": "DV = Daily Value",
+            "dv_na": "† % DV not established",
+            "other_ingredients": "Other ingredients: vegetable cellulose (capsule), silicon dioxide."
+          }
+        },
+        {
+          "type": "formula_ingredient",
+          "settings": {
+            "name": "Vitamin B6",
+            "form": "(as P5P [pyridoxal-5-phosphate])",
+            "amount": "5 mg",
+            "daily_value": "294%"
+          }
+        },
+        {
+          "type": "formula_ingredient",
+          "settings": {
+            "name": "Folate",
+            "form": "(as 5-MTHF [L-methylfolate])",
+            "amount": "400 mcg DFE",
+            "daily_value": "100%"
+          }
+        },
+        {
+          "type": "formula_ingredient",
+          "settings": {
+            "name": "Vitamin B12",
+            "form": "(as Methylcobalamin)",
+            "amount": "500 mcg",
+            "daily_value": "20,833%"
+          }
+        },
+        {
+          "type": "formula_ingredient",
+          "settings": {
+            "name": "Acetyl-L-Carnitine",
+            "form": "",
+            "amount": "500 mg",
+            "daily_value": "†"
+          }
+        },
+        {
+          "type": "formula_ingredient",
+          "settings": {
+            "name": "CDP-Choline",
+            "form": "(Citicoline)",
+            "amount": "250 mg",
+            "daily_value": "†"
+          }
+        },
+        {
+          "type": "formula_ingredient",
+          "settings": {
+            "name": "NMN",
+            "form": "(Nicotinamide mononucleotide)",
+            "amount": "250 mg",
+            "daily_value": "†"
+          }
+        },
+        {
+          "type": "formula_ingredient",
+          "settings": {
+            "name": "L-Theanine",
+            "form": "",
+            "amount": "200 mg",
+            "daily_value": "†"
+          }
+        },
+        {
+          "type": "formula_ingredient",
+          "settings": {
+            "name": "Rhodiola rosea extract",
+            "form": "(standardized to 3% rosavins and 1% salidroside)",
+            "amount": "200 mg",
+            "daily_value": "†"
+          }
+        },
+        {
+          "type": "formula_ingredient",
+          "settings": {
+            "name": "CoQ10",
+            "form": "(as Ubiquinol)",
+            "amount": "100 mg",
+            "daily_value": "†"
+          }
+        },
+        {
+          "type": "detail",
+          "settings": {
+            "title": "What it is",
+            "content": "<p>NX-01 Baseline is a caffeine-free daily nootropic stack designed to support cognitive performance and cellular energy. It features 9 synergistic ingredients, including ubiquinol CoQ10, Rhodiola Rosea (3% rosavins, 1% salidroside), and active forms of B6, B12, and folate (P5P, methylcobalamin, 5-MTHF). Each ingredient serves a distinct role: fueling cellular energy, supporting brain health, providing essential cofactors, and helping your body manage everyday stress.</p>",
+            "open_by_default": false
+          }
+        },
+        {
+          "type": "detail",
+          "settings": {
+            "title": "What to expect",
+            "content": "<p>Designed for daily use. Effects may vary by individual. Take 3 capsules daily as directed.</p>",
+            "note": "",
+            "open_by_default": false
+          }
+        },
+        {
+          "type": "directions",
+          "settings": {
+            "title": "How to use",
+            "open_by_default": false,
+            "link_label": "Dosing guide",
+            "link": "/pages/dosing-guide#dose-nx-01-baseline",
+            "label_1": "Serving",
+            "text_1": "Take 3 capsules with food, ideally in the morning or early afternoon.",
+            "label_2": "Limit",
+            "text_2": "Do not exceed the labelled serving.",
+            "label_3": "Storage",
+            "text_3": "Keep tightly closed, dry and away from heat and sunlight."
+          }
+        },
+        {
+          "type": "safety",
+          "settings": {
+            "title": "Safety & precautions",
+            "tag": "Important",
+            "open_by_default": false,
+            "important_label": "Important",
+            "important": "Take 3 capsules with food each morning or early afternoon. Do not exceed the recommended dose. Store in a cool, dry place away from sunlight.",
+            "general_label": "General safety",
+            "general": "Check with a healthcare professional before use if you take medication or have a medical condition. CoQ10 may interact with blood thinners, insulin, or certain cancer treatments. Not for use during pregnancy, breastfeeding, or by those under 18 unless advised by a qualified clinician. Stop use and seek advice if you experience adverse effects. Keep out of reach of children.",
+            "disclaimer": "A food supplement is not a substitute for a varied diet, sleep or medical care. NX-01 is not intended to diagnose, treat, cure or prevent disease. Individual responses vary; ingredient studies do not establish clinical efficacy of the finished formula."
+          }
+        }
+      ]
     }
-  ]
+  ],
+  "max_blocks": 50
 }
 {% endschema %}
