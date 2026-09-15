@@ -11,10 +11,12 @@
 {% endcomment %}
 
 {% liquid
-  assign image = collection.image
-  if collection.image == blank
+  if collection.image != blank
+    assign image = collection.image
+  else
     assign image = collection.featured_image
   endif
+  assign image_alt = image.alt | default: collection.title
 
   assign gap = 7
   if image_size == 'lg'
@@ -50,10 +52,10 @@
     <div class='collection-card-v2__trigger'>
       <div class='collection-card-v2__wrapper' style='--gap: {{ gap }}px'>
         <div class='collection-card-v2__image{% if image_size %} collection-card-v2__image--{{ image_size }}{% endif %}'>
-          {% render 'image', image: image, aspect_ratio: aspect_ratio, alt: image.alt | default: collection.title %}
+          {% render 'image', image: image, aspect_ratio: aspect_ratio, alt: image_alt %}
         </div>
         {% if collection != empty %}
-          <h3 class='collection-card-v2__title'>{{ collection.title }}</h3>
+          <h3 class='collection-card-v2__title'>{{ title_override | default: collection.title | escape }}</h3>
         {% else %}
           <h3 class='collection-card-v2__title'>{{ 'onboarding.collection_title' | t }}</h3>
         {% endif %}
@@ -66,10 +68,10 @@
     <a href='{{ collection.url }}' class='collection-card-v2__link'>
       <div class='collection-card-v2__wrapper' style='--gap: {{ gap }}px'>
         <div class='collection-card-v2__image{% if image_size %} collection-card-v2__image--{{ image_size }}{% endif %}'>
-          {% render 'image', image: image, aspect_ratio: aspect_ratio, alt: image.alt | default: collection.title %}
+          {% render 'image', image: image, aspect_ratio: aspect_ratio, alt: image_alt %}
         </div>
         {% if collection and collection != empty %}
-          <h3 class='collection-card-v2__title'>{{ collection.title }}</h3>
+          <h3 class='collection-card-v2__title'>{{ title_override | default: collection.title | escape }}</h3>
         {% else %}
           <h3 class='collection-card-v2__title'>{{ 'onboarding.collection_title' | t }}</h3>
         {% endif %}
