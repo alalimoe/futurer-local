@@ -1,0 +1,146 @@
+{%- liquid
+  assign launch_product = section.settings.product | default: all_products['nx-01-baseline']
+  assign launch_image = section.settings.image | default: launch_product.featured_image
+  assign launch_url = section.settings.button_link | default: launch_product.url
+  if launch_url == blank
+    assign launch_url = routes.root_url | append: 'products/nx-01-baseline'
+  endif
+  assign image_alt = section.settings.image_alt | default: launch_image.alt | default: section.settings.product_name
+  assign image_loading = 'eager'
+  assign image_priority = 'high'
+  if section.index > 1
+    assign image_loading = 'lazy'
+    assign image_priority = 'auto'
+  endif
+-%}
+<div class="nx-launch" style="--nx-bg: {{ section.settings.background }}; --nx-ink: {{ section.settings.text_color }}; --nx-muted: {{ section.settings.muted_color }}; --nx-accent: {{ section.settings.accent }}; --nx-button-ink: {{ section.settings.button_text_color }}; --nx-panel: {{ section.settings.image_background }}; --nx-space: {{ section.settings.padding_desktop }}px; --nx-mobile-space: {{ section.settings.padding_mobile }}px; --nx-image-size: {{ section.settings.image_width }}%; --nx-title-size: {{ section.settings.heading_size }}px; --nx-title-mobile: {{ section.settings.heading_size_mobile }}px;">
+  <div class="nx-launch__inner">
+    <div class="nx-launch__copy">
+      {%- if section.settings.eyebrow != blank -%}<p class="nx-launch__eyebrow"><span class="nx-launch__dot" aria-hidden="true"></span>{{ section.settings.eyebrow | escape }}</p>{%- endif -%}
+      {%- if section.settings.product_name != blank -%}<p class="nx-launch__name">{{ section.settings.product_name | escape }}</p>{%- endif -%}
+      {%- if section.settings.heading != blank -%}<{{ section.settings.heading_tag }} class="nx-launch__heading">{{ section.settings.heading | escape | newline_to_br }}</{{ section.settings.heading_tag }}>{%- endif -%}
+      {%- if section.settings.body != blank -%}<div class="nx-launch__body">{{ section.settings.body }}</div>{%- endif -%}
+      {%- if section.settings.button_label != blank -%}
+        <a class="nx-launch__button" href="{{ launch_url | escape }}"><span>{{ section.settings.button_label | escape }}</span><svg viewBox="0 0 24 24" width="22" height="22" fill="none" aria-hidden="true" focusable="false"><path d="M4 12h15m-6-6 6 6-6 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+      {%- endif -%}
+      {%- if section.settings.note != blank -%}<p class="nx-launch__note">{{ section.settings.note | escape }}</p>{%- endif -%}
+    </div>
+    <figure class="nx-launch__visual{% if section.settings.blend_image %} nx-launch__visual--blend{% endif %}">
+      <div class="nx-launch__image-wrap">
+        {%- if launch_image != blank -%}
+          {{ launch_image | image_url: width: 1400 | image_tag: class: 'nx-launch__image', widths: '360, 540, 720, 1000, 1400', sizes: '(min-width: 1440px) 650px, (min-width: 900px) 47vw, 100vw', loading: image_loading, fetchpriority: image_priority, alt: image_alt }}
+        {%- else -%}
+          <div class="nx-launch__placeholder" aria-hidden="true">{{ 'product-1' | placeholder_svg_tag }}</div>
+        {%- endif -%}
+      </div>
+      {%- if section.settings.image_caption != blank -%}<figcaption class="nx-launch__caption">{{ section.settings.image_caption | escape }}</figcaption>{%- endif -%}
+    </figure>
+    {%- if section.blocks.size > 0 -%}
+      <ul class="nx-launch__facts" role="list" style="--nx-fact-count: {{ section.blocks.size }};">
+        {%- for block in section.blocks -%}
+          <li class="nx-launch__fact" {{ block.shopify_attributes }}>
+            {%- if block.settings.value != blank -%}<span class="nx-launch__fact-value">{{ block.settings.value | escape }}</span>{%- endif -%}
+            {%- if block.settings.label != blank -%}<span class="nx-launch__fact-label">{{ block.settings.label | escape }}</span>{%- endif -%}
+          </li>
+        {%- endfor -%}
+      </ul>
+    {%- endif -%}
+  </div>
+</div>
+{% stylesheet %}
+  .nx-launch { background: var(--nx-bg); color: var(--nx-ink); padding: var(--nx-space) clamp(24px, 4.5vw, 72px); font-family: var(--font-body-family, Arial, sans-serif); }
+  .nx-launch, .nx-launch * { box-sizing: border-box; }
+  .nx-launch__inner { max-width: 1320px; margin-inline: auto; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.04fr); column-gap: clamp(28px, 5vw, 76px); align-items: center; }
+  .nx-launch__copy { min-width: 0; padding-block: 10px 28px; }
+  .nx-launch .nx-launch__eyebrow { margin: 0 0 28px; display: flex; align-items: center; gap: 10px; color: var(--nx-ink); font-size: 11px; font-weight: 600; line-height: 1.5; letter-spacing: .13em; text-transform: uppercase; }
+  .nx-launch__dot { display: block; width: 9px; height: 9px; flex: 0 0 9px; background: var(--nx-accent); border-radius: 50%; }
+  .nx-launch .nx-launch__name { margin: 0 0 12px; font-size: 17px; line-height: 1.5; font-weight: 600; letter-spacing: -.02em; color: var(--nx-ink); }
+  .nx-launch .nx-launch__heading { margin: 0; color: var(--nx-ink); font-family: var(--font-heading-family, Arial, sans-serif); font-size: clamp(42px, 5.5vw, var(--nx-title-size)); font-weight: 600; line-height: 1.02; letter-spacing: -.055em; text-transform: none; overflow-wrap: anywhere; }
+  .nx-launch__body { max-width: 490px; margin-top: 24px; font-size: 16px; line-height: 1.75; color: var(--nx-muted); }
+  .nx-launch__body p { margin: 0 0 12px; }
+  .nx-launch__body p:last-child { margin-bottom: 0; }
+  .nx-launch__body a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
+  .nx-launch .nx-launch__button { display: inline-flex; align-items: center; justify-content: center; gap: 28px; min-height: 54px; max-width: 100%; padding: 15px 25px; margin-top: 30px; background: var(--nx-accent); color: var(--nx-button-ink); border: 1px solid transparent; border-radius: 5px; font-size: 15px; font-weight: 600; line-height: 1.5; text-decoration: none; text-align: center; transition: box-shadow 160ms ease; }
+  .nx-launch__button svg { flex-shrink: 0; }
+  .nx-launch .nx-launch__button:hover { color: var(--nx-button-ink); box-shadow: inset 0 0 0 1px currentColor; }
+  .nx-launch a:focus-visible { outline: 2px solid var(--nx-ink); outline-offset: 5px; }
+  .nx-launch .nx-launch__note { margin: 13px 0 0; color: var(--nx-muted); font-size: 11px; line-height: 1.6; }
+  .nx-launch__visual { min-width: 0; margin: 0; align-self: stretch; display: flex; flex-direction: column; justify-content: center; background: var(--nx-panel); border-radius: 18px; overflow: hidden; }
+  .nx-launch__image-wrap { width: 100%; min-height: 330px; display: flex; align-items: center; justify-content: center; padding-block: 24px 0; }
+  .nx-launch .nx-launch__image { display: block; width: var(--nx-image-size); max-width: 100%; height: auto; max-height: 550px; object-fit: contain; }
+  .nx-launch__visual--blend .nx-launch__image { mix-blend-mode: multiply; }
+  .nx-launch__placeholder { width: 70%; }
+  .nx-launch__placeholder svg { display: block; width: 100%; height: auto; fill: var(--nx-muted); }
+  .nx-launch__caption { margin: 8px 20px 30px; text-align: center; color: var(--nx-muted); font-size: 12px; line-height: 1.6; }
+  .nx-launch__facts { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(var(--nx-fact-count), minmax(0, 1fr)); gap: 0; list-style: none; margin: 34px 0 0; padding: 24px 0 0; border-top: 1px solid color-mix(in srgb, var(--nx-ink) 15%, transparent); }
+  .nx-launch__fact { display: flex; align-items: baseline; justify-content: center; flex-wrap: wrap; gap: 6px 12px; min-width: 0; padding-inline: 16px; }
+  .nx-launch__fact + .nx-launch__fact { border-inline-start: 1px solid color-mix(in srgb, var(--nx-ink) 15%, transparent); }
+  .nx-launch__fact-value { font-size: 29px; line-height: 1.2; letter-spacing: -.04em; font-weight: 500; }
+  .nx-launch__fact-label { font-size: 13px; line-height: 1.5; color: var(--nx-muted); overflow-wrap: anywhere; }
+  @media (max-width: 899px) {
+    .nx-launch { padding: var(--nx-mobile-space) 24px; }
+    .nx-launch__inner { grid-template-columns: minmax(0, 1fr); gap: 0; max-width: 600px; }
+    .nx-launch__copy { padding: 0; }
+    .nx-launch .nx-launch__eyebrow { margin-bottom: 20px; font-size: 10px; }
+    .nx-launch .nx-launch__name { margin-bottom: 10px; font-size: 15px; }
+    .nx-launch .nx-launch__heading { font-size: var(--nx-title-mobile); line-height: 1.05; letter-spacing: -.05em; }
+    .nx-launch__body { margin-top: 20px; max-width: none; font-size: 15px; line-height: 1.7; }
+    .nx-launch .nx-launch__button { width: 100%; margin-top: 22px; justify-content: space-between; }
+    .nx-launch .nx-launch__note { text-align: center; }
+    .nx-launch__visual { margin-top: 26px; border-radius: 12px; }
+    .nx-launch__image-wrap { min-height: 0; padding-top: 4px; }
+    .nx-launch .nx-launch__image { max-height: 330px; }
+    .nx-launch__caption { margin: 0 16px 16px; font-size: 11px; }
+    .nx-launch__facts { margin-top: 24px; padding-top: 20px; }
+    .nx-launch__fact { flex-direction: column; align-items: center; justify-content: flex-start; gap: 5px; padding-inline: 6px; text-align: center; }
+    .nx-launch__fact-value { font-size: 24px; }
+    .nx-launch__fact-label { font-size: 11px; }
+  }
+  @media (prefers-reduced-motion: reduce) { .nx-launch .nx-launch__button { transition: none; } }
+{% endstylesheet %}
+{% schema %}
+{
+  "name": "NX-01 launch hero",
+  "tag": "section",
+  "class": "nx-launch-section",
+  "enabled_on": {"templates": ["index"]},
+  "max_blocks": 3,
+  "settings": [
+    {"type": "product", "id": "product", "label": "Product", "info": "Uses NX-01 Baseline when left empty."},
+    {"type": "text", "id": "eyebrow", "label": "Launch label", "default": "New from Nootropix"},
+    {"type": "text", "id": "product_name", "label": "Product name", "default": "NX-01 Baseline"},
+    {"type": "textarea", "id": "heading", "label": "Heading", "default": "Meet your\ndaily baseline."},
+    {"type": "select", "id": "heading_tag", "label": "Heading level", "options": [{"value": "h1", "label": "Main homepage heading (H1)"}, {"value": "h2", "label": "Additional section heading (H2)"}], "default": "h1"},
+    {"type": "richtext", "id": "body", "label": "Description", "default": "<p>9 carefully chosen nootropics. Including Citicoline, NMN, CoQ10, and Rhodiola Rosea, working together in just 3 capsules to support your brain, energy, and focus.</p>"},
+    {"type": "text", "id": "button_label", "label": "Button text", "default": "Discover NX-01"},
+    {"type": "url", "id": "button_link", "label": "Button link", "info": "Leave empty to link to the selected product."},
+    {"type": "text", "id": "note", "label": "Small note below button", "default": "For adults. Use as directed. See label for precautions."},
+    {"type": "header", "content": "Product image"},
+    {"type": "image_picker", "id": "image", "label": "Image", "info": "Leave empty to use the product’s main image."},
+    {"type": "checkbox", "id": "blend_image", "label": "Blend white image background", "default": true, "info": "Turn off for a dark or full-color photo."},
+    {"type": "text", "id": "image_alt", "label": "Image description", "default": "Nootropix NX-01 Baseline bottle, 90 capsules"},
+    {"type": "text", "id": "image_caption", "label": "Image caption", "default": "90 capsules · 30 servings"},
+    {"type": "range", "id": "image_width", "label": "Image width", "min": 60, "max": 100, "step": 5, "unit": "%", "default": 100},
+    {"type": "header", "content": "Colors and spacing"},
+    {"type": "color", "id": "background", "label": "Background", "default": "#F7F7F9"},
+    {"type": "color", "id": "image_background", "label": "Image background", "default": "#F0F2F8"},
+    {"type": "color", "id": "text_color", "label": "Headings", "default": "#181B24"},
+    {"type": "color", "id": "muted_color", "label": "Body text", "default": "#505866"},
+    {"type": "color", "id": "accent", "label": "Button and accent", "default": "#FFC51C"},
+    {"type": "color", "id": "button_text_color", "label": "Button text", "default": "#181B24"},
+    {"type": "range", "id": "heading_size", "label": "Heading size on desktop", "min": 48, "max": 88, "step": 2, "unit": "px", "default": 76},
+    {"type": "range", "id": "heading_size_mobile", "label": "Heading size on mobile", "min": 32, "max": 56, "step": 2, "unit": "px", "default": 44},
+    {"type": "range", "id": "padding_desktop", "label": "Top and bottom space on desktop", "min": 24, "max": 100, "step": 4, "unit": "px", "default": 56},
+    {"type": "range", "id": "padding_mobile", "label": "Top and bottom space on mobile", "min": 20, "max": 60, "step": 4, "unit": "px", "default": 32}
+  ],
+  "blocks": [{"type": "fact", "name": "Quick fact", "settings": [
+    {"type": "text", "id": "value", "label": "Value", "default": "9"},
+    {"type": "text", "id": "label", "label": "Label", "default": "ingredients"}
+  ]}],
+  "presets": [{"name": "NX-01 launch hero", "blocks": [
+    {"type": "fact", "settings": {"value": "9", "label": "ingredients"}},
+    {"type": "fact", "settings": {"value": "3", "label": "capsules daily"}},
+    {"type": "fact", "settings": {"value": "0 mg", "label": "caffeine"}}
+  ]}]
+}
+{% endschema %}
