@@ -1,0 +1,47 @@
+{% doc %}
+  Renders formula ingredient blocks as the NX-01 ingredient table.
+  @param {object} section - NX-01 opening section
+  @param {object} block - Table labels block
+  @example
+  {% render 'nx01-editor-table', section: section, block: block %}
+{% enddoc %}
+
+<div class="nx01-ing-panel">
+  <table class="nx01-ing-table">
+    <caption class="xo-visually-hidden">{{ block.settings.table_caption | escape }}</caption>
+    <thead>
+      <tr>
+        <th scope="col">
+          <span class="nx01-ing-table__serving">
+            <span>{{ block.settings.serving_size_label | escape }} {{ section.settings.daily_capsules }} {{ block.settings.capsules_label | escape }}</span>
+            <span>{{ block.settings.servings_label | escape }} {{ section.settings.servings }}</span>
+          </span>
+        </th>
+        <th scope="col" class="nx01-ing-table__amount">{{ block.settings.amount_heading | escape }}</th>
+        <th scope="col" class="nx01-ing-table__dv">{{ block.settings.dv_heading | escape }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for ingredient in section.blocks %}
+        {% if ingredient.type == 'formula_ingredient' %}
+          <tr {{ ingredient.shopify_attributes }}>
+            <th scope="row">{{ ingredient.settings.name | escape }}{% if ingredient.settings.form != blank %} {{ ingredient.settings.form | escape }}{% endif %}</th>
+            <td class="nx01-ing-table__amount">{{ ingredient.settings.amount | escape }}</td>
+            <td class="nx01-ing-table__dv">{{ ingredient.settings.daily_value | escape }}</td>
+          </tr>
+        {% endif %}
+      {% endfor %}
+    </tbody>
+    <tfoot>
+      {% if block.settings.dv_legend != blank or block.settings.dv_na != blank %}
+        <tr>
+          <td>{{ block.settings.dv_legend | escape }}</td>
+          <td colspan="2" class="nx01-ing-table__dv">{{ block.settings.dv_na | escape }}</td>
+        </tr>
+      {% endif %}
+      {% if block.settings.other_ingredients != blank %}
+        <tr><td colspan="3">{{ block.settings.other_ingredients | escape }}</td></tr>
+      {% endif %}
+    </tfoot>
+  </table>
+</div>
