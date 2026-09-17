@@ -1,0 +1,689 @@
+{%- liquid
+  assign featured_product = section.settings.product
+  if featured_product == blank
+    assign featured_product = all_products['nx-01-baseline']
+  endif
+  assign hero_image = section.settings.image
+  if hero_image == blank
+    assign hero_image = images['nx-01_baseline_2x_floating.png']
+  endif
+  if hero_image == blank
+    assign hero_image = featured_product.featured_image
+  endif
+  assign cta_url = section.settings.button_link | default: featured_product.url
+  assign eyebrow_default = 'nx_focus.copy.eyebrow' | t
+  assign line_one_default = 'nx_focus.copy.line_one' | t
+  assign line_two_default = 'nx_focus.copy.line_two' | t
+  assign accent_default = 'nx_focus.copy.accent' | t
+  assign intro_default = 'nx_focus.copy.intro_html' | t
+  assign button_default = 'nx_focus.copy.button' | t
+  assign note_one_default = 'nx_focus.copy.note_one' | t
+  assign note_two_default = 'nx_focus.copy.note_two' | t
+  assign scene_default = 'nx_focus.copy.scene' | t
+  assign formula_note_default = 'nx_focus.copy.formula_note' | t
+  assign footnote_default = 'nx_focus.copy.footnote' | t
+  assign image_alt = hero_image.alt | default: featured_product.title
+  assign priority = 'auto'
+  assign loading = 'eager'
+  if section.index == 1
+    assign priority = 'high'
+  elsif section.index > 3
+    assign loading = 'lazy'
+  endif
+-%}
+<npx-focus-hero
+  id="NpxFocus-{{ section.id }}"
+  class="npx-focus"
+  data-background="{{ section.settings.background | color_to_hex }}"
+  data-accent="{{ section.settings.accent_color | color_to_hex }}"
+  data-text="{{ section.settings.text_color | color_to_hex }}"
+  data-radius="{{ section.settings.lens_radius }}"
+  data-zoom="{{ section.settings.magnification }}"
+  data-blur="{{ section.settings.blur }}"
+  data-scale="{{ section.settings.image_scale }}"
+  data-motion="{{ section.settings.motion }}"
+  data-detail-caption="{{ 'nx_focus.ui.detail_hint' | t | escape }}"
+  data-formula-caption="{{ 'nx_focus.ui.formula_hint' | t | escape }}"
+  data-play="{{ 'nx_focus.ui.play' | t | escape }}"
+  data-pause="{{ 'nx_focus.ui.pause' | t | escape }}"
+  data-lens-on="{{ 'nx_focus.ui.lens_on' | t | escape }}"
+  data-lens-off="{{ 'nx_focus.ui.lens_off' | t | escape }}"
+  style="--npx-bg: {{ section.settings.background }}; --npx-accent: {{ section.settings.accent_color }}; --npx-text: {{ section.settings.text_color }}; --npx-button-text: {{ section.settings.button_text_color }}; --npx-width: {{ section.settings.content_width }}px; --npx-image-scale: {{ section.settings.image_scale | divided_by: 100.0 }};"
+  {% if localization.language.iso_code == 'ar' %}dir="rtl"{% endif %}
+>
+  <div class="npx-focus__inner">
+    <div class="npx-focus__layout">
+      <div class="npx-focus__copy">
+        <p class="npx-focus__eyebrow">{{ section.settings.eyebrow | default: eyebrow_default | escape }}</p>
+        <{{ section.settings.heading_tag }} class="npx-focus__title">{{ section.settings.line_one | default: line_one_default | escape }}<br>{{ section.settings.line_two | default: line_two_default | escape }} <em>{{ section.settings.accent_text | default: accent_default | escape }}</em></{{ section.settings.heading_tag }}>
+        <div class="npx-focus__intro">{{ section.settings.intro | default: intro_default }}</div>
+        {% if cta_url != blank %}
+          <a class="npx-focus__button" href="{{ cta_url }}">{{ section.settings.button_label | default: button_default | escape }}<svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 18 18 6M6 6h12v12"/></svg></a>
+        {% endif %}
+        <div class="npx-focus__notes"><span>{{ section.settings.note_one | default: note_one_default | escape }}</span><span>{{ section.settings.note_two | default: note_two_default | escape }}</span></div>
+      </div>
+      <div class="npx-focus__scene">
+        <div class="npx-focus__scene-heading"><span>{{ section.settings.scene_label | default: scene_default | escape }}</span><span>{{ 'nx_focus.ui.closer_look' | t }}</span></div>
+        <div class="npx-focus__stage" data-stage>
+          {% if hero_image != blank %}
+            {{ hero_image | image_url: width: 1800 | image_tag: class: 'npx-focus__image', widths: '600, 900, 1200, 1500, 1800', sizes: '(min-width: 1200px) 700px, (min-width: 750px) 52vw, 100vw', loading: loading, fetchpriority: priority, alt: image_alt, crossorigin: 'anonymous', data-image: '' }}
+          {% else %}
+            {{ 'product-1' | placeholder_svg_tag: 'npx-focus__placeholder' }}
+          {% endif %}
+          <canvas class="npx-focus__canvas" aria-hidden="true"></canvas>
+          <button type="button" class="npx-focus__lens-target" data-lens-target hidden aria-label="{{ 'nx_focus.ui.move_lens' | t | escape }}"></button>
+        </div>
+        <div class="npx-focus__controls" data-controls hidden>
+          <div class="npx-focus__modes" role="group" aria-label="{{ 'nx_focus.ui.explore' | t | escape }}">
+            <button type="button" data-action="detail" data-mode="0" aria-pressed="true">{{ 'nx_focus.ui.detail' | t }}</button>
+            {% if section.settings.show_formula and section.blocks.size > 0 %}
+              <button type="button" data-action="formula" data-mode="1" aria-pressed="false">{{ 'nx_focus.ui.formula' | t }}</button>
+            {% endif %}
+          </div>
+          <div class="npx-focus__actions">
+            <button type="button" class="npx-focus__round" data-action="pause" aria-label="{{ 'nx_focus.ui.pause' | t | escape }}" aria-pressed="false"><svg data-pause-icon aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg><svg data-play-icon hidden aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m7 4 14 8-14 8Z"/></svg></button>
+            <button type="button" class="npx-focus__round" data-action="reset" aria-label="{{ 'nx_focus.ui.reset' | t | escape }}"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4v6h6M3.4 10a9 9 0 1 1 .5 6"/></svg></button>
+          </div>
+        </div>
+        <div class="npx-focus__caption" data-controls hidden>
+          <span data-caption aria-live="polite">{{ 'nx_focus.ui.detail_hint' | t }}</span>
+          <button type="button" data-action="lens" aria-pressed="true"><span>{{ 'nx_focus.ui.lens_on' | t }}</span><i aria-hidden="true"></i></button>
+        </div>
+        {% if section.settings.show_formula and section.blocks.size > 0 %}
+          <details class="npx-focus__ingredients">
+            <summary>{{ 'nx_focus.ui.ingredient_list' | t }}</summary>
+            <p>{{ section.settings.formula_note | default: formula_note_default | escape }}</p>
+            <dl>
+              {% for block in section.blocks %}
+                <div data-ingredient {{ block.shopify_attributes }}><dt>{{ block.settings.name | escape }}</dt><dd>{{ block.settings.amount | escape }}</dd></div>
+              {% endfor %}
+            </dl>
+            {% if featured_product != blank %}<a href="{{ featured_product.url }}">{{ 'nx_focus.ui.full_formula' | t }}</a>{% endif %}
+          </details>
+        {% endif %}
+      </div>
+    </div>
+    {% if section.settings.show_footnote %}<div class="npx-focus__footer">{{ section.settings.footnote | default: footnote_default | escape }}</div>{% endif %}
+  </div>
+</npx-focus-hero>
+
+{% stylesheet %}
+.npx-focus,.npx-focus *{box-sizing:border-box}.npx-focus{display:block;isolation:isolate;position:relative;background:var(--npx-bg);color:var(--npx-text);font-family:var(--font-body-family,Arial,sans-serif);font-size:16px;line-height:1.5;--npx-muted:color-mix(in srgb,var(--npx-text) 62%,var(--npx-bg));--npx-line:color-mix(in srgb,var(--npx-text) 15%,var(--npx-bg))}.npx-focus [hidden]{display:none!important}.npx-focus button,.npx-focus a{-webkit-tap-highlight-color:transparent}.npx-focus button{font:inherit;cursor:pointer;letter-spacing:normal;text-transform:none}.npx-focus a{text-decoration:none;color:inherit}.npx-focus button:focus-visible,.npx-focus a:focus-visible,.npx-focus summary:focus-visible{outline:2px solid var(--npx-accent);outline-offset:5px}.npx-focus__inner{max-width:var(--npx-width);margin-inline:auto;padding-inline:clamp(20px,5.2vw,84px)}.npx-focus__layout{display:grid;grid-template-columns:.9fr 1.1fr;align-items:center;gap:2vw;min-height:680px;padding-block:56px 36px}.npx-focus__copy{position:relative;z-index:2;padding-bottom:24px}.npx-focus__eyebrow{display:flex;align-items:center;gap:13px;margin:0 0 34px;color:color-mix(in srgb,var(--npx-accent) 78%,var(--npx-text));font-size:12px;line-height:1.5;font-weight:500;letter-spacing:1.7px}.npx-focus__eyebrow:before{content:'';display:block;width:24px;height:1px;flex-shrink:0;background:currentColor}.npx-focus__title{font-family:var(--font-heading-family,var(--font-body-family,Arial,sans-serif));color:var(--npx-text);font-weight:400!important;font-size:clamp(52px,6.2vw,96px)!important;line-height:1.06!important;letter-spacing:-.055em!important;margin:0 0 28px!important;text-transform:none!important;overflow-wrap:normal}.npx-focus__title em{font-style:normal;color:var(--npx-accent)}.npx-focus__intro{font-size:17px;line-height:1.7;color:var(--npx-muted);max-width:365px;margin:0 0 30px}.npx-focus__intro p{margin:0}.npx-focus a.npx-focus__button{display:inline-flex;min-height:52px;align-items:center;justify-content:center;gap:34px;padding:14px 24px;border:1px solid transparent;border-radius:4px;background:var(--npx-accent);color:var(--npx-button-text);font-size:15px;line-height:1.4;font-weight:600;transition:filter .2s,transform .2s}.npx-focus__button:hover{filter:brightness(1.08);transform:translateY(-2px)}.npx-focus__button svg{flex-shrink:0}.npx-focus__notes{display:flex;flex-wrap:wrap;gap:10px 24px;font-size:12px;line-height:1.5;color:var(--npx-muted);margin-top:21px}.npx-focus__notes span+span{position:relative}.npx-focus__notes span+span:before{content:'';width:3px;height:3px;border-radius:50%;background:currentColor;position:absolute;inset-inline-start:-13px;top:8px}.npx-focus__scene{min-width:0}.npx-focus__scene-heading{display:flex;justify-content:space-between;gap:14px;padding-inline:10px;font-size:12px;letter-spacing:1px;line-height:1.5;color:var(--npx-muted)}.npx-focus__scene-heading span:last-child{text-align:end;opacity:.8}.npx-focus__stage{position:relative;width:100%;height:clamp(360px,39vw,600px);overflow:hidden;isolation:isolate;touch-action:pan-y}.npx-focus__image,.npx-focus__placeholder{position:absolute;width:100%;height:100%;object-fit:contain;inset:0;transform:scale(var(--npx-image-scale));transition:opacity .3s}.npx-focus__placeholder{fill:var(--npx-muted);transform:none}.npx-focus__canvas{position:absolute;inset:0;width:100%;height:100%;opacity:0;transition:opacity .3s;cursor:crosshair;touch-action:pan-y}.npx-focus[data-ready=true] .npx-focus__canvas{opacity:1}.npx-focus[data-ready=true] .npx-focus__image{opacity:0}.npx-focus__lens-target{position:absolute;z-index:3;left:39%;top:54%;transform:translate(-50%,-50%);border:0;border-radius:50%;background:transparent;padding:0;cursor:grab!important;touch-action:none}.npx-focus__lens-target:active{cursor:grabbing!important}.npx-focus__lens-target:focus-visible{outline-offset:8px!important}.npx-focus__controls{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-inline:8px}.npx-focus__modes{display:inline-flex;align-items:center;border:1px solid var(--npx-line);border-radius:50px;padding:3px;gap:2px}.npx-focus__modes button{min-height:40px;font-size:14px;border:0;background:transparent;color:var(--npx-muted);border-radius:50px;padding:8px 16px;white-space:nowrap;line-height:1.4}.npx-focus__modes button[aria-pressed=true]{background:var(--npx-accent);color:var(--npx-button-text)}.npx-focus__actions{display:flex;gap:7px}.npx-focus__round{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;padding:0;border:1px solid var(--npx-line);border-radius:50%;background:transparent;color:var(--npx-muted)}.npx-focus__round:hover{background:color-mix(in srgb,var(--npx-accent) 10%,var(--npx-bg))}.npx-focus__caption{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 10px 0;font-size:12px;line-height:1.5;color:var(--npx-muted)}.npx-focus__caption button{display:flex;align-items:center;gap:8px;min-height:44px;padding:0;border:0;background:transparent;color:var(--npx-muted);font-size:12px;white-space:nowrap}.npx-focus__caption i{display:block;width:6px;height:6px;border-radius:50%;background:var(--npx-muted)}.npx-focus__caption button[aria-pressed=true] i{background:var(--npx-accent)}.npx-focus__ingredients{margin:8px 10px 0;font-size:14px;color:var(--npx-muted);text-align:start}.npx-focus__ingredients summary{cursor:pointer;min-height:44px;display:list-item;list-style:revert;padding-block:11px;line-height:1.5}.npx-focus__ingredients p{font-size:13px;line-height:1.6;margin:10px 0 14px}.npx-focus__ingredients dl{display:grid;gap:9px;margin:0 0 16px}.npx-focus__ingredients dl>div{display:flex;justify-content:space-between;gap:18px}.npx-focus__ingredients dt,.npx-focus__ingredients dd{margin:0}.npx-focus__ingredients dd{white-space:nowrap;color:var(--npx-text);direction:ltr}.npx-focus__ingredients a{text-decoration:underline;text-underline-offset:4px;display:inline-block;padding:8px 0}.npx-focus__footer{border-top:1px solid var(--npx-line);padding-block:23px;font-size:12px;color:var(--npx-muted)}.npx-focus[dir=rtl] .npx-focus__title{letter-spacing:normal!important;line-height:1.3!important}.npx-focus[dir=rtl] .npx-focus__eyebrow{letter-spacing:normal}.npx-focus[dir=rtl] .npx-focus__lens-target{direction:ltr}
+@media(max-width:1050px){.npx-focus__layout{grid-template-columns:1fr 1.05fr;gap:0;min-height:620px}.npx-focus__title{font-size:clamp(46px,6vw,70px)!important;letter-spacing:-.045em!important}.npx-focus__intro{font-size:16px;max-width:290px}.npx-focus__eyebrow{font-size:12px;letter-spacing:1px}.npx-focus__stage{height:420px}.npx-focus__controls{padding-inline:0;gap:8px}.npx-focus__modes button{padding-inline:12px;font-size:13px}.npx-focus__scene-heading{padding-inline:4px;letter-spacing:.5px}.npx-focus__caption{padding-inline:4px}}
+@media(max-width:749px){.npx-focus__inner{padding-inline:6vw}.npx-focus__layout{grid-template-columns:1fr;min-height:0;padding-block:36px 26px;gap:30px}.npx-focus__copy{padding:0}.npx-focus__eyebrow{margin-bottom:21px;font-size:12px}.npx-focus__title{font-size:clamp(49px,11vw,76px)!important;line-height:1.07!important;letter-spacing:-.048em!important;margin-bottom:22px!important}.npx-focus__intro{font-size:16px;max-width:400px;margin-bottom:24px}.npx-focus a.npx-focus__button{min-height:50px;padding:13px 21px;gap:28px}.npx-focus__notes{margin-top:18px}.npx-focus__stage{height:clamp(330px,97vw,555px)}.npx-focus__scene-heading{font-size:12px}.npx-focus__caption{font-size:12px;gap:8px}.npx-focus__caption>span{max-width:220px}.npx-focus__modes button{padding-inline:14px;font-size:13px}.npx-focus__footer{padding-block:21px}}
+@media(max-width:370px){.npx-focus__inner{padding-inline:5vw}.npx-focus__modes button{padding-inline:10px;font-size:12px}.npx-focus__actions{gap:4px}.npx-focus__scene-heading{font-size:12px;letter-spacing:0}.npx-focus__eyebrow{font-size:12px;letter-spacing:.7px}.npx-focus__caption{flex-wrap:wrap;row-gap:0}}
+@media(prefers-reduced-motion:reduce){.npx-focus *{transition:none!important}.npx-focus__button:hover{transform:none}}
+
+{% endstylesheet %}
+
+{% javascript %}
+(() => {
+  if (customElements.get('npx-focus-hero')) return;
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const rgb = (value) => {
+    const h = value.replace('#', '');
+    return [0, 2, 4].map((n) => parseInt(h.slice(n, n + 2), 16) / 255);
+  };
+  const color = (value, alpha = 1) => `rgba(${value.map((v) => Math.round(v * 255)).join(',')},${alpha})`;
+  const mix = (a, b, f) => a.map((v, i) => v * (1 - f) + b[i] * f);
+  function formulaCanvas(width, height, cfg) {
+    const canvas = document.createElement('canvas');
+    canvas.width = width; canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    const scale = width / cfg.width;
+    ctx.scale(scale, scale);
+    const w = cfg.width, h = height / scale;
+    ctx.direction = cfg.rtl ? 'rtl' : 'ltr';
+    const columns = 2, pad = w < 400 ? 12 : 24, gap = 20;
+    const cell = (w - pad * 2 - gap) / columns;
+    cfg.ingredients.forEach((item, i) => {
+      const col = cfg.rtl ? 1 - i % 2 : i % 2;
+      const start = pad + col * (cell + gap);
+      const x = cfg.rtl ? start + cell : start;
+      const y = h * .18 + Math.floor(i / 2) * h * .245;
+      ctx.textAlign = cfg.rtl ? 'right' : 'left';
+      ctx.fillStyle = color(mix(cfg.text, cfg.bg, .4));
+      ctx.font = `500 11px ${cfg.font}`;
+      ctx.fillText(String(i + 1).padStart(2, '0'), x, y - 18);
+      ctx.fillStyle = color(cfg.text);
+      ctx.font = `400 ${w < 400 ? 13 : 15}px ${cfg.font}`;
+      const words = item.name.split(' '); const lines = []; let line = '';
+      for (const word of words) {
+        const next = line ? `${line} ${word}` : word;
+        if (ctx.measureText(next).width > cell && line) { lines.push(line); line = word; } else line = next;
+      }
+      if (line) lines.push(line);
+      lines.slice(0, 2).forEach((value, j) => ctx.fillText(value, x, y + j * 17));
+      ctx.fillStyle = color(cfg.accent);
+      ctx.font = `400 ${w < 400 ? 23 : 30}px ${cfg.font}`;
+      ctx.fillText(item.amount, x, y + 52);
+      ctx.strokeStyle = color(cfg.accent, .2); ctx.lineWidth = .8;
+      ctx.beginPath(); ctx.moveTo(start, y + 70); ctx.lineTo(start + cell, y + 70); ctx.stroke();
+    });
+    return canvas;
+  }
+
+  const vertexSource = `
+attribute vec2 aPosition;
+varying vec2 vUv;
+void main(){vUv=aPosition*.5+.5;gl_Position=vec4(aPosition,0.,1.);}
+`;
+const sceneSource = `
+precision highp float;
+varying vec2 vUv;
+uniform sampler2D uProduct;
+uniform sampler2D uFormula;
+uniform vec2 uResolution;
+uniform float uTime;
+uniform float uMode;
+uniform vec3 uBg;
+uniform vec3 uAccent;
+uniform float uImageAspect;
+uniform float uImageScale;
+float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+void main(){
+ vec2 p=(vUv-.5)*vec2(uResolution.x/uResolution.y,1.);
+ vec3 col=uBg;
+ float halo=exp(-dot(p*vec2(1.2,1.),p*vec2(1.2,1.))*10.);
+ col+=uAccent*.09*halo;
+ 
+ float ca=cos(.48),sa=sin(.48);
+ vec2 q=mat2(ca,-sa,sa,ca)*p;
+ float orbit=length(q*vec2(1.,1.47));
+ float angle=atan(q.y,q.x);
+ float light=.45+.55*pow(.5+.5*cos(angle-1.3),3.);
+ float ring=exp(-pow((orbit-.43)*180.,2.));
+ float inner=exp(-pow((orbit-.423)*270.,2.));
+ col+=uAccent*.34*ring*light;
+ col+=vec3(.13,.17,.17)*inner;
+ float wideGlow=exp(-pow((orbit-.425)*32.,2.));
+ col+=vec3(.025,.035,.014)*wideGlow;
+ vec2 q2=mat2(cos(-.55),-sin(-.55),sin(-.55),cos(-.55))*p;
+ float second=length(q2*vec2(1.,1.65));
+ col+=vec3(.12,.18,.16)*exp(-pow((second-.34)*270.,2.))*(.4+.6*sin(angle*2.+uTime*.06)*sin(angle*2.+uTime*.06));
+ 
+ vec2 grid=abs(fract(p*23.+.5)-.5);
+ float dots=(1.-smoothstep(.018,.038,length(grid)))*.044;
+ col+=dots*exp(-dot(p,p)*3.);
+ float drift=sin(uTime*.42)*.005;
+ float imageSide=min(uResolution.x,uResolution.y)*uImageScale;
+ vec2 imageUv=(vUv*uResolution-vec2(uResolution.x*.5,uResolution.y*(.51+drift)))/(imageSide*vec2(min(1.,uImageAspect),min(1.,1./uImageAspect)))+.5;
+ vec4 product=texture2D(uProduct,clamp(imageUv,0.,1.));
+ float inBounds=step(0.,imageUv.x)*step(imageUv.x,1.)*step(0.,imageUv.y)*step(imageUv.y,1.);
+ col=mix(col,product.rgb,product.a*inBounds*(1.-uMode*.92));
+ vec4 formula=texture2D(uFormula,vUv);
+ col=mix(col,formula.rgb,formula.a*uMode);
+ float vignette=1.-smoothstep(.40,.78,length(p));
+ col=mix(uBg,col,.55+.45*vignette);
+ col+=(hash(gl_FragCoord.xy)-.5)*.004;
+ gl_FragColor=vec4(col,1.);
+}`;
+const blurSource = `
+precision highp float;
+varying vec2 vUv;
+uniform sampler2D uSource;
+uniform vec2 uStep;
+void main(){
+ vec3 c=texture2D(uSource,vUv).rgb*.227027;
+ c+=texture2D(uSource,vUv+uStep*1.384615).rgb*.316216;
+ c+=texture2D(uSource,vUv-uStep*1.384615).rgb*.316216;
+ c+=texture2D(uSource,vUv+uStep*3.230769).rgb*.070270;
+ c+=texture2D(uSource,vUv-uStep*3.230769).rgb*.070270;
+ gl_FragColor=vec4(c,1.);
+}`;
+const lensSource = `
+precision highp float;
+varying vec2 vUv;
+uniform sampler2D uSharp;
+uniform sampler2D uBlur;
+uniform vec2 uResolution;
+uniform vec2 uLens;
+uniform float uRadius;
+uniform float uEnabled;
+uniform float uZoom;
+void main(){
+ vec2 frag=vUv*uResolution;
+ vec2 delta=frag-uLens*uResolution;
+ float dist=length(delta);
+ float r=dist/uRadius;
+ float mask=(1.-smoothstep(.99,1.008,r))*uEnabled;
+ vec3 raw=texture2D(uSharp,vUv).rgb;
+ vec3 soft=texture2D(uBlur,vUv).rgb;
+ vec3 base=mix(raw,soft,.90*uEnabled);
+ base*=1.-.055*uEnabled;
+ 
+ float edge=pow(clamp(r,0.,1.),8.);
+ float magnification=uZoom;
+ vec2 bent=uLens+(vUv-uLens)/magnification;
+ bent+=(vUv-uLens)*edge*.18;
+ vec2 aberration=normalize(delta+vec2(.001))*edge*2.4/uResolution;
+ vec3 glass;
+ glass.r=texture2D(uSharp,clamp(bent+aberration,0.,1.)).r;
+ glass.g=texture2D(uSharp,clamp(bent,0.,1.)).g;
+ glass.b=texture2D(uSharp,clamp(bent-aberration,0.,1.)).b;
+ float angle=atan(delta.y,delta.x);
+ float reflection=pow(.5+.5*cos(angle-2.1),9.);
+ float rim=exp(-pow((r-.995)*155.,2.));
+ float bevel=exp(-pow((r-.964)*65.,2.));
+ float innerShade=exp(-pow((r-.946)*36.,2.));
+ glass*=1.-innerShade*.15;
+ glass+=vec3(.84,.90,.71)*bevel*(.025+reflection*.24);
+ float outsideShadow=exp(-pow((dist-uRadius-5.)/9.,2.))*step(1.,r)*.20*uEnabled;
+ base*=1.-outsideShadow;
+ vec3 col=mix(base,glass,mask);
+ col+=rim*vec3(.72,.80,.68)*(.10+reflection*.68)*uEnabled;
+ float arc=exp(-pow((r-1.016)*160.,2.))*reflection*.15;
+ col+=arc*vec3(.58,.70,.78)*uEnabled;
+ gl_FragColor=vec4(col,1.);
+}`;
+
+  function createGL(canvas, image, cfg) {
+    const gl = canvas.getContext('webgl', { alpha: false, antialias: false, powerPreference: 'low-power' });
+    if (!gl) return null;
+    const textures = [], framebuffers = [], programs = [], shaders = [];
+    let buffer, width = 1, height = 1, ratio = 1;
+    const release = () => {
+      textures.forEach((t) => gl.deleteTexture(t)); framebuffers.forEach((f) => gl.deleteFramebuffer(f));
+      programs.forEach((p) => gl.deleteProgram(p)); shaders.forEach((s) => gl.deleteShader(s));
+      if (buffer) gl.deleteBuffer(buffer);
+    };
+    try {
+      const shader = (type, source) => { const s = gl.createShader(type); shaders.push(s); gl.shaderSource(s, source); gl.compileShader(s); if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw Error('shader'); return s; };
+      const program = (source) => { const p = gl.createProgram(); programs.push(p); gl.attachShader(p, shader(gl.VERTEX_SHADER, vertexSource)); gl.attachShader(p, shader(gl.FRAGMENT_SHADER, source)); gl.linkProgram(p); if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw Error('program'); return p; };
+      const scene = program(sceneSource), blur = program(blurSource), lens = program(lensSource);
+      buffer = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buffer); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,1,-1,-1,1,-1,1,1,-1,1,1]), gl.STATIC_DRAW);
+      const cache = new Map();
+      const uniform = (p, name) => { if (!cache.has(p)) cache.set(p, new Map()); const map = cache.get(p); if (!map.has(name)) map.set(name, gl.getUniformLocation(p, name)); return map.get(name); };
+      const texture = () => { const t = gl.createTexture(); textures.push(t); gl.bindTexture(gl.TEXTURE_2D, t); for (const key of [gl.TEXTURE_MIN_FILTER,gl.TEXTURE_MAG_FILTER]) gl.texParameteri(gl.TEXTURE_2D,key,gl.LINEAR); for(const key of [gl.TEXTURE_WRAP_S,gl.TEXTURE_WRAP_T]) gl.texParameteri(gl.TEXTURE_2D,key,gl.CLAMP_TO_EDGE); return t; };
+      const bind = (p, name, t, n) => { gl.activeTexture(gl.TEXTURE0 + n); gl.bindTexture(gl.TEXTURE_2D,t); gl.uniform1i(uniform(p,name),n); };
+      const use = (p, target) => { gl.bindFramebuffer(gl.FRAMEBUFFER,target); gl.useProgram(p); const a=gl.getAttribLocation(p,'aPosition'); gl.enableVertexAttribArray(a); gl.bindBuffer(gl.ARRAY_BUFFER,buffer); gl.vertexAttribPointer(a,2,gl.FLOAT,false,0,0); };
+      const product = texture(); gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true); gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,image);
+      const formula = texture();
+      const targets = [0,1,2].map(() => { const fb=gl.createFramebuffer(); framebuffers.push(fb); return { texture:texture(), fb }; });
+      return {
+        type: 'webgl',
+        resize(w,h,dpr) {
+          width = Math.max(1,Math.round(w*dpr)); height=Math.max(1,Math.round(h*dpr)); ratio=dpr;
+          canvas.width=width;canvas.height=height;gl.viewport(0,0,width,height);
+          gl.activeTexture(gl.TEXTURE0);
+          targets.forEach((t) => { gl.bindTexture(gl.TEXTURE_2D,t.texture);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,width,height,0,gl.RGBA,gl.UNSIGNED_BYTE,null);gl.bindFramebuffer(gl.FRAMEBUFFER,t.fb);gl.framebufferTexture2D(gl.FRAMEBUFFER,gl.COLOR_ATTACHMENT0,gl.TEXTURE_2D,t.texture,0);if(gl.checkFramebufferStatus(gl.FRAMEBUFFER)!==gl.FRAMEBUFFER_COMPLETE)throw Error('target'); });
+          gl.bindTexture(gl.TEXTURE_2D,formula);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,formulaCanvas(width,height,cfg));
+        },
+        draw(state) {
+          const [sharp,horizontal,soft]=targets;
+          use(scene,sharp.fb);bind(scene,'uProduct',product,0);bind(scene,'uFormula',formula,1);
+          gl.uniform2f(uniform(scene,'uResolution'),width,height);gl.uniform1f(uniform(scene,'uTime'),state.time);gl.uniform1f(uniform(scene,'uMode'),state.mode);gl.uniform3fv(uniform(scene,'uBg'),cfg.bg);gl.uniform3fv(uniform(scene,'uAccent'),cfg.accent);gl.uniform1f(uniform(scene,'uImageAspect'),image.naturalWidth/image.naturalHeight);gl.uniform1f(uniform(scene,'uImageScale'),cfg.imageScale);gl.drawArrays(gl.TRIANGLES,0,6);
+          use(blur,horizontal.fb);bind(blur,'uSource',sharp.texture,0);gl.uniform2f(uniform(blur,'uStep'),ratio*cfg.blur/width,0);gl.drawArrays(gl.TRIANGLES,0,6);
+          use(blur,soft.fb);bind(blur,'uSource',horizontal.texture,0);gl.uniform2f(uniform(blur,'uStep'),0,ratio*cfg.blur/height);gl.drawArrays(gl.TRIANGLES,0,6);
+          use(lens,null);bind(lens,'uSharp',sharp.texture,0);bind(lens,'uBlur',soft.texture,1);gl.uniform2f(uniform(lens,'uResolution'),width,height);gl.uniform2f(uniform(lens,'uLens'),state.x,1-state.y);gl.uniform1f(uniform(lens,'uRadius'),Math.min(width,height)*cfg.radius);gl.uniform1f(uniform(lens,'uEnabled'),state.lens?1:0);gl.uniform1f(uniform(lens,'uZoom'),cfg.zoom);gl.drawArrays(gl.TRIANGLES,0,6);
+        }, dispose: release
+      };
+    } catch (_) { release(); return null; }
+  }
+  function create2D(canvas,image,cfg) {
+    const ctx=canvas.getContext('2d',{alpha:false});if(!ctx)return null;
+    const source=document.createElement('canvas'), sc=source.getContext('2d');
+    let w=1,h=1,dpr=1,formula;
+    return {
+      type:'canvas2d',
+      resize(width,height,ratio){w=width;h=height;dpr=ratio;canvas.width=source.width=Math.round(w*dpr);canvas.height=source.height=Math.round(h*dpr);formula=formulaCanvas(canvas.width,canvas.height,cfg);},
+      draw(state){
+        sc.setTransform(dpr,0,0,dpr,0,0);sc.fillStyle=color(cfg.bg);sc.fillRect(0,0,w,h);
+        const halo=sc.createRadialGradient(w*.5,h*.49,0,w*.5,h*.49,w*.53);halo.addColorStop(0,color(mix(cfg.bg,cfg.accent,.09)));halo.addColorStop(1,color(cfg.bg));sc.fillStyle=halo;sc.fillRect(0,0,w,h);
+        sc.save();sc.translate(w*.5,h*.5);sc.rotate(-.48);const r=Math.min(w,h)*.43;sc.strokeStyle=color(cfg.accent,.18);sc.lineWidth=1;sc.beginPath();sc.ellipse(0,0,r,r/1.47,0,0,Math.PI*2);sc.stroke();sc.strokeStyle=color(cfg.accent,.07);sc.beginPath();sc.ellipse(0,0,r-4,r/1.47-4,0,0,Math.PI*2);sc.stroke();sc.rotate(1.03);sc.strokeStyle=color(cfg.text,.12);sc.beginPath();sc.ellipse(0,0,r*.79,r*.79/1.65,0,0,Math.PI*2);sc.stroke();sc.restore();
+        sc.fillStyle=color(cfg.text,.055);for(let a=22;a<w;a+=24)for(let b=22;b<h;b+=24){sc.beginPath();sc.arc(a,b,.6,0,Math.PI*2);sc.fill();}
+        const side=Math.min(w,h)*cfg.imageScale,aspect=image.naturalWidth/image.naturalHeight,iw=side*Math.min(1,aspect),ih=side*Math.min(1,1/aspect);
+        sc.globalAlpha=1-state.mode*.92;sc.drawImage(image,(w-iw)/2,(h-ih)/2+Math.sin(state.time*.42)*h*.005-h*.01,iw,ih);sc.globalAlpha=1;
+        sc.globalAlpha=state.mode;sc.drawImage(formula,0,0,w,h);sc.globalAlpha=1;
+        ctx.setTransform(dpr,0,0,dpr,0,0);ctx.fillStyle=color(cfg.bg);ctx.fillRect(0,0,w,h);ctx.save();ctx.filter=state.lens?`blur(${cfg.blur*1.5}px)`:'none';ctx.globalAlpha=state.lens ? .945 : 1;ctx.drawImage(source,0,0,w,h);ctx.restore();
+        if(state.lens){const lx=state.x*w,ly=state.y*h,lr=Math.min(w,h)*cfg.radius,z=cfg.zoom;ctx.save();ctx.shadowColor='rgba(0,0,0,.5)';ctx.shadowBlur=12;ctx.shadowOffsetY=5;ctx.fillStyle=color(cfg.bg);ctx.beginPath();ctx.arc(lx,ly,lr,0,Math.PI*2);ctx.fill();ctx.restore();ctx.save();ctx.beginPath();ctx.arc(lx,ly,lr,0,Math.PI*2);ctx.clip();ctx.drawImage(source,lx-lx*z,ly-ly*z,w*z,h*z);const rim=ctx.createRadialGradient(lx,ly,lr*.9,lx,ly,lr);rim.addColorStop(0,color(cfg.accent,0));rim.addColorStop(.7,color(cfg.accent,.025));rim.addColorStop(1,color(cfg.text,.14));ctx.fillStyle=rim;ctx.fillRect(lx-lr,ly-lr,lr*2,lr*2);ctx.restore();const edge=ctx.createLinearGradient(lx-lr,ly-lr,lx+lr,ly+lr);edge.addColorStop(0,color(cfg.text,.8));edge.addColorStop(.35,color(cfg.text,.12));edge.addColorStop(.7,color(cfg.text,.08));edge.addColorStop(1,color(cfg.text,.48));ctx.strokeStyle=edge;ctx.lineWidth=1;ctx.beginPath();ctx.arc(lx,ly,lr,0,Math.PI*2);ctx.stroke();}
+      }, dispose(){source.width=source.height=1;}
+    };
+  }
+
+  class FocusHero extends HTMLElement {
+    connectedCallback() {
+      if(this.connected)return;this.connected=true;this.generation=(this.generation||0)+1;
+      this.abort=new AbortController();this.signal=this.abort.signal;
+      this.stage=this.querySelector('[data-stage]');this.image=this.querySelector('[data-image]');this.canvas=this.querySelector('canvas');this.target=this.querySelector('[data-lens-target]');
+      this.reduced=window.matchMedia('(prefers-reduced-motion: reduce)');
+      this.state={x:.39,y:.54,tx:.39,ty:.54,mode:0,targetMode:0,time:0,lens:true,paused:this.dataset.motion!=='true'||this.reduced.matches};
+      this.cfg={bg:rgb(this.dataset.background),accent:rgb(this.dataset.accent),text:rgb(this.dataset.text),radius:Number(this.dataset.radius)/100,zoom:Number(this.dataset.zoom)/100,blur:Number(this.dataset.blur)/10,imageScale:Number(this.dataset.scale)/100,font:getComputedStyle(this).fontFamily,rtl:getComputedStyle(this).direction==='rtl',width:1,ingredients:[...this.querySelectorAll('[data-ingredient]')].map(e=>({name:e.querySelector('dt').textContent.trim(),amount:e.querySelector('dd').textContent.trim()}))};
+      this.inView=false;this.last=0;this.dirty=true;this.quality=Math.min(window.devicePixelRatio||1,1.5);this.slowFrames=0;
+      this.io=new IntersectionObserver(entries=>{this.inView=entries[0].isIntersecting;if(this.inView){if(!this.started)this.start();this.wake();}else this.stop();},{rootMargin:'80px'});this.io.observe(this);
+      document.addEventListener('visibilitychange',()=>document.hidden?this.stop():this.wake(),{signal:this.signal});
+      this.reduced.addEventListener('change',()=>{if(this.reduced.matches)this.state.paused=true;this.syncControls();this.wake();},{signal:this.signal});
+      this.addEventListener('click',event=>this.click(event),{signal:this.signal});
+      this.addEventListener('keydown',event=>{if(event.target===this.target&&['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home'].includes(event.key)){event.preventDefault();const s=this.state;if(event.key==='Home')this.recenter();if(event.key==='ArrowLeft')s.tx-=.045;if(event.key==='ArrowRight')s.tx+=.045;if(event.key==='ArrowUp')s.ty-=.045;if(event.key==='ArrowDown')s.ty+=.045;s.tx=clamp(s.tx,.1,.9);s.ty=clamp(s.ty,.1,.9);this.wake();}},{signal:this.signal});
+      let drag=false,downPoint=null;
+      this.stage.addEventListener('pointerdown',event=>{if(event.target===this.target){event.preventDefault();drag=true;this.target.setPointerCapture(event.pointerId);this.point(event);}else downPoint={x:event.clientX,y:event.clientY};},{signal:this.signal});
+      this.stage.addEventListener('pointermove',event=>{if(event.pointerType==='mouse'||drag)this.point(event);},{signal:this.signal});
+      this.stage.addEventListener('pointerup',event=>{if(!drag&&downPoint&&Math.hypot(event.clientX-downPoint.x,event.clientY-downPoint.y)<10)this.point(event);drag=false;downPoint=null;if(this.target.hasPointerCapture(event.pointerId))this.target.releasePointerCapture(event.pointerId);},{signal:this.signal});
+      this.stage.addEventListener('pointercancel',()=>{drag=false;downPoint=null;},{signal:this.signal});
+      this.syncControls();
+    }
+    async start() {
+      if(!this.image)return;this.started=true;const generation=this.generation;
+      const image=new Image();image.crossOrigin='anonymous';image.src=this.image.currentSrc||this.image.src;
+      try {await image.decode();if(!this.connected||generation!==this.generation)return;this.loadedImage=image;this.renderer=createGL(this.canvas,image,this.cfg);if(!this.renderer)this.useFallback();if(!this.renderer)return;
+        this.canvas.addEventListener('webglcontextlost',event=>{event.preventDefault();this.stop();this.renderer?.dispose();this.useFallback();this.resize();this.wake();},{signal:this.signal});
+        this.ro=new ResizeObserver(()=>this.resize());this.ro.observe(this.stage);this.resize();this.dataset.renderer=this.renderer.type;this.dataset.ready='true';this.querySelectorAll('[data-controls]').forEach(e=>e.hidden=false);this.target.hidden=false;this.wake();
+        document.fonts.ready.then(()=>{if(this.connected&&generation===this.generation)this.resize();});
+      } catch(_){if(this.connected&&generation===this.generation)this.fail();}
+    }
+    useFallback(){const fresh=this.canvas.cloneNode(false);this.canvas.replaceWith(fresh);this.canvas=fresh;this.renderer=create2D(fresh,this.loadedImage,this.cfg);if(!this.renderer)this.fail();else this.dataset.renderer=this.renderer.type;}
+    fail(){this.stop();this.renderer?.dispose();this.renderer=null;delete this.dataset.ready;this.querySelectorAll('[data-controls]').forEach(e=>e.hidden=true);this.target.hidden=true;}
+    resize(){if(!this.renderer)return;const rect=this.stage.getBoundingClientRect();if(!rect.width||!rect.height)return;this.cfg.width=rect.width;this.width=rect.width;this.height=rect.height;this.target.style.width=this.target.style.height=`${Math.min(rect.width,rect.height)*this.cfg.radius*2}px`;try{this.renderer.resize(rect.width,rect.height,this.quality);}catch(_){if(this.renderer.type==='webgl'){this.renderer.dispose();this.useFallback();this.renderer?.resize(rect.width,rect.height,this.quality);}else this.fail();}this.dirty=true;this.wake();}
+    point(event){if(!this.state.lens)return;const rect=this.stage.getBoundingClientRect();this.state.tx=clamp((event.clientX-rect.left)/rect.width,.1,.9);this.state.ty=clamp((event.clientY-rect.top)/rect.height,.1,.9);this.wake();}
+    recenter(){this.state.tx=this.state.targetMode?(this.cfg.rtl ? .73 : .27):.39;this.state.ty=this.state.targetMode ? .25 : .54;this.wake();}
+    click(event){const button=event.target.closest('[data-action]');if(!button||!this.contains(button))return;const action=button.dataset.action;
+      if(action==='detail'||action==='formula'){this.state.targetMode=action==='formula'?1:0;this.querySelector('[data-caption]').textContent=this.dataset[action+'Caption'];this.recenter();}
+      if(action==='pause')this.state.paused=!this.state.paused;
+      if(action==='reset')this.recenter();
+      if(action==='lens')this.state.lens=!this.state.lens;
+      this.syncControls();this.dirty=true;this.wake();
+    }
+    syncControls(){const s=this.state;this.querySelectorAll('[data-mode]').forEach(e=>e.setAttribute('aria-pressed',String(Number(e.dataset.mode)===s.targetMode)));const pause=this.querySelector('[data-action="pause"]');pause.setAttribute('aria-label',s.paused?this.dataset.play:this.dataset.pause);pause.setAttribute('aria-pressed',String(s.paused));pause.querySelector('[data-pause-icon]').hidden=s.paused;pause.querySelector('[data-play-icon]').hidden=!s.paused;const lens=this.querySelector('[data-action="lens"]');lens.setAttribute('aria-pressed',String(s.lens));lens.querySelector('span').textContent=s.lens?this.dataset.lensOn:this.dataset.lensOff;this.target.hidden=!s.lens||this.dataset.ready!=='true';}
+    wake(){if(this.frame||!this.renderer||!this.connected||!this.inView||document.hidden)return;this.dirty=true;this.frame=requestAnimationFrame(now=>this.tick(now));}
+    stop(){cancelAnimationFrame(this.frame);this.frame=0;this.last=0;}
+    tick(now){this.frame=0;if(!this.connected||!this.renderer||!this.inView||document.hidden)return;
+      if(this.last&&now-this.last<32){this.frame=requestAnimationFrame(t=>this.tick(t));return;}
+      const dt=Math.min((now-this.last)/1000||.033,.08);this.last=now;
+      const s=this.state,ease=this.reduced.matches?1:1-Math.exp(-dt*13);s.x+=(s.tx-s.x)*ease;s.y+=(s.ty-s.y)*ease;s.mode+=(s.targetMode-s.mode)*(this.reduced.matches?1:Math.min(1,dt*7));
+      const animate=!s.paused&&!this.reduced.matches;if(animate)s.time+=dt;
+      const begin=performance.now();try{this.renderer.draw(s);}catch(_){this.fail();return;}const elapsed=performance.now()-begin;
+      if(elapsed>24)this.slowFrames++;else this.slowFrames=Math.max(0,this.slowFrames-1);
+      if(this.slowFrames>12&&this.quality>1){this.quality=1;this.slowFrames=0;this.resize();}
+      this.target.style.left=`${s.x*100}%`;this.target.style.top=`${s.y*100}%`;
+      const moving=Math.abs(s.x-s.tx)+Math.abs(s.y-s.ty)+Math.abs(s.mode-s.targetMode)>.0001;
+      this.dirty=false;if((animate||moving)&&!this.frame)this.frame=requestAnimationFrame(t=>this.tick(t));
+    }
+    disconnectedCallback(){this.connected=false;this.generation++;this.stop();this.abort?.abort();this.io?.disconnect();this.ro?.disconnect();this.renderer?.dispose();this.renderer=null;this.started=false;delete this.dataset.ready;}
+  }
+  customElements.define('npx-focus-hero',FocusHero);
+})();
+
+{% endjavascript %}
+
+{% schema %}
+{
+  "name": "NX-01 focus lens",
+  "tag": "section",
+  "class": "npx-focus-section",
+  "limit": 1,
+  "enabled_on": {
+    "templates": [
+      "index"
+    ]
+  },
+  "max_blocks": 6,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Product"
+    },
+    {
+      "type": "product",
+      "id": "product",
+      "label": "Featured product"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Product image",
+      "info": "Use a transparent PNG or WebP. Defaults to the existing NX-01 floating bottles image when available."
+    },
+    {
+      "type": "range",
+      "id": "image_scale",
+      "label": "Product image size",
+      "min": 80,
+      "max": 140,
+      "step": 5,
+      "unit": "%",
+      "default": 120
+    },
+    {
+      "type": "header",
+      "content": "Copy",
+      "info": "Leave text empty to use the translated default copy."
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow"
+    },
+    {
+      "type": "text",
+      "id": "line_one",
+      "label": "Heading: first line"
+    },
+    {
+      "type": "text",
+      "id": "line_two",
+      "label": "Heading: second line"
+    },
+    {
+      "type": "text",
+      "id": "accent_text",
+      "label": "Heading: accent words"
+    },
+    {
+      "type": "select",
+      "id": "heading_tag",
+      "label": "Heading level",
+      "options": [
+        {
+          "value": "h1",
+          "label": "H1 \u2014 main homepage heading"
+        },
+        {
+          "value": "h2",
+          "label": "H2 \u2014 supporting section"
+        }
+      ],
+      "default": "h1"
+    },
+    {
+      "type": "richtext",
+      "id": "intro",
+      "label": "Introduction"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link",
+      "info": "Leave empty to use the featured product."
+    },
+    {
+      "type": "text",
+      "id": "note_one",
+      "label": "First product note"
+    },
+    {
+      "type": "text",
+      "id": "note_two",
+      "label": "Second product note"
+    },
+    {
+      "type": "text",
+      "id": "scene_label",
+      "label": "Product caption"
+    },
+    {
+      "type": "header",
+      "content": "Focus lens"
+    },
+    {
+      "type": "range",
+      "id": "lens_radius",
+      "label": "Lens radius",
+      "min": 16,
+      "max": 30,
+      "step": 1,
+      "unit": "%",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "magnification",
+      "label": "Magnification",
+      "min": 110,
+      "max": 170,
+      "step": 5,
+      "unit": "%",
+      "default": 130
+    },
+    {
+      "type": "range",
+      "id": "blur",
+      "label": "Surrounding softness",
+      "min": 0,
+      "max": 25,
+      "step": 1,
+      "default": 14
+    },
+    {
+      "type": "checkbox",
+      "id": "motion",
+      "label": "Gentle floating motion",
+      "default": true,
+      "info": "Automatically respects reduced-motion settings and pauses when offscreen."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_formula",
+      "label": "Show formula exploration",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "formula_note",
+      "label": "Formula serving note"
+    },
+    {
+      "type": "header",
+      "content": "Appearance"
+    },
+    {
+      "type": "color",
+      "id": "background",
+      "label": "Background",
+      "default": "#101112"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text",
+      "default": "#f4f4f0"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent",
+      "default": "#e7efad"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Button text",
+      "default": "#181b0f"
+    },
+    {
+      "type": "range",
+      "id": "content_width",
+      "label": "Maximum content width",
+      "min": 1000,
+      "max": 1800,
+      "step": 50,
+      "unit": "px",
+      "default": 1500
+    },
+    {
+      "type": "checkbox",
+      "id": "show_footnote",
+      "label": "Show bottom caption",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "footnote",
+      "label": "Bottom caption"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "ingredient",
+      "name": "Ingredient",
+      "settings": [
+        {
+          "type": "text",
+          "id": "name",
+          "label": "Ingredient name",
+          "default": "Ingredient"
+        },
+        {
+          "type": "text",
+          "id": "amount",
+          "label": "Amount per serving",
+          "default": "200 mg"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "NX-01 focus lens",
+      "blocks": [
+        {
+          "type": "ingredient",
+          "settings": {
+            "name": "Acetyl-L-Carnitine",
+            "amount": "500 mg"
+          }
+        },
+        {
+          "type": "ingredient",
+          "settings": {
+            "name": "CDP-Choline",
+            "amount": "250 mg"
+          }
+        },
+        {
+          "type": "ingredient",
+          "settings": {
+            "name": "NMN",
+            "amount": "250 mg"
+          }
+        },
+        {
+          "type": "ingredient",
+          "settings": {
+            "name": "L-Theanine",
+            "amount": "200 mg"
+          }
+        },
+        {
+          "type": "ingredient",
+          "settings": {
+            "name": "Rhodiola rosea",
+            "amount": "200 mg"
+          }
+        },
+        {
+          "type": "ingredient",
+          "settings": {
+            "name": "Ubiquinol CoQ10",
+            "amount": "100 mg"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
