@@ -1,0 +1,20 @@
+{% liquid
+  assign review_count = product.metafields.reviews.rating_count.value | plus: 0
+  if review_count == 0
+    assign badge = product.metafields.judgeme.badge | replace: "'", '"'
+    if badge contains 'data-number-of-reviews="'
+      assign review_count = badge | split: 'data-number-of-reviews="' | last | split: '"' | first | plus: 0
+    endif
+  endif
+%}
+{% if review_count > 0 %}
+  <div class="npp-reviews">
+    {% for block in section.blocks %}{% render block %}{% endfor %}
+  </div>
+{% endif %}
+{% stylesheet %}
+.npp-reviews{max-width:1240px;margin:auto;padding:48px 24px}
+{% endstylesheet %}
+{% schema %}
+{"name":"Peptide reviews","settings":[],"blocks":[{"type":"@app"}],"presets":[{"name":"Peptide reviews"}]}
+{% endschema %}
