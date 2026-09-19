@@ -1,0 +1,432 @@
+{%- liquid
+  assign variant = product.selected_or_first_available_variant
+  assign reference = product.metafields.pep.reference.value
+  assign archive = variant.metafields.pep.coa_archive.value
+  if archive == blank and variant.metafields.pdp.coa_url == blank and variant.metafields.pep.coa_pdf == blank
+    assign archive = product.metafields.pep.coa_archive.value
+  endif
+  assign form_id = 'npp-form-' | append: section.id
+  assign selected_media = variant.featured_media | default: product.featured_media
+  assign form_text = product.metafields.peptide.form.value
+  assign strength = variant.metafields.pdp.strength_mg.value
+  assign component_count = 0
+  for block in section.blocks
+    if block.type == 'component' and block.settings.for_product == product.handle
+      assign component_count = component_count | plus: 1
+    endif
+  endfor
+  assign is_bundle = false
+  if component_count > 0 or product.metafields.filters.form.value contains 'Bundle'
+    assign is_bundle = true
+  endif
+  assign references = reference.scientific_reference_list.value
+  assign research_sections = product.metafields.pep.sections.value | sort: 'order'
+  assign quantity_min = variant.quantity_rule.min | default: 1
+  assign data_sheet = product.metafields.pep.data_sheet_pdf.value.url
+  assign shipping_url = section.settings.shipping_link | default: shop.shipping_policy.url
+  assign returns_url = shop.refund_policy.url
+  assign contact_url = section.settings.contact_link
+  assign report_count = 0
+  capture report_cards
+    for entry in archive
+      capture report_card
+        render 'npx-peptide-report', entry: entry, product: product, variant: variant
+      endcapture
+      assign report_card = report_card | strip
+      if report_card != blank
+        assign report_count = report_count | plus: 1
+        echo report_card
+      endif
+    endfor
+    if report_count == 0
+      capture report_card
+        render 'npx-peptide-report', product: product, variant: variant
+      endcapture
+      assign report_card = report_card | strip
+      if report_card != blank
+        assign report_count = 1
+        echo report_card
+      endif
+    endif
+  endcapture
+-%}
+<npx-peptide-pdp class="npp" data-section="{{ section.id }}" data-url="{{ product.url }}" data-loading-label="{{ 'npx_peptide.updating' | t | escape }}" data-error-label="{{ 'npx_peptide.variant_error' | t | escape }}" data-variant-id="{{ variant.id }}" {% if request.locale.iso_code == 'ar' %}dir="rtl"{% endif %}>
+  <div class="npp-hero">
+    <div class="npp-shell">
+      <nav class="npp-breadcrumb" aria-label="{{ 'npx_peptide.breadcrumb' | t | escape }}">
+        <a href="{{ routes.root_url }}">{{ 'npx_peptide.home' | t }}</a><span aria-hidden="true">/</span><span>{{ product.title | escape }}</span>
+      </nav>
+      <xo-product xo-product-id="{{ product.id }}" xo-section-id="{{ section.id }}" xo-selected-or-first-available-variant-id="{{ variant.id }}">
+        <div class="npp-layout">
+          <header class="npp-intro">
+            <p class="npp-kicker"><span class="npp-dot" aria-hidden="true"></span>{{ 'npx_peptide.eyebrow' | t }}</p>
+            <h1>{{ product.title | escape }}</h1>
+            {% if form_text != blank %}<p class="npp-subtitle">{{ form_text | escape }}</p>{% endif %}
+          </header>
+          <div class="npp-gallery">
+            <div class="npp-stage">
+              {% for media in product.media %}
+                <div class="npp-media" data-media-panel="{{ media.id }}" {% unless media.id == selected_media.id %}hidden{% endunless %}>
+                  {% if media.media_type == 'image' %}
+                    {% assign image_alt = media.alt | default: product.title %}
+                    <a href="{{ media | image_url: width: 2400 }}" target="_blank" rel="noopener" aria-label="{{ 'npx_peptide.enlarge' | t: title: image_alt | escape }}">
+                      {% if media.id == selected_media.id %}
+                        {{ media | image_url: width: 1200 | image_tag: widths: '360, 540, 720, 960, 1200', sizes: '(max-width: 749px) 90vw, (max-width: 1280px) 46vw, 580px', loading: 'eager', fetchpriority: 'high', alt: image_alt }}
+                      {% else %}
+                        {{ media | image_url: width: 1200 | image_tag: widths: '360, 540, 720, 960, 1200', sizes: '(max-width: 749px) 90vw, 580px', loading: 'lazy', alt: image_alt }}
+                      {% endif %}
+                      <span class="npp-zoom" aria-hidden="true">↗</span>
+                    </a>
+                  {% else %}
+                    {{ media | media_tag: image_size: '900x', controls: true, preload: 'none' }}
+                  {% endif %}
+                </div>
+              {% else %}
+                {{ 'product-1' | placeholder_svg_tag: 'npp-placeholder' }}
+              {% endfor %}
+            </div>
+            {% if product.media.size > 1 %}
+              <div class="npp-thumbs" aria-label="{{ 'npx_peptide.gallery' | t | escape }}">
+                {% for media in product.media %}
+                  <a href="{{ media.preview_image | image_url: width: 1800 }}" data-thumb="{{ media.id }}" {% if media.id == selected_media.id %}aria-current="true"{% endif %} aria-label="{{ 'npx_peptide.view_image' | t: number: forloop.index | escape }}">
+                    {{ media.preview_image | image_url: width: 120 | image_tag: loading: 'lazy', alt: media.alt }}
+                  </a>
+                {% endfor %}
+              </div>
+            {% endif %}
+            {% if report_count > 0 %}<a class="npp-gallery-note" href="#npp-reports-{{ section.id }}">{{ 'npx_peptide.review_reports' | t }} <span aria-hidden="true">↗</span></a>{% endif %}
+          </div>
+          <div class="npp-buy">
+            <div class="npp-facts">
+              {% if is_bundle %}
+                {% for block in section.blocks %}
+                  {% if block.type == 'component' and block.settings.for_product == product.handle %}
+                    <div><strong><bdi>{{ block.settings.amount | escape }}</bdi></strong><span>{{ block.settings.title | escape }}</span></div>
+                  {% endif %}
+                {% endfor %}
+              {% elsif strength != blank %}
+                <div><strong>{{ strength }} <small>{{ 'npx_peptide.mg' | t }}</small></strong><span>{{ 'npx_peptide.selected_strength' | t }}</span></div>
+              {% endif %}
+              <div><strong>{{ 'npx_peptide.ruo_short' | t }}</strong><span>{{ 'npx_peptide.laboratory_material' | t }}</span></div>
+            </div>
+            {% form 'product', product, id: form_id, class: 'npp-form' %}
+              {{ form.errors | default_errors }}
+              {% unless product.has_only_default_variant %}
+                <div class="npp-options" data-option-controls hidden>
+                  {% for option in product.options_with_values %}
+                    <label for="npp-option-{{ section.id }}-{{ option.position }}">{{ option.name | escape }}
+                      <select id="npp-option-{{ section.id }}-{{ option.position }}" data-option data-position="{{ option.position }}">
+                        {% for value in option.values %}<option value="{{ value.id }}" {% if value.selected %}selected{% endif %}>{{ value | escape }}</option>{% endfor %}
+                      </select>
+                    </label>
+                  {% endfor %}
+                </div>
+                <noscript>
+                  <label for="npp-fallback-{{ section.id }}">{{ 'npx_peptide.choose_option' | t }}</label>
+                  <select id="npp-fallback-{{ section.id }}" name="id">
+                    {% for v in product.variants %}<option value="{{ v.id }}" {% if v.id == variant.id %}selected{% endif %} {% unless v.available %}disabled{% endunless %}>{{ v.title | escape }} — {{ v.price | money_with_currency }}{% unless v.available %} — {{ 'npx_peptide.sold_out' | t }}{% endunless %}</option>{% endfor %}
+                  </select>
+                </noscript>
+              {% endunless %}
+              <input type="hidden" name="id" value="{{ variant.id }}" data-variant-input {% unless product.has_only_default_variant %}disabled{% endunless %}>
+              <div class="npp-price-row">
+                <div><span class="npp-price-label">{% if is_bundle %}{{ 'npx_peptide.bundle_price' | t }}{% else %}{{ 'npx_peptide.price' | t }}{% endif %}</span><strong class="npp-price">{% if variant != blank %}{{ variant.price | money_with_currency }}{% else %}{{ 'npx_peptide.unavailable' | t }}{% endif %}</strong></div>
+                {% if variant.compare_at_price > variant.price %}<s class="npp-compare">{{ variant.compare_at_price | money_with_currency }}</s>{% endif %}
+              </div>
+              <div class="npp-purchase">
+                <label class="npp-quantity-label" for="npp-quantity-{{ section.id }}">{{ 'npx_peptide.quantity' | t }}</label>
+                <div class="npp-quantity">
+                  <button type="button" data-quantity-change="-1" aria-label="{{ 'npx_peptide.decrease' | t | escape }}" hidden>−</button>
+                  <input type="number" id="npp-quantity-{{ section.id }}" name="quantity" value="{{ quantity_min }}" min="{{ quantity_min }}" step="{{ variant.quantity_rule.increment | default: 1 }}" {% if variant.quantity_rule.max != blank %}max="{{ variant.quantity_rule.max }}"{% endif %} inputmode="numeric" required data-quantity>
+                  <button type="button" data-quantity-change="1" aria-label="{{ 'npx_peptide.increase' | t | escape }}" hidden>+</button>
+                </div>
+                <xo-cart-add xo-product-id="{{ product.id }}" xo-variant-id="{{ variant.id }}" xo-section-id="{{ section.id }}" xo-product-quantity="{{ quantity_min }}" {% unless variant.available %}xo-disabled{% endunless %} {% if settings.cart_type == 'page' %}xo-cart-redirection{% endif %}>
+                  <button class="npp-button" type="submit" name="add" data-add {% unless variant.available %}disabled{% endunless %}>
+                    {% if variant.available %}{{ 'npx_peptide.add_to_cart' | t }}{% else %}{{ 'npx_peptide.sold_out' | t }}{% endif %}<span aria-hidden="true">→</span>
+                  </button>
+                </xo-cart-add>
+              </div>
+              {% render 'cart-add-error' %}
+              <p class="npp-status" role="status" aria-live="polite" data-status></p>
+              {% if section.settings.show_payment_terms %}<div class="npp-payment-terms">{{ form | payment_terms }}</div>{% endif %}
+            {% endform %}
+            <div class="npp-buy-links">
+              {% if shipping_url != blank %}<a href="{{ shipping_url }}">{{ 'npx_peptide.shipping' | t }} <span aria-hidden="true">↗</span></a>{% endif %}
+              {% if report_count > 0 %}<a href="#npp-reports-{{ section.id }}">{{ 'npx_peptide.reports' | t }} <span aria-hidden="true">↓</span></a>{% endif %}
+            </div>
+            <p class="npp-ruo">{{ 'npx_peptide.ruo' | t }}</p>
+            {% if section.settings.show_payment_icons and shop.enabled_payment_types.size > 0 %}
+              <div class="npp-payment-row"><span>{{ 'npx_peptide.secure_checkout' | t }}</span><ul aria-label="{{ 'npx_peptide.payment_methods' | t | escape }}">{% for payment in shop.enabled_payment_types %}<li>{{ payment | payment_type_svg_tag }}</li>{% endfor %}</ul></div>
+            {% endif %}
+          </div>
+        </div>
+        {% render 'product-data', product: product %}
+      </xo-product>
+    </div>
+  </div>
+  <nav class="npp-navigation" aria-label="{{ 'npx_peptide.on_this_page' | t | escape }}"><div class="npp-shell">
+    <a href="#npp-contents-{{ section.id }}">{{ 'npx_peptide.contents' | t }}</a>
+    <a href="#npp-reports-{{ section.id }}">{{ 'npx_peptide.reports' | t }}</a>
+    {% if references != blank or research_sections != blank %}<a href="#npp-research-{{ section.id }}">{{ 'npx_peptide.research' | t }}</a>{% endif %}
+    <a href="#npp-faq-{{ section.id }}">{{ 'npx_peptide.faq_short' | t }}</a>
+  </div></nav>
+  <section class="npp-band npp-contents" id="npp-contents-{{ section.id }}">
+    <div class="npp-shell">
+      <header class="npp-heading"><p class="npp-kicker">{{ 'npx_peptide.contents_eyebrow' | t }}</p><h2>{{ 'npx_peptide.contents_heading' | t }}</h2></header>
+      {% if component_count > 0 %}
+        <div class="npp-components">
+          {% for block in section.blocks %}
+            {% if block.type == 'component' and block.settings.for_product == product.handle %}
+              {% assign component_product = block.settings.component_product %}
+              <article class="npp-component" {{ block.shopify_attributes }}>
+                {% if component_product.featured_image != blank %}<div class="npp-component__image">{{ component_product.featured_image | image_url: width: 400 | image_tag: loading: 'lazy', widths: '180, 300, 400', sizes: '(max-width: 749px) 96px, 160px' }}</div>{% endif %}
+                <div><span class="npp-kicker">{{ 'npx_peptide.component_number' | t: number: forloop.index }}</span><h3>{{ block.settings.title | escape }}</h3><p class="npp-component__amount"><bdi>{{ block.settings.amount | escape }}</bdi></p><p>{{ 'npx_peptide.vial_count' | t: count: block.settings.vial_count }}</p></div>
+              </article>
+            {% endif %}
+          {% endfor %}
+        </div>
+      {% elsif product.metafields.pdp.whats_inside != blank %}
+        <div class="npp-content-copy">{{ product.metafields.pdp.whats_inside | metafield_tag }}</div>
+      {% else %}
+        <div class="npp-specs">
+          {% if form_text != blank %}<div><span>{{ 'npx_peptide.form' | t }}</span><strong>{{ form_text | escape }}</strong></div>{% endif %}
+          {% if strength != blank %}<div><span>{{ 'npx_peptide.selected_strength' | t }}</span><strong>{{ strength }} {{ 'npx_peptide.mg' | t }}</strong></div>{% endif %}
+          <div><span>{{ 'npx_peptide.intended_use' | t }}</span><strong>{{ 'npx_peptide.laboratory_research' | t }}</strong></div>
+        </div>
+      {% endif %}
+    </div>
+  </section>
+  <section class="npp-band npp-reports" id="npp-reports-{{ section.id }}">
+    <div class="npp-shell">
+      <header class="npp-heading"><p class="npp-kicker">{{ 'npx_peptide.documentation' | t }}</p><h2>{{ 'npx_peptide.reports_heading' | t }}</h2><p>{{ 'npx_peptide.report_scope' | t }}</p></header>
+      {% if report_count > 0 %}<div class="npp-report-grid">{{ report_cards }}</div>
+      {% else %}<div class="npp-empty"><p>{{ 'npx_peptide.no_report' | t }}</p>{% if contact_url != blank %}<a class="npp-text-link" href="{{ contact_url }}">{{ 'npx_peptide.request_report' | t }} ↗</a>{% endif %}</div>{% endif %}
+      {% if data_sheet != blank %}<a class="npp-text-link npp-data-sheet" href="{{ data_sheet }}" target="_blank" rel="noopener">{{ 'npx_peptide.data_sheet' | t }} ↗</a>{% endif %}
+    </div>
+  </section>
+  <section class="npp-band npp-details"><div class="npp-shell npp-split">
+    <header class="npp-heading"><p class="npp-kicker">{{ 'npx_peptide.product_information' | t }}</p><h2>{{ 'npx_peptide.details_heading' | t }}</h2></header>
+    <div class="npp-accordions">
+      {% unless is_bundle %}
+        {% if reference.summary != blank %}<details><summary>{{ 'npx_peptide.overview' | t }}<span aria-hidden="true">+</span></summary><div class="npp-answer">{{ reference.summary | metafield_tag }}</div></details>{% endif %}
+        {% if reference.molecular_formula != blank or reference.sequence != blank %}
+          <details><summary>{{ 'npx_peptide.structure' | t }}<span aria-hidden="true">+</span></summary><div class="npp-answer"><dl class="npp-report__meta">
+            {% if reference.molecular_formula != blank %}<div><dt>{{ 'npx_peptide.formula' | t }}</dt><dd dir="ltr">{{ reference.molecular_formula.value | escape }}</dd></div>{% endif %}
+            {% if reference.molecular_weight_g_mol != blank %}<div><dt>{{ 'npx_peptide.molecular_weight' | t }}</dt><dd dir="ltr">{{ reference.molecular_weight_g_mol.value | escape }}</dd></div>{% endif %}
+            {% if reference.sequence != blank %}<div><dt>{{ 'npx_peptide.sequence' | t }}</dt><dd dir="ltr">{{ reference.sequence.value | escape }}</dd></div>{% endif %}
+          </dl>{% if reference.pubchem_url != blank %}<a class="npp-text-link" href="{{ reference.pubchem_url.value }}" target="_blank" rel="noopener">{{ 'npx_peptide.pubchem' | t }} ↗</a>{% endif %}</div></details>
+        {% endif %}
+      {% endunless %}
+      {% if product.metafields.peptide.storage != blank %}<details><summary>{{ 'npx_peptide.storage' | t }}<span aria-hidden="true">+</span></summary><div class="npp-answer">{{ product.metafields.peptide.storage | metafield_tag }}</div></details>{% endif %}
+      <details><summary>{{ 'npx_peptide.shipping_returns' | t }}<span aria-hidden="true">+</span></summary><div class="npp-answer"><p>{{ 'npx_peptide.shipping_note' | t }}</p>{% if shipping_url != blank %}<a class="npp-text-link" href="{{ shipping_url }}">{{ 'npx_peptide.shipping' | t }} ↗</a>{% endif %} {% if returns_url != blank %}<a class="npp-text-link" href="{{ returns_url }}">{{ 'npx_peptide.returns' | t }} ↗</a>{% endif %}</div></details>
+    </div>
+  </div></section>
+  {% if references != blank or research_sections != blank %}
+    <section class="npp-band npp-research" id="npp-research-{{ section.id }}"><div class="npp-shell npp-split">
+      <header class="npp-heading"><p class="npp-kicker">{{ 'npx_peptide.published_research' | t }}</p><h2>{{ 'npx_peptide.research_heading' | t }}</h2><p>{{ 'npx_peptide.research_scope' | t }}</p></header>
+      <ol class="npp-sources">
+        {% for item in references %}
+          {% liquid
+            assign source_url = item.url | default: item
+            assign source_title = item.title
+            assign source_host = source_url | split: '//' | last | split: '/' | first
+            assign source_id = source_url | remove_last: '/' | split: '/' | last
+            assign compound = reference.title_common.value | default: product.title
+            if source_title == blank
+              assign source_title = 'npx_peptide.source_title' | t: compound: compound, number: forloop.index
+            endif
+          %}
+          {% if source_url != blank %}<li><span class="npp-source-index" aria-hidden="true">{% if forloop.index < 10 %}0{% endif %}{{ forloop.index }}</span><div><h3><a href="{{ source_url | escape }}" target="_blank" rel="noopener">{{ source_title | escape }} <span aria-hidden="true">↗</span></a></h3><p>{{ source_host | escape }} · {{ source_id | escape }}</p></div></li>{% endif %}
+        {% endfor %}
+      </ol>
+      {% if research_sections != blank %}
+        <div class="npp-research-details npp-accordions">
+          {% for research_section in research_sections %}
+            {% if research_section.heading != blank and research_section.body != blank %}
+              <details><summary>{{ research_section.heading.value | escape }}<span aria-hidden="true">+</span></summary><div class="npp-answer">
+                {{ research_section.body | metafield_tag }}
+                {% if research_section.figure_image.value != blank %}{{ research_section.figure_image.value | image_url: width: 900 | image_tag: loading: 'lazy', alt: research_section.figure_caption.value }}{% endif %}
+                {% if research_section.source_link.value != blank %}<a class="npp-text-link" href="{{ research_section.source_link.value }}" target="_blank" rel="noopener">{{ 'npx_peptide.view_source' | t }} ↗</a>{% endif %}
+              </div></details>
+            {% endif %}
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div></section>
+  {% endif %}
+  <section class="npp-band npp-faq" id="npp-faq-{{ section.id }}"><div class="npp-shell npp-split">
+    <header class="npp-heading"><p class="npp-kicker">{{ 'npx_peptide.before_ordering' | t }}</p><h2>{{ 'npx_peptide.faq_heading' | t }}</h2></header>
+    <div class="npp-accordions">
+      {% for i in (1..4) %}
+        {% assign question_key = 'npx_peptide.faq_q' | append: i %}{% assign answer_key = 'npx_peptide.faq_a' | append: i %}
+        <details><summary>{{ question_key | t }}<span aria-hidden="true">+</span></summary><div class="npp-answer"><p>{{ answer_key | t }}</p>{% if i == 2 %}<a class="npp-text-link" href="#npp-reports-{{ section.id }}">{{ 'npx_peptide.reports' | t }} ↑</a>{% elsif i == 4 and contact_url != blank %}<a class="npp-text-link" href="{{ contact_url }}">{{ 'npx_peptide.contact' | t }} ↗</a>{% endif %}</div></details>
+      {% endfor %}
+    </div>
+  </div></section>
+  {% assign related_products = product.metafields.pep.complementary_peptides.value %}
+  {% if section.settings.show_related and related_products != blank %}
+    <section class="npp-band npp-related"><div class="npp-shell"><header class="npp-heading"><p class="npp-kicker">{{ 'npx_peptide.explore' | t }}</p><h2>{{ 'npx_peptide.related_heading' | t }}</h2></header><div class="npp-related-grid">
+      {% for related in related_products limit: 3 %}{% if related.id != product.id and related.url != blank %}<a class="npp-related-card" href="{{ related.url }}">{% if related.featured_image != blank %}{{ related.featured_image | image_url: width: 420 | image_tag: loading: 'lazy', widths: '200, 320, 420', sizes: '(max-width: 749px) 44vw, 320px' }}{% endif %}<h3>{{ related.title | escape }} <span aria-hidden="true">↗</span></h3><p>{% if related.price_varies %}{{ 'npx_peptide.from' | t }} {% endif %}{{ related.price | money_with_currency }}</p></a>{% endif %}{% endfor %}
+    </div></div></section>
+  {% endif %}
+  {% if section.settings.enable_sticky %}
+    <div class="npp-sticky" data-sticky hidden><div class="npp-sticky__inner"><div><strong>{{ product.title | escape }}</strong><span>{{ variant.price | money_with_currency }}{% unless product.has_only_default_variant %} · {{ variant.title | escape }}{% endunless %}</span></div><button type="button" class="npp-button" data-sticky-add {% unless variant.available %}disabled{% endunless %}>{% if variant.available %}{{ 'npx_peptide.add_to_cart' | t }}{% else %}{{ 'npx_peptide.sold_out' | t }}{% endif %}</button></div></div>
+  {% endif %}
+</npx-peptide-pdp>
+{% if section.settings.structured_data %}<script type="application/ld+json">{{ product | structured_data }}</script>{% endif %}
+
+{% schema %}
+{
+  "name": "Peptide product",
+  "settings": [
+    {"type":"url","id":"shipping_link","label":"Shipping information"},
+    {"type":"url","id":"contact_link","label":"Research enquiries"},
+    {"type":"checkbox","id":"enable_sticky","label":"Show purchase bar after main button scrolls away","default":true},
+    {"type":"checkbox","id":"show_payment_terms","label":"Show Shopify payment terms","default":true},
+    {"type":"checkbox","id":"show_payment_icons","label":"Show payment icons","default":true},
+    {"type":"checkbox","id":"show_related","label":"Show linked related products","default":true},
+    {"type":"checkbox","id":"structured_data","label":"Include product structured data","default":true}
+  ],
+  "blocks":[{"type":"component","name":"Bundle component","settings":[
+    {"type":"text","id":"for_product","label":"Bundle product handle","info":"Only shows on this exact bundle. Never use a related product as a bundle component without confirming the contents."},
+    {"type":"product","id":"component_product","label":"Component product image"},
+    {"type":"text","id":"title","label":"Compound name"},
+    {"type":"text","id":"amount","label":"Amount per vial"},
+    {"type":"range","id":"vial_count","label":"Number of vials","min":1,"max":10,"step":1,"default":1}
+  ]}],
+  "presets":[{"name":"Peptide product"}]
+}
+{% endschema %}
+
+{% stylesheet %}
+.npp{--npp-ink:#142342;--npp-muted:#536076;--npp-blue:#243f95;--npp-line:#dfe4ec;display:block;color:var(--npp-ink);background:#fff;font:15px/1.65 var(--font-body-family,Arial,sans-serif);overflow-wrap:anywhere}
+.npp *{box-sizing:border-box}.npp [hidden]{display:none!important}.npp xo-product{display:block}.npp h1,.npp h2,.npp h3{font-family:var(--font-heading-family,Arial,sans-serif);font-weight:500;color:var(--npp-ink);letter-spacing:-.045em;line-height:1.12}.npp p{margin:0}.npp a{color:inherit}.npp button,.npp input,.npp select{font:inherit}.npp a,.npp button{touch-action:manipulation}.npp :is(a,button,input,select,summary):focus-visible{outline:2px solid var(--npp-blue);outline-offset:4px}.npp button{cursor:pointer}.npp button:disabled{cursor:not-allowed;opacity:.5}.npp-shell{max-width:1240px;padding-inline:24px;margin-inline:auto}.npp-hero{background:#f7f7f9;padding:32px 0 58px}.npp-breadcrumb{display:flex;gap:10px;font-size:11px;color:var(--npp-muted);margin-bottom:32px}.npp-breadcrumb a{text-decoration:none}.npp-layout{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);grid-template-areas:'gallery intro' 'gallery buy';column-gap:64px;align-items:start}.npp-intro{grid-area:intro}.npp-kicker{display:flex;gap:9px;align-items:center;font-size:10px;line-height:1.6;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--npp-blue)}.npp-dot{width:7px;height:7px;background:#efc044;border-radius:50%;flex:none}.npp-intro h1{font-size:clamp(30px,3.2vw,44px);margin:14px 0}.npp-subtitle{font-size:15px;color:var(--npp-muted);max-width:450px}.npp-gallery{grid-area:gallery;min-width:0}.npp-stage{position:relative;background:#f3f6fc;border-radius:16px;aspect-ratio:1/1;overflow:hidden}.npp-media{width:100%;height:100%}.npp-media>a{display:block;width:100%;height:100%}.npp-media img{width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply}.npp-media :is(video,iframe,model-viewer){width:100%;height:100%}.npp-zoom{position:absolute;inset-inline-end:20px;inset-block-end:20px;background:#fff;border-radius:50%;width:38px;height:38px;display:grid;place-items:center;font-size:20px}.npp-placeholder{width:100%;height:100%}.npp-thumbs{display:flex;gap:10px;overflow:auto;padding:6px 2px;margin-top:12px}.npp-thumbs a{display:block;flex:0 0 48px;border:1px solid transparent;border-radius:6px;overflow:hidden;height:52px}.npp-thumbs a[aria-current]{border-color:var(--npp-blue)}.npp-thumbs img{width:100%;height:100%;object-fit:contain;background:#fff}.npp-gallery-note{display:flex;justify-content:space-between;gap:16px;margin-top:14px;color:var(--npp-muted)!important;font-size:11px;text-decoration:none}.npp-buy{grid-area:buy;margin-top:24px;min-width:0}.npp-facts{display:flex;border-block:1px solid var(--npp-line);padding:18px 0;margin-bottom:24px}.npp-facts>div{flex:1;padding-inline:18px;border-inline-end:1px solid var(--npp-line)}.npp-facts>div:first-child{padding-inline-start:0}.npp-facts>div:last-child{border:0}.npp-facts strong{display:block;font-size:23px;font-weight:500;line-height:1.2;letter-spacing:-.03em}.npp-facts small{font-size:14px}.npp-facts span{display:block;color:var(--npp-muted);font-size:11px;margin-top:6px}.npp-options{display:flex;gap:12px;margin-bottom:22px}.npp-options label{flex:1;font-size:12px}.npp-form select{display:block;width:100%;padding:10px 12px;border:1px solid #c8d0de;border-radius:5px;min-height:46px;background:#fff;color:var(--npp-ink);margin-top:6px}.npp-price-row{display:flex;gap:16px;align-items:end;margin-bottom:22px}.npp-price-label{display:block;font-size:11px;color:var(--npp-muted);margin-bottom:4px}.npp-price{font-size:29px;font-weight:500;letter-spacing:-.03em;line-height:1.25}.npp-compare{color:var(--npp-muted);font-size:14px;margin-bottom:4px}.npp-purchase{display:grid;grid-template-columns:124px 1fr;gap:6px 14px;align-items:end}.npp-quantity-label{grid-column:1/-1;font-size:11px;color:var(--npp-muted)}.npp-quantity{height:52px;display:flex;border:1px solid #c8d0de;border-radius:5px;background:#fff}.npp-quantity button{width:36px;flex:none;background:none;border:0;color:var(--npp-ink);font-size:18px}.npp-quantity input{width:100%;min-width:0;border:0;background:transparent;text-align:center;color:var(--npp-ink);font-size:16px;appearance:textfield;-moz-appearance:textfield}.npp-quantity input::-webkit-inner-spin-button{appearance:none}.npp xo-cart-add{display:block}.npp-button{display:flex;align-items:center;justify-content:center;gap:20px;width:100%;min-height:52px;border:1px solid var(--npp-blue);background:var(--npp-blue);color:#fff;border-radius:5px;padding:12px 20px;font-weight:500;font-size:14px;line-height:1.3}.npp-button>span{margin-inline-start:auto}.npp[dir=rtl] .npp-button>span{transform:scaleX(-1)}.npp-button:hover:not(:disabled){background:#19317a}.npp xo-cart-add[xo-loading] .npp-button{opacity:.6;pointer-events:none}.npp-status{font-size:12px;color:var(--npp-muted);margin-top:8px!important}.npp-status:empty,.npp-payment-terms:empty{display:none}.npp-payment-terms{font-size:12px;margin-top:12px;color:var(--npp-muted)}.npp-buy-links{display:flex;gap:16px;justify-content:space-between;flex-wrap:wrap;margin-top:19px;font-size:11px}.npp-buy-links a{text-decoration:none}.npp-buy-links a:hover{text-decoration:underline}.npp-ruo{font-size:11px;line-height:1.65;margin-top:18px!important;padding-top:17px;border-top:1px solid var(--npp-line);color:var(--npp-muted)}.npp-payment-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:16px;color:var(--npp-muted);font-size:10px}.npp-payment-row ul{display:flex;list-style:none;gap:5px;flex-wrap:wrap;margin:0;padding:0}.npp-payment-row svg{width:30px;height:20px}.npp-navigation{border-block:1px solid var(--npp-line);background:#fff}.npp-navigation .npp-shell{display:flex;justify-content:center;gap:40px;overflow-x:auto}.npp-navigation a{padding:19px 0;font-size:12px;white-space:nowrap;text-decoration:none}.npp-navigation a:hover{color:var(--npp-blue)}.npp-band{padding:76px 0;scroll-margin-top:110px}.npp-heading{margin-bottom:30px;max-width:680px}.npp-heading h2{font-size:clamp(28px,3vw,36px);margin:12px 0 0}.npp-heading>p:not(.npp-kicker){font-size:14px;color:var(--npp-muted);margin-top:18px;max-width:600px}.npp-contents{background:#f4f7fc}.npp-contents .npp-heading{text-align:center;margin-inline:auto}.npp-contents .npp-kicker{justify-content:center}.npp-components{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}.npp-component{display:flex;align-items:center;gap:24px;padding:28px;background:#fff;border:1px solid #e8edf5;border-radius:12px}.npp-component__image{width:160px;height:190px;flex:none}.npp-component__image img{width:100%;height:100%;object-fit:contain}.npp-component .npp-kicker{justify-content:start}.npp-component h3{font-size:29px;margin:8px 0 12px}.npp-component p{font-size:12px;color:var(--npp-muted)}.npp-component .npp-component__amount{font-size:18px;color:var(--npp-blue);margin-bottom:3px}.npp-content-copy{text-align:center}.npp-specs{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));background:white;border:1px solid #e8edf5;border-radius:12px;padding:28px;gap:32px}.npp-specs span{display:block;font-size:11px;color:var(--npp-muted);margin-bottom:9px}.npp-specs strong{font-size:18px;font-weight:500}.npp-report-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:22px;align-items:start}.npp-report{border:1px solid var(--npp-line);border-radius:10px;padding:28px}.npp-report h3{font-size:23px;line-height:1.3;letter-spacing:-.025em;margin:12px 0 22px}.npp-report__meta{margin:0 0 20px;display:grid;gap:10px}.npp-report__meta>div{display:grid;grid-template-columns:100px minmax(0,1fr);gap:14px;font-size:12px}.npp-report__meta dt{color:var(--npp-muted)}.npp-report__meta dd{margin:0;overflow-wrap:anywhere}.npp-text-link{display:inline-flex;align-items:center;gap:12px;font-size:12px;font-weight:500;text-decoration:underline;text-decoration-color:#b3bdd4;text-underline-offset:5px;color:var(--npp-blue)!important}.npp-report__preview{margin-top:24px;border-top:1px solid var(--npp-line);font-size:12px}.npp summary{list-style:none;display:flex;gap:24px;align-items:center;justify-content:space-between;cursor:pointer;min-height:52px;padding:17px 0}.npp summary::-webkit-details-marker{display:none}.npp summary>span:last-child{font-size:20px;font-weight:400;flex:none}.npp details[open]>summary>span:last-child{transform:rotate(45deg)}.npp-report__images{display:grid;gap:14px;padding-block:8px}.npp-report__images img{display:block;width:100%;height:auto}.npp-data-sheet{margin-top:24px}.npp-empty{background:#f7f7f9;border-radius:8px;padding:24px;color:var(--npp-muted);font-size:14px}.npp-empty a{margin-top:12px}.npp-split{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:80px}.npp-split .npp-heading{margin-bottom:0}.npp-details{border-top:1px solid var(--npp-line)}.npp-accordions{border-top:1px solid var(--npp-line)}.npp-accordions details{border-bottom:1px solid var(--npp-line)}.npp-accordions summary{font-size:14px;min-height:65px}.npp-answer{font-size:14px;color:var(--npp-muted);padding-bottom:24px}.npp-answer p+p{margin-top:12px}.npp-answer a{margin-top:14px;margin-inline-end:14px}.npp-research{background:#f7f7f9}.npp-research-details{grid-column:2}.npp-research-details img{max-width:100%;height:auto}.npp-sources{list-style:none;padding:0;margin:0}.npp-sources li{display:flex;gap:24px;border-top:1px solid var(--npp-line);padding:24px 0}.npp-source-index{font-size:11px;color:var(--npp-blue);padding-top:3px}.npp-sources h3{font-size:18px;letter-spacing:-.02em;line-height:1.4;margin:0 0 7px}.npp-sources a{text-decoration:none}.npp-sources a:hover{text-decoration:underline}.npp-sources p{font-size:11px;color:var(--npp-muted)}.npp-faq{background:#fff}.npp-related{background:#f7f7f9}.npp-related-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}.npp-related-card{display:block;text-decoration:none}.npp-related-card img{width:100%;height:230px;object-fit:contain;border-radius:10px;background:#f3f6fc;mix-blend-mode:multiply}.npp-related-card h3{font-size:20px;letter-spacing:-.02em;margin:18px 0 8px;display:flex;justify-content:space-between}.npp-related-card p{font-size:13px;color:var(--npp-muted)}.npp-sticky{position:fixed;inset-inline:20px;bottom:18px;z-index:80;pointer-events:none}.npp-sticky__inner{display:flex;align-items:center;justify-content:space-between;gap:24px;margin:auto;max-width:1000px;border:1px solid var(--npp-line);background:#fff;box-shadow:0 6px 32px #14234214;border-radius:8px;padding:14px 20px;pointer-events:auto}.npp-sticky__inner>div{min-width:0}.npp-sticky strong{display:block;font-size:13px;font-weight:500;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.npp-sticky span{display:block;font-size:11px;color:var(--npp-muted);margin-top:4px}.npp-sticky .npp-button{width:auto;min-width:155px;min-height:44px;font-size:12px}.npp[aria-busy=true] .npp-purchase{opacity:.55}
+@media(max-width:1000px){.npp-layout{column-gap:32px}.npp-split{gap:40px}.npp-component{gap:14px;padding:20px}.npp-component__image{width:110px;height:160px}.npp-component h3{font-size:24px}}
+@media(max-width:749px){.npp-research-details{grid-column:auto}.npp-shell{padding-inline:20px}.npp-hero{padding:22px 0 30px}.npp-breadcrumb{display:none}.npp-layout{display:flex;flex-direction:column;gap:0}.npp-intro,.npp-gallery,.npp-buy{width:100%}.npp-intro h1{font-size:31px;margin:12px 0 10px}.npp-subtitle{font-size:13px;margin-bottom:22px!important}.npp-kicker{font-size:9px}.npp-stage{aspect-ratio:auto;height:270px;border-radius:10px}.npp-media img{padding:8px}.npp-zoom{width:32px;height:32px;inset-inline-end:12px;inset-block-end:12px}.npp-thumbs{margin-top:8px}.npp-thumbs a{flex-basis:42px;height:44px}.npp-gallery-note{font-size:10px;margin-top:10px}.npp-buy{margin-top:20px}.npp-facts{padding:15px 0;margin-bottom:20px}.npp-facts>div{padding-inline:12px}.npp-facts strong{font-size:22px}.npp-facts span{font-size:10px}.npp-price-row{margin-bottom:18px}.npp-price{font-size:28px}.npp-purchase{grid-template-columns:112px 1fr;gap:6px 12px}.npp-button{padding:12px 16px;font-size:13px}.npp-quantity button{width:32px}.npp-buy-links{font-size:11px}.npp-navigation .npp-shell{gap:28px;justify-content:flex-start}.npp-navigation a{padding:17px 0;font-size:11px}.npp-band{padding:46px 0;scroll-margin-top:80px}.npp-heading{margin-bottom:25px}.npp-heading h2{font-size:29px}.npp-heading>p:not(.npp-kicker){font-size:13px;margin-top:14px}.npp-components{grid-template-columns:1fr;gap:12px}.npp-component{padding:20px 16px;gap:20px}.npp-component__image{width:96px;height:132px}.npp-component h3{font-size:26px;margin:7px 0 10px}.npp-component .npp-component__amount{font-size:17px}.npp-split{grid-template-columns:1fr;gap:25px}.npp-report{padding:22px}.npp-report h3{font-size:21px}.npp-report__meta>div{grid-template-columns:75px 1fr;font-size:11px}.npp-specs{padding:22px;gap:22px}.npp-specs strong{font-size:17px}.npp-accordions summary{font-size:13px;min-height:61px}.npp-answer{font-size:13px}.npp-sources li{gap:18px;padding:20px 0}.npp-sources h3{font-size:17px}.npp-related-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:24px 16px}.npp-related-card img{height:170px}.npp-related-card h3{font-size:18px}.npp-sticky{inset-inline:10px;bottom:max(10px,env(safe-area-inset-bottom))}.npp-sticky__inner{padding:12px;gap:14px}.npp-sticky strong{font-size:11px}.npp-sticky span{font-size:10px}.npp-sticky .npp-button{min-width:118px;max-width:50%;font-size:11px;padding:12px}.npp:has(.npp-sticky:not([hidden])){padding-bottom:80px}}
+@media(prefers-reduced-motion:no-preference){.npp-button{transition:background .18s ease}.npp summary>span:last-child{transition:transform .18s ease}}
+{% endstylesheet %}
+
+{% javascript %}
+if (!customElements.get('npx-peptide-pdp')) {
+  customElements.define('npx-peptide-pdp', class extends HTMLElement {
+    connectedCallback() {
+      if (this.controller) return;
+      this.controller = new AbortController();
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => this.initialize(), { once: true, signal: this.controller.signal });
+      else this.initialize();
+    }
+    initialize() {
+      if (!this.isConnected || this.initialized) return;
+      this.initialized = true;
+      this.form = this.querySelector('.npp-form');
+      this.quantity = this.querySelector('[data-quantity]');
+      this.add = this.querySelector('[data-add]');
+      this.cartAdd = this.querySelector('xo-cart-add');
+      this.sticky = this.querySelector('[data-sticky]');
+      this.options = [...this.querySelectorAll('[data-option]')];
+      this.options.forEach(option => { option.dataset.originalValue = option.value; });
+      this.querySelector('[data-option-controls]')?.removeAttribute('hidden');
+      this.querySelector('[data-variant-input]').disabled = false;
+      this.querySelectorAll('[data-quantity-change]').forEach(button => { button.hidden = false; });
+      const listener = { signal: this.controller.signal };
+      this.addEventListener('click', event => this.onClick(event), listener);
+      this.addEventListener('change', event => {
+        if (event.target.matches('[data-option]')) this.changeVariant(event.target.dataset.position);
+        if (event.target === this.quantity) this.syncQuantity();
+      }, listener);
+      this.quantity.addEventListener('input', () => this.syncQuantity(), listener);
+      this.addEventListener('click', event => {
+        if (event.target.closest('[data-add]') && (!this.form.reportValidity() || this.hasAttribute('aria-busy'))) {
+          event.preventDefault();
+          event.stopImmediatePropagation();
+        }
+      }, { ...listener, capture: true });
+      if (this.sticky && 'IntersectionObserver' in window) {
+        this.observer = new IntersectionObserver(([entry]) => {
+          this.sticky.hidden = entry.isIntersecting || entry.boundingClientRect.bottom >= 0;
+        });
+        this.observer.observe(this.add);
+      }
+      this.syncQuantity();
+    }
+    syncQuantity() {
+      const valid = this.quantity.checkValidity();
+      if (valid) this.cartAdd.setAttribute('xo-product-quantity', this.quantity.value);
+      const minus = this.querySelector('[data-quantity-change="-1"]');
+      const plus = this.querySelector('[data-quantity-change="1"]');
+      if (minus) minus.disabled = valid && Number(this.quantity.value) <= Number(this.quantity.min);
+      if (plus) plus.disabled = valid && !!this.quantity.max && Number(this.quantity.value) >= Number(this.quantity.max);
+    }
+    onClick(event) {
+      const quantityButton = event.target.closest('[data-quantity-change]');
+      if (quantityButton) {
+        if (Number(quantityButton.dataset.quantityChange) > 0) this.quantity.stepUp();
+        else this.quantity.stepDown();
+        this.syncQuantity();
+      }
+      if (event.target.closest('[data-sticky-add]')) {
+        if (this.form.reportValidity()) this.add.click();
+        else this.quantity.focus();
+      }
+      const thumbnail = event.target.closest('[data-thumb]');
+      if (thumbnail && !event.ctrlKey && !event.metaKey && !event.shiftKey && event.button === 0) {
+        event.preventDefault();
+        this.querySelectorAll('[data-media-panel]').forEach(panel => {
+          panel.hidden = panel.dataset.mediaPanel !== thumbnail.dataset.thumb;
+          if (panel.hidden) panel.querySelectorAll('video').forEach(video => video.pause());
+        });
+        this.querySelectorAll('[data-thumb]').forEach(link => link.removeAttribute('aria-current'));
+        thumbnail.setAttribute('aria-current', 'true');
+      }
+    }
+    async changeVariant(position) {
+      this.requestController?.abort();
+      const requestController = new AbortController();
+      this.requestController = requestController;
+      this.setAttribute('aria-busy', 'true');
+      this.add.disabled = true;
+      this.querySelector('[data-sticky-add]')?.setAttribute('disabled', '');
+      this.querySelector('[data-status]').textContent = this.dataset.loadingLabel;
+      const url = new URL(this.dataset.url, window.location.origin);
+      url.searchParams.set('section_id', this.dataset.section);
+      url.searchParams.set('option_values', this.options.map(option => option.value).join(','));
+      try {
+        const response = await fetch(url, { signal: requestController.signal });
+        if (!response.ok) throw new Error('Variant request failed');
+        const page = new DOMParser().parseFromString(await response.text(), 'text/html');
+        const next = page.querySelector('npx-peptide-pdp');
+        if (!next || next.dataset.section !== this.dataset.section) throw new Error('Product section missing');
+        const quantity = next.querySelector('[data-quantity]');
+        quantity.value = this.quantity.value;
+        if (!quantity.checkValidity()) quantity.value = quantity.min || '1';
+        const selectedUrl = new URL(window.location.href);
+        if (next.dataset.variantId) {
+          selectedUrl.searchParams.set('variant', next.dataset.variantId);
+          selectedUrl.searchParams.delete('option_values');
+        } else {
+          selectedUrl.searchParams.delete('variant');
+          selectedUrl.searchParams.set('option_values', this.options.map(option => option.value).join(','));
+        }
+        window.history.replaceState({}, '', selectedUrl);
+        this.replaceWith(next);
+        next.querySelector(`[data-option][data-position="${position}"]`)?.focus({ preventScroll: true });
+      } catch (error) {
+        if (error.name === 'AbortError') return;
+        this.removeAttribute('aria-busy');
+        this.options.forEach(option => { option.value = option.dataset.originalValue; });
+        this.add.disabled = this.cartAdd.hasAttribute('xo-disabled');
+        const stickyAdd = this.querySelector('[data-sticky-add]');
+        if (stickyAdd) stickyAdd.disabled = this.add.disabled;
+        this.querySelector('[data-status]').textContent = this.dataset.errorLabel;
+      }
+    }
+    disconnectedCallback() {
+      this.controller?.abort();
+      this.requestController?.abort();
+      this.observer?.disconnect();
+      this.controller = null;
+      this.initialized = false;
+    }
+  });
+}
+{% endjavascript %}
