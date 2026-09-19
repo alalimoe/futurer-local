@@ -373,6 +373,20 @@
       transition: none;
     }
   }
+  {% if template.suffix == blank %}
+    .xo-section--{{ section.id }} .pcb__card { padding: clamp(1.8rem, 3vw, 3.2rem); border-radius: 1.6rem; background: #f7f8fa; }
+    .xo-section--{{ section.id }} .pcb__grid { gap: 2rem; align-items: start; }
+    .xo-section--{{ section.id }} .pcb__preview { border: 1px solid #e1e4eb; border-radius: 1rem; background: #fff; }
+    .xo-section--{{ section.id }} .pcb__preview > summary { display: flex; align-items: center; justify-content: space-between; gap: 1.6rem; min-height: 5.6rem; padding: 1.6rem; cursor: pointer; list-style: none; font-weight: 500; font-size: 1.4rem; }
+    .xo-section--{{ section.id }} .pcb__preview > summary::-webkit-details-marker { display: none; }
+    .xo-section--{{ section.id }} .pcb__preview > summary::after { content: '+'; font-size: 2rem; }
+    .xo-section--{{ section.id }} .pcb__preview[open] > summary::after { content: '−'; }
+    .xo-section--{{ section.id }} .pcb__preview > summary:focus-visible { outline: 2px solid #2d428a; outline-offset: 3px; }
+    .xo-section--{{ section.id }} .pcb__preview-body { padding: 0 1.6rem 1.6rem; }
+    .xo-section--{{ section.id }} .pcb__preview .pcb__img { max-height: 54rem; object-fit: contain; }
+    .xo-section--{{ section.id }} .pcb__preview .pcb__sub { display: none; }
+    .xo-section--{{ section.id }} .pcb__meta { margin-left: 0; margin-inline-start: auto; }
+  {% endif %}
 {%- endstyle -%}
 
 <section id="pep-coa-band" {% render 'section-attr' %}>
@@ -444,7 +458,7 @@
             {% endif %}
           </div>
 
-          <div>
+          {% if template.suffix == blank %}<details class="pcb__preview"><summary>{{ 'npx_default.coa.preview_certificate' | t }}</summary><div class="pcb__preview-body">{% else %}<div>{% endif %}
             <div class="pcb__sub">COA (image)</div>
             {% if is_third_party and coa_img %}
               <a class="pcb__imgframe" href="{{ coa_url }}" target="_blank" rel="noopener">
@@ -455,11 +469,11 @@
             {% else %}
               <div class="pcb__note">A product document is linked above. No independent-lab image is shown.</div>
             {% endif %}
-          </div>
+          {% if template.suffix == blank %}</div></details>{% else %}</div>{% endif %}
         </div>
 
         <div class="pcb__col">
-          <div>
+          {% if template.suffix == blank %}<details class="pcb__preview"><summary>{{ 'npx_default.coa.preview_chromatogram' | t }}</summary><div class="pcb__preview-body">{% else %}<div>{% endif %}
             <div class="pcb__sub">HPLC</div>
             {% if is_third_party and hplc_img %}
               <a class="pcb__imgframe" href="{{ hplc_img | image_url: width: 1800 }}" target="_blank" rel="noopener">
@@ -470,7 +484,7 @@
             {% else %}
               <div class="pcb__note">No independent-lab HPLC image is attached. Review the linked document for its stated method and scope.</div>
             {% endif %}
-          </div>
+          {% if template.suffix == blank %}</div></details>{% else %}</div>{% endif %}
         </div>
       </div>
     </div>
