@@ -1,0 +1,56 @@
+{%- liquid
+  assign report_url = entry.file.value.url | default: entry.file.url | default: entry.coa_url.value
+  assign report_title = entry.doc_label.value
+  assign report_batch = entry.batch_id.value
+  assign report_lab = entry.lab.value
+  assign report_date = entry.document_date.value
+  assign report_image = entry.coa_img.value
+  assign hplc_image = entry.hplc_img.value
+  if entry == blank
+    assign report_url = variant.metafields.pdp.coa_url.value | default: variant.metafields.pep.coa_pdf.value.url | default: product.metafields.pdp.coa_url.value | default: product.metafields.pep.coa_pdf.value.url | default: product.metafields.peptide.coa_file.value.first.url
+    assign report_batch = product.metafields.pep.coa_batch.value
+    assign report_lab = product.metafields.pep.coa_lab.value
+    assign report_date = product.metafields.pep.coa_assay_date.value
+    assign report_image = product.metafields.pdp.coa_image.value
+    assign hplc_image = product.metafields.pdp.hplc_image.value
+    if variant.metafields.pdp.coa_url != blank or variant.metafields.pep.coa_pdf != blank
+      assign report_batch = variant.metafields.pep.coa_batch.value
+      assign report_lab = variant.metafields.pep.coa_lab.value
+      assign report_date = variant.metafields.pep.coa_assay_date.value
+      assign report_image = variant.metafields.pdp.coa_image.value
+      assign hplc_image = variant.metafields.pdp.hplc_image.value
+    endif
+  endif
+  if report_title == blank
+    assign report_title = 'npx_peptide.product_report' | t: product: product.title
+  endif
+-%}
+{%- if report_url != blank or report_image != blank or hplc_image != blank -%}
+  <article class="npp-report">
+    <span class="npp-kicker">{{ 'npx_peptide.report' | t }}</span>
+    <h3>{{ report_title | escape }}</h3>
+    <dl class="npp-report__meta">
+      {% if report_lab != blank %}<div><dt>{{ 'npx_peptide.lab' | t }}</dt><dd>{{ report_lab | escape }}</dd></div>{% endif %}
+      {% if report_batch != blank %}<div><dt>{{ 'npx_peptide.batch' | t }}</dt><dd dir="ltr">{{ report_batch | escape }}</dd></div>{% endif %}
+      {% if report_date != blank %}<div><dt>{{ 'npx_peptide.report_date' | t }}</dt><dd>{{ report_date | escape }}</dd></div>{% endif %}
+    </dl>
+    {% if report_url != blank %}<a class="npp-text-link" href="{{ report_url | escape }}" target="_blank" rel="noopener">{{ 'npx_peptide.open_report' | t }} <span aria-hidden="true">↗</span></a>{% endif %}
+    {% if report_image != blank or hplc_image != blank %}
+      <details class="npp-report__preview">
+        <summary>{{ 'npx_peptide.preview_report' | t }}<span aria-hidden="true">+</span></summary>
+        <div class="npp-report__images">
+          {% if report_image != blank %}
+            <a href="{{ report_image | image_url: width: 2400 }}" target="_blank" rel="noopener">
+              {{ report_image | image_url: width: 900 | image_tag: loading: 'lazy', widths: '320, 600, 900', sizes: '(max-width: 749px) 85vw, 440px', alt: report_title }}
+            </a>
+          {% endif %}
+          {% if hplc_image != blank %}
+            <a href="{{ hplc_image | image_url: width: 2400 }}" target="_blank" rel="noopener">
+              {{ hplc_image | image_url: width: 900 | image_tag: loading: 'lazy', widths: '320, 600, 900', sizes: '(max-width: 749px) 85vw, 440px', alt: report_title }}
+            </a>
+          {% endif %}
+        </div>
+      </details>
+    {% endif %}
+  </article>
+{%- endif -%}
